@@ -14,9 +14,8 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "aurum-finance-monorepo"
+rootProject.name = "aurum-finance-kotlin"
 
-// settings.gradle.kts (root)
-include(":apps:web-kotlin")
-include(":packages:shared-models")
+include(":apps")
+project(":apps").projectDir = file("apps")
 
