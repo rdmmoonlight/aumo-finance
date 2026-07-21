@@ -1,0 +1,69 @@
+## ==========================================
+## Build & Output Directories
+## ==========================================
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+[Tt]emp/
+[Tt]mp/
+
+## ==========================================
+## Visual Studio / VS Code User & Cache Files
+## ==========================================
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+## Rider / JetBrains (jika ada yang pakai)
+.idea/
+*.sln.iml
+
+## ==========================================
+## NuGet Packages Cache & Restore
+## ==========================================
+*.nupkg
+*.snupkg
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
+
+## ==========================================
+## Environment & Sensitive Settings
+## ==========================================
+# Abaikan file konfigurasi lokal yang berisi password/connection string
+appsettings.Development.json
+appsettings.Local.json
+*.env
+*.pem
+*.key
+*.pfx
+
+## ==========================================
+## Web Frontend Assets (npm/node_modules)
+## ==========================================
+# Jika nantinya proyek MVC-mu memakai npm / libman untuk JS/CSS library
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## ==========================================
+## Operating System Files
+## ==========================================
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSSharedFileList

@@ -3,17 +3,82 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AuthMvcApp</title>
+    <title>@ViewData["Title"] - Aurum Finance</title>
+    
+    <!-- CSS Dependencies -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
+    
+    <style>
+        .sidebar { 
+            transition: width 0.3s ease; 
+            overflow: hidden; 
+            background-color: #212529; 
+            flex-shrink: 0;
+        }
+        .sidebar.collapsed { width: 70px; }
+        .sidebar.expanded { width: 260px; }
+
+        /* Sembunyikan teks saat sidebar collapsed */
+        .sidebar.collapsed .menu-text,
+        .sidebar.collapsed .brand-header-text,
+        .sidebar.collapsed .version-text,
+        .sidebar.collapsed .settings-icon {
+            display: none !important;
+        }
+
+        .sidebar.collapsed .brand-container {
+            justify-content: center !important;
+            width: 100%;
+        }
+
+        .nav-link { 
+            white-space: nowrap; 
+            color: #e9ecef !important; 
+        }
+        .nav-link:hover, .nav-link.active { 
+            background-color: #343a40; 
+        }
+        .brand-header { 
+            font-weight: bold; 
+            font-size: 1.25rem; 
+        }
+        .version-text { 
+            font-size: 0.75rem; 
+            opacity: 0.7; 
+        }
+        .content { 
+            background-color: #f8f9fa; 
+        }
+    </style>
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
-        <div class="container">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AuthMvcApp</a>
-        </div>
-    </nav>
-    <div class="container">
-        @RenderBody()
+    <div class="d-flex vh-100">
+        <!-- Sidebar Partial View -->
+        <partial name="_Sidebar" />
+
+        <!-- Main Content Area -->
+        <main id="mainContent" class="content flex-grow-1 p-4 overflow-auto" role="main">
+            @RenderBody()
+        </main>
     </div>
+
+    <!-- Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sidebar = document.getElementById('sidebar');
+            const toggleBtn = document.getElementById('toggleSidebar');
+
+            if (toggleBtn && sidebar) {
+                toggleBtn.addEventListener('click', () => {
+                    sidebar.classList.toggle('expanded');
+                    sidebar.classList.toggle('collapsed');
+                });
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
