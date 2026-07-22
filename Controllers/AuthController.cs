@@ -9,15 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AurumFinance.Controllers
 {
-    /// <summary>
-    /// Every action here calls Aurum.Api's /api/auth/* endpoints through
-    /// IAurumApiClient instead of touching a local database — this app owns
-    /// no user credentials of its own. On success, a local cookie is issued
-    /// (see AuthPrincipalFactory) carrying the backend's access + refresh
-    /// tokens so later requests can call other protected backend endpoints
-    /// on the user's behalf; CookieAuthEvents.ValidateAsync keeps that
-    /// access token fresh automatically (see Program.cs).
-    /// </summary>
     public class AuthController : Controller
     {
         private readonly IAurumApiClient _apiClient;
@@ -31,13 +22,13 @@ namespace AurumFinance.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View(new LoginModel());
+            return View(new LoginViewModel());
         }
 
         // POST: /Auth/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginModel model)
+        public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (!ModelState.IsValid)
             {
@@ -61,14 +52,14 @@ namespace AurumFinance.Controllers
         [HttpGet]
         public IActionResult Register()
         {
-            var model = new RegisterModel();
+            var model = new RegisterViewModel();
             return View(model);
         }
 
         // POST: /Auth/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
             {

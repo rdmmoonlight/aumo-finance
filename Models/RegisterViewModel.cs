@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace AurumFinance.Models
 {
-    public class RegisterModel
+    public class RegisterViewModel
     {
         [Required(ErrorMessage = "Email address is required")]
         [EmailAddress(ErrorMessage = "Invalid email address format")]
