@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AurumFinance.Controllers
 {
-    [AllowAnonymous] // Mengizinkan tamu/user anonim mengakses controller ini
+    [AllowAnonymous]
     public class AuthController : Controller
     {
         private readonly IAurumApiClient _apiClient;
@@ -29,7 +29,7 @@ namespace AurumFinance.Controllers
         // POST: /Auth/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model) // <-- Tambahkan <IActionResult>
         {
             if (!ModelState.IsValid)
             {
@@ -64,7 +64,7 @@ namespace AurumFinance.Controllers
         // POST: /Auth/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model) // <-- Tambahkan <IActionResult>
         {
             if (!ModelState.IsValid)
             {
@@ -73,17 +73,12 @@ namespace AurumFinance.Controllers
 
             try
             {
-                // 1. Panggil API Backend
                 var result = await _apiClient.RegisterAsync(model.Email, model.Password, model.FullName);
-                
-                // 2. Set Cookie Auth (Optional jika backend mengembalikan token saat register)
                 await SignInAsync(result);
                 
-                // 3. Set data untuk pemicu Pop-Up Modal di View
                 ViewBag.ShowSuccessModal = true;
                 ViewBag.RegisteredEmail = model.Email;
 
-                // Reset form agar inputan bersih
                 ModelState.Clear();
                 return View(new RegisterViewModel());
             }
@@ -102,7 +97,7 @@ namespace AurumFinance.Controllers
         // GET: /Auth/Logout
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout() // <-- Tambahkan <IActionResult>
         {
             var refreshToken = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "refresh_token");
             if (!string.IsNullOrEmpty(refreshToken))
@@ -131,7 +126,7 @@ namespace AurumFinance.Controllers
         // POST: /Auth/ForgotPassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model)
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model) // <-- Tambahkan <IActionResult>
         {
             if (!ModelState.IsValid)
             {
@@ -153,7 +148,7 @@ namespace AurumFinance.Controllers
         // POST: /Auth/ResetPassword
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
+        public async Task<IActionResult> ResetPassword(ResetPasswordModel model) // <-- Tambahkan <IActionResult>
         {
             if (!ModelState.IsValid)
             {
@@ -175,7 +170,7 @@ namespace AurumFinance.Controllers
 
         // GET: /Auth/VerifyEmail?token=...
         [HttpGet]
-        public async Task<IActionResult> VerifyEmail(string token)
+        public async Task<IActionResult> VerifyEmail(string token) // <-- Tambahkan <IActionResult>
         {
             if (string.IsNullOrEmpty(token))
             {
@@ -209,7 +204,7 @@ namespace AurumFinance.Controllers
         // POST: /Auth/ResendVerification
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResendVerification(ResendVerificationModel model)
+        public async Task<IActionResult> ResendVerification(ResendVerificationModel model) // <-- Tambahkan <IActionResult>
         {
             if (!ModelState.IsValid)
             {
