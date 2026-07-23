@@ -40,7 +40,7 @@ namespace AurumFinance.Controllers
             {
                 var result = await _apiClient.LoginAsync(model.Email, model.Password);
                 await SignInAsync(result);
-                return RedirectToAction("Index", "Home"); // Atau "Welcome" / "Dashboard"
+                return RedirectToAction("Index", "Home");
             }
             catch (AurumApiException ex)
             {
@@ -54,18 +54,14 @@ namespace AurumFinance.Controllers
             }
         }
 
-        // =========================================================================
-        // GET: /Auth/Register (SEBELUMNYA HILANG - PENYEBAB HALAMAN KOSONG)
-        // =========================================================================
+        // GET: /Auth/Register
         [HttpGet]
         public IActionResult Register()
         {
             return View(new RegisterViewModel());
         }
 
-        // =========================================================================
-        // POST: /Auth/Register (SEBELUMNYA HILANG - PENYEBAB SUBMIT GAGAL)
-        // =========================================================================
+        // POST: /Auth/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -80,24 +76,24 @@ namespace AurumFinance.Controllers
                 // 1. Panggil API Backend
                 var result = await _apiClient.RegisterAsync(model.Email, model.Password, model.FullName);
                 
-                // 2. Set cookie autentikasi
+                // 2. Set Cookie Auth (Optional jika backend mengembalikan token saat register)
                 await SignInAsync(result);
                 
-                // 3. Tampilkan pesan sukses
-                TempData["SuccessMessage"] = "Registrasi berhasil! Link verifikasi telah dikirim ke email Anda.";
-                
-                // 4. Redirect ke Halaman Utama / Dashboard
-                return RedirectToAction("Index", "Home");
+                // 3. Set data untuk pemicu Pop-Up Modal di View
+                ViewBag.ShowSuccessModal = true;
+                ViewBag.RegisteredEmail = model.Email;
+
+                // Reset form agar inputan bersih
+                ModelState.Clear();
+                return View(new RegisterViewModel());
             }
             catch (AurumApiException ex)
             {
-                // Error dari API (misal: Email sudah terdaftar)
                 ModelState.AddModelError(string.Empty, ex.Message);
                 return View(model);
             }
             catch (Exception ex)
             {
-                // Error umum (misal: API offline / koneksi gagal)
                 ModelState.AddModelError(string.Empty, $"Gagal terhubung ke server backend: {ex.Message}");
                 return View(model);
             }
@@ -105,7 +101,7 @@ namespace AurumFinance.Controllers
 
         // GET: /Auth/Logout
         [HttpGet]
-        [Authorize] // Khusus Logout, wajib login dulu
+        [Authorize]
         public async Task<IActionResult> Logout()
         {
             var refreshToken = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "refresh_token");
