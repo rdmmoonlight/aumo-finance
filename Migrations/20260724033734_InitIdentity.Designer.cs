@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AurumFinance.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260724025750_InitIdentity")]
+    [Migration("20260724033734_InitIdentity")]
     partial class InitIdentity
     {
         /// <inheritdoc />

@@ -1,0 +1,218 @@
+@model AurumFinance.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard Utama";
+    var idr = new System.Globalization.CultureInfo("id-ID");
+}
+
+<div class="container-fluid p-0">
+    <!-- Header Page -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h4 class="fw-bold mb-1">Ringkasan Keuangan</h4>
+            <p class="text-secondary small mb-0">Pantau arus kas, posisi keuangan, dan entri jurnal terbaru.</p>
+        </div>
+        <div>
+            <a asp-controller="JournalEntry" asp-action="Create" class="btn btn-warning btn-sm fw-semibold shadow-sm d-flex align-items-center gap-2">
+                <i class="bi bi-plus-lg"></i> Buat Jurnal Umum
+            </a>
+        </div>
+    </div>
+
+    <!-- 1. KEY METRICS (KPI CARDS) -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-body-tertiary border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-secondary small fw-semibold">Kas & Kesetaraan Kas</span>
+                        <i class="bi bi-wallet2 text-success"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">@Model.TotalKasBank.ToString("C0", idr)</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-body-tertiary border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-secondary small fw-semibold">Pendapatan Bulan Ini</span>
+                        <i class="bi bi-graph-up-arrow text-primary"></i>
+                    </div>
+                    <h4 class="fw-bold text-primary mb-1">@Model.PendapatanBulanIni.ToString("C0", idr)</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card bg-body-tertiary border-0 shadow-sm h-100 rounded-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="text-secondary small fw-semibold">Beban Operasional</span>
+                        <i class="bi bi-exclamation-triangle text-danger"></i>
+                    </div>
+                    <h4 class="fw-bold text-danger mb-1">@Model.BebanOperasional.ToString("C0", idr)</h4>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100 rounded-3" style="background-color: var(--bs-primary); color: white;">
+                <div class="card-body">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small fw-semibold text-white-50">Laba Bersih (Net Income)</span>
+                        <i class="bi bi-shield-check text-warning fs-5"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1">@Model.LabaBersih.ToString("C0", idr)</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. GRAPH & CHART SECTION -->
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-lg-8">
+            <div class="card bg-body border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Tren Pendapatan vs Beban</h6>
+                </div>
+                <div class="card-body">
+                    <canvas id="incomeExpenseChart" style="max-height: 250px;"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <!-- Shortcut COA -->
+            <div class="card bg-body border-0 shadow-sm rounded-3 h-100">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h6 class="fw-bold mb-0">Saldo Akun Utama</h6>
+                </div>
+                <div class="list-group list-group-flush small">
+                    @if(Model.MainCoaBalances != null && Model.MainCoaBalances.Any())
+                    {
+                        foreach (var coa in Model.MainCoaBalances)
+                        {
+                            <div class="list-group-item bg-transparent d-flex justify-content-between align-items-center py-2">
+                                <div>
+                                    <span class="fw-semibold d-block text-body">@coa.AccountCode - @coa.AccountName</span>
+                                    <span class="text-secondary fs-8">@coa.Category</span>
+                                </div>
+                                <span class="fw-bold text-body">@coa.Balance.ToString("N0", idr)</span>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <div class="list-group-item bg-transparent text-center text-secondary py-3">
+                            Belum ada data akun.
+                        </div>
+                    }
+                </div>
+                <div class="card-footer bg-transparent border-0 text-center py-2 mt-auto">
+                    <a asp-controller="ChartOfAccounts" asp-action="Index" class="small text-decoration-none fw-semibold">Kelola Akun &rarr;</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. RECENT JOURNAL ENTRIES -->
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="card bg-body border-0 shadow-sm rounded-3">
+                <div class="card-header bg-transparent border-0 py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="fw-bold mb-0">Entri Jurnal Terakhir</h6>
+                    <a asp-controller="GeneralJournal" asp-action="Index" class="btn btn-link btn-sm p-0 text-decoration-none">Lihat Semua Laporan</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0 small">
+                        <thead class="table-group-divider">
+                            <tr>
+                                <th scope="col" class="ps-3">No. Reff</th>
+                                <th scope="col">Tanggal</th>
+                                <th scope="col">Keterangan</th>
+                                <th scope="col" class="text-end">Debet</th>
+                                <th scope="col" class="text-end pe-3">Kredit</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if(Model.RecentJournals != null && Model.RecentJournals.Any())
+                            {
+                                foreach (var journal in Model.RecentJournals)
+                                {
+                                    <tr>
+                                        <td class="ps-3 fw-semibold">@journal.ReferenceNo</td>
+                                        <td>@journal.Date.ToString("dd/MM/yyyy")</td>
+                                        <td>@journal.Memo</td>
+                                        <td class="text-end text-success">@journal.TotalDebit.ToString("N0", idr)</td>
+                                        <td class="text-end pe-3 text-danger">@journal.TotalCredit.ToString("N0", idr)</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="5" class="text-center text-secondary py-3">Belum ada transaksi jurnal.</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Ambil data array dari model C# ke JS
+            const chartLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartLabels));
+            const chartDataPendapatan = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartPendapatan));
+            const chartDataBeban = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ChartBeban));
+
+            const ctxIncome = document.getElementById('incomeExpenseChart').getContext('2d');
+            
+            // Konfigurasi dinamis untuk ikut dark/light theme
+            Chart.defaults.color = 'var(--bs-secondary-color)';
+            Chart.defaults.borderColor = 'var(--bs-border-color)';
+
+            new Chart(ctxIncome, {
+                type: 'bar',
+                data: {
+                    labels: chartLabels,
+                    datasets: [
+                        { 
+                            label: 'Pendapatan', 
+                            data: chartDataPendapatan, 
+                            backgroundColor: 'rgba(25, 135, 84, 0.8)', 
+                            borderRadius: 4 
+                        },
+                        { 
+                            label: 'Beban', 
+                            data: chartDataBeban, 
+                            backgroundColor: 'rgba(220, 53, 69, 0.8)', 
+                            borderRadius: 4 
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { position: 'top' } 
+                    },
+                    scales: { 
+                        y: { 
+                            beginAtZero: true,
+                            ticks: { 
+                                // Format angka jadi "Jt" biar rapi di layar kecil
+                                callback: function(value) { return 'Rp ' + (value / 1000000) + 'Jt'; } 
+                            } 
+                        } 
+                    }
+                }
+            });
+        });
+    </script>
+}
