@@ -78,4 +78,4 @@ $RECYCLE.BIN/
 # macOS
 .DS_Store
 .AppleDouble
-.LSSharedFileList
+.LSSharedFileListapp.db
