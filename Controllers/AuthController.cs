@@ -1,22 +1,28 @@
-using AurumFinance.Exceptions;
+using System.Text;
 using AurumFinance.Models;
-using AurumFinance.Models.Api;
 using AurumFinance.Services;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace AurumFinance.Controllers
 {
     [AllowAnonymous]
     public class AuthController : Controller
     {
-        private readonly IAurumApiClient _apiClient;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IEmailSender _emailSender;
 
-        public AuthController(IAurumApiClient apiClient)
+        public AuthController(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender)
         {
-            _apiClient = apiClient;
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _emailSender = emailSender;
         }
 
         // GET: /Auth/Login
@@ -36,22 +42,28 @@ namespace AurumFinance.Controllers
                 return View(model);
             }
 
-            try
+            var result = await _signInManager.PasswordSignInAsync(
+                model.Email, model.Password, isPersistent: true, lockoutOnFailure: true);
+
+            if (result.Succeeded)
             {
-                var result = await _apiClient.LoginAsync(model.Email, model.Password);
-                await SignInAsync(result);
                 return RedirectToAction("Index", "Home");
             }
-            catch (AurumApiException ex)
+
+            if (result.IsNotAllowed)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
+                ModelState.AddModelError(string.Empty, "Please verify your email address before logging in.");
             }
-            catch (Exception ex)
+            else if (result.IsLockedOut)
             {
-                ModelState.AddModelError(string.Empty, $"Gagal terhubung ke server: {ex.Message}");
-                return View(model);
+                ModelState.AddModelError(string.Empty, "This account is temporarily locked out due to too many failed attempts.");
             }
+            else
+            {
+                ModelState.AddModelError(string.Empty, "Invalid email or password.");
+            }
+
+            return View(model);
         }
 
         // GET: /Auth/Register
@@ -71,27 +83,31 @@ namespace AurumFinance.Controllers
                 return View(model);
             }
 
-            try
+            var user = new ApplicationUser
             {
-                var result = await _apiClient.RegisterAsync(model.Email, model.Password, model.FullName);
-                await SignInAsync(result);
-                
-                ViewBag.ShowSuccessModal = true;
-                ViewBag.RegisteredEmail = model.Email;
+                UserName = model.Email,
+                Email = model.Email,
+                FullName = model.FullName,
+            };
 
-                ModelState.Clear();
-                return View(new RegisterViewModel());
-            }
-            catch (AurumApiException ex)
+            var createResult = await _userManager.CreateAsync(user, model.Password);
+
+            if (!createResult.Succeeded)
             {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                foreach (var error in createResult.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
                 return View(model);
             }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, $"Gagal terhubung ke server backend: {ex.Message}");
-                return View(model);
-            }
+
+            await SendEmailConfirmationAsync(user);
+
+            ViewBag.ShowSuccessModal = true;
+            ViewBag.RegisteredEmail = model.Email;
+
+            ModelState.Clear();
+            return View(new RegisterViewModel());
         }
 
         // GET: /Auth/Logout
@@ -99,20 +115,7 @@ namespace AurumFinance.Controllers
         [Authorize]
         public async Task<IActionResult> Logout()
         {
-            var refreshToken = await HttpContext.GetTokenAsync(CookieAuthenticationDefaults.AuthenticationScheme, "refresh_token");
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                try
-                {
-                    await _apiClient.LogoutAsync(refreshToken);
-                }
-                catch (AurumApiException)
-                {
-                    // Token expired/invalid di server
-                }
-            }
-
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await _signInManager.SignOutAsync();
             return RedirectToAction("Login", "Auth");
         }
 
@@ -133,16 +136,29 @@ namespace AurumFinance.Controllers
                 return View(model);
             }
 
-            await _apiClient.ForgotPasswordAsync(model.Email);
-            TempData["SuccessMessage"] = "Jika email terdaftar, tautan reset password telah dikirimkan.";
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is not null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+                var resetUrl = Url.Action("ResetPassword", "Auth", new { email = user.Email, token = encodedToken }, Request.Scheme);
+
+                await _emailSender.SendEmailAsync(
+                    user.Email!,
+                    "Reset your Aurum Finance password",
+                    $"Reset your password by clicking <a href='{resetUrl}'>here</a>.");
+            }
+
+            // Same message whether or not the email is registered — avoids account enumeration.
+            TempData["SuccessMessage"] = "If that email is registered, a password reset link has been sent.";
             return RedirectToAction("Login");
         }
 
-        // GET: /Auth/ResetPassword?token=...
+        // GET: /Auth/ResetPassword?email=...&token=...
         [HttpGet]
-        public IActionResult ResetPassword(string token)
+        public IActionResult ResetPassword(string email, string token)
         {
-            return View(new ResetPasswordModel { Token = token ?? string.Empty });
+            return View(new ResetPasswordModel { Email = email ?? string.Empty, Token = token ?? string.Empty });
         }
 
         // POST: /Auth/ResetPassword
@@ -155,40 +171,65 @@ namespace AurumFinance.Controllers
                 return View(model);
             }
 
-            try
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is null)
             {
-                await _apiClient.ResetPasswordAsync(model.Token, model.NewPassword);
-                TempData["SuccessMessage"] = "Password berhasil diubah. Silakan masuk menggunakan password baru.";
-                return RedirectToAction("Login");
-            }
-            catch (AurumApiException ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
+                ModelState.AddModelError(string.Empty, "This reset link is invalid or has expired.");
                 return View(model);
             }
+
+            string decodedToken;
+            try
+            {
+                decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(model.Token));
+            }
+            catch (FormatException)
+            {
+                ModelState.AddModelError(string.Empty, "This reset link is invalid or has expired.");
+                return View(model);
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
+                return View(model);
+            }
+
+            TempData["SuccessMessage"] = "Password changed successfully. Please sign in with your new password.";
+            return RedirectToAction("Login");
         }
 
-        // GET: /Auth/VerifyEmail?token=...
+        // GET: /Auth/VerifyEmail?email=...&token=...
         [HttpGet]
-        public async Task<IActionResult> VerifyEmail(string token)
+        public async Task<IActionResult> VerifyEmail(string email, string token)
         {
-            if (string.IsNullOrEmpty(token))
+            var user = string.IsNullOrEmpty(email) ? null : await _userManager.FindByEmailAsync(email);
+
+            if (user is null || string.IsNullOrEmpty(token))
             {
                 ViewBag.Success = false;
-                ViewBag.Message = "Tautan verifikasi tidak valid.";
+                ViewBag.Message = "This verification link is invalid.";
                 return View();
             }
 
             try
             {
-                await _apiClient.VerifyEmailAsync(token);
-                ViewBag.Success = true;
-                ViewBag.Message = "Email Anda telah berhasil diverifikasi!";
+                var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token));
+                var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+
+                ViewBag.Success = result.Succeeded;
+                ViewBag.Message = result.Succeeded
+                    ? "Your email has been successfully verified!"
+                    : "This verification link is invalid or has expired.";
             }
-            catch (AurumApiException ex)
+            catch (FormatException)
             {
                 ViewBag.Success = false;
-                ViewBag.Message = ex.Message;
+                ViewBag.Message = "This verification link is invalid.";
             }
 
             return View();
@@ -211,24 +252,27 @@ namespace AurumFinance.Controllers
                 return View(model);
             }
 
-            await _apiClient.ResendVerificationAsync(model.Email);
-            TempData["SuccessMessage"] = "Jika email terdaftar dan belum diverifikasi, link baru telah dikirimkan.";
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user is not null && !await _userManager.IsEmailConfirmedAsync(user))
+            {
+                await SendEmailConfirmationAsync(user);
+            }
+
+            // Same message whether or not the email is registered/already verified.
+            TempData["SuccessMessage"] = "If that email is registered and not yet verified, a new link has been sent.";
             return RedirectToAction("Login");
         }
 
-        private async Task SignInAsync(AuthApiResponse result)
+        private async Task SendEmailConfirmationAsync(ApplicationUser user)
         {
-            var principal = AuthPrincipalFactory.Create(result.User);
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var encodedToken = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(token));
+            var confirmUrl = Url.Action("VerifyEmail", "Auth", new { email = user.Email, token = encodedToken }, Request.Scheme);
 
-            var properties = new AuthenticationProperties { IsPersistent = true };
-            properties.StoreTokens(new[]
-            {
-                new AuthenticationToken { Name = "access_token", Value = result.AccessToken },
-                new AuthenticationToken { Name = "refresh_token", Value = result.RefreshToken },
-                new AuthenticationToken { Name = "expires_at_utc", Value = result.ExpiresAtUtc.ToString("o") },
-            });
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal, properties);
+            await _emailSender.SendEmailAsync(
+                user.Email!,
+                "Confirm your Aurum Finance account",
+                $"Confirm your account by clicking <a href='{confirmUrl}'>here</a>.");
         }
     }
 }

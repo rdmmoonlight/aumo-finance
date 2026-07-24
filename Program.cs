@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authorization; // <-- Tambahan
-using Microsoft.AspNetCore.Mvc.Authorization; // <-- Tambahan
-using Microsoft.EntityFrameworkCore;
 using AurumFinance.Models;
 using AurumFinance.Services;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +12,31 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// 2. MVC Services + Kunci Semua Halaman Secara Global
+// 2. ASP.NET Core Identity — single source of truth for accounts. Replaces
+//    the old cookie-plus-external-JWT-API setup entirely: no more custom
+//    User table, no more remote Aurum.Api calls for auth.
+builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
+{
+    options.SignIn.RequireConfirmedAccount = true;
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+})
+    .AddEntityFrameworkStores<AppDbContext>()
+    .AddDefaultTokenProviders()
+    .AddClaimsPrincipalFactory<AurumUserClaimsPrincipalFactory>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Auth/Login";
+    options.AccessDeniedPath = "/Auth/Login";
+    options.ExpireTimeSpan = TimeSpan.FromDays(30);
+    options.SlidingExpiration = true;
+});
+
+builder.Services.AddScoped<IEmailSender, LoggingEmailSender>();
+
+// 3. MVC Services + Kunci Semua Halaman Secara Global
 builder.Services.AddControllersWithViews(options =>
 {
     // Ini mengunci SELURUH Controller dan Action secara default
@@ -22,38 +46,21 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.Add(new AuthorizeFilter(policy));
 });
 
-// 3. HTTP Client
-var apiBaseUrl = builder.Configuration["Api:BaseUrl"]
-    ?? throw new InvalidOperationException("Configuration \"Api:BaseUrl\" is required (see appsettings.json).");
-builder.Services.AddHttpClient<IAurumApiClient, AurumApiClient>(client =>
-{
-    client.BaseAddress = new Uri(apiBaseUrl);
-});
-
-// 4. Authentication Configuration
-var googleClientId = builder.Configuration["Authentication:Google:ClientId"] 
+// 4. Optional Google external login
+var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
     ?? builder.Configuration["Google:ClientId"];
-var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] 
+var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
     ?? builder.Configuration["Google:ClientSecret"];
-
-var authBuilder = builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
-    {
-        options.LoginPath = "/Auth/Login";
-        options.AccessDeniedPath = "/Auth/Login";
-        options.ExpireTimeSpan = TimeSpan.FromDays(30);
-        options.SlidingExpiration = true;
-        options.Events.OnValidatePrincipal = CookieAuthEvents.ValidateAsync;
-    });
 
 if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
 {
-    authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
-    {
-        googleOptions.ClientId = googleClientId;
-        googleOptions.ClientSecret = googleClientSecret;
-        googleOptions.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    });
+    builder.Services.AddAuthentication()
+        .AddGoogle(GoogleDefaults.AuthenticationScheme, googleOptions =>
+        {
+            googleOptions.ClientId = googleClientId;
+            googleOptions.ClientSecret = googleClientSecret;
+            googleOptions.SignInScheme = IdentityConstants.ExternalScheme;
+        });
 }
 
 var app = builder.Build();
