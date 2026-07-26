@@ -143,10 +143,6 @@ namespace AumoFinance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("Memo")
-                        .HasMaxLength(250)
-                        .HasColumnType("character varying(250)");
-
                     b.Property<string>("ReferenceNumber")
                         .IsRequired()
                         .HasMaxLength(30)
