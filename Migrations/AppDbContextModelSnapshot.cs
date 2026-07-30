@@ -143,10 +143,19 @@ namespace AumoFinance.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("MobileNote")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("NeedsClassification")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("ReferenceNumber")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
+
+                    b.Property<string>("Source")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
