@@ -22,11 +22,27 @@
         </div>
     </div>
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm py-2" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success alert-dismissible fade show shadow-sm py-2" role="alert">
             <i class="bi bi-check-circle-fill me-2"></i> @TempData["SuccessMessage"]
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if ((int)(ViewBag.HiddenClosedCount ?? 0) > 0)
+    {
+        <div class="alert alert-secondary shadow-sm py-2 small">
+            <i class="bi bi-lock-fill me-2"></i>
+            @ViewBag.HiddenClosedCount entr@(((int)ViewBag.HiddenClosedCount) == 1 ? "y" : "ies") from closed periods are hidden here. View them from the <a asp-controller="Periods" asp-action="Index" class="alert-link">Periods</a> page.
         </div>
     }
 
