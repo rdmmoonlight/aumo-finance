@@ -1,8 +1,8 @@
 import axios from 'axios'
-import { WEB_API_BASE_URL } from '@/lib/config'
+import { VITE_WEB_API_URL } from '@/lib/config'
 
 const apiClient = axios.create({
-  baseURL: WEB_API_BASE_URL,
+  baseURL: VITE_WEB_API_URL,
   withCredentials: false,
 })
 
