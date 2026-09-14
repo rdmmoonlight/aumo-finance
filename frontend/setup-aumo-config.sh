@@ -15,7 +15,7 @@ echo "✅ src/lib/config.ts created"
 
 # 2. Bikin apiClient yang clean
 mkdir -p src/services
-cat > src/services/apiClient.ts <<'EOF'
+cat > src/lib/apiClient.ts <<'EOF'
 import axios from 'axios';
 import { VITE_WEB_API_URL } from '@/lib/config';
 
@@ -38,7 +38,7 @@ apiClient.interceptors.response.use(
 
 export default apiClient;
 EOF
-echo "✅ src/services/apiClient.ts updated"
+echo "✅ src/lib/apiClient.ts updated"
 
 # 3. Auto-fix semua file yang masih pakai WEB_ / process.env / rawApiUrl / VITE_WEB_API_URL hardcode
 echo "🔧 Cleaning old VITE_WEB_API_URL declarations..."
@@ -58,7 +58,7 @@ find src -type f \( -name "*.ts" -o -name "*.tsx" \) -exec sed -i 's|//api|/api|
 echo ""
 echo "🎉 DONE! Sekarang cek:"
 echo "  cat src/lib/config.ts"
-echo "  cat src/services/apiClient.ts"
+echo "  cat src/lib/apiClient.ts"
 echo ""
 echo "Semua page sekarang cukup pakai:"
 echo "  apiClient.get('/api/v1/dashboard')"

@@ -9,13 +9,21 @@ export const apiClient = axios.create({
   },
 })
 
+// Interceptor request (Mencegah penggabungan baseURL jika URL bersifat eksternal)
+apiClient.interceptors.request.use((config) => {
+  if (config.url?.startsWith('http')) {
+    config.baseURL = ''
+  }
+  return config
+})
+
 // Interceptor response (Redirect ke /auth kalau 401 Unauthorized)
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
       const currentPath = window.location.pathname
-      
+
       // Mencegah infinite loop redirect jika sudah berada di halaman auth
       if (!currentPath.startsWith('/auth') && !currentPath.startsWith('/login')) {
         window.location.href = '/auth'
@@ -26,4 +34,3 @@ apiClient.interceptors.response.use(
 )
 
 export default apiClient
-      
