@@ -27,61 +27,60 @@ function NotFoundComponent() {
 function RootComponent() {
   const location = useLocation()
   const navigate = useNavigate()
+  
+  // State auth: null (loading), true (login), false (unauthenticated)
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
-  const isAuthPage = location.pathname === '/auth'
+  const isAuthPage = location.pathname.startsWith('/auth') || location.pathname.startsWith('/login')
 
   useEffect(() => {
+    // 1. Jalankan autentikasi HANYA di Client Side (Browser)
+    if (typeof window === 'undefined') return
+
     let isMounted = true
 
     async function checkAuth() {
       try {
-        // Cek sesi/auth pengguna ke backend
         await apiClient.get('/api/v1/auth/me')
         if (isMounted) setIsAuthenticated(true)
       } catch (err) {
         if (isMounted) {
           setIsAuthenticated(false)
-          // Jika tidak di halaman login dan gagal auth, langsung tendang ke /auth
+          // Tendang ke /auth hanya jika sedang tidak berada di halaman auth
           if (!isAuthPage) {
-            navigate({ to: '/auth' })
+            navigate({ to: '/auth', replace: true })
           }
         }
       }
     }
 
     checkAuth()
+
     return () => {
       isMounted = false
     }
-  }, [location.pathname, isAuthPage, navigate])
-
-  // Tampilkan layar loading sebentar saat mengecek autentikasi (mencegah flicker UI)
-  if (isAuthenticated === null && !isAuthPage) {
-    return (
-      <html lang="en">
-        <head>
-          <HeadContent />
-        </head>
-        <body className="antialiased grid place-items-center h-screen bg-background text-foreground">
-          <div className="flex flex-col items-center gap-2">
-            <IconLoader2 className="animate-spin text-primary" size={32} />
-            <span className="text-xs text-muted-foreground font-medium">Memeriksa autentikasi...</span>
-          </div>
-          <Scripts />
-        </body>
-      </html>
-    )
-  }
+    // Dependency disederhanakan agar tidak memicu re-fetch loop
+  }, [isAuthPage])
 
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
-      <body className="antialiased">
-        {/* Render halaman auth atau layout utama di dalam Outlet */}
-        <Outlet />
+      <body className="antialiased bg-background text-foreground">
+        {/* Loading overlay tanpa merusak tag <html> */}
+        {isAuthenticated === null && !isAuthPage ? (
+          <div className="grid place-items-center h-screen w-full">
+            <div className="flex flex-col items-center gap-2">
+              <IconLoader2 className="animate-spin text-primary" size={32} />
+              <span className="text-xs text-muted-foreground font-medium">
+                Memeriksa autentikasi...
+              </span>
+            </div>
+          </div>
+        ) : (
+          <Outlet />
+        )}
         <Scripts />
       </body>
     </html>
@@ -100,4 +99,3 @@ export const Route = createRootRoute({
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 })
-    
