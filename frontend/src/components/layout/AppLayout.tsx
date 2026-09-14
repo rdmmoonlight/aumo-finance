@@ -40,7 +40,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 
 interface MenuItem {
   label: string;

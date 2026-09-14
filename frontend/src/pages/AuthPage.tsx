@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import apiClient from '@/services/apiClient';
+import { useNavigate } from '@tanstack/react-router';
+import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function AuthPage() {
+  const navigate = useNavigate();
+
   const [email, setEmail] = useState('admin@aumo.com');
   const [password, setPassword] = useState('Admin123!');
   const [keepMe, setKeepMe] = useState(true);
@@ -27,11 +30,10 @@ export default function AuthPage() {
     setErr('');
 
     try {
-      const res = await apiClient.post(
-        '/api/v1/auth/login',
-        { Email: email, Password: password },
-        { withCredentials: true }
-      );
+      const res = await apiClient.post('/api/v1/auth/login', {
+        email,
+        password,
+      });
 
       const isOk =
         res.status === 200 ||
@@ -45,7 +47,7 @@ export default function AuthPage() {
         );
       }
 
-      // LocalStorage flag (UX Cache saja, bukan sumber otentikasi utama)
+      // LocalStorage flag (UX Cache)
       localStorage.setItem('isAuthenticated', 'true');
       if (keepMe) {
         localStorage.setItem('aumo_saved_email', email);
@@ -53,7 +55,8 @@ export default function AuthPage() {
         localStorage.removeItem('aumo_saved_email');
       }
 
-      window.location.href = '/homepage';
+      // Navigasi menggunakan TanStack Router
+      navigate({ to: '/homepage' });
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
 

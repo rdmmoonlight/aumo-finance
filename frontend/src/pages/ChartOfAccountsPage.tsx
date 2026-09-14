@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router';
 import { useNavigate, useSearchParams } from '@/hooks/useCompatRouter';
 import { IconSitemap, IconPlus, IconPencil, IconNotebook, IconTrash, IconX, IconSearch } from '@tabler/icons-react';
 
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

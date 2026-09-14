@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { IconShieldCheck, IconHeartbeat, IconCircleCheck, IconAlertTriangle, IconActivity, IconDeviceLaptop, IconAlertOctagon, IconLogout, IconHistory, IconDownload, IconLoader2 } from '@tabler/icons-react';
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
