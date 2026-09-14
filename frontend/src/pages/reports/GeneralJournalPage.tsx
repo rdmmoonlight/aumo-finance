@@ -29,7 +29,7 @@ export default function GeneralJournalPage() {
   const fetchData = useCallback(async () => {
     setLoading(true); setErrorMessage(null);
     try{
-      const {data}=await apiClient.get('/api/v1/reports/general-journal');
+      const {data}=await apiClient.get('/api/v1/reports/journals/general');
       if(data.success){ setSelectedPeriodName(data.selectedPeriodName||null); setIsPeriodClosed(data.isPeriodClosed||false); setEntries(data.entries||[]); }
       else throw new Error(data.message);
     }catch(err:any){ if(err.response?.status===401) navigate({ to: '/' }); setErrorMessage(err.response?.data?.message||err.message); } finally{ setLoading(false); }
@@ -40,7 +40,7 @@ export default function GeneralJournalPage() {
   const deleteEntry = async (entry:JournalEntry) => {
     if(isPeriodClosed){ alert(`${entry.transactionNumber} in closed period`); return; }
     if(!confirm(`Delete ${entry.transactionNumber}?`)) return;
-    try{ await apiClient.delete(`/api/v1/reports/general-journal/${entry.id}`); setEntries(prev=>prev.filter(e=>e.id!==entry.id)); }catch(err:any){ setErrorMessage(err.response?.data?.message||'Failed delete'); }
+    try{ await apiClient.delete(`/api/v1/reports/journals/general/${entry.id}`); setEntries(prev=>prev.filter(e=>e.id!==entry.id)); }catch(err:any){ setErrorMessage(err.response?.data?.message||'Failed delete'); }
   };
 
   let currentDateTracker=''; let groupIdx=0;
