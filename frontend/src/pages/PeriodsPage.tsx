@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from '@tanstack/react-router';
 import { IconCalendar, IconCalendarPlus, IconEye, IconEyeOff, IconPlus, IconLock, IconLockOpen, IconArrowLeft, IconCheck, IconAlertTriangle, IconX, IconInfoCircle, IconRefresh, IconCirclePlus, IconCalendarOff, IconLoader2 } from '@tabler/icons-react';
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';

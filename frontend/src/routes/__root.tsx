@@ -9,7 +9,7 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import appCss from '../styles/index.css?url'
-import apiClient from '@/services/apiClient'
+import apiClient from '@/lib/apiClient'
 import { IconLoader2 } from '@tabler/icons-react'
 
 function NotFoundComponent() {

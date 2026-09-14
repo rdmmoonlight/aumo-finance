@@ -8,7 +8,7 @@ import {
   IconWallet, IconTrendingUp, IconTrendingDown, IconShieldCheck, IconCreditCard, IconChartPie, IconX,
 } from '@tabler/icons-react';
 
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

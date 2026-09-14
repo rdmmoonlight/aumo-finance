@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from '@/hooks/useCompatRouter';
 import {
   IconEdit, IconNotebook, IconArrowLeft, IconCircleCheck, IconAlertTriangle, IconLock, IconPlus, IconTrash, IconDeviceFloppy, IconLoader2,
 } from '@tabler/icons-react';
-import apiClient from '@/services/apiClient';
+import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
