@@ -13,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 // Ini bawaan Core Identity, bukan custom
-using Microsoft.AspNetCore.Identity.UI.Services; 
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace AumoBackend
 {
@@ -96,8 +96,12 @@ namespace AumoBackend
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtIssuer, ValidAudience = jwtIssuer,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtIssuer,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
                     ClockSkew = TimeSpan.FromMinutes(5)
                 };
@@ -151,7 +155,7 @@ namespace AumoBackend
             builder.Services.AddScoped<DashboardDataService>();
             builder.Services.AddHttpClient<IAiService, AiService>();
             builder.Services.AddHostedService<RenderKeepAliveService>();
-            builder.Services.AddScoped<IEmailSender, ResendEmailSender>(); 
+            builder.Services.AddScoped<IEmailSender, ResendEmailSender>();
             builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSender>();
 
             // --- 6b. ACCOUNTING CYCLE (5 File Utama) ---

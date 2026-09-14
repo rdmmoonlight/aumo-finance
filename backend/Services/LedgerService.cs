@@ -29,7 +29,7 @@ public class LedgerService : ILedgerService
         {
             bool isDebit = IsDebitNormal(acc.Type);
             var accLines = lines.Where(l => l.AccountId == acc.Id).ToList();
-            
+
             decimal running = 0;
             var trans = new List<LedgerTransaction>();
             foreach (var l in accLines)
@@ -38,7 +38,7 @@ public class LedgerService : ILedgerService
                 if (l.JournalEntry!.EntryDate >= start)
                     trans.Add(new(l.JournalEntry.EntryDate, l.JournalEntry.TransactionNumber, l.JournalEntry.Description, l.Debit, l.Credit, running));
             }
-            
+
             // Skip akun kosong biar ledger gak sampah
             if (trans.Any() || running != 0)
                 result.Add(new(acc.Id, acc.ReferenceNumber.ToString(), acc.AccountName, acc.Type!, running, trans));
