@@ -9,39 +9,35 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AiassistantRouteImport } from './routes/aiassistant'
+import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as AuthRouteImport } from './routes/auth'
-import { Route as ChartOfAccountsRouteImport } from './routes/chart-of-accounts'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as GuardianRouteImport } from './routes/guardian'
-import { Route as JournalEntryRouteImport } from './routes/journal-entry'
-import { Route as PeriodsRouteImport } from './routes/periods'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ToolsRouteImport } from './routes/tools'
-import { Route as ReportsAdjustedTrialBalanceRouteImport } from './routes/reports/adjusted-trial-balance'
-import { Route as ReportsAdjustingJournalRouteImport } from './routes/reports/adjusting-journal'
-import { Route as ReportsClosingJournalRouteImport } from './routes/reports/closing-journal'
-import { Route as ReportsGeneralJournalRouteImport } from './routes/reports/general-journal'
-import { Route as ReportsGeneralLedgerPermanentRouteImport } from './routes/reports/general-ledger-permanent'
-import { Route as ReportsGeneralLedgerTemporaryRouteImport } from './routes/reports/general-ledger-temporary'
-import { Route as ReportsIncomeStatementRouteImport } from './routes/reports/income-statement'
-import { Route as ReportsPostClosingTrialBalanceRouteImport } from './routes/reports/post-closing-trial-balance'
-import { Route as ReportsRetainedEarningsRouteImport } from './routes/reports/retained-earnings'
-import { Route as ReportsStatementOfCashFlowRouteImport } from './routes/reports/statement-of-cash-flow'
-import { Route as ReportsStatementOfFinancialPositionRouteImport } from './routes/reports/statement-of-financial-position'
-import { Route as ReportsTrialBalanceRouteImport } from './routes/reports/trial-balance'
-import { Route as ReportsUnadjustedTrialBalanceRouteImport } from './routes/reports/unadjusted-trial-balance'
-import { Route as ReportsWorksheetRouteImport } from './routes/reports/worksheet'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAiassistantRouteImport } from './routes/_authenticated/aiassistant'
+import { Route as AuthenticatedChartOfAccountsRouteImport } from './routes/_authenticated/chart-of-accounts'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedGuardianRouteImport } from './routes/_authenticated/guardian'
+import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated/home'
+import { Route as AuthenticatedJournalEntryRouteImport } from './routes/_authenticated/journal-entry'
+import { Route as AuthenticatedPeriodsRouteImport } from './routes/_authenticated/periods'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
+import { Route as AuthenticatedReportsAdjustedTrialBalanceRouteImport } from './routes/_authenticated/reports/adjusted-trial-balance'
+import { Route as AuthenticatedReportsAdjustingJournalRouteImport } from './routes/_authenticated/reports/adjusting-journal'
+import { Route as AuthenticatedReportsClosingJournalRouteImport } from './routes/_authenticated/reports/closing-journal'
+import { Route as AuthenticatedReportsGeneralJournalRouteImport } from './routes/_authenticated/reports/general-journal'
+import { Route as AuthenticatedReportsGeneralLedgerPermanentRouteImport } from './routes/_authenticated/reports/general-ledger-permanent'
+import { Route as AuthenticatedReportsGeneralLedgerTemporaryRouteImport } from './routes/_authenticated/reports/general-ledger-temporary'
+import { Route as AuthenticatedReportsIncomeStatementRouteImport } from './routes/_authenticated/reports/income-statement'
+import { Route as AuthenticatedReportsPostClosingTrialBalanceRouteImport } from './routes/_authenticated/reports/post-closing-trial-balance'
+import { Route as AuthenticatedReportsRetainedEarningsRouteImport } from './routes/_authenticated/reports/retained-earnings'
+import { Route as AuthenticatedReportsStatementOfCashFlowRouteImport } from './routes/_authenticated/reports/statement-of-cash-flow'
+import { Route as AuthenticatedReportsStatementOfFinancialPositionRouteImport } from './routes/_authenticated/reports/statement-of-financial-position'
+import { Route as AuthenticatedReportsTrialBalanceRouteImport } from './routes/_authenticated/reports/trial-balance'
+import { Route as AuthenticatedReportsUnadjustedTrialBalanceRouteImport } from './routes/_authenticated/reports/unadjusted-trial-balance'
+import { Route as AuthenticatedReportsWorksheetRouteImport } from './routes/_authenticated/reports/worksheet'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiassistantRoute = AiassistantRouteImport.update({
-  id: '/aiassistant',
-  path: '/aiassistant',
+const AuthenticatedRoute = AuthenticatedRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -49,207 +45,237 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ChartOfAccountsRoute = ChartOfAccountsRouteImport.update({
-  id: '/chart-of-accounts',
-  path: '/chart-of-accounts',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
+const AuthenticatedAiassistantRoute =
+  AuthenticatedAiassistantRouteImport.update({
+    id: '/aiassistant',
+    path: '/aiassistant',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedChartOfAccountsRoute =
+  AuthenticatedChartOfAccountsRouteImport.update({
+    id: '/chart-of-accounts',
+    path: '/chart-of-accounts',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const GuardianRoute = GuardianRouteImport.update({
+const AuthenticatedGuardianRoute = AuthenticatedGuardianRouteImport.update({
   id: '/guardian',
   path: '/guardian',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const JournalEntryRoute = JournalEntryRouteImport.update({
-  id: '/journal-entry',
-  path: '/journal-entry',
-  getParentRoute: () => rootRouteImport,
+const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const PeriodsRoute = PeriodsRouteImport.update({
+const AuthenticatedJournalEntryRoute =
+  AuthenticatedJournalEntryRouteImport.update({
+    id: '/journal-entry',
+    path: '/journal-entry',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedPeriodsRoute = AuthenticatedPeriodsRouteImport.update({
   id: '/periods',
   path: '/periods',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const SettingsRoute = SettingsRouteImport.update({
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const ToolsRoute = ToolsRouteImport.update({
+const AuthenticatedToolsRoute = AuthenticatedToolsRouteImport.update({
   id: '/tools',
   path: '/tools',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
-const ReportsAdjustedTrialBalanceRoute =
-  ReportsAdjustedTrialBalanceRouteImport.update({
+const AuthenticatedReportsAdjustedTrialBalanceRoute =
+  AuthenticatedReportsAdjustedTrialBalanceRouteImport.update({
     id: '/reports/adjusted-trial-balance',
     path: '/reports/adjusted-trial-balance',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsAdjustingJournalRoute = ReportsAdjustingJournalRouteImport.update({
-  id: '/reports/adjusting-journal',
-  path: '/reports/adjusting-journal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsClosingJournalRoute = ReportsClosingJournalRouteImport.update({
-  id: '/reports/closing-journal',
-  path: '/reports/closing-journal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsGeneralJournalRoute = ReportsGeneralJournalRouteImport.update({
-  id: '/reports/general-journal',
-  path: '/reports/general-journal',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsGeneralLedgerPermanentRoute =
-  ReportsGeneralLedgerPermanentRouteImport.update({
+const AuthenticatedReportsAdjustingJournalRoute =
+  AuthenticatedReportsAdjustingJournalRouteImport.update({
+    id: '/reports/adjusting-journal',
+    path: '/reports/adjusting-journal',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsClosingJournalRoute =
+  AuthenticatedReportsClosingJournalRouteImport.update({
+    id: '/reports/closing-journal',
+    path: '/reports/closing-journal',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsGeneralJournalRoute =
+  AuthenticatedReportsGeneralJournalRouteImport.update({
+    id: '/reports/general-journal',
+    path: '/reports/general-journal',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsGeneralLedgerPermanentRoute =
+  AuthenticatedReportsGeneralLedgerPermanentRouteImport.update({
     id: '/reports/general-ledger-permanent',
     path: '/reports/general-ledger-permanent',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsGeneralLedgerTemporaryRoute =
-  ReportsGeneralLedgerTemporaryRouteImport.update({
+const AuthenticatedReportsGeneralLedgerTemporaryRoute =
+  AuthenticatedReportsGeneralLedgerTemporaryRouteImport.update({
     id: '/reports/general-ledger-temporary',
     path: '/reports/general-ledger-temporary',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsIncomeStatementRoute = ReportsIncomeStatementRouteImport.update({
-  id: '/reports/income-statement',
-  path: '/reports/income-statement',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsPostClosingTrialBalanceRoute =
-  ReportsPostClosingTrialBalanceRouteImport.update({
+const AuthenticatedReportsIncomeStatementRoute =
+  AuthenticatedReportsIncomeStatementRouteImport.update({
+    id: '/reports/income-statement',
+    path: '/reports/income-statement',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsPostClosingTrialBalanceRoute =
+  AuthenticatedReportsPostClosingTrialBalanceRouteImport.update({
     id: '/reports/post-closing-trial-balance',
     path: '/reports/post-closing-trial-balance',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsRetainedEarningsRoute = ReportsRetainedEarningsRouteImport.update({
-  id: '/reports/retained-earnings',
-  path: '/reports/retained-earnings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsStatementOfCashFlowRoute =
-  ReportsStatementOfCashFlowRouteImport.update({
+const AuthenticatedReportsRetainedEarningsRoute =
+  AuthenticatedReportsRetainedEarningsRouteImport.update({
+    id: '/reports/retained-earnings',
+    path: '/reports/retained-earnings',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsStatementOfCashFlowRoute =
+  AuthenticatedReportsStatementOfCashFlowRouteImport.update({
     id: '/reports/statement-of-cash-flow',
     path: '/reports/statement-of-cash-flow',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsStatementOfFinancialPositionRoute =
-  ReportsStatementOfFinancialPositionRouteImport.update({
+const AuthenticatedReportsStatementOfFinancialPositionRoute =
+  AuthenticatedReportsStatementOfFinancialPositionRouteImport.update({
     id: '/reports/statement-of-financial-position',
     path: '/reports/statement-of-financial-position',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsTrialBalanceRoute = ReportsTrialBalanceRouteImport.update({
-  id: '/reports/trial-balance',
-  path: '/reports/trial-balance',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportsUnadjustedTrialBalanceRoute =
-  ReportsUnadjustedTrialBalanceRouteImport.update({
+const AuthenticatedReportsTrialBalanceRoute =
+  AuthenticatedReportsTrialBalanceRouteImport.update({
+    id: '/reports/trial-balance',
+    path: '/reports/trial-balance',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsUnadjustedTrialBalanceRoute =
+  AuthenticatedReportsUnadjustedTrialBalanceRouteImport.update({
     id: '/reports/unadjusted-trial-balance',
     path: '/reports/unadjusted-trial-balance',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AuthenticatedRoute,
   } as any)
-const ReportsWorksheetRoute = ReportsWorksheetRouteImport.update({
-  id: '/reports/worksheet',
-  path: '/reports/worksheet',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const AuthenticatedReportsWorksheetRoute =
+  AuthenticatedReportsWorksheetRouteImport.update({
+    id: '/reports/worksheet',
+    path: '/reports/worksheet',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/aiassistant': typeof AiassistantRoute
+  '/': typeof AuthenticatedIndexRoute
   '/auth': typeof AuthRoute
-  '/chart-of-accounts': typeof ChartOfAccountsRoute
-  '/dashboard': typeof DashboardRoute
-  '/guardian': typeof GuardianRoute
-  '/journal-entry': typeof JournalEntryRoute
-  '/periods': typeof PeriodsRoute
-  '/settings': typeof SettingsRoute
-  '/tools': typeof ToolsRoute
-  '/reports/adjusted-trial-balance': typeof ReportsAdjustedTrialBalanceRoute
-  '/reports/adjusting-journal': typeof ReportsAdjustingJournalRoute
-  '/reports/closing-journal': typeof ReportsClosingJournalRoute
-  '/reports/general-journal': typeof ReportsGeneralJournalRoute
-  '/reports/general-ledger-permanent': typeof ReportsGeneralLedgerPermanentRoute
-  '/reports/general-ledger-temporary': typeof ReportsGeneralLedgerTemporaryRoute
-  '/reports/income-statement': typeof ReportsIncomeStatementRoute
-  '/reports/post-closing-trial-balance': typeof ReportsPostClosingTrialBalanceRoute
-  '/reports/retained-earnings': typeof ReportsRetainedEarningsRoute
-  '/reports/statement-of-cash-flow': typeof ReportsStatementOfCashFlowRoute
-  '/reports/statement-of-financial-position': typeof ReportsStatementOfFinancialPositionRoute
-  '/reports/trial-balance': typeof ReportsTrialBalanceRoute
-  '/reports/unadjusted-trial-balance': typeof ReportsUnadjustedTrialBalanceRoute
-  '/reports/worksheet': typeof ReportsWorksheetRoute
+  '/aiassistant': typeof AuthenticatedAiassistantRoute
+  '/chart-of-accounts': typeof AuthenticatedChartOfAccountsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/guardian': typeof AuthenticatedGuardianRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/journal-entry': typeof AuthenticatedJournalEntryRoute
+  '/periods': typeof AuthenticatedPeriodsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/tools': typeof AuthenticatedToolsRoute
+  '/reports/adjusted-trial-balance': typeof AuthenticatedReportsAdjustedTrialBalanceRoute
+  '/reports/adjusting-journal': typeof AuthenticatedReportsAdjustingJournalRoute
+  '/reports/closing-journal': typeof AuthenticatedReportsClosingJournalRoute
+  '/reports/general-journal': typeof AuthenticatedReportsGeneralJournalRoute
+  '/reports/general-ledger-permanent': typeof AuthenticatedReportsGeneralLedgerPermanentRoute
+  '/reports/general-ledger-temporary': typeof AuthenticatedReportsGeneralLedgerTemporaryRoute
+  '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/reports/post-closing-trial-balance': typeof AuthenticatedReportsPostClosingTrialBalanceRoute
+  '/reports/retained-earnings': typeof AuthenticatedReportsRetainedEarningsRoute
+  '/reports/statement-of-cash-flow': typeof AuthenticatedReportsStatementOfCashFlowRoute
+  '/reports/statement-of-financial-position': typeof AuthenticatedReportsStatementOfFinancialPositionRoute
+  '/reports/trial-balance': typeof AuthenticatedReportsTrialBalanceRoute
+  '/reports/unadjusted-trial-balance': typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
+  '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/aiassistant': typeof AiassistantRoute
   '/auth': typeof AuthRoute
-  '/chart-of-accounts': typeof ChartOfAccountsRoute
-  '/dashboard': typeof DashboardRoute
-  '/guardian': typeof GuardianRoute
-  '/journal-entry': typeof JournalEntryRoute
-  '/periods': typeof PeriodsRoute
-  '/settings': typeof SettingsRoute
-  '/tools': typeof ToolsRoute
-  '/reports/adjusted-trial-balance': typeof ReportsAdjustedTrialBalanceRoute
-  '/reports/adjusting-journal': typeof ReportsAdjustingJournalRoute
-  '/reports/closing-journal': typeof ReportsClosingJournalRoute
-  '/reports/general-journal': typeof ReportsGeneralJournalRoute
-  '/reports/general-ledger-permanent': typeof ReportsGeneralLedgerPermanentRoute
-  '/reports/general-ledger-temporary': typeof ReportsGeneralLedgerTemporaryRoute
-  '/reports/income-statement': typeof ReportsIncomeStatementRoute
-  '/reports/post-closing-trial-balance': typeof ReportsPostClosingTrialBalanceRoute
-  '/reports/retained-earnings': typeof ReportsRetainedEarningsRoute
-  '/reports/statement-of-cash-flow': typeof ReportsStatementOfCashFlowRoute
-  '/reports/statement-of-financial-position': typeof ReportsStatementOfFinancialPositionRoute
-  '/reports/trial-balance': typeof ReportsTrialBalanceRoute
-  '/reports/unadjusted-trial-balance': typeof ReportsUnadjustedTrialBalanceRoute
-  '/reports/worksheet': typeof ReportsWorksheetRoute
+  '/aiassistant': typeof AuthenticatedAiassistantRoute
+  '/chart-of-accounts': typeof AuthenticatedChartOfAccountsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/guardian': typeof AuthenticatedGuardianRoute
+  '/home': typeof AuthenticatedHomeRoute
+  '/journal-entry': typeof AuthenticatedJournalEntryRoute
+  '/periods': typeof AuthenticatedPeriodsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/tools': typeof AuthenticatedToolsRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/reports/adjusted-trial-balance': typeof AuthenticatedReportsAdjustedTrialBalanceRoute
+  '/reports/adjusting-journal': typeof AuthenticatedReportsAdjustingJournalRoute
+  '/reports/closing-journal': typeof AuthenticatedReportsClosingJournalRoute
+  '/reports/general-journal': typeof AuthenticatedReportsGeneralJournalRoute
+  '/reports/general-ledger-permanent': typeof AuthenticatedReportsGeneralLedgerPermanentRoute
+  '/reports/general-ledger-temporary': typeof AuthenticatedReportsGeneralLedgerTemporaryRoute
+  '/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/reports/post-closing-trial-balance': typeof AuthenticatedReportsPostClosingTrialBalanceRoute
+  '/reports/retained-earnings': typeof AuthenticatedReportsRetainedEarningsRoute
+  '/reports/statement-of-cash-flow': typeof AuthenticatedReportsStatementOfCashFlowRoute
+  '/reports/statement-of-financial-position': typeof AuthenticatedReportsStatementOfFinancialPositionRoute
+  '/reports/trial-balance': typeof AuthenticatedReportsTrialBalanceRoute
+  '/reports/unadjusted-trial-balance': typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
+  '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/aiassistant': typeof AiassistantRoute
+  '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/auth': typeof AuthRoute
-  '/chart-of-accounts': typeof ChartOfAccountsRoute
-  '/dashboard': typeof DashboardRoute
-  '/guardian': typeof GuardianRoute
-  '/journal-entry': typeof JournalEntryRoute
-  '/periods': typeof PeriodsRoute
-  '/settings': typeof SettingsRoute
-  '/tools': typeof ToolsRoute
-  '/reports/adjusted-trial-balance': typeof ReportsAdjustedTrialBalanceRoute
-  '/reports/adjusting-journal': typeof ReportsAdjustingJournalRoute
-  '/reports/closing-journal': typeof ReportsClosingJournalRoute
-  '/reports/general-journal': typeof ReportsGeneralJournalRoute
-  '/reports/general-ledger-permanent': typeof ReportsGeneralLedgerPermanentRoute
-  '/reports/general-ledger-temporary': typeof ReportsGeneralLedgerTemporaryRoute
-  '/reports/income-statement': typeof ReportsIncomeStatementRoute
-  '/reports/post-closing-trial-balance': typeof ReportsPostClosingTrialBalanceRoute
-  '/reports/retained-earnings': typeof ReportsRetainedEarningsRoute
-  '/reports/statement-of-cash-flow': typeof ReportsStatementOfCashFlowRoute
-  '/reports/statement-of-financial-position': typeof ReportsStatementOfFinancialPositionRoute
-  '/reports/trial-balance': typeof ReportsTrialBalanceRoute
-  '/reports/unadjusted-trial-balance': typeof ReportsUnadjustedTrialBalanceRoute
-  '/reports/worksheet': typeof ReportsWorksheetRoute
+  '/_authenticated/aiassistant': typeof AuthenticatedAiassistantRoute
+  '/_authenticated/chart-of-accounts': typeof AuthenticatedChartOfAccountsRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/guardian': typeof AuthenticatedGuardianRoute
+  '/_authenticated/home': typeof AuthenticatedHomeRoute
+  '/_authenticated/journal-entry': typeof AuthenticatedJournalEntryRoute
+  '/_authenticated/periods': typeof AuthenticatedPeriodsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/tools': typeof AuthenticatedToolsRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/reports/adjusted-trial-balance': typeof AuthenticatedReportsAdjustedTrialBalanceRoute
+  '/_authenticated/reports/adjusting-journal': typeof AuthenticatedReportsAdjustingJournalRoute
+  '/_authenticated/reports/closing-journal': typeof AuthenticatedReportsClosingJournalRoute
+  '/_authenticated/reports/general-journal': typeof AuthenticatedReportsGeneralJournalRoute
+  '/_authenticated/reports/general-ledger-permanent': typeof AuthenticatedReportsGeneralLedgerPermanentRoute
+  '/_authenticated/reports/general-ledger-temporary': typeof AuthenticatedReportsGeneralLedgerTemporaryRoute
+  '/_authenticated/reports/income-statement': typeof AuthenticatedReportsIncomeStatementRoute
+  '/_authenticated/reports/post-closing-trial-balance': typeof AuthenticatedReportsPostClosingTrialBalanceRoute
+  '/_authenticated/reports/retained-earnings': typeof AuthenticatedReportsRetainedEarningsRoute
+  '/_authenticated/reports/statement-of-cash-flow': typeof AuthenticatedReportsStatementOfCashFlowRoute
+  '/_authenticated/reports/statement-of-financial-position': typeof AuthenticatedReportsStatementOfFinancialPositionRoute
+  '/_authenticated/reports/trial-balance': typeof AuthenticatedReportsTrialBalanceRoute
+  '/_authenticated/reports/unadjusted-trial-balance': typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
+  '/_authenticated/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/aiassistant'
     | '/auth'
+    | '/aiassistant'
     | '/chart-of-accounts'
     | '/dashboard'
     | '/guardian'
+    | '/home'
     | '/journal-entry'
     | '/periods'
     | '/settings'
@@ -270,16 +296,17 @@ export interface FileRouteTypes {
     | '/reports/worksheet'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
-    | '/aiassistant'
     | '/auth'
+    | '/aiassistant'
     | '/chart-of-accounts'
     | '/dashboard'
     | '/guardian'
+    | '/home'
     | '/journal-entry'
     | '/periods'
     | '/settings'
     | '/tools'
+    | '/'
     | '/reports/adjusted-trial-balance'
     | '/reports/adjusting-journal'
     | '/reports/closing-journal'
@@ -296,73 +323,46 @@ export interface FileRouteTypes {
     | '/reports/worksheet'
   id:
     | '__root__'
-    | '/'
-    | '/aiassistant'
+    | '/_authenticated'
     | '/auth'
-    | '/chart-of-accounts'
-    | '/dashboard'
-    | '/guardian'
-    | '/journal-entry'
-    | '/periods'
-    | '/settings'
-    | '/tools'
-    | '/reports/adjusted-trial-balance'
-    | '/reports/adjusting-journal'
-    | '/reports/closing-journal'
-    | '/reports/general-journal'
-    | '/reports/general-ledger-permanent'
-    | '/reports/general-ledger-temporary'
-    | '/reports/income-statement'
-    | '/reports/post-closing-trial-balance'
-    | '/reports/retained-earnings'
-    | '/reports/statement-of-cash-flow'
-    | '/reports/statement-of-financial-position'
-    | '/reports/trial-balance'
-    | '/reports/unadjusted-trial-balance'
-    | '/reports/worksheet'
+    | '/_authenticated/aiassistant'
+    | '/_authenticated/chart-of-accounts'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/guardian'
+    | '/_authenticated/home'
+    | '/_authenticated/journal-entry'
+    | '/_authenticated/periods'
+    | '/_authenticated/settings'
+    | '/_authenticated/tools'
+    | '/_authenticated/'
+    | '/_authenticated/reports/adjusted-trial-balance'
+    | '/_authenticated/reports/adjusting-journal'
+    | '/_authenticated/reports/closing-journal'
+    | '/_authenticated/reports/general-journal'
+    | '/_authenticated/reports/general-ledger-permanent'
+    | '/_authenticated/reports/general-ledger-temporary'
+    | '/_authenticated/reports/income-statement'
+    | '/_authenticated/reports/post-closing-trial-balance'
+    | '/_authenticated/reports/retained-earnings'
+    | '/_authenticated/reports/statement-of-cash-flow'
+    | '/_authenticated/reports/statement-of-financial-position'
+    | '/_authenticated/reports/trial-balance'
+    | '/_authenticated/reports/unadjusted-trial-balance'
+    | '/_authenticated/reports/worksheet'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AiassistantRoute: typeof AiassistantRoute
+  AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ChartOfAccountsRoute: typeof ChartOfAccountsRoute
-  DashboardRoute: typeof DashboardRoute
-  GuardianRoute: typeof GuardianRoute
-  JournalEntryRoute: typeof JournalEntryRoute
-  PeriodsRoute: typeof PeriodsRoute
-  SettingsRoute: typeof SettingsRoute
-  ToolsRoute: typeof ToolsRoute
-  ReportsAdjustedTrialBalanceRoute: typeof ReportsAdjustedTrialBalanceRoute
-  ReportsAdjustingJournalRoute: typeof ReportsAdjustingJournalRoute
-  ReportsClosingJournalRoute: typeof ReportsClosingJournalRoute
-  ReportsGeneralJournalRoute: typeof ReportsGeneralJournalRoute
-  ReportsGeneralLedgerPermanentRoute: typeof ReportsGeneralLedgerPermanentRoute
-  ReportsGeneralLedgerTemporaryRoute: typeof ReportsGeneralLedgerTemporaryRoute
-  ReportsIncomeStatementRoute: typeof ReportsIncomeStatementRoute
-  ReportsPostClosingTrialBalanceRoute: typeof ReportsPostClosingTrialBalanceRoute
-  ReportsRetainedEarningsRoute: typeof ReportsRetainedEarningsRoute
-  ReportsStatementOfCashFlowRoute: typeof ReportsStatementOfCashFlowRoute
-  ReportsStatementOfFinancialPositionRoute: typeof ReportsStatementOfFinancialPositionRoute
-  ReportsTrialBalanceRoute: typeof ReportsTrialBalanceRoute
-  ReportsUnadjustedTrialBalanceRoute: typeof ReportsUnadjustedTrialBalanceRoute
-  ReportsWorksheetRoute: typeof ReportsWorksheetRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/aiassistant': {
-      id: '/aiassistant'
-      path: '/aiassistant'
-      fullPath: '/aiassistant'
-      preLoaderRoute: typeof AiassistantRouteImport
+      preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -372,192 +372,251 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/chart-of-accounts': {
-      id: '/chart-of-accounts'
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/aiassistant': {
+      id: '/_authenticated/aiassistant'
+      path: '/aiassistant'
+      fullPath: '/aiassistant'
+      preLoaderRoute: typeof AuthenticatedAiassistantRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/chart-of-accounts': {
+      id: '/_authenticated/chart-of-accounts'
       path: '/chart-of-accounts'
       fullPath: '/chart-of-accounts'
-      preLoaderRoute: typeof ChartOfAccountsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedChartOfAccountsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/dashboard': {
-      id: '/dashboard'
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/guardian': {
-      id: '/guardian'
+    '/_authenticated/guardian': {
+      id: '/_authenticated/guardian'
       path: '/guardian'
       fullPath: '/guardian'
-      preLoaderRoute: typeof GuardianRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedGuardianRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/journal-entry': {
-      id: '/journal-entry'
+    '/_authenticated/home': {
+      id: '/_authenticated/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof AuthenticatedHomeRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/journal-entry': {
+      id: '/_authenticated/journal-entry'
       path: '/journal-entry'
       fullPath: '/journal-entry'
-      preLoaderRoute: typeof JournalEntryRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedJournalEntryRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/periods': {
-      id: '/periods'
+    '/_authenticated/periods': {
+      id: '/_authenticated/periods'
       path: '/periods'
       fullPath: '/periods'
-      preLoaderRoute: typeof PeriodsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedPeriodsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/settings': {
-      id: '/settings'
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
       path: '/settings'
       fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/tools': {
-      id: '/tools'
+    '/_authenticated/tools': {
+      id: '/_authenticated/tools'
       path: '/tools'
       fullPath: '/tools'
-      preLoaderRoute: typeof ToolsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedToolsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/adjusted-trial-balance': {
-      id: '/reports/adjusted-trial-balance'
+    '/_authenticated/reports/adjusted-trial-balance': {
+      id: '/_authenticated/reports/adjusted-trial-balance'
       path: '/reports/adjusted-trial-balance'
       fullPath: '/reports/adjusted-trial-balance'
-      preLoaderRoute: typeof ReportsAdjustedTrialBalanceRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsAdjustedTrialBalanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/adjusting-journal': {
-      id: '/reports/adjusting-journal'
+    '/_authenticated/reports/adjusting-journal': {
+      id: '/_authenticated/reports/adjusting-journal'
       path: '/reports/adjusting-journal'
       fullPath: '/reports/adjusting-journal'
-      preLoaderRoute: typeof ReportsAdjustingJournalRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsAdjustingJournalRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/closing-journal': {
-      id: '/reports/closing-journal'
+    '/_authenticated/reports/closing-journal': {
+      id: '/_authenticated/reports/closing-journal'
       path: '/reports/closing-journal'
       fullPath: '/reports/closing-journal'
-      preLoaderRoute: typeof ReportsClosingJournalRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsClosingJournalRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/general-journal': {
-      id: '/reports/general-journal'
+    '/_authenticated/reports/general-journal': {
+      id: '/_authenticated/reports/general-journal'
       path: '/reports/general-journal'
       fullPath: '/reports/general-journal'
-      preLoaderRoute: typeof ReportsGeneralJournalRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsGeneralJournalRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/general-ledger-permanent': {
-      id: '/reports/general-ledger-permanent'
+    '/_authenticated/reports/general-ledger-permanent': {
+      id: '/_authenticated/reports/general-ledger-permanent'
       path: '/reports/general-ledger-permanent'
       fullPath: '/reports/general-ledger-permanent'
-      preLoaderRoute: typeof ReportsGeneralLedgerPermanentRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsGeneralLedgerPermanentRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/general-ledger-temporary': {
-      id: '/reports/general-ledger-temporary'
+    '/_authenticated/reports/general-ledger-temporary': {
+      id: '/_authenticated/reports/general-ledger-temporary'
       path: '/reports/general-ledger-temporary'
       fullPath: '/reports/general-ledger-temporary'
-      preLoaderRoute: typeof ReportsGeneralLedgerTemporaryRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsGeneralLedgerTemporaryRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/income-statement': {
-      id: '/reports/income-statement'
+    '/_authenticated/reports/income-statement': {
+      id: '/_authenticated/reports/income-statement'
       path: '/reports/income-statement'
       fullPath: '/reports/income-statement'
-      preLoaderRoute: typeof ReportsIncomeStatementRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsIncomeStatementRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/post-closing-trial-balance': {
-      id: '/reports/post-closing-trial-balance'
+    '/_authenticated/reports/post-closing-trial-balance': {
+      id: '/_authenticated/reports/post-closing-trial-balance'
       path: '/reports/post-closing-trial-balance'
       fullPath: '/reports/post-closing-trial-balance'
-      preLoaderRoute: typeof ReportsPostClosingTrialBalanceRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsPostClosingTrialBalanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/retained-earnings': {
-      id: '/reports/retained-earnings'
+    '/_authenticated/reports/retained-earnings': {
+      id: '/_authenticated/reports/retained-earnings'
       path: '/reports/retained-earnings'
       fullPath: '/reports/retained-earnings'
-      preLoaderRoute: typeof ReportsRetainedEarningsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsRetainedEarningsRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/statement-of-cash-flow': {
-      id: '/reports/statement-of-cash-flow'
+    '/_authenticated/reports/statement-of-cash-flow': {
+      id: '/_authenticated/reports/statement-of-cash-flow'
       path: '/reports/statement-of-cash-flow'
       fullPath: '/reports/statement-of-cash-flow'
-      preLoaderRoute: typeof ReportsStatementOfCashFlowRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsStatementOfCashFlowRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/statement-of-financial-position': {
-      id: '/reports/statement-of-financial-position'
+    '/_authenticated/reports/statement-of-financial-position': {
+      id: '/_authenticated/reports/statement-of-financial-position'
       path: '/reports/statement-of-financial-position'
       fullPath: '/reports/statement-of-financial-position'
-      preLoaderRoute: typeof ReportsStatementOfFinancialPositionRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsStatementOfFinancialPositionRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/trial-balance': {
-      id: '/reports/trial-balance'
+    '/_authenticated/reports/trial-balance': {
+      id: '/_authenticated/reports/trial-balance'
       path: '/reports/trial-balance'
       fullPath: '/reports/trial-balance'
-      preLoaderRoute: typeof ReportsTrialBalanceRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsTrialBalanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/unadjusted-trial-balance': {
-      id: '/reports/unadjusted-trial-balance'
+    '/_authenticated/reports/unadjusted-trial-balance': {
+      id: '/_authenticated/reports/unadjusted-trial-balance'
       path: '/reports/unadjusted-trial-balance'
       fullPath: '/reports/unadjusted-trial-balance'
-      preLoaderRoute: typeof ReportsUnadjustedTrialBalanceRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsUnadjustedTrialBalanceRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
-    '/reports/worksheet': {
-      id: '/reports/worksheet'
+    '/_authenticated/reports/worksheet': {
+      id: '/_authenticated/reports/worksheet'
       path: '/reports/worksheet'
       fullPath: '/reports/worksheet'
-      preLoaderRoute: typeof ReportsWorksheetRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedReportsWorksheetRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
   }
 }
 
+interface AuthenticatedRouteChildren {
+  AuthenticatedAiassistantRoute: typeof AuthenticatedAiassistantRoute
+  AuthenticatedChartOfAccountsRoute: typeof AuthenticatedChartOfAccountsRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGuardianRoute: typeof AuthenticatedGuardianRoute
+  AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
+  AuthenticatedJournalEntryRoute: typeof AuthenticatedJournalEntryRoute
+  AuthenticatedPeriodsRoute: typeof AuthenticatedPeriodsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedToolsRoute: typeof AuthenticatedToolsRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedReportsAdjustedTrialBalanceRoute: typeof AuthenticatedReportsAdjustedTrialBalanceRoute
+  AuthenticatedReportsAdjustingJournalRoute: typeof AuthenticatedReportsAdjustingJournalRoute
+  AuthenticatedReportsClosingJournalRoute: typeof AuthenticatedReportsClosingJournalRoute
+  AuthenticatedReportsGeneralJournalRoute: typeof AuthenticatedReportsGeneralJournalRoute
+  AuthenticatedReportsGeneralLedgerPermanentRoute: typeof AuthenticatedReportsGeneralLedgerPermanentRoute
+  AuthenticatedReportsGeneralLedgerTemporaryRoute: typeof AuthenticatedReportsGeneralLedgerTemporaryRoute
+  AuthenticatedReportsIncomeStatementRoute: typeof AuthenticatedReportsIncomeStatementRoute
+  AuthenticatedReportsPostClosingTrialBalanceRoute: typeof AuthenticatedReportsPostClosingTrialBalanceRoute
+  AuthenticatedReportsRetainedEarningsRoute: typeof AuthenticatedReportsRetainedEarningsRoute
+  AuthenticatedReportsStatementOfCashFlowRoute: typeof AuthenticatedReportsStatementOfCashFlowRoute
+  AuthenticatedReportsStatementOfFinancialPositionRoute: typeof AuthenticatedReportsStatementOfFinancialPositionRoute
+  AuthenticatedReportsTrialBalanceRoute: typeof AuthenticatedReportsTrialBalanceRoute
+  AuthenticatedReportsUnadjustedTrialBalanceRoute: typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
+  AuthenticatedReportsWorksheetRoute: typeof AuthenticatedReportsWorksheetRoute
+}
+
+const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAiassistantRoute: AuthenticatedAiassistantRoute,
+  AuthenticatedChartOfAccountsRoute: AuthenticatedChartOfAccountsRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGuardianRoute: AuthenticatedGuardianRoute,
+  AuthenticatedHomeRoute: AuthenticatedHomeRoute,
+  AuthenticatedJournalEntryRoute: AuthenticatedJournalEntryRoute,
+  AuthenticatedPeriodsRoute: AuthenticatedPeriodsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedToolsRoute: AuthenticatedToolsRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedReportsAdjustedTrialBalanceRoute:
+    AuthenticatedReportsAdjustedTrialBalanceRoute,
+  AuthenticatedReportsAdjustingJournalRoute:
+    AuthenticatedReportsAdjustingJournalRoute,
+  AuthenticatedReportsClosingJournalRoute:
+    AuthenticatedReportsClosingJournalRoute,
+  AuthenticatedReportsGeneralJournalRoute:
+    AuthenticatedReportsGeneralJournalRoute,
+  AuthenticatedReportsGeneralLedgerPermanentRoute:
+    AuthenticatedReportsGeneralLedgerPermanentRoute,
+  AuthenticatedReportsGeneralLedgerTemporaryRoute:
+    AuthenticatedReportsGeneralLedgerTemporaryRoute,
+  AuthenticatedReportsIncomeStatementRoute:
+    AuthenticatedReportsIncomeStatementRoute,
+  AuthenticatedReportsPostClosingTrialBalanceRoute:
+    AuthenticatedReportsPostClosingTrialBalanceRoute,
+  AuthenticatedReportsRetainedEarningsRoute:
+    AuthenticatedReportsRetainedEarningsRoute,
+  AuthenticatedReportsStatementOfCashFlowRoute:
+    AuthenticatedReportsStatementOfCashFlowRoute,
+  AuthenticatedReportsStatementOfFinancialPositionRoute:
+    AuthenticatedReportsStatementOfFinancialPositionRoute,
+  AuthenticatedReportsTrialBalanceRoute: AuthenticatedReportsTrialBalanceRoute,
+  AuthenticatedReportsUnadjustedTrialBalanceRoute:
+    AuthenticatedReportsUnadjustedTrialBalanceRoute,
+  AuthenticatedReportsWorksheetRoute: AuthenticatedReportsWorksheetRoute,
+}
+
+const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
+  AuthenticatedRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AiassistantRoute: AiassistantRoute,
+  AuthenticatedRoute: AuthenticatedRouteWithChildren,
   AuthRoute: AuthRoute,
-  ChartOfAccountsRoute: ChartOfAccountsRoute,
-  DashboardRoute: DashboardRoute,
-  GuardianRoute: GuardianRoute,
-  JournalEntryRoute: JournalEntryRoute,
-  PeriodsRoute: PeriodsRoute,
-  SettingsRoute: SettingsRoute,
-  ToolsRoute: ToolsRoute,
-  ReportsAdjustedTrialBalanceRoute: ReportsAdjustedTrialBalanceRoute,
-  ReportsAdjustingJournalRoute: ReportsAdjustingJournalRoute,
-  ReportsClosingJournalRoute: ReportsClosingJournalRoute,
-  ReportsGeneralJournalRoute: ReportsGeneralJournalRoute,
-  ReportsGeneralLedgerPermanentRoute: ReportsGeneralLedgerPermanentRoute,
-  ReportsGeneralLedgerTemporaryRoute: ReportsGeneralLedgerTemporaryRoute,
-  ReportsIncomeStatementRoute: ReportsIncomeStatementRoute,
-  ReportsPostClosingTrialBalanceRoute: ReportsPostClosingTrialBalanceRoute,
-  ReportsRetainedEarningsRoute: ReportsRetainedEarningsRoute,
-  ReportsStatementOfCashFlowRoute: ReportsStatementOfCashFlowRoute,
-  ReportsStatementOfFinancialPositionRoute:
-    ReportsStatementOfFinancialPositionRoute,
-  ReportsTrialBalanceRoute: ReportsTrialBalanceRoute,
-  ReportsUnadjustedTrialBalanceRoute: ReportsUnadjustedTrialBalanceRoute,
-  ReportsWorksheetRoute: ReportsWorksheetRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}

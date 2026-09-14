@@ -1,10 +1,9 @@
+// src/routes/_authenticated/index.tsx
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import HomePage from '../pages/HomePage'
 
-export const Route = createFileRoute('/')({
-  // Lempar otomatis ke /homepage jika route '/' hanya alias
+export const Route = createFileRoute('/_authenticated/')({
+  // Begitu buka '/', otomatis lempar ke '/homepage'
   beforeLoad: () => {
     throw redirect({ to: '/homepage' })
   },
-  component: HomePage,
 })
