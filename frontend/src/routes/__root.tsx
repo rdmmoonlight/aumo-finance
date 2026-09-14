@@ -1,16 +1,13 @@
-import { useState, useEffect } from 'react'
 import {
   createRootRoute,
   Outlet,
-  useLocation,
-  useNavigate,
   Link,
   HeadContent,
   Scripts,
+  redirect,
 } from '@tanstack/react-router'
 import appCss from '../styles/index.css?url'
 import apiClient from '@/lib/apiClient'
-import { IconLoader2 } from '@tabler/icons-react'
 
 function NotFoundComponent() {
   return (
@@ -25,62 +22,13 @@ function NotFoundComponent() {
 }
 
 function RootComponent() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  
-  // State auth: null (loading), true (login), false (unauthenticated)
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
-
-  const isAuthPage = location.pathname.startsWith('/auth') || location.pathname.startsWith('/login')
-
-  useEffect(() => {
-    // 1. Jalankan autentikasi HANYA di Client Side (Browser)
-    if (typeof window === 'undefined') return
-
-    let isMounted = true
-
-    async function checkAuth() {
-      try {
-        await apiClient.get('/api/v1/auth/me')
-        if (isMounted) setIsAuthenticated(true)
-      } catch (err) {
-        if (isMounted) {
-          setIsAuthenticated(false)
-          // Tendang ke /auth hanya jika sedang tidak berada di halaman auth
-          if (!isAuthPage) {
-            navigate({ to: '/auth', replace: true })
-          }
-        }
-      }
-    }
-
-    checkAuth()
-
-    return () => {
-      isMounted = false
-    }
-    // Dependency disederhanakan agar tidak memicu re-fetch loop
-  }, [isAuthPage])
-
   return (
     <html lang="en">
       <head>
         <HeadContent />
       </head>
       <body className="antialiased bg-background text-foreground">
-        {/* Loading overlay tanpa merusak tag <html> */}
-        {isAuthenticated === null && !isAuthPage ? (
-          <div className="grid place-items-center h-screen w-full">
-            <div className="flex flex-col items-center gap-2">
-              <IconLoader2 className="animate-spin text-primary" size={32} />
-              <span className="text-xs text-muted-foreground font-medium">
-                Memeriksa autentikasi...
-              </span>
-            </div>
-          </div>
-        ) : (
-          <Outlet />
-        )}
+        <Outlet />
         <Scripts />
       </body>
     </html>
@@ -88,6 +36,30 @@ function RootComponent() {
 }
 
 export const Route = createRootRoute({
+  // Pengecekan auth dijalankan di beforeLoad sebelum UI di-render
+  beforeLoad: async ({ location }) => {
+    const isAuthPage =
+      location.pathname.startsWith('/auth') ||
+      location.pathname.startsWith('/login')
+
+    // Jalankan eksekusi API hanya di browser client agar SSR di Vercel tidak crash 500
+    if (typeof window !== 'undefined') {
+      try {
+        await apiClient.get('/api/v1/auth/me')
+
+        // Jika user sudah login tapi mencoba buka halaman /auth, lempar balik ke /homepage
+        if (isAuthPage) {
+          throw redirect({ to: '/homepage' })
+        }
+      } catch (err) {
+        // Jika belum login dan bukan di halaman auth, lempar ke /auth
+        if (!isAuthPage) {
+          throw redirect({ to: '/auth' })
+        }
+      }
+    }
+  },
+
   head: () => ({
     meta: [
       { charSet: 'utf-8' },
@@ -96,6 +68,7 @@ export const Route = createRootRoute({
     ],
     links: [{ rel: 'stylesheet', href: appCss }],
   }),
+
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 })
