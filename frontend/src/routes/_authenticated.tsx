@@ -47,5 +47,9 @@ function AuthenticatedLayout() {
     )
   }
 
-  return <Outlet />
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  )
 }
