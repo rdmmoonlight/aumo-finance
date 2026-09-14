@@ -100,6 +100,7 @@ public class TrialBalanceController : ControllerBase
 
         if (normalizedType == "post-closing")
         {
+<<<<<<< HEAD
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
             var reRow = rows.Find(r => r.Role == "RetainedEarnings");
 
@@ -126,6 +127,21 @@ public class TrialBalanceController : ControllerBase
                     });
                     rows.Sort((a, b) => a.ReferenceNumber.CompareTo(b.ReferenceNumber));
                 }
+=======
+            var reEnding = await ComputeRetainedEarningsEndingFixedAsync(_db, userId, period);
+            var reRow = rows.FirstOrDefault(r => r.Type == "Equity" && r.Name.Contains("Retained", StringComparison.OrdinalIgnoreCase));
+            if (reRow != null)
+            {
+                // replace row RE dengan saldo ending yang bener
+                rows.Remove(reRow);
+                rows.Add(reRow with { Debit = reEnding < 0 ? -reEnding : 0, Credit = reEnding > 0 ? reEnding : 0, NetBalance = reEnding });
+            }
+            else if (reEnding != 0)
+            {
+                var reAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.UserId == userId && a.Type == "Equity" && a.Role == "RetainedEarnings");
+                if (reAccount != null)
+                    rows.Add(new TrialBalanceRow(reAccount.ReferenceNumber.ToString(), reAccount.AccountName, reAccount.Type!, reEnding > 0 ? 0 : -reEnding, reEnding > 0 ? reEnding : 0, reEnding));
+>>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
             }
         }
 
@@ -234,9 +250,13 @@ public class TrialBalanceController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
+<<<<<<< HEAD
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
                      ?? User.FindFirstValue("sub");
 
+=======
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+>>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }
