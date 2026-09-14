@@ -27,6 +27,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "d6be87c0-882a-4c24-aa65-db6806b9f59a"
+      }
+    },
+    "owner": "obscuron"
   }
 }
