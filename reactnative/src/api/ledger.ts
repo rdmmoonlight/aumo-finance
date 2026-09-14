@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '../config/apiClient';
+import { apiClient } from '../../apiClient';
 import { LedgerParams } from './types';
 
 export const ledgerService = {

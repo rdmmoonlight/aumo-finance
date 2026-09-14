@@ -6,7 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import * as Updates from 'expo-updates';
 
 import { customDarkTheme } from '../src/theme/theme';
-import { queryClient } from '../src/api/queryClient'; // Pastikan path queryClient sesuai lokasi file
+import { queryClient } from '../queryClient';
 
 export default function RootLayout() {
   // Logika Auto-Detect & Auto-Apply Update Terbaru dari Expo
