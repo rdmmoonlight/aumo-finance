@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using AumoBackend.Controllers.Api;
 using AumoBackend.Models;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.Google;
+using AumoBackend.Services; // 6 file baru lu
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -14,12 +8,12 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+// Ini bawaan Core Identity, bukan custom
+using Microsoft.AspNetCore.Identity.UI.Services; 
 
 namespace AumoBackend
 {
@@ -30,24 +24,18 @@ namespace AumoBackend
             var builder = WebApplication.CreateBuilder(args);
 
             // =====================================
-            // 1. DATABASE CONFIGURATION (PostgreSQL)
+            // 1. DATABASE
             // =====================================
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                 ?? Environment.GetEnvironmentVariable("DATABASE_URL");
-
             if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new InvalidOperationException("Database connection string 'DefaultConnection' or 'DATABASE_URL' is missing.");
-            }
+                throw new InvalidOperationException("Database connection string missing.");
 
-            // Registrasi AddDbContext standar
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
                 options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
-
-            // DbContextFactory
             builder.Services.AddDbContextFactory<AppDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
@@ -55,14 +43,14 @@ namespace AumoBackend
             }, ServiceLifetime.Scoped);
 
             // =====================================
-            // 2. DATA PROTECTION & PERSISTENCE
+            // 2. DATA PROTECTION
             // =====================================
             builder.Services.AddDataProtection()
                 .PersistKeysToDbContext<AppDbContext>()
                 .SetApplicationName("AumoFinanceApp");
 
             // =====================================
-            // 3. ASP.NET CORE IDENTITY SETUP
+            // 3. IDENTITY
             // =====================================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
@@ -85,33 +73,16 @@ namespace AumoBackend
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
                 options.SlidingExpiration = true;
-
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                    return Task.CompletedTask;
-                };
-                options.Events.OnRedirectToAccessDenied = context =>
-                {
-                    context.Response.StatusCode = StatusCodes.Status403Forbidden;
-                    return Task.CompletedTask;
-                };
+                options.Events.OnRedirectToLogin = c => { c.Response.StatusCode = 401; return Task.CompletedTask; };
+                options.Events.OnRedirectToAccessDenied = c => { c.Response.StatusCode = 403; return Task.CompletedTask; };
             });
 
             // =====================================
-            // 4. AUTHENTICATION (Cookie, JWT & OAuth)
+            // 4. AUTH (JWT & GOOGLE)
             // =====================================
-            var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"]
-                ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
-
-            var jwtIssuer = builder.Configuration["JWT_ISSUER"]
-                ?? Environment.GetEnvironmentVariable("JWT_ISSUER")
-                ?? "AumoFinanceApp";
-
-            if (string.IsNullOrWhiteSpace(jwtSigningKey))
-            {
-                throw new InvalidOperationException("Fatal Error: Environment variable 'JWT_SIGNING_KEY' is missing.");
-            }
+            var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"] ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
+            var jwtIssuer = builder.Configuration["JWT_ISSUER"] ?? Environment.GetEnvironmentVariable("JWT_ISSUER") ?? "AumoFinanceApp";
+            if (string.IsNullOrWhiteSpace(jwtSigningKey)) throw new InvalidOperationException("JWT_SIGNING_KEY missing.");
 
             var authBuilder = builder.Services.AddAuthentication(options =>
             {
@@ -125,34 +96,20 @@ namespace AumoBackend
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtIssuer,
+                    ValidateIssuer = true, ValidateAudience = true, ValidateLifetime = true, ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer, ValidAudience = jwtIssuer,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
                     ClockSkew = TimeSpan.FromMinutes(5)
                 };
             });
 
-            var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
-                ?? builder.Configuration["Google:ClientId"]
-                ?? Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
-
-            var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]
-                ?? builder.Configuration["Google:ClientSecret"]
-                ?? Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
-
+            var googleClientId = builder.Configuration["Authentication:Google:ClientId"] ?? Environment.GetEnvironmentVariable("GOOGLE_CLIENT_ID");
+            var googleClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? Environment.GetEnvironmentVariable("GOOGLE_CLIENT_SECRET");
             if (!string.IsNullOrWhiteSpace(googleClientId) && !string.IsNullOrWhiteSpace(googleClientSecret))
             {
-                authBuilder.AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-                {
-                    options.ClientId = googleClientId;
-                    options.ClientSecret = googleClientSecret;
-                    options.SignInScheme = IdentityConstants.ExternalScheme;
-                });
+                authBuilder.AddGoogle(options => { options.ClientId = googleClientId; options.ClientSecret = googleClientSecret; options.SignInScheme = IdentityConstants.ExternalScheme; });
             }
+
             builder.Services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
@@ -162,86 +119,47 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 5. REST API CORE SETUP, SWAGGER & CORS
+            // 5. API, SWAGGER, CORS
             // =====================================
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
-
             builder.Services.AddSwaggerGen(options =>
             {
                 options.SwaggerDoc("v1", new OpenApiInfo { Title = "AumoFinance API", Version = "v1" });
-
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
-                    Description = "Enter the JWT token in the format: Bearer <your_token>"
-                });
-
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
-                {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
+                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme { Name = "Authorization", Type = SecuritySchemeType.Http, Scheme = "Bearer", BearerFormat = "JWT", In = ParameterLocation.Header, Description = "Bearer {token}" });
+                options.AddSecurityRequirement(new OpenApiSecurityRequirement { { new OpenApiSecurityScheme { Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" } }, Array.Empty<string>() } });
             });
 
-            var originsList = new List<string>
-            {
-                "http://localhost:3000",
-                "https://my-authentic-web.vercel.app",
-                "https://aumo-finance-web.vercel.app",
-                "https://aumo-finance-web.ndopoer.workers.dev"
-            };
-
-
-            var allowedOrigins = originsList.Distinct().ToArray();
-
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowFrontend", policy =>
-                {
-                    policy.WithOrigins(allowedOrigins)
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials();
-                });
-            });
+            var allowedOrigins = new[] { "http://localhost:3000", "https://my-authentic-web.vercel.app", "https://aumo-finance-web.vercel.app" }.Distinct().ToArray();
+            builder.Services.AddCors(options => { options.AddPolicy("AllowFrontend", p => p.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod().AllowCredentials()); });
 
             // =====================================
-            // 6. APPLICATION SERVICES & HEALTH CHECKS
+            // 6. APPLICATION SERVICES - CUMA 6 FILE
             // =====================================
             builder.Services.AddHealthChecks();
-            builder.Services.AddHostedService<RenderKeepAliveService>();
-
-            builder.Services.AddTransient<ResendEmailSender>();
-            builder.Services.AddTransient<IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
-
-            builder.Services.AddScoped<IGuardianService, GuardianService>();
-            builder.Services.AddHttpClient<IAiService, AiService>();
-            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
             builder.Services.AddMemoryCache();
-            builder.Services.AddScoped<ICloudStorageService, CloudinaryService>();
-            builder.Services.AddScoped<DashboardDataService>();
-
             builder.Services.AddHttpClient("MarketApiClient", client =>
             {
                 client.Timeout = TimeSpan.FromSeconds(15);
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AumoFinance/1.0");
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 AumoFinance/1.0");
             });
 
+            // --- 6a. INFRASTRUCTURE (File ke-6: InfrastructureServices.cs) ---
+            builder.Services.AddScoped<IGuardianService, GuardianService>();
             builder.Services.AddScoped<IMarketService, MarketService>();
+            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
+            builder.Services.AddScoped<DashboardDataService>();
+            builder.Services.AddHttpClient<IAiService, AiService>();
+            builder.Services.AddHostedService<RenderKeepAliveService>();
+            builder.Services.AddScoped<IEmailSender, ResendEmailSender>(); 
+            builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSender>();
+
+            // --- 6b. ACCOUNTING CYCLE (5 File Utama) ---
+            builder.Services.AddScoped<IJournalService, JournalService>();
+            builder.Services.AddScoped<ILedgerService, LedgerService>();
+            builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
+            builder.Services.AddScoped<IWorksheetService, WorksheetService>();
+            builder.Services.AddScoped<IFinancialStatementService, FinancialStatementService>();
 
             // =====================================
             // 7. FORWARDED HEADERS
@@ -249,159 +167,32 @@ namespace AumoBackend
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-                options.KnownIPNetworks.Clear();
-                options.KnownProxies.Clear();
+                options.KnownIPNetworks.Clear(); options.KnownProxies.Clear();
             });
 
-            // =====================================
-            // BUILD APPLICATION
-            // =====================================
             var app = builder.Build();
 
-            // =====================================
-            // 8. AUTOMATIC DATABASE MIGRATION
-            // =====================================
             using (var scope = app.Services.CreateScope())
             {
-                var services = scope.ServiceProvider;
-                try
-                {
-                    var context = services.GetRequiredService<AppDbContext>();
-                    context.Database.Migrate();
-                }
-                catch (Exception ex)
-                {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "Failed to run automatic database migration.");
-                }
+                try { scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate(); }
+                catch (Exception ex) { scope.ServiceProvider.GetRequiredService<ILogger<Program>>().LogError(ex, "Migration failed"); }
             }
 
-            // =====================================
-            // 9. HTTP PIPELINE MIDDLEWARE
-            // =====================================
             app.UseForwardedHeaders();
-
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            app.UseSwagger(); app.UseSwaggerUI();
+            if (app.Environment.IsDevelopment()) app.UseDeveloperExceptionPage();
             else
             {
                 app.UseHsts();
-                app.Use(async (context, next) =>
-                {
-                    try
-                    {
-                        await next();
-                    }
-                    catch (Exception ex)
-                    {
-                        var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                        logger.LogError(ex, "Unhandled exception on {Path}", context.Request.Path);
-
-                        if (!context.Response.HasStarted)
-                        {
-                            context.Response.Clear();
-                            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                            context.Response.ContentType = "application/json";
-                            await context.Response.WriteAsJsonAsync(new
-                            {
-                                success = false,
-                                message = "A server error occurred. Please try again in a moment."
-                            });
-                        }
-                    }
-                });
+                app.Use(async (ctx, next) => { try { await next(); } catch (Exception ex) { var log = ctx.RequestServices.GetRequiredService<ILogger<Program>>(); log.LogError(ex, "Unhandled {Path}", ctx.Request.Path); if (!ctx.Response.HasStarted) { ctx.Response.StatusCode = 500; await ctx.Response.WriteAsJsonAsync(new { success = false, message = "Server error" }); } } });
             }
 
-            app.UseRouting();
-            app.UseCors("AllowFrontend");
-            app.UseAuthentication();
-            app.UseAuthorization();
-
-            // =====================================
-            // 10. ENDPOINTS & MAP CONTROLLERS
-            // =====================================
-            app.MapGet("/", () => Results.Ok(new
-            {
-                service = "AumoFinance API",
-                status = "Online",
-                timestamp = DateTime.UtcNow
-            }));
-
+            app.UseRouting(); app.UseCors("AllowFrontend"); app.UseAuthentication(); app.UseAuthorization();
+            app.MapGet("/", () => Results.Ok(new { service = "AumoFinance API", status = "Online", timestamp = DateTime.UtcNow }));
             app.MapHealthChecks("/health");
-
-            app.MapPost("/auth/logout", async (SignInManager<ApplicationUser> signInManager) =>
-            {
-                await signInManager.SignOutAsync();
-                return Results.Ok(new { success = true, message = "Logout successful" });
-            });
-
+            app.MapPost("/auth/logout", async (SignInManager<ApplicationUser> sm) => { await sm.SignOutAsync(); return Results.Ok(new { success = true }); });
             app.MapControllers();
-
-            // =====================================
-            // 11. RUN APPLICATION
-            // =====================================
             app.Run();
-        }
-    }
-
-    // =====================================
-    // 12. IDENTITY EMAIL SENDER BRIDGE CLASS
-    // =====================================
-    public class IdentityEmailSenderBridge : IEmailSender<ApplicationUser>
-    {
-        private readonly ResendEmailSender _emailSender;
-
-        public IdentityEmailSenderBridge(ResendEmailSender emailSender)
-        {
-            _emailSender = emailSender;
-        }
-
-        public Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
-        {
-            var message = $"""
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Confirm Your Email</h2>
-                    <p>Hello {user.FullName ?? user.UserName},</p>
-                    <p>Please confirm your account email by clicking the link below:</p>
-                    <p><a href="{confirmationLink}" style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
-                    <br/>
-                    <p>If you did not request this, please ignore this email.</p>
-                </div>
-                """;
-
-            return _emailSender.SendEmailAsync(email, "Confirm your email - Aumo Finance", message);
-        }
-
-        public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
-        {
-            var message = $"""
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Reset Your Password</h2>
-                    <p>Hello {user.FullName ?? user.UserName},</p>
-                    <p>You can reset your password by clicking the link below:</p>
-                    <p><a href="{resetLink}" style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
-                </div>
-                """;
-
-            return _emailSender.SendEmailAsync(email, "Reset your password - Aumo Finance", message);
-        }
-
-        public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
-        {
-            var message = $"""
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Reset Password Code</h2>
-                    <p>Hello {user.FullName ?? user.UserName},</p>
-                    <p>Your password reset code is: <strong>{resetCode}</strong></p>
-                </div>
-                """;
-
-            return _emailSender.SendEmailAsync(email, "Password Reset Code - Aumo Finance", message);
         }
     }
 }
