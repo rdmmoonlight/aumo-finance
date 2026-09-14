@@ -59,17 +59,17 @@ public class TrialBalanceController : ControllerBase
         {
             var reEnding = await ComputeRetainedEarningsEndingFixedAsync(_db, userId, period);
             var reRow = rows.FirstOrDefault(r => r.Type == "Equity" && r.Name.Contains("Retained", StringComparison.OrdinalIgnoreCase));
-            if (reRow!= null)
+            if (reRow != null)
             {
                 // replace row RE dengan saldo ending yang bener
                 rows.Remove(reRow);
-                rows.Add(reRow with { Debit = reEnding < 0? -reEnding : 0, Credit = reEnding > 0? reEnding : 0, NetBalance = reEnding });
+                rows.Add(reRow with { Debit = reEnding < 0 ? -reEnding : 0, Credit = reEnding > 0 ? reEnding : 0, NetBalance = reEnding });
             }
-            else if (reEnding!= 0)
+            else if (reEnding != 0)
             {
                 var reAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.UserId == userId && a.Type == "Equity" && a.Role == "RetainedEarnings");
-                if (reAccount!= null)
-                    rows.Add(new TrialBalanceRow(reAccount.ReferenceNumber.ToString(), reAccount.AccountName, reAccount.Type!, reEnding > 0? 0 : -reEnding, reEnding > 0? reEnding : 0, reEnding));
+                if (reAccount != null)
+                    rows.Add(new TrialBalanceRow(reAccount.ReferenceNumber.ToString(), reAccount.AccountName, reAccount.Type!, reEnding > 0 ? 0 : -reEnding, reEnding > 0 ? reEnding : 0, reEnding));
             }
             rows = rows.OrderBy(r => r.Code).ToList();
         }
@@ -121,7 +121,7 @@ public class TrialBalanceController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)?? User.FindFirstValue("sub");
-        return Guid.TryParse(userIdStr, out Guid userId)? userId : Guid.Empty;
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }

@@ -29,7 +29,7 @@ public class AiService : IAiService
     public AiService(HttpClient httpClient, IConfiguration configuration, ILogger<AiService> logger)
     {
         _httpClient = httpClient;
-        _apiKey = configuration["Gemini:ApiKey"]?? string.Empty;
+        _apiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
         _logger = logger;
     }
     public async Task<string> AnalyzeFinancialQueryAsync(string userPrompt, string contextData = "")
@@ -38,7 +38,7 @@ public class AiService : IAiService
         try
         {
             string systemInstruction = @"You are the resident AI Financial Controller for Aumo Finance in Indonesia. CURRENCY MANDATE: 1. ALL monetary values MUST be in Rp. 2. NEVER use USD or '$'. 3. Use dot as thousand separator.";
-            string fullPrompt = string.IsNullOrWhiteSpace(contextData)? userPrompt : $"Context Financial Data:\n{contextData}\n\nUser Question: {userPrompt}";
+            string fullPrompt = string.IsNullOrWhiteSpace(contextData) ? userPrompt : $"Context Financial Data:\n{contextData}\n\nUser Question: {userPrompt}";
             var requestBody = new { system_instruction = new { parts = new[] { new { text = systemInstruction } } }, contents = new[] { new { role = "user", parts = new[] { new { text = fullPrompt } } } } };
             string url = $"https://generativelanguage.googleapis.com/v1beta/models/{Model}:generateContent?key={_apiKey}";
             using var response = await _httpClient.PostAsJsonAsync(url, requestBody);
@@ -46,7 +46,7 @@ public class AiService : IAiService
             using var stream = await response.Content.ReadAsStreamAsync();
             using var doc = await JsonDocument.ParseAsync(stream);
             var text = doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
-            return string.IsNullOrWhiteSpace(text)? "Unable to generate AI analysis." : text;
+            return string.IsNullOrWhiteSpace(text) ? "Unable to generate AI analysis." : text;
         }
         catch (Exception ex) { _logger.LogError(ex, "Error calling Gemini API."); return "Unable to generate AI analysis."; }
     }
@@ -59,7 +59,7 @@ public class EmailSender : IEmailSender
     public EmailSender(IConfiguration config, ILogger<EmailSender> logger) { _config = config; _logger = logger; }
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        var host = _config["Smtp:Host"]; var port = int.Parse(_config["Smtp:Port"]?? "587");
+        var host = _config["Smtp:Host"]; var port = int.Parse(_config["Smtp:Port"] ?? "587");
         var username = _config["Smtp:Username"]; var password = _config["Smtp:Password"];
         if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(username)) { _logger.LogWarning("SMTP missing"); return; }
         using var client = new SmtpClient(host, port) { Credentials = new NetworkCredential(username, password), EnableSsl = true };
@@ -84,7 +84,7 @@ public class ResendEmailSender : IEmailSender
     public ResendEmailSender(IConfiguration configuration, ILogger<ResendEmailSender> logger) { _configuration = configuration; _logger = logger; }
     public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        var apiKey = _configuration["Resend:ApiKey"]?? _configuration["Resend__ApiKey"];
+        var apiKey = _configuration["Resend:ApiKey"] ?? _configuration["Resend__ApiKey"];
         using var client = new HttpClient();
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         var payload = new { from = "Aumo Finance <onboarding@resend.dev>", to = new[] { email }, subject, html = htmlMessage };
@@ -159,7 +159,7 @@ public class MarketService : IMarketService
             var usdTask = FetchUsdAsync(client); var ihsgTask = FetchIhsgAsync(client); var biTask = FetchBiAsync(client);
             await Task.WhenAll(usdTask, ihsgTask, biTask);
             response.Usd = await usdTask; response.Ihsg = await ihsgTask; response.BiRate = await biTask;
-            response.Success = response.Usd!= null || response.Ihsg!= null;
+            response.Success = response.Usd != null || response.Ihsg != null;
         }
         catch { response.Success = false; }
         return response;
@@ -181,21 +181,21 @@ public class TransactionNumberService : ITransactionNumberService
     public TransactionNumberService(AppDbContext db) => _db = db;
     public async Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate)
     {
-        string prefix = journalType == "Adjusting"? "AJ" : "GJ"; string counterKey = $"{prefix}{entryDate:yyMM}";
-        var conn = _db.Database.GetDbConnection(); if (conn.State!= ConnectionState.Open) await conn.OpenAsync();
+        string prefix = journalType == "Adjusting" ? "AJ" : "GJ"; string counterKey = $"{prefix}{entryDate:yyMM}";
+        var conn = _db.Database.GetDbConnection(); if (conn.State != ConnectionState.Open) await conn.OpenAsync();
         using var cmd = conn.CreateCommand();
         cmd.CommandText = @"INSERT INTO ""TransactionCounters"" (""UserId"", ""CounterKey"", ""LastSequence"") VALUES (@userId, @counterKey, 1) ON CONFLICT (""UserId"", ""CounterKey"") DO UPDATE SET ""LastSequence"" = ""TransactionCounters"".""LastSequence"" + 1 RETURNING ""LastSequence"";";
         var p1 = cmd.CreateParameter(); p1.ParameterName = "userId"; p1.Value = userId; cmd.Parameters.Add(p1);
         var p2 = cmd.CreateParameter(); p2.ParameterName = "counterKey"; p2.Value = counterKey; cmd.Parameters.Add(p2);
-        var raw = await cmd.ExecuteScalarAsync()?? throw new InvalidOperationException("Counter failed");
+        var raw = await cmd.ExecuteScalarAsync() ?? throw new InvalidOperationException("Counter failed");
         int seq = Convert.ToInt32(raw); if (seq > 9999) throw new InvalidOperationException($"Sequence {counterKey} full");
         return $"{counterKey}{seq:D4}";
     }
     public async Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate)
     {
-        string prefix = journalType == "Adjusting"? "AJ" : "GJ"; string counterKey = $"{prefix}{entryDate:yyMM}";
+        string prefix = journalType == "Adjusting" ? "AJ" : "GJ"; string counterKey = $"{prefix}{entryDate:yyMM}";
         var cur = await _db.TransactionCounters.Where(c => c.UserId == userId && c.CounterKey == counterKey).Select(c => (int?)c.LastSequence).FirstOrDefaultAsync();
-        return $"{counterKey}{(cur?? 0) + 1:D4}";
+        return $"{counterKey}{(cur ?? 0) + 1:D4}";
     }
 }
 
@@ -207,7 +207,7 @@ public class AumoUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<Applica
         var identity = await base.GenerateClaimsAsync(user);
         if (!string.IsNullOrWhiteSpace(user.FullName))
         {
-            var existing = identity.FindFirst(ClaimTypes.Name); if (existing!= null) identity.RemoveClaim(existing);
+            var existing = identity.FindFirst(ClaimTypes.Name); if (existing != null) identity.RemoveClaim(existing);
             identity.AddClaim(new Claim(ClaimTypes.Name, user.FullName));
         }
         return identity;
@@ -221,7 +221,7 @@ public class DashboardDataService
     public async Task<DashboardViewModel> GetDashboardDataAsync(Guid userId, string periodType)
     {
         var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
-        var model = new DashboardViewModel { UserId = userId, HasSelectedPeriod = selectedPeriod!= null };
+        var model = new DashboardViewModel { UserId = userId, HasSelectedPeriod = selectedPeriod != null };
         if (selectedPeriod == null) return model;
         return model;
     }
@@ -234,7 +234,7 @@ public class RenderKeepAliveService : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
-        var appUrl = _configuration["AppUrl"]?? Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL")?? "https://aumo.onrender.com";
+        var appUrl = _configuration["AppUrl"] ?? Environment.GetEnvironmentVariable("RENDER_EXTERNAL_URL") ?? "https://aumo.onrender.com";
         var healthUrl = $"{appUrl.TrimEnd('/')}/health";
         while (!stoppingToken.IsCancellationRequested)
         {
