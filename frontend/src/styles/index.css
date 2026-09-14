@@ -36,6 +36,28 @@
 }
 
 @layer base {
-    * { @apply border-border outline-ring/50; }
-  body { @apply bg-background text-foreground antialiased; }
+  * { 
+    @apply border-border outline-ring/50; 
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  body { 
+    @apply bg-background text-foreground antialiased; 
+  }
+
+  /* Modern Webkit Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.25);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.45);
+  }
 }
