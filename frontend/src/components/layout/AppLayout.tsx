@@ -102,7 +102,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 border-r bg-card flex flex-col h-screen shrink-0 overflow-hidden select-none">
+    <aside className="w-64 border-r bg-card flex flex-col h-screen sticky top-0 shrink-0 select-none z-20">
       <div className="h-16 px-5 border-b flex items-center gap-3 shrink-0">
         <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shadow-sm">A</div>
         <div className="flex flex-col">
@@ -189,11 +189,11 @@ export function Topbar() {
 
 export default function AppLayout() {
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-muted/20">
+    <div className="flex min-h-screen w-full bg-muted/20">
       <Sidebar />
-      <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
+      <div className="flex flex-1 flex-col min-w-0">
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6 lg:p-8">
+        <main className="flex-1 p-6 lg:p-8">
           <div className="mx-auto max-w-7xl">
             <Outlet />
           </div>
