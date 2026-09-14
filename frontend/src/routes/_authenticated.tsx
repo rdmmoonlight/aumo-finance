@@ -3,6 +3,7 @@ import { createFileRoute, Outlet, useNavigate } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import apiClient from '@/lib/apiClient'
 import { IconLoader2 } from '@tabler/icons-react'
+import Layout from '@/components/layout/AppLayout'
 
 export const Route = createFileRoute('/_authenticated')({
   ssr: false, // Wajib diset false agar Layout Guard hanya diproses di Client Side
