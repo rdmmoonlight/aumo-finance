@@ -7,11 +7,11 @@ import { nitro } from 'nitro/vite'
 import { defineConfig, loadEnv } from 'vite'
 
 export default defineConfig(({ mode }) => {
-  // Load variabel lingkungan berdasarkan mode (development/production)
   const env = loadEnv(mode, process.cwd(), '')
   const backendTarget = env.WEB_API_URL || 'http://localhost:5000'
 
   return {
+    envPrefix: ['VITE_', 'WEB_'],
     plugins: [
       devtools(),
       nitro(),
