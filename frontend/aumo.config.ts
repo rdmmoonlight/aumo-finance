@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
   const backendTarget = env.WEB_API_URL || 'http://localhost:5000'
 
   return {
-    envPrefix: ['VITE_', 'WEB_'],
+    envPrefix: ['WEB_'],
     plugins: [
       devtools(),
       nitro(),
