@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from '@tanstack/react-router';
 import apiClient from '@/services/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,7 +12,6 @@ export default function AuthPage() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState('');
-  const nav = useNavigate();
 
   useEffect(() => {
     const saved = localStorage.getItem('aumo_saved_email');
@@ -29,23 +27,25 @@ export default function AuthPage() {
     setErr('');
 
     try {
-      // COOKIE MODE: Cookie dikirim & disimpan otomatis oleh browser
       const res = await apiClient.post(
         '/api/v1/auth/login',
         { Email: email, Password: password },
         { withCredentials: true }
       );
 
-      console.log('[COOKIE LOGIN SUCCESS]', res.data);
-
-      // Backend me-return OkObjectResult (HTTP 200)
-      const isOk = res.status === 200 || res.data?.Success || res.data?.success || res.data?.isSuccess;
+      const isOk =
+        res.status === 200 ||
+        res.data?.Success ||
+        res.data?.success ||
+        res.data?.isSuccess;
 
       if (!isOk) {
-        throw new Error(res.data?.Message || res.data?.message || 'Login gagal');
+        throw new Error(
+          res.data?.Message || res.data?.message || 'Login gagal'
+        );
       }
 
-      // Simpan flag di LocalStorage
+      // LocalStorage flag (UX Cache saja, bukan sumber otentikasi utama)
       localStorage.setItem('isAuthenticated', 'true');
       if (keepMe) {
         localStorage.setItem('aumo_saved_email', email);
@@ -54,10 +54,9 @@ export default function AuthPage() {
       }
 
       window.location.href = '/homepage';
-
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
-      
+
       const errorMessage =
         e.response?.data?.Message ||
         e.response?.data?.message ||
