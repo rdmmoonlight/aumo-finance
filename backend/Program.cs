@@ -20,6 +20,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+<<<<<<< HEAD
+=======
+// Ini bawaan Core Identity, bukan custom
+using Microsoft.AspNetCore.Identity.UI.Services;
+>>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
 
 namespace AumoBackend
 {
@@ -242,6 +247,22 @@ namespace AumoBackend
             });
 
             builder.Services.AddScoped<IMarketService, MarketService>();
+<<<<<<< HEAD
+=======
+            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
+            builder.Services.AddScoped<DashboardDataService>();
+            builder.Services.AddHttpClient<IAiService, AiService>();
+            builder.Services.AddHostedService<RenderKeepAliveService>();
+            builder.Services.AddScoped<IEmailSender, ResendEmailSender>();
+            builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSender>();
+
+            // --- 6b. ACCOUNTING CYCLE (5 File Utama) ---
+            builder.Services.AddScoped<IJournalService, JournalService>();
+            builder.Services.AddScoped<ILedgerService, LedgerService>();
+            builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
+            builder.Services.AddScoped<IWorksheetService, WorksheetService>();
+            builder.Services.AddScoped<IFinancialStatementService, FinancialStatementService>();
+>>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
 
             // =====================================
             // 7. FORWARDED HEADERS
