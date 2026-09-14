@@ -22,12 +22,13 @@ import apiClient from '@/lib/apiClient';
 interface MenuItem { label: string; path: string; icon: React.ElementType; }
 interface UserProfile { userId?: string; email?: string; userName?: string; fullName?: string; }
 
+// Disesuaikan dengan definisi fullPaths TanStack Router
 const mainNavItems: MenuItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: IconLayoutDashboard },
   { label: 'Chart of Accounts', path: '/chart-of-accounts', icon: IconListDetails },
   { label: 'Journal Entry', path: '/journal-entry', icon: IconFilePencil },
   { label: 'Periods', path: '/periods', icon: IconCalendarTime },
-  { label: 'AI Assistant', path: '/ai-assistant', icon: IconRobot },
+  { label: 'AI Assistant', path: '/aiassistant', icon: IconRobot }, // Disesuaikan dari /ai-assistant
   { label: 'Guardian', path: '/guardian', icon: IconShieldCheck },
   { label: 'Tools', path: '/tools', icon: IconTools },
   { label: 'Settings', path: '/settings', icon: IconSettings },
@@ -37,11 +38,11 @@ const reportNavItems: MenuItem[] = [
   { label: 'General Journal', path: '/reports/general-journal', icon: IconBook },
   { label: 'Adjusting Journal', path: '/reports/adjusting-journal', icon: IconFileCheck },
   { label: 'Closing Journal', path: '/reports/closing-journal', icon: IconLock },
-  { label: 'Permanent Ledger', path: '/reports/general-ledger/permanent', icon: IconNotebook },
-  { label: 'Temporary Ledger', path: '/reports/general-ledger/temporary', icon: IconNotebook },
-  { label: 'Unadjusted Trial Balance', path: '/reports/trial-balance/unadjusted', icon: IconScale },
-  { label: 'Adjusted Trial Balance', path: '/reports/trial-balance/adjusted', icon: IconScaleOff },
-  { label: 'Post-Closing Trial Balance', path: '/reports/trial-balance/post-closing', icon: IconReceipt2 },
+  { label: 'Permanent Ledger', path: '/reports/general-ledger-permanent', icon: IconNotebook }, // Disesuaikan
+  { label: 'Temporary Ledger', path: '/reports/general-ledger-temporary', icon: IconNotebook }, // Disesuaikan
+  { label: 'Unadjusted Trial Balance', path: '/reports/unadjusted-trial-balance', icon: IconScale }, // Disesuaikan
+  { label: 'Adjusted Trial Balance', path: '/reports/adjusted-trial-balance', icon: IconScaleOff }, // Disesuaikan
+  { label: 'Post-Closing Trial Balance', path: '/reports/post-closing-trial-balance', icon: IconReceipt2 }, // Disesuaikan
   { label: 'Income Statement', path: '/reports/income-statement', icon: IconPigMoney },
   { label: 'Retained Earnings', path: '/reports/retained-earnings', icon: IconBuildingBank },
   { label: 'Financial Position', path: '/reports/statement-of-financial-position', icon: IconBuildingStore },
