@@ -62,7 +62,6 @@ export default function GeneralJournalPage() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      // Disesuaikan dengan controller backend: /api/v1/reports/journals/general
       const { data } = await apiClient.get('/api/v1/reports/journals/general');
       if (data.success) {
         setSelectedPeriodName(data.selectedPeriodName || null);
@@ -95,7 +94,6 @@ export default function GeneralJournalPage() {
     }
     if (!confirm(`Delete ${entry.transactionNumber}?`)) return;
     try {
-      // Menyesuaikan endpoint delete jika backend menyediakan penanganan hapus jurnal umum
       await apiClient.delete(`/api/v1/reports/journals/general/${entry.id}`);
       setEntries((prev) => prev.filter((e) => e.id !== entry.id));
     } catch (err: any) {
@@ -107,7 +105,7 @@ export default function GeneralJournalPage() {
   let groupIdx = 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
@@ -142,134 +140,137 @@ export default function GeneralJournalPage() {
         </div>
       </div>
 
-      <Card className="overflow-hidden">
+      {/* Menambahkan wrapper overflow-x-auto agar tabel bisa di-scroll secara horizontal/vertikal dengan mulus */}
+      <Card className="w-full">
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="pl-6 w-[14%]">Date & Ref</TableHead>
-                <TableHead className="w-[26%]">Account</TableHead>
-                <TableHead className="w-[28%]">Description</TableHead>
-                <TableHead className="text-center w-[8%]">Ref #</TableHead>
-                <TableHead className="text-right w-[12%]">Debit</TableHead>
-                <TableHead className="text-right pr-6 w-[12%]">Credit</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
+          <div className="overflow-x-auto w-full">
+            <Table className="min-w-[650px]">
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                    <IconLoader2 className="animate-spin inline mr-2" size={16} /> Loading general journal...
-                  </TableCell>
+                  <TableHead className="pl-6 w-[16%]">Date & Ref</TableHead>
+                  <TableHead className="w-[26%]">Account</TableHead>
+                  <TableHead className="w-[26%]">Description</TableHead>
+                  <TableHead className="text-center w-[10%]">Ref #</TableHead>
+                  <TableHead className="text-right w-[11%]">Debit</TableHead>
+                  <TableHead className="text-right pr-6 w-[11%]">Credit</TableHead>
                 </TableRow>
-              ) : entries.length > 0 ? (
-                entries.map((entry) => {
-                  const sorted = [...(entry.lines || [])].sort((a, b) => a.lineOrder - b.lineOrder);
-                  const curDate = formatDateDisplay(entry.entryDate);
-                  const showHeader = curDate !== currentDateTracker;
-                  if (showHeader) {
-                    currentDateTracker = curDate;
-                    groupIdx++;
-                  }
-                  const shade = groupIdx % 2 === 0 ? 'bg-muted/20' : '';
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
+                      <IconLoader2 className="animate-spin inline mr-2" size={16} /> Loading general journal...
+                    </TableCell>
+                  </TableRow>
+                ) : entries.length > 0 ? (
+                  entries.map((entry) => {
+                    const sorted = [...(entry.lines || [])].sort((a, b) => a.lineOrder - b.lineOrder);
+                    const curDate = formatDateDisplay(entry.entryDate);
+                    const showHeader = curDate !== currentDateTracker;
+                    if (showHeader) {
+                      currentDateTracker = curDate;
+                      groupIdx++;
+                    }
+                    const shade = groupIdx % 2 === 0 ? 'bg-muted/20' : '';
 
-                  return sorted.map((line, i) => {
-                    const isFirst = i === 0;
-                    const isDebit = line.debit > 0;
-                    const accName = line.accountName || line.account?.accountName || 'Unknown';
-                    const ref = line.referenceNumber || line.account?.referenceNumber || '-';
+                    return sorted.map((line, i) => {
+                      const isFirst = i === 0;
+                      const isDebit = line.debit > 0;
+                      const accName = line.accountName || line.account?.accountName || 'Unknown';
+                      const ref = line.referenceNumber || line.account?.referenceNumber || '-';
 
-                    return (
-                      <TableRow key={`${entry.id}-${line.id || i}`} className={shade}>
-                        <TableCell className="pl-6 align-top py-2 text-xs">
-                          {isFirst && showHeader && (
-                            <Badge variant="secondary" className="mb-1 font-mono">
-                              {curDate}
+                      return (
+                        <TableRow key={`${entry.id}-${line.id || i}`} className={shade}>
+                          <TableCell className="pl-6 align-top py-2 text-xs">
+                            {isFirst && showHeader && (
+                              <Badge variant="secondary" className="mb-1 font-mono">
+                                {curDate}
+                              </Badge>
+                            )}
+                            {isFirst && (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="font-mono font-bold text-amber-500">
+                                  {entry.transactionNumber}
+                                </span>
+                                {entry.createdAt && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatDateTimeDisplay(entry.createdAt)}
+                                  </span>
+                                )}
+                                {entry.updatedAt && (
+                                  <span className="text-xs text-sky-500 flex items-center gap-0.5">
+                                    <IconPencil size={10} /> {formatDateTimeDisplay(entry.updatedAt)}
+                                  </span>
+                                )}
+                                {editMode && (
+                                  <div className="flex gap-1 mt-1">
+                                    <Button asChild variant="outline" size="icon" className="h-6 w-6">
+                                      <Link to={`/journal-entry?id=${entry.id}`}>
+                                        <IconPencil size={12} />
+                                      </Link>
+                                    </Button>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-6 w-6 text-destructive"
+                                      onClick={() => deleteEntry(entry)}
+                                    >
+                                      <IconTrash size={12} />
+                                    </Button>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className={`align-top py-2 text-xs ${isDebit ? 'font-semibold' : 'pl-6 text-muted-foreground'}`}>
+                            {accName}
+                          </TableCell>
+                          <TableCell className="align-top py-2 text-xs text-muted-foreground">
+                            {line.lineDescription || '-'}
+                          </TableCell>
+                          <TableCell className="text-center align-top py-2">
+                            <Badge variant="outline" className="font-mono text-amber-500">
+                              {ref}
                             </Badge>
-                          )}
-                          {isFirst && (
-                            <div className="flex flex-col gap-0.5">
-                              <span className="font-mono font-bold text-amber-500">
-                                {entry.transactionNumber}
-                              </span>
-                              {entry.createdAt && (
-                                <span className="text-muted-foreground">
-                                  {formatDateTimeDisplay(entry.createdAt)}
-                                </span>
-                              )}
-                              {entry.updatedAt && (
-                                <span className="text-sky-500 flex items-center gap-0.5">
-                                  <IconPencil size={10} /> {formatDateTimeDisplay(entry.updatedAt)}
-                                </span>
-                              )}
-                              {editMode && (
-                                <div className="flex gap-1 mt-1">
-                                  <Button asChild variant="outline" size="icon" className="h-6 w-6">
-                                    <Link to={`/journal-entry?id=${entry.id}`}>
-                                      <IconPencil size={12} />
-                                    </Link>
-                                  </Button>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-6 w-6 text-destructive"
-                                    onClick={() => deleteEntry(entry)}
-                                  >
-                                    <IconTrash size={12} />
-                                  </Button>
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </TableCell>
-                        <TableCell className={`align-top py-2 text-xs ${isDebit ? 'font-semibold' : 'pl-6 text-muted-foreground'}`}>
-                          {accName}
-                        </TableCell>
-                        <TableCell className="align-top py-2 text-xs text-muted-foreground">
-                          {line.lineDescription || '-'}
-                        </TableCell>
-                        <TableCell className="text-center align-top py-2">
-                          <Badge variant="outline" className="font-mono text-amber-500">
-                            {ref}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right align-top py-2 font-mono text-xs font-medium text-emerald-500">
-                          {line.debit > 0 ? formatNumber(line.debit) : '-'}
-                        </TableCell>
-                        <TableCell className="text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500">
-                          {line.credit > 0 ? formatNumber(line.credit) : '-'}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  });
-                })
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12">
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      {selectedPeriodName === null ? (
-                        <>
-                          <IconEyeOff size={28} />
-                          <p className="text-sm font-medium">No Period Selected</p>
-                          <p className="text-xs">
-                            Go to <Link to="/periods" className="text-primary underline">Periods</Link>
-                          </p>
-                        </>
-                      ) : (
-                        <>
-                          <IconBookOff size={28} />
-                          <p className="text-sm font-medium">No Entries Found</p>
-                          <p className="text-xs">
-                            No entries in <strong>{selectedPeriodName}</strong>
-                          </p>
-                        </>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                          </TableCell>
+                          <TableCell className="text-right align-top py-2 font-mono text-xs font-medium text-emerald-500">
+                            {line.debit > 0 ? formatNumber(line.debit) : '-'}
+                          </TableCell>
+                          <TableCell className="text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500">
+                            {line.credit > 0 ? formatNumber(line.credit) : '-'}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    });
+                  })
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-12">
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        {selectedPeriodName === null ? (
+                          <>
+                            <IconEyeOff size={28} />
+                            <p className="text-sm font-medium">No Period Selected</p>
+                            <p className="text-xs">
+                              Go to <Link to="/periods" className="text-primary underline">Periods</Link>
+                            </p>
+                          </>
+                        ) : (
+                          <>
+                            <IconBookOff size={28} />
+                            <p className="text-sm font-medium">No Entries Found</p>
+                            <p className="text-xs">
+                              No entries in <strong>{selectedPeriodName}</strong>
+                            </p>
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
