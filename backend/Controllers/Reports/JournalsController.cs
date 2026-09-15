@@ -47,7 +47,6 @@ public class JournalController : ControllerBase
             });
         }
 
-        // Pengoptimalan kueri tanggal agar mendukung PostgreSQL Index Scan
         var startUtc = selectedPeriod.StartDate.Date;
         var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
@@ -74,7 +73,7 @@ public class JournalController : ControllerBase
                     l.Id,
                     l.AccountId,
                     AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber : 0,
+                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString() : "0",
                     l.LineDescription,
                     l.Debit,
                     l.Credit,
@@ -118,7 +117,6 @@ public class JournalController : ControllerBase
             });
         }
 
-        // Pengoptimalan kueri tanggal untuk PostgreSQL Index Scan
         var startUtc = selectedPeriod.StartDate.Date;
         var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
@@ -145,7 +143,7 @@ public class JournalController : ControllerBase
                     l.Id,
                     l.AccountId,
                     AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber : 0,
+                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString() : "0",
                     l.LineDescription,
                     l.Debit,
                     l.Credit,
@@ -234,7 +232,7 @@ public class JournalController : ControllerBase
             {
                 group1.Lines.Add(new ClosingJournalLineApiResponse
                 {
-                    ReferenceNumber = r.ReferenceNumber,
+                    ReferenceNumber = r.ReferenceNumber ?? "0",
                     AccountName = r.AccountName,
                     Debit = r.NetBalance,
                     Credit = 0m
@@ -242,7 +240,7 @@ public class JournalController : ControllerBase
             }
             group1.Lines.Add(new ClosingJournalLineApiResponse
             {
-                ReferenceNumber = 0,
+                ReferenceNumber = "0",
                 AccountName = incomeSummaryName,
                 Debit = 0m,
                 Credit = incomeRows.Sum(r => r.NetBalance)
@@ -256,7 +254,7 @@ public class JournalController : ControllerBase
             var group2 = new ClosingJournalEntryGroupApiResponse { Description = "Closing Expense Accounts to Income Summary" };
             group2.Lines.Add(new ClosingJournalLineApiResponse
             {
-                ReferenceNumber = 0,
+                ReferenceNumber = "0",
                 AccountName = incomeSummaryName,
                 Debit = expenseRows.Sum(r => r.NetBalance),
                 Credit = 0m
@@ -265,7 +263,7 @@ public class JournalController : ControllerBase
             {
                 group2.Lines.Add(new ClosingJournalLineApiResponse
                 {
-                    ReferenceNumber = r.ReferenceNumber,
+                    ReferenceNumber = r.ReferenceNumber ?? "0",
                     AccountName = r.AccountName,
                     Debit = 0m,
                     Credit = r.NetBalance
@@ -283,14 +281,14 @@ public class JournalController : ControllerBase
             {
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
-                    ReferenceNumber = 0,
+                    ReferenceNumber = "0",
                     AccountName = incomeSummaryName,
                     Debit = incomeStatement.NetIncome,
                     Credit = 0m
                 });
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
-                    ReferenceNumber = 0,
+                    ReferenceNumber = "0",
                     AccountName = reAccountName,
                     Debit = 0m,
                     Credit = incomeStatement.NetIncome
@@ -301,14 +299,14 @@ public class JournalController : ControllerBase
                 var netLoss = Math.Abs(incomeStatement.NetIncome);
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
-                    ReferenceNumber = 0,
+                    ReferenceNumber = "0",
                     AccountName = reAccountName,
                     Debit = netLoss,
                     Credit = 0m
                 });
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
-                    ReferenceNumber = 0,
+                    ReferenceNumber = "0",
                     AccountName = incomeSummaryName,
                     Debit = 0m,
                     Credit = netLoss
@@ -363,7 +361,7 @@ public class ClosingJournalEntryGroupApiResponse
 
 public class ClosingJournalLineApiResponse
 {
-    public int ReferenceNumber { get; set; }
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public decimal Debit { get; set; }
     public decimal Credit { get; set; }
