@@ -89,8 +89,7 @@ public class TrialBalanceController : ControllerBase
         if (normalizedType == "post-closing")
         {
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
-
-            // Perbaikan CS1503 / CS0200: Cari berdasarkan string role secara presisi
+            
             var reRowIndex = rows.FindIndex(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
 
             decimal reDebit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
@@ -124,7 +123,7 @@ public class TrialBalanceController : ControllerBase
                     rows.Add(new TrialBalanceRow
                     {
                         AccountId = reAccount.Id,
-                        ReferenceNumber = reAccount.ReferenceNumber,
+                        ReferenceNumber = reAccount.ReferenceNumber.ToString(),
                         AccountName = reAccount.AccountName,
                         Type = reAccount.Type,
                         Role = reAccount.Role,
@@ -222,7 +221,7 @@ public class TrialBalanceController : ControllerBase
             rows.Add(new TrialBalanceRow
             {
                 AccountId = account.Id,
-                ReferenceNumber = account.ReferenceNumber,
+                ReferenceNumber = account.ReferenceNumber.ToString(),
                 AccountName = account.AccountName,
                 Type = account.Type,
                 Role = account.Role,
@@ -258,36 +257,20 @@ public class TrialBalanceController : ControllerBase
 
     private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
     {
-        string accountType = (account.Type ?? string.Empty).ToLower();
-        return accountType.Contains("asset") ||
-               accountType.Contains("expense") ||
-               accountType.Contains("aktiva") ||
-               accountType.Contains("beban") ||
-               accountType.Contains("biaya");
+        if (string.IsNullOrEmpty(account.Type)) return false;
+        return AccountClassification.NormalBalanceIsDebit(account.Type);
     }
 
     private static bool IsAccountPermanent(ChartOfAccount account)
     {
-        string accountType = (account.Type ?? string.Empty).ToLower();
-        return accountType.Contains("asset") ||
-               accountType.Contains("liability") ||
-               accountType.Contains("equity") ||
-               accountType.Contains("aktiva") ||
-               accountType.Contains("pasiva") ||
-               accountType.Contains("modal");
+        if (string.IsNullOrEmpty(account.Type)) return false;
+        return AccountClassification.IsPermanent(account.Type);
     }
 
     private static bool IsTemporaryType(string? typeStr)
     {
         if (string.IsNullOrEmpty(typeStr)) return false;
-
-        string t = typeStr.ToLower();
-        return t.Contains("revenue") ||
-               t.Contains("income") ||
-               t.Contains("expense") ||
-               t.Contains("pendapatan") ||
-               t.Contains("beban") ||
-               t.Contains("biaya");
+        return AccountClassification.IsTemporary(typeStr);
     }
 
     private Guid GetCurrentUserId()
