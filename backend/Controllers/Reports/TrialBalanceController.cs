@@ -275,11 +275,11 @@ public class TrialBalanceController : ControllerBase
         }
 
         string accountCategory = (account.Category ?? account.Type ?? string.Empty).ToLower();
-        return accountCategory.Contains("asset") || 
-               accountCategory.Contains("liability") || 
-               accountCategory.Contains("equity") || 
-               accountCategory.Contains("aktiva") || 
-               accountCategory.Contains("pasiva") || 
+        return accountCategory.Contains("asset") ||
+               accountCategory.Contains("liability") ||
+               accountCategory.Contains("equity") ||
+               accountCategory.Contains("aktiva") ||
+               accountCategory.Contains("pasiva") ||
                accountCategory.Contains("modal");
     }
 
@@ -287,13 +287,13 @@ public class TrialBalanceController : ControllerBase
     private static bool IsTemporaryType(string typeStr)
     {
         if (string.IsNullOrEmpty(typeStr)) return false;
-        
+
         string t = typeStr.ToLower();
-        return t.Contains("revenue") || 
-               t.Contains("income") || 
-               t.Contains("expense") || 
-               t.Contains("pendapatan") || 
-               t.Contains("beban") || 
+        return t.Contains("revenue") ||
+               t.Contains("income") ||
+               t.Contains("expense") ||
+               t.Contains("pendapatan") ||
+               t.Contains("beban") ||
                t.Contains("biaya");
     }
 
