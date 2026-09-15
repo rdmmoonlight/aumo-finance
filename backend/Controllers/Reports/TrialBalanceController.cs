@@ -22,36 +22,24 @@ public class TrialBalanceController : ControllerBase
         _db = db;
     }
 
-    // =========================================================================
-    // 1. GET: /api/v1/reports/trial-balance?type=unadjusted|adjusted|post-closing
-    // =========================================================================
     [HttpGet]
     public async Task<IActionResult> GetTrialBalance([FromQuery] string type = "unadjusted")
     {
         return await ProcessTrialBalanceAsync(type);
     }
 
-    // =========================================================================
-    // 2. GET: /api/v1/reports/trial-balance/unadjusted
-    // =========================================================================
     [HttpGet("unadjusted")]
     public async Task<IActionResult> GetUnadjustedTrialBalance()
     {
         return await ProcessTrialBalanceAsync("unadjusted");
     }
 
-    // =========================================================================
-    // 3. GET: /api/v1/reports/trial-balance/adjusted
-    // =========================================================================
     [HttpGet("adjusted")]
     public async Task<IActionResult> GetAdjustedTrialBalance()
     {
         return await ProcessTrialBalanceAsync("adjusted");
     }
 
-    // =========================================================================
-    // 4. GET: /api/v1/reports/trial-balance/post-closing
-    // =========================================================================
     [HttpGet("post-closing")]
     public async Task<IActionResult> GetPostClosingTrialBalance()
     {
@@ -100,13 +88,14 @@ public class TrialBalanceController : ControllerBase
 
         if (normalizedType == "post-closing")
         {
-<<<<<<< HEAD
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
-            var reRow = rows.Find(r => r.Role == "RetainedEarnings");
+            var reRow = rows.FirstOrDefault(r => r.Role == "RetainedEarnings");
 
             if (reRow != null)
             {
                 reRow.NetBalance = reEndingBalance;
+                reRow.Debit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
+                reRow.Credit = reEndingBalance >= 0 ? reEndingBalance : 0m;
             }
             else if (reEndingBalance != 0)
             {
@@ -123,25 +112,12 @@ public class TrialBalanceController : ControllerBase
                         Type = reAccount.Type,
                         Role = reAccount.Role,
                         NormalBalanceIsDebit = false,
-                        NetBalance = reEndingBalance
+                        NetBalance = reEndingBalance,
+                        Debit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m,
+                        Credit = reEndingBalance >= 0 ? reEndingBalance : 0m
                     });
                     rows.Sort((a, b) => a.ReferenceNumber.CompareTo(b.ReferenceNumber));
                 }
-=======
-            var reEnding = await ComputeRetainedEarningsEndingFixedAsync(_db, userId, period);
-            var reRow = rows.FirstOrDefault(r => r.Type == "Equity" && r.Name.Contains("Retained", StringComparison.OrdinalIgnoreCase));
-            if (reRow != null)
-            {
-                // replace row RE dengan saldo ending yang bener
-                rows.Remove(reRow);
-                rows.Add(reRow with { Debit = reEnding < 0 ? -reEnding : 0, Credit = reEnding > 0 ? reEnding : 0, NetBalance = reEnding });
-            }
-            else if (reEnding != 0)
-            {
-                var reAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.UserId == userId && a.Type == "Equity" && a.Role == "RetainedEarnings");
-                if (reAccount != null)
-                    rows.Add(new TrialBalanceRow(reAccount.ReferenceNumber.ToString(), reAccount.AccountName, reAccount.Type!, reEnding > 0 ? 0 : -reEnding, reEnding > 0 ? reEnding : 0, reEnding));
->>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
             }
         }
 
@@ -213,6 +189,21 @@ public class TrialBalanceController : ControllerBase
                 ? accountLines.Sum(l => l.Debit - l.Credit)
                 : accountLines.Sum(l => l.Credit - l.Debit);
 
+            // Hitung nilai Debit dan Credit sesuai Normal Balance akun
+            decimal debit = 0m;
+            decimal credit = 0m;
+
+            if (normalDebit)
+            {
+                if (netBalance >= 0) debit = netBalance;
+                else credit = Math.Abs(netBalance);
+            }
+            else
+            {
+                if (netBalance >= 0) credit = netBalance;
+                else debit = Math.Abs(netBalance);
+            }
+
             rows.Add(new TrialBalanceRow
             {
                 AccountId = account.Id,
@@ -221,7 +212,9 @@ public class TrialBalanceController : ControllerBase
                 Type = account.Type,
                 Role = account.Role,
                 NormalBalanceIsDebit = normalDebit,
-                NetBalance = netBalance
+                NetBalance = netBalance,
+                Debit = debit,
+                Credit = credit
             });
         }
 
@@ -250,13 +243,9 @@ public class TrialBalanceController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-<<<<<<< HEAD
         var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
                      ?? User.FindFirstValue("sub");
 
-=======
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
->>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }
