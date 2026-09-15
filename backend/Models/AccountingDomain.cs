@@ -7,9 +7,6 @@ using System.Text.RegularExpressions;
 
 namespace AumoBackend.Models;
 
-// Aturan klasifikasi akun akuntansi dipusatkan di satu tempat, supaya
-// Chart of Accounts, Journal Entry, General Journal, General Ledger, dan
-// General Ledger (Temporary Accounts) memakai definisi yang sama persis.
 public static class AccountClassification
 {
     private static readonly HashSet<string> PermanentTypes = new()
@@ -27,10 +24,8 @@ public static class AccountClassification
         "Assets", "OperatingExpenses", "OtherExpenses"
     };
 
-    // Akun riil/permanen (Neraca): saldo dibawa terus antar periode.
     public static bool IsPermanent(string type) => PermanentTypes.Contains(type);
 
-    // Akun nominal/sementara (Laba Rugi): ditutup ke Equity/Retained Earnings pada akhir periode.
     public static bool IsTemporary(string type) => TemporaryTypes.Contains(type);
 
     public static bool NormalBalanceIsDebit(string type) => NormalDebitTypes.Contains(type);
@@ -66,7 +61,6 @@ public static class AccountClassification
         return start != 0 && referenceNumber >= start && referenceNumber <= end;
     }
 
-    // Kebalikan dari ValidRangeStart/End: dipakai saat auto-membuat akun baru ke Chart of Accounts
     public static string? TypeFromReferenceNumber(int referenceNumber) => referenceNumber switch
     {
         >= 100 and <= 199 => "Assets",
@@ -106,20 +100,6 @@ public class ChartOfAccount
 
     [NotMapped]
     public string DisplayLabel => $"{ReferenceNumber} - {AccountName}";
-}
-
-// Model DTO untuk baris laporan Neraca Saldo (Trial Balance)
-public class TrialBalanceRow
-{
-    public int AccountId { get; set; }
-    public string? ReferenceNumber { get; set; }
-    public string AccountName { get; set; } = string.Empty;
-    public string? Type { get; set; }
-    public string? Role { get; set; }
-    public bool NormalBalanceIsDebit { get; set; }
-    public decimal NetBalance { get; set; }
-    public decimal Debit { get; set; }
-    public decimal Credit { get; set; }
 }
 
 public class JournalEntry
