@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,11 +21,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-<<<<<<< HEAD
-=======
-// Ini bawaan Core Identity, bukan custom
-using Microsoft.AspNetCore.Identity.UI.Services;
->>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
 
 namespace AumoBackend
 {
@@ -158,12 +154,13 @@ namespace AumoBackend
                     options.SignInScheme = IdentityConstants.ExternalScheme;
                 });
             }
+
             builder.Services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser()
-                .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme)
-                .Build();
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme)
+                    .Build();
             });
 
             // =====================================
@@ -207,9 +204,7 @@ namespace AumoBackend
                 "http://localhost:3000",
                 "https://my-authentic-web.vercel.app",
                 "https://aumo-finance-web.vercel.app",
-                "https://aumo-finance-web.ndopoer.workers.dev"
             };
-
 
             var allowedOrigins = originsList.Distinct().ToArray();
 
@@ -231,7 +226,8 @@ namespace AumoBackend
             builder.Services.AddHostedService<RenderKeepAliveService>();
 
             builder.Services.AddTransient<ResendEmailSender>();
-            builder.Services.AddTransient<IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
+            builder.Services.AddTransient<IEmailSender, ResendEmailSender>();
+            builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
 
             builder.Services.AddScoped<IGuardianService, GuardianService>();
             builder.Services.AddHttpClient<IAiService, AiService>();
@@ -247,22 +243,13 @@ namespace AumoBackend
             });
 
             builder.Services.AddScoped<IMarketService, MarketService>();
-<<<<<<< HEAD
-=======
-            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
-            builder.Services.AddScoped<DashboardDataService>();
-            builder.Services.AddHttpClient<IAiService, AiService>();
-            builder.Services.AddHostedService<RenderKeepAliveService>();
-            builder.Services.AddScoped<IEmailSender, ResendEmailSender>();
-            builder.Services.AddScoped<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSender>();
 
-            // --- 6b. ACCOUNTING CYCLE (5 File Utama) ---
+            // --- 6b. ACCOUNTING CYCLE ---
             builder.Services.AddScoped<IJournalService, JournalService>();
             builder.Services.AddScoped<ILedgerService, LedgerService>();
             builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
             builder.Services.AddScoped<IWorksheetService, WorksheetService>();
             builder.Services.AddScoped<IFinancialStatementService, FinancialStatementService>();
->>>>>>> 62228f86127268bdebc9b2c9c60864a62e0e6dd2
 
             // =====================================
             // 7. FORWARDED HEADERS
