@@ -42,7 +42,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
-      { rel: 'icon', type: 'image/png', href: '/favicon.png' },
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
     ],
   }),
   component: RootComponent,
