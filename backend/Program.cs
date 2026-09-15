@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using AumoBackend.Controllers.Api;
 using AumoBackend.Models;
-using AumoBackend.Services; // Tambahkan namespace Services untuk Accounting Cycle (CS0246)
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -227,8 +226,8 @@ namespace AumoBackend
             builder.Services.AddHostedService<RenderKeepAliveService>();
 
             builder.Services.AddTransient<ResendEmailSender>();
-            // PERBAIKAN: Gunakan fully qualified namespace Microsoft.AspNetCore.Identity.UI.Services untuk menghindari CS0104 & CS0311
-            builder.Services.AddTransient<Microsoft.AspNetCore.Identity.UI.Services.IEmailSender, ResendEmailSender>();
+            // Menggunakan Fully Qualified Name untuk menghindari error CS0104 / CS0311
+            builder.Services.AddTransient<AumoBackend.Models.IEmailSender, ResendEmailSender>();
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
 
             builder.Services.AddScoped<IGuardianService, GuardianService>();
