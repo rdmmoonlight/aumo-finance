@@ -89,13 +89,27 @@ public class TrialBalanceController : ControllerBase
         if (normalizedType == "post-closing")
         {
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
-            var reRow = rows.FirstOrDefault(r => r.Role == "RetainedEarnings");
+            var reRowIndex = rows.FindIndex(r => r.Role == "RetainedEarnings");
 
-            if (reRow != null)
+            decimal reDebit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
+            decimal reCredit = reEndingBalance >= 0 ? reEndingBalance : 0m;
+
+            if (reRowIndex >= 0)
             {
-                reRow.NetBalance = reEndingBalance;
-                reRow.Debit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
-                reRow.Credit = reEndingBalance >= 0 ? reEndingBalance : 0m;
+                var oldRow = rows[reRowIndex];
+                // Mengganti objek dengan instansiasi baru untuk mengatasi properti read-only
+                rows[reRowIndex] = new TrialBalanceRow
+                {
+                    AccountId = oldRow.AccountId,
+                    ReferenceNumber = oldRow.ReferenceNumber,
+                    AccountName = oldRow.AccountName,
+                    Type = oldRow.Type,
+                    Role = oldRow.Role,
+                    NormalBalanceIsDebit = oldRow.NormalBalanceIsDebit,
+                    NetBalance = reEndingBalance,
+                    Debit = reDebit,
+                    Credit = reCredit
+                };
             }
             else if (reEndingBalance != 0)
             {
@@ -113,10 +127,10 @@ public class TrialBalanceController : ControllerBase
                         Role = reAccount.Role,
                         NormalBalanceIsDebit = false,
                         NetBalance = reEndingBalance,
-                        Debit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m,
-                        Credit = reEndingBalance >= 0 ? reEndingBalance : 0m
+                        Debit = reDebit,
+                        Credit = reCredit
                     });
-                    rows.Sort((a, b) => a.ReferenceNumber.CompareTo(b.ReferenceNumber));
+                    rows.Sort((a, b) => string.Compare(a.ReferenceNumber, b.ReferenceNumber, StringComparison.Ordinal));
                 }
             }
         }
@@ -189,7 +203,6 @@ public class TrialBalanceController : ControllerBase
                 ? accountLines.Sum(l => l.Debit - l.Credit)
                 : accountLines.Sum(l => l.Credit - l.Debit);
 
-            // Hitung nilai Debit dan Credit sesuai Normal Balance akun
             decimal debit = 0m;
             decimal credit = 0m;
 
