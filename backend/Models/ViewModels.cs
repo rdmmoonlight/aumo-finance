@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System;
 
 namespace AumoBackend.Models;
 
@@ -11,11 +11,6 @@ public class CashFlowLine
     public decimal Amount { get; set; }
 }
 
-// Laporan Arus Kas metode langsung (IAS 7). Setiap mutasi akun berperan
-// CashAndEquivalents diklasifikasikan berdasarkan tipe akun lawan pada
-// baris jurnal yang sama: Operasi (akun nominal & liabilitas jangka
-// pendek), Investasi (akun Assets non-kas), Pendanaan (Liabilities
-// jangka panjang/Equity, mis. modal atau dividen).
 public class CashFlowStatementViewModel
 {
     public decimal BeginningCash { get; set; }
@@ -46,10 +41,6 @@ public class ClosingJournalEntryGroup
     public decimal TotalCredit => Lines.Sum(l => l.Credit);
 }
 
-// Jurnal penutup dihitung langsung dari saldo akun nominal (tidak
-// disimpan ke database) — metode langsung ke Retained Earnings, tanpa
-// akun perantara Income Summary, karena COA tidak menyediakan peran
-// tersebut.
 public class ClosingJournalViewModel
 {
     public List<ClosingJournalEntryGroup> Groups { get; set; } = new();
@@ -59,7 +50,6 @@ public class ClosingJournalViewModel
 
 public class DashboardViewModel
 {
-    // PERBAIKAN: Ditambahkan untuk menangani @Model.UserId di Views/Dashboard/Index.cshtml
     public Guid UserId { get; set; }
 
     public decimal TotalCashAndEquivalents { get; set; }
@@ -69,13 +59,11 @@ public class DashboardViewModel
     public decimal TotalAssets { get; set; }
     public decimal TotalLiabilities { get; set; }
 
-    // Trend percentages
     public decimal? CashTrendPercent { get; set; }
     public decimal? RevenueTrendPercent { get; set; }
     public decimal? ExpenseTrendPercent { get; set; }
     public decimal? NetIncomeTrendPercent { get; set; }
 
-    // Predictive & Financial Health Metrics
     public decimal MonthlyBurnRate { get; set; }
     public double CashRunwayMonths { get; set; }
     public int FinancialHealthScore { get; set; }
@@ -87,7 +75,6 @@ public class DashboardViewModel
     public List<string> ExpenseCategoryLabels { get; set; } = new();
     public List<decimal> ExpenseCategoryValues { get; set; } = new();
 
-    // Safe null-check & penyederhanaan LINQ
     public bool HasExpenseData => ExpenseCategoryValues?.Any(v => v > 0) ?? false;
 
     public List<JournalEntryDto> RecentJournals { get; set; } = new();
@@ -130,9 +117,6 @@ public class ForgotPasswordModel
     public string Email { get; set; } = string.Empty;
 }
 
-// Satu kartu ledger per akun. Baris-barisnya diambil langsung dari
-// JournalEntryLine (yang diinput lewat Journal Entry), sehingga General
-// Ledger tidak pernah "lepas" dari General Journal.
 public class LedgerAccountViewModel
 {
     public int AccountId { get; set; }
@@ -227,11 +211,6 @@ public class IncomeStatementLine
     public decimal Amount { get; set; }
 }
 
-// Format IAS 1 (Statement of Profit or Loss) untuk laporan keuangan
-// pribadi: Pendapatan dikurangi Beban Usaha menjadi Laba Usaha, lalu
-// ditambah/kurang Pendapatan & Beban Lain-lain menjadi Laba Bersih.
-// Tidak ada Beban Pokok Penjualan (COGS) / Laba Bruto karena tidak
-// relevan untuk entitas non-dagang.
 public class IncomeStatementViewModel
 {
     public DateTime AsOfDate { get; set; }
@@ -261,14 +240,11 @@ public class JournalEntryCreateViewModel
     public DateTime EntryDate { get; set; } = DateTime.Today;
 
     public List<JournalEntryLineInputModel> Lines { get; set; } = new()
-        {
-            new JournalEntryLineInputModel(),
-            new JournalEntryLineInputModel()
-        };
+    {
+        new JournalEntryLineInputModel(),
+        new JournalEntryLineInputModel()
+    };
 
-    // Daftar akun aktif dari Chart of Account, dipakai untuk mengisi
-    // dropdown "Account" di setiap baris jurnal. Setiap opsi menampilkan
-    // Nomor Ref. COA secara otomatis (mis. "101 - Cash on Hand").
     public List<ChartOfAccount> AvailableAccounts { get; set; } = new();
 }
 
@@ -286,9 +262,6 @@ public class JournalEntryLineInputModel
     public decimal? Credit { get; set; }
 }
 
-// Dipakai oleh JournalEntry/Edit. Mewarisi field yang sama dengan Create,
-// ditambah Id (entry yang diedit) dan TransactionNumber (ditampilkan
-// read-only, tidak diregenerasi ulang saat entry diedit).
 public class JournalEntryEditViewModel
 {
     public int Id { get; set; }
@@ -303,10 +276,10 @@ public class JournalEntryEditViewModel
     public DateTime EntryDate { get; set; } = DateTime.Today;
 
     public List<JournalEntryLineInputModel> Lines { get; set; } = new()
-        {
-            new JournalEntryLineInputModel(),
-            new JournalEntryLineInputModel()
-        };
+    {
+        new JournalEntryLineInputModel(),
+        new JournalEntryLineInputModel()
+    };
 
     public List<ChartOfAccount> AvailableAccounts { get; set; } = new();
 }
@@ -321,12 +294,11 @@ public class LoginViewModel
     public string Password { get; set; } = string.Empty;
 }
 
-// Baris daftar di halaman index verifikasi (gabungan Simple + Manual).
 public class MobilePendingListItemViewModel
 {
     public int Id { get; set; }
     public DateTime EntryDate { get; set; }
-    public string Mode { get; set; } = string.Empty; // "Simple" | "Manual"
+    public string Mode { get; set; } = string.Empty;
     public string? Type { get; set; }
     public decimal Amount { get; set; }
     public string? Note { get; set; }
@@ -335,7 +307,6 @@ public class MobilePendingListItemViewModel
     public int LineCount { get; set; }
 }
 
-// Untuk mode "Simple": staf memilih akun lawan (income/expense) + akun kas.
 public class MobileClassifySimpleViewModel
 {
     public int MobileJournalEntryId { get; set; }
@@ -351,8 +322,6 @@ public class MobileClassifySimpleViewModel
     public List<ChartOfAccount> IncomeOrExpenseAccounts { get; set; } = new();
 }
 
-// Untuk mode "Manual": akun tiap baris sudah dipilih dari app, staf tinggal
-// meninjau lalu approve/reject (opsional edit sebelum approve).
 public class MobileClassifyManualLineViewModel
 {
     public int AccountId { get; set; }
@@ -385,17 +354,9 @@ public class OpenPeriodViewModel
     [Display(Name = "Year")]
     public int Year { get; set; }
 
-    // Menentukan cara akun permanen (Cash, Bank, Retained Earnings)
-    // disiapkan untuk periode ini:
-    // - "LoadExisting": pakai akun permanen yang sudah ada dari periode
-    //   sebelumnya (saldo otomatis lanjut karena ledger tidak di-reset
-    //   per periode).
-    // - "CreateNew": daftarkan akun permanen baru ke COA (khusus untuk
-    //   periode pertama / instalasi baru yang belum punya akun permanen).
     [Required]
     public string SetupMode { get; set; } = ModeLoadExisting;
 
-    // --- MODE: LOAD EXISTING ---
     [Display(Name = "Cash Account")]
     public int? CashAccountId { get; set; }
 
@@ -405,7 +366,6 @@ public class OpenPeriodViewModel
     [Display(Name = "Retained Earnings Account")]
     public int? RetainedEarningsAccountId { get; set; }
 
-    // --- MODE: CREATE NEW ---
     [Display(Name = "Cash Account Ref (Code)")]
     public string? CashAccountCode { get; set; }
 
@@ -432,7 +392,6 @@ public class OpenPeriodViewModel
     [Display(Name = "Retained Earnings Name")]
     public string? RetainedEarningsAccountName { get; set; }
 
-    // Referensi tampilan khusus akun permanen (bukan diisi lewat form):
     public List<ChartOfAccount> PermanentAccounts { get; set; } = new();
     public List<ChartOfAccount> AvailableCashAndBankAccounts { get; set; } = new();
     public List<ChartOfAccount> AvailableRetainedEarningsAccounts { get; set; } = new();
@@ -478,8 +437,6 @@ public class ResetPasswordModel
     public string ConfirmPassword { get; set; } = string.Empty;
 }
 
-// Retained Earnings Statement: bridges the Income Statement with the
-// Equity section on the Balance Sheet (US GAAP / ASC 210).
 public class RetainedEarningsViewModel
 {
     public string AccountName { get; set; } = "Retained Earnings";
@@ -507,10 +464,6 @@ public class FinancialPositionLine
     public decimal Amount { get; set; }
 }
 
-// Format IAS 1 (Statement of Financial Position). Saldo Laba yang
-// ditampilkan adalah saldo akhir dari Retained Earnings Statement
-// (saldo awal + laba/rugi periode berjalan), bukan saldo mentah akun
-// Retained Earnings di ledger — karena penutupan buku belum diposting.
 public class StatementOfFinancialPositionViewModel
 {
     public DateTime AsOfDate { get; set; }
@@ -528,32 +481,17 @@ public class StatementOfFinancialPositionViewModel
     public bool IsBalanced => Math.Round(TotalAssets - TotalLiabilitiesAndEquity, 2) == 0;
 }
 
-// Satu baris Neraca Saldo per akun. Dipakai bersama oleh Trial Balance
-// (hanya JournalType "General") dan Adjusted Trial Balance (General +
-// Adjusting), supaya logika penyajian tetap konsisten.
 public class TrialBalanceRow
 {
     public int AccountId { get; set; }
-    public int ReferenceNumber { get; set; } = 0;
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
+    public string? Type { get; set; }
+    public string? Role { get; set; }
     public bool NormalBalanceIsDebit { get; set; }
-
-    // Saldo bersih akun (mengikuti sisi normal). Bisa negatif bila
-    // saldo akun berlawanan dari sisi normalnya.
     public decimal NetBalance { get; set; }
-
-    // Nilai yang tampil di kolom Debit/Kredit Neraca Saldo. Bila saldo
-    // berlawanan arah dari sisi normalnya, otomatis dipindah ke sisi
-    // yang sesuai supaya total Debit = total Kredit tetap terjaga.
-    public decimal Debit => NetBalance >= 0
-        ? (NormalBalanceIsDebit ? NetBalance : 0)
-        : (NormalBalanceIsDebit ? 0 : -NetBalance);
-
-    public decimal Credit => NetBalance >= 0
-        ? (NormalBalanceIsDebit ? 0 : NetBalance)
-        : (NormalBalanceIsDebit ? -NetBalance : 0);
+    public decimal Debit { get; set; }
+    public decimal Credit { get; set; }
 }
 
 public class TrialBalanceViewModel
@@ -565,9 +503,6 @@ public class TrialBalanceViewModel
     public bool IsBalanced => Math.Round(TotalDebit - TotalCredit, 2) == 0;
 }
 
-// Worksheet akuntansi 10 kolom: Neraca Saldo (belum disesuaikan),
-// Penyesuaian, Neraca Saldo Disesuaikan, Laporan Laba Rugi, dan
-// Laporan Posisi Keuangan. Setiap baris mewakili satu akun aktif.
 public class WorksheetRow
 {
     public int AccountId { get; set; }
