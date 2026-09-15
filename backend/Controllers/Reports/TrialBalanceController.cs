@@ -188,7 +188,6 @@ public class TrialBalanceController : ControllerBase
         var rows = new List<TrialBalanceRow>();
         foreach (var account in accounts)
         {
-            // Menentukan sifat akun secara dinamis berdasarkan properti / relasi dari DB
             bool isPermanent = IsAccountPermanent(account);
 
             if (reportType == "post-closing" && !isPermanent)
@@ -239,7 +238,6 @@ public class TrialBalanceController : ControllerBase
     {
         var rows = await BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
 
-        // Evaluasi tipe akun sementara (Pendapatan & Beban) secara dinamis
         decimal totalRevenue = rows
             .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
             .Sum(r => r.NetBalance);
@@ -256,34 +254,30 @@ public class TrialBalanceController : ControllerBase
         return initialRE + netIncome;
     }
 
-    // Helper dinamis untuk mengecek Normal Balance
+    // Checking Normal Balance safely using Type string
     private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
     {
-        if (!string.IsNullOrEmpty(account.NormalBalance))
-        {
-            return string.Equals(account.NormalBalance, "Debit", StringComparison.OrdinalIgnoreCase);
-        }
-        return account.NormalBalanceIsDebit;
+        string accountType = (account.Type ?? string.Empty).ToLower();
+        return accountType.Contains("asset") ||
+               accountType.Contains("expense") ||
+               accountType.Contains("aktiva") ||
+               accountType.Contains("beban") ||
+               accountType.Contains("biaya");
     }
 
-    // Helper dinamis untuk menentukan apakah Akun Permanen (Neraca/Balance Sheet)
+    // Checking Balance Sheet / Permanent Account
     private static bool IsAccountPermanent(ChartOfAccount account)
     {
-        if (account.IsPermanent.HasValue)
-        {
-            return account.IsPermanent.Value;
-        }
-
-        string accountCategory = (account.Category ?? account.Type ?? string.Empty).ToLower();
-        return accountCategory.Contains("asset") ||
-               accountCategory.Contains("liability") ||
-               accountCategory.Contains("equity") ||
-               accountCategory.Contains("aktiva") ||
-               accountCategory.Contains("pasiva") ||
-               accountCategory.Contains("modal");
+        string accountType = (account.Type ?? string.Empty).ToLower();
+        return accountType.Contains("asset") ||
+               accountType.Contains("liability") ||
+               accountType.Contains("equity") ||
+               accountType.Contains("aktiva") ||
+               accountType.Contains("pasiva") ||
+               accountType.Contains("modal");
     }
 
-    // Helper dinamis untuk menentukan Akun Nominal/Sementara (Laba Rugi)
+    // Checking Income Statement / Temporary Account
     private static bool IsTemporaryType(string typeStr)
     {
         if (string.IsNullOrEmpty(typeStr)) return false;
