@@ -89,7 +89,9 @@ public class TrialBalanceController : ControllerBase
         if (normalizedType == "post-closing")
         {
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
-            var reRowIndex = rows.FindIndex(r => string.Equals(r.Role, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
+            
+            // Perbaikan CS1503 / CS0200: Cari berdasarkan string role secara presisi
+            var reRowIndex = rows.FindIndex(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
 
             decimal reDebit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
             decimal reCredit = reEndingBalance >= 0 ? reEndingBalance : 0m;
@@ -131,7 +133,7 @@ public class TrialBalanceController : ControllerBase
                         Debit = reDebit,
                         Credit = reCredit
                     });
-                    rows.Sort((a, b) => string.Compare(a.ReferenceNumber, b.ReferenceNumber, StringComparison.Ordinal));
+                    rows.Sort((a, b) => string.Compare(a.ReferenceNumber ?? string.Empty, b.ReferenceNumber ?? string.Empty, StringComparison.Ordinal));
                 }
             }
         }
@@ -248,13 +250,12 @@ public class TrialBalanceController : ControllerBase
 
         decimal netIncome = totalRevenue - totalExpense;
 
-        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
+        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
         decimal initialRE = reRow?.NetBalance ?? 0m;
 
         return initialRE + netIncome;
     }
 
-    // Checking Normal Balance safely using Type string
     private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
     {
         string accountType = (account.Type ?? string.Empty).ToLower();
@@ -265,7 +266,6 @@ public class TrialBalanceController : ControllerBase
                accountType.Contains("biaya");
     }
 
-    // Checking Balance Sheet / Permanent Account
     private static bool IsAccountPermanent(ChartOfAccount account)
     {
         string accountType = (account.Type ?? string.Empty).ToLower();
@@ -277,8 +277,7 @@ public class TrialBalanceController : ControllerBase
                accountType.Contains("modal");
     }
 
-    // Checking Income Statement / Temporary Account
-    private static bool IsTemporaryType(string typeStr)
+    private static bool IsTemporaryType(string? typeStr)
     {
         if (string.IsNullOrEmpty(typeStr)) return false;
 
