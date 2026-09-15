@@ -46,8 +46,14 @@ export interface JournalEntry {
 const formatNumber = (n: number) => new Intl.NumberFormat('id-ID').format(Math.abs(n));
 const formatDateDisplay = (s: string) => 
   !s ? '-' : new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(s));
-const formatDateTimeDisplay = (s?: string) => 
-  !s ? null : new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(new Date(s));
+const formatDateTimeDisplay = (s?: string) => {
+  if (!s) return null;
+  const d = new Date(s);
+  const dateStr = new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
+  const hours = String(d.getHours()).padStart(2, '0');
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  return `${dateStr}, ${hours}:${minutes}`;
+};
 
 export default function GeneralJournalPage() {
   const navigate = useNavigate();
@@ -119,7 +125,7 @@ export default function GeneralJournalPage() {
             <IconBook className="text-amber-500" size={22} /> General Journal
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Chronological record {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ''}
+            Chronological record {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ''} • All amounts in IDR (Rp)
           </p>
         </div>
         <div className="flex gap-2">
@@ -140,7 +146,6 @@ export default function GeneralJournalPage() {
         </div>
       </div>
 
-      {/* Menambahkan wrapper overflow-x-auto agar tabel bisa di-scroll secara horizontal/vertikal dengan mulus */}
       <Card className="w-full">
         <CardContent className="p-0">
           <div className="overflow-x-auto w-full">
@@ -151,8 +156,8 @@ export default function GeneralJournalPage() {
                   <TableHead className="w-[26%]">Account</TableHead>
                   <TableHead className="w-[26%]">Description</TableHead>
                   <TableHead className="text-center w-[10%]">Ref #</TableHead>
-                  <TableHead className="text-right w-[11%]">Debit</TableHead>
-                  <TableHead className="text-right pr-6 w-[11%]">Credit</TableHead>
+                  <TableHead className="text-right w-[11%]">Debit (Rp)</TableHead>
+                  <TableHead className="text-right pr-6 w-[11%]">Credit (Rp)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
