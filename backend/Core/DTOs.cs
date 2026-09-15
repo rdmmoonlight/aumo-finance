@@ -38,7 +38,7 @@ public class PeriodDto
 
 public class CreateJournalEntryRequest
 {
-        public DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
     public DateTime EntryDate { get; set; }
     public string JournalType { get; set; } = "GJ"; // GJ = General Journal
     public string? MobileNote { get; set; }
