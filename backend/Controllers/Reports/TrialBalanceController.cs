@@ -89,7 +89,7 @@ public class TrialBalanceController : ControllerBase
         if (normalizedType == "post-closing")
         {
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
-            var reRowIndex = rows.FindIndex(r => r.Role == "RetainedEarnings");
+            var reRowIndex = rows.FindIndex(r => string.Equals(r.Role, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
 
             decimal reDebit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
             decimal reCredit = reEndingBalance >= 0 ? reEndingBalance : 0m;
@@ -97,7 +97,6 @@ public class TrialBalanceController : ControllerBase
             if (reRowIndex >= 0)
             {
                 var oldRow = rows[reRowIndex];
-                // Mengganti objek dengan instansiasi baru untuk mengatasi properti read-only
                 rows[reRowIndex] = new TrialBalanceRow
                 {
                     AccountId = oldRow.AccountId,
@@ -118,6 +117,8 @@ public class TrialBalanceController : ControllerBase
 
                 if (reAccount != null)
                 {
+                    bool isDebit = IsAccountNormalBalanceDebit(reAccount);
+
                     rows.Add(new TrialBalanceRow
                     {
                         AccountId = reAccount.Id,
@@ -125,7 +126,7 @@ public class TrialBalanceController : ControllerBase
                         AccountName = reAccount.AccountName,
                         Type = reAccount.Type,
                         Role = reAccount.Role,
-                        NormalBalanceIsDebit = false,
+                        NormalBalanceIsDebit = isDebit,
                         NetBalance = reEndingBalance,
                         Debit = reDebit,
                         Credit = reCredit
@@ -137,7 +138,7 @@ public class TrialBalanceController : ControllerBase
 
         decimal totalDebit = rows.Sum(r => r.Debit);
         decimal totalCredit = rows.Sum(r => r.Credit);
-        bool isBalanced = Math.Round(totalDebit - totalCredit, 2) == 0;
+        bool isBalanced = Math.Abs(totalDebit - totalCredit) < 0.01m;
 
         return Ok(new
         {
@@ -187,7 +188,8 @@ public class TrialBalanceController : ControllerBase
         var rows = new List<TrialBalanceRow>();
         foreach (var account in accounts)
         {
-            var isPermanent = AccountClassification.IsPermanent(account.Type);
+            // Menentukan sifat akun secara dinamis berdasarkan properti / relasi dari DB
+            bool isPermanent = IsAccountPermanent(account);
 
             if (reportType == "post-closing" && !isPermanent)
             {
@@ -195,11 +197,10 @@ public class TrialBalanceController : ControllerBase
             }
 
             var accountLines = lines.Where(l => l.AccountId == account.Id).ToList();
-
             if (!accountLines.Any()) continue;
 
-            var normalDebit = AccountClassification.NormalBalanceIsDebit(account.Type);
-            var netBalance = normalDebit
+            bool normalDebit = IsAccountNormalBalanceDebit(account);
+            decimal netBalance = normalDebit
                 ? accountLines.Sum(l => l.Debit - l.Credit)
                 : accountLines.Sum(l => l.Credit - l.Debit);
 
@@ -238,20 +239,62 @@ public class TrialBalanceController : ControllerBase
     {
         var rows = await BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
 
+        // Evaluasi tipe akun sementara (Pendapatan & Beban) secara dinamis
         decimal totalRevenue = rows
-            .Where(r => AccountClassification.IsTemporary(r.Type) && !r.NormalBalanceIsDebit)
+            .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
             .Sum(r => r.NetBalance);
 
         decimal totalExpense = rows
-            .Where(r => AccountClassification.IsTemporary(r.Type) && r.NormalBalanceIsDebit)
+            .Where(r => r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
             .Sum(r => r.NetBalance);
 
         decimal netIncome = totalRevenue - totalExpense;
 
-        var reRow = rows.FirstOrDefault(r => r.Role == "RetainedEarnings");
+        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
         decimal initialRE = reRow?.NetBalance ?? 0m;
 
         return initialRE + netIncome;
+    }
+
+    // Helper dinamis untuk mengecek Normal Balance
+    private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
+    {
+        if (!string.IsNullOrEmpty(account.NormalBalance))
+        {
+            return string.Equals(account.NormalBalance, "Debit", StringComparison.OrdinalIgnoreCase);
+        }
+        return account.NormalBalanceIsDebit;
+    }
+
+    // Helper dinamis untuk menentukan apakah Akun Permanen (Neraca/Balance Sheet)
+    private static bool IsAccountPermanent(ChartOfAccount account)
+    {
+        if (account.IsPermanent.HasValue)
+        {
+            return account.IsPermanent.Value;
+        }
+
+        string accountCategory = (account.Category ?? account.Type ?? string.Empty).ToLower();
+        return accountCategory.Contains("asset") || 
+               accountCategory.Contains("liability") || 
+               accountCategory.Contains("equity") || 
+               accountCategory.Contains("aktiva") || 
+               accountCategory.Contains("pasiva") || 
+               accountCategory.Contains("modal");
+    }
+
+    // Helper dinamis untuk menentukan Akun Nominal/Sementara (Laba Rugi)
+    private static bool IsTemporaryType(string typeStr)
+    {
+        if (string.IsNullOrEmpty(typeStr)) return false;
+        
+        string t = typeStr.ToLower();
+        return t.Contains("revenue") || 
+               t.Contains("income") || 
+               t.Contains("expense") || 
+               t.Contains("pendapatan") || 
+               t.Contains("beban") || 
+               t.Contains("biaya");
     }
 
     private Guid GetCurrentUserId()
