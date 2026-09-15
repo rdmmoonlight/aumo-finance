@@ -1,0 +1,8 @@
+Services/
+├── AccountingService.cs         <-- COA, Period, & Journal Entry
+├── AuthService.cs               <-- Login, Register, User Identity
+├── SystemToolsService.cs        <-- Email SMTP & Guardian Security
+└── Reports/
+    ├── FinancialStatementsService.cs <-- IncomeStatement, FinancialPosition, CashFlow, RetainedEarnings
+    ├── JournalReportService.cs       <-- General Journal Reports
+    └── LedgerAndWorksheetService.cs  <-- GeneralLedger, TrialBalance, Worksheet
