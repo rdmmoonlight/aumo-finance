@@ -134,7 +134,7 @@ public class IncomeStatementApiResponse
 
 public class IncomeStatementLineApiResponse
 {
-    public int ReferenceNumber { get; set; }
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
 }
