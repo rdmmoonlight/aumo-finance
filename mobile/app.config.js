@@ -12,8 +12,8 @@ const appVersion = `${year}.${month}.${versionState.build}`;
 
 module.exports = {
   expo: {
-    name: 'reactnative',
-    slug: 'reactnative',
+    name: 'Aumo Mobile',
+    slug: 'aumo-mobile',
     version: appVersion,
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -25,7 +25,7 @@ module.exports = {
     },
     assetBundlePatterns: ['**/*'],
     android: {
-      package: 'com.rdmmoonlight.aumofinance',
+      package: 'com.rdmmoonlight.aumomobile',
       minSdkVersion: 28,
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
