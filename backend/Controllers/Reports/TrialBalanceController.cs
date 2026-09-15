@@ -202,7 +202,7 @@ public class TrialBalanceController : ControllerBase
             if (!accountLines.Any()) continue;
 
             bool normalDebit = IsAccountNormalBalanceDebit(account);
-            
+
             decimal totalDebitLines = accountLines.Sum(l => l.Debit);
             decimal totalCreditLines = accountLines.Sum(l => l.Credit);
 
