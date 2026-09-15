@@ -1,9 +1,7 @@
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { Link } from '@tanstack/react-router';
 import { useNavigate, useSearchParams } from '@/hooks/useCompatRouter';
-import {
-  IconEdit, IconNotebook, IconArrowLeft, IconCircleCheck, IconAlertTriangle, IconLock, IconPlus, IconTrash, IconDeviceFloppy, IconLoader2,
-} from '@tabler/icons-react';
+import { IconEdit, IconNotebook, IconArrowLeft, IconCircleCheck, IconAlertTriangle, IconLock, IconPlus, IconTrash, IconDeviceFloppy, IconLoader2, } from '@tabler/icons-react';
 import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,7 +28,7 @@ function JournalEntryContent() {
 
   const [journalType, setJournalType] = useState('General');
   const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0]);
-  const [transactionNumber, setTransactionNumber] = useState('');
+  const [transactionNumber, setTransactionNumber] = useState('Loading...');
   const [availableAccounts, setAvailableAccounts] = useState<ChartOfAccountOption[]>([]);
   const [lines, setLines] = useState<LineItem[]>([
     { id: '1', accountId: 0, lineDescription: '', debit: '', credit: '' },
@@ -40,77 +38,86 @@ function JournalEntryContent() {
   const [lockedMessage, setLockedMessage] = useState<string|null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isTxLoading, setIsTxLoading] = useState(false);
+  const [txLoading, setTxLoading] = useState(false);
 
-  // fungsi mengambil Transaction Number dari API Backend
+  // 1. Fungsi Mengambil Transaction Number Terbaru dari Backend (Server-side Generation)
   const fetchNextTxNumber = async (type: string, date: string) => {
-    if (isEdit) return;
+    if (isEdit) return; // Jika mode Edit, nomor transaksi menggunakan bawaan data lama
+    setTxLoading(true);
     try {
-      setIsTxLoading(true);
-      const { data } = await apiClient.get('/api/v1/journals/next-number', {
-        params: { type, date }
+      const { data } = await apiClient.get('/api/v1/journal-entry/next-transaction-number', {
+        params: { journalType: type, entryDate: date }
       });
-      // Menyesuaikan jika backend mengembalikan string langsung atau objek { transactionNumber: '...' }
-      setTransactionNumber(data?.transactionNumber || data);
+      if (data?.success && data?.transactionNumber) {
+        setTransactionNumber(data.transactionNumber);
+      }
     } catch (err) {
       console.error('Failed to fetch next transaction number', err);
     } finally {
-      setIsTxLoading(false);
+      setTxLoading(false);
     }
   };
 
-  const resetForm = () => {
+  const resetForm = async () => {
     const defaultDate = new Date().toISOString().split('T')[0];
     setJournalType('General'); 
-    setEntryDate(defaultDate); 
+    setEntryDate(defaultDate);
     setLines([
       { id: Date.now()+'-1', accountId: 0, lineDescription: '', debit: '', credit: '' },
       { id: Date.now()+'-2', accountId: 0, lineDescription: '', debit: '', credit: '' }
     ]);
     setValidationErrors([]); 
     setSuccessMessage(null);
-    fetchNextTxNumber('General', defaultDate);
+    await fetchNextTxNumber('General', defaultDate);
   };
 
-  // Mengambil nomor urut otomatis dari DB setiap kali tipe jurnal atau tanggal berubah
+  // 2. Kunci Efek: Ambil Transaction Number Baru Setiap Tipe atau Tanggal Berubah (Hanya Mode Create)
   useEffect(() => {
-    if (!isEdit) {
+    if (!isEdit && !loading) {
       fetchNextTxNumber(journalType, entryDate);
     }
   }, [journalType, entryDate, isEdit]);
 
+  // 3. Load Data Awal (Akun & Detail Journal jika Edit)
   useEffect(() => {
     const init = async () => {
       setLoading(true);
       try {
         const { data: accRes } = await apiClient.get(`/api/v1/chart-of-accounts`);
         const accountsData = Array.isArray(accRes) ? accRes : accRes?.accounts || accRes?.data || [];
-        setAvailableAccounts(accountsData.map((a:any) => ({ id: a.id, referenceNumber: a.referenceNumber, accountName: a.accountName })));
+        setAvailableAccounts(accountsData.map((a: any) => ({ id: a.id, referenceNumber: a.referenceNumber, accountName: a.accountName })));
 
         if (isEdit && entryIdParam) {
-          const { data: jData } = await apiClient.get(`/api/v1/journals/${entryIdParam}`);
-          if (jData.isClosedPeriod) {
-            setLockedMessage(`Journal ${jData.transactionNumber} is in closed period`);
-          } else {
-            setTransactionNumber(jData.transactionNumber); 
-            setJournalType(jData.journalType || 'General'); 
-            setEntryDate(jData.entryDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
-            const rawLines = jData.lines || []; 
-            if (rawLines.length) {
-              setLines(rawLines.map((l:any, i:number) => ({ 
-                id: l.id?.toString() || `${Date.now()}-${i}`, 
-                accountId: l.accountId, 
-                lineDescription: l.lineDescription || '', 
-                debit: l.debit > 0 ? formatNumberWithDots(l.debit) : '', 
-                credit: l.credit > 0 ? formatNumberWithDots(l.credit) : '' 
-              })));
+          // Sesuaikan Endpoint dengan Controller Backend (/api/v1/journal-entry/{id})
+          const { data: res } = await apiClient.get(`/api/v1/journal-entry/${entryIdParam}`);
+          const jData = res?.entry;
+          
+          if (jData) {
+            if (res.isLocked) {
+              setLockedMessage(`Journal ${jData.transactionNumber} is in closed period`);
+            } else {
+              setTransactionNumber(jData.transactionNumber); 
+              setJournalType(jData.journalType || 'General'); 
+              setEntryDate(jData.entryDate?.split('T')[0] || new Date().toISOString().split('T')[0]);
+              
+              const rawLines = jData.lines || []; 
+              if (rawLines.length) {
+                setLines(rawLines.map((l: any, i: number) => ({ 
+                  id: l.id?.toString() || `${Date.now()}-${i}`, 
+                  accountId: l.accountId, 
+                  lineDescription: l.lineDescription || '', 
+                  debit: l.debit > 0 ? formatNumberWithDots(l.debit) : '', 
+                  credit: l.credit > 0 ? formatNumberWithDots(l.credit) : '' 
+                })));
+              }
             }
           }
-        } else { 
-          resetForm(); 
+        } else {
+          // Mode Tambah Baru: Minta nomor terbaru dari Backend
+          await fetchNextTxNumber(journalType, entryDate);
         }
       } catch (err: any) { 
-        setValidationErrors([err?.response?.data?.message || 'Failed to load']); 
+        setValidationErrors([err?.response?.data?.message || 'Failed to load initial data']); 
       } finally { 
         setLoading(false); 
       }
@@ -118,13 +125,13 @@ function JournalEntryContent() {
     init();
   }, [isEdit, entryIdParam]);
 
-  const totalDebit = useMemo(() => lines.reduce((s,l) => s + parseFormattedNumber(l.debit), 0), [lines]);
-  const totalCredit = useMemo(() => lines.reduce((s,l) => s + parseFormattedNumber(l.credit), 0), [lines]);
+  const totalDebit = useMemo(() => lines.reduce((s, l) => s + parseFormattedNumber(l.debit), 0), [lines]);
+  const totalCredit = useMemo(() => lines.reduce((s, l) => s + parseFormattedNumber(l.credit), 0), [lines]);
   const isBalanced = useMemo(() => totalDebit > 0 && totalDebit === totalCredit, [totalDebit, totalCredit]);
 
   const addLine = () => setLines(prev => [...prev, { id: `${Date.now()}-${Math.random()}`, accountId: 0, lineDescription: '', debit: '', credit: '' }]);
   const removeLine = (id: string) => { 
-    if (lines.length <= 2) { alert('Min 2 lines'); return; } 
+    if (lines.length <= 2) { alert('Min 2 lines required'); return; } 
     setLines(prev => prev.filter(l => l.id !== id)); 
   };
 
@@ -141,14 +148,15 @@ function JournalEntryContent() {
     e.preventDefault(); 
     setValidationErrors([]); 
     setSuccessMessage(null);
+
     const effective = lines.filter(l => l.accountId !== 0 && (parseFormattedNumber(l.debit) > 0 || parseFormattedNumber(l.credit) > 0));
-    if (effective.length < 2) { setValidationErrors(['Min 2 valid lines']); return; }
+    if (effective.length < 2) { setValidationErrors(['Min 2 valid lines required']); return; }
     if (!isBalanced) { setValidationErrors(['Debit must equal Credit']); return; }
+
     try {
       const payload = { 
         journalType, 
         entryDate, 
-        transactionNumber, 
         lines: effective.map(l => ({ 
           accountId: l.accountId, 
           lineDescription: l.lineDescription, 
@@ -156,17 +164,20 @@ function JournalEntryContent() {
           credit: parseFormattedNumber(l.credit) 
         })) 
       };
-      const endpoint = isEdit ? `/api/v1/journals/${entryIdParam}` : `/api/v1/journals`;
-      const res = isEdit ? await apiClient.put(endpoint, payload) : await apiClient.post(endpoint, payload);
-      if (isEdit) { 
-        setSuccessMessage(`Updated ${transactionNumber}`); 
-        setTimeout(() => navigate({ to: '/reports/general-journal' }), 1200); 
-      } else { 
-        setSuccessMessage(`Posted ${res.data?.transactionNumber || transactionNumber}`); 
-        resetForm(); 
+
+      // Disesuaikan dengan Endpoint Controller Backend: /api/v1/journal-entry/create & edit/{id}
+      if (isEdit) {
+        await apiClient.put(`/api/v1/journal-entry/edit/${entryIdParam}`, payload);
+        setSuccessMessage(`Updated ${transactionNumber}`);
+        setTimeout(() => navigate({ to: '/reports/general-journal' }), 1200);
+      } else {
+        const res = await apiClient.post(`/api/v1/journal-entry/create`, payload);
+        const postedTxNumber = res.data?.transactionNumber || transactionNumber;
+        setSuccessMessage(`Posted ${postedTxNumber}`);
+        await resetForm();
       }
     } catch (err: any) { 
-      setValidationErrors([err?.response?.data?.message || 'Failed to post']); 
+      setValidationErrors([err?.response?.data?.message || 'Failed to post journal entry']); 
     }
   };
 
@@ -189,7 +200,7 @@ function JournalEntryContent() {
       </div>
 
       {successMessage && <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300"><IconCircleCheck size={16}/><AlertDescription>{successMessage}</AlertDescription></Alert>}
-      {validationErrors.length > 0 && <Alert variant="destructive"><IconAlertTriangle size={16}/><AlertDescription><ul className="list-disc ml-4">{validationErrors.map((e,i) => <li key={i}>{e}</li>)}</ul></AlertDescription></Alert>}
+      {validationErrors.length > 0 && <Alert variant="destructive"><IconAlertTriangle size={16}/><AlertDescription><ul className="list-disc ml-4">{validationErrors.map((e, i) => <li key={i}>{e}</li>)}</ul></AlertDescription></Alert>}
       
       {lockedMessage ? (
         <Alert><IconLock size={16}/><AlertDescription>{lockedMessage} <Link to="/reports/general-journal" className="underline">Back</Link></AlertDescription></Alert>
@@ -200,10 +211,10 @@ function JournalEntryContent() {
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
                 <label className="text-xs font-medium flex items-center justify-between">
-                  Transaction No.
-                  {isTxLoading && <IconLoader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+                  <span>Transaction No.</span>
+                  {txLoading && <IconLoader2 size={12} className="animate-spin text-muted-foreground" />}
                 </label>
-                <Input className="h-9 font-mono bg-muted" value={transactionNumber} readOnly placeholder="Loading..." />
+                <Input className="h-9 font-mono bg-muted" value={transactionNumber} readOnly />
               </div>
               <div className="space-y-1.5">
                 <label className="text-xs font-medium">Journal Type</label>
@@ -248,7 +259,7 @@ function JournalEntryContent() {
                       <TableRow key={line.id}>
                         <TableCell><Input className="h-8 text-center text-xs bg-muted" readOnly value={ref || ''} placeholder="---"/></TableCell>
                         <TableCell>
-                          <Select value={String(line.accountId)} onValueChange={v => updateLine(line.id, 'accountId', Number(v))}>
+                          <Select value={line.accountId ? String(line.accountId) : ''} onValueChange={v => updateLine(line.id, 'accountId', Number(v))}>
                             <SelectTrigger className="h-8 text-xs"><SelectValue placeholder="Select Account"/></SelectTrigger>
                             <SelectContent>
                               {availableAccounts.map(acc => (
@@ -296,7 +307,7 @@ function JournalEntryContent() {
 
           <div className="flex justify-end gap-2">
             <Button type="button" variant="outline" onClick={resetForm}>Reset</Button>
-            <Button type="submit" disabled={!isBalanced || isTxLoading} className="gap-2">
+            <Button type="submit" disabled={!isBalanced} className="gap-2">
               <IconDeviceFloppy size={16}/>{isEdit ? 'Save Changes' : 'Post Journal Entry'}
             </Button>
           </div>
