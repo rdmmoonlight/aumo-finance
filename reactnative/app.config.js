@@ -1,0 +1,55 @@
+const fs = require('fs');
+const path = require('path');
+
+// Baca angka urutan build bulan ini dari build-version.json (dinaikkan
+// oleh scripts/bump-build-number.js lewat "npm run build:android",
+// BUKAN di sini - supaya file ini aman dievaluasi berkali-kali tanpa
+// ikut menaikkan angkanya).
+const versionStatePath = path.join(__dirname, 'build-version.json');
+const versionState = JSON.parse(fs.readFileSync(versionStatePath, 'utf8'));
+const [year, month] = versionState.month.split('-').map(Number);
+const appVersion = `${year}.${month}.${versionState.build}`;
+
+module.exports = {
+  expo: {
+    name: 'reactnative',
+    slug: 'reactnative',
+    version: appVersion,
+    orientation: 'portrait',
+    icon: './assets/icon.png',
+    userInterfaceStyle: 'light',
+    splash: {
+      image: './assets/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#ffffff',
+    },
+    assetBundlePatterns: ['**/*'],
+    android: {
+      package: 'com.rdmmoonlight.aumofinance',
+      minSdkVersion: 28,
+      adaptiveIcon: {
+        foregroundImage: './assets/adaptive-icon.png',
+        backgroundColor: '#ffffff',
+      },
+    },
+    web: {
+      favicon: './assets/favicon.png',
+    },
+    extra: {
+      eas: {
+        projectId: 'd6be87c0-882a-4c24-aa65-db6806b9f59a',
+      },
+    },
+    owner: 'obscuron',
+    plugins: ['expo-router'],
+    runtimeVersion: {
+      policy: 'appVersion',
+    },
+    updates: {
+      url: 'https://u.expo.dev/d6be87c0-882a-4c24-aa65-db6806b9f59a',
+      enabled: true,
+      checkAutomatically: 'ON_LOAD',
+      fallbackToCacheTimeout: 0,
+    },
+  },
+};
