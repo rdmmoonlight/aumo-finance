@@ -331,26 +331,3 @@ public class JournalEntryController : ControllerBase
     }
 }
 
-public class CreateJournalEntryRequest
-{
-    public string JournalType { get; set; } = "General";
-    public DateTime EntryDate { get; set; } = DateTime.Today;
-    public DateTime CreatedAt { get; set; }
-    public List<JournalEntryLineRequest> Lines { get; set; } = new();
-}
-
-public class UpdateJournalEntryRequest
-{
-    public string JournalType { get; set; } = "General";
-    public DateTime EntryDate { get; set; } = DateTime.Today;
-    public DateTime UpdatedAt { get; set; }
-    public List<JournalEntryLineRequest> Lines { get; set; } = new();
-}
-
-public class JournalEntryLineRequest
-{
-    public int AccountId { get; set; }
-    public string? LineDescription { get; set; }
-    public decimal Debit { get; set; }
-    public decimal Credit { get; set; }
-}

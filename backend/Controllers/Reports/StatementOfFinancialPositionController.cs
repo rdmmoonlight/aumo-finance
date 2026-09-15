@@ -53,9 +53,11 @@ public class StatementOfFinancialPositionController : ControllerBase
 
         var balanceSheetData = await BuildSofpAsync(_db, userId, period, isPostClosing);
 
+        // REVISI CS8620: Pastikan e.ReferenceNumber ditangani jika null (menggunakan ?? "") 
+        // agar tipe data anonim konsisten bertipe non-nullable 'string'.
         var equityAccountsWithRe = balanceSheetData.EquityExcludingRetainedEarnings
-            .Select(e => new { accountId = 0, referenceNumber = e.ReferenceNumber, accountName = e.AccountName, amount = e.Amount })
-            .Append(new { accountId = 0, referenceNumber = (string?)"0", accountName = "Retained Earnings", amount = balanceSheetData.RetainedEarningsEnding })
+            .Select(e => new { accountId = 0, referenceNumber = e.ReferenceNumber ?? "", accountName = e.AccountName, amount = e.Amount })
+            .Append(new { accountId = 0, referenceNumber = "0", accountName = "Retained Earnings", amount = balanceSheetData.RetainedEarningsEnding })
             .ToList();
 
         return Ok(new
@@ -81,10 +83,12 @@ public class StatementOfFinancialPositionController : ControllerBase
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true);
         var re = await RetainedEarningsController.BuildRetainedEarningsAsync(db, userId, period);
 
+        // REVISI CS8601: Berikan null-coalescing (?? "") pada property ReferenceNumber dan AccountName 
+        // untuk memastikan nilai non-nullable string di FinancialPositionLineApiResponse tidak kemasukan null.
         FinancialPositionLineApiResponse ToLine(TrialBalanceRow r) => new()
         {
-            ReferenceNumber = r.ReferenceNumber,
-            AccountName = r.AccountName,
+            ReferenceNumber = r.ReferenceNumber ?? "",
+            AccountName = r.AccountName ?? "",
             Amount = r.NetBalance
         };
 
@@ -125,26 +129,4 @@ public class StatementOfFinancialPositionController : ControllerBase
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
-}
-
-public class StatementOfFinancialPositionApiResponse
-{
-    public DateTime AsOfDate { get; set; }
-    public bool IsPostClosing { get; set; }
-    public List<FinancialPositionLineApiResponse> Assets { get; set; } = new();
-    public decimal TotalAssets { get; set; }
-    public List<FinancialPositionLineApiResponse> Liabilities { get; set; } = new();
-    public decimal TotalLiabilities { get; set; }
-    public List<FinancialPositionLineApiResponse> EquityExcludingRetainedEarnings { get; set; } = new();
-    public decimal RetainedEarningsEnding { get; set; }
-    public decimal TotalEquity { get; set; }
-    public decimal TotalLiabilitiesAndEquity { get; set; }
-    public bool IsBalanced { get; set; }
-}
-
-public class FinancialPositionLineApiResponse
-{
-    public string? ReferenceNumber { get; set; }
-    public string AccountName { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
 }

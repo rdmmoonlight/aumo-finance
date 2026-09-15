@@ -131,7 +131,7 @@ public class GeneralLedgerController : ControllerBase
                 {
                     JournalEntryId = line.JournalEntryId,
                     EntryDate = line.JournalEntry!.EntryDate.ToString("yyyy-MM-dd"),
-                    Description = line.LineDescription,
+                    Description = line.LineDescription ?? string.Empty, // Perbaikan CS8601: Menggunakan null-coalescing operator
                     Debit = line.Debit,
                     Credit = line.Credit,
                     RunningBalance = running
@@ -178,25 +178,4 @@ public class GeneralLedgerController : ControllerBase
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
-}
-
-public class LedgerAccountResponse
-{
-    public int AccountId { get; set; }
-    public int ReferenceNumber { get; set; }
-    public string AccountName { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public bool NormalBalanceIsDebit { get; set; }
-    public decimal EndingBalance { get; set; }
-    public List<LedgerLineResponse> Lines { get; set; } = new();
-}
-
-public class LedgerLineResponse
-{
-    public int JournalEntryId { get; set; }
-    public string EntryDate { get; set; } = string.Empty;
-    public string? Description { get; set; }
-    public decimal Debit { get; set; }
-    public decimal Credit { get; set; }
-    public decimal RunningBalance { get; set; }
 }

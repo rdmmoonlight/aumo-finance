@@ -204,11 +204,3 @@ public class AuthController : ControllerBase
     }
 }
 
-public class LoginRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public bool RememberMe { get; set; } = false;
-    public string? UserAgent { get; set; }
-    public string? OperatingSystem { get; set; }
-}

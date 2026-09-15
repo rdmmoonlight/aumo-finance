@@ -71,9 +71,10 @@ public class IncomeStatementController : ControllerBase
 
     public static IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period)
     {
+        // PERBAIKAN WARNING CS8601: Menambahkan ?? string.Empty untuk menangani potensi null
         IncomeStatementLineApiResponse ToLine(TrialBalanceRow r) => new()
         {
-            ReferenceNumber = r.ReferenceNumber,
+            ReferenceNumber = r.ReferenceNumber ?? string.Empty,
             AccountName = r.AccountName,
             Amount = r.NetBalance
         };
@@ -115,26 +116,4 @@ public class IncomeStatementController : ControllerBase
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
-}
-
-public class IncomeStatementApiResponse
-{
-    public DateTime AsOfDate { get; set; }
-    public List<IncomeStatementLineApiResponse> Revenues { get; set; } = new();
-    public decimal TotalRevenue { get; set; }
-    public List<IncomeStatementLineApiResponse> OperatingExpenses { get; set; } = new();
-    public decimal TotalOperatingExpenses { get; set; }
-    public decimal OperatingIncome { get; set; }
-    public List<IncomeStatementLineApiResponse> OtherIncome { get; set; } = new();
-    public decimal TotalOtherIncome { get; set; }
-    public List<IncomeStatementLineApiResponse> OtherExpenses { get; set; } = new();
-    public decimal TotalOtherExpenses { get; set; }
-    public decimal NetIncome { get; set; }
-}
-
-public class IncomeStatementLineApiResponse
-{
-    public string? ReferenceNumber { get; set; }
-    public string AccountName { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
 }
