@@ -40,9 +40,11 @@ module.exports = {
       eas: {
         projectId: 'd6be87c0-882a-4c24-aa65-db6806b9f59a',
       },
+      sentryDsn:
+        'https://f1723103ea0cc6b4a9f8c5d68b4988ee@o4512092717121536.ingest.us.sentry.io/4512092731670528',
     },
     owner: 'obscuron',
-    plugins: ['expo-router'],
+    plugins: ['expo-router', 'sentry-expo'],
     runtimeVersion: {
       policy: 'appVersion',
     },
