@@ -1,0 +1,31 @@
+name: Architecture Guardrail
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  check-architecture:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Verify Controllers Cleanliness
+        run: |
+          echo "=== Checking backend/Controllers for embedded DTOs ==="
+          STRAY_CLASSES=$(grep -rnE '^\s*public\s+(class|record)\s+' Controllers/ | grep -v 'Controller :' || true)
+
+          if [ -n "$STRAY_CLASSES" ]; then
+            echo "::error::DTO terdeteksi di dalam folder backend/Controllers! Harap pindahkan ke folder Core/."
+            echo "$STRAY_CLASSES"
+            exit 1
+          else
+            echo "Controllers 100% steril dari DTO!"
+          fi
