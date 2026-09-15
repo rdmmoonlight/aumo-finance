@@ -218,6 +218,7 @@ namespace AumoBackend
 
             // Registrasi Service internal
             builder.Services.AddScoped<IGuardianService, GuardianService>();
+            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>(); // <-- DITAMBAHKAN DI SINI
             builder.Services.AddTransient<ResendEmailSender>();
             builder.Services.AddTransient<AumoBackend.Models.IEmailSender, ResendEmailSender>();
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
