@@ -46,7 +46,10 @@ function main() {
 
   run('git commit -m "chore: bump build-version.json [skip ci]"');
   run('git fetch origin main');
-  run('git rebase origin/main');
+  
+  // Gunakan --autostash agar sisa file terubah akibat proses build disimpan sementara saat rebase
+  run('git rebase --autostash origin/main');
+  
   run('git push origin HEAD:main');
 }
 
