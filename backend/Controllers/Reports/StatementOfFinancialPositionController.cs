@@ -55,7 +55,7 @@ public class StatementOfFinancialPositionController : ControllerBase
 
         var equityAccountsWithRe = balanceSheetData.EquityExcludingRetainedEarnings
             .Select(e => new { accountId = 0, referenceNumber = e.ReferenceNumber, accountName = e.AccountName, amount = e.Amount })
-            .Append(new { accountId = 0, referenceNumber = 0, accountName = "Retained Earnings", amount = balanceSheetData.RetainedEarningsEnding })
+            .Append(new { accountId = 0, referenceNumber = (string?)"0", accountName = "Retained Earnings", amount = balanceSheetData.RetainedEarningsEnding })
             .ToList();
 
         return Ok(new
@@ -144,7 +144,7 @@ public class StatementOfFinancialPositionApiResponse
 
 public class FinancialPositionLineApiResponse
 {
-    public int ReferenceNumber { get; set; }
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
 }
