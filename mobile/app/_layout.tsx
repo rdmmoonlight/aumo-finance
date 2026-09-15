@@ -4,10 +4,23 @@ import { Stack } from 'expo-router';
 import { PaperProvider } from 'react-native-paper';
 import { QueryClientProvider } from '@tanstack/react-query';
 import * as Updates from 'expo-updates';
+import Constants from 'expo-constants';
+import * as Sentry from 'sentry-expo';
 
 import { customDarkTheme } from '../src/theme/theme';
 import { queryClient } from '../queryClient';
 import { checkForUpdateSilently } from '../src/services/appUpdateService';
+
+// Inisialisasi Sentry sedini mungkin (di scope modul, bukan di dalam
+// komponen), supaya crash native maupun error JS yang terjadi di awal
+// startup app tetap tertangkap. sentry-expo (bukan @sentry/react-native
+// versi baru - itu butuh Expo SDK 50+) sudah bawa penangkap crash native
+// Android otomatis lewat config plugin-nya.
+Sentry.init({
+  dsn: Constants.expoConfig?.extra?.sentryDsn,
+  enableInExpoDevelopment: true,
+  debug: __DEV__,
+});
 
 export default function RootLayout() {
   // Logika Auto-Detect & Auto-Apply Update Terbaru dari Expo
