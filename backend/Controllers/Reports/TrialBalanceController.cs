@@ -89,7 +89,7 @@ public class TrialBalanceController : ControllerBase
         if (normalizedType == "post-closing")
         {
             var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
-            
+
             // Perbaikan CS1503 / CS0200: Cari berdasarkan string role secara presisi
             var reRowIndex = rows.FindIndex(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
 
