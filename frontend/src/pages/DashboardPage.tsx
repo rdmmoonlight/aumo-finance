@@ -38,49 +38,113 @@ export interface DashboardViewModel {
 function DashboardContent() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [periodType, setPeriodType] = useState('monthly');
+
+  const [periodType, setPeriodType] = useState<'monthly' | 'annual'>(() => {
+    const p = searchParams.get('period');
+    return p?.toLowerCase() === 'annual'? 'annual' : 'monthly';
+  });
+
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [data, setData] = useState<DashboardViewModel | null>(null);
 
-  const fetchDashboardData = useCallback(async (type: string) => {
-    setLoading(true); setErrorMessage(null);
+  const fetchDashboardData = useCallback(async (type: string, signal?: AbortSignal) => {
+    setLoading(true);
+    setErrorMessage(null);
     try {
-      const { data: resData } = await apiClient.get(`/api/v1/dashboard?period=${type}`);
+      const { data: resData } = await apiClient.get(`/api/v1/dashboard?period=${type}`, { signal });
       if (resData?.hasPeriodSelected === false) {
         setData({ hasPeriodSelected: false, isPeriodClosed: false, totalAssets: 0, totalLiabilities: 0, totalEquity: 0, totalRevenue: 0, totalExpenses: 0, netIncome: 0, cashAccounts: [], totalCashOnHand: 0, bankAccounts: [], totalBankBalance: 0, expenseAccountsList: [], chartTrend: [], recentEntries: [] });
         return;
       }
       setData({
-        hasPeriodSelected: true, selectedPeriodName: resData?.selectedPeriodName || 'Current Period', isPeriodClosed:!!resData?.isPeriodClosed,
-        totalAssets: Number(resData?.totalAssets) || 0, totalLiabilities: Number(resData?.totalLiabilities) || 0, totalEquity: Number(resData?.totalEquity) || 0,
-        totalRevenue: Number(resData?.totalRevenue) || 0, totalExpenses: Number(resData?.totalExpenses) || 0, netIncome: Number(resData?.netIncome) || 0,
-        cashAccounts: resData?.cashAccounts || [], totalCashOnHand: Number(resData?.totalCashOnHand) || 0,
-        bankAccounts: resData?.bankAccounts || [], totalBankBalance: Number(resData?.totalBankBalance) || 0,
-        expenseAccountsList: resData?.expenseAccountsList || [], chartTrend: resData?.chartTrend || [], recentEntries: resData?.recentEntries || [],
+        hasPeriodSelected: true,
+        selectedPeriodName: resData?.selectedPeriodName || 'Current Period',
+        isPeriodClosed:!!resData?.isPeriodClosed,
+        totalAssets: Number(resData?.totalAssets) || 0,
+        totalLiabilities: Number(resData?.totalLiabilities) || 0,
+        totalEquity: Number(resData?.totalEquity) || 0,
+        totalRevenue: Number(resData?.totalRevenue) || 0,
+        totalExpenses: Number(resData?.totalExpenses) || 0,
+        netIncome: Number(resData?.netIncome) || 0,
+        cashAccounts: resData?.cashAccounts || [],
+        totalCashOnHand: Number(resData?.totalCashOnHand) || 0,
+        bankAccounts: resData?.bankAccounts || [],
+        totalBankBalance: Number(resData?.totalBankBalance) || 0,
+        expenseAccountsList: resData?.expenseAccountsList || [],
+        chartTrend: resData?.chartTrend || [],
+        recentEntries: resData?.recentEntries || [],
       });
     } catch (err: any) {
+      if (err?.name === 'CanceledError' || err?.name === 'AbortError') return;
       setErrorMessage(err?.response?.data?.message || err.message || 'Failed to connect');
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  // FIX 2: fetch cuma kalo periodType berubah, bukan searchParams. + Abort biar gak race
   useEffect(() => {
-    const periodParam = searchParams.get('period');
-    const active = periodParam?.toLowerCase() === 'annual'? 'annual' : 'monthly';
-    setPeriodType(active); fetchDashboardData(active);
-  }, [searchParams, fetchDashboardData]);
+    const controller = new AbortController();
+    fetchDashboardData(periodType, controller.signal);
+    return () => controller.abort();
+  }, [periodType, fetchDashboardData]);
 
-  const handlePeriodSwitch = (type: string) => {
-    if (periodType === type) return; setPeriodType(type); navigate({ to: `/dashboard?period=${type}` });
+  // FIX 3: tombol jelas beda active nya + cegah double click pas loading
+  const handlePeriodSwitch = (type: 'monthly' | 'annual') => {
+    if (periodType === type || loading) return;
+    setPeriodType(type);
+    navigate({ to: `/dashboard?period=${type}` } as any);
   };
 
   const healthScore = useMemo(() => {
-    if (!data) return 0; if (data.totalRevenue === 0 && data.totalExpenses === 0) return 100;
+    if (!data) return 0;
+    if (data.totalRevenue === 0 && data.totalExpenses === 0) return 100;
     const margin = data.totalRevenue > 0? (data.netIncome / data.totalRevenue) * 100 : 0;
-    if (margin >= 20) return 90; if (margin >= 10) return 75; if (margin >= 0) return 60; return 40;
+    if (margin >= 20) return 90;
+    if (margin >= 10) return 75;
+    if (margin >= 0) return 60;
+    return 40;
   }, [data]);
 
-  if (loading &&!data) return <div className="p-6 space-y-4"><Skeleton className="h-24" /><Skeleton className="h-64" /></div>;
+  const chartOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' as const, labels: { boxWidth: 10, usePointStyle: true, padding: 16 } } },
+    scales: { y: { beginAtZero: true, grid: { color: 'hsl(var(--border))' } }, x: { grid: { display: false } } }
+  }), []);
+
+  const doughnutOptions = useMemo(() => ({
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { position: 'bottom' as const, labels: { boxWidth: 10, usePointStyle: true } } }
+  }), []);
+
+  // Memoize data chart biar gak re-render kedip
+  const doughnutCashData = useMemo(() => ({
+    labels: ['Cash on Hand', 'Bank Balance'],
+    datasets: [{ data: data? [data.totalCashOnHand, data.totalBankBalance] : [0, 0], backgroundColor: ['#6366f1', '#06b6d4'], borderWidth: 0, hoverOffset: 8 }],
+  }), [data]);
+
+  const expenseChartData = useMemo(() => ({
+    labels: data?.expenseAccountsList?.length? data.expenseAccountsList.map(i => i.accountName) : ['No Expenses'],
+    datasets: [{ data: data?.expenseAccountsList?.length? data.expenseAccountsList.map(i => i.balance) : [1], backgroundColor: ['#ef4444', '#f59e0b', '#f97316', '#8b5cf6', '#6b7280', '#10b981', '#ec4899'], borderWidth: 0 }],
+  }), [data]);
+
+  const barTrendData = useMemo(() => ({
+    labels: data?.chartTrend.map(t => t.label) || [],
+    datasets: [
+      { label: 'Revenue', data: data?.chartTrend.map(t => t.revenue) || [], backgroundColor: '#10b981', borderRadius: 4 },
+      { label: 'Expenses', data: data?.chartTrend.map(t => t.expense) || [], backgroundColor: '#ef4444', borderRadius: 4 },
+    ],
+  }), [data]);
+
+  const lineNetData = useMemo(() => ({
+    labels: data?.chartTrend.map(t => t.label) || [],
+    datasets: [{ label: 'Net Income', data: data?.chartTrend.map(t => t.net) || [], borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.2)', fill: true, tension: 0.4, pointRadius: 2, borderWidth: 2 }],
+  }), [data]);
+
+  if (loading &&!data) return <div className="p-6 space-y-4"><Skeleton className="h-24" /><Skeleton className="h-" /></div>;
 
   if (!data ||!data.hasPeriodSelected) {
     return (
@@ -95,44 +159,16 @@ function DashboardContent() {
     );
   }
 
-  // --- CHARTJS DATA ---
-  const doughnutCashData = {
-    labels: ['Cash on Hand', 'Bank Balance'],
-    datasets: [{ data: [data.totalCashOnHand, data.totalBankBalance], backgroundColor: ['#6366f1', '#06b6d4'], borderWidth: 0, hoverOffset: 4 }],
-  };
-
-  const expenseChartData = {
-    labels: data.expenseAccountsList?.length? data.expenseAccountsList.map(i => i.accountName) : ['No Expenses'],
-    datasets: [{ data: data.expenseAccountsList?.length? data.expenseAccountsList.map(i => i.balance) : [1], backgroundColor: ['#ef4444', '#f59e0b', '#f97316', '#8b5cf6', '#6b7280', '#10b981', '#ec4899'], borderWidth: 0 }],
-  };
-
-  const barTrendData = {
-    labels: data.chartTrend.map(t => t.label),
-    datasets: [
-      { label: 'Revenue', data: data.chartTrend.map(t => t.revenue), backgroundColor: '#10b981', borderRadius: 4 },
-      { label: 'Expenses', data: data.chartTrend.map(t => t.expense), backgroundColor: '#ef4444', borderRadius: 4 },
-    ],
-  };
-
-  const lineNetData = {
-    labels: data.chartTrend.map(t => t.label),
-    datasets: [{
-      label: 'Net Income', data: data.chartTrend.map(t => t.net), borderColor: '#6366f1', backgroundColor: 'rgba(99,102,241,0.2)', fill: true, tension: 0.4, pointRadius: 2
-    }],
-  };
-
-  const chartOptions = { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' as const, labels: { boxWidth: 10, usePointStyle: true } } } };
-
   return (
     <div className="space-y-6 p-4 md:p-6">
       {errorMessage && <Alert variant="destructive" className="flex justify-between"><AlertDescription className="flex gap-2 items-center"><IconAlertTriangle size={16} />{errorMessage}</AlertDescription><button onClick={() => setErrorMessage(null)}><IconX size={14} /></button></Alert>}
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div><h1 className="text-2xl font-bold tracking-tight">Financial Overview</h1><p className="text-sm text-muted-foreground">Active Period: <span className="font-semibold text-foreground">{data.selectedPeriodName}</span> • In IDR</p></div>
+        <div><h1 className="text-2xl font-bold tracking-tight">Financial Overview</h1><p className="text-sm text-muted-foreground">Active Period: <span className="font-semibold text-foreground">{data.selectedPeriodName}</span> • In IDR {loading && <span className="animate-pulse ml-2">• Loading...</span>}</p></div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border p-1 bg-muted">
-            <Button variant={periodType === 'monthly'? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs" onClick={() => handlePeriodSwitch('monthly')}>Monthly</Button>
-            <Button variant={periodType === 'annual'? 'secondary' : 'ghost'} size="sm" className="h-7 text-xs" onClick={() => handlePeriodSwitch('annual')}>Annual</Button>
+            <Button size="sm" disabled={loading} onClick={() => handlePeriodSwitch('monthly')} className={cn("h-7 text-xs px-4 transition-all", periodType === 'monthly'? "bg-white text-foreground shadow-sm hover:bg-white" : "bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground")}>Monthly</Button>
+            <Button size="sm" disabled={loading} onClick={() => handlePeriodSwitch('annual')} className={cn("h-7 text-xs px-4 transition-all", periodType === 'annual'? "bg-white text-foreground shadow-sm hover:bg-white" : "bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground")}>Annual</Button>
           </div>
           <Button asChild size="sm" className="h-8 gap-1"><Link to="/journal-entry"><IconPlus size={14} /> New Entry</Link></Button>
           <Button asChild variant="outline" size="sm" className="h-8 gap-1"><Link to="/reports/income-statement"><IconReport size={14} /> Report</Link></Button>
@@ -152,13 +188,13 @@ function DashboardContent() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Revenue vs Expense Trend</CardTitle><CardDescription>{periodType === 'annual'? 'Jan - Dec' : 'Daily in period'}</CardDescription></div><IconChartPie size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-"><Bar data={barTrendData} options={chartOptions} /></CardContent></Card>
-        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Net Income Trend</CardTitle><CardDescription>Profitability over time</CardDescription></div><IconTrendingUp size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-"><Line data={lineNetData} options={chartOptions} /></CardContent></Card>
+        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Revenue vs Expense Trend</CardTitle><CardDescription>{periodType === 'annual'? 'Jan - Dec' : 'Daily in period'}</CardDescription></div><IconChartPie size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-"><Bar data={barTrendData} options={chartOptions as any} /></CardContent></Card>
+        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Net Income Trend</CardTitle><CardDescription>Profitability over time</CardDescription></div><IconTrendingUp size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-"><Line data={lineNetData} options={chartOptions as any} /></CardContent></Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Asset Composition</CardTitle><CardDescription>Cash vs Bank (Kumulatif)</CardDescription></div><IconChartPie size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-64 flex justify-center"><Doughnut data={doughnutCashData} options={chartOptions} /></CardContent></Card>
-        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Expense Composition</CardTitle><CardDescription>Operating Breakdown</CardDescription></div><IconChartPie size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-64 flex justify-center"><Doughnut data={expenseChartData} options={chartOptions} /></CardContent></Card>
+        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Asset Composition</CardTitle><CardDescription>Cash vs Bank (Kumulatif)</CardDescription></div><IconChartPie size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-64 flex justify-center"><Doughnut data={doughnutCashData} options={doughnutOptions as any} /></CardContent></Card>
+        <Card><CardHeader className="flex-row items-center justify-between"><div><CardTitle className="text-sm">Expense Composition</CardTitle><CardDescription>Operating Breakdown</CardDescription></div><IconChartPie size={18} className="text-muted-foreground" /></CardHeader><CardContent className="h-64 flex justify-center"><Doughnut data={expenseChartData} options={doughnutOptions as any} /></CardContent></Card>
       </div>
     </div>
   );
