@@ -225,6 +225,8 @@ namespace AumoBackend
             builder.Services.AddHealthChecks();
             builder.Services.AddMemoryCache();
 
+            // Registrasi Service internal
+            builder.Services.AddScoped<IGuardianService, GuardianService>();
             builder.Services.AddTransient<ResendEmailSender>();
             builder.Services.AddTransient<AumoBackend.Models.IEmailSender, ResendEmailSender>();
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
