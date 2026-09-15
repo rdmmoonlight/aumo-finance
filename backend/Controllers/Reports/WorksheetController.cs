@@ -169,26 +169,3 @@ public class WorksheetController : ControllerBase
     }
 }
 
-public class WorksheetRowApiResponse
-{
-    public int AccountId { get; set; }
-    public int ReferenceNumber { get; set; }
-    public string AccountName { get; set; } = string.Empty;
-    public string Type { get; set; } = string.Empty;
-    public bool NormalBalanceIsDebit { get; set; }
-
-    public decimal UnadjustedDebit { get; set; }
-    public decimal UnadjustedCredit { get; set; }
-
-    public decimal AdjustmentDebit { get; set; }
-    public decimal AdjustmentCredit { get; set; }
-
-    public decimal AdjustedDebit { get; set; }
-    public decimal AdjustedCredit { get; set; }
-
-    public decimal IncomeStatementDebit { get; set; }
-    public decimal IncomeStatementCredit { get; set; }
-
-    public decimal FinancialPositionDebit { get; set; }
-    public decimal FinancialPositionCredit { get; set; }
-}

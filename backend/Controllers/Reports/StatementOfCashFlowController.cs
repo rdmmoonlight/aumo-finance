@@ -146,8 +146,3 @@ public class StatementOfCashFlowController : ControllerBase
     }
 }
 
-public class StatementOfCashFlowLineResponse
-{
-    public string Description { get; set; } = string.Empty;
-    public decimal Amount { get; set; }
-}

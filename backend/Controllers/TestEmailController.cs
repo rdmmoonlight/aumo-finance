@@ -70,4 +70,3 @@ public class TestEmailController : ControllerBase
     }
 }
 
-public record ResendRequest(string Email);

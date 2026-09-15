@@ -388,30 +388,3 @@ public class PeriodsController : ControllerBase
     }
 }
 
-public class CreatePeriodRequest
-{
-    public const string ModeLoadExisting = "LoadExisting";
-    public const string ModeCreateNew = "CreateNew";
-
-    public int Month { get; set; }
-    public int Year { get; set; }
-
-    public string SetupMode { get; set; } = ModeLoadExisting;
-
-    // --- MODE: LoadExisting ---
-    public int? CashAccountId { get; set; }
-    public int? BankAccountId { get; set; }
-    public int? RetainedEarningsAccountId { get; set; }
-
-    // --- MODE: CreateNew ---
-    public string? CashAccountCode { get; set; }
-    public string? CashAccountName { get; set; }
-    public decimal? CashBalance { get; set; }
-
-    public string? BankAccountCode { get; set; }
-    public string? BankAccountName { get; set; }
-    public decimal? BankBalance { get; set; }
-
-    public string? RetainedEarningsAccountCode { get; set; }
-    public string? RetainedEarningsAccountName { get; set; }
-}

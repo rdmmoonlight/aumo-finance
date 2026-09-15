@@ -97,13 +97,3 @@ public class RetainedEarningsController : ControllerBase
     }
 }
 
-public class RetainedEarningsApiResponse
-{
-    public string AccountName { get; set; } = "Retained Earnings";
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
-    public decimal BeginningBalance { get; set; }
-    public decimal NetIncome { get; set; }
-    public decimal Dividends { get; set; }
-    public decimal EndingBalance { get; set; }
-}
