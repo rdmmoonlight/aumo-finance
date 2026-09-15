@@ -13,7 +13,7 @@ const appVersion = `${year}.${month}.${versionState.build}`;
 module.exports = {
   expo: {
     name: 'Aumo Mobile',
-    slug: 'aumo-mobile',
+    slug: 'reactnative',
     version: appVersion,
     orientation: 'portrait',
     icon: './assets/icon.png',
@@ -27,6 +27,7 @@ module.exports = {
     android: {
       package: 'com.rdmmoonlight.aumomobile',
       minSdkVersion: 28,
+      permissions: ['REQUEST_INSTALL_PACKAGES'],
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
         backgroundColor: '#ffffff',
