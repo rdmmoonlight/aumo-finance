@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace AumoBackend.Models;
+namespace AumoBackend.Core;
 
 public static class AccountClassification
 {

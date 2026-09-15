@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Identity;
 
-namespace AumoBackend.Models;
+namespace AumoBackend.Core;
 
 /// <summary>
 /// The application's user record, owned entirely by ASP.NET Core Identity.
