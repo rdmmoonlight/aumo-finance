@@ -7,6 +7,7 @@ import * as Updates from 'expo-updates';
 
 import { customDarkTheme } from '../src/theme/theme';
 import { queryClient } from '../queryClient';
+import { checkForUpdateSilently } from '../src/services/appUpdateService';
 
 export default function RootLayout() {
   // Logika Auto-Detect & Auto-Apply Update Terbaru dari Expo
@@ -43,6 +44,14 @@ export default function RootLayout() {
     }
 
     handleAutoUpdate();
+  }, []);
+
+  // Cek update APK penuh (native) dari GitHub Releases - untuk perubahan
+  // yang tidak bisa dikirim lewat OTA expo-updates di atas (native module,
+  // permission, dependency baru, dsb). Konsepnya sama dengan
+  // AppUpdateService.kt di aumo-finance-android.
+  useEffect(() => {
+    checkForUpdateSilently();
   }, []);
 
   return (
