@@ -27,7 +27,8 @@ public class CashFlowStatementViewModel
 
 public class ClosingJournalLine
 {
-    public int ReferenceNumber { get; set; }
+    // Diselaraskan ke string? untuk menghindari error konversi tipe data
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public decimal Debit { get; set; }
     public decimal Credit { get; set; }
@@ -120,7 +121,7 @@ public class ForgotPasswordModel
 public class LedgerAccountViewModel
 {
     public int AccountId { get; set; }
-    public int ReferenceNumber { get; set; }
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public bool NormalBalanceIsDebit { get; set; }
@@ -206,7 +207,8 @@ public class ActiveSessionViewModel
 
 public class IncomeStatementLine
 {
-    public int ReferenceNumber { get; set; }
+    // Diselaraskan ke string?
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
 }
@@ -459,7 +461,8 @@ public class SettingsViewModel
 
 public class FinancialPositionLine
 {
-    public int ReferenceNumber { get; set; }
+    // Diselaraskan ke string?
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
 }
@@ -506,7 +509,7 @@ public class TrialBalanceViewModel
 public class WorksheetRow
 {
     public int AccountId { get; set; }
-    public int ReferenceNumber { get; set; }
+    public string? ReferenceNumber { get; set; }
     public string AccountName { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public bool NormalBalanceIsDebit { get; set; }
