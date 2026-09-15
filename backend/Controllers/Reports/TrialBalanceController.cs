@@ -92,6 +92,8 @@ public class TrialBalanceController : ControllerBase
 
             var reRowIndex = rows.FindIndex(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
 
+            // Retained Earnings adalah akun Ekuitas (Normal Balance = Credit)
+            // Saldo positif berarti Credit, saldo negatif berarti Debit
             decimal reDebit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
             decimal reCredit = reEndingBalance >= 0 ? reEndingBalance : 0m;
 
@@ -200,22 +202,27 @@ public class TrialBalanceController : ControllerBase
             if (!accountLines.Any()) continue;
 
             bool normalDebit = IsAccountNormalBalanceDebit(account);
+            
+            decimal totalDebitLines = accountLines.Sum(l => l.Debit);
+            decimal totalCreditLines = accountLines.Sum(l => l.Credit);
+
+            // Hitung net balance sesuai saldo normal
             decimal netBalance = normalDebit
-                ? accountLines.Sum(l => l.Debit - l.Credit)
-                : accountLines.Sum(l => l.Credit - l.Debit);
+                ? (totalDebitLines - totalCreditLines)
+                : (totalCreditLines - totalDebitLines);
 
             decimal debit = 0m;
             decimal credit = 0m;
 
-            if (normalDebit)
+            // Masukkan angka selisih ke kolom Debit/Credit murni berdasarkan mana yang lebih besar
+            // (Mencegah pergeseran kolom berlebihan pada kontra akun)
+            if (totalDebitLines >= totalCreditLines)
             {
-                if (netBalance >= 0) debit = netBalance;
-                else credit = Math.Abs(netBalance);
+                debit = totalDebitLines - totalCreditLines;
             }
             else
             {
-                if (netBalance >= 0) credit = netBalance;
-                else debit = Math.Abs(netBalance);
+                credit = totalCreditLines - totalDebitLines;
             }
 
             rows.Add(new TrialBalanceRow
@@ -237,18 +244,22 @@ public class TrialBalanceController : ControllerBase
 
     private static async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
     {
+        // Ambil data Adjusted Trial Balance lengkap (termasuk akun sementara)
         var rows = await BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
 
+        // Pendapatan: Akun sementara dengan saldo normal Credit (NetBalance positif = Kredit > Debit)
         decimal totalRevenue = rows
             .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
             .Sum(r => r.NetBalance);
 
+        // Beban: Akun sementara dengan saldo normal Debit (NetBalance positif = Debit > Kredit)
         decimal totalExpense = rows
             .Where(r => r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
             .Sum(r => r.NetBalance);
 
         decimal netIncome = totalRevenue - totalExpense;
 
+        // Ambil saldo awal Retained Earnings sebelum jurnal penutup
         var reRow = rows.FirstOrDefault(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
         decimal initialRE = reRow?.NetBalance ?? 0m;
 
