@@ -6,7 +6,6 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import appCss from '../styles/index.css?url'
-import faviconUrl from '/favicon.ico?url'
 
 function NotFoundComponent() {
   return (
@@ -43,7 +42,7 @@ export const Route = createRootRoute({
     ],
     links: [
       { rel: 'stylesheet', href: appCss },
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=1' },
     ],
   }),
   component: RootComponent,
