@@ -6,6 +6,7 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import appCss from '../styles/index.css?url'
+import faviconUrl from '/favicon.ico?url'
 
 function NotFoundComponent() {
   return (
