@@ -41,19 +41,15 @@ namespace AumoBackend
                 throw new InvalidOperationException("Database connection string 'DefaultConnection' or 'DATABASE_URL' is missing.");
             }
 
-            // Registrasi AddDbContext standar
-            builder.Services.AddDbContext<AppDbContext>(options =>
+            // Cukup gunakan AddDbContextFactory jika aplikasi butuh factory & scoped DbContext sekaligus
+            builder.Services.AddDbContextFactory<AppDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
                 options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
 
-            // DbContextFactory
-            builder.Services.AddDbContextFactory<AppDbContext>(options =>
-            {
-                options.UseNpgsql(connectionString);
-                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-            }, ServiceLifetime.Scoped);
+            // Menyediakan AppDbContext Scoped via Factory agar hemat resource dan konsisten
+            builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             // =====================================
             // 2. DATA PROTECTION & PERSISTENCE
@@ -100,7 +96,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 4. AUTHENTICATION (Cookie, JWT & OAuth)
+            // 4. AUTHENTICATION & AUTHORIZATION (Cookie, JWT & OAuth)
             // =====================================
             var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"]
                 ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
@@ -114,28 +110,23 @@ namespace AumoBackend
                 throw new InvalidOperationException("Fatal Error: Environment variable 'JWT_SIGNING_KEY' is missing.");
             }
 
-            var authBuilder = builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
-                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
-            })
-            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
+            var authBuilder = builder.Services.AddAuthentication()
+                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
                 {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtIssuer,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
-                    ClockSkew = TimeSpan.FromMinutes(5)
-                };
-            });
+                    options.RequireHttpsMetadata = false;
+                    options.SaveToken = true;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ValidateIssuerSigningKey = true,
+                        ValidIssuer = jwtIssuer,
+                        ValidAudience = jwtIssuer,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
+                        ClockSkew = TimeSpan.FromMinutes(5)
+                    };
+                });
 
             var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
                 ?? builder.Configuration["Google:ClientId"]
@@ -279,29 +270,26 @@ namespace AumoBackend
             else
             {
                 app.UseHsts();
-                app.Use(async (context, next) =>
+                app.UseExceptionHandler(exceptionHandlerApp =>
                 {
-                    try
-                    {
-                        await next();
-                    }
-                    catch (Exception ex)
+                    exceptionHandlerApp.Run(async context =>
                     {
                         var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                        logger.LogError(ex, "Unhandled exception on {Path}", context.Request.Path);
+                        var exceptionHandlerFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
 
-                        if (!context.Response.HasStarted)
+                        if (exceptionHandlerFeature?.Error != null)
                         {
-                            context.Response.Clear();
-                            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-                            context.Response.ContentType = "application/json";
-                            await context.Response.WriteAsJsonAsync(new
-                            {
-                                success = false,
-                                message = "A server error occurred. Please try again in a moment."
-                            });
+                            logger.LogError(exceptionHandlerFeature.Error, "Unhandled exception on {Path}", context.Request.Path);
                         }
-                    }
+
+                        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsJsonAsync(new
+                        {
+                            success = false,
+                            message = "A server error occurred. Please try again in a moment."
+                        });
+                    });
                 });
             }
 
