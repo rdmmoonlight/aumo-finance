@@ -220,37 +220,14 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 6. APPLICATION SERVICES & HEALTH CHECKS
+            // 6. INFRASTRUCTURE & HEALTH CHECKS
             // =====================================
             builder.Services.AddHealthChecks();
-            builder.Services.AddHostedService<RenderKeepAliveService>();
+            builder.Services.AddMemoryCache();
 
             builder.Services.AddTransient<ResendEmailSender>();
-            // Menggunakan Fully Qualified Name untuk menghindari error CS0104 / CS0311
             builder.Services.AddTransient<AumoBackend.Models.IEmailSender, ResendEmailSender>();
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
-
-            builder.Services.AddScoped<IGuardianService, GuardianService>();
-            builder.Services.AddHttpClient<IAiService, AiService>();
-            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
-            builder.Services.AddMemoryCache();
-            builder.Services.AddScoped<ICloudStorageService, CloudinaryService>();
-            builder.Services.AddScoped<DashboardDataService>();
-
-            builder.Services.AddHttpClient("MarketApiClient", client =>
-            {
-                client.Timeout = TimeSpan.FromSeconds(15);
-                client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AumoFinance/1.0");
-            });
-
-            builder.Services.AddScoped<IMarketService, MarketService>();
-
-            // --- 6b. ACCOUNTING CYCLE ---
-            builder.Services.AddScoped<IJournalService, JournalService>();
-            builder.Services.AddScoped<ILedgerService, LedgerService>();
-            builder.Services.AddScoped<ITrialBalanceService, TrialBalanceService>();
-            builder.Services.AddScoped<IWorksheetService, WorksheetService>();
-            builder.Services.AddScoped<IFinancialStatementService, FinancialStatementService>();
 
             // =====================================
             // 7. FORWARDED HEADERS
