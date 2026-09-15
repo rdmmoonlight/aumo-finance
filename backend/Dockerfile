@@ -8,17 +8,14 @@ ENV ASPNETCORE_URLS=http://+:8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy file .csproj terlebih dahulu untuk mengoptimalkan Docker Layer Caching
-COPY ["backend/AumoBackend.csproj", "backend/"]
+# Copy csproj dan restore (Caching layer)
+COPY ["AumoBackend.csproj", "./"]
+RUN dotnet restore "AumoBackend.csproj"
 
-# Restore dependency paket NuGet
-RUN dotnet restore "backend/AumoBackend.csproj"
-
-# Copy seluruh source code setelah restore selesai
+# Copy seluruh source code backend
 COPY . .
 
-# Pindah ke direktori backend untuk kompilasi & publish
-WORKDIR "/src/backend"
+# Publish aplikasi
 RUN dotnet publish "AumoBackend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # 3. Stage Final
@@ -26,5 +23,4 @@ FROM base AS final
 WORKDIR /app
 COPY --from=build /app/publish .
 
-# Entrypoint mengacu pada DLL utama hasil publish
 ENTRYPOINT ["dotnet", "AumoBackend.dll"]

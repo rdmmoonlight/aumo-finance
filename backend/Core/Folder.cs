@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using System;
 
-namespace AumoBackend.Models;
+namespace AumoBackend.Core;
 
 public class Folder
 {

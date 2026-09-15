@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AumoBackend.Controllers.Api;
-using AumoBackend.Models;
+using AumoBackend.Core;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -220,7 +220,7 @@ namespace AumoBackend
             builder.Services.AddScoped<IGuardianService, GuardianService>();
             builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>(); // <-- DITAMBAHKAN DI SINI
             builder.Services.AddTransient<ResendEmailSender>();
-            builder.Services.AddTransient<AumoBackend.Models.IEmailSender, ResendEmailSender>();
+            builder.Services.AddTransient<AumoBackend.Core.IEmailSender, AumoBackend.Core.ResendEmailSender>();
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
 
             // =====================================

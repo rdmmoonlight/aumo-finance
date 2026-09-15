@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
-namespace AumoBackend.Models;
+namespace AumoBackend.Core;
 
 public class CashFlowLine
 {
