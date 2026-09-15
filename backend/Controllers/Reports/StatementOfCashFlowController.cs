@@ -75,12 +75,14 @@ public class StatementOfCashFlowController : ControllerBase
             if (r.NetBalance == 0 || r.Role == "CashAndEquivalents" || r.Role == "RetainedEarnings")
                 continue;
 
-            if (AccountClassification.IsTemporary(r.Type) || r.ReferenceNumber >= 400)
+            int.TryParse(r.ReferenceNumber, out int refNum);
+
+            if (AccountClassification.IsTemporary(r.Type ?? string.Empty) || refNum >= 400)
                 continue;
 
-            if (r.Type == "Assets" || (r.ReferenceNumber >= 100 && r.ReferenceNumber <= 199))
+            if (r.Type == "Assets" || (refNum >= 100 && refNum <= 199))
             {
-                bool isFixedAsset = r.ReferenceNumber >= 150 ||
+                bool isFixedAsset = refNum >= 150 ||
                                     r.AccountName.Contains("Equipment", StringComparison.OrdinalIgnoreCase) ||
                                     r.AccountName.Contains("Depreciation", StringComparison.OrdinalIgnoreCase) ||
                                     r.AccountName.Contains("Asset", StringComparison.OrdinalIgnoreCase);
@@ -90,9 +92,9 @@ public class StatementOfCashFlowController : ControllerBase
                 else
                     operatingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = -r.NetBalance });
             }
-            else if (r.Type == "Liabilities" || (r.ReferenceNumber >= 200 && r.ReferenceNumber <= 299))
+            else if (r.Type == "Liabilities" || (refNum >= 200 && refNum <= 299))
             {
-                bool isLongTermDebt = r.ReferenceNumber >= 250 ||
+                bool isLongTermDebt = refNum >= 250 ||
                                       r.AccountName.Contains("Bank Loan", StringComparison.OrdinalIgnoreCase) ||
                                       r.AccountName.Contains("Long Term", StringComparison.OrdinalIgnoreCase);
 
@@ -101,7 +103,7 @@ public class StatementOfCashFlowController : ControllerBase
                 else
                     operatingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = r.NetBalance });
             }
-            else if (r.Type == "Equity" || (r.ReferenceNumber >= 300 && r.ReferenceNumber <= 399))
+            else if (r.Type == "Equity" || (refNum >= 300 && refNum <= 399))
             {
                 financingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = r.NetBalance });
             }
