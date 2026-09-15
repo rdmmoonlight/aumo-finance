@@ -56,7 +56,7 @@ export default function AuthPage() {
       }
 
       // Navigasi menggunakan TanStack Router
-      navigate({ to: '/homepage' });
+      navigate({ to: '/home' });
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
 
@@ -185,7 +185,7 @@ export default function AuthPage() {
             )}
 
             <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl text-sm font-medium">
-              {loading ? 'Processing...' : 'Sign In to Dashboard'}
+              {loading ? 'Processing...' : 'Sign In'}
             </Button>
 
             <div className="flex justify-between pt-6 border-t text-xs font-mono text-muted-foreground">
