@@ -1,11 +1,4 @@
-import {
-  createRootRoute,
-  Outlet,
-  Link,
-  HeadContent,
-  Scripts,
-} from '@tanstack/react-router'
-import appCss from '../styles/index.css?url'
+import { createRootRoute, Outlet, Link } from '@tanstack/react-router'
 
 function NotFoundComponent() {
   return (
@@ -20,31 +13,12 @@ function NotFoundComponent() {
 }
 
 function RootComponent() {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body className="antialiased bg-background text-foreground">
-        <Outlet />
-        <Scripts />
-      </body>
-    </html>
-  )
+  // Cuma merender Outlet tempat rute anak muncul
+  return <Outlet />
 }
 
 export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'Aumo Finance' },
-    ],
-    links: [
-      { rel: 'stylesheet', href: appCss },
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico?v=1' },
-    ],
-  }),
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 })
+  
