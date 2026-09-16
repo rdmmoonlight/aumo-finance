@@ -303,19 +303,3 @@ public class AuthController : ControllerBase
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
-
-public class LoginRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public bool RememberMe { get; set; } = false;
-    public bool IsMobileClient { get; set; } = false;
-    public string? UserAgent { get; set; }
-    public string? OperatingSystem { get; set; }
-}
-
-public class GoogleLoginRequest
-{
-    public string IdToken { get; set; } = string.Empty;
-    public bool IsMobileClient { get; set; } = false;
-}
