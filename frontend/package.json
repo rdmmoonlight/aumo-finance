@@ -6,14 +6,14 @@
     "#/*": "./src/*"
   },
   "scripts": {
-    "dev": "vite dev --config aumo.config.ts --port 3000",
-    "generate-routes": "tsr generate",
-    "build": "vite build --config aumo.config.ts",
-    "preview": "vite preview --config aumo.config.ts",
-    "lint": "eslint",
-    "format": "prettier --write . && eslint --fix",
-    "check": "prettier --check ."
-  },
+  "dev": "vite dev --config aumo.config.ts --port 3000",
+  "generate-routes": "tsr generate",
+  "build": "tsr generate && vite build --config aumo.config.ts",
+  "preview": "vite preview --config aumo.config.ts",
+  "lint": "eslint",
+  "format": "prettier --write . && eslint --fix",
+  "check": "prettier --check ."
+},
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.3.2",
     "@hugeicons/react": "^1.1.10",
