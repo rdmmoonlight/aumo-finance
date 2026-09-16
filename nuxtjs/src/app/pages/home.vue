@@ -6,7 +6,7 @@
 
     <div class="relative max-w- mx-auto px-6 py-10 md:px-10 md:py-16 flex flex-col items-center">
 
-      <!-- TOP SUCCESS BADGE (punya mu yang lama gua keep) -->
+      <!-- TOP SUCCESS BADGE -->
       <div class="inline-flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-1.5 rounded-full text-xs font-mono mb-8">
         <Icon name="tabler:circle-check" class="w-4 h-4" />
         Berhasil Masuk ke Halaman Web!
@@ -32,7 +32,7 @@
       <div class="grid md:grid-cols-3 gap-6 w-full max-w-">
 
         <!-- 1. EXTRACTION -->
-        <NuxtLink to="/extraction" class="group rounded- bg-zinc-900 border border-zinc-800 p-7 hover:border-zinc-600 hover:bg-zinc-[900] transition-all duration-300 flex flex-col text-left">
+        <NuxtLink to="/extraction" class="group rounded- bg-zinc-900 border border-zinc-800 p-7 hover:border-zinc-600 hover:bg-zinc-900 transition-all duration-300 flex flex-col text-left">
           <div class="flex justify-between items-start mb-6">
             <div class="w-12 h-12 rounded-full bg-white text-black flex items-center justify-center">
               <Icon name="tabler:cloud-download" class="w-6 h-6" />
@@ -60,7 +60,7 @@
           </div>
           <div class="text- font-mono tracking-widest text-amber-500/70 uppercase mb-2">Stage 02 // Buffer</div>
           <h3 class="text-2xl font-bold mb-2">Staging Buffer</h3>
-          <p class="text-sm text-zinc-400 leading-relaxed mb-8">Review, edit metadata, clean duplicate & commit ke library permanen. {{ pendingRawCount }} lagu nunggu aksi.</p>
+          <p class="text-sm text-zinc-400 leading-relaxed mb-8">Review, clean duplicate & commit ke library permanen. {{ pendingRawCount }} lagu nunggu aksi.</p>
           <div class="mt-auto relative">
             <span class="inline-flex items-center gap-2 bg-amber-500 text-black font-mono font-bold text-xs px-5 py-3 rounded-full group-hover:bg-amber-400 transition">
               OPEN STAGING ({{ pendingRawCount }}) <Icon name="tabler:arrow-right" class="w-4 h-4" />
@@ -102,12 +102,6 @@
 <script setup lang="ts">
 useHead({ title: 'Hypen Music Vault - Control Center' })
 
-// Mock data - nanti ganti $fetch dari API lu
 const pendingRawCount = ref(128)
 const completedSongsCount = ref(2450)
-
-// Kalau mau live dari API:
-// const { data } = await useFetch('/api/stats')
-// pendingRawCount.value = data.value.pending
-// completedSongsCount.value = data.value.library
 </script>
