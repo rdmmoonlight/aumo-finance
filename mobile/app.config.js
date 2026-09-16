@@ -29,6 +29,7 @@ module.exports = {
     android: {
       package: 'com.rdmmoonlight.aumomobile',
       minSdkVersion: 28,
+      targetSdkVersion: 34,
       permissions: ['INTERNET', 'REQUEST_INSTALL_PACKAGES'],
       adaptiveIcon: {
         foregroundImage: './assets/adaptive-icon.png',
