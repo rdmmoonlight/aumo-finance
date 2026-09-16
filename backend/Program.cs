@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AumoBackend.Controllers.Api;
@@ -26,7 +27,7 @@ namespace AumoBackend
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -41,14 +42,12 @@ namespace AumoBackend
                 throw new InvalidOperationException("Database connection string 'DefaultConnection' or 'DATABASE_URL' is missing.");
             }
 
-            // Cukup gunakan AddDbContextFactory jika aplikasi butuh factory & scoped DbContext sekaligus
             builder.Services.AddDbContextFactory<AppDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
                 options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
 
-            // Menyediakan AppDbContext Scoped via Factory agar hemat resource dan konsisten
             builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             // =====================================
@@ -59,19 +58,24 @@ namespace AumoBackend
                 .SetApplicationName("AumoFinanceApp");
 
             // =====================================
-            // 3. ASP.NET CORE IDENTITY SETUP
+            // 3. ASP.NET CORE IDENTITY SETUP (FULL FEATURES)
             // =====================================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.AllowedForNewUsers = true;
+
                 options.Password.RequiredLength = 6;
                 options.Password.RequireDigit = false;
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
+            .AddRoles<IdentityRole<Guid>>() // Memungkinkan penggunaan AspNetRoles & AspNetUserRoles
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders()
+            .AddDefaultTokenProviders()    // Memungkinkan penggunaan AspNetUserTokens (Token 2FA/Reset Pass)
             .AddClaimsPrincipalFactory<AumoUserClaimsPrincipalFactory>();
 
             builder.Services.ConfigureApplicationCookie(options =>
@@ -96,7 +100,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 4. AUTHENTICATION & AUTHORIZATION (Cookie, JWT & OAuth)
+            // 4. AUTHENTICATION & AUTHORIZATION (Cookie, JWT, OAuth, RBAC)
             // =====================================
             var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"]
                 ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
@@ -152,6 +156,10 @@ namespace AumoBackend
                     .RequireAuthenticatedUser()
                     .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme)
                     .Build();
+
+                // Policies berbasis Role & Claim
+                options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("CanApproveTransaction", policy => policy.RequireClaim("Permission", "Transaction.Approve"));
             });
 
             // =====================================
@@ -216,9 +224,8 @@ namespace AumoBackend
             builder.Services.AddHealthChecks();
             builder.Services.AddMemoryCache();
 
-            // Registrasi Service internal
             builder.Services.AddScoped<IGuardianService, GuardianService>();
-            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>(); // <-- DITAMBAHKAN DI SINI
+            builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
             builder.Services.AddTransient<ResendEmailSender>();
             builder.Services.AddTransient<AumoBackend.Core.IEmailSender, AumoBackend.Core.ResendEmailSender>();
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
@@ -239,7 +246,7 @@ namespace AumoBackend
             var app = builder.Build();
 
             // =====================================
-            // 8. AUTOMATIC DATABASE MIGRATION
+            // 8. AUTOMATIC DATABASE MIGRATION & SEEDING
             // =====================================
             using (var scope = app.Services.CreateScope())
             {
@@ -247,12 +254,40 @@ namespace AumoBackend
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
-                    context.Database.Migrate();
+                    await context.Database.MigrateAsync();
+
+                    // Seed Roles & RoleClaims ke AspNetRoles & AspNetRoleClaims
+                    var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
+                    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+                    string[] defaultRoles = { "Admin", "User", "Manager" };
+
+                    foreach (var roleName in defaultRoles)
+                    {
+                        if (!await roleManager.RoleExistsAsync(roleName))
+                        {
+                            var role = new IdentityRole<Guid> { Name = roleName };
+                            await roleManager.CreateAsync(role);
+
+                            if (roleName == "Admin")
+                            {
+                                await roleManager.AddClaimAsync(role, new Claim("Permission", "Transaction.Approve"));
+                                await roleManager.AddClaimAsync(role, new Claim("Permission", "User.Manage"));
+                            }
+                        }
+                    }
+
+                    // Assign role 'Admin' ke user utama (ndopoer@gmail.com) -> Memuat data ke AspNetUserRoles
+                    var adminUser = await userManager.FindByEmailAsync("ndopoer@gmail.com");
+                    if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+                    {
+                        await userManager.AddToRoleAsync(adminUser, "Admin");
+                    }
                 }
                 catch (Exception ex)
                 {
                     var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "Failed to run automatic database migration.");
+                    logger.LogError(ex, "Failed to run automatic database migration or seeding.");
                 }
             }
 
@@ -322,7 +357,7 @@ namespace AumoBackend
             // =====================================
             // 11. RUN APPLICATION
             // =====================================
-            app.Run();
+            await app.RunAsync();
         }
     }
 
