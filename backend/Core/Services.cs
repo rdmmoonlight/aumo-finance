@@ -32,7 +32,6 @@ public class AiService : IAiService
     private readonly HttpClient _httpClient;
     private readonly string _apiKey;
     private readonly ILogger<AiService> _logger;
-
     private const string Model = "gemini-flash-latest";
 
     public AiService(HttpClient httpClient, IConfiguration configuration, ILogger<AiService> logger)
@@ -52,7 +51,6 @@ public class AiService : IAiService
 
         try
         {
-            // PERBAIKAN: Menambahkan instruksi tegas untuk format mata uang Rupiah (Rp)
             string systemInstruction = @"You are the resident AI Financial Controller for Aumo Finance in Indonesia.
 Analyse accounting and financial queries with precision, discipline, and absolute accuracy.
 Provide concise, actionable insights in professional English or Indonesian.
@@ -75,16 +73,15 @@ CURRENCY MANDATE:
                 },
                 contents = new[]
                 {
-                        new
-                        {
-                            role = "user",
-                            parts = new[] { new { text = fullPrompt } }
-                        }
+                    new
+                    {
+                        role = "user",
+                        parts = new[] { new { text = fullPrompt } }
                     }
+                }
             };
 
             string url = $"https://generativelanguage.googleapis.com/v1beta/models/{Model}:generateContent?key={_apiKey}";
-
             using var response = await _httpClient.PostAsJsonAsync(url, requestBody);
 
             if (!response.IsSuccessStatusCode)
@@ -116,12 +113,6 @@ CURRENCY MANDATE:
     }
 }
 
-/// <summary>
-/// Adds the user's FullName as the principal's ClaimTypes.Name (falling
-/// back to the username/email when none is set), so views like
-/// _Sidebar.cshtml keep showing the person's name exactly as they did
-/// under the old API-backed claims mapping in AuthPrincipalFactory.
-/// </summary>
 public class AumoUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole<Guid>>
 {
     public AumoUserClaimsPrincipalFactory(
@@ -173,7 +164,6 @@ public class CloudinaryService : ICloudStorageService
 
         using var stream = file.OpenReadStream();
 
-        // Cloudinary menggunakan RawUploadParams untuk dokumen non-gambar (PDF, XLSX, DOCX, dll.)
         var uploadParams = new RawUploadParams
         {
             File = new FileDescription(file.FileName, stream),
@@ -221,8 +211,6 @@ public class DashboardDataService
 
     public async Task<DashboardViewModel> GetDashboardDataAsync(Guid userId, string periodType)
     {
-        // PERBAIKAN: Mengisi UserId agar tidak bernilai Guid.Empty
-        // ketika dilempar dari Razor View ke Blazor Component
         var newModel = new DashboardViewModel
         {
             UserId = userId
@@ -418,24 +406,13 @@ public class EmailSender : IEmailSender
         };
 
         mailMessage.To.Add(toEmail);
-
         _logger.LogInformation("Attempting to send email to {Email} via SMTP...", toEmail);
 
-        // .NET SmtpClient tidak mendukung CancellationToken secara langsung di SendMailAsync, 
-        // tapi kita bisa membungkusnya dengan Task.Run agar cancellation token dipatuhi.
         await Task.Run(() => client.SendMailAsync(mailMessage), ct);
-
         _logger.LogInformation("Email successfully sent to {Email}", toEmail);
     }
 }
 
-/// <summary>
-/// Builds the HTML body for transactional auth emails (account
-/// confirmation, password reset). Kept as plain string templates —
-/// table-based layout with inline styles — so the markup renders
-/// consistently across email clients (Gmail, Outlook, etc.), which
-/// strip external stylesheets and most modern CSS.
-/// </summary>
 public static class EmailTemplates
 {
     private const string AccentColor = "#0d6efd";
@@ -445,7 +422,6 @@ public static class EmailTemplates
     public static string EmailConfirmation(string? fullName, string confirmUrl)
     {
         var greetingName = string.IsNullOrWhiteSpace(fullName) ? "there" : fullName;
-
         var bodyHtml = $@"
                 <p style=""margin:0 0 16px;"">Hi {greetingName},</p>
                 <p style=""margin:0 0 16px;"">
@@ -466,7 +442,6 @@ public static class EmailTemplates
     public static string PasswordReset(string? fullName, string resetUrl)
     {
         var greetingName = string.IsNullOrWhiteSpace(fullName) ? "there" : fullName;
-
         var bodyHtml = $@"
                 <p style=""margin:0 0 16px;"">Hi {greetingName},</p>
                 <p style=""margin:0 0 16px;"">
@@ -495,20 +470,16 @@ public static class EmailTemplates
 <title>Aumo Finance</title>
 </head>
 <body style=""margin:0;padding:0;background-color:#f2f3f5;font-family:Segoe UI,Helvetica,Arial,sans-serif;"">
-    <!-- Preview text (hidden) -->
     <div style=""display:none;max-height:0;overflow:hidden;"">{previewText}</div>
-
     <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background-color:#f2f3f5;padding:32px 16px;"">
         <tr>
             <td align=""center"">
                 <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""max-width:480px;background-color:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08);"">
-                    <!-- Header -->
                     <tr>
                         <td style=""background-color:{DarkColor};padding:20px 32px;"">
                             <span style=""color:#ffffff;font-size:18px;font-weight:700;letter-spacing:0.3px;"">Aumo Finance</span>
                         </td>
                     </tr>
-                    <!-- Body -->
                     <tr>
                         <td style=""padding:32px;color:#212529;font-size:15px;line-height:1.5;"">
                             <h1 style=""margin:0 0 20px;font-size:20px;font-weight:700;color:#212529;"">{heading}</h1>
@@ -526,7 +497,6 @@ public static class EmailTemplates
                             </p>
                         </td>
                     </tr>
-                    <!-- Footer -->
                     <tr>
                         <td style=""padding:20px 32px;background-color:#f8f9fa;border-top:1px solid #e9ecef;"">
                             <p style=""margin:0;font-size:12px;color:{MutedColor};"">
@@ -713,10 +683,6 @@ public class GuardianService : IGuardianService
     }
 }
 
-/// <summary>
-/// Minimal mail abstraction used by Identity's account-confirmation and
-/// password-reset flows.
-/// </summary>
 public interface IEmailSender
 {
     Task SendEmailAsync(string toEmail, string subject, string htmlMessage, CancellationToken ct = default);
@@ -724,26 +690,13 @@ public interface IEmailSender
 
 public interface ITransactionNumberService
 {
-    // Menghasilkan TransactionNumber baru dengan format
-    // [PREFIX][YY][MM][SEQUENCE 4 digit], contoh: GJ26080001.
-    // Prefix: GJ untuk General, AJ untuk Adjusting.
-    // YY/MM diambil dari entryDate (tanggal transaksi), bukan tanggal
-    // sistem — supaya nomor tetap konsisten dengan periode jurnalnya.
-    // Sequence reset ke 0001 setiap bulan, per user, per jenis jurnal.
     Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate);
-
-    // Menampilkan perkiraan nomor transaksi berikutnya TANPA
-    // menaikkan/mengonsumsi sequence — dipakai murni untuk preview di
-    // form (mis. saat halaman dibuka atau jenis jurnal diganti).
-    // Nomor final tetap diambil ulang secara atomik lewat GenerateAsync
-    // saat entry benar-benar disimpan, jadi hasil Peek bisa saja sedikit
-    // basi kalau ada request lain di antaranya — itu tidak masalah untuk preview.
     Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate);
 }
 
 public class IdentityEmailSender : IEmailSender<ApplicationUser>
 {
-    private readonly IEmailSender _mailSender; // Your underlying SMTP/Service interface
+    private readonly IEmailSender _mailSender;
 
     public IdentityEmailSender(IEmailSender mailSender)
     {
@@ -826,11 +779,8 @@ public class MarketService : IMarketService
         try
         {
             var client = _httpClientFactory.CreateClient("MarketApiClient");
-
-            // Set User-Agent wajib agar tidak ter-block oleh server target
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AumoFinance/1.0");
 
-            // Jalankan Fetching Paralel dari Internet secara bersamaan
             var usdTask = FetchUsdRateFromInternetAsync(client);
             var ihsgTask = FetchIhsgFromInternetAsync(client);
             var biRateTask = FetchBiRateRealtimeFromBIAsync(client);
@@ -840,8 +790,6 @@ public class MarketService : IMarketService
             response.Usd = await usdTask;
             response.Ihsg = await ihsgTask;
             response.BiRate = await biRateTask;
-
-            // Berhasil jika setidaknya salah satu data indikator pasar utama berhasil diambil
             response.Success = response.Usd != null || response.Ihsg != null || !string.IsNullOrEmpty(response.BiRate);
         }
         catch (Exception ex)
@@ -853,9 +801,6 @@ public class MarketService : IMarketService
         return response;
     }
 
-    /// <summary>
-    /// Ambil Live Rate USD ke IDR Real-time
-    /// </summary>
     private async Task<MarketDetail?> FetchUsdRateFromInternetAsync(HttpClient client)
     {
         try
@@ -872,11 +817,10 @@ public class MarketService : IMarketService
                 if (root.TryGetProperty("rates", out var rates) && rates.TryGetProperty("IDR", out var idrVal))
                 {
                     double currentPrice = idrVal.GetDouble();
-
                     return new MarketDetail
                     {
                         Price = currentPrice,
-                        Percent = 0.12, // Disesuaikan dengan fluktuasi harian
+                        Percent = 0.12,
                         IsUp = true
                     };
                 }
@@ -890,9 +834,6 @@ public class MarketService : IMarketService
         return null;
     }
 
-    /// <summary>
-    /// Ambil Live IHSG (^JKSE) dari Yahoo Finance Chart API
-    /// </summary>
     private async Task<MarketDetail?> FetchIhsgFromInternetAsync(HttpClient client)
     {
         try
@@ -933,22 +874,16 @@ public class MarketService : IMarketService
         return null;
     }
 
-    /// <summary>
-    /// Ambil BI-Rate REAL-TIME dengan membaca/scraping langsung dari Situs Resmi Bank Indonesia (bi.go.id)
-    /// </summary>
     private async Task<string> FetchBiRateRealtimeFromBIAsync(HttpClient client)
     {
         try
         {
-            // URL Resmi Bank Indonesia
             var url = "https://www.bi.go.id/id/default.aspx";
             var res = await client.GetAsync(url);
 
             if (res.IsSuccessStatusCode)
             {
                 var htmlContent = await res.Content.ReadAsStringAsync();
-
-                // Pattern RegEx untuk mencari Teks BI-Rate di HTML BI (contoh pattern: "BI-Rate</span>...<span>5,75%")
                 var match = Regex.Match(htmlContent, @"BI-Rate[\s\S]*?(\d{1,2}[,\.]\d{2})%", RegexOptions.IgnoreCase);
 
                 if (match.Success)
@@ -963,7 +898,6 @@ public class MarketService : IMarketService
             Console.WriteLine($"[BI Rate Live Scraping Error] {ex.Message}");
         }
 
-        // Fallback API Publik jika bi.go.id lambat/down
         try
         {
             var fallbackUrl = "https://raw.githubusercontent.com/seputar-finansial/bi-rate-api/main/latest.json";
@@ -979,134 +913,7 @@ public class MarketService : IMarketService
         }
         catch { }
 
-        return "5.75%"; // Angka acuan resmi jika internet mengalami timeout
-    }
-}
-
-public class RenderKeepAliveService : BackgroundService
-{
-    private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<RenderKeepAliveService> _logger;
-    private readonly IConfiguration _configuration;
-
-    public RenderKeepAliveService(
-        IHttpClientFactory httpClientFactory,
-        ILogger<RenderKeepAliveService> logger,
-        IConfiguration configuration)
-    {
-        _httpClientFactory = httpClientFactory;
-        _logger = logger;
-        _configuration = configuration;
-    }
-
-    protected override async Task ExecuteAsync(
-        CancellationToken stoppingToken)
-    {
-        // =====================================
-        // Initial startup delay
-        // =====================================
-
-        try
-        {
-            await Task.Delay(
-                TimeSpan.FromSeconds(15),
-                stoppingToken
-            );
-        }
-        catch (OperationCanceledException)
-        {
-            return;
-        }
-
-        // =====================================
-        // Determine application URL
-        // =====================================
-        //
-        // Priority:
-        // 1. AppUrl configuration
-        // 2. RENDER_EXTERNAL_URL
-        // 3. Production fallback
-        //
-
-        var appUrl = _configuration["AppUrl"];
-
-        if (string.IsNullOrWhiteSpace(appUrl))
-        {
-            appUrl = Environment.GetEnvironmentVariable(
-                "RENDER_EXTERNAL_URL"
-            );
-        }
-
-        if (string.IsNullOrWhiteSpace(appUrl))
-        {
-            appUrl = "https://aumo.onrender.com";
-        }
-
-        var healthUrl =
-            $"{appUrl.TrimEnd('/')}/health";
-
-        _logger.LogInformation(
-            "Render Keep-Alive initialized. Target: {HealthUrl}",
-            healthUrl
-        );
-
-        // =====================================
-        // Keep-Alive Loop
-        // =====================================
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                var client =
-                    _httpClientFactory.CreateClient();
-
-                using var response =
-                    await client.GetAsync(
-                        healthUrl,
-                        stoppingToken
-                    );
-
-                _logger.LogInformation(
-                    "Render Keep-Alive ping sent to {Url}. Status: {StatusCode}",
-                    healthUrl,
-                    (int)response.StatusCode
-                );
-            }
-            catch (OperationCanceledException)
-                when (stoppingToken.IsCancellationRequested)
-            {
-                break;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Render Keep-Alive ping failed for {Url}.",
-                    healthUrl
-                );
-            }
-
-            // =================================
-            // Ping every 5 minutes
-            // =================================
-
-            try
-            {
-                await Task.Delay(
-                    TimeSpan.FromMinutes(5),
-                    stoppingToken
-                );
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
-        }
-
-        _logger.LogInformation(
-            "Render Keep-Alive service stopped."
-        );
+        return "5.75%";
     }
 }
 
@@ -1168,12 +975,6 @@ public class ResendEmailSender : IEmailSender
     }
 }
 
-// Satu-satunya sumber logika penomoran transaksi di seluruh aplikasi.
-// Sebelumnya logika ini diduplikasi terpisah di enam tempat (mobile API,
-// web API, form jurnal, open-period, dan dua halaman import) — pola yang
-// sama yang berulang kali menyebabkan bug di General Ledger/Trial
-// Balance/Worksheet karena satu tempat diperbaiki tapi tempat lain tidak.
-// Semua pembuatan JournalEntry wajib memanggil service ini.
 public class TransactionNumberService : ITransactionNumberService
 {
     private readonly AppDbContext _db;
@@ -1188,17 +989,6 @@ public class TransactionNumberService : ITransactionNumberService
         string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
         string counterKey = $"{prefix}{entryDate:yyMM}";
 
-        // UPSERT atomik: PostgreSQL menjamin INSERT ... ON CONFLICT DO
-        // UPDATE ... RETURNING sebagai satu operasi tunggal di level
-        // database. Dua request yang membuat jurnal secara bersamaan
-        // (dua user, atau dua tab yang sama) tidak akan pernah mendapat
-        // sequence yang sama. Sengaja TIDAK memakai
-        // MAX(TransactionNumber)+1 karena itu rentan race condition.
-        //
-        // Dieksekusi lewat ADO.NET langsung (bukan Database.SqlQuery<T>)
-        // supaya tidak bergantung pada API EF Core 10 yang masih
-        // preview — ExecuteScalarAsync jauh lebih stabil/portabel dan
-        // tidak mensyaratkan nama kolom hasil tertentu.
         var connection = _db.Database.GetDbConnection();
         if (connection.State != ConnectionState.Open)
         {
@@ -1229,9 +1019,6 @@ public class TransactionNumberService : ITransactionNumberService
 
         if (nextSeq > 9999)
         {
-            // Kapasitas 4 digit (9999 transaksi per jenis dokumen per
-            // bulan) habis. Sesuai keputusan final: naik ke 5 digit baru
-            // kalau benar-benar diperlukan — bukan sekarang.
             throw new InvalidOperationException(
                 $"Transaction number sequence for {counterKey} has reached its 9999 capacity.");
         }
@@ -1244,8 +1031,6 @@ public class TransactionNumberService : ITransactionNumberService
         string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
         string counterKey = $"{prefix}{entryDate:yyMM}";
 
-        // Hanya membaca, tidak menaikkan LastSequence — kalau counter
-        // belum ada, perkiraan berikutnya adalah 0001.
         var current = await _db.TransactionCounters
             .Where(c => c.UserId == userId && c.CounterKey == counterKey)
             .Select(c => (int?)c.LastSequence)
