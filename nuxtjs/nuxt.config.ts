@@ -5,11 +5,11 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   
-  css: [resolve(__dirname, './app/assets/css/main.css')],
+  css: [resolve(__dirname, './src/app/assets/css/main.css')],
 
   alias: {
-    '@': resolve(__dirname, './app'),
-    '~': resolve(__dirname, './app')
+    '@': resolve(__dirname, './src/app'),
+    '~': resolve(__dirname, './src/app')
   },
 
   modules: [
@@ -29,6 +29,6 @@ export default defineNuxtConfig({
 
   shadcn: {
     prefix: '',
-    componentDir: './app/components/ui'
+    componentDir: './src/app/components/ui'
   }
 })
