@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using AumoBackend.Core;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -14,14 +17,6 @@ namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/api/v1/auth")]
-// Menerima cookie ASP.NET Identity (web/nextjs) MAUPUN JWT Bearer (mobile) —
-// dua-duanya sudah dikonfigurasi di Program.cs (DefaultPolicy malah sudah
-// menerima keduanya lewat AddAuthenticationSchemes), controller lain di
-// project ini sebelumnya cuma sengaja dipersempit ke cookie saja lewat
-// atribut ini. Login tetap sign-in cookie seperti biasa (SignInManager,
-// dipakai web/nextjs) DAN sekaligus menerbitkan token JWT di response body
-// (dipakai mobile) — dua mekanisme berjalan berdampingan, tidak saling
-// menggantikan.
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class AuthController : ControllerBase
 {
@@ -59,41 +54,13 @@ public class AuthController : ControllerBase
             return Unauthorized(new { success = false, message = "Invalid email/username or password." });
         }
 
-        var result = await _signInManager.PasswordSignInAsync(
-            user.UserName ?? user.Email!,
-            request.Password,
-            isPersistent: request.RememberMe,
-            lockoutOnFailure: false);
-
         var headerUserAgent = Request.Headers["User-Agent"].ToString();
         var safeUserAgent = !string.IsNullOrWhiteSpace(request.UserAgent)
             ? request.UserAgent
-            : (!string.IsNullOrWhiteSpace(headerUserAgent) ? headerUserAgent : "Aumo Client / Web");
+            : (!string.IsNullOrWhiteSpace(headerUserAgent) ? headerUserAgent : "Aumo Client");
 
-        if (!result.Succeeded)
-        {
-            var isMobileFail = safeUserAgent.Contains("Android", StringComparison.OrdinalIgnoreCase) ||
-                               safeUserAgent.Contains("iPhone", StringComparison.OrdinalIgnoreCase) ||
-                               safeUserAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase);
-
-            string deviceCategoryFail = isMobileFail ? "Mobile" : "Web";
-
-            await _guardianService.CreateLoginActivityAsync(
-                user.Id,
-                "Failed Login",
-                deviceCategoryFail,
-                isMobileFail ? "Mobile App/Browser" : "Web Browser",
-                HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0",
-                "ID",
-                false,
-                operatingSystem: !string.IsNullOrWhiteSpace(request.OperatingSystem) ? request.OperatingSystem : deviceCategoryFail,
-                userAgent: safeUserAgent
-            );
-
-            return Unauthorized(new { success = false, message = "Invalid email/username or password." });
-        }
-
-        var isMobile = safeUserAgent.Contains("Android", StringComparison.OrdinalIgnoreCase) ||
+        var isMobile = request.IsMobileClient ||
+                       safeUserAgent.Contains("Android", StringComparison.OrdinalIgnoreCase) ||
                        safeUserAgent.Contains("iPhone", StringComparison.OrdinalIgnoreCase) ||
                        safeUserAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase);
 
@@ -101,14 +68,50 @@ public class AuthController : ControllerBase
         string ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
         string osValue = !string.IsNullOrWhiteSpace(request.OperatingSystem) ? request.OperatingSystem : deviceCategory;
 
+        // Validasi Password
+        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+        if (!passwordValid)
+        {
+            await _guardianService.CreateLoginActivityAsync(
+                user.Id,
+                "Failed Login",
+                deviceCategory,
+                isMobile ? "Mobile App" : "Web Browser",
+                ip,
+                "ID",
+                false,
+                operatingSystem: osValue,
+                userAgent: safeUserAgent
+            );
+
+            return Unauthorized(new { success = false, message = "Invalid email/username or password." });
+        }
+
+        // =====================================
+        // PEMISAHAN MEKANISME: COOKIE VS JWT
+        // =====================================
+        string? jwtToken = null;
+
+        if (!isMobile)
+        {
+            // --- WEB FLOW: Hanya buat Cookie Session ---
+            await _signInManager.SignInAsync(user, isPersistent: request.RememberMe);
+        }
+        else
+        {
+            // --- MOBILE FLOW: Hanya buat JWT Token (TIDAK buat Cookie) ---
+            jwtToken = await GenerateJwtTokenAsync(user);
+        }
+
+        // Audit Log & Guardian Session
         await _guardianService.CreateSessionAsync(
             user.Id,
             deviceName: deviceCategory,
             operatingSystem: osValue,
-            browser: isMobile ? "Mobile App/Browser" : "Web Browser",
+            browser: isMobile ? "Mobile App" : "Web Browser",
             ipAddress: ip,
             country: "ID",
-            refreshTokenHash: "COOKIE_SESSION",
+            refreshTokenHash: isMobile ? "JWT_BEARER" : "COOKIE_SESSION",
             userAgent: safeUserAgent
         );
 
@@ -116,7 +119,7 @@ public class AuthController : ControllerBase
             user.Id,
             "Interactive Login",
             deviceCategory,
-            isMobile ? "Mobile App/Browser" : "Web Browser",
+            isMobile ? "Mobile App" : "Web Browser",
             ip,
             "ID",
             true,
@@ -124,26 +127,139 @@ public class AuthController : ControllerBase
             userAgent: safeUserAgent
         );
 
+        // Web mendapat JSON tanpa Token (murni Cookie), Mobile mendapat JSON berisi Token JWT
+        if (isMobile)
+        {
+            return Ok(new
+            {
+                success = true,
+                message = "Mobile login successful.",
+                userId = user.Id.ToString(),
+                fullName = user.FullName ?? user.UserName ?? "User",
+                token = jwtToken
+            });
+        }
+
         return Ok(new
         {
             success = true,
-            message = "Login successful.",
+            message = "Web login successful.",
             userId = user.Id.ToString(),
-            fullName = user.FullName ?? user.UserName ?? "User",
-            token = GenerateJwtToken(user)
+            fullName = user.FullName ?? user.UserName ?? "User"
         });
     }
 
-    // Dipakai mobile lewat header "Authorization: Bearer <token>". Signing
-    // key/issuer sama persis dengan yang dipakai Program.cs memvalidasi JWT
-    // (JWT_SIGNING_KEY/JWT_ISSUER) supaya token yang diterbitkan di sini
-    // memang lolos TokenValidationParameters yang sudah dikonfigurasi.
-    // ClaimTypes.NameIdentifier dipakai karena controller lain di project
-    // ini sudah lebih dulu membaca User.FindFirstValue(ClaimTypes.
-    // NameIdentifier) (dengan fallback "sub") untuk menentukan user yang
-    // sedang login — token ini otomatis kompatibel tanpa controller lain
-    // perlu diubah.
-    private string GenerateJwtToken(ApplicationUser user)
+    /// <summary>
+    /// Google OAuth Login (Mendukung Web via Cookie & Mobile via JWT)
+    /// </summary>
+    [HttpPost("google-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(request.IdToken))
+        {
+            return BadRequest(new { success = false, message = "Google ID Token is required." });
+        }
+
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken);
+        }
+        catch (Exception)
+        {
+            return Unauthorized(new { success = false, message = "Invalid Google ID Token." });
+        }
+
+        var info = new UserLoginInfo("Google", payload.Subject, "Google");
+        var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+
+        if (user == null)
+        {
+            user = await _userManager.FindByEmailAsync(payload.Email);
+
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = payload.Email,
+                    Email = payload.Email,
+                    EmailConfirmed = true,
+                    FullName = payload.Name
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    return BadRequest(new { success = false, message = "Failed to create user from Google account." });
+                }
+
+                await _userManager.AddToRoleAsync(user, "User");
+            }
+
+            // Simpan relasi Google Login ke tabel AspNetUserLogins
+            await _userManager.AddLoginAsync(user, info);
+        }
+
+        if (!request.IsMobileClient)
+        {
+            // Web: Issue Cookie
+            await _signInManager.SignInAsync(user, isPersistent: true);
+            return Ok(new
+            {
+                success = true,
+                message = "Google login successful (Cookie session established).",
+                userId = user.Id.ToString(),
+                fullName = user.FullName ?? user.UserName ?? "User"
+            });
+        }
+
+        // Mobile: Issue JWT Token
+        var token = await GenerateJwtTokenAsync(user);
+        return Ok(new
+        {
+            success = true,
+            message = "Google login successful.",
+            userId = user.Id.ToString(),
+            fullName = user.FullName ?? user.UserName ?? "User",
+            token = token
+        });
+    }
+
+    [HttpGet("me")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user == null)
+            return NotFound(new { success = false, message = "User session active, but user not found." });
+
+        var roles = await _userManager.GetRolesAsync(user);
+        var userClaims = await _userManager.GetClaimsAsync(user);
+
+        return Ok(new
+        {
+            success = true,
+            userId = user.Id,
+            email = user.Email,
+            userName = user.UserName,
+            fullName = user.FullName ?? user.UserName,
+            roles = roles,
+            customClaims = userClaims
+        });
+    }
+
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await _signInManager.SignOutAsync();
+        return Ok(new { success = true, message = "Logged out successfully." });
+    }
+
+    /// <summary>
+    /// Generate JWT Token async yang memuat data User, Roles (AspNetUserRoles), dan Claims (AspNetUserClaims).
+    /// </summary>
+    private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
         var jwtSigningKey = _configuration["JWT_SIGNING_KEY"]
             ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY")
@@ -162,6 +278,17 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
+        // Memasukkan Roles ke JWT (AspNetUserRoles)
+        var roles = await _userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        // Memasukkan Custom User Claims ke JWT (AspNetUserClaims)
+        var userClaims = await _userManager.GetClaimsAsync(user);
+        claims.AddRange(userClaims);
+
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
@@ -169,38 +296,26 @@ public class AuthController : ControllerBase
             issuer: jwtIssuer,
             audience: jwtIssuer,
             claims: claims,
-            // 30 hari, disamakan dengan masa berlaku cookie sesi
-            // (ConfigureApplicationCookie di Program.cs) supaya perilaku
-            // "Ingat saya" konsisten antara web dan mobile.
             expires: DateTime.UtcNow.AddDays(30),
             signingCredentials: credentials
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
-    [HttpGet("me")]
-    public async Task<IActionResult> GetProfile()
-    {
-        var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-            return NotFound(new { success = false, message = "User session active, but user not found." });
-
-        return Ok(new
-        {
-            success = true,
-            userId = user.Id,
-            email = user.Email,
-            userName = user.UserName,
-            fullName = user.FullName ?? user.UserName
-        });
-    }
-
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout()
-    {
-        await _signInManager.SignOutAsync();
-        return Ok(new { success = true, message = "Logged out successfully." });
-    }
 }
 
+public class LoginRequest
+{
+    public string Email { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
+    public bool RememberMe { get; set; } = false;
+    public bool IsMobileClient { get; set; } = false;
+    public string? UserAgent { get; set; }
+    public string? OperatingSystem { get; set; }
+}
+
+public class GoogleLoginRequest
+{
+    public string IdToken { get; set; } = string.Empty;
+    public bool IsMobileClient { get; set; } = false;
+}
