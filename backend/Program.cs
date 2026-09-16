@@ -348,8 +348,8 @@ namespace AumoBackend
 
             app.MapPost("/auth/logout", async (SignInManager<ApplicationUser> signInManager) =>
             {
-            await signInManager.SignOutAsync();
-            return Results.Ok(new { success = true, message = "Logout successful" });
+                await signInManager.SignOutAsync();
+                return Results.Ok(new { success = true, message = "Logout successful" });
             });
 
             app.MapControllers();
