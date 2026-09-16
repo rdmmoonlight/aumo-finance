@@ -157,9 +157,57 @@ export function Topbar() {
   const location = useLocation();
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
+  const [verse, setVerse] = useState<{
+    textEn: string;
+    textAr: string;
+    surahName: string;
+    surahNo: number;
+    ayahNo: number;
+  } | null>(null);
+  const [loadingVerse, setLoadingVerse] = useState(true);
+
+  useEffect(() => {
+    // load semua ayat -> kita random 1 dari 6236 via API random edition
+    const fetchRandomVerse = async () => {
+      try {
+        setLoadingVerse(true);
+        const res = await fetch('https://api.alquran.cloud/v1/ayah/random/editions/quran-uthmani,en.sahih');
+        const json = await res.json();
+
+        if (json?.data && Array.isArray(json.data)) {
+          const ar = json.data[0];
+          const en = json.data[1];
+          setVerse({
+            textAr: ar.text,
+            textEn: en.text,
+            surahName: en.surah.englishName,
+            surahNo: en.surah.number,
+            ayahNo: en.numberInSurah,
+          });
+        }
+      } catch (e) {
+        console.error('Failed to load Quran verse', e);
+        // fallback
+        setVerse({
+          textAr: 'فَإِنَّ مَعَ الْعُسْرِ يُسْرًا',
+          textEn: 'Indeed, with hardship [will be] ease.',
+          surahName: 'Ash-Sharh',
+          surahNo: 94,
+          ayahNo: 6,
+        });
+      } finally {
+        setLoadingVerse(false);
+      }
+    };
+
+    fetchRandomVerse();
+    // ini cuma jalan pas page di-reload / Topbar mount
+    // kalau mau ganti tiap pindah route, tambahin location.pathname di dep array
+  }, [location.pathname]);
+
   return (
-    <header className="h-16 border-b bg-background/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0 sticky top-0 z-10">
-      <Breadcrumb>
+    <header className="h-16 border-b bg-background/80 backdrop-blur-md px-6 flex items-center justify-between shrink-0 sticky top-0 z-10 gap-4">
+      <Breadcrumb className="shrink-0">
         <BreadcrumbList>
           <BreadcrumbItem>
             <BreadcrumbLink asChild><Link to="/">Home</Link></BreadcrumbLink>
@@ -171,7 +219,7 @@ export function Topbar() {
               <div key={url} className="contents">
                 <BreadcrumbSeparator><IconChevronRight size={14} /></BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  {isLast ? (
+                  {isLast? (
                     <BreadcrumbPage className="capitalize">{seg.replace(/-/g, ' ')}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
@@ -184,6 +232,29 @@ export function Topbar() {
           })}
         </BreadcrumbList>
       </Breadcrumb>
+
+      {/* Quran Verse Area */}
+      <div className="ml-auto hidden md:flex items-center justify-end max-w- flex-1">
+        {loadingVerse? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <IconLoader2 size={14} className="animate-spin" />
+            <span>Loading verse...</span>
+          </div>
+        ) : verse? (
+          <div
+            className="flex flex-col items-end text-right leading-tight"
+            title={`${verse.textAr} - Quran ${verse.surahName} ${verse.surahNo}:${verse.ayahNo}`}
+          >
+            <p className="text- font-medium text-foreground/80 italic line-clamp-1 truncate max-w-">
+              "{verse.textEn}"
+            </p>
+            <span className="text- font-mono text-muted-foreground mt-0.5 tracking-wide flex items-center gap-1.5">
+              <IconBook size={12} />
+              QS. {verse.surahName} {verse.surahNo}:{verse.ayahNo}
+            </span>
+          </div>
+        ) : null}
+      </div>
     </header>
   );
 }
