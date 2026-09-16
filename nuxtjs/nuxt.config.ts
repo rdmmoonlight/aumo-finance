@@ -1,3 +1,4 @@
+// nuxt.config.ts
 import { resolve } from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -5,8 +6,9 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   
-  srcDir: 'src',
-  
+  // Arahkan srcDir langsung ke folder src/app
+  srcDir: 'src/app',
+
   css: [resolve(__dirname, './src/app/assets/css/main.css')],
 
   alias: {
