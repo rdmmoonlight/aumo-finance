@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList,
   BreadcrumbPage, BreadcrumbSeparator
@@ -54,11 +53,13 @@ function NavItemLink({ item }: { item: MenuItem }) {
     <Link to={item.path} className="block">
       {({ isActive }: { isActive: boolean }) => (
         <div className={cn(
-          'group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-          isActive? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:bg-accent hover:text-accent-foreground'
+          'group flex items-center gap-3 rounded-lg px-3 py-2 text- leading-none transition-colors duration-200',
+          isActive
+          ? 'bg-[#2a2a2e] text-white font-medium'
+            : 'text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05] font-[400]'
         )}>
-          <item.icon size={18} stroke={1.8} className="shrink-0" />
-          <span className="truncate">{item.label}</span>
+          <item.icon size={18} stroke={1.6} className={cn("shrink-0", isActive? "opacity-100" : "opacity-60 group-hover:opacity-100")} />
+          <span className="truncate tracking-[-0.01em]">{item.label}</span>
         </div>
       )}
     </Link>
@@ -102,49 +103,57 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-64 border-r bg-card flex flex-col h-screen sticky top-0 shrink-0 select-none z-20">
-      <div className="h-16 px-5 border-b flex items-center gap-3 shrink-0">
-        <div className="w-9 h-9 rounded-xl bg-primary text-primary-foreground grid place-items-center font-bold shadow-sm">A</div>
+    <aside className="w-64 border-r border-white/[0.06] bg-[#18181b] flex flex-col h-screen sticky top-0 shrink-0 select-none z-20">
+      {/* Logo matte */}
+      <div className="h-16 px-5 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[#2a2a2e] text-white grid place-items-center font-bold text-">A</div>
         <div className="flex flex-col">
-          <span className="font-bold text-sm leading-none tracking-tight">Aumo Finance</span>
-          <span className="text- text-muted-foreground uppercase tracking-widest font-semibold mt-1">Accounting Suite</span>
+          <span className="font-semibold text- leading-none tracking-tight text-white">Aumo Finance</span>
+          <span className="text- text-zinc-500 uppercase tracking-[0.16em] font-medium mt-">Accounting Suite</span>
         </div>
       </div>
+
       <ScrollArea className="flex-1 min-h-0">
-        <div className="px-3 py-4 space-y-6">
+        <div className="px-3 py-5 space-y-7">
           <div>
-            <h2 className="px-3 mb-2 text- font-bold text-muted-foreground/70 uppercase tracking-widest">Main Domain</h2>
-            <div className="space-y-1">
+            <h2 className="px-3 mb-3 text- font-semibold text-zinc-500 uppercase tracking-[0.14em]">Main Domain</h2>
+            <div className="space-y-0.5">
               {mainNavItems.map((item) => <NavItemLink key={item.path} item={item} />)}
             </div>
           </div>
-          <Separator />
+
+          <div className="h-px bg-white/[0.06] mx-2" />
+
           <div>
-            <h2 className="px-3 mb-2 text- font-bold text-muted-foreground/70 uppercase tracking-widest">Reports & Statements</h2>
-            <div className="space-y-1">
+            <h2 className="px-3 mb-3 text- font-semibold text-zinc-500 uppercase tracking-[0.14em]">Reports & Statements</h2>
+            <div className="space-y-0.5">
               {reportNavItems.map((item) => <NavItemLink key={item.path} item={item} />)}
             </div>
           </div>
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
-      <div className="p-3 border-t bg-card shrink-0 space-y-2">
-        <div className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg bg-muted/40 border border-border/50">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-full bg-primary/10 text-primary grid place-items-center shrink-0">
-              <IconUser size={16} />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-xs font-semibold truncate">{loading? 'Loading...' : user?.fullName || user?.userName || 'User'}</span>
-              <span className="text- text-muted-foreground truncate font-mono">{user?.email || 'Active Session'}</span>
-            </div>
+
+      <div className="p-3 border-t border-white/[0.06] bg-[#18181b] shrink-0 space-y-2.5">
+        <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl bg-[#202023] border border-white/[0.06]">
+          <div className="w-7 h-7 rounded-full bg-white/[0.06] text-zinc-300 grid place-items-center shrink-0">
+            <IconUser size={14} />
           </div>
-          <Badge variant="outline" className="px-1.5 py-0.5 text- gap-1 font-mono border-emerald-500/30 text-emerald-600 bg-emerald-500/5 shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />Online
+          <div className="flex flex-col min-w-0 flex-1">
+            <span className="text- font-medium truncate text-white leading-none">
+              {loading? 'Loading...' : user?.fullName || user?.userName || 'User'}
+            </span>
+            <span className="text- text-zinc-500 truncate leading-none mt-1.5 font-mono">
+              {user?.email || 'Active Session'}
+            </span>
+          </div>
+          <Badge variant="outline" className="px-1.5 py-0 text- gap-1 font-mono border-emerald-500/20 text-emerald-400 bg-emerald-500/10 shrink-0 rounded-md">
+            <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />Online
           </Badge>
         </div>
-        <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loggingOut} className="w-full justify-start gap-2.5 h-9 text-xs text-destructive hover:text-destructive hover:bg-destructive/10">
-          {loggingOut? <IconLoader2 size={16} className="animate-spin" /> : <IconLogout size={16} />}
+
+        <Button variant="ghost" size="sm" onClick={handleLogout} disabled={loggingOut} className="w-full justify-start gap-2 h-8 text-[12.5px] text-zinc-500 hover:text-white hover:bg-white/[0.06] rounded-lg">
+          {loggingOut? <IconLoader2 size={14} className="animate-spin" /> : <IconLogout size={14} />}
           <span>{loggingOut? 'Logging out...' : 'Sign Out'}</span>
         </Button>
       </div>
@@ -157,11 +166,7 @@ export function Topbar() {
   const pathSegments = location.pathname.split('/').filter(Boolean);
 
   const [verse, setVerse] = useState<{
-    textEn: string;
-    textAr: string;
-    surahName: string;
-    surahNo: number;
-    ayahNo: number;
+    textEn: string; textAr: string; surahName: string; surahNo: number; ayahNo: number;
   } | null>(null);
   const [loadingVerse, setLoadingVerse] = useState(true);
   const [isOverflowing, setIsOverflowing] = useState(false);
@@ -199,13 +204,10 @@ export function Topbar() {
     fetchRandomVerse();
   }, [location.pathname]);
 
-  // Deteksi apakah text kepanjangan
   useEffect(() => {
     const checkOverflow = () => {
       if (containerRef.current && measureRef.current) {
-        const containerWidth = containerRef.current.clientWidth;
-        const textWidth = measureRef.current.scrollWidth;
-        setIsOverflowing(textWidth > containerWidth + 10);
+        setIsOverflowing(measureRef.current.scrollWidth > containerRef.current.clientWidth + 10);
       }
     };
     checkOverflow();
@@ -216,15 +218,14 @@ export function Topbar() {
   const fullText = verse? `"${verse.textEn}" — QS. ${verse.surahName} ${verse.surahNo}:${verse.ayahNo}` : '';
 
   return (
-    <header className="h-16 border-b border-zinc-800 bg-[#0e0e10] px-6 flex items-center justify-between shrink-0 sticky top-0 z-10 gap-4">
+    <header className="h-16 border-b border-white/[0.06] bg-[#18181b] px-6 flex items-center justify-between shrink-0 sticky top-0 z-10 gap-4">
       <style>{`
         @keyframes quran-marquee {
           0% { transform: translateX(0); }
           100% { transform: translateX(-50%); }
         }
        .animate-quran-marquee {
-          animation: quran-marquee 20s linear infinite;
-          will-change: transform;
+          animation: quran-marquee 24s linear infinite;
         }
        .group:hover.animate-quran-marquee {
           animation-play-state: paused;
@@ -234,7 +235,7 @@ export function Topbar() {
       <Breadcrumb className="shrink-0">
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild><Link to="/" className="text-white/60 hover:text-white">Home</Link></BreadcrumbLink>
+            <BreadcrumbLink asChild><Link to="/" className="text-zinc-500 hover:text-white text-">Home</Link></BreadcrumbLink>
           </BreadcrumbItem>
           {pathSegments.map((seg, i) => {
             const url = `/${pathSegments.slice(0, i + 1).join('/')}`;
@@ -244,10 +245,10 @@ export function Topbar() {
                 <BreadcrumbSeparator className="text-white/20"><IconChevronRight size={14} /></BreadcrumbSeparator>
                 <BreadcrumbItem>
                   {isLast? (
-                    <BreadcrumbPage className="capitalize text-white">{seg.replace(/-/g, ' ')}</BreadcrumbPage>
+                    <BreadcrumbPage className="capitalize text-white text-">{seg.replace(/-/g, ' ')}</BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link to={url} className="capitalize text-white/60 hover:text-white">{seg.replace(/-/g, ' ')}</Link>
+                      <Link to={url} className="capitalize text-zinc-500 hover:text-white text-">{seg.replace(/-/g, ' ')}</Link>
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
@@ -257,12 +258,9 @@ export function Topbar() {
         </BreadcrumbList>
       </Breadcrumb>
 
-      {/* Quran Verse Area - Pure White */}
+      {/* Quran Verse Matte - Pure White */}
       <div ref={containerRef} className="ml-auto hidden md:flex flex-1 justify-end max-w- overflow-hidden">
-        {/* hidden measure untuk cek overflow */}
-        <span ref={measureRef} className="invisible absolute whitespace-nowrap" style={{ fontSize: '10.5px' }}>
-          {fullText}
-        </span>
+        <span ref={measureRef} className="invisible absolute whitespace-nowrap" style={{ fontSize: '10.5px' }}>{fullText}</span>
 
         {loadingVerse? (
           <div className="flex items-center gap-2" style={{ color: '#FFFFFF' }}>
@@ -272,27 +270,18 @@ export function Topbar() {
         ) : verse? (
           <div className="group relative w-full flex justify-end">
             {isOverflowing? (
-              // JALAN OTOMATIS KALO GA CUKUP
-              <div className="flex gap-10 animate-quran-marquee whitespace-nowrap">
-                <span style={{ color: '#FFFFFF', fontSize: '10.5px' }} className="font-medium italic shrink-0">
-                  {fullText}
-                </span>
-                <span aria-hidden style={{ color: '#FFFFFF', fontSize: '10.5px' }} className="font-medium italic shrink-0">
-                  {fullText}
-                </span>
+              <div className="flex gap-12 animate-quran-marquee whitespace-nowrap">
+                <span style={{ color: '#FFFFFF', fontSize: '10.5px' }} className="font-medium italic shrink-0 tracking-wide">{fullText}</span>
+                <span aria-hidden style={{ color: '#FFFFFF', fontSize: '10.5px' }} className="font-medium italic shrink-0 tracking-wide">{fullText}</span>
               </div>
             ) : (
-              // DIAM KALO CUKUP
-              <p className="truncate text-right font-medium italic" style={{ color: '#FFFFFF', fontSize: '10.5px' }}>
-                {fullText}
-              </p>
+              <p className="truncate text-right font-medium italic tracking-wide" style={{ color: '#FFFFFF', fontSize: '10.5px' }}>{fullText}</p>
             )}
 
-            {/* Tooltip full pas hover */}
-            <div className="absolute right-0 top-full mt-3 hidden group-hover:block z-50 w- rounded-lg bg-zinc-900 p-3.5 shadow-2xl ring-1 ring-white/10">
+            <div className="absolute right-0 top-full mt-3 hidden group-hover:block z-50 w- rounded-xl bg-[#242427] border border-white/[0.08] p-3.5 shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
               <p className="text-right leading-relaxed" style={{ color: '#FFFFFF', fontSize: '14px' }}>{verse.textAr}</p>
               <p className="mt-2 text-left leading-relaxed italic" style={{ color: '#FFFFFF', fontSize: '11px' }}>"{verse.textEn}"</p>
-              <p className="mt-2 text-left" style={{ color: '#FFFFFF', fontSize: '9px', opacity: 0.6 }}>— QS. {verse.surahName} {verse.surahNo}:{verse.ayahNo}</p>
+              <p className="mt-2 text-left" style={{ color: '#FFFFFF', fontSize: '9px', opacity: 0.5 }}>— QS. {verse.surahName} {verse.surahNo}:{verse.ayahNo}</p>
             </div>
           </div>
         ) : null}
@@ -303,7 +292,7 @@ export function Topbar() {
 
 export default function AppLayout() {
   return (
-    <div className="flex min-h-screen w-full bg-muted/20">
+    <div className="flex min-h-screen w-full bg-[#f5f5f5]">
       <Sidebar />
       <div className="flex flex-1 flex-col min-w-0">
         <Topbar />
