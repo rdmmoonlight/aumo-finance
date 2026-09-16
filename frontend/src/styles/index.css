@@ -26,38 +26,26 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-  --color-sidebar-background: hsl(var(--sidebar-background));
-  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+
+  /* MATTE TOK - biar gak bentrok sama hsl(var) */
+  --color-matte: #18181b;
+  --color-matte-soft: #202023;
+  --color-matte-hover: #2a2a2e;
 }
 
 @layer base {
-  * { 
-    @apply border-border outline-ring/50; 
-    scrollbar-width: thin;
-    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+    * {
+    @apply border-border outline-ring/50;
   }
-  body { 
-    @apply bg-background text-foreground antialiased; 
+  body {
+    @apply bg-background text-foreground antialiased;
   }
+}
 
-  /* Modern Webkit Scrollbar */
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-  }
-  ::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.25);
-    border-radius: 9999px;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.45);
-  }
+/* scrollbar jangan di *, taro di layer base biar gak nimpa sidebar */
+@layer base {
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: hsl(var(--muted-foreground) / 0.2); border-radius: 9999px; }
+  ::-webkit-scrollbar-thumb:hover { background: hsl(var(--muted-foreground) / 0.35); }
 }
