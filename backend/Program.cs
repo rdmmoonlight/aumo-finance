@@ -337,7 +337,7 @@ namespace AumoBackend
             // =====================================
             // 10. ENDPOINTS & MAP CONTROLLERS
             // =====================================
-            app.MapGet("/", () => Results.Ok(new
+            app.MapMethods("/", new[] { "GET", "HEAD" }, () => Results.Ok(new
             {
                 service = "AumoFinance API",
                 status = "Online",
