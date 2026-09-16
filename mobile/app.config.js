@@ -1,10 +1,6 @@
 const fs = require('fs');
 const path = require('path');
 
-// Baca angka urutan build bulan ini dari build-version.json (dinaikkan
-// oleh scripts/bump-build-number.js lewat "npm run build:android",
-// BUKAN di sini - supaya file ini aman dievaluasi berkali-kali tanpa
-// ikut menaikkan angkanya).
 const versionStatePath = path.join(__dirname, 'build-version.json');
 const versionState = JSON.parse(fs.readFileSync(versionStatePath, 'utf8'));
 const [year, month] = versionState.month.split('-').map(Number);
@@ -14,7 +10,7 @@ const sentryDsn =
 
 module.exports = {
   expo: {
-    name: 'Aumo Mobile',
+    name: 'Aumo',
     slug: 'reactnative',
     version: appVersion,
     orientation: 'portrait',
@@ -27,7 +23,7 @@ module.exports = {
     },
     assetBundlePatterns: ['**/*'],
     android: {
-      package: 'com.rdmmoonlight.aumomobile',
+      package: 'com.rdmmoonlight.aumo',
       minSdkVersion: 28,
       targetSdkVersion: 34,
       permissions: ['INTERNET', 'REQUEST_INSTALL_PACKAGES'],
