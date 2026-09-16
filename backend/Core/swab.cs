@@ -28,7 +28,7 @@ namespace AumoBackend.Core
         public string IdToken { get; set; } = string.Empty;
         public bool IsMobileClient { get; set; } = false;
     }
-    
+
     // CHART OF ACCOUNTS DTOs
     public class CreateAccountRequest
     {
