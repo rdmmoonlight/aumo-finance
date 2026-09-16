@@ -337,7 +337,7 @@ namespace AumoBackend
             // =====================================
             // 10. ENDPOINTS & MAP CONTROLLERS
             // =====================================
-            app.MapGet("/", () => Results.Ok(new
+            app.MapMethods("/", new[] { "GET", "HEAD" }, () => Results.Ok(new
             {
                 service = "AumoFinance API",
                 status = "Online",
@@ -348,8 +348,8 @@ namespace AumoBackend
 
             app.MapPost("/auth/logout", async (SignInManager<ApplicationUser> signInManager) =>
             {
-                await signInManager.SignOutAsync();
-                return Results.Ok(new { success = true, message = "Logout successful" });
+            await signInManager.SignOutAsync();
+            return Results.Ok(new { success = true, message = "Logout successful" });
             });
 
             app.MapControllers();
