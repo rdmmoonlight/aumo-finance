@@ -44,7 +44,16 @@ module.exports = {
         'https://f1723103ea0cc6b4a9f8c5d68b4988ee@o4512092717121536.ingest.us.sentry.io/4512092731670528',
     },
     owner: 'obscuron',
-    plugins: ['expo-router', 'sentry-expo'],
+    plugins: [
+      'expo-router',
+      [
+        'sentry-expo',
+        {
+          organization: 'blue-and-rich-corporation',
+          project: 'react-native',
+        },
+      ],
+    ],
     runtimeVersion: {
       policy: 'appVersion',
     },

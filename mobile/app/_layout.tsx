@@ -11,14 +11,13 @@ import { customDarkTheme } from '../src/theme/theme';
 import { queryClient } from '../queryClient';
 import { checkForUpdateSilently } from '../src/services/appUpdateService';
 
-// Inisialisasi Sentry sedini mungkin (di scope modul, bukan di dalam
-// komponen), supaya crash native maupun error JS yang terjadi di awal
-// startup app tetap tertangkap. sentry-expo (bukan @sentry/react-native
-// versi baru - itu butuh Expo SDK 50+) sudah bawa penangkap crash native
-// Android otomatis lewat config plugin-nya.
+// Inisialisasi Sentry di module scope (di luar komponen)
+// Membaca dsn dari app.config.js (extra.sentryDsn)
+const sentryDsn = Constants.expoConfig?.extra?.sentryDsn || Constants.manifest?.extra?.sentryDsn;
+
 Sentry.init({
-  dsn: Constants.expoConfig?.extra?.sentryDsn,
-  enableInExpoDevelopment: true,
+  dsn: sentryDsn,
+  enableInExpoDevelopment: true, // Ubah ke false jika tidak ingin track di dev local
   debug: __DEV__,
 });
 
@@ -53,16 +52,15 @@ export default function RootLayout() {
         }
       } catch (error) {
         console.warn('Gagal memeriksa pembaruan Expo:', error);
+        // Kirim error gagal update ke Sentry agar bisa di-monitor
+        Sentry.Native.captureException(error);
       }
     }
 
     handleAutoUpdate();
   }, []);
 
-  // Cek update APK penuh (native) dari GitHub Releases - untuk perubahan
-  // yang tidak bisa dikirim lewat OTA expo-updates di atas (native module,
-  // permission, dependency baru, dsb). Konsepnya sama dengan
-  // AppUpdateService.kt di aumo-finance-android.
+  // Cek update APK penuh (native) dari GitHub Releases
   useEffect(() => {
     checkForUpdateSilently();
   }, []);
