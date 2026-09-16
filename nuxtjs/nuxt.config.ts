@@ -5,6 +5,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
   
+  srcDir: 'src',
+  
   css: [resolve(__dirname, './src/app/assets/css/main.css')],
 
   alias: {
