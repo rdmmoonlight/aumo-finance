@@ -83,14 +83,12 @@ function DashboardContent() {
     }
   }, []);
 
-  // FIX 2: fetch cuma kalo periodType berubah, bukan searchParams. + Abort biar gak race
   useEffect(() => {
     const controller = new AbortController();
     fetchDashboardData(periodType, controller.signal);
     return () => controller.abort();
   }, [periodType, fetchDashboardData]);
 
-  // FIX 3: tombol jelas beda active nya + cegah double click pas loading
   const handlePeriodSwitch = (type: 'monthly' | 'annual') => {
     if (periodType === type || loading) return;
     setPeriodType(type);
@@ -120,7 +118,6 @@ function DashboardContent() {
     plugins: { legend: { position: 'bottom' as const, labels: { boxWidth: 10, usePointStyle: true } } }
   }), []);
 
-  // Memoize data chart biar gak re-render kedip
   const doughnutCashData = useMemo(() => ({
     labels: ['Cash on Hand', 'Bank Balance'],
     datasets: [{ data: data? [data.totalCashOnHand, data.totalBankBalance] : [0, 0], backgroundColor: ['#6366f1', '#06b6d4'], borderWidth: 0, hoverOffset: 8 }],
@@ -166,9 +163,36 @@ function DashboardContent() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div><h1 className="text-2xl font-bold tracking-tight">Financial Overview</h1><p className="text-sm text-muted-foreground">Active Period: <span className="font-semibold text-foreground">{data.selectedPeriodName}</span> • In IDR {loading && <span className="animate-pulse ml-2">• Loading...</span>}</p></div>
         <div className="flex items-center gap-2">
+          {/* FIX TAB: putih = tulisan hitam, dark pun tetap putih-hitam */}
           <div className="flex rounded-lg border p-1 bg-muted">
-            <Button size="sm" disabled={loading} onClick={() => handlePeriodSwitch('monthly')} className={cn("h-7 text-xs px-4 transition-all", periodType === 'monthly'? "bg-white text-foreground shadow-sm hover:bg-white" : "bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground")}>Monthly</Button>
-            <Button size="sm" disabled={loading} onClick={() => handlePeriodSwitch('annual')} className={cn("h-7 text-xs px-4 transition-all", periodType === 'annual'? "bg-white text-foreground shadow-sm hover:bg-white" : "bg-transparent text-muted-foreground shadow-none hover:bg-transparent hover:text-foreground")}>Annual</Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={loading}
+              onClick={() => handlePeriodSwitch('monthly')}
+              className={cn(
+                "h-7 text-xs px-4 transition-all border-0 shadow-none",
+                periodType === 'monthly'
+                 ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
+                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100"
+              )}
+            >
+              Monthly
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={loading}
+              onClick={() => handlePeriodSwitch('annual')}
+              className={cn(
+                "h-7 text-xs px-4 transition-all border-0 shadow-none",
+                periodType === 'annual'
+                 ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
+                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100"
+              )}
+            >
+              Annual
+            </Button>
           </div>
           <Button asChild size="sm" className="h-8 gap-1"><Link to="/journal-entry"><IconPlus size={14} /> New Entry</Link></Button>
           <Button asChild variant="outline" size="sm" className="h-8 gap-1"><Link to="/reports/income-statement"><IconReport size={14} /> Report</Link></Button>
