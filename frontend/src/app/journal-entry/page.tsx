@@ -171,7 +171,7 @@ function JournalEntryContent() {
       if (isEdit) {
         await apiClient.put(`/api/v1/journal-entry/edit/${entryIdParam}`, payload);
         setSuccessMessage(`Updated ${transactionNumber}`);
-        setTimeout(() => router.push('/reports/general-journal')), 1200);
+        setTimeout(() => router.push('/reports/general-journal'), 1200);
       } else {
         const res = await apiClient.post(`/api/v1/journal-entry/create`, payload);
         const postedTxNumber = res.data?.transactionNumber || transactionNumber;
