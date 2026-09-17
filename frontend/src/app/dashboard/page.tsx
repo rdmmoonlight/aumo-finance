@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
 import { Link } from 'next/navigation';
-import { useRouter, useSearchParams } from '@/hooks/useCompatRouter';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Chart as ChartJS, ArcElement, CategoryScale, LinearScale,
   BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler

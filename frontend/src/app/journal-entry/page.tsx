@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, Suspense } from 'react';
 import { Link } from 'next/navigation';
-import { useRouter, useSearchParams } from '@/hooks/useCompatRouter';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEdit, IconNotebook, IconArrowLeft, IconCircleCheck, IconAlertTriangle, IconLock, IconPlus, IconTrash, IconDeviceFloppy, IconLoader2, } from '@tabler/icons-react';
 import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
