@@ -1,213 +1,202 @@
 'use client'
 
-
-export const dynamic = 'force-dynamic'
-
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import {
-  IconDashboard,
-  IconNotebook,
-  IconChartLine,
-  IconRefresh,
-  IconTrendingUp,
-  IconTrendingDown,
-} from '@tabler/icons-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { useRouter } from 'next/navigation';
+import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 
-interface MarketItem {
-  symbol: string;
-  name: string;
-  price: string;
-  change: string;
-  isUp: boolean;
-}
+export default function LandingPage() {
+  const [showSignIn, setShowSignIn] = useState(false);
 
-export default function HomePage() {
   return (
-    <div className="min-h-screen w-full grid place-items-center p-4 bg-[#0B0F19] bg-[radial-gradient(circle_at_50%_30%,rgba(30,27,75,0.8),transparent_60%),radial-gradient(circle_at_80%_80%,rgba(76,29,149,0.25),transparent_50%),radial-gradient(circle_at_20%_20%,rgba(14,165,233,0.15),transparent_40%)]">
-      <Card className="w-full max-w-2xl bg-white/[0.06] backdrop-blur-xl border-white/10 shadow-2xl rounded-2xl">
-        <CardContent className="p-6 md:p-8">
-          <MarketWidget />
-          <div className="text-center mt-6">
-            <p className="text-sm leading-relaxed text-white/80 max-w-md mx-auto">
-              Integrated financial & accounting intelligence core. Manage
-              full-cycle general ledgers, trial balances, and operational
-              analytics with absolute precision.
-            </p>
-            <div className="flex justify-center gap-3 mt-6 flex-wrap">
-              <Button
-                asChild
-                className="rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 border border-indigo-300/20 shadow-lg hover:from-indigo-500 hover:to-violet-600"
-              >
-                <Link href="/dashboard" className="flex items-center gap-2">
-                  <IconDashboard size={16} /> Dashboard
-                </Link>
-              </Button>
-              <Button
-                asChild
-                variant="secondary"
-                className="rounded-xl bg-white/10 text-white hover:bg-white/15 border border-white/10"
-              >
-                <Link href="/journal-entry" className="flex items-center gap-2">
-                  <IconNotebook size={16} /> General Journal
-                </Link>
-              </Button>
+    <div className="min-h-screen w-full grid lg:grid-cols-[1.15fr_1fr] bg-background">
+      {/* LEFT PANEL (HITAM) */}
+      <div className="bg-foreground text-background flex flex-col justify-between p-8 lg:p-12">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-background text-foreground rounded flex items-center justify-center font-bold">
+            A
+          </div>
+          <span className="font-semibold tracking-tight">AUMO FINANCE</span>
+        </div>
+
+        <div className="mt-12 lg:mt-0">
+          <h1 className="text-4xl lg:text-6xl font-semibold leading-[0.95] tracking-[-0.03em] max-w-lg">
+            Operations,<br />neatly<br />organized.
+          </h1>
+          <p className="text-sm leading-6 opacity-60 max-w-sm mt-6">
+            Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan pameran.
+          </p>
+          <div className="mt-12 border-t border-background/10">
+            <div className="flex justify-between py-4 border-b border-background/10 text-xs">
+              <span className="opacity-40 font-mono">01</span>
+              <span>Revenues & Expenses</span>
+            </div>
+            <div className="flex justify-between py-4 border-b border-background/10 text-xs">
+              <span className="opacity-40 font-mono">02</span>
+              <span>Tracking</span>
+            </div>
+            <div className="flex justify-between py-4 border-b border-background/10 text-xs">
+              <span className="opacity-40 font-mono">03</span>
+              <span>Finance & Costings</span>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        <div className="hidden lg:flex justify-between text-xs font-mono opacity-40">
+          <span>© rdmmoonlight 2026</span>
+          <span>COOKIE AUTH • AUMO SYSTEM</span>
+        </div>
+      </div>
+
+      {/* RIGHT PANEL (SEBELAH KANAN) */}
+      <div className="bg-background text-foreground flex items-center justify-center p-6 lg:p-12">
+        {showSignIn ? (
+          <AuthForm />
+        ) : (
+          <div className="text-center max-w-sm w-full">
+            <h2 className="text-2xl font-semibold tracking-tight">Selamat Datang</h2>
+            <p className="text-sm text-muted-foreground mt-2 mb-6">
+              Silakan masuk ke akun workspace Aumo Finance kamu.
+            </p>
+            <Button
+              onClick={() => setShowSignIn(true)}
+              className="w-full h-11 rounded-xl text-sm font-medium"
+            >
+              Sign In
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function MarketWidget() {
-  const [marketData, setMarketData] = useState<MarketItem[]>([]);
-  const [loading, setLoading] = useState(true);
+function AuthForm() {
+  const router = useRouter();
+  const [email, setEmail] = useState('admin@aumo.com');
+  const [password, setPassword] = useState('Admin123!');
+  const [keepMe, setKeepMe] = useState(true);
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
 
-  const fetchMarketData = async () => {
+  useEffect(() => {
+    const saved = localStorage.getItem('aumo_saved_email');
+    if (saved) {
+      setEmail(saved);
+      setKeepMe(true);
+    }
+  }, []);
+
+  const onLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
-    try {
-      const res = await fetch('https://open.er-api.com/v6/latest/USD');
-      const fiatData = await res.json();
-      const items: MarketItem[] = [];
+    setErr('');
 
-      if (fiatData?.rates?.IDR) {
-        items.push({
-          symbol: 'USD/IDR',
-          name: 'Rupiah',
-          price: `Rp ${fiatData.rates.IDR.toLocaleString('id-ID', {
-            maximumFractionDigits: 0,
-          })}`,
-          change: '+0.15%',
-          isUp: true,
-        });
-      } else {
-        items.push({
-          symbol: 'USD/IDR',
-          name: 'Rupiah',
-          price: 'Rp 15.850',
-          change: '+0.15%',
-          isUp: true,
-        });
+    try {
+      const res = await apiClient.post(
+        '/api/v1/auth/login',
+        {
+          email,
+          password,
+          rememberMe: keepMe,
+          isMobileClient: false,
+        },
+        { withCredentials: true }
+      );
+
+      const isOk = res.status === 200 || res.data?.Success || res.data?.success || res.data?.isSuccess;
+
+      if (!isOk) {
+        throw new Error(res.data?.Message || res.data?.message || 'Login gagal');
       }
 
-      items.push({
-        symbol: 'IHSG',
-        name: 'Indeks Saham',
-        price: '7.320,50',
-        change: '+0.42%',
-        isUp: true,
-      });
-      items.push({
-        symbol: 'BI RATE',
-        name: 'Suku Bunga',
-        price: '6,00%',
-        change: 'Tetap',
-        isUp: true,
-      });
+      localStorage.setItem('isAuthenticated', 'true');
+      if (keepMe) {
+        localStorage.setItem('aumo_saved_email', email);
+      } else {
+        localStorage.removeItem('aumo_saved_email');
+      }
 
-      setMarketData(items);
-    } catch {
-      setMarketData([
-        {
-          symbol: 'USD/IDR',
-          name: 'Rupiah',
-          price: 'Rp 15.850',
-          change: '+0.15%',
-          isUp: true,
-        },
-        {
-          symbol: 'IHSG',
-          name: 'Indeks Saham',
-          price: '7.320,50',
-          change: '+0.42%',
-          isUp: true,
-        },
-        {
-          symbol: 'BI RATE',
-          name: 'Suku Bunga',
-          price: '6,00%',
-          change: 'Tetap',
-          isUp: true,
-        },
-      ]);
+      // Setelah login berhasil, arahkan ke Home Page terproteksi
+      router.push('/home');
+    } catch (e: any) {
+      console.error('[LOGIN FAIL]', e.response?.data || e.message);
+      const errorMessage = e.response?.data?.Message || e.response?.data?.message || e.response?.data?.title || 'Email atau password salah';
+      setErr(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchMarketData();
-  }, []);
-
   return (
-    <div className="rounded-xl bg-[#0F172A]/60 border border-white/5 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h6 className="text-sm font-bold flex items-center gap-2 text-amber-400">
-          <IconChartLine size={16} /> Market Indicators
-        </h6>
-        <div className="flex items-center gap-2">
-          {loading ? (
-            <Skeleton className="h-4 w-4 rounded-full" />
-          ) : (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-6 w-6 text-white/60 hover:text-white"
-              onClick={fetchMarketData}
-            >
-              <IconRefresh size={14} />
-            </Button>
-          )}
-          <Badge
-            variant="outline"
-            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]"
-          >
-            LIVE
-          </Badge>
+    <div className="w-full max-w-sm">
+      <div className="mb-8">
+        <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
+        <p className="text-sm text-muted-foreground mt-2">Masuk ke workspace kamu.</p>
+      </div>
+      <form onSubmit={onLogin} className="space-y-5">
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-xs tracking-widest uppercase text-muted-foreground">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="admin@aumo.com"
+            className="h-11 rounded-xl bg-card"
+            required
+          />
         </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {loading
-          ? [1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20 rounded-lg bg-white/5" />
-            ))
-          : marketData.map((item) => (
-              <div
-                key={item.symbol}
-                className="rounded-lg border border-white/10 bg-black/20 p-2.5 flex flex-col justify-between min-h-[76px]"
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-white">
-                    {item.symbol}
-                  </span>
-                  <Badge
-                    className={`text-[10px] ${
-                      item.isUp
-                        ? 'bg-emerald-500/15 text-emerald-400'
-                        : 'bg-red-500/15 text-red-400'
-                    } border-0 flex items-center px-1.5 py-0.5`}
-                  >
-                    {item.isUp ? (
-                      <IconTrendingUp size={10} className="mr-0.5" />
-                    ) : (
-                      <IconTrendingDown size={10} className="mr-0.5" />
-                    )}
-                    {item.change}
-                  </Badge>
-                </div>
-                <div className="text-sm font-semibold text-white mt-1">
-                  {item.price}
-                </div>
-                <div className="text-[11px] text-white/50">{item.name}</div>
-              </div>
-            ))}
-      </div>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <Label htmlFor="password" className="text-xs tracking-widest uppercase text-muted-foreground">Password</Label>
+            <button
+              type="button"
+              onClick={() => setShowPass(!showPass)}
+              className="text-xs uppercase tracking-wide text-muted-foreground hover:text-foreground"
+            >
+              {showPass ? 'Hide' : 'Show'}
+            </button>
+          </div>
+          <Input
+            id="password"
+            type={showPass ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            className="h-11 rounded-xl bg-card"
+            required
+          />
+        </div>
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="keepMe"
+              checked={keepMe}
+              onCheckedChange={(v) => setKeepMe(v as boolean)}
+              className="rounded border-foreground/20 data-[state=checked]:bg-foreground data-[state=checked]:text-background"
+            />
+            <Label htmlFor="keepMe" className="text-xs font-normal cursor-pointer leading-none">Keep me signed in</Label>
+          </div>
+          <a href="#" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4">Forgot?</a>
+        </div>
+        {err && (
+          <div className="bg-destructive/10 text-destructive border border-destructive/20 text-xs px-3.5 py-3 rounded-xl">
+            {err}
+          </div>
+        )}
+        <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl text-sm font-medium">
+          {loading ? 'Processing...' : 'Sign In'}
+        </Button>
+        <div className="flex justify-between pt-6 border-t text-xs font-mono text-muted-foreground">
+          <span>SECURE COOKIE</span>
+          <span>Keep your data safe</span>
+        </div>
+      </form>
     </div>
   );
 }

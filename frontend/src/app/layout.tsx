@@ -1,27 +1,27 @@
-import type { Metadata, Viewport } from 'next'
-import '@/styles/index.css'
+import type { Metadata, Viewport } from 'next';
+import '@/styles/index.css';
 
 export const metadata: Metadata = {
   title: {
     default: 'Aumo Finance',
     template: '%s | Aumo Finance',
   },
-  description: 'Aplikasi Manajemen Keuangan Aumo Finance',
+  description: 'Aplikasi Keuangan Aumo Finance',
   icons: {
-    icon: '/favicon.ico',
+    icon: '/public/favicon.ico',
   },
-}
+};
 
 export const viewport: Viewport = {
   themeColor: '#0f172a',
   width: 'device-width',
   initialScale: 1,
-}
+};
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
@@ -29,5 +29,5 @@ export default function RootLayout({
         {children}
       </body>
     </html>
-  )
+  );
 }
