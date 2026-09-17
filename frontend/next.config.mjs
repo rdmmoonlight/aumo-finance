@@ -2,11 +2,13 @@ import aumoConfig from './aumo.config.ts'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  // Aktifkan pemeriksaan TypeScript saat build
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
+  },
+  // Aktifkan pemeriksaan ESLint saat build
+  eslint: {
+    ignoreDuringBuilds: false,
   },
   env: {
     WEB_API_URL: aumoConfig.backendTarget,

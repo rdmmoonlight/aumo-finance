@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState, useMemo, useCallback, Suspense } from 'react';
-import { Link } from 'next/navigation';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Chart as ChartJS, ArcElement, CategoryScale, LinearScale,
   BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
+// @ts-ignore
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import {
   IconEyeOff, IconCalendar, IconAlertTriangle, IconPlus, IconReport, IconActivity,
@@ -39,9 +40,8 @@ export interface DashboardViewModel {
 
 function DashboardContent() {
   const router = useRouter();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
 
-  // Guarding window/SSR agar aman saat Next.js prerendering di Vercel
   const [periodType, setPeriodType] = useState<'monthly' | 'annual'>(() => {
     if (typeof window === 'undefined') return 'monthly';
     const p = searchParams.get('period');
@@ -59,21 +59,10 @@ function DashboardContent() {
       const { data: resData } = await apiClient.get(`/api/v1/dashboard?period=${type}`, { signal });
       if (resData?.hasPeriodSelected === false) {
         setData({ 
-          hasPeriodSelected: false, 
-          isPeriodClosed: false, 
-          totalAssets: 0, 
-          totalLiabilities: 0, 
-          totalEquity: 0, 
-          totalRevenue: 0, 
-          totalExpenses: 0, 
-          netIncome: 0, 
-          cashAccounts: [], 
-          totalCashOnHand: 0, 
-          bankAccounts: [], 
-          totalBankBalance: 0, 
-          expenseAccountsList: [], 
-          chartTrend: [], 
-          recentEntries: [] 
+          hasPeriodSelected: false, isPeriodClosed: false, totalAssets: 0, totalLiabilities: 0, 
+          totalEquity: 0, totalRevenue: 0, totalExpenses: 0, netIncome: 0, cashAccounts: [], 
+          totalCashOnHand: 0, bankAccounts: [], totalBankBalance: 0, expenseAccountsList: [], 
+          chartTrend: [], recentEntries: [] 
         });
         return;
       }
@@ -194,34 +183,8 @@ function DashboardContent() {
         </div>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border p-1 bg-muted">
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={loading}
-              onClick={() => handlePeriodSwitch('monthly')}
-              className={cn(
-                "h-7 text-xs px-4 transition-all border-0 shadow-none",
-                periodType === 'monthly'
-                  ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
-                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100"
-              )}
-            >
-              Monthly
-            </Button>
-            <Button
-              size="sm"
-              variant="ghost"
-              disabled={loading}
-              onClick={() => handlePeriodSwitch('annual')}
-              className={cn(
-                "h-7 text-xs px-4 transition-all border-0 shadow-none",
-                periodType === 'annual'
-                  ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
-                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100"
-              )}
-            >
-              Annual
-            </Button>
+            <Button size="sm" variant="ghost" disabled={loading} onClick={() => handlePeriodSwitch('monthly')} className={cn("h-7 text-xs px-4 transition-all border-0 shadow-none", periodType === 'monthly' ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black" : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100")}>Monthly</Button>
+            <Button size="sm" variant="ghost" disabled={loading} onClick={() => handlePeriodSwitch('annual')} className={cn("h-7 text-xs px-4 transition-all border-0 shadow-none", periodType === 'annual' ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black" : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100")}>Annual</Button>
           </div>
           <Button asChild size="sm" className="h-8 gap-1"><Link href="/journal-entry"><IconPlus size={14} /> New Entry</Link></Button>
           <Button asChild variant="outline" size="sm" className="h-8 gap-1"><Link href="/reports/income-statement"><IconReport size={14} /> Report</Link></Button>

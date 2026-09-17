@@ -1,7 +1,8 @@
 'use client'
 
+
 import { useState, useEffect, useMemo, Suspense } from 'react'
-import { Link } from 'next/navigation'
+import Link from 'next/link'
 import {
   IconSitemap,
   IconPlus,
@@ -85,7 +86,7 @@ const ACCOUNT_RANGES: Record<string, { start: number; end: number; label: string
 
 function ChartOfAccountsContent() {
   const router = useRouter()
-  const [searchParams] = useSearchParams()
+  const searchParams = useSearchParams()
   const highlightId = searchParams.get('highlight')
 
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([])

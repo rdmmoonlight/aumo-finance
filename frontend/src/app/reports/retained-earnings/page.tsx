@@ -1,7 +1,8 @@
 'use client'
 
+
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Link } from 'next/navigation';
+import Link from 'next/link';
 import apiClient from '@/lib/apiClient';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
