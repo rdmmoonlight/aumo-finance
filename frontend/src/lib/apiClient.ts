@@ -3,11 +3,14 @@ import axios from 'axios'
 // Tentukan Base URL secara aman antara Server & Client
 const getBaseURL = () => {
   if (typeof window !== 'undefined') {
-    // Di Browser/Client: Gunakan URL relatif agar kena proxy Next.js rewrites
-    return process.env.NEXT_PUBLIC_WEB_API_URL || '/api'
+    // Di Browser/Client: Gunakan string kosong jika dipanggil relatif, 
+    // atau hilangkan akhiran `/api` jika NEXT_PUBLIC_WEB_API_URL sudah diset
+    const clientUrl = process.env.NEXT_PUBLIC_WEB_API_URL || ''
+    return clientUrl.replace(/\/api\/?$/, '')
   }
-  // Di Server (Node.js/SSR): Gunakan URL backend absolut
-  return process.env.WEB_API_URL || process.env.NEXT_PUBLIC_WEB_API_URL || 'http://localhost:3000/api'
+  // Di Server (Node.js/SSR): Gunakan URL backend absolut tanpa akhiran `/api`
+  const serverUrl = process.env.WEB_API_URL || process.env.NEXT_PUBLIC_WEB_API_URL || 'http://localhost:3000'
+  return serverUrl.replace(/\/api\/?$/, '')
 }
 
 export const apiClient = axios.create({
@@ -50,8 +53,8 @@ apiClient.interceptors.response.use(
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
       const currentPath = window.location.pathname
-      if (!currentPath.startsWith('/auth') && !currentPath.startsWith('/login')) {
-        window.location.href = '/auth'
+      if (!currentPath.startsWith('/auth') && !currentPath.startsWith('/login') && currentPath !== '/') {
+        window.location.href = '/'
       }
     }
     return Promise.reject(err)
