@@ -1,16 +1,11 @@
+// next.config.mjs
 import aumoConfig from './aumo.config.ts'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // 1. Abaikan folder src/pages dari pencarian rute Pages Router
-  // Ini mencegah Next.js mengabaikan rute app/[[...slug]]/page.tsx
-  webpack: (config) => {
-    config.watchOptions = {
-      ...config.watchOptions,
-      ignored: ['**/src/pages/**'],
-    }
-    return config
-  },
+  // Hanya kenali file di app/ yang memiliki akhiran .tsx/.ts standar,
+  // sekaligus melewati otomatisasi Pages Router untuk folder src/pages/
+  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
 
   eslint: {
     ignoreDuringBuilds: true,
