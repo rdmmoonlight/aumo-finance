@@ -112,7 +112,7 @@ function DashboardContent() {
   const handlePeriodSwitch = (type: 'monthly' | 'annual') => {
     if (periodType === type || loading) return;
     setPeriodType(type);
-    router.push(`/dashboard?period=${type}` } as any);
+    router.push(`/dashboard?period=${type}`);
   };
 
   const healthScore = useMemo(() => {

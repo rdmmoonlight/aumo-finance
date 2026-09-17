@@ -115,7 +115,7 @@ function ChartOfAccountsContent() {
     } catch (err: unknown) {
       const apiErr = err as ApiErrorResponse
       if (apiErr.response?.status === 401) {
-        router.push('/auth' })
+        router.push('/auth'))
       }
       setErrorMessage(apiErr.response?.data?.message || 'Failed to load accounts')
     } finally {

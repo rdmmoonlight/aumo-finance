@@ -55,7 +55,7 @@ export default function AuthPage() {
         localStorage.removeItem('aumo_saved_email');
       }
 
-      router.push('/home' });
+      router.push('/home'));
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
       const errorMessage = e.response?.data?.Message || e.response?.data?.message || e.response?.data?.title || 'Email atau password salah';
