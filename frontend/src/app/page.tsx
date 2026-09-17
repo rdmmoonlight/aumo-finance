@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,7 +74,6 @@ export default function LandingPage() {
 }
 
 function AuthForm() {
-  const router = useRouter();
   const [email, setEmail] = useState('admin@aumo.com');
   const [password, setPassword] = useState('Admin123!');
   const [keepMe, setKeepMe] = useState(true);
@@ -121,8 +119,8 @@ function AuthForm() {
         localStorage.removeItem('aumo_saved_email');
       }
 
-      // Setelah login berhasil, arahkan ke Home Page terproteksi
-      router.push('/home');
+      // Gunakan Hard Redirect agar cookie session tersinkron penuh dengan browser & server
+      window.location.href = '/home';
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
       const errorMessage = e.response?.data?.Message || e.response?.data?.message || e.response?.data?.title || 'Email atau password salah';
@@ -199,4 +197,5 @@ function AuthForm() {
       </form>
     </div>
   );
-}
+      }
+          
