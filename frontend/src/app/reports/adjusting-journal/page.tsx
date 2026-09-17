@@ -1,7 +1,9 @@
 'use client'
 
+import Link from 'next/link'
+
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/apiClient';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -34,7 +36,7 @@ export default function AdjustingJournalPage() {
       if (data.success) { setSelectedPeriodName(data.selectedPeriodName || null); setIsPeriodClosed(data.isPeriodClosed || false); setEntries(data.entries || []); }
       else throw new Error(data.message);
     } catch (err: any) { if (err.response?.status === 401) router.push('/'); setErrorMessage(err.response?.data?.message || err.message); setEntries([]); } finally { setLoading(false); }
-  }, [navigate]);
+  }, [router]);
 
   useEffect(() => {
     fetchData();

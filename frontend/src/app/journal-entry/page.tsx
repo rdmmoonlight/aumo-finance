@@ -1,7 +1,8 @@
 'use client'
 
+
 import { useState, useEffect, useMemo, Suspense } from 'react';
-import { Link } from 'next/navigation';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { IconEdit, IconNotebook, IconArrowLeft, IconCircleCheck, IconAlertTriangle, IconLock, IconPlus, IconTrash, IconDeviceFloppy, IconLoader2, } from '@tabler/icons-react';
 import apiClient from '@/lib/apiClient';
@@ -24,7 +25,7 @@ const parseFormattedNumber = (val: string): number => { if(!val) return 0; const
 
 function JournalEntryContent() {
   const router = useRouter();
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const entryIdParam = searchParams.get('id');
   const isEdit = Boolean(entryIdParam);
 

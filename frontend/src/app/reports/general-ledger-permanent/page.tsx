@@ -1,7 +1,8 @@
 'use client'
 
+
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'next/navigation';
+import Link from 'next/link';
 import apiClient from '@/lib/apiClient';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
