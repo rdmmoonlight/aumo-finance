@@ -1,12 +1,8 @@
-'use client'
-
+// src/app/[[...slug]]/page.tsx
 export const dynamic = 'force-dynamic'
 
-import { RouterProvider } from '@tanstack/react-router'
-import { getRouter } from '@/router'
-
-const router = getRouter()
+import AppClient from './client-app'
 
 export default function NextCatchAllPage() {
-  return <RouterProvider router={router} />
+  return <AppClient />
 }
