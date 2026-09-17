@@ -21,9 +21,9 @@ interface UserProfile { userId?: string; email?: string; userName?: string; full
 
 const mainNavItems: MenuItem[] = [
   { label: 'Dashboard', path: '/dashboard', icon: IconLayoutDashboard },
+  { label: 'Periods', path: '/periods', icon: IconCalendarTime },
   { label: 'Chart of Accounts', path: '/chart-of-accounts', icon: IconListDetails },
   { label: 'Journal Entry', path: '/journal-entry', icon: IconFilePencil },
-  { label: 'Periods', path: '/periods', icon: IconCalendarTime },
   { label: 'AI Assistant', path: '/aiassistant', icon: IconRobot },
   { label: 'Guardian', path: '/guardian', icon: IconShieldCheck },
   { label: 'Tools', path: '/tools', icon: IconTools },
@@ -72,19 +72,26 @@ export default function Sidebar() {
 
   useEffect(() => {
     let m = true;
-    apiClient.get('/api/v1/auth/me').then(r => { if (m && r.data) setUser(r.data); }).finally(() => { if (m) setLoading(false); });
+    apiClient.get('/api/v1/auth/me')
+      .then(r => { if (m && r.data) setUser(r.data); })
+      .catch(() => {})
+      .finally(() => { if (m) setLoading(false); });
     return () => { m = false; };
   }, []);
 
   const handleLogout = async () => {
     try { 
       setLoggingOut(true); 
-      await apiClient.post('/api/v1/auth/logout'); 
+      // Memanggil endpoint ASP.NET Core logout untuk menghapus cookie AumoFinance.Session
+      await apiClient.post('/auth/logout'); 
+    } catch (err) {
+      console.error('Logout error:', err);
     } finally {
-      localStorage.removeItem('token'); 
-      sessionStorage.clear(); 
+      localStorage.removeItem('isAuthenticated');
       setLoggingOut(false); 
-      router.push('/auth');
+      // Mengarahkan kembali ke halaman login dan refresh state halaman
+      router.push('/auth/login');
+      router.refresh();
     }
   };
 
@@ -126,5 +133,5 @@ export default function Sidebar() {
       </div>
     </aside>
   );
-    }
-   
+  }
+  
