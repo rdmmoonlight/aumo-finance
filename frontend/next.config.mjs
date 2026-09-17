@@ -1,4 +1,3 @@
-// next.config.mjs
 import aumoConfig from './aumo.config.ts'
 
 /** @type {import('next').NextConfig} */
