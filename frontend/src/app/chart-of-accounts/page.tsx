@@ -42,7 +42,7 @@ import {
 } from '@/components/ui/select'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { cn } from '@/lib/utils'
-import { useRouter, useSearchParams } from '@/hooks/useCompatRouter'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export interface ChartOfAccount {
   id: number

@@ -2,6 +2,8 @@
 
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
+export { useRouter, usePathname, useSearchParams }
+
 export function useCompatRouter() {
   const router = useRouter()
   const pathname = usePathname()
