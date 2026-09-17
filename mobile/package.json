@@ -2,6 +2,10 @@
   "name": "aumo-mobile",
   "version": "2.0.0",
   "main": "expo-router/entry",
+  "overrides": {
+    "react": "18.2.0",
+    "react-native-gesture-handler": "~2.12.0"
+  },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
