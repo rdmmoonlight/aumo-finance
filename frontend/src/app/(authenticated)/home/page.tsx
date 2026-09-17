@@ -1,13 +1,8 @@
-'use client'
-
-import { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   IconDashboard,
   IconNotebook,
   IconChartLine,
-  IconRefresh,
   IconTrendingUp,
   IconTrendingDown,
 } from '@tabler/icons-react';
@@ -83,12 +78,67 @@ async function fetchMarketData(): Promise<MarketItem[]> {
   return items;
 }
 
-export default function HomePage() {
+export default async function HomePage() {
+  const marketData = await fetchMarketData();
+
   return (
     <div className="w-full grid place-items-center py-6">
       <Card className="w-full max-w-2xl bg-[#0F172A] border-white/10 shadow-2xl rounded-2xl text-white">
         <CardContent className="p-6 md:p-8">
-          <MarketWidget />
+          {/* Market Widget Component */}
+          <div className="rounded-xl bg-slate-900/80 border border-white/10 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <h6 className="text-sm font-bold flex items-center gap-2 text-amber-400">
+                <IconChartLine size={16} /> Market Indicators
+              </h6>
+              <Badge
+                variant="outline"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]"
+              >
+                LIVE
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              {marketData.length > 0 ? (
+                marketData.map((item) => (
+                  <div
+                    key={item.symbol}
+                    className="rounded-lg border border-white/10 bg-black/40 p-2.5 flex flex-col justify-between min-h-[76px]"
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-white">
+                        {item.symbol}
+                      </span>
+                      <Badge
+                        className={`text-[10px] ${
+                          item.isUp
+                            ? 'bg-emerald-500/15 text-emerald-400'
+                            : 'bg-red-500/15 text-red-400'
+                        } border-0 flex items-center px-1.5 py-0.5`}
+                      >
+                        {item.isUp ? (
+                          <IconTrendingUp size={10} className="mr-0.5" />
+                        ) : (
+                          <IconTrendingDown size={10} className="mr-0.5" />
+                        )}
+                        {item.change}
+                      </Badge>
+                    </div>
+                    <div className="text-sm font-semibold text-white mt-1">
+                      {item.price}
+                    </div>
+                    <div className="text-[11px] text-white/50">{item.name}</div>
+                  </div>
+                ))
+              ) : (
+                <div className="col-span-3 text-center text-xs text-white/40 py-4">
+                  Gagal memuat indikator pasar dari server.
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="text-center mt-6">
             <p className="text-sm leading-relaxed text-white/80 max-w-md mx-auto">
               Integrated financial & accounting intelligence core. Manage
@@ -119,100 +169,5 @@ export default function HomePage() {
       </Card>
     </div>
   );
-}
-
-function MarketWidget() {
-  const router = useRouter();
-  const [marketData, setMarketData] = useState<MarketItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isPending, startTransition] = useTransition();
-
-  const loadData = async () => {
-    setLoading(true);
-    const data = await fetchMarketData();
-    setMarketData(data);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const handleRefresh = () => {
-    startTransition(async () => {
-      await loadData();
-      router.refresh();
-    });
-  };
-
-  return (
-    <div className="rounded-xl bg-slate-900/80 border border-white/10 p-4">
-      <div className="flex items-center justify-between mb-3">
-        <h6 className="text-sm font-bold flex items-center gap-2 text-amber-400">
-          <IconChartLine size={16} /> Market Indicators
-        </h6>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-white/60 hover:text-white"
-            onClick={handleRefresh}
-            disabled={loading || isPending}
-          >
-            <IconRefresh size={14} className={loading || isPending ? 'animate-spin' : ''} />
-          </Button>
-          <Badge
-            variant="outline"
-            className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]"
-          >
-            LIVE
-          </Badge>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-        {loading ? (
-          <div className="col-span-3 text-center text-xs text-white/40 py-4">
-            Memuat indikator pasar dari server...
-          </div>
-        ) : marketData.length > 0 ? (
-          marketData.map((item) => (
-            <div
-              key={item.symbol}
-              className="rounded-lg border border-white/10 bg-black/40 p-2.5 flex flex-col justify-between min-h-[76px]"
-            >
-              <div className="flex justify-between items-center">
-                <span className="text-xs font-bold text-white">
-                  {item.symbol}
-                </span>
-                <Badge
-                  className={`text-[10px] ${
-                    item.isUp
-                      ? 'bg-emerald-500/15 text-emerald-400'
-                      : 'bg-red-500/15 text-red-400'
-                  } border-0 flex items-center px-1.5 py-0.5`}
-                >
-                  {item.isUp ? (
-                    <IconTrendingUp size={10} className="mr-0.5" />
-                  ) : (
-                    <IconTrendingDown size={10} className="mr-0.5" />
-                  )}
-                  {item.change}
-                </Badge>
-              </div>
-              <div className="text-sm font-semibold text-white mt-1">
-                {item.price}
-              </div>
-              <div className="text-[11px] text-white/50">{item.name}</div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-3 text-center text-xs text-white/40 py-4">
-            Gagal memuat indikator pasar dari server.
-          </div>
-        )}
-      </div>
-    </div>
-  );
-        }
-      
+                                           }
+                       
