@@ -1,4 +1,4 @@
-import GeneralJournalClient from './GeneralJournalClient';
+import GeneralJournalClient from './GeneralJournal';
 
 export const metadata = {
   title: 'General Journal | Aumo Finance',
