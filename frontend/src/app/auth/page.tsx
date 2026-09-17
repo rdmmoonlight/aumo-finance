@@ -31,8 +31,9 @@ export default function AuthPage() {
     setErr('');
 
     try {
+      // Panggil endpoint /v1/auth/login agar tidak terjadi /api/api/
       const res = await apiClient.post(
-        '/api/v1/auth/login',
+        '/v1/auth/login',
         {
           email,
           password,
@@ -55,6 +56,8 @@ export default function AuthPage() {
         localStorage.removeItem('aumo_saved_email');
       }
 
+      // Refresh cache router Next.js agar membaca cookie yang baru diset oleh Set-Cookie Response
+      router.refresh();
       router.push('/home');
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
@@ -132,4 +135,5 @@ export default function AuthPage() {
       </form>
     </div>
   );
-}
+      }
+                         
