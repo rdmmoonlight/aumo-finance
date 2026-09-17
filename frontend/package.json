@@ -9,10 +9,7 @@
     "dev": "tsr watch & next dev -p 3000",
     "generate-routes": "tsr generate",
     "build": "tsr generate && next build",
-    "start": "next start -p 3000",
-    "lint": "next lint",
-    "format": "prettier --write .",
-    "check": "prettier --check ."
+    "start": "next start -p 3000"
   },
   "dependencies": {
     "@hugeicons/core-free-icons": "^4.3.2",
@@ -40,15 +37,11 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.16",
-    "@tanstack/eslint-config": "latest",
     "@tanstack/router-cli": "^1.132.0",
     "@types/node": "^22.20.2",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "eslint": "^10.10.0",
-    "eslint-config-next": "^15.1.0",
     "postcss": "^8.5.0",
-    "prettier": "^3.8.1",
     "typescript": "^6.0.2"
   },
   "pnpm": {
