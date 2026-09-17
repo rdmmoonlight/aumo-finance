@@ -4,7 +4,11 @@ const path = require('path');
 const versionStatePath = path.join(__dirname, 'build-version.json');
 const versionState = JSON.parse(fs.readFileSync(versionStatePath, 'utf8'));
 const [year, month] = versionState.month.split('-').map(Number);
-const appVersion = `${year}.${month}.${versionState.build}`;
+// MANUAL_BUILD_VERSION di-set oleh workflow GitHub Actions manual
+// (.github/workflows/build-apk-manual.yml, format vYY.MM.urutan).
+// Jalur EAS Build (eas-build-pre-install) tidak mengeset env ini,
+// jadi skema versi EAS lama tetap tidak berubah.
+const appVersion = process.env.MANUAL_BUILD_VERSION || `${year}.${month}.${versionState.build}`;
 const sentryDsn =
   'https://f1723103ea0cc6b4a9f8c5d68b4988ee@o4512092717121536.ingest.us.sentry.io/4512092731670528';
 

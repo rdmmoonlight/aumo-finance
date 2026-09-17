@@ -1,0 +1,80 @@
+name: Build APK (Manual)
+
+on:
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: mobile
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Tentukan nomor versi (v<YY>.<MM>.<urutan build bulan ini>)
+        id: version
+        run: node scripts/bump-gh-build-number.js
+
+      - name: Expo prebuild (Android)
+        env:
+          MANUAL_BUILD_VERSION: ${{ steps.version.outputs.version }}
+        run: npx expo prebuild --platform android --no-install
+
+      - name: Build APK release (Gradle)
+        env:
+          MANUAL_BUILD_VERSION: ${{ steps.version.outputs.version }}
+        working-directory: mobile/android
+        run: |
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+
+      - name: Rename APK sesuai versi
+        run: |
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             "dist/aumo-${{ steps.version.outputs.version }}.apk"
+
+      - name: Upload APK sebagai artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aumo-${{ steps.version.outputs.version }}
+          path: mobile/dist/aumo-${{ steps.version.outputs.version }}.apk
+
+      - name: Commit balik counter versi
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add build-version-gh.json
+          if ! git diff --cached --quiet; then
+            git commit -m "chore: bump GH Actions build counter to ${{ steps.version.outputs.version }}"
+            git push origin HEAD:main
+          else
+            echo "Tidak ada perubahan pada build-version-gh.json"
+          fi
