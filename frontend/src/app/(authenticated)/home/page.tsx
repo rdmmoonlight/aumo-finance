@@ -85,8 +85,8 @@ async function fetchMarketData(): Promise<MarketItem[]> {
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen w-full grid place-items-center p-4 bg-[#0B0F19] bg-[radial-gradient(circle_at_50%_30%,rgba(30,27,75,0.8),transparent_60%),radial-gradient(circle_at_80%_80%,rgba(76,29,149,0.25),transparent_50%),radial-gradient(circle_at_20%_20%,rgba(14,165,233,0.15),transparent_40%)]">
-      <Card className="w-full max-w-2xl bg-white/[0.06] backdrop-blur-xl border-white/10 shadow-2xl rounded-2xl">
+    <div className="w-full grid place-items-center py-6">
+      <Card className="w-full max-w-2xl bg-[#0F172A] border-white/10 shadow-2xl rounded-2xl text-white">
         <CardContent className="p-6 md:p-8">
           <MarketWidget />
           <div className="text-center mt-6">
@@ -98,7 +98,7 @@ export default function HomePage() {
             <div className="flex justify-center gap-3 mt-6 flex-wrap">
               <Button
                 asChild
-                className="rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 border border-indigo-300/20 shadow-lg hover:from-indigo-500 hover:to-violet-600"
+                className="rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 border border-indigo-300/20 shadow-lg hover:from-indigo-500 hover:to-violet-600 text-white"
               >
                 <Link href="/dashboard" className="flex items-center gap-2">
                   <IconDashboard size={16} /> Dashboard
@@ -110,7 +110,7 @@ export default function HomePage() {
                 className="rounded-xl bg-white/10 text-white hover:bg-white/15 border border-white/10"
               >
                 <Link href="/journal-entry" className="flex items-center gap-2">
-                  <IconNotebook size={16} /> General Journal
+                  <IconNotebook size={16} /> Journal Entry
                 </Link>
               </Button>
             </div>
@@ -146,7 +146,7 @@ function MarketWidget() {
   };
 
   return (
-    <div className="rounded-xl bg-[#0F172A]/60 border border-white/5 p-4">
+    <div className="rounded-xl bg-slate-900/80 border border-white/10 p-4">
       <div className="flex items-center justify-between mb-3">
         <h6 className="text-sm font-bold flex items-center gap-2 text-amber-400">
           <IconChartLine size={16} /> Market Indicators
@@ -179,7 +179,7 @@ function MarketWidget() {
           marketData.map((item) => (
             <div
               key={item.symbol}
-              className="rounded-lg border border-white/10 bg-black/20 p-2.5 flex flex-col justify-between min-h-[76px]"
+              className="rounded-lg border border-white/10 bg-black/40 p-2.5 flex flex-col justify-between min-h-[76px]"
             >
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-white">
@@ -214,4 +214,5 @@ function MarketWidget() {
       </div>
     </div>
   );
-}
+        }
+      
