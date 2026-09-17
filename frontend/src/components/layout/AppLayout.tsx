@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Outlet, useLocation, useNavigate, Link } from '@tanstack/react-router';
+import { Outlet, usePathname, useRouter, Link } from 'next/navigation';
 import {
   IconLayoutDashboard, IconListDetails, IconFilePencil, IconCalendarTime,
   IconRobot, IconShieldCheck, IconTools, IconSettings, IconBook, IconFileCheck,
@@ -45,7 +45,7 @@ const reportNavItems: MenuItem[] = [
 
 function NavItemLink({ item }: { item: MenuItem }) {
   return (
-    <Link to={item.path} className="block">
+    <Link href={item.path} className="block">
       {({ isActive }: { isActive: boolean }) => (
         <div className={cn(
           'group flex items-center gap-2.5 rounded-lg px-3 py-2 text- leading-none transition-colors',
@@ -60,7 +60,7 @@ function NavItemLink({ item }: { item: MenuItem }) {
 }
 
 export function Sidebar() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -71,7 +71,7 @@ export function Sidebar() {
   }, []);
   const handleLogout = async () => {
     try { setLoggingOut(true); await apiClient.post('/api/v1/auth/logout'); } finally {
-      localStorage.removeItem('token'); sessionStorage.clear(); setLoggingOut(false); navigate({ to: '/auth' });
+      localStorage.removeItem('token'); sessionStorage.clear(); setLoggingOut(false); router.push('/auth' });
     }
   };
   return (
@@ -115,7 +115,7 @@ export function Sidebar() {
 }
 
 export function Topbar() {
-  const location = useLocation();
+  const location = usePathname();
   const pathSegments = location.pathname.split('/').filter(Boolean);
   const [verse, setVerse] = useState<{ textEn: string; textAr: string; surahName: string; surahNo: number; ayahNo: number; } | null>(null);
   const [loadingVerse, setLoadingVerse] = useState(true);
@@ -149,14 +149,14 @@ export function Topbar() {
       <style>{`@keyframes quran-marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}.animate-quran-marquee{animation:quran-marquee 24s linear infinite}`}</style>
       <Breadcrumb className="shrink-0">
         <BreadcrumbList>
-          <BreadcrumbItem><BreadcrumbLink asChild><Link to="/" className="text-zinc-500 hover:text-white text-">Home</Link></BreadcrumbLink></BreadcrumbItem>
+          <BreadcrumbItem><BreadcrumbLink asChild><Link href="/" className="text-zinc-500 hover:text-white text-">Home</Link></BreadcrumbLink></BreadcrumbItem>
           {pathSegments.map((seg, i) => {
             const url = `/${pathSegments.slice(0, i + 1).join('/')}`;
             const isLast = i === pathSegments.length - 1;
             return (
               <div key={url} className="contents">
                 <BreadcrumbSeparator className="text-white/20"><IconChevronRight size={14} /></BreadcrumbSeparator>
-                <BreadcrumbItem>{isLast? <BreadcrumbPage className="capitalize text-white text-">{seg.replace(/-/g, ' ')}</BreadcrumbPage> : <BreadcrumbLink asChild><Link to={url} className="capitalize text-zinc-500 hover:text-white text-">{seg.replace(/-/g, ' ')}</Link></BreadcrumbLink>}</BreadcrumbItem>
+                <BreadcrumbItem>{isLast? <BreadcrumbPage className="capitalize text-white text-">{seg.replace(/-/g, ' ')}</BreadcrumbPage> : <BreadcrumbLink asChild><Link href={url} className="capitalize text-zinc-500 hover:text-white text-">{seg.replace(/-/g, ' ')}</Link></BreadcrumbLink>}</BreadcrumbItem>
               </div>
             );
           })}

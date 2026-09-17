@@ -1,4 +1,4 @@
-import { useNavigate as useTanNavigate } from '@tanstack/react-router'
+import { useRouter as useTanNavigate } from 'next/navigation'
 
 export function useSearchParams() {
   const navigate = useTanNavigate()
@@ -10,12 +10,12 @@ export function useSearchParams() {
     else nextParams = new URLSearchParams(next as Record<string, string>)
     const obj = Object.fromEntries(nextParams.entries())
     // @ts-ignore
-    navigate({ to: '.', search: obj })
+    router.push('.', search: obj })
   }
   return [searchParams, setSearchParams] as const
 }
 
-export function useNavigate() {
+export function useRouter() {
   const tanNavigate = useTanNavigate()
   return (to: any) => {
     if (typeof to === 'string') return tanNavigate({ to } as any)
