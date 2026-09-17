@@ -12,6 +12,7 @@ module.exports = {
   expo: {
     name: 'Aumo',
     slug: 'reactnative',
+    scheme: 'aumomobile',
     version: appVersion,
     orientation: 'portrait',
     icon: './assets/icon.png',
