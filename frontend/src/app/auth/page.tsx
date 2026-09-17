@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import apiClient from '@/lib/apiClient';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function AuthPage() {
-  const router = useRouter();
   const [email, setEmail] = useState('admin@aumo.com');
   const [password, setPassword] = useState('Admin123!');
   const [keepMe, setKeepMe] = useState(true);
@@ -31,9 +29,9 @@ export default function AuthPage() {
     setErr('');
 
     try {
-      // Panggil endpoint /v1/auth/login agar tidak terjadi /api/api/
+      // 1. Endpoint ditulis lengkap sesuai aturan strict apiClient
       const res = await apiClient.post(
-        '/v1/auth/login',
+        '/api/v1/auth/login',
         {
           email,
           password,
@@ -56,9 +54,8 @@ export default function AuthPage() {
         localStorage.removeItem('aumo_saved_email');
       }
 
-      // Refresh cache router Next.js agar membaca cookie yang baru diset oleh Set-Cookie Response
-      router.refresh();
-      router.push('/home');
+      // 2. Hard Redirect untuk memastikan cookie terikat mutlak di request baru
+      window.location.href = '/home';
     } catch (e: any) {
       console.error('[LOGIN FAIL]', e.response?.data || e.message);
       const errorMessage = e.response?.data?.Message || e.response?.data?.message || e.response?.data?.title || 'Email atau password salah';
@@ -135,5 +132,4 @@ export default function AuthPage() {
       </form>
     </div>
   );
-      }
-                         
+}
