@@ -1,11 +1,12 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { RouterProvider } from '@tanstack/react-router'
-import { getRouter } from '@/router' // Fungsi getRouter() kamu
+import { getRouter } from '@/router'
 
 const router = getRouter()
 
 export default function NextCatchAllPage() {
-  // TanStack Router mengambil alih seluruh render tampilan di sini
   return <RouterProvider router={router} />
 }
