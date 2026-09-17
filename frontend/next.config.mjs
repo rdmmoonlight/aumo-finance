@@ -3,9 +3,8 @@ import aumoConfig from './aumo.config.ts'
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Hanya kenali file di app/ yang memiliki akhiran .tsx/.ts standar,
-  // sekaligus melewati otomatisasi Pages Router untuk folder src/pages/
-  pageExtensions: ['tsx', 'ts', 'jsx', 'js'],
+  // Hanya proses file yang secara eksplisit berada di folder app
+  pageExtensions: ['app.tsx', 'app.ts', 'app.jsx', 'app.js'],
 
   eslint: {
     ignoreDuringBuilds: true,
