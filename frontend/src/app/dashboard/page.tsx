@@ -7,6 +7,7 @@ import {
   Chart as ChartJS, ArcElement, CategoryScale, LinearScale,
   BarElement, PointElement, LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
+import { Chart } from 'react-chartjs-2';
 import { Doughnut, Bar, Line } from 'react-chartjs-2';
 import {
   IconEyeOff, IconCalendar, IconAlertTriangle, IconPlus, IconReport, IconActivity,
