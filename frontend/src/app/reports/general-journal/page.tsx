@@ -80,7 +80,7 @@ export default function GeneralJournalPage() {
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        router.push('/'));
+        router.push('/');
       }
       setErrorMessage(err.response?.data?.message || err.message);
     } finally {

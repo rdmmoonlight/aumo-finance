@@ -1,24 +1,18 @@
-import { useRouter as useTanNavigate } from 'next/navigation'
+'use client'
 
-export function useSearchParams() {
-  const navigate = useTanNavigate()
-  const searchParams = new URLSearchParams(window.location.search)
-  const setSearchParams = (next: any) => {
-    let nextParams: URLSearchParams
-    if (next instanceof URLSearchParams) nextParams = next
-    else if (typeof next === 'function') nextParams = next(searchParams)
-    else nextParams = new URLSearchParams(next as Record<string, string>)
-    const obj = Object.fromEntries(nextParams.entries())
-    // @ts-ignore
-    router.push('.', search: obj })
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+
+export function useCompatRouter() {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const setSearchParams = (next: Record<string, string> | URLSearchParams) => {
+    const params = new URLSearchParams(next as any)
+    router.push(`${pathname}?${params.toString()}`)
   }
+
   return [searchParams, setSearchParams] as const
 }
 
-export function useRouter() {
-  const tanNavigate = useTanNavigate()
-  return (to: any) => {
-    if (typeof to === 'string') return tanNavigate({ to } as any)
-    return tanNavigate(to as any)
-  }
-}
+export default useCompatRouter
