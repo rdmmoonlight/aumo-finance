@@ -32,7 +32,6 @@ import { Route as AuthenticatedReportsPostClosingTrialBalanceRouteImport } from 
 import { Route as AuthenticatedReportsRetainedEarningsRouteImport } from './routes/_authenticated/reports/retained-earnings'
 import { Route as AuthenticatedReportsStatementOfCashFlowRouteImport } from './routes/_authenticated/reports/statement-of-cash-flow'
 import { Route as AuthenticatedReportsStatementOfFinancialPositionRouteImport } from './routes/_authenticated/reports/statement-of-financial-position'
-import { Route as AuthenticatedReportsTrialBalanceRouteImport } from './routes/_authenticated/reports/trial-balance'
 import { Route as AuthenticatedReportsUnadjustedTrialBalanceRouteImport } from './routes/_authenticated/reports/unadjusted-trial-balance'
 import { Route as AuthenticatedReportsWorksheetRouteImport } from './routes/_authenticated/reports/worksheet'
 
@@ -164,12 +163,6 @@ const AuthenticatedReportsStatementOfFinancialPositionRoute =
     path: '/reports/statement-of-financial-position',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
-const AuthenticatedReportsTrialBalanceRoute =
-  AuthenticatedReportsTrialBalanceRouteImport.update({
-    id: '/reports/trial-balance',
-    path: '/reports/trial-balance',
-    getParentRoute: () => AuthenticatedRoute,
-  } as any)
 const AuthenticatedReportsUnadjustedTrialBalanceRoute =
   AuthenticatedReportsUnadjustedTrialBalanceRouteImport.update({
     id: '/reports/unadjusted-trial-balance',
@@ -206,7 +199,6 @@ export interface FileRoutesByFullPath {
   '/reports/retained-earnings': typeof AuthenticatedReportsRetainedEarningsRoute
   '/reports/statement-of-cash-flow': typeof AuthenticatedReportsStatementOfCashFlowRoute
   '/reports/statement-of-financial-position': typeof AuthenticatedReportsStatementOfFinancialPositionRoute
-  '/reports/trial-balance': typeof AuthenticatedReportsTrialBalanceRoute
   '/reports/unadjusted-trial-balance': typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
   '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
 }
@@ -233,7 +225,6 @@ export interface FileRoutesByTo {
   '/reports/retained-earnings': typeof AuthenticatedReportsRetainedEarningsRoute
   '/reports/statement-of-cash-flow': typeof AuthenticatedReportsStatementOfCashFlowRoute
   '/reports/statement-of-financial-position': typeof AuthenticatedReportsStatementOfFinancialPositionRoute
-  '/reports/trial-balance': typeof AuthenticatedReportsTrialBalanceRoute
   '/reports/unadjusted-trial-balance': typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
   '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
 }
@@ -262,7 +253,6 @@ export interface FileRoutesById {
   '/_authenticated/reports/retained-earnings': typeof AuthenticatedReportsRetainedEarningsRoute
   '/_authenticated/reports/statement-of-cash-flow': typeof AuthenticatedReportsStatementOfCashFlowRoute
   '/_authenticated/reports/statement-of-financial-position': typeof AuthenticatedReportsStatementOfFinancialPositionRoute
-  '/_authenticated/reports/trial-balance': typeof AuthenticatedReportsTrialBalanceRoute
   '/_authenticated/reports/unadjusted-trial-balance': typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
   '/_authenticated/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
 }
@@ -291,7 +281,6 @@ export interface FileRouteTypes {
     | '/reports/retained-earnings'
     | '/reports/statement-of-cash-flow'
     | '/reports/statement-of-financial-position'
-    | '/reports/trial-balance'
     | '/reports/unadjusted-trial-balance'
     | '/reports/worksheet'
   fileRoutesByTo: FileRoutesByTo
@@ -318,7 +307,6 @@ export interface FileRouteTypes {
     | '/reports/retained-earnings'
     | '/reports/statement-of-cash-flow'
     | '/reports/statement-of-financial-position'
-    | '/reports/trial-balance'
     | '/reports/unadjusted-trial-balance'
     | '/reports/worksheet'
   id:
@@ -346,7 +334,6 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/retained-earnings'
     | '/_authenticated/reports/statement-of-cash-flow'
     | '/_authenticated/reports/statement-of-financial-position'
-    | '/_authenticated/reports/trial-balance'
     | '/_authenticated/reports/unadjusted-trial-balance'
     | '/_authenticated/reports/worksheet'
   fileRoutesById: FileRoutesById
@@ -519,13 +506,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsStatementOfFinancialPositionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
-    '/_authenticated/reports/trial-balance': {
-      id: '/_authenticated/reports/trial-balance'
-      path: '/reports/trial-balance'
-      fullPath: '/reports/trial-balance'
-      preLoaderRoute: typeof AuthenticatedReportsTrialBalanceRouteImport
-      parentRoute: typeof AuthenticatedRoute
-    }
     '/_authenticated/reports/unadjusted-trial-balance': {
       id: '/_authenticated/reports/unadjusted-trial-balance'
       path: '/reports/unadjusted-trial-balance'
@@ -565,7 +545,6 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReportsRetainedEarningsRoute: typeof AuthenticatedReportsRetainedEarningsRoute
   AuthenticatedReportsStatementOfCashFlowRoute: typeof AuthenticatedReportsStatementOfCashFlowRoute
   AuthenticatedReportsStatementOfFinancialPositionRoute: typeof AuthenticatedReportsStatementOfFinancialPositionRoute
-  AuthenticatedReportsTrialBalanceRoute: typeof AuthenticatedReportsTrialBalanceRoute
   AuthenticatedReportsUnadjustedTrialBalanceRoute: typeof AuthenticatedReportsUnadjustedTrialBalanceRoute
   AuthenticatedReportsWorksheetRoute: typeof AuthenticatedReportsWorksheetRoute
 }
@@ -603,7 +582,6 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedReportsStatementOfCashFlowRoute,
   AuthenticatedReportsStatementOfFinancialPositionRoute:
     AuthenticatedReportsStatementOfFinancialPositionRoute,
-  AuthenticatedReportsTrialBalanceRoute: AuthenticatedReportsTrialBalanceRoute,
   AuthenticatedReportsUnadjustedTrialBalanceRoute:
     AuthenticatedReportsUnadjustedTrialBalanceRoute,
   AuthenticatedReportsWorksheetRoute: AuthenticatedReportsWorksheetRoute,
