@@ -1,15 +1,19 @@
 import axios from 'axios'
 
+const baseURL = 
+  process.env.WEB_API_URL || 
+  process.env.NEXT_PUBLIC_WEB_API_URL || 
+  '/api'
+
 export const apiClient = axios.create({
-  baseURL: import.meta.env.WEB_API_URL,
-  withCredentials: true, // WAJIB agar Cookie SameSite/Cors dikirim oleh browser
+  baseURL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
   },
 })
 
-// Interceptor request (Mencegah penggabungan baseURL jika URL bersifat eksternal)
 apiClient.interceptors.request.use((config) => {
   if (config.url?.startsWith('http')) {
     config.baseURL = ''
@@ -17,14 +21,11 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
-// Interceptor response (Redirect ke /auth kalau 401 Unauthorized)
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
       const currentPath = window.location.pathname
-
-      // Mencegah infinite loop redirect jika sudah berada di halaman auth
       if (!currentPath.startsWith('/auth') && !currentPath.startsWith('/login')) {
         window.location.href = '/auth'
       }
