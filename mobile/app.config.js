@@ -60,7 +60,7 @@ module.exports = {
     updates: {
       url: 'https://u.expo.dev/d6be87c0-882a-4c24-aa65-db6806b9f59a',
       enabled: true,
-      checkAutomatically: 'ON_LOAD',
+      checkAutomatically: 'NEVER',
       fallbackToCacheTimeout: 0,
     },
   },
