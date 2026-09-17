@@ -1,16 +1,13 @@
 import axios from 'axios'
 
-// Tentukan Base URL secara aman antara Server & Client
+// Strict Base URL: Mengembalikan URL murni sesuai env
 const getBaseURL = () => {
   if (typeof window !== 'undefined') {
-    // Di Browser/Client: Gunakan string kosong jika dipanggil relatif, 
-    // atau hilangkan akhiran `/api` jika NEXT_PUBLIC_WEB_API_URL sudah diset
-    const clientUrl = process.env.NEXT_PUBLIC_WEB_API_URL || ''
-    return clientUrl.replace(/\/api\/?$/, '')
+    // Di Client: Gunakan env client atau fallback string kosong (relatif)
+    return process.env.NEXT_PUBLIC_WEB_API_URL || ''
   }
-  // Di Server (Node.js/SSR): Gunakan URL backend absolut tanpa akhiran `/api`
-  const serverUrl = process.env.WEB_API_URL || process.env.NEXT_PUBLIC_WEB_API_URL || 'http://localhost:3000'
-  return serverUrl.replace(/\/api\/?$/, '')
+  // Di Server (SSR): Gunakan env server atau fallback default
+  return process.env.WEB_API_URL || process.env.NEXT_PUBLIC_WEB_API_URL || 'http://localhost:3000'
 }
 
 export const apiClient = axios.create({
@@ -22,14 +19,8 @@ export const apiClient = axios.create({
   },
 })
 
-// Request Interceptor: Oper Cookie dari Next.js Server ke Backend jika dipanggil dari SSR
+// Request Interceptor: Murni oper Cookie saat SSR
 apiClient.interceptors.request.use(async (config) => {
-  // Mencegah penumpukan baseURL jika URL eksternal
-  if (config.url?.startsWith('http')) {
-    config.baseURL = ''
-  }
-
-  // Jika eksekusi terjadi di Sisi Server (SSR Node.js)
   if (typeof window === 'undefined') {
     try {
       const { cookies } = await import('next/headers')
@@ -47,13 +38,14 @@ apiClient.interceptors.request.use(async (config) => {
   return config
 })
 
-// Response Interceptor: Menangani Unauthenticated Request
+// Response Interceptor: Menangani Unauthenticated Request (401)
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== 'undefined') {
       const currentPath = window.location.pathname
-      if (!currentPath.startsWith('/auth') && !currentPath.startsWith('/login') && currentPath !== '/') {
+      if (currentPath !== '/') {
+        localStorage.removeItem('isAuthenticated')
         window.location.href = '/'
       }
     }
@@ -62,3 +54,4 @@ apiClient.interceptors.response.use(
 )
 
 export default apiClient
+      
