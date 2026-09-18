@@ -38,7 +38,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Tentukan nomor versi (v<YY>.<MM>.<urutan build bulan ini>)
+      - name: Tentukan nomor versi (YY.MM.urutan build bulan ini)
         id: version
         run: node scripts/bump-gh-build-number.js
 
@@ -59,13 +59,23 @@ jobs:
         run: |
           mkdir -p dist
           cp android/app/build/outputs/apk/release/app-release.apk \
-             "dist/aumo-${{ steps.version.outputs.version }}.apk"
+             "dist/Aumo_${{ steps.version.outputs.tag }}.apk"
 
-      - name: Upload APK sebagai artifact
+      - name: Upload APK sebagai artifact run
         uses: actions/upload-artifact@v4
         with:
-          name: aumo-${{ steps.version.outputs.version }}
-          path: mobile/dist/aumo-${{ steps.version.outputs.version }}.apk
+          name: Aumo_${{ steps.version.outputs.tag }}
+          path: mobile/dist/Aumo_${{ steps.version.outputs.tag }}.apk
+
+      - name: Buat GitHub Release + upload APK (sumber deteksi fitur auto-update)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            "dist/Aumo_${{ steps.version.outputs.tag }}.apk" \
+            --repo "${{ github.repository }}" \
+            --title "Aumo ${{ steps.version.outputs.tag }}" \
+            --notes "Build manual dari GitHub Actions (workflow_dispatch) - ${{ steps.version.outputs.tag }}."
 
       - name: Commit balik counter versi
         run: |
