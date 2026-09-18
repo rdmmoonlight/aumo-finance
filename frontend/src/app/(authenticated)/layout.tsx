@@ -11,11 +11,11 @@ export default async function AuthenticatedLayout({
   const [user, verse] = await Promise.all([getAuthUser(), getQuranVerse()]);
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f5f5f5]">
+    <div className="flex min-h-screen w-full bg-background bg-[#0E0E0E]">
       <Sidebar user={user} />
       <div className="flex flex-1 flex-col min-w-0">
         <Topbar verse={verse} />
-        <main className="flex-1 p-6 lg:p-8">
+        <main className="flex-1 p-6 lg:p-8 bg-[#0E0E0E]">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>
