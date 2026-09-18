@@ -1,4 +1,4 @@
-name: C# Code Quality & Formatting Check
+name: C# & TypeScript Quality, Formatting & Test Workflow
 
 on:
   push:
@@ -9,35 +9,70 @@ permissions:
   contents: write
 
 jobs:
-  lint-and-analyze:
+  lint-analyze-test:
     runs-on: ubuntu-latest
 
     steps:
+      # 0. JEDA / SLEEP 60 DETIK
+      - name: Sleep for 60 seconds
+        run: sleep 60
+
+      # 1. CHECKOUT REPOSITORY
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
+      # 2. SETUP LINGKUNGAN (.NET & NODE.JS)
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore Dependencies
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm' # Mengaktifkan caching npm agar build lebih cepat
+
+      # 3. RESTORE & INSTALL DEPENDENCIES
+      - name: Restore .NET Dependencies
         run: dotnet restore
 
-      # 1. LINT (Auto-Format)
-      - name: Auto-Format Code
+      - name: Install Node.js Dependencies
+        run: npm ci
+
+      # 4. FORMATTING & LINTING (C# & TYPESCRIPT)
+      - name: Auto-Format C# Code
         run: dotnet format
 
-      - name: Commit Formatted Changes
+      - name: Run Prettier (TypeScript / Frontend)
+        run: npx prettier --write .
+
+      - name: Commit Formatted Changes (C# & TS)
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "style: auto-correct code formatting via dotnet format [skip ci]"
+          commit_message: "style: auto-correct code formatting via dotnet format & prettier [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
-      # 2. TYPECHECK & LINT (Build Analysis)
+      # 5. TYPECHECK & BUILD (.NET)
       - name: Build & Typecheck (.NET)
         run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true
+
+      # 6. TESTING WITH PLAYWRIGHT (TYPESCRIPT)
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      - name: Run Playwright Tests
+        run: npx playwright test
+
+      # 7. UPLOAD PLAYWRIGHT REPORT (OPSIONAL - JIKA TES GAGAL/SELESAI)
+      - name: Upload Playwright Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
