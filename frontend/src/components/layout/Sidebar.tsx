@@ -172,12 +172,16 @@ function NavItemLink({
         stroke={isActive ? 2 : 1.8}
         className={cn(
           "shrink-0 transition-colors",
-          isActive ? "text-zinc-900" : "text-zinc-500 group-hover:text-zinc-200",
+          isActive
+            ? "text-zinc-900"
+            : "text-zinc-500 group-hover:text-zinc-200",
         )}
       />
       {!isCollapsed && (
         <>
-          <span className="flex-1 truncate tracking-[-0.01em]">{item.label}</span>
+          <span className="flex-1 truncate tracking-[-0.01em]">
+            {item.label}
+          </span>
           {item.badge && (
             <span className="ml-auto flex items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
               <IconSparkles size={10} />
@@ -299,7 +303,8 @@ export default function Sidebar({ user }: SidebarProps) {
         <div
           className={cn(
             "group relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-1 transition-all",
-            isCollapsed && "border-transparent bg-transparent from-transparent to-transparent p-0",
+            isCollapsed &&
+              "border-transparent bg-transparent from-transparent to-transparent p-0",
           )}
         >
           <div
