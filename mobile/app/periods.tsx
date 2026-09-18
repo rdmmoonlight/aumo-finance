@@ -1,9 +1,16 @@
 import React from "react";
-import { View, StyleSheet, FlatList } from "react-native";
-import { Text, useTheme } from "react-native-paper";
+import { View, StyleSheet } from "react-native";
+import { FlatList } from "react-native";
+import { Text, Button, useTheme } from "react-native-paper";
 import { Stack } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
 
-import { usePeriods, Period } from "../src/api/periods";
+import {
+  usePeriods,
+  useSelectPeriod,
+  useClosePeriod,
+  Period,
+} from "../src/api/periods";
 import { AppCard, AppBadge, AppSkeleton } from "../src/components/ui";
 
 function formatDate(iso: string) {
@@ -20,8 +27,16 @@ function formatDate(iso: string) {
 
 export default function PeriodsScreen() {
   const theme = useTheme();
+  // Query dimatikan saat layar tidak fokus - mencegah FlatList di-render
+  // ulang dengan props yang belum lengkap akibat notifikasi background
+  // refetch pada layar yang sedang di-freeze oleh react-native-screens.
+  // (fix untuk Sentry REACT-NATIVE-4: "Cannot read property 'getItem' of undefined")
+  const isFocused = useIsFocused();
   const { data, isLoading, isError, error, refetch, isRefetching } =
-    usePeriods();
+    usePeriods({ enabled: isFocused });
+
+  const selectPeriod = useSelectPeriod();
+  const closePeriod = useClosePeriod();
 
   return (
     <View
@@ -43,6 +58,19 @@ export default function PeriodsScreen() {
         </View>
       )}
 
+      {(selectPeriod.isError || closePeriod.isError) && (
+        <View style={styles.center}>
+          <Text
+            variant="bodySmall"
+            style={{ color: theme.colors.error, textAlign: "center" }}
+          >
+            {(selectPeriod.error as any)?.response?.data?.message ||
+              (closePeriod.error as any)?.response?.data?.message ||
+              "Aksi gagal diproses."}
+          </Text>
+        </View>
+      )}
+
       {!isLoading && !isError && (
         <FlatList
           data={data?.periods ?? []}
@@ -60,22 +88,42 @@ export default function PeriodsScreen() {
               </Text>
             </View>
           }
-          renderItem={({ item }: { item: Period }) => (
-            <AppCard
-              title={item.periodName}
-              subtitle={`${formatDate(item.startDate)} - ${formatDate(item.endDate)}`}
-            >
-              <View style={styles.badgeRow}>
-                <AppBadge
-                  label={item.isClosed ? "Closed" : "Open"}
-                  variant={item.isClosed ? "error" : "success"}
-                />
-                {item.id === data?.selectedPeriodId && (
-                  <AppBadge label="Sedang Dipilih" variant="info" />
+          renderItem={({ item }: { item: Period }) => {
+            const isSelected = item.id === data?.selectedPeriodId;
+            return (
+              <AppCard
+                title={item.periodName}
+                subtitle={`${formatDate(item.startDate)} - ${formatDate(item.endDate)}`}
+                onPress={
+                  isSelected
+                    ? undefined
+                    : () => selectPeriod.mutate(item.id)
+                }
+              >
+                <View style={styles.badgeRow}>
+                  <AppBadge
+                    label={item.isClosed ? "Closed" : "Open"}
+                    variant={item.isClosed ? "error" : "success"}
+                  />
+                  {isSelected && (
+                    <AppBadge label="Sedang Dipilih" variant="info" />
+                  )}
+                </View>
+
+                {isSelected && !item.isClosed && (
+                  <Button
+                    mode="outlined"
+                    style={styles.closeButton}
+                    loading={closePeriod.isPending}
+                    disabled={closePeriod.isPending}
+                    onPress={() => closePeriod.mutate(item.id)}
+                  >
+                    Tutup Periode
+                  </Button>
                 )}
-              </View>
-            </AppCard>
-          )}
+              </AppCard>
+            );
+          }}
         />
       )}
     </View>
@@ -87,4 +135,5 @@ const styles = StyleSheet.create({
   list: { paddingBottom: 24 },
   center: { padding: 32, alignItems: "center" },
   badgeRow: { flexDirection: "row", gap: 8 },
+  closeButton: { marginTop: 12 },
 });

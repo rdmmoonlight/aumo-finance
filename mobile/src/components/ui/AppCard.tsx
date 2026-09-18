@@ -7,13 +7,15 @@ interface AppCardProps {
   subtitle?: string;
   children: React.ReactNode;
   style?: ViewStyle;
+  onPress?: () => void;
 }
 
-export function AppCard({ title, subtitle, children, style }: AppCardProps) {
+export function AppCard({ title, subtitle, children, style, onPress }: AppCardProps) {
   const theme = useTheme();
   return (
     <Card
       mode="outlined"
+      onPress={onPress}
       style={[
         styles.card,
         {
