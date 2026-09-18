@@ -42,10 +42,11 @@ export const periodsService = {
   },
 };
 
-export const usePeriods = () => {
+export const usePeriods = (options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ["periods"],
     queryFn: periodsService.getPeriods,
+    enabled: options?.enabled ?? true,
   });
 };
 
