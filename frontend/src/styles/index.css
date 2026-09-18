@@ -27,28 +27,56 @@
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
 
-  /* MATTE TOK - biar gak bentrok sama hsl(var) */
-  --color-matte: #18181b;
-  --color-matte-soft: #202023;
-  --color-matte-hover: #2a2a2e;
+  /* AUMO MATTE SYSTEM - Premium Layered Dark */
+  --color-matte: #0E0E10; /* Base paling dalam */
+  --color-matte-soft: #151519; /* Card / Soft surface */
+  --color-matte-hover: #1E1E22; /* Hover state */
+  --color-matte-border: rgba(255, 255, 255, 0.07);
+  --color-matte-border-strong: rgba(255, 255, 255, 0.11);
+  --color-matte-active: #FFFFFF;
+  --color-matte-active-fg: #0E0E10;
+
+  --shadow-soft: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04) inset;
+  --shadow-glow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5);
 }
 
 @layer base {
-  * {
+  :root {
+    --radius: 0.75rem; /* lebih modern, jangan 0.5 */
+  }
+
+    * {
     @apply border-border outline-ring/50;
   }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scrollbar-gutter: stable;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
+    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    letter-spacing: -0.011em;
   }
-  /* Mengatur warna sorotan/block teks secara global */
+
+  /* Selection premium - putih hitam, bukan abu2 */
   ::selection {
-    background-color: #27272a; /* Warna background block (zinc-800) */
-    color: #ffffff;            /* Warna teks saat di-block */
+    background-color: white;
+    color: black;
   }
 }
 
-/* scrollbar jangan di *, taro di layer base biar gak nimpa sidebar */
+/* SCROLLBAR - super minimal, gak ganggu sidebar */
 @layer base {
+  /* Firefox */
+    * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.14) transparent;
+  }
+
   ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -57,10 +85,40 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(var(--muted-foreground) / 0.2);
+    background: rgba(255,255,255,0.14);
     border-radius: 9999px;
+    background-clip: padding-box;
+    border: 1px solid transparent;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(var(--muted-foreground) / 0.35);
+    background: rgba(255,255,255,0.22);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+}
+
+@layer utilities {
+  .matte-card {
+    background: var(--color-matte-soft);
+    border: 1px solid var(--color-matte-border);
+    box-shadow: var(--shadow-soft);
+  }
+  .matte-hover {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .matte-hover:hover {
+    background: var(--color-matte-hover);
+    border-color: var(--color-matte-border-strong);
+  }
+  .glass {
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255,255,255,0.07);
+  }
+  .text-balance {
+    text-wrap: balance;
   }
 }
