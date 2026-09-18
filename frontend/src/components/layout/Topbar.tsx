@@ -12,6 +12,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { QuranVerse } from "@/lib/getQuranVerse";
 import { cn } from "@/lib/utils";
 
@@ -48,50 +49,53 @@ export default function Topbar({ verse }: TopbarProps) {
 
   return (
     <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.07] bg-[#0E0E0E]/80 px-5 backdrop-blur-xl">
-      {/* BREADCRUMB */}
-      <Breadcrumb className="shrink-0">
-        <BreadcrumbList className="gap-1.5">
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link
-                href="/"
-                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.06] px-2.5 py-1 text-xs font-[450] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white"
-              >
-                <IconHome size={12} />
-                Home
-              </Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
+      {/* BREADCRUMB WITH HORIZONTAL SCROLL AREA */}
+      <ScrollArea className="max-w-[50%] shrink-0 whitespace-nowrap">
+        <Breadcrumb>
+          <BreadcrumbList className="flex-nowrap gap-1.5">
+            <BreadcrumbItem className="shrink-0">
+              <BreadcrumbLink asChild>
+                <Link
+                  href="/"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.06] px-2.5 py-1 text-xs font-[450] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                >
+                  <IconHome size={12} />
+                  Home
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
 
-          {pathSegments.map((seg, i) => {
-            const url = `/${pathSegments.slice(0, i + 1).join("/")}`;
-            const isLast = i === pathSegments.length - 1;
-            return (
-              <div key={url} className="contents">
-                <BreadcrumbSeparator className="text-white/15">
-                  <IconChevronRight size={14} stroke={1.5} />
-                </BreadcrumbSeparator>
-                <BreadcrumbItem>
-                  {isLast ? (
-                    <BreadcrumbPage className="rounded-full bg-white px-2.5 py-1 text-xs font-[550] capitalize tracking-[-0.01em] text-zinc-900">
-                      {seg.replace(/-/g, " ")}
-                    </BreadcrumbPage>
-                  ) : (
-                    <BreadcrumbLink asChild>
-                      <Link
-                        href={url}
-                        className="px-2 py-1 text-xs font-[450] capitalize text-zinc-500 transition-colors hover:text-zinc-200"
-                      >
+            {pathSegments.map((seg, i) => {
+              const url = `/${pathSegments.slice(0, i + 1).join("/")}`;
+              const isLast = i === pathSegments.length - 1;
+              return (
+                <div key={url} className="contents">
+                  <BreadcrumbSeparator className="text-white/15">
+                    <IconChevronRight size={14} stroke={1.5} />
+                  </BreadcrumbSeparator>
+                  <BreadcrumbItem className="shrink-0">
+                    {isLast ? (
+                      <BreadcrumbPage className="rounded-full bg-white px-2.5 py-1 text-xs font-[550] capitalize tracking-[-0.01em] text-zinc-900">
                         {seg.replace(/-/g, " ")}
-                      </Link>
-                    </BreadcrumbLink>
-                  )}
-                </BreadcrumbItem>
-              </div>
-            );
-          })}
-        </BreadcrumbList>
-      </Breadcrumb>
+                      </BreadcrumbPage>
+                    ) : (
+                      <BreadcrumbLink asChild>
+                        <Link
+                          href={url}
+                          className="px-2 py-1 text-xs font-[450] capitalize text-zinc-500 transition-colors hover:text-zinc-200"
+                        >
+                          {seg.replace(/-/g, " ")}
+                        </Link>
+                      </BreadcrumbLink>
+                    )}
+                  </BreadcrumbItem>
+                </div>
+              );
+            })}
+          </BreadcrumbList>
+        </Breadcrumb>
+        <ScrollBar orientation="horizontal" className="h-1.5" />
+      </ScrollArea>
 
       {/* QURAN VERSE */}
       <div
