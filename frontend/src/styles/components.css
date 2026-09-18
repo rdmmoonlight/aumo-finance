@@ -433,3 +433,53 @@
 .aumo-row-normal {
   @apply bg-transparent;
 }
+
+.aumo-page-container { @apply space-y-6 w-full; }
+.aumo-page-header { @apply flex flex-wrap items-center justify-between gap-3; }
+.aumo-heading-title { @apply text-xl font-bold flex items-center gap-2; }
+.aumo-heading-subtitle { @apply text-sm text-muted-foreground mt-1; }
+.aumo-icon-amber { @apply text-amber-500; }
+.aumo-button-group { @apply flex gap-2; }
+.aumo-btn-icon-gap { @apply gap-1.5; }
+
+.aumo-card-full { @apply w-full; }
+.aumo-card-content-flush { @apply p-0; }
+.aumo-table-scroll-wrapper { @apply overflow-x-auto w-full; }
+.aumo-table-min-width { @apply min-w-[650px]; }
+
+.aumo-th-date-ref { @apply pl-6 w-[16%]; }
+.aumo-th-account { @apply w-[26%]; }
+.aumo-th-description { @apply w-[26%]; }
+.aumo-th-ref { @apply text-center w-[10%]; }
+.aumo-th-debit { @apply text-right w-[11%]; }
+.aumo-th-credit { @apply text-right pr-6 w-[11%]; }
+
+.aumo-table-loading-cell { @apply text-center py-10 text-muted-foreground; }
+.aumo-spinner-icon { @apply animate-spin inline mr-2; }
+.aumo-row-shaded { @apply bg-muted/20; }
+
+.aumo-td-date-ref { @apply pl-6 align-top py-2 text-xs; }
+.aumo-badge-date { @apply mb-1 font-mono; }
+.aumo-ref-column { @apply flex flex-col gap-0.5; }
+.aumo-ref-trx-number { @apply font-mono font-bold text-amber-500; }
+.aumo-ref-timestamp { @apply text-xs text-muted-foreground; }
+.aumo-ref-updated-at { @apply text-xs text-sky-500 flex items-center gap-0.5; }
+.aumo-edit-actions { @apply flex gap-1 mt-1; }
+.aumo-btn-square-sm { @apply h-6 w-6; }
+.aumo-btn-square-destructive { @apply h-6 w-6 text-destructive; }
+
+.aumo-journal-cell { @apply align-top py-2 text-xs; }
+.aumo-journal-debit { @apply font-semibold; }
+.aumo-journal-credit { @apply pl-6 text-muted-foreground; }
+
+.aumo-td-description { @apply align-top py-2 text-xs text-muted-foreground; }
+.aumo-td-ref { @apply text-center align-top py-2; }
+.aumo-badge-ref { @apply font-mono text-amber-500; }
+.aumo-td-debit { @apply text-right align-top py-2 font-mono text-xs font-medium text-emerald-500; }
+.aumo-td-credit { @apply text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500; }
+
+.aumo-empty-table-cell { @apply text-center py-12; }
+.aumo-empty-state-wrapper { @apply flex flex-col items-center gap-2 text-muted-foreground; }
+.aumo-empty-title { @apply text-sm font-medium; }
+.aumo-empty-subtitle { @apply text-xs; }
+.aumo-link-primary { @apply text-primary underline; }
