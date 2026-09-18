@@ -249,7 +249,7 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
       </div>
 
-      {/* NAV */}
+      {/* NAV & FOOTER INTEGRATED IN SCROLL AREA */}
       <ScrollArea className="flex-1">
         <div className="aumo-sidebar-nav-container">
           <div className="aumo-sidebar-section-wrapper">
@@ -286,70 +286,71 @@ export default function Sidebar({ user }: SidebarProps) {
             </div>
           </div>
         </div>
-        <ScrollBar orientation="vertical" className="aumo-sidebar-scrollbar" />
-      </ScrollArea>
 
-      {/* FOOTER */}
-      <div className="aumo-sidebar-footer">
-        <div
-          className={cn(
-            "aumo-sidebar-footer-card-outer",
-            isCollapsed && "aumo-sidebar-footer-card-outer-collapsed",
-          )}
-        >
+        {/* FOOTER DIPINDAHKAN KE DALAM SCROLL AREA */}
+        <div className="aumo-sidebar-footer">
           <div
             className={cn(
-              "aumo-sidebar-footer-card",
-              isCollapsed && "aumo-sidebar-footer-card-collapsed",
+              "aumo-sidebar-footer-card-outer",
+              isCollapsed && "aumo-sidebar-footer-card-outer-collapsed",
             )}
           >
-            {isCollapsed ? (
-              <div className="aumo-user-avatar-collapsed">
-                <IconUser size={16} />
-              </div>
-            ) : (
-              <div className="aumo-user-flex">
-                <div className="aumo-user-avatar">
-                  {(
-                    user?.fullName?.[0] ||
-                    user?.userName?.[0] ||
-                    "U"
-                  ).toUpperCase()}
+            <div
+              className={cn(
+                "aumo-sidebar-footer-card",
+                isCollapsed && "aumo-sidebar-footer-card-collapsed",
+              )}
+            >
+              {isCollapsed ? (
+                <div className="aumo-user-avatar-collapsed">
+                  <IconUser size={16} />
                 </div>
-                <div className="aumo-user-details">
-                  <p className="aumo-user-name">
-                    {user?.fullName || user?.userName || "Ghofur"}
-                  </p>
-                  <p className="aumo-user-email">
-                    {user?.email || "ghofur@aumo.id"}
-                  </p>
+              ) : (
+                <div className="aumo-user-flex">
+                  <div className="aumo-user-avatar">
+                    {(
+                      user?.fullName?.[0] ||
+                      user?.userName?.[0] ||
+                      "U"
+                    ).toUpperCase()}
+                  </div>
+                  <div className="aumo-user-details">
+                    <p className="aumo-user-name">
+                      {user?.fullName || user?.userName || "Ghofur"}
+                    </p>
+                    <p className="aumo-user-email">
+                      {user?.email || "ghofur@aumo.id"}
+                    </p>
+                  </div>
+                  <div className="aumo-user-status-dot" />
                 </div>
-                <div className="aumo-user-status-dot" />
-              </div>
-            )}
+              )}
+            </div>
           </div>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleLogout}
+            disabled={loggingOut}
+            className={cn(
+              "aumo-logout-btn",
+              isCollapsed && "aumo-logout-btn-collapsed",
+            )}
+          >
+            {loggingOut ? (
+              <IconLoader2 size={18} className="animate-spin" />
+            ) : (
+              <IconLogout size={18} />
+            )}
+            {!isCollapsed && (
+              <span>{loggingOut ? "Signing out..." : "Sign Out"}</span>
+            )}
+          </Button>
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleLogout}
-          disabled={loggingOut}
-          className={cn(
-            "aumo-logout-btn",
-            isCollapsed && "aumo-logout-btn-collapsed",
-          )}
-        >
-          {loggingOut ? (
-            <IconLoader2 size={18} className="animate-spin" />
-          ) : (
-            <IconLogout size={18} />
-          )}
-          {!isCollapsed && (
-            <span>{loggingOut ? "Signing out..." : "Sign Out"}</span>
-          )}
-        </Button>
-      </div>
+        <ScrollBar orientation="vertical" className="aumo-sidebar-scrollbar" />
+      </ScrollArea>
     </aside>
   );
 }
