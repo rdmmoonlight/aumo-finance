@@ -139,3 +139,168 @@
 .aumo-logout-btn-collapsed {
   @apply justify-center px-0;
 }
+
+/* Guardian Layout & Headers */
+.aumo-page-container {
+  @apply space-y-6 max-w-5xl;
+}
+
+.aumo-page-header {
+  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4;
+}
+
+.aumo-page-title {
+  @apply text-xl font-bold flex items-center gap-2;
+}
+
+.aumo-page-subtitle {
+  @apply text-sm text-muted-foreground;
+}
+
+/* Guardian Badge Statuses */
+.aumo-guardian-badge-base {
+  @apply gap-2 px-3 py-1.5;
+}
+
+.aumo-guardian-badge-healthy {
+  @apply bg-emerald-500/10 text-emerald-500 border-emerald-500/20;
+}
+
+.aumo-guardian-badge-unhealthy {
+  @apply bg-amber-500/10 text-amber-500 border-amber-500/20;
+}
+
+.aumo-badge-success-subtle {
+  @apply text-xs bg-emerald-500/15 text-emerald-600;
+}
+
+.aumo-badge-xs {
+  @apply text-xs;
+}
+
+/* Loader & States */
+.aumo-loader-container {
+  @apply flex flex-col items-center justify-center min-h-[300px] gap-3 text-muted-foreground;
+}
+
+.aumo-loader-icon {
+  @apply w-8 h-8 animate-spin text-primary;
+}
+
+.aumo-empty-state {
+  @apply p-8 text-center text-sm text-muted-foreground;
+}
+
+/* Alerts & Icons */
+.aumo-alert-success {
+  @apply bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300;
+}
+
+.aumo-icon-primary {
+  @apply text-primary;
+}
+
+.aumo-icon-rose {
+  @apply text-rose-400;
+}
+
+/* Tabs */
+.aumo-tabs-list {
+  @apply grid w-full grid-cols-3 sm:w-[400px];
+}
+
+.aumo-tab-trigger {
+  @apply gap-1.5 text-xs;
+}
+
+.aumo-tab-badge {
+  @apply ml-1 px-1 text-xs;
+}
+
+.aumo-tab-content {
+  @apply mt-4;
+}
+
+/* Cards & Health Section */
+.aumo-card-header {
+  @apply py-3 flex-row items-center justify-between space-y-0 border-b;
+}
+
+.aumo-card-header-title {
+  @apply flex items-center gap-2 text-sm font-semibold;
+}
+
+.aumo-card-header-text {
+  @apply text-sm font-semibold;
+}
+
+.aumo-card-content {
+  @apply p-4 space-y-4;
+}
+
+.aumo-card-content-table {
+  @apply p-0;
+}
+
+.aumo-health-item {
+  @apply flex items-center justify-between p-3 rounded-lg bg-muted/50 border;
+}
+
+/* Typography Helpers */
+.aumo-label-medium {
+  @apply text-sm font-medium;
+}
+
+.aumo-subtext {
+  @apply text-xs text-muted-foreground;
+}
+
+.aumo-text-mono-subtle {
+  @apply text-sm font-mono text-muted-foreground;
+}
+
+.aumo-text-micro {
+  @apply text-[10px];
+}
+
+.aumo-text-micro-subtle {
+  @apply text-[10px] text-muted-foreground;
+}
+
+.aumo-text-emerald-active {
+  @apply text-xs text-emerald-500 font-medium;
+}
+
+/* Table Specific Styling */
+.aumo-table-row-header {
+  @apply text-xs;
+}
+
+.aumo-table-cell-bold {
+  @apply font-medium flex items-center gap-2;
+}
+
+.aumo-table-cell-medium {
+  @apply font-medium text-xs;
+}
+
+.aumo-table-cell-subtle {
+  @apply text-xs text-muted-foreground;
+}
+
+.aumo-table-cell-primary {
+  @apply font-mono text-xs text-primary;
+}
+
+.aumo-table-cell-right {
+  @apply text-right;
+}
+
+/* Buttons */
+.aumo-btn-compact {
+  @apply h-7 text-xs gap-1;
+}
+
+.aumo-btn-ghost-danger {
+  @apply h-6 text-xs text-destructive hover:text-destructive;
+}
