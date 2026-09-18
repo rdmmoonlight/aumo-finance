@@ -100,7 +100,6 @@ function NavItemLink({ item, isCollapsed }: { item: MenuItem; isCollapsed: boole
           : "bg-transparent text-zinc-500 border-transparent hover:bg-white/[0.06] hover:text-zinc-200 hover:border-white/[0.06]"
       )}
     >
-      {/* Active Indicator for collapsed mode */}
       {isActive && isCollapsed && (
         <span className="absolute left-0 top-1/2 -translate-y-1/2 w- h-5 bg-white rounded-full -ml-" />
       )}
@@ -152,10 +151,8 @@ export default function Sidebar({ user }: SidebarProps) {
         isCollapsed? "w-" : "w-"
       )}
     >
-      {/* Subtle top glow */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/[0.06] to-transparent" />
 
-      {/* Collapse Button Floating */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="absolute -right-3 top-6 z-30 grid h-6 w-6 place-items-center rounded-full border border-white/10 bg-[#1A1A1A] text-zinc-400 shadow-md backdrop-blur-md transition-all hover:bg-[#222] hover:text-white"
