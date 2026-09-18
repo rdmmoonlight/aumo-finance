@@ -131,7 +131,7 @@ export default function AdjustingJournalPage() {
   let groupIdx = 0;
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="aumo-page-container">
       {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
@@ -139,19 +139,19 @@ export default function AdjustingJournalPage() {
         </Alert>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="aumo-page-header">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <IconAdjustments className="text-amber-500" size={22} /> Adjusting
+          <h1 className="aumo-heading-title">
+            <IconAdjustments className="aumo-icon-amber" size={22} /> Adjusting
             Journal
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="aumo-heading-subtitle">
             Align revenues & expenses{" "}
             {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ""}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild size="sm" className="gap-1.5">
+        <div className="aumo-button-group">
+          <Button asChild size="sm" className="aumo-btn-icon-gap">
             <Link href="/adjusting-journal-entry">
               <IconPlus size={14} /> Add Entry
             </Link>
@@ -159,7 +159,7 @@ export default function AdjustingJournalPage() {
           <Button
             variant={editMode ? "secondary" : "outline"}
             size="sm"
-            className="gap-1.5"
+            className="aumo-btn-icon-gap"
             onClick={() => setEditMode((p) => !p)}
             disabled={!entries.length}
           >
@@ -168,18 +168,18 @@ export default function AdjustingJournalPage() {
         </div>
       </div>
 
-      <Card className="w-full">
-        <CardContent className="p-0">
-          <div className="overflow-x-auto w-full">
-            <Table className="min-w-[650px]">
+      <Card className="aumo-card-full">
+        <CardContent className="aumo-card-content-flush">
+          <div className="aumo-table-scroll-wrapper">
+            <Table className="aumo-table-min-width">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-6 w-[16%]">Date & Ref</TableHead>
-                  <TableHead className="w-[26%]">Account</TableHead>
-                  <TableHead className="w-[26%]">Description</TableHead>
-                  <TableHead className="text-center w-[10%]">Ref #</TableHead>
-                  <TableHead className="text-right w-[11%]">Debit</TableHead>
-                  <TableHead className="text-right pr-6 w-[11%]">
+                  <TableHead className="aumo-th-date-ref">Date & Ref</TableHead>
+                  <TableHead className="aumo-th-account">Account</TableHead>
+                  <TableHead className="aumo-th-description">Description</TableHead>
+                  <TableHead className="aumo-th-ref">Ref #</TableHead>
+                  <TableHead className="aumo-th-debit">Debit</TableHead>
+                  <TableHead className="aumo-th-credit">
                     Credit
                   </TableHead>
                 </TableRow>
@@ -189,10 +189,10 @@ export default function AdjustingJournalPage() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="text-center py-10 text-muted-foreground"
+                      className="aumo-table-loading-cell"
                     >
                       <IconLoader2
-                        className="animate-spin inline mr-2"
+                        className="aumo-spinner-icon"
                         size={16}
                       />{" "}
                       Loading adjusting journal...
@@ -209,7 +209,7 @@ export default function AdjustingJournalPage() {
                       currentDateTracker = curDate;
                       groupIdx++;
                     }
-                    const shade = groupIdx % 2 === 0 ? "bg-muted/20" : "";
+                    const shade = groupIdx % 2 === 0 ? "aumo-row-shaded" : "";
                     return sorted.map((line, i) => {
                       const isFirst = i === 0;
                       const isDebit = line.debit > 0;
@@ -226,38 +226,38 @@ export default function AdjustingJournalPage() {
                           key={`${entry.id}-${line.id || i}`}
                           className={shade}
                         >
-                          <TableCell className="pl-6 align-top py-2 text-xs">
+                          <TableCell className="aumo-td-date-ref">
                             {isFirst && showHeader && (
                               <Badge
                                 variant="secondary"
-                                className="mb-1 font-mono"
+                                className="aumo-badge-date"
                               >
                                 {curDate}
                               </Badge>
                             )}
                             {isFirst && (
-                              <div className="flex flex-col gap-0.5">
-                                <span className="font-mono font-bold text-amber-500">
+                              <div className="aumo-ref-column">
+                                <span className="aumo-ref-trx-number">
                                   {entry.transactionNumber}
                                 </span>
                                 {entry.createdAt && (
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="aumo-ref-timestamp">
                                     {formatDateTimeDisplay(entry.createdAt)}
                                   </span>
                                 )}
                                 {entry.updatedAt && (
-                                  <span className="text-xs text-sky-500 flex items-center gap-0.5">
+                                  <span className="aumo-ref-updated-at">
                                     <IconPencil size={10} />{" "}
                                     {formatDateTimeDisplay(entry.updatedAt)}
                                   </span>
                                 )}
                                 {editMode && (
-                                  <div className="flex gap-1 mt-1">
+                                  <div className="aumo-edit-actions">
                                     <Button
                                       asChild
                                       variant="outline"
                                       size="icon"
-                                      className="h-6 w-6"
+                                      className="aumo-btn-square-sm"
                                     >
                                       <Link
                                         href={`/adjusting-journal-entry?id=${entry.id}`}
@@ -268,7 +268,7 @@ export default function AdjustingJournalPage() {
                                     <Button
                                       variant="outline"
                                       size="icon"
-                                      className="h-6 w-6 text-destructive"
+                                      className="aumo-btn-square-destructive"
                                       onClick={() => deleteEntry(entry)}
                                     >
                                       <IconTrash size={12} />
@@ -279,25 +279,25 @@ export default function AdjustingJournalPage() {
                             )}
                           </TableCell>
                           <TableCell
-                            className={`align-top py-2 text-xs ${isDebit ? "font-semibold" : "pl-6 text-muted-foreground"}`}
+                            className={`aumo-journal-cell ${isDebit ? "aumo-journal-debit" : "aumo-journal-credit"}`}
                           >
                             {accName}
                           </TableCell>
-                          <TableCell className="align-top py-2 text-xs text-muted-foreground">
+                          <TableCell className="aumo-td-description">
                             {line.lineDescription || "-"}
                           </TableCell>
-                          <TableCell className="text-center align-top py-2">
+                          <TableCell className="aumo-td-ref">
                             <Badge
                               variant="outline"
-                              className="font-mono text-amber-500"
+                              className="aumo-badge-ref"
                             >
                               {ref}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right align-top py-2 font-mono text-xs font-medium text-emerald-500">
+                          <TableCell className="aumo-td-debit">
                             {line.debit > 0 ? formatNumber(line.debit) : "-"}
                           </TableCell>
-                          <TableCell className="text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500">
+                          <TableCell className="aumo-td-credit">
                             {line.credit > 0 ? formatNumber(line.credit) : "-"}
                           </TableCell>
                         </TableRow>
@@ -306,19 +306,19 @@ export default function AdjustingJournalPage() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
-                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <TableCell colSpan={6} className="aumo-empty-table-cell">
+                      <div className="aumo-empty-state-wrapper">
                         {selectedPeriodName === null ? (
                           <>
                             <IconEyeOff size={28} />
-                            <p className="text-sm font-medium">
+                            <p className="aumo-empty-title">
                               No Period Selected
                             </p>
-                            <p className="text-xs">
+                            <p className="aumo-empty-subtitle">
                               Go to{" "}
                               <Link
                                 href="/periods"
-                                className="text-primary underline"
+                                className="aumo-link-primary"
                               >
                                 Periods
                               </Link>{" "}
@@ -328,10 +328,10 @@ export default function AdjustingJournalPage() {
                         ) : (
                           <>
                             <IconFileX size={28} />
-                            <p className="text-sm font-medium">
+                            <p className="aumo-empty-title">
                               No Adjusting Entries
                             </p>
-                            <p className="text-xs">
+                            <p className="aumo-empty-subtitle">
                               No entries in{" "}
                               <strong>{selectedPeriodName}</strong>.
                             </p>
