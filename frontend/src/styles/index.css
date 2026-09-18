@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./theme.css";
 @import "./utilities.css";
+@import "./components.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -43,7 +44,7 @@
 }
 
 @layer base {
-    * {
+  * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: rgba(255,255,255,0.14) transparent;
@@ -108,65 +109,4 @@
 
 .animate-quran-marquee {
   animation: quran-marquee 20s linear infinite;
-}
-
-/* Layout & Global Root */
-.aumo-root-layout {
-  @apply min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground;
-}
-
-/* Sidebar Utilities */
-.aumo-sidebar-collapsible-wrapper {
-  @apply flex flex-col overflow-hidden transition-all duration-200;
-}
-
-.aumo-sidebar-collapsed-hidden {
-  @apply w-0 opacity-0;
-}
-
-.aumo-sidebar-header-label {
-  @apply px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500 transition-opacity;
-}
-
-.aumo-sidebar-header-collapsed {
-  @apply opacity-0 h-0;
-}
-
-.aumo-sidebar-footer-card {
-  @apply rounded-lg bg-[#161616] p-2.5;
-}
-
-.aumo-sidebar-footer-card-collapsed {
-  @apply bg-transparent p-0 flex justify-center;
-}
-
-/* Guardian Status Badge */
-.aumo-guardian-badge-base {
-  @apply gap-2 px-3 py-1.5;
-}
-
-.aumo-guardian-badge-healthy {
-  @apply bg-emerald-500/10 text-emerald-500 border-emerald-500/20;
-}
-
-.aumo-guardian-badge-unhealthy {
-  @apply bg-amber-500/10 text-amber-500 border-amber-500/20;
-}
-
-/* Journal / Table Utilities */
-.aumo-journal-cell {
-  @apply align-top py-2 text-xs;
-}
-
-.aumo-journal-debit {
-  @apply font-semibold;
-}
-
-.aumo-journal-credit {
-  @apply pl-6 text-muted-foreground;
-}
-
-/* Generic Helpers */
-.aumo-badge-xs {
-  @apply text-[10px];
 }
