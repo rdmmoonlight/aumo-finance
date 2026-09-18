@@ -1,5 +1,5 @@
-import { defineConfig } from '@playwright/test';
+import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './src/tests', // Sesuaikan dengan lokasi folder tes kamu
+  testDir: "./src/tests", // Sesuaikan dengan lokasi folder tes kamu
 });

@@ -39,7 +39,7 @@ export default function LoginForm() {
           rememberMe: keepMe,
           isMobileClient: false,
         },
-        { withCredentials: true }
+        { withCredentials: true },
       );
 
       const isOk =
@@ -50,7 +50,7 @@ export default function LoginForm() {
 
       if (!isOk) {
         throw new Error(
-          res.data?.Message || res.data?.message || "Login gagal"
+          res.data?.Message || res.data?.message || "Login gagal",
         );
       }
 

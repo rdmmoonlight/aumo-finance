@@ -51,9 +51,9 @@ async function fetchMarketData(): Promise<MarketItem[]> {
     const resIhsg = await fetch(
       "https://api.allorigins.win/raw?url=" +
         encodeURIComponent(
-          "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
+          "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
         ),
-      { next: { revalidate: 300 } }
+      { next: { revalidate: 300 } },
     );
 
     if (resIhsg.ok) {
@@ -158,7 +158,11 @@ export default async function HomePage() {
                   <IconDashboard size={16} /> Dashboard
                 </Link>
               </Button>
-              <Button asChild variant="secondary" className="aumo-secondary-btn">
+              <Button
+                asChild
+                variant="secondary"
+                className="aumo-secondary-btn"
+              >
                 <Link href="/journal-entry">
                   <IconNotebook size={16} /> Journal Entry
                 </Link>

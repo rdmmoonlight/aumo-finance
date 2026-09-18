@@ -8,10 +8,7 @@ export default async function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [user, verse] = await Promise.all([
-    getAuthUser(),
-    getQuranVerse(),
-  ]);
+  const [user, verse] = await Promise.all([getAuthUser(), getQuranVerse()]);
 
   return (
     <div className="flex min-h-screen w-full bg-[#f5f5f5]">

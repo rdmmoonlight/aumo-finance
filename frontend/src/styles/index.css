@@ -10,7 +10,7 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
-  
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -31,23 +31,25 @@
   --color-ring: hsl(var(--ring));
 
   /* AUMO MATTE - premium */
-  --color-matte: #0E0E10;
+  --color-matte: #0e0e10;
   --color-matte-soft: #151519;
-  --color-matte-hover: #1E1E22;
+  --color-matte-hover: #1e1e22;
   --color-matte-border: rgba(255, 255, 255, 0.07);
   --color-matte-border-strong: rgba(255, 255, 255, 0.11);
-  --color-matte-active: #FFFFFF;
-  --color-matte-active-fg: #0E0E10;
+  --color-matte-active: #ffffff;
+  --color-matte-active-fg: #0e0e10;
 
-  --shadow-soft: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.04) inset;
-  --shadow-glow: 0 0 0 1px rgba(255,255,255,0.06), 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-soft:
+    0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  --shadow-glow:
+    0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,0.14) transparent;
+    scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
   }
 
   html {
@@ -69,16 +71,25 @@
   }
 
   /* Scrollbar Webkit */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.14);
+    background: rgba(255, 255, 255, 0.14);
     border-radius: 9999px;
     background-clip: padding-box;
     border: 1px solid transparent;
   }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.22); }
-  ::-webkit-scrollbar-corner { background: transparent; }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.22);
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
+  }
 }
 
 @layer utilities {
@@ -95,16 +106,20 @@
     border-color: var(--color-matte-border-strong);
   }
   .glass {
-    background: rgba(255,255,255,0.04);
+    background: rgba(255, 255, 255, 0.04);
     backdrop-filter: blur(20px) saturate(150%);
     -webkit-backdrop-filter: blur(20px) saturate(150%);
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid rgba(255, 255, 255, 0.07);
   }
 }
 
 @keyframes quran-marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 
 .animate-quran-marquee {

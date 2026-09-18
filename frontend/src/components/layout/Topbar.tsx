@@ -27,15 +27,17 @@ export default function Topbar({ verse }: TopbarProps) {
   const measureRef = useRef<HTMLSpanElement>(null);
 
   const fullText = useMemo(
-    () => `"${verse.textEn}" — QS. ${verse.surahName} ${verse.surahNo}:${verse.ayahNo}`,
-    [verse]
+    () =>
+      `"${verse.textEn}" — QS. ${verse.surahName} ${verse.surahNo}:${verse.ayahNo}`,
+    [verse],
   );
 
   useEffect(() => {
     const check = () => {
       if (containerRef.current && measureRef.current) {
         setIsOverflowing(
-          measureRef.current.scrollWidth > containerRef.current.clientWidth + 12
+          measureRef.current.scrollWidth >
+            containerRef.current.clientWidth + 12,
         );
       }
     };
