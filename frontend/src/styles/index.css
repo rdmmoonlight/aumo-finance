@@ -40,6 +40,11 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+  /* Mengatur warna sorotan/block teks secara global */
+  ::selection {
+    background-color: #27272a; /* Warna background block (zinc-800) */
+    color: #ffffff;            /* Warna teks saat di-block */
+  }
 }
 
 /* scrollbar jangan di *, taro di layer base biar gak nimpa sidebar */
