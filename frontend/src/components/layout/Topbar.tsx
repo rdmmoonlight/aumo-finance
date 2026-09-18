@@ -23,15 +23,16 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
   const measureRef = useRef<HTMLSpanElement>(null);
 
   const fullText = useMemo(
-    () => `"${verse.textEn}" — QS. ${verse.surahName} ${verse.surahNo}:${verse.ayahNo}`,
-    [verse]
+    () =>
+      `"${verse.textEn}" — QS. ${verse.surahName} ${verse.surahNo}:${verse.ayahNo}`,
+    [verse],
   );
 
   useEffect(() => {
     const check = () => {
       if (containerRef.current && measureRef.current) {
         setIsOverflowing(
-          measureRef.current.scrollWidth > containerRef.current.clientWidth
+          measureRef.current.scrollWidth > containerRef.current.clientWidth,
         );
       }
     };
@@ -49,7 +50,10 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
           <BreadcrumbList className="flex-nowrap gap-1 text-">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/" className="flex items-center gap-1 text-zinc-400 hover:text-white">
+                <Link
+                  href="/"
+                  className="flex items-center gap-1 text-zinc-400 hover:text-white"
+                >
                   <IconHome size={12} /> Home
                 </Link>
               </BreadcrumbLink>
@@ -63,13 +67,16 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
                     <IconChevronRight size={12} />
                   </BreadcrumbSeparator>
                   <BreadcrumbItem>
-                    {isLast? (
+                    {isLast ? (
                       <BreadcrumbPage className="max-w- truncate text- font-medium text-white">
                         {seg.replace(/-/g, " ")}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
-                        <Link href={href} className="max-w- truncate text-zinc-500 hover:text-zinc-200">
+                        <Link
+                          href={href}
+                          className="max-w- truncate text-zinc-500 hover:text-zinc-200"
+                        >
                           {seg.replace(/-/g, " ")}
                         </Link>
                       </BreadcrumbLink>
@@ -97,13 +104,16 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
         </span>
 
         <div className="group relative flex w-full justify-end">
-          {isOverflowing? (
+          {isOverflowing ? (
             <div className="flex w-full overflow-hidden">
               <div className="flex w-max animate-quran-marquee items-center gap-8 whitespace-nowrap group-hover:[animation-play-state:paused]">
                 <span className="text- font-medium leading-none text-zinc-400">
                   {fullText}
                 </span>
-                <span aria-hidden className="text- font-medium leading-none text-zinc-400">
+                <span
+                  aria-hidden
+                  className="text- font-medium leading-none text-zinc-400"
+                >
                   {fullText}
                 </span>
               </div>
@@ -121,7 +131,9 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
                 {verse.textAr}
               </p>
               <div className="my-2 h-px bg-white/10" />
-              <p className="text- leading-snug text-zinc-300">"{verse.textEn}"</p>
+              <p className="text- leading-snug text-zinc-300">
+                "{verse.textEn}"
+              </p>
               <p className="mt-1.5 text- uppercase tracking-widest text-zinc-500">
                 — QS. {verse.surahName} {verse.surahNo}:{verse.ayahNo}
               </p>
