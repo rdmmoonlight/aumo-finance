@@ -66,20 +66,20 @@ export default function LoginForm() {
         e.response?.data?.title ||
         'Email atau password salah';
       setErr(errorMessage);
-    } finally {
+    } fontally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="w-full max-w-sm">
+    <div className="w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200">
       <div className="mb-8">
-        <h2 className="text-2xl font-semibold tracking-tight">Sign in</h2>
-        <p className="text-sm text-muted-foreground mt-2">Masuk ke workspace kamu.</p>
+        <h2 className="text-2xl font-semibold tracking-tight text-black">Sign in</h2>
+        <p className="text-sm text-zinc-600 mt-2">Masuk ke workspace kamu.</p>
       </div>
       <form onSubmit={onLogin} className="space-y-5">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-xs tracking-widest uppercase text-muted-foreground">
+          <Label htmlFor="email" className="text-xs tracking-widest uppercase font-semibold text-black">
             Email
           </Label>
           <Input
@@ -88,19 +88,19 @@ export default function LoginForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="admin@aumo.com"
-            className="h-11 rounded-xl bg-card"
+            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black"
             required
           />
         </div>
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <Label htmlFor="password" className="text-xs tracking-widest uppercase text-muted-foreground">
+            <Label htmlFor="password" className="text-xs tracking-widest uppercase font-semibold text-black">
               Password
             </Label>
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
-              className="text-xs uppercase tracking-wide text-muted-foreground hover:text-foreground"
+              className="text-xs uppercase tracking-wide text-zinc-600 hover:text-black font-medium"
             >
               {showPass ? 'Hide' : 'Show'}
             </button>
@@ -111,7 +111,7 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="h-11 rounded-xl bg-card"
+            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black"
             required
           />
         </div>
@@ -121,25 +121,25 @@ export default function LoginForm() {
               id="keepMe"
               checked={keepMe}
               onCheckedChange={(v) => setKeepMe(v as boolean)}
-              className="rounded border-foreground/20 data-[state=checked]:bg-foreground data-[state=checked]:text-background"
+              className="rounded border-zinc-400 data-[state=checked]:bg-black data-[state=checked]:text-white"
             />
-            <Label htmlFor="keepMe" className="text-xs font-normal cursor-pointer leading-none">
+            <Label htmlFor="keepMe" className="text-xs font-normal cursor-pointer leading-none text-black">
               Keep me signed in
             </Label>
           </div>
-          <a href="#" className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-4">
+          <a href="#" className="text-xs text-zinc-600 hover:text-black underline underline-offset-4">
             Forgot?
           </a>
         </div>
         {err && (
-          <div className="bg-destructive/10 text-destructive border border-destructive/20 text-xs px-3.5 py-3 rounded-xl">
+          <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl font-medium">
             {err}
           </div>
         )}
-        <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl text-sm font-medium">
+        <Button type="submit" disabled={loading} className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800">
           {loading ? 'Processing...' : 'Sign In'}
         </Button>
-        <div className="flex justify-between pt-6 border-t text-xs font-mono text-muted-foreground">
+        <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>
           <span>Keep your data safe</span>
         </div>
