@@ -9,15 +9,13 @@ on:
 jobs:
   check-architecture:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # ===== BACKEND CHECKS =====
       - name: Verify Controllers Cleanliness
+        working-directory: backend
         run: |
           echo "=== Checking backend/Controllers for embedded DTOs ==="
           STRAY_DTOS=$(grep -rnE '^\s*public\s+(class|record)\s+' Controllers/ | grep -v 'Controller :' || true)
@@ -32,6 +30,7 @@ jobs:
           fi
 
       - name: Verify Core Cleanliness
+        working-directory: backend
         run: |
           echo "=== Checking backend/Core for Controller classes ==="
           STRAY_CONTROLLERS=$(grep -rnE '^\s*public\s+(class|record)\s+[A-Za-z0-9]+Controller\b' Core/ || true)
@@ -44,3 +43,55 @@ jobs:
           else
             echo "[OK] Core 100% steril dari Controller!"
           fi
+
+      # ===== FRONTEND CHECKS - BARU =====
+      - name: Verify Frontend Style Cleanliness
+        run: |
+          echo "=== Checking frontend for stray CSS outside /style ==="
+          
+          # 1. Cek file .css/.scss yang nyasar di luar frontend/style
+          echo "--> Cek file .css/.scss liar..."
+          STRAY_CSS_FILES=$(find frontend -type f \( -name "*.css" -o -name "*.scss" \) \
+            ! -path "*/frontend/style/*" \
+            ! -path "*/node_modules/*" \
+            ! -path "*/.next/*" \
+            ! -path "*/dist/*" \
+            ! -path "*/build/*" || true)
+
+          if [ -n "$STRAY_CSS_FILES" ]; then
+            echo "::error::File CSS terdeteksi di luar folder frontend/style! Semua CSS WAJIB di frontend/style/"
+            echo "--- Daftar File Salah Tempat ---"
+            echo "$STRAY_CSS_FILES"
+            exit 1
+          fi
+
+          # 2. Cek kode CSS mentah (.class { }, @apply, @keyframes, @import *.css) di file tsx/jsx
+          echo "--> Cek kode CSS mentah di komponen..."
+          STRAY_CSS_CODE=$(grep -rnE '^\s*\.[a-zA-Z0-9_\-]+\s*\{|@apply\s+|@keyframes\s+|^\s*@import.*\.css|^\s*@tailwind' frontend \
+            --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" \
+            | grep -v "frontend/style" \
+            | grep -v "node_modules" \
+            | grep -v ".next" || true)
+
+          if [ -n "$STRAY_CSS_CODE" ]; then
+            echo "::error::Kode CSS mentah terdeteksi di luar frontend/style! Pindahkan ke index.css / theme.css"
+            echo "--- Daftar Kode Yang Tertinggal ---"
+            echo "$STRAY_CSS_CODE"
+            exit 1
+          fi
+
+          # 3. Cek <style> tag (inline style block) yang haram
+          echo "--> Cek <style> tag liar..."
+          STRAY_STYLE_TAG=$(grep -rn "<style" frontend \
+            --include="*.tsx" --include="*.jsx" \
+            | grep -v "node_modules" \
+            | grep -v "frontend/style" || true)
+
+          if [ -n "$STRAY_STYLE_TAG" ]; then
+            echo "::error::<style> tag terdeteksi di luar frontend/style! Dilarang pakai <style> di komponen."
+            echo "--- Daftar Tag Salah Tempat ---"
+            echo "$STRAY_STYLE_TAG"
+            exit 1
+          fi
+
+          echo "[OK] Frontend 100% steril - semua CSS hanya di /style!"
