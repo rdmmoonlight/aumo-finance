@@ -45,21 +45,7 @@ export default function Topbar({ verse }: TopbarProps) {
   }, [fullText]);
 
   return (
-    <header className="sticky top-0 z-10 flex h- shrink-0 items-center justify-between gap-4 border-b border-white/[0.07] bg-[#0E0E0E]/80 px-5 backdrop-blur-xl">
-      <style>{`
-        @keyframes quran-marquee {
-          0% { transform: translateX(0) }
-          100% { transform: translateX(-50%) }
-        }
-       .animate-quran-marquee {
-          animation: quran-marquee 32s linear infinite;
-          will-change: transform;
-        }
-       .group:hover.animate-quran-marquee {
-          animation-play-state: paused;
-        }
-      `}</style>
-
+    <header className="sticky top-0 z-10 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.07] bg-[#0E0E0E]/80 px-5 backdrop-blur-xl">
       {/* BREADCRUMB */}
       <Breadcrumb className="shrink-0">
         <BreadcrumbList className="gap-1.5">
@@ -67,7 +53,7 @@ export default function Topbar({ verse }: TopbarProps) {
             <BreadcrumbLink asChild>
               <Link
                 href="/"
-                className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] border border-white/[0.06] px-2.5 py-1 text- font-[450] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.06] bg-white/[0.06] px-2.5 py-1 text-xs font-[450] text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-white"
               >
                 <IconHome size={12} />
                 Home
@@ -84,15 +70,15 @@ export default function Topbar({ verse }: TopbarProps) {
                   <IconChevronRight size={14} stroke={1.5} />
                 </BreadcrumbSeparator>
                 <BreadcrumbItem>
-                  {isLast? (
-                    <BreadcrumbPage className="rounded-full bg-white px-2.5 py-1 text- font-[550] capitalize tracking-[-0.01em] text-zinc-900">
+                  {isLast ? (
+                    <BreadcrumbPage className="rounded-full bg-white px-2.5 py-1 text-xs font-[550] capitalize tracking-[-0.01em] text-zinc-900">
                       {seg.replace(/-/g, " ")}
                     </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
                       <Link
                         href={url}
-                        className="px-2 py-1 text- font-[450] capitalize text-zinc-500 transition-colors hover:text-zinc-200"
+                        className="px-2 py-1 text-xs font-[450] capitalize text-zinc-500 transition-colors hover:text-zinc-200"
                       >
                         {seg.replace(/-/g, " ")}
                       </Link>
@@ -108,46 +94,46 @@ export default function Topbar({ verse }: TopbarProps) {
       {/* QURAN VERSE */}
       <div
         ref={containerRef}
-        className="ml-auto hidden max-w- flex-1 justify-end overflow-hidden md:flex [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+        className="ml-auto hidden max-w-md flex-1 justify-end overflow-hidden md:flex [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
       >
         {/* measurer */}
         <span
           ref={measureRef}
-          className="pointer-events-none invisible absolute whitespace-nowrap text-"
+          className="pointer-events-none absolute invisible whitespace-nowrap text-xs"
         >
           {fullText}
         </span>
 
         <div className="group relative flex w-full justify-end">
-          {isOverflowing? (
-            <div className="flex w-max items-center gap-16 animate-quran-marquee whitespace-nowrap">
-              <span className="shrink-0 text- font-[450] tracking-[-0.01em] text-zinc-300 italic">
+          {isOverflowing ? (
+            <div className="flex w-max items-center gap-16 whitespace-nowrap animate-[quran-marquee_32s_linear_infinite] will-change-transform group-hover:[animation-play-state:paused]">
+              <span className="shrink-0 text-xs font-[450] italic tracking-[-0.01em] text-zinc-300">
                 {fullText}
               </span>
               <span
                 aria-hidden
-                className="shrink-0 text- font-[450] tracking-[-0.01em] text-zinc-300 italic"
+                className="shrink-0 text-xs font-[450] italic tracking-[-0.01em] text-zinc-300"
               >
                 {fullText}
               </span>
             </div>
           ) : (
-            <p className="truncate text-right text- font-[450] tracking-[-0.01em] text-zinc-400 italic">
+            <p className="truncate text-right text-xs font-[450] italic tracking-[-0.01em] text-zinc-400">
               {fullText}
             </p>
           )}
 
           {/* Tooltip - premium glass card */}
-          <div className="pointer-events-none absolute right-0 top-full z-50 mt-3 hidden w- translate-y-1 rounded- border border-white/[0.08] bg-[#151519] p- opacity-0 shadow-[0_16px_48px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.06)_inset] transition-all duration-200 group-hover:pointer-events-auto group-hover:block group-hover:translate-y-0 group-hover:opacity-100">
-            <div className="rounded- bg-gradient-to-b from-[#1C1C20] to-[#151519] p-4">
-              <p className="text-right font-serif text- font-medium leading-[1.9] tracking-wide text-white">
+          <div className="pointer-events-none absolute right-0 top-full z-50 mt-3 hidden w-80 translate-y-1 rounded-xl border border-white/[0.08] bg-[#151519] p-1 opacity-0 shadow-[0_16px_48px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.06)_inset] transition-all duration-200 group-hover:pointer-events-auto group-hover:block group-hover:translate-y-0 group-hover:opacity-100">
+            <div className="rounded-lg bg-gradient-to-b from-[#1C1C20] to-[#151519] p-4">
+              <p className="text-right font-serif text-sm font-medium leading-[1.9] tracking-wide text-white">
                 {verse.textAr}
               </p>
               <div className="my-3 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
-              <p className="text-left text-[12.5px] leading-relaxed text-zinc-300 italic">
+              <p className="text-left text-[12.5px] italic leading-relaxed text-zinc-300">
                 "{verse.textEn}"
               </p>
-              <p className="mt-3 text-left text- font-medium uppercase tracking-[0.14em] text-zinc-500">
+              <p className="mt-3 text-left text-[10px] font-medium uppercase tracking-[0.14em] text-zinc-500">
                 — QS. {verse.surahName} {verse.surahNo}:{verse.ayahNo}
               </p>
             </div>
