@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   },
   description: "Aplikasi Keuangan Aumo Finance",
   icons: {
-    icon: "/favicon.ico", // Path diperbaiki (tanpa prefix /public)
+    icon: "/favicon.ico",
   },
 };
 
@@ -31,9 +31,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body
-        className={`min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground ${inter.className}`}
-      >
+      <body className={`aumo-root-layout ${inter.className}`}>
         {children}
       </body>
     </html>
