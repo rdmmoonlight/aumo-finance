@@ -31,7 +31,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className={`min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground ${inter.className}`}>{children}</body>
+      <body
+        className={`min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground ${inter.className}`}
+      >
+        {children}
+      </body>
     </html>
   );
 }

@@ -178,20 +178,25 @@ export default function GeneralJournalClient() {
             <Table className="min-w-[650px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[16%] pl-6">
-                    Date & Ref
-                  </TableHead>
+                  <TableHead className="w-[16%] pl-6">Date & Ref</TableHead>
                   <TableHead className="w-[26%]">Account</TableHead>
                   <TableHead className="w-[26%]">Description</TableHead>
                   <TableHead className="w-[10%] text-center">Ref #</TableHead>
-                  <TableHead className="w-[11%] text-right">Debit (Rp)</TableHead>
-                  <TableHead className="w-[11%] pr-6 text-right">Credit (Rp)</TableHead>
+                  <TableHead className="w-[11%] text-right">
+                    Debit (Rp)
+                  </TableHead>
+                  <TableHead className="w-[11%] pr-6 text-right">
+                    Credit (Rp)
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
+                    <TableCell
+                      colSpan={6}
+                      className="py-10 text-center text-muted-foreground"
+                    >
                       <IconLoader2 className="aumo-spin-icon" size={16} />{" "}
                       Loading general journal...
                     </TableCell>
@@ -208,9 +213,7 @@ export default function GeneralJournalClient() {
                       groupIdx++;
                     }
                     const shade =
-                      groupIdx % 2 === 0
-                        ? "bg-muted/20"
-                        : "bg-transparent";
+                      groupIdx % 2 === 0 ? "bg-muted/20" : "bg-transparent";
 
                     return sorted.map((line, i) => {
                       const isFirst = i === 0;
@@ -294,7 +297,10 @@ export default function GeneralJournalClient() {
                             {line.lineDescription || "-"}
                           </TableCell>
                           <TableCell className="align-top py-2 text-xs text-center">
-                            <Badge variant="outline" className="font-mono text-amber-500">
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-amber-500"
+                            >
                               {ref}
                             </Badge>
                           </TableCell>
