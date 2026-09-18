@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import {
   IconLayoutDashboard,
   IconListDetails,
@@ -28,6 +28,8 @@ import {
   IconLogout,
   IconLoader2,
   IconUser,
+  IconChevronDown,
+  IconChevronRight,
 } from "@tabler/icons-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -98,38 +100,39 @@ function NavItemLink({ item }: { item: MenuItem }) {
         stroke={1.7}
         className={cn(
           "shrink-0",
-          isActive ? "opacity-100 text-white" : "opacity-60 group-hover:opacity-100"
+          isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100"
         )}
       />
-      <span className="truncate">{item.label}</span>
+      <span className="truncate text-[12px]">{item.label}</span>
     </Link>
   );
 }
 
 export default function Sidebar({ user }: SidebarProps) {
-  const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [showMainDomain, setShowMainDomain] = useState(true);
+  const [showReports, setShowReports] = useState(true);
 
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
-      // Dipanggil ke endpoint versi API yang seragam
+      // Dipanggil ke endpoint API yang benar
       await apiClient.post("/api/v1/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
       localStorage.removeItem("isAuthenticated");
       setLoggingOut(false);
-      // Redirect langsung ke landing page/login root
+      // Force redirect ke landing page agar cookie & state ter-reset total
       window.location.href = "/";
     }
   };
 
   return (
     <aside className="w-64 border-r border-white/[0.06] bg-[var(--color-matte)] flex flex-col h-screen sticky top-0 shrink-0 select-none z-20">
-      {/* Brand Header & Favicon Icon */}
-      <div className="h-16 px-4 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 p-1.5 flex items-center justify-center shrink-0">
+      {/* HEADER LOGO */}
+      <div className="h-16 px-5 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 grid place-items-center overflow-hidden shrink-0">
           <Image
             src="/favicon.ico"
             alt="Aumo Logo"
@@ -138,61 +141,85 @@ export default function Sidebar({ user }: SidebarProps) {
             className="object-contain"
           />
         </div>
-        <div className="flex flex-col min-w-0">
-          <span className="font-semibold text-xs leading-none text-white tracking-tight truncate">
-            AUMO FINANCE
+        <div className="flex flex-col">
+          <span className="font-semibold text-sm leading-none text-white tracking-tight">
+            Aumo Finance
           </span>
-          <span className="text-[9.5px] text-zinc-400 uppercase tracking-[0.14em] font-medium mt-1 truncate">
+          <span className="text-[10px] text-zinc-500 uppercase tracking-[0.15em] font-medium mt-1">
             Accounting Suite
           </span>
         </div>
       </div>
 
-      {/* Navigation Links */}
+      {/* MENU NAVIGATION */}
       <ScrollArea className="flex-1 min-h-0">
         <div className="px-3 py-4 space-y-6">
+          {/* MAIN DOMAIN SECTION */}
           <div>
-            <h2 className="px-3 mb-2.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.14em]">
-              Main Domain
-            </h2>
-            <div className="space-y-0.5">
-              {mainNavItems.map((i) => (
-                <NavItemLink key={i.path} item={i} />
-              ))}
-            </div>
+            <button
+              onClick={() => setShowMainDomain(!showMainDomain)}
+              className="w-full px-3 mb-2 flex items-center justify-between text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.14em] hover:text-white transition-colors"
+            >
+              <span>Main Domain</span>
+              {showMainDomain ? (
+                <IconChevronDown size={14} className="text-zinc-500" />
+              ) : (
+                <IconChevronRight size={14} className="text-zinc-500" />
+              )}
+            </button>
+            {showMainDomain && (
+              <div className="space-y-0.5">
+                {mainNavItems.map((i) => (
+                  <NavItemLink key={i.path} item={i} />
+                ))}
+              </div>
+            )}
           </div>
+
           <div className="h-px bg-white/[0.06] mx-2" />
+
+          {/* REPORTS SECTION */}
           <div>
-            <h2 className="px-3 mb-2.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.14em]">
-              Reports & Statements
-            </h2>
-            <div className="space-y-0.5">
-              {reportNavItems.map((i) => (
-                <NavItemLink key={i.path} item={i} />
-              ))}
-            </div>
+            <button
+              onClick={() => setShowReports(!showReports)}
+              className="w-full px-3 mb-2 flex items-center justify-between text-[11px] font-semibold text-zinc-400 uppercase tracking-[0.14em] hover:text-white transition-colors"
+            >
+              <span>Reports & Statements</span>
+              {showReports ? (
+                <IconChevronDown size={14} className="text-zinc-500" />
+              ) : (
+                <IconChevronRight size={14} className="text-zinc-500" />
+              )}
+            </button>
+            {showReports && (
+              <div className="space-y-0.5">
+                {reportNavItems.map((i) => (
+                  <NavItemLink key={i.path} item={i} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
 
-      {/* User Footer & Logout Action */}
-      <div className="p-3 border-t border-white/[0.06] bg-[var(--color-matte)] space-y-2">
-        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-[var(--color-matte-soft)] border border-white/[0.06]">
-          <div className="w-7 h-7 rounded-full bg-white/[0.08] text-zinc-300 grid place-items-center shrink-0">
+      {/* USER FOOTER & LOGOUT */}
+      <div className="p-3 border-t border-white/[0.06] bg-[var(--color-matte)] space-y-2.5">
+        <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl bg-[var(--color-matte-soft)] border border-white/[0.06]">
+          <div className="w-7 h-7 rounded-full bg-white/[0.06] text-zinc-300 grid place-items-center shrink-0">
             <IconUser size={14} />
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-xs font-medium truncate text-white leading-none">
               {user?.fullName || user?.userName || "User"}
             </span>
-            <span className="text-[10px] text-zinc-400 truncate leading-none mt-1 font-mono">
+            <span className="text-[10px] text-zinc-500 truncate leading-none mt-1.5 font-mono">
               {user?.email || "Active Session"}
             </span>
           </div>
           <Badge
             variant="outline"
-            className="px-1.5 py-0 text-[9px] border-emerald-500/20 text-emerald-400 bg-emerald-500/10 rounded-md shrink-0"
+            className="px-1.5 py-0 text-[10px] border-emerald-500/20 text-emerald-400 bg-emerald-500/10 rounded-md"
           >
             <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse mr-1" />
             Online
@@ -206,7 +233,7 @@ export default function Sidebar({ user }: SidebarProps) {
           className="w-full justify-start gap-2 h-8 text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-lg"
         >
           {loggingOut ? (
-            <IconLoader2 size={14} className="animate-spin text-white" />
+            <IconLoader2 size={14} className="animate-spin" />
           ) : (
             <IconLogout size={14} />
           )}
