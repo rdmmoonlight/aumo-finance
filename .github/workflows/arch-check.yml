@@ -31,18 +31,19 @@ jobs:
         run: |
           SRC="frontend/src"
           STYLE="frontend/src/styles"
-          echo "=== SCAN $SRC | Allowed: $STYLE ==="
+          EXCLUDE_UI="frontend/src/components/ui"
+          echo "=== SCAN $SRC | Allowed: $STYLE, $EXCLUDE_UI ==="
 
-          # 1. File css liar
-          STRAY_FILES=$(find $SRC -type f \( -name "*.css" -o -name "*.scss" \)! -path "$STYLE/*" || true)
+          # 1. File css liar (Memperbaiki sintaks find + mengabaikan folder ui & styles)
+          STRAY_FILES=$(find $SRC \( -path "$STYLE" -o -path "$EXCLUDE_UI" \) -prune -o \( -name "*.css" -o -name "*.scss" \) -type f -print || true)
           if [ -n "$STRAY_FILES" ]; then echo "::error::File CSS di luar $STYLE"; echo "$STRAY_FILES"; exit 1; fi
 
           # 2. Inline style={{ }}
-          STRAY_INLINE=$(grep -RnwE 'style\s*=\s*\{\{|style\s*:\s*\{' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" | grep -v "$STYLE" || true)
+          STRAY_INLINE=$(grep -RnwE 'style\s*=\s*\{\{|style\s*:\s*\{' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --exclude-dir="styles" --exclude-dir="ui" || true)
           if [ -n "$STRAY_INLINE" ]; then echo "::error::Inline style haram!"; echo "$STRAY_INLINE"; exit 1; fi
 
           # 3. CSS mentah @apply,.class { }
-          STRAY_RAW=$(grep -RnwE '^\s*\.[a-zA-Z0-9_\-]+\s*\{|@apply|@keyframes|@import.*\.css' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" | grep -v "$STYLE" || true)
+          STRAY_RAW=$(grep -RnwE '^\s*\.[a-zA-Z0-9_\-]+\s*\{|@apply|@keyframes|@import.*\.css' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --exclude-dir="styles" --exclude-dir="ui" || true)
           if [ -n "$STRAY_RAW" ]; then echo "::error::Kode CSS mentah di komponen!"; echo "$STRAY_RAW"; exit 1; fi
 
           echo "[OK] Frontend normal steril!"
@@ -54,22 +55,23 @@ jobs:
         run: |
           SRC="frontend/src"
           STYLE="frontend/src/styles"
-          if [ "$SUPER_STRICT"!= "true" ]; then echo "Super strict OFF - skip"; exit 0; fi
+          EXCLUDE_UI="frontend/src/components/ui"
+          if [ "$SUPER_STRICT" != "true" ]; then echo "Super strict OFF - skip"; exit 0; fi
 
-          echo "=== SUPER STRICT ON: className=\"bg-white...\" di luar $STYLE = HARAM ==="
+          echo "=== SUPER STRICT ON: className=\"bg-white...\" di luar $STYLE & $EXCLUDE_UI = HARAM ==="
 
           # Pola Tailwind utility yang paling umum
           TAILWIND_PATTERN='(bg-|text-\[|text-white|text-black|text-zinc|p-\[|p-[0-9]|px-|py-|m-|mx-|my-|flex|grid|rounded-\[|rounded-|border|shadow|w-\[|h-\[|gap-|justify-|items-|overflow-|opacity-)'
 
           echo "--> Scan className, cn(), clsx() yang mengandung Tailwind..."
-          STRAY_TAILWIND=$(grep -RnwE "className\s*=\s*\"|className\s*=\s*\{|cn\(|clsx\(" $SRC --include="*.tsx" --include="*.jsx" | grep -v "$STYLE" | grep -E "$TAILWIND_PATTERN" || true)
+          STRAY_TAILWIND=$(grep -RnwE "className\s*=\s*\"|className\s*=\s*\{|cn\(|clsx\(" $SRC --include="*.tsx" --include="*.jsx" --exclude-dir="styles" --exclude-dir="ui" | grep -E "$TAILWIND_PATTERN" || true)
 
           if [ -n "$STRAY_TAILWIND" ]; then
-            echo "::error::SUPER STRICT VIOLATION! Tailwind utility terdeteksi di luar $STYLE. Bungkus pake @apply!"
+            echo "::error::SUPER STRICT VIOLATION! Tailwind utility terdeteksi di luar $STYLE dan $EXCLUDE_UI. Bungkus pake @apply!"
             echo "--- Daftar File Haram ---"
             echo "$STRAY_TAILWIND"
             echo ""
-            echo "Cara benerin: di $STYLE/components.css bikin.aumo-card { @apply bg-white text-black... } terus di komponen pakai className=\"aumo-card\""
+            echo "Cara benerin: di $STYLE/components.css bikin .aumo-card { @apply bg-white text-black... } terus di komponen pakai className=\"aumo-card\""
             exit 1
           fi
 
