@@ -34,18 +34,22 @@ export interface DashboardViewModel {
 }
 
 export async function getDashboardData(
-  periodType: string = "monthly"
+  periodType: string = "monthly",
 ): Promise<{ data: DashboardViewModel | null; error: string | null }> {
   try {
-    const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
-    
+    const apiBaseUrl =
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3000";
+
     // Ganti endpoint dan header auth sesuai kebutuhan API backend
-    const res = await fetch(`${apiBaseUrl}/api/v1/dashboard?period=${periodType}`, {
-      cache: "no-store",
-      headers: {
-        "Content-Type": "application/json",
+    const res = await fetch(
+      `${apiBaseUrl}/api/v1/dashboard?period=${periodType}`,
+      {
+        cache: "no-store",
+        headers: {
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     if (!res.ok) {
       return { data: null, error: `Failed to fetch data: ${res.statusText}` };

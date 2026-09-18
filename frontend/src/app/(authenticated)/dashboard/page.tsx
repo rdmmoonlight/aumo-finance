@@ -10,7 +10,8 @@ interface PageProps {
 export default async function DashboardPage({ searchParams }: PageProps) {
   const resolvedSearchParams = await searchParams;
   const periodParam = resolvedSearchParams.period?.toLowerCase();
-  const periodType: "monthly" | "annual" = periodParam === "annual" ? "annual" : "monthly";
+  const periodType: "monthly" | "annual" =
+    periodParam === "annual" ? "annual" : "monthly";
 
   const { data, error } = await getDashboardData(periodType);
 

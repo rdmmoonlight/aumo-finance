@@ -56,7 +56,7 @@ ChartJS.register(
   Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
 const formatNumber = (amount: number) => {
@@ -83,7 +83,9 @@ export default function DashboardClient({
 
   const [data, setData] = useState<DashboardViewModel | null>(initialData);
   const [errorMessage, setErrorMessage] = useState<string | null>(initialError);
-  const [periodType, setPeriodType] = useState<"monthly" | "annual">(currentPeriod);
+  const [periodType, setPeriodType] = useState<"monthly" | "annual">(
+    currentPeriod,
+  );
 
   const handlePeriodSwitch = (type: "monthly" | "annual") => {
     if (periodType === type || isPending) return;
@@ -128,7 +130,7 @@ export default function DashboardClient({
         x: { grid: { display: false } },
       },
     }),
-    []
+    [],
   );
 
   const doughnutOptions = useMemo(
@@ -142,7 +144,7 @@ export default function DashboardClient({
         },
       },
     }),
-    []
+    [],
   );
 
   const doughnutCashData = useMemo(
@@ -157,7 +159,7 @@ export default function DashboardClient({
         },
       ],
     }),
-    [data]
+    [data],
   );
 
   const expenseChartData = useMemo(
@@ -183,7 +185,7 @@ export default function DashboardClient({
         },
       ],
     }),
-    [data]
+    [data],
   );
 
   const barTrendData = useMemo(
@@ -204,7 +206,7 @@ export default function DashboardClient({
         },
       ],
     }),
-    [data]
+    [data],
   );
 
   const lineNetData = useMemo(
@@ -223,7 +225,7 @@ export default function DashboardClient({
         },
       ],
     }),
-    [data]
+    [data],
   );
 
   if (!data || !data.hasPeriodSelected) {
@@ -286,7 +288,7 @@ export default function DashboardClient({
                 "h-7 text-xs px-4 transition-all border-0 shadow-none",
                 periodType === "monthly"
                   ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
-                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100"
+                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100",
               )}
             >
               Monthly
@@ -300,7 +302,7 @@ export default function DashboardClient({
                 "h-7 text-xs px-4 transition-all border-0 shadow-none",
                 periodType === "annual"
                   ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
-                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100"
+                  : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100",
               )}
             >
               Annual
@@ -336,15 +338,15 @@ export default function DashboardClient({
                   healthScore >= 80
                     ? "text-emerald-500"
                     : healthScore >= 60
-                    ? "text-sky-500"
-                    : "text-amber-500"
+                      ? "text-sky-500"
+                      : "text-amber-500",
                 )}
               >
                 {healthScore >= 80
                   ? "Excellent"
                   : healthScore >= 60
-                  ? "Stable"
-                  : "Attention"}
+                    ? "Stable"
+                    : "Attention"}
               </p>
               <p className="text-xs text-muted-foreground">
                 Based on net profit margin
