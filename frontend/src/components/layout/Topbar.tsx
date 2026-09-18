@@ -26,7 +26,10 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
           <BreadcrumbList className="flex-nowrap gap-1 text-">
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/" className="flex items-center gap-1 text-zinc-400 hover:text-white">
+                <Link
+                  href="/"
+                  className="flex items-center gap-1 text-zinc-400 hover:text-white"
+                >
                   <IconHome size={12} /> Home
                 </Link>
               </BreadcrumbLink>
@@ -40,13 +43,16 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
                     <IconChevronRight size={12} />
                   </BreadcrumbSeparator>
                   <BreadcrumbItem>
-                    {isLast? (
+                    {isLast ? (
                       <BreadcrumbPage className="max-w- truncate text- font-medium text-white">
                         {seg.replace(/-/g, " ")}
                       </BreadcrumbPage>
                     ) : (
                       <BreadcrumbLink asChild>
-                        <Link href={href} className="max-w- truncate text-zinc-500 hover:text-zinc-200">
+                        <Link
+                          href={href}
+                          className="max-w- truncate text-zinc-500 hover:text-zinc-200"
+                        >
                           {seg.replace(/-/g, " ")}
                         </Link>
                       </BreadcrumbLink>
@@ -69,7 +75,8 @@ export default function Topbar({ verse }: { verse: QuranVerse }) {
               {verse.textAr}
             </p>
             <p className="line-clamp-2 w-full text-right text- leading-snug text-zinc-400">
-              "{verse.textEn}" — QS. {verse.surahName} {verse.surahNo}:{verse.ayahNo}
+              "{verse.textEn}" — QS. {verse.surahName} {verse.surahNo}:
+              {verse.ayahNo}
             </p>
           </div>
 
