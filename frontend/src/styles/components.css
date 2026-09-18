@@ -483,3 +483,63 @@
 .aumo-empty-title { @apply text-sm font-medium; }
 .aumo-empty-subtitle { @apply text-xs; }
 .aumo-link-primary { @apply text-primary underline; }
+
+.aumo-home-wrapper {
+  @apply w-full grid place-items-center py-6;
+}
+
+.aumo-home-card {
+  @apply w-full max-w-2xl bg-[#0F172A] border-white/10 shadow-2xl rounded-2xl text-white;
+}
+
+.aumo-market-widget {
+  @apply rounded-xl bg-slate-900/80 border border-white/10 p-4;
+}
+
+.aumo-market-header {
+  @apply flex items-center justify-between mb-3;
+}
+
+.aumo-market-title {
+  @apply text-sm font-bold flex items-center gap-2 text-amber-400;
+}
+
+.aumo-market-grid {
+  @apply grid grid-cols-1 sm:grid-cols-2 gap-2;
+}
+
+.aumo-market-item {
+  @apply rounded-lg border border-white/10 bg-black/40 p-2.5 flex flex-col justify-between min-h-[76px];
+}
+
+.aumo-market-symbol {
+  @apply text-xs font-bold text-white;
+}
+
+.aumo-market-price {
+  @apply text-sm font-semibold text-white mt-1;
+}
+
+.aumo-market-name {
+  @apply text-[11px] text-white/50;
+}
+
+.aumo-home-footer {
+  @apply text-center mt-6;
+}
+
+.aumo-home-desc {
+  @apply text-sm leading-relaxed text-white/80 max-w-md mx-auto;
+}
+
+.aumo-home-actions {
+  @apply flex justify-center gap-3 mt-6 flex-wrap;
+}
+
+.aumo-primary-btn {
+  @apply rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 border border-indigo-300/20 shadow-lg hover:from-indigo-500 hover:to-violet-600 text-white flex items-center gap-2;
+}
+
+.aumo-secondary-btn {
+  @apply rounded-xl bg-white/10 text-white hover:bg-white/15 border border-white/10 flex items-center gap-2;
+}
