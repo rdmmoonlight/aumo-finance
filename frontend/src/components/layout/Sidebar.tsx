@@ -156,34 +156,30 @@ function NavItemLink({
       href={item.path}
       title={isCollapsed ? item.label : undefined}
       className={cn(
-        "group relative flex items-center gap-3 rounded-lg border px-3 py-2 text-xs leading-none transition-all duration-200",
-        isCollapsed && "justify-center px-2",
-        isActive
-          ? "border-white bg-white font-[550] text-zinc-900 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_0_0_1px_rgba(0,0,0,0.04)]"
-          : "border-transparent bg-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.06] hover:text-zinc-200",
+        "aumo-nav-item-link",
+        isCollapsed && "aumo-nav-item-collapsed",
+        isActive ? "aumo-nav-item-active" : "aumo-nav-item-inactive",
       )}
     >
       {isActive && isCollapsed && (
-        <span className="absolute left-0 top-1/2 -ml-1 h-5 w-1 -translate-y-1/2 rounded-full bg-white" />
+        <span className="aumo-nav-active-collapsed-indicator" />
       )}
 
       <item.icon
         size={18}
         stroke={isActive ? 2 : 1.8}
         className={cn(
-          "shrink-0 transition-colors",
+          "aumo-nav-item-icon-base",
           isActive
-            ? "text-zinc-900"
-            : "text-zinc-500 group-hover:text-zinc-200",
+            ? "aumo-nav-item-icon-active"
+            : "aumo-nav-item-icon-inactive",
         )}
       />
       {!isCollapsed && (
         <>
-          <span className="flex-1 truncate tracking-[-0.01em]">
-            {item.label}
-          </span>
+          <span className="aumo-nav-item-text">{item.label}</span>
           {item.badge && (
-            <span className="ml-auto flex items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
+            <span className="aumo-nav-item-badge">
               <IconSparkles size={10} />
               {item.badge}
             </span>
@@ -214,16 +210,16 @@ export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside
       className={cn(
-        "relative sticky top-0 z-20 flex h-screen shrink-0 select-none flex-col border-r border-white/[0.07] bg-[#0E0E0E] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        isCollapsed ? "w-16" : "w-64",
+        "aumo-sidebar-root",
+        isCollapsed ? "aumo-sidebar-collapsed" : "aumo-sidebar-expanded",
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/[0.06] to-transparent" />
+      <div className="aumo-sidebar-top-gradient" />
 
       {/* TOGGLE BUTTON */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-6 z-30 grid h-6 w-6 place-items-center rounded-full border border-white/10 bg-[#1A1A1A] text-zinc-400 shadow-md backdrop-blur-md transition-all hover:bg-[#222] hover:text-white"
+        className="aumo-sidebar-toggle-btn"
       >
         {isCollapsed ? (
           <IconChevronRight size={14} />
@@ -233,8 +229,8 @@ export default function Sidebar({ user }: SidebarProps) {
       </button>
 
       {/* HEADER (STATIS) */}
-      <div className="relative flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.06] px-4">
-        <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-zinc-800 to-zinc-900 shadow-[0_1px_1px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)]">
+      <div className="aumo-sidebar-header">
+        <div className="aumo-sidebar-logo-box">
           <Image
             src="/favicon.ico"
             alt="Aumo Logo"
@@ -245,96 +241,91 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
         <div
           className={cn(
-            "flex flex-col overflow-hidden transition-all duration-200",
-            isCollapsed && "w-0 opacity-0",
+            "aumo-sidebar-collapsible-wrapper",
+            isCollapsed && "aumo-sidebar-collapsed-hidden",
           )}
         >
-          <span className="whitespace-nowrap text-xs font-semibold tracking-tight text-white">
-            AUMO FINANCE
-          </span>
-          <span className="whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.16em] text-zinc-500">
-            Accounting Suite
-          </span>
+          <span className="aumo-sidebar-brand-title">AUMO FINANCE</span>
+          <span className="aumo-sidebar-brand-subtitle">Accounting Suite</span>
         </div>
       </div>
 
       {/* AREA SCROLL (HANYA NAVIGASI) */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="p-3">
-          <div className="mb-6 space-y-3">
+        <div className="aumo-sidebar-nav-container">
+          <div className="aumo-sidebar-section-wrapper">
             <h2
               className={cn(
-                "px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500 transition-opacity",
-                isCollapsed && "h-0 opacity-0",
+                "aumo-sidebar-header-label",
+                isCollapsed && "aumo-sidebar-header-collapsed",
               )}
             >
               Main
             </h2>
-            <div className="space-y-1">
+            <div className="aumo-sidebar-nav-group">
               {mainNavItems.map((i) => (
                 <NavItemLink key={i.path} item={i} isCollapsed={isCollapsed} />
               ))}
             </div>
           </div>
 
-          <div className="mb-6 h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent" />
+          <div className="aumo-sidebar-divider" />
 
           <div className="space-y-3">
             <h2
               className={cn(
-                "px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500 transition-opacity",
-                isCollapsed && "h-0 opacity-0",
+                "aumo-sidebar-header-label",
+                isCollapsed && "aumo-sidebar-header-collapsed",
               )}
             >
               Reports
             </h2>
-            <div className="space-y-1">
+            <div className="aumo-sidebar-nav-group">
               {reportNavItems.map((i) => (
                 <NavItemLink key={i.path} item={i} isCollapsed={isCollapsed} />
               ))}
             </div>
           </div>
         </div>
-        <ScrollBar orientation="vertical" className="w-1" />
+        <ScrollBar orientation="vertical" className="aumo-sidebar-scrollbar" />
       </ScrollArea>
 
       {/* FOOTER (STATIS / PEMBATAS SCROLL) */}
-      <div className="relative shrink-0 border-t border-white/[0.06] p-3 bg-[#0E0E0E]">
+      <div className="aumo-sidebar-footer">
         <div
           className={cn(
-            "group relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-1 transition-all",
-            isCollapsed &&
-              "border-transparent bg-transparent from-transparent to-transparent p-0",
+            "aumo-sidebar-footer-card-outer",
+            isCollapsed && "aumo-sidebar-footer-card-outer-collapsed",
           )}
         >
           <div
             className={cn(
-              "rounded-lg bg-[#161616] p-2.5",
-              isCollapsed && "flex justify-center bg-transparent p-0",
+              "aumo-sidebar-footer-card",
+              isCollapsed && "aumo-sidebar-footer-card-collapsed",
             )}
           >
             {isCollapsed ? (
-              <div className="grid h-9 w-9 place-items-center rounded-full border border-white/[0.08] bg-white/[0.08] text-white">
+              <div className="aumo-user-avatar-collapsed">
                 <IconUser size={16} />
               </div>
             ) : (
-              <div className="flex items-center gap-2.5">
-                <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-xs font-semibold text-zinc-900 shadow-inner">
+              <div className="aumo-user-flex">
+                <div className="aumo-user-avatar">
                   {(
                     user?.fullName?.[0] ||
                     user?.userName?.[0] ||
                     "U"
                   ).toUpperCase()}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-[12.5px] font-medium leading-none text-white">
+                <div className="aumo-user-details">
+                  <p className="aumo-user-name">
                     {user?.fullName || user?.userName || "Ghofur"}
                   </p>
-                  <p className="mt-1 truncate text-[10px] leading-none text-zinc-500">
+                  <p className="aumo-user-email">
                     {user?.email || "ghofur@aumo.id"}
                   </p>
                 </div>
-                <div className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]" />
+                <div className="aumo-user-status-dot" />
               </div>
             )}
           </div>
@@ -346,8 +337,8 @@ export default function Sidebar({ user }: SidebarProps) {
           onClick={handleLogout}
           disabled={loggingOut}
           className={cn(
-            "mt-2.5 h-9 w-full justify-start gap-2.5 rounded-lg text-xs font-[450] text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200",
-            isCollapsed && "justify-center px-0",
+            "aumo-logout-btn",
+            isCollapsed && "aumo-logout-btn-collapsed",
           )}
         >
           {loggingOut ? (
