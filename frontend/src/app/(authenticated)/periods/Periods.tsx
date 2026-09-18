@@ -11,7 +11,6 @@ import {
   IconLock,
   IconLockOpen,
   IconArrowLeft,
-  IconCheck,
   IconAlertTriangle,
   IconX,
   IconInfoCircle,
@@ -214,7 +213,7 @@ export default function PeriodsManager() {
   const totalOpening = (Number(cashBalance) || 0) + (Number(bankBalance) || 0);
 
   return (
-    <>
+    <div className="space-y-6">
       {errorMessage && (
         <Alert variant="destructive" className="flex justify-between">
           <AlertDescription className="flex items-center gap-2">
@@ -469,4 +468,87 @@ export default function PeriodsManager() {
                         </SelectTrigger>
                         <SelectContent>
                           {availableRetained.map((a) => (
-                            <SelectItem key={a
+                            <SelectItem key={a.id} value={a.id}>
+                              {a.displayLabel}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <Label>Cash Code</Label>
+                        <Input value={cashAccountCode} onChange={(e) => setCashAccountCode(e.target.value)} required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Cash Name</Label>
+                        <Input value={cashAccountName} onChange={(e) => setCashAccountName(e.target.value)} required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Cash Balance</Label>
+                        <Input
+                          type="number"
+                          value={cashBalance}
+                          onChange={(e) => setCashBalance(e.target.value === '' ? '' : Number(e.target.value))}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <Label>Bank Code</Label>
+                        <Input value={bankAccountCode} onChange={(e) => setBankAccountCode(e.target.value)} required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Bank Name</Label>
+                        <Input value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Bank Balance</Label>
+                        <Input
+                          type="number"
+                          value={bankBalance}
+                          onChange={(e) => setBankBalance(e.target.value === '' ? '' : Number(e.target.value))}
+                          placeholder="0"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label>Retained Code</Label>
+                        <Input value={retainedCode} onChange={(e) => setRetainedCode(e.target.value)} required />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Retained Name</Label>
+                        <Input value={retainedName} onChange={(e) => setRetainedName(e.target.value)} required />
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground">
+                      Opening Retained Earnings: <strong>{totalOpening.toLocaleString()}</strong>
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setViewMode('list')}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <IconLoader2 className="animate-spin mr-2" size={14} />}
+                Open Period
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
