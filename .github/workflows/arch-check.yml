@@ -27,52 +27,42 @@ jobs:
           if [ -n "$STRAY_CONTROLLERS" ]; then echo "::error::Controller di Core!"; echo "$STRAY_CONTROLLERS"; exit 1; fi
           echo "[OK] Core steril!"
 
-      - name: Verify Frontend NO-CSS-Outside-styles
+      - name: Verify Frontend Cleanliness
         run: |
           SRC="frontend/src"
           STYLE="frontend/src/styles"
           EXCLUDE_UI="frontend/src/components/ui"
-          echo "=== SCAN $SRC | Allowed: $STYLE, $EXCLUDE_UI ==="
+          echo "=== SCAN $SRC | Allow Tailwind & shadcn/ui ==="
 
-          # 1. File css liar (Memperbaiki sintaks find + mengabaikan folder ui & styles)
+          # 1. File .css / .scss liar di luar folder styles & components/ui
           STRAY_FILES=$(find $SRC \( -path "$STYLE" -o -path "$EXCLUDE_UI" \) -prune -o \( -name "*.css" -o -name "*.scss" \) -type f -print || true)
           if [ -n "$STRAY_FILES" ]; then echo "::error::File CSS di luar $STYLE"; echo "$STRAY_FILES"; exit 1; fi
 
-          # 2. Inline style={{ }}
+          # 2. Inline style={{ }} (tetap dilarang agar bersih)
           STRAY_INLINE=$(grep -RnwE 'style\s*=\s*\{\{|style\s*:\s*\{' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --exclude-dir="styles" --exclude-dir="ui" || true)
-          if [ -n "$STRAY_INLINE" ]; then echo "::error::Inline style haram!"; echo "$STRAY_INLINE"; exit 1; fi
+          if [ -n "$STRAY_INLINE" ]; then echo "::error::Inline style haram! Gunakan class Tailwind/shadcn."; echo "$STRAY_INLINE"; exit 1; fi
 
-          # 3. CSS mentah @apply,.class { }
+          # 3. CSS mentah @apply, @keyframes, selector CSS tradisional di dalam file .tsx
           STRAY_RAW=$(grep -RnwE '^\s*\.[a-zA-Z0-9_\-]+\s*\{|@apply|@keyframes|@import.*\.css' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --exclude-dir="styles" --exclude-dir="ui" || true)
-          if [ -n "$STRAY_RAW" ]; then echo "::error::Kode CSS mentah di komponen!"; echo "$STRAY_RAW"; exit 1; fi
+          if [ -n "$STRAY_RAW" ]; then echo "::error::Kode CSS mentah di komponen! Pindahkan ke $STYLE atau gunakan Tailwind utility."; echo "$STRAY_RAW"; exit 1; fi
 
-          echo "[OK] Frontend normal steril!"
+          echo "[OK] Frontend steril! Tailwind & shadcn/ui bebas digunakan di className."
 
-      # ===== SUPER STRICT MODE - Tailwind className = HARAM =====
+      # ===== SUPER STRICT MODE - OFF (Tailwind & shadcn dibebaskan) =====
       - name: Verify SUPER STRICT - No Tailwind in Components
         env:
-          SUPER_STRICT: "true" # <-- ganti ke "false" kalau mau dimatiin
+          SUPER_STRICT: "false" # <-- Di-OFF-kan agar Tailwind & shadcn bebas dipakai di JSX
         run: |
           SRC="frontend/src"
           STYLE="frontend/src/styles"
           EXCLUDE_UI="frontend/src/components/ui"
-          if [ "$SUPER_STRICT" != "true" ]; then echo "Super strict OFF - skip"; exit 0; fi
+          if [ "$SUPER_STRICT" != "true" ]; then echo "Super strict OFF - Tailwind & shadcn/ui diizinkan penuh."; exit 0; fi
 
-          echo "=== SUPER STRICT ON: className=\"bg-white...\" di luar $STYLE & $EXCLUDE_UI = HARAM ==="
-
-          # Pola Tailwind utility yang paling umum
           TAILWIND_PATTERN='(bg-|text-\[|text-white|text-black|text-zinc|p-\[|p-[0-9]|px-|py-|m-|mx-|my-|flex|grid|rounded-\[|rounded-|border|shadow|w-\[|h-\[|gap-|justify-|items-|overflow-|opacity-)'
-
-          echo "--> Scan className, cn(), clsx() yang mengandung Tailwind..."
           STRAY_TAILWIND=$(grep -RnwE "className\s*=\s*\"|className\s*=\s*\{|cn\(|clsx\(" $SRC --include="*.tsx" --include="*.jsx" --exclude-dir="styles" --exclude-dir="ui" | grep -E "$TAILWIND_PATTERN" || true)
 
           if [ -n "$STRAY_TAILWIND" ]; then
-            echo "::error::SUPER STRICT VIOLATION! Tailwind utility terdeteksi di luar $STYLE dan $EXCLUDE_UI. Bungkus pake @apply!"
-            echo "--- Daftar File Haram ---"
+            echo "::error::SUPER STRICT VIOLATION!"
             echo "$STRAY_TAILWIND"
-            echo ""
-            echo "Cara benerin: di $STYLE/components.css bikin .aumo-card { @apply bg-white text-black... } terus di komponen pakai className=\"aumo-card\""
             exit 1
           fi
-
-          echo "[OK] Super strict lolos! Gak ada Tailwind liar di komponen!"
