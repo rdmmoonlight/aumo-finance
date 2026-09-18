@@ -66,7 +66,7 @@ export default function LoginForm() {
         e.response?.data?.title ||
         'Email atau password salah';
       setErr(errorMessage);
-    } fontally {
+    } finally {
       setLoading(false);
     }
   };
