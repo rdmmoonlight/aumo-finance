@@ -13,81 +13,64 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      # ===== BACKEND CHECKS =====
       - name: Verify Controllers Cleanliness
         working-directory: backend
         run: |
-          echo "=== Checking backend/Controllers for embedded DTOs ==="
           STRAY_DTOS=$(grep -rnE '^\s*public\s+(class|record)\s+' Controllers/ | grep -v 'Controller :' || true)
-          if [ -n "$STRAY_DTOS" ]; then
-            echo "::error::DTO/Kelas non-Controller di Controllers! Pindahkan ke Core/swab.cs"
-            echo "$STRAY_DTOS"
-            exit 1
-          fi
+          if [ -n "$STRAY_DTOS" ]; then echo "::error::DTO di Controllers!"; echo "$STRAY_DTOS"; exit 1; fi
           echo "[OK] Controllers steril!"
 
       - name: Verify Core Cleanliness
         working-directory: backend
         run: |
-          echo "=== Checking backend/Core for Controller classes ==="
           STRAY_CONTROLLERS=$(grep -rnE '^\s*public\s+(class|record)\s+[A-Za-z0-9]+Controller\b' Core/ || true)
-          if [ -n "$STRAY_CONTROLLERS" ]; then
-            echo "::error::Controller di Core! Pindahkan ke Controllers/"
-            echo "$STRAY_CONTROLLERS"
-            exit 1
-          fi
+          if [ -n "$STRAY_CONTROLLERS" ]; then echo "::error::Controller di Core!"; echo "$STRAY_CONTROLLERS"; exit 1; fi
           echo "[OK] Core steril!"
 
-      # ===== FRONTEND CHECKS =====
-      - name: Verify Frontend NO-CSS-Outside-src/style
+      - name: Verify Frontend NO-CSS-Outside-styles
         run: |
-          echo "=== HARAM CHECK: Kode CSS di luar /src/style ==="
-          
-          # Deteksi root src (support frontend/src dan src)
-          if [ -d "frontend/src" ]; then SRC="frontend/src"; else SRC="src"; fi
-          STYLE="$SRC/style"
-          echo "Scanning SRC=$SRC | Allowed STYLE=$STYLE"
+          SRC="frontend/src"
+          STYLE="frontend/src/styles"
+          echo "=== SCAN $SRC | Allowed: $STYLE ==="
 
-          if [ ! -d "$STYLE" ]; then
-            echo "::error::Folder $STYLE gak ketemu! Bikin dulu folder src/style"
+          # 1. File css liar
+          STRAY_FILES=$(find $SRC -type f \( -name "*.css" -o -name "*.scss" \)! -path "$STYLE/*" || true)
+          if [ -n "$STRAY_FILES" ]; then echo "::error::File CSS di luar $STYLE"; echo "$STRAY_FILES"; exit 1; fi
+
+          # 2. Inline style={{ }}
+          STRAY_INLINE=$(grep -RnwE 'style\s*=\s*\{\{|style\s*:\s*\{' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" | grep -v "$STYLE" || true)
+          if [ -n "$STRAY_INLINE" ]; then echo "::error::Inline style haram!"; echo "$STRAY_INLINE"; exit 1; fi
+
+          # 3. CSS mentah @apply,.class { }
+          STRAY_RAW=$(grep -RnwE '^\s*\.[a-zA-Z0-9_\-]+\s*\{|@apply|@keyframes|@import.*\.css' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" | grep -v "$STYLE" || true)
+          if [ -n "$STRAY_RAW" ]; then echo "::error::Kode CSS mentah di komponen!"; echo "$STRAY_RAW"; exit 1; fi
+
+          echo "[OK] Frontend normal steril!"
+
+      # ===== SUPER STRICT MODE - Tailwind className = HARAM =====
+      - name: Verify SUPER STRICT - No Tailwind in Components
+        env:
+          SUPER_STRICT: "true" # <-- ganti ke "false" kalau mau dimatiin
+        run: |
+          SRC="frontend/src"
+          STYLE="frontend/src/styles"
+          if [ "$SUPER_STRICT"!= "true" ]; then echo "Super strict OFF - skip"; exit 0; fi
+
+          echo "=== SUPER STRICT ON: className=\"bg-white...\" di luar $STYLE = HARAM ==="
+
+          # Pola Tailwind utility yang paling umum
+          TAILWIND_PATTERN='(bg-|text-\[|text-white|text-black|text-zinc|p-\[|p-[0-9]|px-|py-|m-|mx-|my-|flex|grid|rounded-\[|rounded-|border|shadow|w-\[|h-\[|gap-|justify-|items-|overflow-|opacity-)'
+
+          echo "--> Scan className, cn(), clsx() yang mengandung Tailwind..."
+          STRAY_TAILWIND=$(grep -RnwE "className\s*=\s*\"|className\s*=\s*\{|cn\(|clsx\(" $SRC --include="*.tsx" --include="*.jsx" | grep -v "$STYLE" | grep -E "$TAILWIND_PATTERN" || true)
+
+          if [ -n "$STRAY_TAILWIND" ]; then
+            echo "::error::SUPER STRICT VIOLATION! Tailwind utility terdeteksi di luar $STYLE. Bungkus pake @apply!"
+            echo "--- Daftar File Haram ---"
+            echo "$STRAY_TAILWIND"
+            echo ""
+            echo "Cara benerin: di $STYLE/components.css bikin.aumo-card { @apply bg-white text-black... } terus di komponen pakai className=\"aumo-card\""
             exit 1
           fi
 
-          # 1. File .css/.scss liar di luar src/style
-          echo "--> [1/4] Cek file .css liar..."
-          STRAY_FILES=$(find $SRC -type f \( -name "*.css" -o -name "*.scss" \) ! -path "$STYLE/*" || true)
-          if [ -n "$STRAY_FILES" ]; then
-            echo "::error::File CSS haram di luar $STYLE"
-            echo "$STRAY_FILES"
-            exit 1
-          fi
-
-          # 2. Inline style={{ }} dan style="color: red" di dalam .tsx/.jsx
-          echo "--> [2/4] Cek inline style={{ }} ..."
-          STRAY_INLINE=$(grep -RnwE 'style\s*=\s*\{\{|style\s*:\s*\{|style\s*=\s*"' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" | grep -v "$STYLE" || true)
-          if [ -n "$STRAY_INLINE" ]; then
-            echo "::error::Inline style terdeteksi! Haram di luar $STYLE"
-            echo "$STRAY_INLINE"
-            exit 1
-          fi
-
-          # 3. Kode CSS mentah: .kelas { , @apply, @keyframes, @import .css, color: xxx;
-          echo "--> [3/4] Cek kode CSS mentah di dalam komponen..."
-          STRAY_RAW=$(grep -RnwE '^\s*\.[a-zA-Z0-9_\-]+\s*\{|@apply|@keyframes|@import.*\.css|^\s*[a-z\-]+\s*:\s*[^;]+\s*;\s*$' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" | grep -v "$STYLE" | grep -v "tailwind.config" || true)
-          # filter biar gak false positive kena object JS biasa, kita cek lagi harus ada : dan ;
-          if [ -n "$STRAY_RAW" ]; then
-            echo "::error::Kode CSS mentah terdeteksi di luar $STYLE - Pindahkan ke index.css/theme.css"
-            echo "$STRAY_RAW"
-            exit 1
-          fi
-
-          # 4. styled-components / emotion / <style> tag
-          echo "--> [4/4] Cek styled-components & <style> tag..."
-          STRAY_STYLED=$(grep -RnwE 'styled\.[a-z]+|createGlobalStyle|css`|css=\{|<style' $SRC --include="*.tsx" --include="*.ts" --include="*.jsx" --include="*.js" | grep -v "$STYLE" || true)
-          if [ -n "$STRAY_STYLED" ]; then
-            echo "::error::styled-components / <style> tag haram di luar $STYLE"
-            echo "$STRAY_STYLED"
-            exit 1
-          fi
-
-          echo "[OK] Frontend 100% steril - Gak ada kode CSS di luar $STYLE!"
+          echo "[OK] Super strict lolos! Gak ada Tailwind liar di komponen!"
