@@ -135,7 +135,7 @@ export default function GeneralJournalClient() {
   let groupIdx = 0;
 
   return (
-    <div className="space-y-6 w-full">
+    <div className="aumo-page-container">
       {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
@@ -143,19 +143,19 @@ export default function GeneralJournalClient() {
         </Alert>
       )}
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="aumo-page-header">
         <div>
-          <h1 className="text-xl font-bold flex items-center gap-2">
-            <IconBook className="text-amber-500" size={22} /> General Journal
+          <h1 className="aumo-page-title">
+            <IconBook className="aumo-text-amber" size={22} /> General Journal
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="aumo-page-subtitle">
             Chronological record{" "}
             {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ""} • All
             amounts in IDR (Rp)
           </p>
         </div>
-        <div className="flex gap-2">
-          <Button asChild size="sm" className="gap-1.5">
+        <div className="aumo-btn-group">
+          <Button asChild size="sm" className="aumo-btn-icon-label">
             <Link href="/journal-entry">
               <IconPlus size={14} /> Add Entry
             </Link>
@@ -163,7 +163,7 @@ export default function GeneralJournalClient() {
           <Button
             variant={editMode ? "secondary" : "outline"}
             size="sm"
-            className="gap-1.5"
+            className="aumo-btn-icon-label"
             onClick={() => setEditMode((p) => !p)}
             disabled={!entries.length}
           >
@@ -174,18 +174,18 @@ export default function GeneralJournalClient() {
 
       <Card className="w-full">
         <CardContent className="p-0">
-          <div className="overflow-x-auto w-full">
-            <Table className="min-w-[650px]">
+          <div className="aumo-table-container">
+            <Table className="aumo-journal-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pl-6 w-[16%]">Date & Ref</TableHead>
-                  <TableHead className="w-[26%]">Account</TableHead>
-                  <TableHead className="w-[26%]">Description</TableHead>
-                  <TableHead className="text-center w-[10%]">Ref #</TableHead>
-                  <TableHead className="text-right w-[11%]">
+                  <TableHead className="aumo-col-date-ref">Date & Ref</TableHead>
+                  <TableHead className="aumo-col-account">Account</TableHead>
+                  <TableHead className="aumo-col-desc">Description</TableHead>
+                  <TableHead className="aumo-col-refno">Ref #</TableHead>
+                  <TableHead className="aumo-col-debit">
                     Debit (Rp)
                   </TableHead>
-                  <TableHead className="text-right pr-6 w-[11%]">
+                  <TableHead className="aumo-col-credit">
                     Credit (Rp)
                   </TableHead>
                 </TableRow>
@@ -195,10 +195,10 @@ export default function GeneralJournalClient() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="text-center py-10 text-muted-foreground"
+                      className="aumo-table-loading"
                     >
                       <IconLoader2
-                        className="animate-spin inline mr-2"
+                        className="aumo-spin-icon"
                         size={16}
                       />{" "}
                       Loading general journal...
@@ -215,7 +215,7 @@ export default function GeneralJournalClient() {
                       currentDateTracker = curDate;
                       groupIdx++;
                     }
-                    const shade = groupIdx % 2 === 0 ? "bg-muted/20" : "";
+                    const shade = groupIdx % 2 === 0 ? "aumo-row-shaded" : "aumo-row-normal";
 
                     return sorted.map((line, i) => {
                       const isFirst = i === 0;
@@ -234,38 +234,38 @@ export default function GeneralJournalClient() {
                           key={`${entry.id}-${line.id || i}`}
                           className={shade}
                         >
-                          <TableCell className="pl-6 align-top py-2 text-xs">
+                          <TableCell className="aumo-table-cell-base pl-6">
                             {isFirst && showHeader && (
                               <Badge
                                 variant="secondary"
-                                className="mb-1 font-mono"
+                                className="aumo-badge-date"
                               >
                                 {curDate}
                               </Badge>
                             )}
                             {isFirst && (
-                              <div className="flex flex-col gap-0.5">
-                                <span className="font-mono font-bold text-amber-500">
+                              <div className="aumo-entry-info">
+                                <span className="aumo-entry-tx-num">
                                   {entry.transactionNumber}
                                 </span>
                                 {entry.createdAt && (
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="aumo-entry-created">
                                     {formatDateTimeDisplay(entry.createdAt)}
                                   </span>
                                 )}
                                 {entry.updatedAt && (
-                                  <span className="text-xs text-sky-500 flex items-center gap-0.5">
+                                  <span className="aumo-entry-updated">
                                     <IconPencil size={10} />{" "}
                                     {formatDateTimeDisplay(entry.updatedAt)}
                                   </span>
                                 )}
                                 {editMode && (
-                                  <div className="flex gap-1 mt-1">
+                                  <div className="aumo-entry-actions">
                                     <Button
                                       asChild
                                       variant="outline"
                                       size="icon"
-                                      className="h-6 w-6"
+                                      className="aumo-btn-icon-xs"
                                     >
                                       <Link
                                         href={`/journal-entry?id=${entry.id}`}
@@ -276,7 +276,7 @@ export default function GeneralJournalClient() {
                                     <Button
                                       variant="outline"
                                       size="icon"
-                                      className="h-6 w-6 text-destructive"
+                                      className="aumo-btn-icon-xs text-destructive"
                                       onClick={() => deleteEntry(entry)}
                                     >
                                       <IconTrash size={12} />
@@ -287,25 +287,29 @@ export default function GeneralJournalClient() {
                             )}
                           </TableCell>
                           <TableCell
-                            className={`align-top py-2 text-xs ${isDebit ? "font-semibold" : "pl-6 text-muted-foreground"}`}
+                            className={
+                              isDebit
+                                ? "aumo-table-cell-debit"
+                                : "aumo-table-cell-credit"
+                            }
                           >
                             {accName}
                           </TableCell>
-                          <TableCell className="align-top py-2 text-xs text-muted-foreground">
+                          <TableCell className="aumo-table-cell-base text-muted-foreground">
                             {line.lineDescription || "-"}
                           </TableCell>
-                          <TableCell className="text-center align-top py-2">
+                          <TableCell className="aumo-table-cell-base text-center">
                             <Badge
                               variant="outline"
-                              className="font-mono text-amber-500"
+                              className="aumo-badge-ref"
                             >
                               {ref}
                             </Badge>
                           </TableCell>
-                          <TableCell className="text-right align-top py-2 font-mono text-xs font-medium text-emerald-500">
+                          <TableCell className="aumo-cell-debit-val">
                             {line.debit > 0 ? formatNumber(line.debit) : "-"}
                           </TableCell>
-                          <TableCell className="text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500">
+                          <TableCell className="aumo-cell-credit-val">
                             {line.credit > 0 ? formatNumber(line.credit) : "-"}
                           </TableCell>
                         </TableRow>
@@ -314,8 +318,8 @@ export default function GeneralJournalClient() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-12">
-                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                    <TableCell colSpan={6} className="aumo-table-empty">
+                      <div className="aumo-table-empty-box">
                         {selectedPeriodName === null ? (
                           <>
                             <IconEyeOff size={28} />
