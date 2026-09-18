@@ -1,4 +1,4 @@
-import LoginForm from "./LoginForm";
+import LoginForm from "@/app/auth/LoginForm";
 
 export const metadata = {
   title: "Sign In | Aumo Workspace",

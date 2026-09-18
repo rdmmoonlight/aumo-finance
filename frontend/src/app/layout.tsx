@@ -1,5 +1,11 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import "@/styles/index.css";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+});
 
 export const metadata: Metadata = {
   title: {
@@ -8,7 +14,7 @@ export const metadata: Metadata = {
   },
   description: "Aplikasi Keuangan Aumo Finance",
   icons: {
-    icon: "/public/favicon.ico",
+    icon: "/favicon.ico", // Path diperbaiki (tanpa prefix /public)
   },
 };
 
@@ -25,7 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body className="min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+      <body
+        className={`min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground ${inter.className}`}
+      >
         {children}
       </body>
     </html>

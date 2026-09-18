@@ -1,4 +1,4 @@
-import PeriodsManager from "./Periods";
+import Periods from "@/app/(authenticated)/periods/Periods";
 
 export const metadata = {
   title: "Accounting Periods | Aumo Finance",
@@ -8,7 +8,7 @@ export const metadata = {
 export default function PeriodsPage() {
   return (
     <div className="space-y-6 max-w-5xl">
-      <PeriodsManager />
+      <Periods />
     </div>
   );
 }
