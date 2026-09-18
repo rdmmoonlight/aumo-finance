@@ -227,7 +227,7 @@ export default function Sidebar({ user }: SidebarProps) {
         )}
       </button>
 
-      {/* HEADER */}
+      {/* 1. HEADER (STATIS DI ATAS) */}
       <div className="aumo-sidebar-header">
         <div className="aumo-sidebar-logo-box">
           <Image
@@ -249,8 +249,8 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
       </div>
 
-      {/* NAV & FOOTER INTEGRATED IN SCROLL AREA */}
-      <ScrollArea className="flex-1">
+      {/* 2. AREA SCROLL (HANYA DITULISKAN UNTUK MENU NAVIGASI) */}
+      <ScrollArea className="flex-1 min-h-0">
         <div className="aumo-sidebar-nav-container">
           <div className="aumo-sidebar-section-wrapper">
             <h2
@@ -286,71 +286,70 @@ export default function Sidebar({ user }: SidebarProps) {
             </div>
           </div>
         </div>
-
-        {/* FOOTER DIPINDAHKAN KE DALAM SCROLL AREA */}
-        <div className="aumo-sidebar-footer">
-          <div
-            className={cn(
-              "aumo-sidebar-footer-card-outer",
-              isCollapsed && "aumo-sidebar-footer-card-outer-collapsed",
-            )}
-          >
-            <div
-              className={cn(
-                "aumo-sidebar-footer-card",
-                isCollapsed && "aumo-sidebar-footer-card-collapsed",
-              )}
-            >
-              {isCollapsed ? (
-                <div className="aumo-user-avatar-collapsed">
-                  <IconUser size={16} />
-                </div>
-              ) : (
-                <div className="aumo-user-flex">
-                  <div className="aumo-user-avatar">
-                    {(
-                      user?.fullName?.[0] ||
-                      user?.userName?.[0] ||
-                      "U"
-                    ).toUpperCase()}
-                  </div>
-                  <div className="aumo-user-details">
-                    <p className="aumo-user-name">
-                      {user?.fullName || user?.userName || "Ghofur"}
-                    </p>
-                    <p className="aumo-user-email">
-                      {user?.email || "ghofur@aumo.id"}
-                    </p>
-                  </div>
-                  <div className="aumo-user-status-dot" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleLogout}
-            disabled={loggingOut}
-            className={cn(
-              "aumo-logout-btn",
-              isCollapsed && "aumo-logout-btn-collapsed",
-            )}
-          >
-            {loggingOut ? (
-              <IconLoader2 size={18} className="animate-spin" />
-            ) : (
-              <IconLogout size={18} />
-            )}
-            {!isCollapsed && (
-              <span>{loggingOut ? "Signing out..." : "Sign Out"}</span>
-            )}
-          </Button>
-        </div>
-
         <ScrollBar orientation="vertical" className="aumo-sidebar-scrollbar" />
       </ScrollArea>
+
+      {/* 3. FOOTER (STATIS DI BAWAH / DI LUAR SCROLL AREA) */}
+      <div className="aumo-sidebar-footer shrink-0">
+        <div
+          className={cn(
+            "aumo-sidebar-footer-card-outer",
+            isCollapsed && "aumo-sidebar-footer-card-outer-collapsed",
+          )}
+        >
+          <div
+            className={cn(
+              "aumo-sidebar-footer-card",
+              isCollapsed && "aumo-sidebar-footer-card-collapsed",
+            )}
+          >
+            {isCollapsed ? (
+              <div className="aumo-user-avatar-collapsed">
+                <IconUser size={16} />
+              </div>
+            ) : (
+              <div className="aumo-user-flex">
+                <div className="aumo-user-avatar">
+                  {(
+                    user?.fullName?.[0] ||
+                    user?.userName?.[0] ||
+                    "U"
+                  ).toUpperCase()}
+                </div>
+                <div className="aumo-user-details">
+                  <p className="aumo-user-name">
+                    {user?.fullName || user?.userName || "Ghofur"}
+                  </p>
+                  <p className="aumo-user-email">
+                    {user?.email || "ghofur@aumo.id"}
+                  </p>
+                </div>
+                <div className="aumo-user-status-dot" />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className={cn(
+            "aumo-logout-btn",
+            isCollapsed && "aumo-logout-btn-collapsed",
+          )}
+        >
+          {loggingOut ? (
+            <IconLoader2 size={18} className="animate-spin" />
+          ) : (
+            <IconLogout size={18} />
+          )}
+          {!isCollapsed && (
+            <span>{loggingOut ? "Signing out..." : "Sign Out"}</span>
+          )}
+        </Button>
+      </div>
     </aside>
   );
 }
