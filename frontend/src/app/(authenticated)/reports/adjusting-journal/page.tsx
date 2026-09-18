@@ -176,25 +176,19 @@ export default function AdjustingJournalPage() {
                 <TableRow>
                   <TableHead className="aumo-th-date-ref">Date & Ref</TableHead>
                   <TableHead className="aumo-th-account">Account</TableHead>
-                  <TableHead className="aumo-th-description">Description</TableHead>
+                  <TableHead className="aumo-th-description">
+                    Description
+                  </TableHead>
                   <TableHead className="aumo-th-ref">Ref #</TableHead>
                   <TableHead className="aumo-th-debit">Debit</TableHead>
-                  <TableHead className="aumo-th-credit">
-                    Credit
-                  </TableHead>
+                  <TableHead className="aumo-th-credit">Credit</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="aumo-table-loading-cell"
-                    >
-                      <IconLoader2
-                        className="aumo-spinner-icon"
-                        size={16}
-                      />{" "}
+                    <TableCell colSpan={6} className="aumo-table-loading-cell">
+                      <IconLoader2 className="aumo-spinner-icon" size={16} />{" "}
                       Loading adjusting journal...
                     </TableCell>
                   </TableRow>
@@ -287,10 +281,7 @@ export default function AdjustingJournalPage() {
                             {line.lineDescription || "-"}
                           </TableCell>
                           <TableCell className="aumo-td-ref">
-                            <Badge
-                              variant="outline"
-                              className="aumo-badge-ref"
-                            >
+                            <Badge variant="outline" className="aumo-badge-ref">
                               {ref}
                             </Badge>
                           </TableCell>

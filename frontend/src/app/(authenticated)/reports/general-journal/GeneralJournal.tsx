@@ -178,29 +178,21 @@ export default function GeneralJournalClient() {
             <Table className="aumo-journal-table">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="aumo-col-date-ref">Date & Ref</TableHead>
+                  <TableHead className="aumo-col-date-ref">
+                    Date & Ref
+                  </TableHead>
                   <TableHead className="aumo-col-account">Account</TableHead>
                   <TableHead className="aumo-col-desc">Description</TableHead>
                   <TableHead className="aumo-col-refno">Ref #</TableHead>
-                  <TableHead className="aumo-col-debit">
-                    Debit (Rp)
-                  </TableHead>
-                  <TableHead className="aumo-col-credit">
-                    Credit (Rp)
-                  </TableHead>
+                  <TableHead className="aumo-col-debit">Debit (Rp)</TableHead>
+                  <TableHead className="aumo-col-credit">Credit (Rp)</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="aumo-table-loading"
-                    >
-                      <IconLoader2
-                        className="aumo-spin-icon"
-                        size={16}
-                      />{" "}
+                    <TableCell colSpan={6} className="aumo-table-loading">
+                      <IconLoader2 className="aumo-spin-icon" size={16} />{" "}
                       Loading general journal...
                     </TableCell>
                   </TableRow>
@@ -215,7 +207,10 @@ export default function GeneralJournalClient() {
                       currentDateTracker = curDate;
                       groupIdx++;
                     }
-                    const shade = groupIdx % 2 === 0 ? "aumo-row-shaded" : "aumo-row-normal";
+                    const shade =
+                      groupIdx % 2 === 0
+                        ? "aumo-row-shaded"
+                        : "aumo-row-normal";
 
                     return sorted.map((line, i) => {
                       const isFirst = i === 0;
@@ -299,10 +294,7 @@ export default function GeneralJournalClient() {
                             {line.lineDescription || "-"}
                           </TableCell>
                           <TableCell className="aumo-table-cell-base text-center">
-                            <Badge
-                              variant="outline"
-                              className="aumo-badge-ref"
-                            >
+                            <Badge variant="outline" className="aumo-badge-ref">
                               {ref}
                             </Badge>
                           </TableCell>

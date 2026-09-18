@@ -18,7 +18,7 @@ export async function getQuranVerse(): Promise<QuranVerse> {
   try {
     const res = await fetch(
       "https://api.alquran.cloud/v1/ayah/random/editions/quran-uthmani,en.sahih",
-      { next: { revalidate: 3600 } } // Cache di server selama 1 jam
+      { next: { revalidate: 3600 } }, // Cache di server selama 1 jam
     );
     if (!res.ok) return FALLBACK_VERSE;
     const json = await res.json();

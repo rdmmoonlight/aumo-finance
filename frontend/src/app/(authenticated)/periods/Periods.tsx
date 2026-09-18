@@ -89,12 +89,12 @@ export default function PeriodsManager() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting"
+    "LoadExisting",
   );
   const [hasExisting, setHasExisting] = useState(false);
   const [availableCash, setAvailableCash] = useState<AccountOption[]>([]);
   const [availableRetained, setAvailableRetained] = useState<AccountOption[]>(
-    []
+    [],
   );
 
   const [cashAccountId, setCashAccountId] = useState("");
@@ -133,7 +133,7 @@ export default function PeriodsManager() {
         periodsRaw?.selectedPeriodId ||
           periodsData.find((p) => !p.isClosed)?.id ||
           periodsData[0]?.id ||
-          null
+          null,
       );
 
       const { data: info } = await apiClient.get(`/api/v1/periods/open-info`);
@@ -142,7 +142,7 @@ export default function PeriodsManager() {
           id: acc.id.toString(),
           displayLabel:
             acc.displayLabel || `${acc.referenceNumber} - ${acc.accountName}`,
-        })
+        }),
       );
       const retainedOptions = (
         info.availableRetainedEarningsAccounts || []
@@ -163,7 +163,7 @@ export default function PeriodsManager() {
       if (exists) {
         setCashAccountId(cashBankOptions[0]?.id || "");
         setBankAccountId(
-          cashBankOptions[1]?.id || cashBankOptions[0]?.id || ""
+          cashBankOptions[1]?.id || cashBankOptions[0]?.id || "",
         );
         setRetainedId(retainedOptions[0]?.id || "");
       }
@@ -212,7 +212,7 @@ export default function PeriodsManager() {
     try {
       await apiClient.post(`/api/v1/periods/close/${p.id}`);
       setPeriods((prev) =>
-        prev.map((x) => (x.id === p.id ? { ...x, isClosed: true } : x))
+        prev.map((x) => (x.id === p.id ? { ...x, isClosed: true } : x)),
       );
       setSuccessMessage(`${p.periodName} closed`);
       window.dispatchEvent(new Event("periodChanged"));
@@ -624,7 +624,7 @@ export default function PeriodsManager() {
                             setCashBalance(
                               e.target.value === ""
                                 ? ""
-                                : Number(e.target.value)
+                                : Number(e.target.value),
                             )
                           }
                           placeholder="0"
@@ -658,7 +658,7 @@ export default function PeriodsManager() {
                             setBankBalance(
                               e.target.value === ""
                                 ? ""
-                                : Number(e.target.value)
+                                : Number(e.target.value),
                             )
                           }
                           placeholder="0"
