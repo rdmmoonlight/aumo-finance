@@ -150,7 +150,7 @@ export default function GuardianSecurityPage() {
         </div>
         <Badge
           variant="outline"
-          className={`aumo-guardian-badge-base ${isHealthy ? "aumo-guardian-badge-healthy" : "aumo-guardian-badge-unhealthy"}`}
+          className={`gap-2 px-3 py-1.5 ${isHealthy ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500" : "border-amber-500/20 bg-amber-500/10 text-amber-500"}`}
         >
           <IconHeartbeat size={16} /> Status:{" "}
           {security?.statusLevel || "Unknown"}
