@@ -33,13 +33,18 @@ function main() {
 
   fs.writeFileSync(STATE_PATH, JSON.stringify(nextState, null, 2) + '\n');
 
-  const version = `v${yy}.${mm}.${nextBuild}`;
-  console.log(`Versi build manual GitHub Actions: ${version}`);
+  // "version" (tanpa 'v') ditanam ke app.config.js sebagai Application.nativeApplicationVersion.
+  // "tag" (pakai 'v') dipakai untuk nama GitHub Release, sesuai konvensi yang sudah dipakai
+  // publish-github-release.js (jalur EAS) - appUpdateService.ts men-strip 'v' dari tag rilis
+  // sebelum membandingkan, jadi kedua angka ini WAJIB sama persis selain prefix 'v'-nya.
+  const version = `${yy}.${mm}.${nextBuild}`;
+  const tag = `v${version}`;
+  console.log(`Versi build manual GitHub Actions: ${tag}`);
 
   // Tulis ke GITHUB_OUTPUT supaya step lain di workflow bisa memakainya
   const githubOutput = process.env.GITHUB_OUTPUT;
   if (githubOutput) {
-    fs.appendFileSync(githubOutput, `version=${version}\n`);
+    fs.appendFileSync(githubOutput, `version=${version}\ntag=${tag}\n`);
   }
 }
 
