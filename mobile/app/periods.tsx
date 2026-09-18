@@ -32,8 +32,9 @@ export default function PeriodsScreen() {
   // refetch pada layar yang sedang di-freeze oleh react-native-screens.
   // (fix untuk Sentry REACT-NATIVE-4: "Cannot read property 'getItem' of undefined")
   const isFocused = useIsFocused();
-  const { data, isLoading, isError, error, refetch, isRefetching } =
-    usePeriods({ enabled: isFocused });
+  const { data, isLoading, isError, error, refetch, isRefetching } = usePeriods(
+    { enabled: isFocused },
+  );
 
   const selectPeriod = useSelectPeriod();
   const closePeriod = useClosePeriod();
@@ -95,9 +96,7 @@ export default function PeriodsScreen() {
                 title={item.periodName}
                 subtitle={`${formatDate(item.startDate)} - ${formatDate(item.endDate)}`}
                 onPress={
-                  isSelected
-                    ? undefined
-                    : () => selectPeriod.mutate(item.id)
+                  isSelected ? undefined : () => selectPeriod.mutate(item.id)
                 }
               >
                 <View style={styles.badgeRow}>
