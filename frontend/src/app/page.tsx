@@ -14,7 +14,7 @@ import {
 import { IconArrowRight, IconLock } from "@tabler/icons-react";
 
 export default function LandingPage() {
-  const router = Router();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
 
   // Pengecekan sesi pengguna di sisi client
