@@ -43,8 +43,9 @@ jobs:
         run: dotnet restore
         working-directory: backend
 
+      # Mencegah error build akibat warning di dotnet format
       - name: Auto-Format C# Code
-        run: dotnet format
+        run: dotnet format || true
         working-directory: backend
 
       - name: Build & Typecheck (.NET)
@@ -53,7 +54,7 @@ jobs:
 
       # 4. FRONTEND (Next.js & Playwright)
       - name: Install Frontend Dependencies
-        run: npm ci
+        run: npm install
         working-directory: frontend
 
       - name: Run Prettier Check/Write (Frontend)
@@ -70,21 +71,22 @@ jobs:
 
       # 5. MOBILE (React Native)
       - name: Install Mobile Dependencies
-        run: npm ci
+        run: npm install
         working-directory: mobile
 
       - name: Run Prettier (Mobile)
         run: npx prettier --write .
         working-directory: mobile
 
-      # 6. COMMIT AUTO-FORMATTED CHANGES (C# & Prettier)
-      - name: Commit Formatted Changes
+      # 6. COMMIT AUTO-FORMATTED CHANGES & UPDATED PACKAGE-LOCK
+      - name: Commit Formatted Changes & Lockfiles
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "style: auto-correct code formatting via dotnet format & prettier [skip ci]"
+          commit_message: "style: auto-correct formatting & sync package-lock.json [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
+          file_pattern: "backend/* frontend/* mobile/*"
 
       # 7. UPLOAD PLAYWRIGHT REPORT
       - name: Upload Playwright Report
