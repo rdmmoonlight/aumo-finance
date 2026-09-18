@@ -1,11 +1,16 @@
-// Menaikkan angka urutan build dalam bulan berjalan, dipakai oleh
-// "npm run build:android" sebelum memanggil `eas build`.
+// SATU-SATUNYA sumber penomoran versi AumoMobile. Hanya dijalankan oleh
+// workflow GitHub Actions ".github/workflows/build-apk-manual.yml"
+// (trigger manual, workflow_dispatch). Jalur EAS Build TIDAK LAGI menaikkan
+// versi ini (hook eas-build-pre-install/eas-build-on-success sudah dicabut
+// dari mobile/package.json) - kalau build lewat `eas build` dijalankan,
+// app.config.js hanya akan membaca versi terakhir yang ditulis di sini,
+// tanpa menaikkannya.
 //
-// Skema versi: <tahun>.<bulan>.<urutan build dalam bulan itu>
-// Contoh: build ke-3 di bulan September 2026 -> "2026.9.3"
+// Skema versi: <tahun 2 digit>.<bulan 2 digit>.<urutan build GitHub Actions bulan itu>
+// Contoh: build ke-8 pada workflow run di bulan September 2026 -> "26.09.8"
 //
-// State disimpan di build-version.json (harus ikut di-commit ke git supaya
-// urutannya konsisten lintas build/lintas orang yang build).
+// State disimpan di build-version.json, di-commit balik ke repo oleh
+// workflow setelah build sukses, supaya urutannya konsisten antar run.
 
 const fs = require('fs');
 const path = require('path');
@@ -21,18 +26,30 @@ function loadState() {
 
 function main() {
   const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const yyyy = now.getFullYear();
+  const yy = String(yyyy).slice(-2);
+  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const currentMonth = `${yyyy}-${mm}`;
 
   const state = loadState();
-
   const nextBuild = state.month === currentMonth ? state.build + 1 : 1;
   const nextState = { month: currentMonth, build: nextBuild };
 
   fs.writeFileSync(STATE_PATH, JSON.stringify(nextState, null, 2) + '\n');
 
-  const version = `${now.getFullYear()}.${now.getMonth() + 1}.${nextBuild}`;
-  console.log(`Version dinaikkan ke ${version} (build ke-${nextBuild} bulan ${currentMonth}).`);
-  console.log('Jangan lupa commit build-version.json setelah build ini.');
+  // "version" (tanpa 'v') ditanam ke app.config.js sebagai Application.nativeApplicationVersion.
+  // "tag" (pakai 'v') dipakai untuk nama GitHub Release. appUpdateService.ts men-strip 'v'
+  // dari tag rilis sebelum membandingkan, jadi kedua angka ini WAJIB sama persis
+  // selain prefix 'v'-nya.
+  const version = `${yy}.${mm}.${nextBuild}`;
+  const tag = `v${version}`;
+  console.log(`Versi build: ${tag}`);
+
+  // Tulis ke GITHUB_OUTPUT supaya step lain di workflow bisa memakainya
+  const githubOutput = process.env.GITHUB_OUTPUT;
+  if (githubOutput) {
+    fs.appendFileSync(githubOutput, `version=${version}\ntag=${tag}\n`);
+  }
 }
 
 main();
