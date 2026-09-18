@@ -33,9 +33,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          # Mengaktifkan cache npm di sub-folder frontend
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: |
+            frontend/package-lock.json
+            mobile/package-lock.json
 
       # 3. BACKEND (.NET C#)
       - name: Restore .NET Dependencies
@@ -55,7 +56,7 @@ jobs:
         run: npm ci
         working-directory: frontend
 
-      - name: Run Prettier Check/Write (Frontend & Root)
+      - name: Run Prettier Check/Write (Frontend)
         run: npx prettier --write .
         working-directory: frontend
 
@@ -67,7 +68,7 @@ jobs:
         run: npx playwright test --pass-with-no-tests
         working-directory: frontend
 
-      # 5. MOBILE (React Native) - Optional Linting
+      # 5. MOBILE (React Native)
       - name: Install Mobile Dependencies
         run: npm ci
         working-directory: mobile
