@@ -1,46 +1,34 @@
-/* INI FILE PUSAT TEMA - AUMO FINANCE v2 - Premium Matte */
+/* theme.css - PUSAT TOKO CAT - CUMA VARIABLE */
 
-/* DEFAULT DARK - AUMO (Base Identity) */
 :root {
-  --background: 0 0% 5.5%; /* #0E0E0E - true matte */
-  --foreground: 0 0% 96%; /* off-white, gak bikin mata perih */
-  
-  --card: 0 0% 7%; /* #111 - sedikit naik 1 level dari bg */
+  --background: 0 0% 5.5%;
+  --foreground: 0 0% 96%;
+  --card: 0 0% 7%;
   --card-foreground: 0 0% 96%;
-  
-  --popover: 0 0% 8.5%; /* #151515 - buat dropdown/modal */
+  --popover: 0 0% 8.5%;
   --popover-foreground: 0 0% 96%;
-  
-  --primary: 0 0% 98%; /* White is the new primary */
+  --primary: 0 0% 98%;
   --primary-foreground: 0 0% 8%;
-  
-  --secondary: 0 0% 11%; /* #1C1C1C */
+  --secondary: 0 0% 11%;
   --secondary-foreground: 0 0% 92%;
-  
   --muted: 0 0% 11%;
-  --muted-foreground: 0 0% 58%; /* zinc-500 yang lebih kalem */
-  
-  --accent: 0 0% 13%; /* #212121 */
+  --muted-foreground: 0 0% 58%;
+  --accent: 0 0% 13%;
   --accent-foreground: 0 0% 96%;
-  
-  --destructive: 0 72% 51%; /* red-500 yang proper */
+  --destructive: 0 72% 51%;
   --destructive-foreground: 0 0% 98%;
-  
-  --border: 0 0% 11%; /* super tipis, 1% beda dari card */
+  --border: 0 0% 11%;
   --input: 0 0% 11%;
-  --ring: 0 0% 83%; /* ring putih tipis, bukan biru */
-  
-  --radius: 0.75rem; /* ini kunci estetiknya */
+  --ring: 0 0% 83%;
+  --radius: 0.75rem;
 
-  /* Chart - muted premium, bukan pelangi norak */
   --chart-1: 221 83% 53%;
   --chart-2: 173 58% 39%;
   --chart-3: 43 96% 56%;
   --chart-4: 262 83% 58%;
   --chart-5: 24 94% 53%;
 
-  /* Sidebar - beda 0.5% lebih gelap dari main bg biar ada depth */
-  --sidebar-background: 0 0% 4.5%; /* #0B0B0B */
+  --sidebar-background: 0 0% 4.5%;
   --sidebar-foreground: 0 0% 88%;
   --sidebar-primary: 0 0% 98%;
   --sidebar-primary-foreground: 0 0% 6%;
@@ -50,7 +38,6 @@
   --sidebar-ring: 0 0% 83%;
 }
 
-/* LIGHT MODE - kalau butuh nanti, udah gua benerin juga */
 .light {
   --background: 0 0% 100%;
   --foreground: 0 0% 7%;
@@ -71,7 +58,6 @@
   --border: 0 0% 91%;
   --input: 0 0% 91%;
   --ring: 0 0% 9%;
-
   --sidebar-background: 0 0% 98.5%;
   --sidebar-foreground: 0 0% 20%;
   --sidebar-primary: 0 0% 9%;
