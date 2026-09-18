@@ -77,7 +77,8 @@ export default function LandingPage() {
             Selamat Datang
           </h2>
           <p className="mt-2 text-sm text-zinc-400">
-            Silakan masuk ke akun Anda untuk mengakses dashboard dan layanan finansial.
+            Silakan masuk ke akun Anda untuk mengakses dashboard dan layanan
+            finansial.
           </p>
         </div>
 
