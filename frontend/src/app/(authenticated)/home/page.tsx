@@ -96,13 +96,13 @@ export default async function HomePage() {
   const marketData = await fetchMarketData();
 
   return (
-    <div className="aumo-home-wrapper">
-      <Card className="aumo-home-card">
+    <div className="grid w-full place-items-center py-6">
+      <Card className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0F172A] p-6 text-white shadow-2xl">
         <CardContent className="p-6 md:p-8">
           {/* Market Widget Component */}
-          <div className="aumo-market-widget">
-            <div className="aumo-market-header">
-              <h6 className="aumo-market-title">
+          <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
+            <div className="mb-3 flex items-center justify-between">
+              <h6 className="flex items-center gap-2 text-sm font-bold text-amber-400">
                 <IconChartLine size={16} /> Market Indicators
               </h6>
               <Badge
@@ -113,14 +113,14 @@ export default async function HomePage() {
               </Badge>
             </div>
 
-            <div className="aumo-market-grid">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {marketData.length > 0 ? (
                 marketData.map((item) => (
-                  <div key={item.symbol} className="aumo-market-item">
+                  <div key={item.symbol} className="flex min-h-[76px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5">
                     <div className="flex justify-between items-center">
-                      <span className="aumo-market-symbol">{item.symbol}</span>
+                      <span className="text-xs font-bold text-white">{item.symbol}</span>
                       <Badge
-                        className={`aumo-badge-xs ${
+                        className={`text-[10px] ${
                           item.isUp
                             ? "bg-emerald-500/15 text-emerald-400"
                             : "bg-red-500/15 text-red-400"
@@ -134,8 +134,8 @@ export default async function HomePage() {
                         {item.change}
                       </Badge>
                     </div>
-                    <div className="aumo-market-price">{item.price}</div>
-                    <div className="aumo-market-name">{item.name}</div>
+                    <div className="mt-1 text-sm font-semibold text-white">{item.price}</div>
+                    <div className="text-[11px] text-white/50">{item.name}</div>
                   </div>
                 ))
               ) : (
@@ -146,14 +146,14 @@ export default async function HomePage() {
             </div>
           </div>
 
-          <div className="aumo-home-footer">
-            <p className="aumo-home-desc">
+          <div className="mt-6 text-center">
+            <p className="mx-auto max-w-md text-sm leading-relaxed text-white/80">
               Integrated financial & accounting intelligence core. Manage
               full-cycle general ledgers, trial balances, and operational
               analytics with absolute precision.
             </p>
-            <div className="aumo-home-actions">
-              <Button asChild className="aumo-primary-btn">
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button asChild className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-white shadow-lg hover:from-indigo-500 hover:to-violet-600">
                 <Link href="/dashboard">
                   <IconDashboard size={16} /> Dashboard
                 </Link>
@@ -161,7 +161,7 @@ export default async function HomePage() {
               <Button
                 asChild
                 variant="secondary"
-                className="aumo-secondary-btn"
+                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-white hover:bg-white/15"
               >
                 <Link href="/journal-entry">
                   <IconNotebook size={16} /> Journal Entry
