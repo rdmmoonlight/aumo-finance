@@ -1,6 +1,10 @@
+/* ==========================================================================
+   1. SIDEBAR & NAVIGATION
+   ========================================================================== */
+
 /* Sidebar Root & Shell */
 .aumo-sidebar-root {
-  @apply relative flex h-screen shrink-0 select-none flex-col border-r border-white/[0.07] bg-[#0E0E0E] sticky top-0 z-20 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)];
+  @apply relative sticky top-0 z-20 flex h-screen shrink-0 select-none flex-col border-r border-white/[0.07] bg-[#0E0E0E] transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)];
 }
 .aumo-sidebar-expanded {
   @apply w-64;
@@ -12,17 +16,17 @@
   @apply pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-white/[0.06] to-transparent;
 }
 
-/* Toggle Button */
+/* Sidebar Toggle Button */
 .aumo-sidebar-toggle-btn {
   @apply absolute -right-3 top-6 z-30 grid h-6 w-6 place-items-center rounded-full border border-white/10 bg-[#1A1A1A] text-zinc-400 shadow-md backdrop-blur-md transition-all hover:bg-[#222] hover:text-white;
 }
 
-/* Header */
+/* Sidebar Header */
 .aumo-sidebar-header {
   @apply relative flex h-14 shrink-0 items-center gap-3 border-b border-white/[0.06] px-4;
 }
 .aumo-sidebar-logo-box {
-  @apply relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/[0.08] shadow-[0_1px_1px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)];
+  @apply relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-zinc-800 to-zinc-900 shadow-[0_1px_1px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.1)];
 }
 .aumo-sidebar-brand-title {
   @apply whitespace-nowrap text-xs font-semibold tracking-tight text-white;
@@ -31,7 +35,7 @@
   @apply whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.16em] text-zinc-500;
 }
 
-/* Collapsible Helper */
+/* Collapsible Helpers */
 .aumo-sidebar-collapsible-wrapper {
   @apply flex flex-col overflow-hidden transition-all duration-200;
 }
@@ -39,7 +43,7 @@
   @apply w-0 opacity-0;
 }
 
-/* Navigation Items */
+/* Navigation Items & Structure */
 .aumo-sidebar-nav-container {
   @apply p-3;
 }
@@ -50,7 +54,7 @@
   @apply px-3 text-[10.5px] font-semibold uppercase tracking-[0.14em] text-zinc-500 transition-opacity;
 }
 .aumo-sidebar-header-collapsed {
-  @apply opacity-0 h-0;
+  @apply h-0 opacity-0;
 }
 .aumo-sidebar-nav-group {
   @apply space-y-1;
@@ -62,21 +66,21 @@
   @apply w-1;
 }
 
-/* Nav Item Link */
+/* Navigation Item Link */
 .aumo-nav-item-link {
-  @apply group relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs leading-none transition-all duration-200 border;
+  @apply group relative flex items-center gap-3 rounded-lg border px-3 py-2 text-xs leading-none transition-all duration-200;
 }
 .aumo-nav-item-collapsed {
   @apply justify-center px-2;
 }
 .aumo-nav-item-active {
-  @apply bg-white text-zinc-900 border-white shadow-[0_1px_1px_rgba(0,0,0,0.05),0_0_0_1px_rgba(0,0,0,0.04)] font-[550];
+  @apply border-white bg-white font-[550] text-zinc-900 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_0_0_1px_rgba(0,0,0,0.04)];
 }
 .aumo-nav-item-inactive {
-  @apply bg-transparent text-zinc-500 border-transparent hover:bg-white/[0.06] hover:text-zinc-200 hover:border-white/[0.06];
+  @apply border-transparent bg-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.06] hover:text-zinc-200;
 }
 .aumo-nav-active-collapsed-indicator {
-  @apply absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-white rounded-full -ml-1;
+  @apply absolute left-0 top-1/2 -ml-1 h-5 w-1 -translate-y-1/2 rounded-full bg-white;
 }
 .aumo-nav-item-icon-base {
   @apply shrink-0 transition-colors;
@@ -91,10 +95,10 @@
   @apply flex-1 truncate tracking-[-0.01em];
 }
 .aumo-nav-item-badge {
-  @apply ml-auto flex items-center gap-1 rounded-full bg-violet-500/15 border border-violet-500/20 px-1.5 py-0.5 text-[10px] font-medium text-violet-300;
+  @apply ml-auto flex items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300;
 }
 
-/* Footer Section */
+/* Sidebar Footer & User Profile */
 .aumo-sidebar-footer {
   @apply relative border-t border-white/[0.06] p-3;
 }
@@ -102,22 +106,22 @@
   @apply group relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-1 transition-all;
 }
 .aumo-sidebar-footer-card-outer-collapsed {
-  @apply bg-transparent border-transparent p-0 from-transparent to-transparent;
+  @apply border-transparent bg-transparent from-transparent to-transparent p-0;
 }
 .aumo-sidebar-footer-card {
   @apply rounded-lg bg-[#161616] p-2.5;
 }
 .aumo-sidebar-footer-card-collapsed {
-  @apply bg-transparent p-0 flex justify-center;
-}
-.aumo-user-avatar-collapsed {
-  @apply grid h-9 w-9 place-items-center rounded-full bg-white/[0.08] border border-white/[0.08] text-white;
+  @apply flex justify-center bg-transparent p-0;
 }
 .aumo-user-flex {
   @apply flex items-center gap-2.5;
 }
 .aumo-user-avatar {
-  @apply grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-zinc-900 font-semibold text-xs shadow-inner;
+  @apply grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-xs font-semibold text-zinc-900 shadow-inner;
+}
+.aumo-user-avatar-collapsed {
+  @apply grid h-9 w-9 place-items-center rounded-full border border-white/[0.08] bg-white/[0.08] text-white;
 }
 .aumo-user-details {
   @apply min-w-0 flex-1;
@@ -132,414 +136,370 @@
   @apply h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)];
 }
 
-/* Logout Button */
+/* Sidebar Action Buttons */
 .aumo-logout-btn {
-  @apply mt-2.5 w-full h-9 justify-start gap-2.5 rounded-lg text-xs font-[450] text-zinc-500 hover:bg-white/[0.06] hover:text-zinc-200 transition-colors;
+  @apply mt-2.5 h-9 w-full justify-start gap-2.5 rounded-lg text-xs font-[450] text-zinc-500 transition-colors hover:bg-white/[0.06] hover:text-zinc-200;
 }
 .aumo-logout-btn-collapsed {
   @apply justify-center px-0;
 }
 
-/* Guardian Layout & Headers */
+
+/* ==========================================================================
+   2. PAGE LAYOUT & HEADERS
+   ========================================================================== */
+
 .aumo-page-container {
-  @apply space-y-6 max-w-5xl;
+  @apply max-w-5xl space-y-6 w-full;
 }
-
 .aumo-page-header {
-  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4;
+  @apply flex flex-wrap sm:flex-row items-center justify-between gap-3 sm:gap-4;
+}
+.aumo-page-title,
+.aumo-heading-title {
+  @apply flex items-center gap-2 text-xl font-bold;
+}
+.aumo-page-subtitle,
+.aumo-heading-subtitle {
+  @apply mt-1 text-sm text-muted-foreground;
 }
 
-.aumo-page-title {
-  @apply text-xl font-bold flex items-center gap-2;
-}
 
-.aumo-page-subtitle {
-  @apply text-sm text-muted-foreground;
-}
+/* ==========================================================================
+   3. CARDS, TABS & CONTAINERS
+   ========================================================================== */
 
-/* Guardian Badge Statuses */
-.aumo-guardian-badge-base {
-  @apply gap-2 px-3 py-1.5;
+.aumo-card-full {
+  @apply w-full;
 }
-
-.aumo-guardian-badge-healthy {
-  @apply bg-emerald-500/10 text-emerald-500 border-emerald-500/20;
+.aumo-card-header {
+  @apply flex-row items-center justify-between space-y-0 border-b py-3;
 }
-
-.aumo-guardian-badge-unhealthy {
-  @apply bg-amber-500/10 text-amber-500 border-amber-500/20;
+.aumo-card-header-title,
+.aumo-card-header-text {
+  @apply flex items-center gap-2 text-sm font-semibold;
 }
-
-.aumo-badge-success-subtle {
-  @apply text-xs bg-emerald-500/15 text-emerald-600;
+.aumo-card-content {
+  @apply space-y-4 p-4;
 }
-
-.aumo-badge-xs {
-  @apply text-xs;
-}
-
-/* Loader & States */
-.aumo-loader-container {
-  @apply flex flex-col items-center justify-center min-h-[300px] gap-3 text-muted-foreground;
-}
-
-.aumo-loader-icon {
-  @apply w-8 h-8 animate-spin text-primary;
-}
-
-.aumo-empty-state {
-  @apply p-8 text-center text-sm text-muted-foreground;
-}
-
-/* Alerts & Icons */
-.aumo-alert-success {
-  @apply bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300;
-}
-
-.aumo-icon-primary {
-  @apply text-primary;
-}
-
-.aumo-icon-rose {
-  @apply text-rose-400;
+.aumo-card-content-table,
+.aumo-card-content-flush {
+  @apply p-0;
 }
 
 /* Tabs */
 .aumo-tabs-list {
   @apply grid w-full grid-cols-3 sm:w-[400px];
 }
-
 .aumo-tab-trigger {
   @apply gap-1.5 text-xs;
 }
-
 .aumo-tab-badge {
   @apply ml-1 px-1 text-xs;
 }
-
 .aumo-tab-content {
   @apply mt-4;
 }
 
-/* Cards & Health Section */
-.aumo-card-header {
-  @apply py-3 flex-row items-center justify-between space-y-0 border-b;
+
+/* ==========================================================================
+   4. TABLES & GENERAL JOURNAL STYLING
+   ========================================================================== */
+
+.aumo-table-container,
+.aumo-table-scroll-wrapper {
+  @apply w-full overflow-x-auto;
+}
+.aumo-journal-table,
+.aumo-table-min-width {
+  @apply min-w-[650px];
 }
 
-.aumo-card-header-title {
-  @apply flex items-center gap-2 text-sm font-semibold;
+/* Column Widths & Headers */
+.aumo-col-date-ref,
+.aumo-th-date-ref {
+  @apply w-[16%] pl-6;
 }
-
-.aumo-card-header-text {
-  @apply text-sm font-semibold;
+.aumo-col-account,
+.aumo-th-account {
+  @apply w-[26%];
 }
-
-.aumo-card-content {
-  @apply p-4 space-y-4;
+.aumo-col-desc,
+.aumo-th-description {
+  @apply w-[26%];
 }
-
-.aumo-card-content-table {
-  @apply p-0;
+.aumo-col-refno,
+.aumo-th-ref {
+  @apply w-[10%] text-center;
 }
-
-.aumo-health-item {
-  @apply flex items-center justify-between p-3 rounded-lg bg-muted/50 border;
+.aumo-col-debit,
+.aumo-th-debit {
+  @apply w-[11%] text-right;
 }
-
-/* Typography Helpers */
-.aumo-label-medium {
-  @apply text-sm font-medium;
+.aumo-col-credit,
+.aumo-th-credit {
+  @apply w-[11%] pr-6 text-right;
 }
-
-.aumo-subtext {
-  @apply text-xs text-muted-foreground;
-}
-
-.aumo-text-mono-subtle {
-  @apply text-sm font-mono text-muted-foreground;
-}
-
-.aumo-text-micro {
-  @apply text-[10px];
-}
-
-.aumo-text-micro-subtle {
-  @apply text-[10px] text-muted-foreground;
-}
-
-.aumo-text-emerald-active {
-  @apply text-xs text-emerald-500 font-medium;
-}
-
-/* Table Specific Styling */
 .aumo-table-row-header {
   @apply text-xs;
 }
 
+/* Table Cells & Content */
+.aumo-table-cell-base,
+.aumo-journal-cell {
+  @apply align-top py-2 text-xs;
+}
+.aumo-table-cell-debit,
+.aumo-journal-debit {
+  @apply align-top py-2 text-xs font-semibold;
+}
+.aumo-table-cell-credit,
+.aumo-journal-credit {
+  @apply align-top py-2 pl-6 text-xs text-muted-foreground;
+}
+.aumo-td-date-ref {
+  @apply align-top py-2 pl-6 text-xs;
+}
+.aumo-td-description {
+  @apply align-top py-2 text-xs text-muted-foreground;
+}
+.aumo-td-ref {
+  @apply align-top py-2 text-center;
+}
+.aumo-td-debit,
+.aumo-cell-debit-val {
+  @apply align-top py-2 text-right font-mono text-xs font-medium text-emerald-500;
+}
+.aumo-td-credit,
+.aumo-cell-credit-val {
+  @apply align-top py-2 pr-6 text-right font-mono text-xs font-medium text-red-500;
+}
+
 .aumo-table-cell-bold {
-  @apply font-medium flex items-center gap-2;
+  @apply flex items-center gap-2 font-medium;
 }
-
 .aumo-table-cell-medium {
-  @apply font-medium text-xs;
+  @apply text-xs font-medium;
 }
-
 .aumo-table-cell-subtle {
   @apply text-xs text-muted-foreground;
 }
-
 .aumo-table-cell-primary {
   @apply font-mono text-xs text-primary;
 }
-
 .aumo-table-cell-right {
   @apply text-right;
 }
 
-/* Buttons */
-.aumo-btn-compact {
-  @apply h-7 text-xs gap-1;
+/* Rows & States */
+.aumo-row-shaded {
+  @apply bg-muted/20;
 }
-
-.aumo-btn-ghost-danger {
-  @apply h-6 text-xs text-destructive hover:text-destructive;
+.aumo-row-normal {
+  @apply bg-transparent;
 }
-
-/* Custom Guardrail Utility Classes for GeneralJournal */
-.aumo-page-container {
-  @apply space-y-6 w-full;
+.aumo-table-loading,
+.aumo-table-loading-cell {
+  @apply py-10 text-center text-muted-foreground;
 }
-
-.aumo-page-header {
-  @apply flex flex-wrap items-center justify-between gap-3;
+.aumo-table-empty,
+.aumo-empty-table-cell {
+  @apply py-12 text-center;
 }
-
-.aumo-page-title {
-  @apply text-xl font-bold flex items-center gap-2;
-}
-
-.aumo-page-subtitle {
-  @apply text-sm text-muted-foreground mt-1;
-}
-
-.aumo-btn-group {
-  @apply flex gap-2;
-}
-
-.aumo-btn-icon-label {
-  @apply gap-1.5;
-}
-
-.aumo-table-container {
-  @apply overflow-x-auto w-full;
-}
-
-.aumo-journal-table {
-  @apply min-w-[650px];
-}
-
-.aumo-col-date-ref {
-  @apply pl-6 w-[16%];
-}
-
-.aumo-col-account {
-  @apply w-[26%];
-}
-
-.aumo-col-desc {
-  @apply w-[26%];
-}
-
-.aumo-col-refno {
-  @apply text-center w-[10%];
-}
-
-.aumo-col-debit {
-  @apply text-right w-[11%];
-}
-
-.aumo-col-credit {
-  @apply text-right pr-6 w-[11%];
-}
-
-.aumo-table-loading {
-  @apply text-center py-10 text-muted-foreground;
-}
-
-.aumo-table-empty {
-  @apply text-center py-12;
-}
-
-.aumo-table-empty-box {
+.aumo-table-empty-box,
+.aumo-empty-state-wrapper {
   @apply flex flex-col items-center gap-2 text-muted-foreground;
 }
 
-.aumo-table-cell-base {
-  @apply align-top py-2 text-xs;
+/* Entry Details & References */
+.aumo-entry-info,
+.aumo-ref-column {
+  @apply flex flex-col gap-0.5;
 }
-
-.aumo-table-cell-debit {
-  @apply align-top py-2 text-xs font-semibold;
+.aumo-entry-tx-num,
+.aumo-ref-trx-number {
+  @apply font-mono font-bold text-amber-500;
 }
-
-.aumo-table-cell-credit {
-  @apply align-top py-2 text-xs pl-6 text-muted-foreground;
+.aumo-entry-created,
+.aumo-ref-timestamp {
+  @apply text-xs text-muted-foreground;
 }
-
+.aumo-entry-updated,
+.aumo-ref-updated-at {
+  @apply flex items-center gap-0.5 text-xs text-sky-500;
+}
+.aumo-entry-actions,
+.aumo-edit-actions {
+  @apply mt-1 flex gap-1;
+}
 .aumo-badge-date {
   @apply mb-1 font-mono;
 }
-
-.aumo-entry-info {
-  @apply flex flex-col gap-0.5;
-}
-
-.aumo-entry-tx-num {
-  @apply font-mono font-bold text-amber-500;
-}
-
-.aumo-entry-created {
-  @apply text-xs text-muted-foreground;
-}
-
-.aumo-entry-updated {
-  @apply text-xs text-sky-500 flex items-center gap-0.5;
-}
-
-.aumo-entry-actions {
-  @apply flex gap-1 mt-1;
-}
-
-.aumo-btn-icon-xs {
-  @apply h-6 w-6;
-}
-
 .aumo-badge-ref {
   @apply font-mono text-amber-500;
 }
 
-.aumo-cell-debit-val {
-  @apply text-right align-top py-2 font-mono text-xs font-medium text-emerald-500;
+
+/* ==========================================================================
+   5. GUARDIAN MODULE & SYSTEM HEALTH
+   ========================================================================== */
+
+.aumo-health-item {
+  @apply flex items-center justify-between rounded-lg border bg-muted/50 p-3;
+}
+.aumo-guardian-badge-base {
+  @apply gap-2 px-3 py-1.5;
+}
+.aumo-guardian-badge-healthy {
+  @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-500;
+}
+.aumo-guardian-badge-unhealthy {
+  @apply border-amber-500/20 bg-amber-500/10 text-amber-500;
 }
 
-.aumo-cell-credit-val {
-  @apply text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500;
-}
 
-.aumo-row-shaded {
-  @apply bg-muted/20;
-}
-
-.aumo-row-normal {
-  @apply bg-transparent;
-}
-
-.aumo-page-container { @apply space-y-6 w-full; }
-.aumo-page-header { @apply flex flex-wrap items-center justify-between gap-3; }
-.aumo-heading-title { @apply text-xl font-bold flex items-center gap-2; }
-.aumo-heading-subtitle { @apply text-sm text-muted-foreground mt-1; }
-.aumo-icon-amber { @apply text-amber-500; }
-.aumo-button-group { @apply flex gap-2; }
-.aumo-btn-icon-gap { @apply gap-1.5; }
-
-.aumo-card-full { @apply w-full; }
-.aumo-card-content-flush { @apply p-0; }
-.aumo-table-scroll-wrapper { @apply overflow-x-auto w-full; }
-.aumo-table-min-width { @apply min-w-[650px]; }
-
-.aumo-th-date-ref { @apply pl-6 w-[16%]; }
-.aumo-th-account { @apply w-[26%]; }
-.aumo-th-description { @apply w-[26%]; }
-.aumo-th-ref { @apply text-center w-[10%]; }
-.aumo-th-debit { @apply text-right w-[11%]; }
-.aumo-th-credit { @apply text-right pr-6 w-[11%]; }
-
-.aumo-table-loading-cell { @apply text-center py-10 text-muted-foreground; }
-.aumo-spinner-icon { @apply animate-spin inline mr-2; }
-.aumo-row-shaded { @apply bg-muted/20; }
-
-.aumo-td-date-ref { @apply pl-6 align-top py-2 text-xs; }
-.aumo-badge-date { @apply mb-1 font-mono; }
-.aumo-ref-column { @apply flex flex-col gap-0.5; }
-.aumo-ref-trx-number { @apply font-mono font-bold text-amber-500; }
-.aumo-ref-timestamp { @apply text-xs text-muted-foreground; }
-.aumo-ref-updated-at { @apply text-xs text-sky-500 flex items-center gap-0.5; }
-.aumo-edit-actions { @apply flex gap-1 mt-1; }
-.aumo-btn-square-sm { @apply h-6 w-6; }
-.aumo-btn-square-destructive { @apply h-6 w-6 text-destructive; }
-
-.aumo-journal-cell { @apply align-top py-2 text-xs; }
-.aumo-journal-debit { @apply font-semibold; }
-.aumo-journal-credit { @apply pl-6 text-muted-foreground; }
-
-.aumo-td-description { @apply align-top py-2 text-xs text-muted-foreground; }
-.aumo-td-ref { @apply text-center align-top py-2; }
-.aumo-badge-ref { @apply font-mono text-amber-500; }
-.aumo-td-debit { @apply text-right align-top py-2 font-mono text-xs font-medium text-emerald-500; }
-.aumo-td-credit { @apply text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500; }
-
-.aumo-empty-table-cell { @apply text-center py-12; }
-.aumo-empty-state-wrapper { @apply flex flex-col items-center gap-2 text-muted-foreground; }
-.aumo-empty-title { @apply text-sm font-medium; }
-.aumo-empty-subtitle { @apply text-xs; }
-.aumo-link-primary { @apply text-primary underline; }
+/* ==========================================================================
+   6. HOME & MARKET WIDGETS
+   ========================================================================== */
 
 .aumo-home-wrapper {
-  @apply w-full grid place-items-center py-6;
+  @apply grid w-full place-items-center py-6;
 }
-
 .aumo-home-card {
-  @apply w-full max-w-2xl bg-[#0F172A] border-white/10 shadow-2xl rounded-2xl text-white;
+  @apply w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0F172A] p-6 text-white shadow-2xl;
+}
+.aumo-home-footer {
+  @apply mt-6 text-center;
+}
+.aumo-home-desc {
+  @apply mx-auto max-w-md text-sm leading-relaxed text-white/80;
+}
+.aumo-home-actions {
+  @apply mt-6 flex flex-wrap justify-center gap-3;
 }
 
+/* Market Widget */
 .aumo-market-widget {
-  @apply rounded-xl bg-slate-900/80 border border-white/10 p-4;
+  @apply rounded-xl border border-white/10 bg-slate-900/80 p-4;
 }
-
 .aumo-market-header {
-  @apply flex items-center justify-between mb-3;
+  @apply mb-3 flex items-center justify-between;
 }
-
 .aumo-market-title {
-  @apply text-sm font-bold flex items-center gap-2 text-amber-400;
+  @apply flex items-center gap-2 text-sm font-bold text-amber-400;
 }
-
 .aumo-market-grid {
-  @apply grid grid-cols-1 sm:grid-cols-2 gap-2;
+  @apply grid grid-cols-1 gap-2 sm:grid-cols-2;
 }
-
 .aumo-market-item {
-  @apply rounded-lg border border-white/10 bg-black/40 p-2.5 flex flex-col justify-between min-h-[76px];
+  @apply flex min-h-[76px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5;
 }
-
 .aumo-market-symbol {
   @apply text-xs font-bold text-white;
 }
-
 .aumo-market-price {
-  @apply text-sm font-semibold text-white mt-1;
+  @apply mt-1 text-sm font-semibold text-white;
 }
-
 .aumo-market-name {
   @apply text-[11px] text-white/50;
 }
 
-.aumo-home-footer {
-  @apply text-center mt-6;
-}
 
-.aumo-home-desc {
-  @apply text-sm leading-relaxed text-white/80 max-w-md mx-auto;
-}
+/* ==========================================================================
+   7. BUTTONS, BADGES & ICONS
+   ========================================================================== */
 
-.aumo-home-actions {
-  @apply flex justify-center gap-3 mt-6 flex-wrap;
+/* Buttons */
+.aumo-btn-group,
+.aumo-button-group {
+  @apply flex gap-2;
 }
-
+.aumo-btn-compact {
+  @apply h-7 gap-1 text-xs;
+}
+.aumo-btn-ghost-danger {
+  @apply h-6 text-xs text-destructive hover:text-destructive;
+}
+.aumo-btn-icon-xs,
+.aumo-btn-square-sm {
+  @apply h-6 w-6;
+}
+.aumo-btn-square-destructive {
+  @apply h-6 w-6 text-destructive;
+}
+.aumo-btn-icon-label,
+.aumo-btn-icon-gap {
+  @apply gap-1.5;
+}
 .aumo-primary-btn {
-  @apply rounded-xl bg-gradient-to-br from-indigo-500/80 to-violet-600/80 border border-indigo-300/20 shadow-lg hover:from-indigo-500 hover:to-violet-600 text-white flex items-center gap-2;
+  @apply flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-white shadow-lg hover:from-indigo-500 hover:to-violet-600;
+}
+.aumo-secondary-btn {
+  @apply flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-white hover:bg-white/15;
 }
 
-.aumo-secondary-btn {
-  @apply rounded-xl bg-white/10 text-white hover:bg-white/15 border border-white/10 flex items-center gap-2;
+/* Badges */
+.aumo-badge-success-subtle {
+  @apply bg-emerald-500/15 text-xs text-emerald-600;
+}
+.aumo-badge-xs {
+  @apply text-xs;
+}
+
+/* Icons & Colors */
+.aumo-icon-primary {
+  @apply text-primary;
+}
+.aumo-icon-rose {
+  @apply text-rose-400;
+}
+.aumo-icon-amber {
+  @apply text-amber-500;
+}
+.aumo-spinner-icon {
+  @apply mr-2 inline animate-spin;
+}
+
+
+/* ==========================================================================
+   8. TYPOGRAPHY, ALERTS & STATES
+   ========================================================================== */
+
+/* Typography */
+.aumo-label-medium,
+.aumo-empty-title {
+  @apply text-sm font-medium;
+}
+.aumo-subtext,
+.aumo-empty-subtitle {
+  @apply text-xs text-muted-foreground;
+}
+.aumo-text-mono-subtle {
+  @apply font-mono text-sm text-muted-foreground;
+}
+.aumo-text-micro {
+  @apply text-[10px];
+}
+.aumo-text-micro-subtle {
+  @apply text-[10px] text-muted-foreground;
+}
+.aumo-text-emerald-active {
+  @apply text-xs font-medium text-emerald-500;
+}
+.aumo-link-primary {
+  @apply text-primary underline;
+}
+
+/* System Feedback & States */
+.aumo-loader-container {
+  @apply flex min-h-[300px] flex-col items-center justify-center gap-3 text-muted-foreground;
+}
+.aumo-loader-icon {
+  @apply h-8 w-8 animate-spin text-primary;
+}
+.aumo-empty-state {
+  @apply p-8 text-center text-sm text-muted-foreground;
+}
+.aumo-alert-success {
+  @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300;
 }
