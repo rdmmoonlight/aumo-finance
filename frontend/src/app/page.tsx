@@ -1,4 +1,4 @@
-import LoginForm from './LoginForm'; // Import Client Component LoginForm yang dipisah
+import LoginForm from './auth/LoginForm'; // Import Client Component LoginForm yang dipisah
 
 export const metadata = {
   title: 'Aumo Finance - Sign In',
