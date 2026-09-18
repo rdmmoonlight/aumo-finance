@@ -23,7 +23,7 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      # 2. SETUP LINGKUNGAN (.NET & NODE.JS)
+      # 2. SETUP ENVIRONMENT (.NET & NODE.JS)
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -32,24 +32,52 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm' # Mengaktifkan caching npm agar build lebih cepat
+          node-version: '24'
+          # Mengaktifkan cache npm di sub-folder frontend
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
 
-      # 3. RESTORE & INSTALL DEPENDENCIES
+      # 3. BACKEND (.NET C#)
       - name: Restore .NET Dependencies
         run: dotnet restore
+        working-directory: backend
 
-      - name: Install Node.js Dependencies
-        run: npm ci
-
-      # 4. FORMATTING & LINTING (C# & TYPESCRIPT)
       - name: Auto-Format C# Code
         run: dotnet format
+        working-directory: backend
 
-      - name: Run Prettier (TypeScript / Frontend)
+      - name: Build & Typecheck (.NET)
+        run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true
+        working-directory: backend
+
+      # 4. FRONTEND (Next.js & Playwright)
+      - name: Install Frontend Dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run Prettier Check/Write (Frontend & Root)
         run: npx prettier --write .
+        working-directory: frontend
 
-      - name: Commit Formatted Changes (C# & TS)
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+        working-directory: frontend
+
+      - name: Run Playwright Tests
+        run: npx playwright test
+        working-directory: frontend
+
+      # 5. MOBILE (React Native) - Optional Linting
+      - name: Install Mobile Dependencies
+        run: npm ci
+        working-directory: mobile
+
+      - name: Run Prettier (Mobile)
+        run: npx prettier --write .
+        working-directory: mobile
+
+      # 6. COMMIT AUTO-FORMATTED CHANGES (C# & Prettier)
+      - name: Commit Formatted Changes
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -57,22 +85,11 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
 
-      # 5. TYPECHECK & BUILD (.NET)
-      - name: Build & Typecheck (.NET)
-        run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true
-
-      # 6. TESTING WITH PLAYWRIGHT (TYPESCRIPT)
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
-
-      - name: Run Playwright Tests
-        run: npx playwright test
-
-      # 7. UPLOAD PLAYWRIGHT REPORT (OPSIONAL - JIKA TES GAGAL/SELESAI)
+      # 7. UPLOAD PLAYWRIGHT REPORT
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
-          path: playwright-report/
+          path: frontend/playwright-report/
           retention-days: 30
