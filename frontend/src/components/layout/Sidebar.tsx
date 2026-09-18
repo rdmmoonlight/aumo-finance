@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -89,15 +90,15 @@ function NavItemLink({ item }: { item: MenuItem }) {
         "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs leading-none transition-colors block",
         isActive
           ? "bg-[var(--color-matte-hover)] text-white font-medium"
-          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05]"
+          : "text-zinc-400 hover:text-zinc-100 hover:bg-white/[0.05]"
       )}
     >
       <item.icon
-        size={17}
+        size={16}
         stroke={1.7}
         className={cn(
           "shrink-0",
-          isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100"
+          isActive ? "opacity-100 text-white" : "opacity-60 group-hover:opacity-100"
         )}
       />
       <span className="truncate">{item.label}</span>
@@ -112,36 +113,46 @@ export default function Sidebar({ user }: SidebarProps) {
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
-      await apiClient.post("/auth/logout");
+      // Dipanggil ke endpoint versi API yang seragam
+      await apiClient.post("/api/v1/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
       localStorage.removeItem("isAuthenticated");
       setLoggingOut(false);
-      router.push("/auth/login");
-      router.refresh();
+      // Redirect langsung ke landing page/login root
+      window.location.href = "/";
     }
   };
 
   return (
     <aside className="w-64 border-r border-white/[0.06] bg-[var(--color-matte)] flex flex-col h-screen sticky top-0 shrink-0 select-none z-20">
-      <div className="h-16 px-5 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
-        <div className="w-8 h-8 rounded-lg bg-[var(--color-matte-hover)] text-white grid place-items-center font-bold text-sm">
-          A
+      {/* Brand Header & Favicon Icon */}
+      <div className="h-16 px-4 border-b border-white/[0.06] flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-zinc-900 border border-white/10 p-1.5 flex items-center justify-center shrink-0">
+          <Image
+            src="/favicon.ico"
+            alt="Aumo Logo"
+            width={20}
+            height={20}
+            className="object-contain"
+          />
         </div>
-        <div className="flex flex-col">
-          <span className="font-semibold text-sm leading-none text-white tracking-tight">
-            Aumo Finance
+        <div className="flex flex-col min-w-0">
+          <span className="font-semibold text-xs leading-none text-white tracking-tight truncate">
+            AUMO FINANCE
           </span>
-          <span className="text-[10px] text-zinc-500 uppercase tracking-[0.16em] font-medium mt-1">
+          <span className="text-[9.5px] text-zinc-400 uppercase tracking-[0.14em] font-medium mt-1 truncate">
             Accounting Suite
           </span>
         </div>
       </div>
+
+      {/* Navigation Links */}
       <ScrollArea className="flex-1 min-h-0">
-        <div className="px-3 py-5 space-y-7">
+        <div className="px-3 py-4 space-y-6">
           <div>
-            <h2 className="px-3 mb-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-[0.14em]">
+            <h2 className="px-3 mb-2.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.14em]">
               Main Domain
             </h2>
             <div className="space-y-0.5">
@@ -152,7 +163,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
           <div className="h-px bg-white/[0.06] mx-2" />
           <div>
-            <h2 className="px-3 mb-3 text-[11px] font-semibold text-zinc-500 uppercase tracking-[0.14em]">
+            <h2 className="px-3 mb-2.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.14em]">
               Reports & Statements
             </h2>
             <div className="space-y-0.5">
@@ -164,22 +175,24 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
         <ScrollBar orientation="vertical" />
       </ScrollArea>
-      <div className="p-3 border-t border-white/[0.06] bg-[var(--color-matte)] space-y-2.5">
-        <div className="flex items-center gap-2.5 px-2.5 py-2.5 rounded-xl bg-[var(--color-matte-soft)] border border-white/[0.06]">
-          <div className="w-7 h-7 rounded-full bg-white/[0.06] text-zinc-300 grid place-items-center shrink-0">
+
+      {/* User Footer & Logout Action */}
+      <div className="p-3 border-t border-white/[0.06] bg-[var(--color-matte)] space-y-2">
+        <div className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl bg-[var(--color-matte-soft)] border border-white/[0.06]">
+          <div className="w-7 h-7 rounded-full bg-white/[0.08] text-zinc-300 grid place-items-center shrink-0">
             <IconUser size={14} />
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-xs font-medium truncate text-white leading-none">
               {user?.fullName || user?.userName || "User"}
             </span>
-            <span className="text-[10px] text-zinc-500 truncate leading-none mt-1.5 font-mono">
+            <span className="text-[10px] text-zinc-400 truncate leading-none mt-1 font-mono">
               {user?.email || "Active Session"}
             </span>
           </div>
           <Badge
             variant="outline"
-            className="px-1.5 py-0 text-[10px] border-emerald-500/20 text-emerald-400 bg-emerald-500/10 rounded-md"
+            className="px-1.5 py-0 text-[9px] border-emerald-500/20 text-emerald-400 bg-emerald-500/10 rounded-md shrink-0"
           >
             <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse mr-1" />
             Online
@@ -190,10 +203,10 @@ export default function Sidebar({ user }: SidebarProps) {
           size="sm"
           onClick={handleLogout}
           disabled={loggingOut}
-          className="w-full justify-start gap-2 h-8 text-[12.5px] text-zinc-500 hover:text-white hover:bg-white/[0.06] rounded-lg"
+          className="w-full justify-start gap-2 h-8 text-xs text-zinc-400 hover:text-white hover:bg-white/[0.06] rounded-lg"
         >
           {loggingOut ? (
-            <IconLoader2 size={14} className="animate-spin" />
+            <IconLoader2 size={14} className="animate-spin text-white" />
           ) : (
             <IconLogout size={14} />
           )}
