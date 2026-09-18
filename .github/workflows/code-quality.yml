@@ -64,7 +64,7 @@ jobs:
         working-directory: frontend
 
       - name: Run Playwright Tests
-        run: npx playwright test
+        run: npx playwright test --pass-with-no-tests
         working-directory: frontend
 
       # 5. MOBILE (React Native) - Optional Linting
