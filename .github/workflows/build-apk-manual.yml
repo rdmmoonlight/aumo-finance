@@ -83,7 +83,11 @@ jobs:
           git add build-version.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: bump build counter to ${{ steps.version.outputs.tag }}"
+            git remote set-url origin "https://x-access-token:${GIT_PUSH_TOKEN}@github.com/${{ github.repository }}.git"
+            git pull --rebase origin main
             git push origin HEAD:main
           else
             echo "Tidak ada perubahan pada build-version.json"
           fi
+        env:
+          GIT_PUSH_TOKEN: ${{ secrets.GIT_PUSH_TOKEN }}
