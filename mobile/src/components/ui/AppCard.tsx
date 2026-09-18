@@ -10,7 +10,13 @@ interface AppCardProps {
   onPress?: () => void;
 }
 
-export function AppCard({ title, subtitle, children, style, onPress }: AppCardProps) {
+export function AppCard({
+  title,
+  subtitle,
+  children,
+  style,
+  onPress,
+}: AppCardProps) {
   const theme = useTheme();
   return (
     <Card
