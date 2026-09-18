@@ -1,26 +1,33 @@
-import path from 'node:path'
+import path from "node:path";
 
 export const aumoConfig = {
-  envPrefix: ['WEB_'],
-  
+  envPrefix: ["WEB_"],
+
   // Gunakan getter agar selalu dievaluasi saat dipanggil, bukan saat file di-import
   get backendTarget() {
-    return process.env.WEB_API_URL || process.env.NEXT_PUBLIC_WEB_API_URL || 'http://localhost:5000'
+    return (
+      process.env.WEB_API_URL ||
+      process.env.NEXT_PUBLIC_WEB_API_URL ||
+      "http://localhost:5000"
+    );
   },
 
   alias: {
-    '@': path.resolve(process.cwd(), './src'),
+    "@": path.resolve(process.cwd(), "./src"),
   },
 
   getRewrites: () => {
-    const target = process.env.WEB_API_URL || process.env.NEXT_PUBLIC_WEB_API_URL || 'http://localhost:5000'
+    const target =
+      process.env.WEB_API_URL ||
+      process.env.NEXT_PUBLIC_WEB_API_URL ||
+      "http://localhost:5000";
     return [
       {
-        source: '/api/:path*',
+        source: "/api/:path*",
         destination: `${target}/api/:path*`,
       },
-    ]
+    ];
   },
-}
+};
 
-export default aumoConfig
+export default aumoConfig;

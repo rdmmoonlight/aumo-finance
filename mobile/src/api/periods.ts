@@ -1,6 +1,6 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '../../apiClient';
-import { PeriodConfigPayload } from './types';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiClient } from "../../apiClient";
+import { PeriodConfigPayload } from "./types";
 
 export interface Period {
   id: number;
@@ -20,7 +20,7 @@ export interface PeriodsResponse {
 export const periodsService = {
   // GET /api/v1/periods -> daftar periode milik user + periode yang sedang dipilih
   getPeriods: async (): Promise<PeriodsResponse> => {
-    const response = await apiClient.get<PeriodsResponse>('/api/v1/periods');
+    const response = await apiClient.get<PeriodsResponse>("/api/v1/periods");
     return response.data;
   },
   // CATATAN: payload di bawah ini (PeriodConfigPayload: name/startDate/endDate/
@@ -29,7 +29,7 @@ export const periodsService = {
   // tergantung LoadExisting vs CreateNew). Jangan dipakai sebelum disamakan
   // ulang dengan Controllers/PeriodsController.cs -> CreatePeriodRequest.
   createPeriod: async (payload: PeriodConfigPayload) => {
-    const response = await apiClient.post('/api/v1/periods', payload);
+    const response = await apiClient.post("/api/v1/periods", payload);
     return response.data;
   },
   selectPeriod: async (periodId: number) => {
@@ -44,7 +44,7 @@ export const periodsService = {
 
 export const usePeriods = () => {
   return useQuery({
-    queryKey: ['periods'],
+    queryKey: ["periods"],
     queryFn: periodsService.getPeriods,
   });
 };
@@ -52,9 +52,10 @@ export const usePeriods = () => {
 export const useCreatePeriod = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: PeriodConfigPayload) => periodsService.createPeriod(payload),
+    mutationFn: (payload: PeriodConfigPayload) =>
+      periodsService.createPeriod(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['periods'] });
+      queryClient.invalidateQueries({ queryKey: ["periods"] });
     },
   });
 };
@@ -64,7 +65,7 @@ export const useSelectPeriod = () => {
   return useMutation({
     mutationFn: (periodId: number) => periodsService.selectPeriod(periodId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['periods'] });
+      queryClient.invalidateQueries({ queryKey: ["periods"] });
     },
   });
 };
@@ -74,7 +75,7 @@ export const useClosePeriod = () => {
   return useMutation({
     mutationFn: (periodId: number) => periodsService.closePeriod(periodId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['periods'] });
+      queryClient.invalidateQueries({ queryKey: ["periods"] });
     },
   });
 };

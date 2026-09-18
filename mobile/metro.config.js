@@ -1,5 +1,5 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { getDefaultConfig } = require('expo/metro-config');
+const { getDefaultConfig } = require("expo/metro-config");
 
 const config = getDefaultConfig(__dirname);
 
@@ -9,6 +9,6 @@ const config = getDefaultConfig(__dirname);
 // that file even though a CJS build ("main" field) exists right next to it.
 // Registering "mjs" as a recognized source extension lets Metro load it
 // (Babel already knows how to transform ES module syntax).
-config.resolver.sourceExts.push('mjs');
+config.resolver.sourceExts.push("mjs");
 
 module.exports = config;

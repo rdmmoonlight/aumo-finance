@@ -12,30 +12,30 @@
 // State disimpan di build-version.json, di-commit balik ke repo oleh
 // workflow setelah build sukses, supaya urutannya konsisten antar run.
 
-const fs = require('fs');
-const path = require('path');
+const fs = require("fs");
+const path = require("path");
 
-const STATE_PATH = path.join(__dirname, '..', 'build-version.json');
+const STATE_PATH = path.join(__dirname, "..", "build-version.json");
 
 function loadState() {
   if (!fs.existsSync(STATE_PATH)) {
     return { month: null, build: 0 };
   }
-  return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));
+  return JSON.parse(fs.readFileSync(STATE_PATH, "utf8"));
 }
 
 function main() {
   const now = new Date();
   const yyyy = now.getFullYear();
   const yy = String(yyyy).slice(-2);
-  const mm = String(now.getMonth() + 1).padStart(2, '0');
+  const mm = String(now.getMonth() + 1).padStart(2, "0");
   const currentMonth = `${yyyy}-${mm}`;
 
   const state = loadState();
   const nextBuild = state.month === currentMonth ? state.build + 1 : 1;
   const nextState = { month: currentMonth, build: nextBuild };
 
-  fs.writeFileSync(STATE_PATH, JSON.stringify(nextState, null, 2) + '\n');
+  fs.writeFileSync(STATE_PATH, JSON.stringify(nextState, null, 2) + "\n");
 
   // "version" (tanpa 'v') ditanam ke app.config.js sebagai Application.nativeApplicationVersion.
   // "tag" (pakai 'v') dipakai untuk nama GitHub Release. appUpdateService.ts men-strip 'v'

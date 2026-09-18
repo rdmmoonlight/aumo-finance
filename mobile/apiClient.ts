@@ -1,7 +1,7 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import * as SecureStore from 'expo-secure-store';
-import { router } from 'expo-router';
-import { CONFIG } from './config';
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
+import { CONFIG } from "./config";
 
 // Key untuk menyimpan token JWT
 const TOKEN_KEY = CONFIG.TOKEN_KEY;
@@ -12,7 +12,7 @@ export const tokenStorage = {
     try {
       return await SecureStore.getItemAsync(TOKEN_KEY);
     } catch (error) {
-      console.error('Error reading auth token:', error);
+      console.error("Error reading auth token:", error);
       return null;
     }
   },
@@ -20,14 +20,14 @@ export const tokenStorage = {
     try {
       await SecureStore.setItemAsync(TOKEN_KEY, token);
     } catch (error) {
-      console.error('Error saving auth token:', error);
+      console.error("Error saving auth token:", error);
     }
   },
   removeToken: async () => {
     try {
       await SecureStore.deleteItemAsync(TOKEN_KEY);
     } catch (error) {
-      console.error('Error removing auth token:', error);
+      console.error("Error removing auth token:", error);
     }
   },
 };
@@ -37,7 +37,7 @@ export const apiClient = axios.create({
   baseURL: CONFIG.API_BASE_URL,
   timeout: CONFIG.TIMEOUT,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -50,7 +50,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // Response Interceptor: Menangani 401 Unauthorized & Redirect ke Auth
@@ -62,8 +62,8 @@ apiClient.interceptors.response.use(
       await tokenStorage.removeToken();
 
       // Redirect ke layar login/auth menggunakan Expo Router
-      router.replace('/(auth)/login');
+      router.replace("/(auth)/login");
     }
     return Promise.reject(error);
-  }
+  },
 );

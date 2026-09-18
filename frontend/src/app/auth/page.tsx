@@ -1,8 +1,8 @@
-import LoginForm from './LoginForm';
+import LoginForm from "./LoginForm";
 
 export const metadata = {
-  title: 'Sign In | Aumo Workspace',
-  description: 'Masuk ke workspace kamu.',
+  title: "Sign In | Aumo Workspace",
+  description: "Masuk ke workspace kamu.",
 };
 
 export default function LoginPage() {

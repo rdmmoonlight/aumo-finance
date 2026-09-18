@@ -1,14 +1,14 @@
-import Link from 'next/link';
+import Link from "next/link";
 import {
   IconDashboard,
   IconNotebook,
   IconChartLine,
   IconTrendingUp,
   IconTrendingDown,
-} from '@tabler/icons-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+} from "@tabler/icons-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface MarketItem {
   symbol: string;
@@ -23,34 +23,34 @@ async function fetchMarketData(): Promise<MarketItem[]> {
 
   // 1. Fetch Kurs USD/IDR dari API Server
   try {
-    const resUsd = await fetch('https://open.er-api.com/v6/latest/USD', {
-      cache: 'no-store',
+    const resUsd = await fetch("https://open.er-api.com/v6/latest/USD", {
+      cache: "no-store",
     });
     if (resUsd.ok) {
       const usdData = await resUsd.json();
       const rate = usdData?.rates?.IDR;
       if (rate) {
         items.push({
-          symbol: 'USD/IDR',
-          name: 'Rupiah',
-          price: `Rp ${rate.toLocaleString('id-ID', { maximumFractionDigits: 0 })}`,
-          change: 'Live',
+          symbol: "USD/IDR",
+          name: "Rupiah",
+          price: `Rp ${rate.toLocaleString("id-ID", { maximumFractionDigits: 0 })}`,
+          change: "Live",
           isUp: true,
         });
       }
     }
   } catch (error) {
-    console.error('Error fetching USD/IDR:', error);
+    console.error("Error fetching USD/IDR:", error);
   }
 
   // 2. Fetch Data IHSG (^JKSE) dari Yahoo Finance API
   try {
     const resYahoo = await fetch(
-      'https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE',
+      "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
       {
-        headers: { 'User-Agent': 'Mozilla/5.0' },
-        cache: 'no-store',
-      }
+        headers: { "User-Agent": "Mozilla/5.0" },
+        cache: "no-store",
+      },
     );
 
     if (resYahoo.ok) {
@@ -63,16 +63,20 @@ async function fetchMarketData(): Promise<MarketItem[]> {
         const isUp = changePercent >= 0;
 
         items.push({
-          symbol: 'IHSG',
-          name: 'Indeks Saham',
-          price: price ? price.toLocaleString('id-ID', { minimumFractionDigits: 2 }) : 'N/A',
-          change: changePercent ? `${isUp ? '+' : ''}${changePercent.toFixed(2)}%` : '0.00%',
+          symbol: "IHSG",
+          name: "Indeks Saham",
+          price: price
+            ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
+            : "N/A",
+          change: changePercent
+            ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
+            : "0.00%",
           isUp,
         });
       }
     }
   } catch (error) {
-    console.error('Error fetching Yahoo Finance data:', error);
+    console.error("Error fetching Yahoo Finance data:", error);
   }
 
   return items;
@@ -113,8 +117,8 @@ export default async function HomePage() {
                       <Badge
                         className={`text-[10px] ${
                           item.isUp
-                            ? 'bg-emerald-500/15 text-emerald-400'
-                            : 'bg-red-500/15 text-red-400'
+                            ? "bg-emerald-500/15 text-emerald-400"
+                            : "bg-red-500/15 text-red-400"
                         } border-0 flex items-center px-1.5 py-0.5`}
                       >
                         {item.isUp ? (
@@ -169,5 +173,4 @@ export default async function HomePage() {
       </Card>
     </div>
   );
-                                           }
-                       
+}

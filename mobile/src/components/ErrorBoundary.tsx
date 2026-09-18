@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Text, Button } from 'react-native-paper';
-import * as Sentry from 'sentry-expo';
+import React from "react";
+import { View, StyleSheet } from "react-native";
+import { Text, Button } from "react-native-paper";
+import * as Sentry from "sentry-expo";
 
 interface Props {
   children: React.ReactNode;
@@ -25,7 +25,9 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
-    Sentry.Native.captureException(error, { extra: { componentStack: info.componentStack } });
+    Sentry.Native.captureException(error, {
+      extra: { componentStack: info.componentStack },
+    });
   }
 
   handleRetry = () => {
@@ -55,12 +57,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0D0D0D',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#0D0D0D",
+    justifyContent: "center",
+    alignItems: "center",
     padding: 24,
     gap: 12,
   },
-  title: { color: '#FAFAFA' },
-  body: { color: '#A3A3A3', textAlign: 'center', marginBottom: 8 },
+  title: { color: "#FAFAFA" },
+  body: { color: "#A3A3A3", textAlign: "center", marginBottom: 8 },
 });

@@ -1,4 +1,4 @@
-import aumoConfig from './aumo.config.ts'
+import aumoConfig from "./aumo.config.ts";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -14,8 +14,8 @@ const nextConfig = {
     WEB_API_URL: aumoConfig.backendTarget,
   },
   async rewrites() {
-    return aumoConfig.getRewrites()
+    return aumoConfig.getRewrites();
   },
-}
+};
 
-export default nextConfig
+export default nextConfig;

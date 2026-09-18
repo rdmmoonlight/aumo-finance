@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useMemo } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   IconSitemap,
   IconPlus,
@@ -11,14 +11,14 @@ import {
   IconTrash,
   IconX,
   IconSearch,
-} from '@tabler/icons-react';
+} from "@tabler/icons-react";
 
-import apiClient from '@/lib/apiClient';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import apiClient from "@/lib/apiClient";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -26,23 +26,23 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
+} from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog';
+} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { cn } from "@/lib/utils";
 
 export interface ChartOfAccount {
   id: number;
@@ -64,34 +64,45 @@ interface ApiErrorResponse {
 }
 
 const ACCOUNT_TYPES = [
-  'Assets',
-  'Liabilities',
-  'Equity',
-  'OperatingIncome',
-  'OperatingExpenses',
-  'OtherIncome',
-  'OtherExpenses',
+  "Assets",
+  "Liabilities",
+  "Equity",
+  "OperatingIncome",
+  "OperatingExpenses",
+  "OtherIncome",
+  "OtherExpenses",
 ];
 
-const ACCOUNT_RANGES: Record<string, { start: number; end: number; label: string }> = {
-  Assets: { start: 100, end: 199, label: 'Assets (100-199)' },
-  Liabilities: { start: 200, end: 299, label: 'Liabilities (200-299)' },
-  Equity: { start: 300, end: 399, label: 'Equity (300-399)' },
-  OperatingIncome: { start: 400, end: 499, label: 'Operating Income (400-499)' },
-  OperatingExpenses: { start: 500, end: 599, label: 'Operating Expenses (500-599)' },
-  OtherIncome: { start: 600, end: 799, label: 'Other Income (600-799)' },
-  OtherExpenses: { start: 800, end: 999, label: 'Other Expenses (800-999)' },
+const ACCOUNT_RANGES: Record<
+  string,
+  { start: number; end: number; label: string }
+> = {
+  Assets: { start: 100, end: 199, label: "Assets (100-199)" },
+  Liabilities: { start: 200, end: 299, label: "Liabilities (200-299)" },
+  Equity: { start: 300, end: 399, label: "Equity (300-399)" },
+  OperatingIncome: {
+    start: 400,
+    end: 499,
+    label: "Operating Income (400-499)",
+  },
+  OperatingExpenses: {
+    start: 500,
+    end: 599,
+    label: "Operating Expenses (500-599)",
+  },
+  OtherIncome: { start: 600, end: 799, label: "Other Income (600-799)" },
+  OtherExpenses: { start: 800, end: 999, label: "Other Expenses (800-999)" },
 };
 
 export default function ChartOfAccountsClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const highlightId = searchParams.get('highlight');
+  const highlightId = searchParams.get("highlight");
 
   const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [searchText, setSearchText] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -99,25 +110,27 @@ export default function ChartOfAccountsClient() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [newAccount, setNewAccount] = useState<Partial<ChartOfAccount>>({
-    type: '',
+    type: "",
     referenceNumber: 0,
-    accountName: '',
-    role: 'Default',
+    accountName: "",
+    role: "Default",
   });
   const [editAccount, setEditAccount] = useState<ChartOfAccount | null>(null);
 
   const fetchAccounts = async () => {
     setLoading(true);
     try {
-      const { data } = await apiClient.get('/api/v1/chart-of-accounts');
+      const { data } = await apiClient.get("/api/v1/chart-of-accounts");
       const loaded: ChartOfAccount[] = data?.accounts || [];
       setAccounts(loaded.sort((a, b) => a.referenceNumber - b.referenceNumber));
     } catch (err: unknown) {
       const apiErr = err as ApiErrorResponse;
       if (apiErr.response?.status === 401) {
-        router.push('/auth');
+        router.push("/auth");
       }
-      setErrorMessage(apiErr.response?.data?.message || 'Failed to load accounts');
+      setErrorMessage(
+        apiErr.response?.data?.message || "Failed to load accounts",
+      );
     } finally {
       setLoading(false);
     }
@@ -143,11 +156,13 @@ export default function ChartOfAccountsClient() {
     setCreateError(null);
 
     const refNum = Number(newAccount.referenceNumber);
-    const currentType = newAccount.type || '';
+    const currentType = newAccount.type || "";
     const range = ACCOUNT_RANGES[currentType];
 
     if (range && (refNum < range.start || refNum > range.end)) {
-      setCreateError(`Ref ${refNum} not valid for ${currentType} (${range.start}-${range.end})`);
+      setCreateError(
+        `Ref ${refNum} not valid for ${currentType} (${range.start}-${range.end})`,
+      );
       return;
     }
 
@@ -157,19 +172,24 @@ export default function ChartOfAccountsClient() {
     }
 
     try {
-      await apiClient.post('/api/v1/chart-of-accounts', {
+      await apiClient.post("/api/v1/chart-of-accounts", {
         referenceNumber: refNum,
         accountName: newAccount.accountName,
         type: newAccount.type,
-        role: newAccount.role || 'Default',
+        role: newAccount.role || "Default",
       });
       setSuccessMessage(`Account '${newAccount.accountName}' created`);
       setIsAddModalOpen(false);
-      setNewAccount({ type: '', referenceNumber: 0, accountName: '', role: 'Default' });
+      setNewAccount({
+        type: "",
+        referenceNumber: 0,
+        accountName: "",
+        role: "Default",
+      });
       fetchAccounts();
     } catch (err: unknown) {
       const apiErr = err as ApiErrorResponse;
-      setCreateError(apiErr.response?.data?.message || 'Failed to create');
+      setCreateError(apiErr.response?.data?.message || "Failed to create");
     }
   };
 
@@ -179,18 +199,24 @@ export default function ChartOfAccountsClient() {
     setEditError(null);
 
     try {
-      await apiClient.put(`/api/v1/chart-of-accounts/${editAccount.id}`, editAccount);
+      await apiClient.put(
+        `/api/v1/chart-of-accounts/${editAccount.id}`,
+        editAccount,
+      );
       setSuccessMessage(`Account '${editAccount.accountName}' updated`);
       setIsEditModalOpen(false);
       fetchAccounts();
     } catch (err: unknown) {
       const apiErr = err as ApiErrorResponse;
-      setEditError(apiErr.response?.data?.message || 'Failed to update');
+      setEditError(apiErr.response?.data?.message || "Failed to update");
     }
   };
 
   const confirmAndDelete = async (account: ChartOfAccount) => {
-    if (typeof window !== 'undefined' && !window.confirm(`Delete "${account.accountName}"?`)) {
+    if (
+      typeof window !== "undefined" &&
+      !window.confirm(`Delete "${account.accountName}"?`)
+    ) {
       return;
     }
 
@@ -200,7 +226,7 @@ export default function ChartOfAccountsClient() {
       fetchAccounts();
     } catch (err: unknown) {
       const apiErr = err as ApiErrorResponse;
-      setErrorMessage(apiErr.response?.data?.message || 'Failed to delete');
+      setErrorMessage(apiErr.response?.data?.message || "Failed to delete");
     }
   };
 
@@ -212,7 +238,8 @@ export default function ChartOfAccountsClient() {
             <IconSitemap className="text-primary" size={24} /> Chart of Accounts
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Master list of financial accounts • {filteredAccounts.length} accounts
+            Master list of financial accounts • {filteredAccounts.length}{" "}
+            accounts
           </p>
         </div>
         <Button
@@ -227,7 +254,10 @@ export default function ChartOfAccountsClient() {
       </div>
 
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center"
+        >
           <AlertDescription>{errorMessage}</AlertDescription>
           <button type="button" onClick={() => setErrorMessage(null)}>
             <IconX size={14} />
@@ -248,7 +278,10 @@ export default function ChartOfAccountsClient() {
         <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
           <div className="flex items-center gap-2">
             <div className="relative">
-              <IconSearch size={14} className="absolute left-3 top-3 text-muted-foreground" />
+              <IconSearch
+                size={14}
+                className="absolute left-3 top-3 text-muted-foreground"
+              />
               <Input
                 className="pl-8 h-9 w-60"
                 placeholder="Search..."
@@ -272,7 +305,7 @@ export default function ChartOfAccountsClient() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setCategoryFilter('')}
+                onClick={() => setCategoryFilter("")}
                 className="h-9 px-2"
               >
                 <IconX size={14} />
@@ -299,7 +332,10 @@ export default function ChartOfAccountsClient() {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-10 text-muted-foreground"
+                  >
                     Loading...
                   </TableCell>
                 </TableRow>
@@ -307,43 +343,50 @@ export default function ChartOfAccountsClient() {
                 filteredAccounts.map((acc) => (
                   <TableRow
                     key={acc.id}
-                    className={cn(highlightId === String(acc.id) && 'bg-primary/10')}
+                    className={cn(
+                      highlightId === String(acc.id) && "bg-primary/10",
+                    )}
                   >
                     <TableCell className="pl-6 font-mono text-primary font-medium">
                       {acc.referenceNumber}
                     </TableCell>
-                    <TableCell className="font-medium">{acc.accountName}</TableCell>
+                    <TableCell className="font-medium">
+                      {acc.accountName}
+                    </TableCell>
                     <TableCell>
                       <Badge variant="outline" className="text-xs">
                         {acc.type}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {acc.role !== 'Default' ? (
+                      {acc.role !== "Default" ? (
                         <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
                           {acc.role}
                         </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Standard</span>
+                        <span className="text-xs text-muted-foreground">
+                          Standard
+                        </span>
                       )}
                     </TableCell>
                     <TableCell
                       className={cn(
-                        'text-right font-medium font-mono',
-                        acc.balance >= 0 ? 'text-emerald-500' : 'text-red-500'
+                        "text-right font-medium font-mono",
+                        acc.balance >= 0 ? "text-emerald-500" : "text-red-500",
                       )}
                     >
-                      Rp {acc.balance.toLocaleString('en-US')}
+                      Rp {acc.balance.toLocaleString("en-US")}
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge
-                        variant={acc.isActive ? 'default' : 'secondary'}
+                        variant={acc.isActive ? "default" : "secondary"}
                         className={cn(
-                          'text-xs',
-                          acc.isActive && 'bg-emerald-500/15 text-emerald-600 border-emerald-500/20'
+                          "text-xs",
+                          acc.isActive &&
+                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
                         )}
                       >
-                        {acc.isActive ? 'Active' : 'Inactive'}
+                        {acc.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </TableCell>
                     <TableCell className="pr-6">
@@ -359,8 +402,15 @@ export default function ChartOfAccountsClient() {
                         >
                           <IconPencil size={14} />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                          <Link href={`/reports/general-ledger/permanent#account-${acc.id}`}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-7 w-7"
+                          asChild
+                        >
+                          <Link
+                            href={`/reports/general-ledger/permanent#account-${acc.id}`}
+                          >
                             <IconNotebook size={14} />
                           </Link>
                         </Button>
@@ -379,7 +429,10 @@ export default function ChartOfAccountsClient() {
               )}
               {!loading && filteredAccounts.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <TableCell
+                    colSpan={7}
+                    className="text-center py-12 text-muted-foreground"
+                  >
                     No accounts found
                   </TableCell>
                 </TableRow>
@@ -432,9 +485,12 @@ export default function ChartOfAccountsClient() {
               <Label>Reference Number</Label>
               <Input
                 type="number"
-                value={newAccount.referenceNumber || ''}
+                value={newAccount.referenceNumber || ""}
                 onChange={(e) =>
-                  setNewAccount({ ...newAccount, referenceNumber: Number(e.target.value) })
+                  setNewAccount({
+                    ...newAccount,
+                    referenceNumber: Number(e.target.value),
+                  })
                 }
                 disabled={!newAccount.type}
                 required
@@ -442,19 +498,25 @@ export default function ChartOfAccountsClient() {
               <p className="text-xs text-muted-foreground">
                 {newAccount.type
                   ? `Valid: ${ACCOUNT_RANGES[newAccount.type].start}-${ACCOUNT_RANGES[newAccount.type].end}`
-                  : 'Select category first'}
+                  : "Select category first"}
               </p>
             </div>
             <div className="space-y-2">
               <Label>Account Name</Label>
               <Input
-                value={newAccount.accountName || ''}
-                onChange={(e) => setNewAccount({ ...newAccount, accountName: e.target.value })}
+                value={newAccount.accountName || ""}
+                onChange={(e) =>
+                  setNewAccount({ ...newAccount, accountName: e.target.value })
+                }
                 required
               />
             </div>
             <DialogFooter>
-              <Button type="button" variant="ghost" onClick={() => setIsAddModalOpen(false)}>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsAddModalOpen(false)}
+              >
                 Cancel
               </Button>
               <Button type="submit">Save Account</Button>
@@ -481,7 +543,10 @@ export default function ChartOfAccountsClient() {
                 <Input
                   value={editAccount.accountName}
                   onChange={(e) =>
-                    setEditAccount({ ...editAccount, accountName: e.target.value })
+                    setEditAccount({
+                      ...editAccount,
+                      accountName: e.target.value,
+                    })
                   }
                   required
                 />
@@ -492,13 +557,20 @@ export default function ChartOfAccountsClient() {
                   type="number"
                   value={editAccount.referenceNumber}
                   onChange={(e) =>
-                    setEditAccount({ ...editAccount, referenceNumber: Number(e.target.value) })
+                    setEditAccount({
+                      ...editAccount,
+                      referenceNumber: Number(e.target.value),
+                    })
                   }
                   required
                 />
               </div>
               <DialogFooter>
-                <Button type="button" variant="ghost" onClick={() => setIsEditModalOpen(false)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setIsEditModalOpen(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit">Update</Button>
@@ -509,5 +581,4 @@ export default function ChartOfAccountsClient() {
       </Dialog>
     </div>
   );
-  }
-  
+}
