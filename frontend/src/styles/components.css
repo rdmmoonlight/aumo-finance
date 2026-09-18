@@ -68,7 +68,8 @@
 
 /* Navigation Item Link */
 .aumo-nav-item-link {
-  @apply group relative flex items-center gap-3 rounded-lg border px-3 py-2 text-xs leading-none transition-all duration-200;
+  /* Diberbaiki: Dihapus "group" dari @apply */
+  @apply relative flex items-center gap-3 rounded-lg border px-3 py-2 text-xs leading-none transition-all duration-200;
 }
 .aumo-nav-item-collapsed {
   @apply justify-center px-2;
@@ -103,7 +104,7 @@
   @apply relative border-t border-white/[0.06] p-3;
 }
 .aumo-sidebar-footer-card-outer {
-  @apply group relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-1 transition-all;
+  @apply relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-1 transition-all;
 }
 .aumo-sidebar-footer-card-outer-collapsed {
   @apply border-transparent bg-transparent from-transparent to-transparent p-0;
@@ -498,20 +499,4 @@
 }
 .aumo-alert-success {
   @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300;
-}
-
-/* Badges & Text Helpers */
-.aumo-badge-xs {
-  @apply text-[10px];
-}
-
-/* Guardian Status Badges */
-.aumo-guardian-badge-base {
-  @apply gap-2 px-3 py-1.5;
-}
-.aumo-guardian-badge-healthy {
-  @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-500;
-}
-.aumo-guardian-badge-unhealthy {
-  @apply border-amber-500/20 bg-amber-500/10 text-amber-500;
 }
