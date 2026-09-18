@@ -499,3 +499,19 @@
 .aumo-alert-success {
   @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300;
 }
+
+/* Badges & Text Helpers */
+.aumo-badge-xs {
+  @apply text-[10px];
+}
+
+/* Guardian Status Badges */
+.aumo-guardian-badge-base {
+  @apply gap-2 px-3 py-1.5;
+}
+.aumo-guardian-badge-healthy {
+  @apply border-emerald-500/20 bg-emerald-500/10 text-emerald-500;
+}
+.aumo-guardian-badge-unhealthy {
+  @apply border-amber-500/20 bg-amber-500/10 text-amber-500;
+}
