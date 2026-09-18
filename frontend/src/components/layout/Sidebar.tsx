@@ -158,7 +158,9 @@ function NavItemLink({
       className={cn(
         "relative flex items-center gap-3 rounded-lg border px-3 py-2 text-xs leading-none transition-all duration-200",
         isCollapsed && "justify-center px-2",
-        isActive ? "border-white bg-white font-[550] text-zinc-900 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_0_0_1px_rgba(0,0,0,0.04)]" : "border-transparent bg-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.06] hover:text-zinc-200",
+        isActive
+          ? "border-white bg-white font-[550] text-zinc-900 shadow-[0_1px_1px_rgba(0,0,0,0.05),0_0_0_1px_rgba(0,0,0,0.04)]"
+          : "border-transparent bg-transparent text-zinc-500 hover:border-white/[0.06] hover:bg-white/[0.06] hover:text-zinc-200",
       )}
     >
       {isActive && isCollapsed && (
@@ -177,7 +179,9 @@ function NavItemLink({
       />
       {!isCollapsed && (
         <>
-          <span className="flex-1 truncate tracking-[-0.01em]">{item.label}</span>
+          <span className="flex-1 truncate tracking-[-0.01em]">
+            {item.label}
+          </span>
           {item.badge && (
             <span className="ml-auto flex items-center gap-1 rounded-full border border-violet-500/20 bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-medium text-violet-300">
               <IconSparkles size={10} />
@@ -245,8 +249,12 @@ export default function Sidebar({ user }: SidebarProps) {
             isCollapsed && "w-0 opacity-0",
           )}
         >
-          <span className="whitespace-nowrap text-xs font-semibold tracking-tight text-white">AUMO FINANCE</span>
-          <span className="whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.16em] text-zinc-500">Accounting Suite</span>
+          <span className="whitespace-nowrap text-xs font-semibold tracking-tight text-white">
+            AUMO FINANCE
+          </span>
+          <span className="whitespace-nowrap text-[9px] font-medium uppercase tracking-[0.16em] text-zinc-500">
+            Accounting Suite
+          </span>
         </div>
       </div>
 
@@ -295,7 +303,8 @@ export default function Sidebar({ user }: SidebarProps) {
         <div
           className={cn(
             "relative overflow-hidden rounded-xl border border-white/[0.08] bg-gradient-to-b from-white/[0.08] to-white/[0.03] p-1 transition-all",
-            isCollapsed && "border-transparent bg-transparent from-transparent to-transparent p-0",
+            isCollapsed &&
+              "border-transparent bg-transparent from-transparent to-transparent p-0",
           )}
         >
           <div

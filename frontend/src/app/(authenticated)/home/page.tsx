@@ -116,9 +116,14 @@ export default async function HomePage() {
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {marketData.length > 0 ? (
                 marketData.map((item) => (
-                  <div key={item.symbol} className="flex min-h-[76px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5">
+                  <div
+                    key={item.symbol}
+                    className="flex min-h-[76px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
+                  >
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-white">{item.symbol}</span>
+                      <span className="text-xs font-bold text-white">
+                        {item.symbol}
+                      </span>
                       <Badge
                         className={`text-[10px] ${
                           item.isUp
@@ -134,7 +139,9 @@ export default async function HomePage() {
                         {item.change}
                       </Badge>
                     </div>
-                    <div className="mt-1 text-sm font-semibold text-white">{item.price}</div>
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {item.price}
+                    </div>
                     <div className="text-[11px] text-white/50">{item.name}</div>
                   </div>
                 ))
@@ -153,7 +160,10 @@ export default async function HomePage() {
               analytics with absolute precision.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <Button asChild className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-white shadow-lg hover:from-indigo-500 hover:to-violet-600">
+              <Button
+                asChild
+                className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
+              >
                 <Link href="/dashboard">
                   <IconDashboard size={16} /> Dashboard
                 </Link>

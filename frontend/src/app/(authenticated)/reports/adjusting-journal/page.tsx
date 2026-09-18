@@ -176,19 +176,25 @@ export default function AdjustingJournalPage() {
                 <TableRow>
                   <TableHead className="w-[16%] pl-6">Date & Ref</TableHead>
                   <TableHead className="w-[26%]">Account</TableHead>
-                  <TableHead className="w-[26%]">
-                    Description
-                  </TableHead>
+                  <TableHead className="w-[26%]">Description</TableHead>
                   <TableHead className="w-[10%] text-center">Ref #</TableHead>
                   <TableHead className="w-[11%] text-right">Debit</TableHead>
-                  <TableHead className="w-[11%] pr-6 text-right">Credit</TableHead>
+                  <TableHead className="w-[11%] pr-6 text-right">
+                    Credit
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                      <IconLoader2 className="mr-2 inline animate-spin" size={16} />{" "}
+                    <TableCell
+                      colSpan={6}
+                      className="py-10 text-center text-muted-foreground"
+                    >
+                      <IconLoader2
+                        className="mr-2 inline animate-spin"
+                        size={16}
+                      />{" "}
                       Loading adjusting journal...
                     </TableCell>
                   </TableRow>
@@ -281,7 +287,10 @@ export default function AdjustingJournalPage() {
                             {line.lineDescription || "-"}
                           </TableCell>
                           <TableCell className="align-top py-2 text-center">
-                            <Badge variant="outline" className="font-mono text-amber-500">
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-amber-500"
+                            >
                               {ref}
                             </Badge>
                           </TableCell>
