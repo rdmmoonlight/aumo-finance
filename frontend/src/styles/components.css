@@ -304,3 +304,132 @@
 .aumo-btn-ghost-danger {
   @apply h-6 text-xs text-destructive hover:text-destructive;
 }
+
+/* Custom Guardrail Utility Classes for GeneralJournal */
+.aumo-page-container {
+  @apply space-y-6 w-full;
+}
+
+.aumo-page-header {
+  @apply flex flex-wrap items-center justify-between gap-3;
+}
+
+.aumo-page-title {
+  @apply text-xl font-bold flex items-center gap-2;
+}
+
+.aumo-page-subtitle {
+  @apply text-sm text-muted-foreground mt-1;
+}
+
+.aumo-btn-group {
+  @apply flex gap-2;
+}
+
+.aumo-btn-icon-label {
+  @apply gap-1.5;
+}
+
+.aumo-table-container {
+  @apply overflow-x-auto w-full;
+}
+
+.aumo-journal-table {
+  @apply min-w-[650px];
+}
+
+.aumo-col-date-ref {
+  @apply pl-6 w-[16%];
+}
+
+.aumo-col-account {
+  @apply w-[26%];
+}
+
+.aumo-col-desc {
+  @apply w-[26%];
+}
+
+.aumo-col-refno {
+  @apply text-center w-[10%];
+}
+
+.aumo-col-debit {
+  @apply text-right w-[11%];
+}
+
+.aumo-col-credit {
+  @apply text-right pr-6 w-[11%];
+}
+
+.aumo-table-loading {
+  @apply text-center py-10 text-muted-foreground;
+}
+
+.aumo-table-empty {
+  @apply text-center py-12;
+}
+
+.aumo-table-empty-box {
+  @apply flex flex-col items-center gap-2 text-muted-foreground;
+}
+
+.aumo-table-cell-base {
+  @apply align-top py-2 text-xs;
+}
+
+.aumo-table-cell-debit {
+  @apply align-top py-2 text-xs font-semibold;
+}
+
+.aumo-table-cell-credit {
+  @apply align-top py-2 text-xs pl-6 text-muted-foreground;
+}
+
+.aumo-badge-date {
+  @apply mb-1 font-mono;
+}
+
+.aumo-entry-info {
+  @apply flex flex-col gap-0.5;
+}
+
+.aumo-entry-tx-num {
+  @apply font-mono font-bold text-amber-500;
+}
+
+.aumo-entry-created {
+  @apply text-xs text-muted-foreground;
+}
+
+.aumo-entry-updated {
+  @apply text-xs text-sky-500 flex items-center gap-0.5;
+}
+
+.aumo-entry-actions {
+  @apply flex gap-1 mt-1;
+}
+
+.aumo-btn-icon-xs {
+  @apply h-6 w-6;
+}
+
+.aumo-badge-ref {
+  @apply font-mono text-amber-500;
+}
+
+.aumo-cell-debit-val {
+  @apply text-right align-top py-2 font-mono text-xs font-medium text-emerald-500;
+}
+
+.aumo-cell-credit-val {
+  @apply text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500;
+}
+
+.aumo-row-shaded {
+  @apply bg-muted/20;
+}
+
+.aumo-row-normal {
+  @apply bg-transparent;
+}
