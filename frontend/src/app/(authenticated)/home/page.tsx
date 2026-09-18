@@ -120,7 +120,7 @@ export default async function HomePage() {
                     <div className="flex justify-between items-center">
                       <span className="aumo-market-symbol">{item.symbol}</span>
                       <Badge
-                        className={`text-[10px] ${
+                        className={`aumo-badge-xs ${
                           item.isUp
                             ? "bg-emerald-500/15 text-emerald-400"
                             : "bg-red-500/15 text-red-400"
