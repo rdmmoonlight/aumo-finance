@@ -100,3 +100,12 @@
     border: 1px solid rgba(255,255,255,0.07);
   }
 }
+
+@keyframes quran-marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+.animate-quran-marquee {
+  animation: quran-marquee 20s linear infinite;
+}
