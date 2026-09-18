@@ -1,8 +1,8 @@
-import LoginForm from './auth/LoginForm'; // Import Client Component LoginForm yang dipisah
+import LoginForm from "./auth/LoginForm"; // Import Client Component LoginForm yang dipisah
 
 export const metadata = {
-  title: 'Aumo Finance - Sign In',
-  description: 'Operations, neatly organized.',
+  title: "Aumo Finance - Sign In",
+  description: "Operations, neatly organized.",
 };
 
 export default function LandingPage() {
@@ -19,10 +19,15 @@ export default function LandingPage() {
 
         <div className="mt-12 lg:mt-0">
           <h1 className="text-4xl lg:text-6xl font-semibold leading-[0.95] tracking-[-0.03em] max-w-lg">
-            Operations,<br />neatly<br />organized.
+            Operations,
+            <br />
+            neatly
+            <br />
+            organized.
           </h1>
           <p className="text-sm leading-6 text-zinc-400 max-w-sm mt-6">
-            Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan pameran.
+            Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan
+            pameran.
           </p>
           <div className="mt-12 border-t border-zinc-800">
             <div className="flex justify-between py-4 border-b border-zinc-800 text-xs">
@@ -52,5 +57,4 @@ export default function LandingPage() {
       </div>
     </div>
   );
-              }
-      
+}

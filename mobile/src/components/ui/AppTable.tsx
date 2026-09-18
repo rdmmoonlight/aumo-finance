@@ -1,12 +1,12 @@
-import React from 'react';
-import { ScrollView, View, StyleSheet } from 'react-native';
-import { Text, useTheme, Divider } from 'react-native-paper';
+import React from "react";
+import { ScrollView, View, StyleSheet } from "react-native";
+import { Text, useTheme, Divider } from "react-native-paper";
 
 export interface Column<T> {
   key: string;
   title: string;
   width?: number;
-  align?: 'left' | 'center' | 'right';
+  align?: "left" | "center" | "right";
   render?: (item: T) => React.ReactNode;
 }
 
@@ -21,17 +21,33 @@ export function AppTable<T>({ columns, data, keyExtractor }: AppTableProps<T>) {
 
   return (
     <ScrollView horizontal showsHorizontalScrollIndicator={true}>
-      <View style={{ minWidth: '100%' }}>
-        <View style={[styles.headerRow, { backgroundColor: theme.colors.surfaceVariant }]}>
+      <View style={{ minWidth: "100%" }}>
+        <View
+          style={[
+            styles.headerRow,
+            { backgroundColor: theme.colors.surfaceVariant },
+          ]}
+        >
           {columns.map((col) => (
             <View
               key={col.key}
               style={[
                 styles.cell,
-                { width: col.width || 120, alignItems: col.align === 'right' ? 'flex-end' : col.align === 'center' ? 'center' : 'flex-start' },
+                {
+                  width: col.width || 120,
+                  alignItems:
+                    col.align === "right"
+                      ? "flex-end"
+                      : col.align === "center"
+                        ? "center"
+                        : "flex-start",
+                },
               ]}
             >
-              <Text variant="titleSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              <Text
+                variant="titleSmall"
+                style={{ color: theme.colors.onSurfaceVariant }}
+              >
                 {col.title}
               </Text>
             </View>
@@ -46,14 +62,25 @@ export function AppTable<T>({ columns, data, keyExtractor }: AppTableProps<T>) {
                   key={col.key}
                   style={[
                     styles.cell,
-                    { width: col.width || 120, alignItems: col.align === 'right' ? 'flex-end' : col.align === 'center' ? 'center' : 'flex-start' },
+                    {
+                      width: col.width || 120,
+                      alignItems:
+                        col.align === "right"
+                          ? "flex-end"
+                          : col.align === "center"
+                            ? "center"
+                            : "flex-start",
+                    },
                   ]}
                 >
                   {col.render ? (
                     col.render(item)
                   ) : (
-                    <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
-                      {(item as any)[col.key] ?? '-'}
+                    <Text
+                      variant="bodyMedium"
+                      style={{ color: theme.colors.onSurface }}
+                    >
+                      {(item as any)[col.key] ?? "-"}
                     </Text>
                   )}
                 </View>
@@ -68,7 +95,11 @@ export function AppTable<T>({ columns, data, keyExtractor }: AppTableProps<T>) {
 }
 
 const styles = StyleSheet.create({
-  headerRow: { flexDirection: 'row', paddingVertical: 10, paddingHorizontal: 8 },
-  dataRow: { flexDirection: 'row', paddingVertical: 12, paddingHorizontal: 8 },
-  cell: { justifyContent: 'center', paddingHorizontal: 4 },
+  headerRow: {
+    flexDirection: "row",
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+  },
+  dataRow: { flexDirection: "row", paddingVertical: 12, paddingHorizontal: 8 },
+  cell: { justifyContent: "center", paddingHorizontal: 4 },
 });

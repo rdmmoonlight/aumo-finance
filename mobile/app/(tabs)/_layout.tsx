@@ -1,13 +1,13 @@
-import React from 'react';
-import { Tabs } from 'expo-router';
-import { useTheme } from 'react-native-paper';
-import { 
-  IconHome, 
-  IconLayoutDashboard, 
-  IconListDetails, 
-  IconTools, 
-  IconSettings 
-} from '@tabler/icons-react-native';
+import React from "react";
+import { Tabs } from "expo-router";
+import { useTheme } from "react-native-paper";
+import {
+  IconHome,
+  IconLayoutDashboard,
+  IconListDetails,
+  IconTools,
+  IconSettings,
+} from "@tabler/icons-react-native";
 
 export default function TabsLayout() {
   const theme = useTheme();
@@ -34,15 +34,15 @@ export default function TabsLayout() {
         },
         headerTitleStyle: {
           color: theme.colors.onSurface,
-          fontWeight: 'bold',
+          fontWeight: "bold",
         },
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Beranda',
-          tabBarLabel: 'Beranda',
+          title: "Beranda",
+          tabBarLabel: "Beranda",
           tabBarIcon: ({ color, size }) => (
             <IconHome color={color} size={size ?? 24} stroke={1.8} />
           ),
@@ -51,8 +51,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: 'Dashboard',
-          tabBarLabel: 'Dashboard',
+          title: "Dashboard",
+          tabBarLabel: "Dashboard",
           tabBarIcon: ({ color, size }) => (
             <IconLayoutDashboard color={color} size={size ?? 24} stroke={1.8} />
           ),
@@ -61,8 +61,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="coa"
         options={{
-          title: 'Chart of Accounts',
-          tabBarLabel: 'COA',
+          title: "Chart of Accounts",
+          tabBarLabel: "COA",
           tabBarIcon: ({ color, size }) => (
             <IconListDetails color={color} size={size ?? 24} stroke={1.8} />
           ),
@@ -71,8 +71,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="tools"
         options={{
-          title: 'Tools',
-          tabBarLabel: 'Tools',
+          title: "Tools",
+          tabBarLabel: "Tools",
           tabBarIcon: ({ color, size }) => (
             <IconTools color={color} size={size ?? 24} stroke={1.8} />
           ),
@@ -81,8 +81,8 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: 'Pengaturan',
-          tabBarLabel: 'Pengaturan',
+          title: "Pengaturan",
+          tabBarLabel: "Pengaturan",
           tabBarIcon: ({ color, size }) => (
             <IconSettings color={color} size={size ?? 24} stroke={1.8} />
           ),

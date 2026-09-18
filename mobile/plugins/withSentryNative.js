@@ -1,4 +1,7 @@
-const { withAndroidManifest, withAppBuildGradle } = require('@expo/config-plugins');
+const {
+  withAndroidManifest,
+  withAppBuildGradle,
+} = require("@expo/config-plugins");
 
 // Autolinking @sentry/react-native gagal diam-diam di project ini (dicek
 // langsung dari APK hasil build: tidak ada libsentry.so ataupun class
@@ -11,20 +14,20 @@ const { withAndroidManifest, withAppBuildGradle } = require('@expo/config-plugin
 //
 // Referensi: https://docs.sentry.io/platforms/android/manual-configuration/
 
-const SENTRY_ANDROID_VERSION = '6.34.0';
+const SENTRY_ANDROID_VERSION = "6.34.0";
 
 function withSentryManifest(config, { dsn }) {
   return withAndroidManifest(config, (config) => {
     const application = config.modResults.manifest.application[0];
-    if (!application['meta-data']) {
-      application['meta-data'] = [];
+    if (!application["meta-data"]) {
+      application["meta-data"] = [];
     }
-    const alreadyThere = application['meta-data'].some(
-      (item) => item.$ && item.$['android:name'] === 'io.sentry.dsn'
+    const alreadyThere = application["meta-data"].some(
+      (item) => item.$ && item.$["android:name"] === "io.sentry.dsn",
     );
     if (!alreadyThere) {
-      application['meta-data'].push({
-        $: { 'android:name': 'io.sentry.dsn', 'android:value': dsn },
+      application["meta-data"].push({
+        $: { "android:name": "io.sentry.dsn", "android:value": dsn },
       });
     }
     return config;
@@ -33,16 +36,16 @@ function withSentryManifest(config, { dsn }) {
 
 function withSentryGradleDependency(config) {
   return withAppBuildGradle(config, (config) => {
-    if (config.modResults.contents.includes('io.sentry:sentry-android')) {
+    if (config.modResults.contents.includes("io.sentry:sentry-android")) {
       return config;
     }
-    const isGroovy = config.modResults.language !== 'kt';
+    const isGroovy = config.modResults.language !== "kt";
     const depLine = isGroovy
       ? `    implementation 'io.sentry:sentry-android:${SENTRY_ANDROID_VERSION}'`
       : `    implementation("io.sentry:sentry-android:${SENTRY_ANDROID_VERSION}")`;
     config.modResults.contents = config.modResults.contents.replace(
       /dependencies\s*\{/,
-      (match) => `${match}\n${depLine}`
+      (match) => `${match}\n${depLine}`,
     );
     return config;
   });

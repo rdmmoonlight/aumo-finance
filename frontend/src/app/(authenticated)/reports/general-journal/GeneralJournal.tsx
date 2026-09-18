@@ -1,67 +1,87 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
-import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import apiClient from '@/lib/apiClient';
-import { Card, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  IconBook, 
-  IconPlus, 
-  IconPencil, 
-  IconTrash, 
-  IconEyeOff, 
-  IconBookOff, 
-  IconAlertTriangle, 
-  IconLoader2 
-} from '@tabler/icons-react';
+import Link from "next/link";
+import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import apiClient from "@/lib/apiClient";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  IconBook,
+  IconPlus,
+  IconPencil,
+  IconTrash,
+  IconEyeOff,
+  IconBookOff,
+  IconAlertTriangle,
+  IconLoader2,
+} from "@tabler/icons-react";
 
-export interface Account { 
-  id: number; 
-  referenceNumber: number; 
-  accountName: string; 
+export interface Account {
+  id: number;
+  referenceNumber: number;
+  accountName: string;
 }
 
-export interface JournalLine { 
-  id: number; 
-  lineOrder: number; 
-  debit: number; 
-  credit: number; 
-  lineDescription?: string; 
-  accountName?: string; 
-  referenceNumber?: number; 
-  account?: Account; 
+export interface JournalLine {
+  id: number;
+  lineOrder: number;
+  debit: number;
+  credit: number;
+  lineDescription?: string;
+  accountName?: string;
+  referenceNumber?: number;
+  account?: Account;
 }
 
-export interface JournalEntry { 
-  id: number; 
-  transactionNumber: string; 
-  entryDate: string; 
-  createdAt: string; 
-  updatedAt?: string; 
-  lines: JournalLine[]; 
+export interface JournalEntry {
+  id: number;
+  transactionNumber: string;
+  entryDate: string;
+  createdAt: string;
+  updatedAt?: string;
+  lines: JournalLine[];
 }
 
-const formatNumber = (n: number) => new Intl.NumberFormat('id-ID').format(Math.abs(n));
-const formatDateDisplay = (s: string) => 
-  !s ? '-' : new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(s));
+const formatNumber = (n: number) =>
+  new Intl.NumberFormat("id-ID").format(Math.abs(n));
+const formatDateDisplay = (s: string) =>
+  !s
+    ? "-"
+    : new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(new Date(s));
 const formatDateTimeDisplay = (s?: string) => {
   if (!s) return null;
   const d = new Date(s);
-  const dateStr = new Intl.DateTimeFormat('id-ID', { day: '2-digit', month: 'short', year: 'numeric' }).format(d);
-  const hours = String(d.getHours()).padStart(2, '0');
-  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const dateStr = new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
   return `${dateStr}, ${hours}:${minutes}`;
 };
 
 export default function GeneralJournalClient() {
   const router = useRouter();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [selectedPeriodName, setSelectedPeriodName] = useState<string | null>(null);
+  const [selectedPeriodName, setSelectedPeriodName] = useState<string | null>(
+    null,
+  );
   const [isPeriodClosed, setIsPeriodClosed] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -71,7 +91,7 @@ export default function GeneralJournalClient() {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const { data } = await apiClient.get('/api/v1/reports/journals/general');
+      const { data } = await apiClient.get("/api/v1/reports/journals/general");
       if (data.success) {
         setSelectedPeriodName(data.selectedPeriodName || null);
         setIsPeriodClosed(data.isPeriodClosed || false);
@@ -81,7 +101,7 @@ export default function GeneralJournalClient() {
       }
     } catch (err: any) {
       if (err.response?.status === 401) {
-        router.push('/');
+        router.push("/");
       }
       setErrorMessage(err.response?.data?.message || err.message);
     } finally {
@@ -92,8 +112,9 @@ export default function GeneralJournalClient() {
   useEffect(() => {
     fetchData();
     const handlePeriodChange = () => fetchData();
-    window.addEventListener('periodChanged', handlePeriodChange);
-    return () => window.removeEventListener('periodChanged', handlePeriodChange);
+    window.addEventListener("periodChanged", handlePeriodChange);
+    return () =>
+      window.removeEventListener("periodChanged", handlePeriodChange);
   }, [fetchData]);
 
   const deleteEntry = async (entry: JournalEntry) => {
@@ -106,11 +127,11 @@ export default function GeneralJournalClient() {
       await apiClient.delete(`/api/v1/reports/journals/general/${entry.id}`);
       setEntries((prev) => prev.filter((e) => e.id !== entry.id));
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || 'Failed to delete entry');
+      setErrorMessage(err.response?.data?.message || "Failed to delete entry");
     }
   };
 
-  let currentDateTracker = '';
+  let currentDateTracker = "";
   let groupIdx = 0;
 
   return (
@@ -128,7 +149,9 @@ export default function GeneralJournalClient() {
             <IconBook className="text-amber-500" size={22} /> General Journal
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Chronological record {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ''} • All amounts in IDR (Rp)
+            Chronological record{" "}
+            {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ""} • All
+            amounts in IDR (Rp)
           </p>
         </div>
         <div className="flex gap-2">
@@ -138,7 +161,7 @@ export default function GeneralJournalClient() {
             </Link>
           </Button>
           <Button
-            variant={editMode ? 'secondary' : 'outline'}
+            variant={editMode ? "secondary" : "outline"}
             size="sm"
             className="gap-1.5"
             onClick={() => setEditMode((p) => !p)}
@@ -159,39 +182,64 @@ export default function GeneralJournalClient() {
                   <TableHead className="w-[26%]">Account</TableHead>
                   <TableHead className="w-[26%]">Description</TableHead>
                   <TableHead className="text-center w-[10%]">Ref #</TableHead>
-                  <TableHead className="text-right w-[11%]">Debit (Rp)</TableHead>
-                  <TableHead className="text-right pr-6 w-[11%]">Credit (Rp)</TableHead>
+                  <TableHead className="text-right w-[11%]">
+                    Debit (Rp)
+                  </TableHead>
+                  <TableHead className="text-right pr-6 w-[11%]">
+                    Credit (Rp)
+                  </TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
-                      <IconLoader2 className="animate-spin inline mr-2" size={16} /> Loading general journal...
+                    <TableCell
+                      colSpan={6}
+                      className="text-center py-10 text-muted-foreground"
+                    >
+                      <IconLoader2
+                        className="animate-spin inline mr-2"
+                        size={16}
+                      />{" "}
+                      Loading general journal...
                     </TableCell>
                   </TableRow>
                 ) : entries.length > 0 ? (
                   entries.map((entry) => {
-                    const sorted = [...(entry.lines || [])].sort((a, b) => a.lineOrder - b.lineOrder);
+                    const sorted = [...(entry.lines || [])].sort(
+                      (a, b) => a.lineOrder - b.lineOrder,
+                    );
                     const curDate = formatDateDisplay(entry.entryDate);
                     const showHeader = curDate !== currentDateTracker;
                     if (showHeader) {
                       currentDateTracker = curDate;
                       groupIdx++;
                     }
-                    const shade = groupIdx % 2 === 0 ? 'bg-muted/20' : '';
+                    const shade = groupIdx % 2 === 0 ? "bg-muted/20" : "";
 
                     return sorted.map((line, i) => {
                       const isFirst = i === 0;
                       const isDebit = line.debit > 0;
-                      const accName = line.accountName || line.account?.accountName || 'Unknown';
-                      const ref = line.referenceNumber || line.account?.referenceNumber || '-';
+                      const accName =
+                        line.accountName ||
+                        line.account?.accountName ||
+                        "Unknown";
+                      const ref =
+                        line.referenceNumber ||
+                        line.account?.referenceNumber ||
+                        "-";
 
                       return (
-                        <TableRow key={`${entry.id}-${line.id || i}`} className={shade}>
+                        <TableRow
+                          key={`${entry.id}-${line.id || i}`}
+                          className={shade}
+                        >
                           <TableCell className="pl-6 align-top py-2 text-xs">
                             {isFirst && showHeader && (
-                              <Badge variant="secondary" className="mb-1 font-mono">
+                              <Badge
+                                variant="secondary"
+                                className="mb-1 font-mono"
+                              >
                                 {curDate}
                               </Badge>
                             )}
@@ -207,13 +255,21 @@ export default function GeneralJournalClient() {
                                 )}
                                 {entry.updatedAt && (
                                   <span className="text-xs text-sky-500 flex items-center gap-0.5">
-                                    <IconPencil size={10} /> {formatDateTimeDisplay(entry.updatedAt)}
+                                    <IconPencil size={10} />{" "}
+                                    {formatDateTimeDisplay(entry.updatedAt)}
                                   </span>
                                 )}
                                 {editMode && (
                                   <div className="flex gap-1 mt-1">
-                                    <Button asChild variant="outline" size="icon" className="h-6 w-6">
-                                      <Link href={`/journal-entry?id=${entry.id}`}>
+                                    <Button
+                                      asChild
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-6 w-6"
+                                    >
+                                      <Link
+                                        href={`/journal-entry?id=${entry.id}`}
+                                      >
                                         <IconPencil size={12} />
                                       </Link>
                                     </Button>
@@ -230,22 +286,27 @@ export default function GeneralJournalClient() {
                               </div>
                             )}
                           </TableCell>
-                          <TableCell className={`align-top py-2 text-xs ${isDebit ? 'font-semibold' : 'pl-6 text-muted-foreground'}`}>
+                          <TableCell
+                            className={`align-top py-2 text-xs ${isDebit ? "font-semibold" : "pl-6 text-muted-foreground"}`}
+                          >
                             {accName}
                           </TableCell>
                           <TableCell className="align-top py-2 text-xs text-muted-foreground">
-                            {line.lineDescription || '-'}
+                            {line.lineDescription || "-"}
                           </TableCell>
                           <TableCell className="text-center align-top py-2">
-                            <Badge variant="outline" className="font-mono text-amber-500">
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-amber-500"
+                            >
                               {ref}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right align-top py-2 font-mono text-xs font-medium text-emerald-500">
-                            {line.debit > 0 ? formatNumber(line.debit) : '-'}
+                            {line.debit > 0 ? formatNumber(line.debit) : "-"}
                           </TableCell>
                           <TableCell className="text-right pr-6 align-top py-2 font-mono text-xs font-medium text-red-500">
-                            {line.credit > 0 ? formatNumber(line.credit) : '-'}
+                            {line.credit > 0 ? formatNumber(line.credit) : "-"}
                           </TableCell>
                         </TableRow>
                       );
@@ -258,17 +319,28 @@ export default function GeneralJournalClient() {
                         {selectedPeriodName === null ? (
                           <>
                             <IconEyeOff size={28} />
-                            <p className="text-sm font-medium">No Period Selected</p>
+                            <p className="text-sm font-medium">
+                              No Period Selected
+                            </p>
                             <p className="text-xs">
-                              Go to <Link href="/periods" className="text-primary underline">Periods</Link>
+                              Go to{" "}
+                              <Link
+                                href="/periods"
+                                className="text-primary underline"
+                              >
+                                Periods
+                              </Link>
                             </p>
                           </>
                         ) : (
                           <>
                             <IconBookOff size={28} />
-                            <p className="text-sm font-medium">No Entries Found</p>
+                            <p className="text-sm font-medium">
+                              No Entries Found
+                            </p>
                             <p className="text-xs">
-                              No entries in <strong>{selectedPeriodName}</strong>
+                              No entries in{" "}
+                              <strong>{selectedPeriodName}</strong>
                             </p>
                           </>
                         )}

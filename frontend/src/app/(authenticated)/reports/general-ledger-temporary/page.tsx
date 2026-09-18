@@ -1,15 +1,29 @@
-'use client'
+"use client";
 
-
-import { useState, useEffect, useCallback } from 'react';
-import Link from 'next/link';
-import apiClient from '@/lib/apiClient';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { IconBook2, IconCalendar, IconEyeOff, IconAlertTriangle, IconLoader2, IconTrendingUp, IconTrendingDown } from '@tabler/icons-react';
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
+import apiClient from "@/lib/apiClient";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  IconBook2,
+  IconCalendar,
+  IconEyeOff,
+  IconAlertTriangle,
+  IconLoader2,
+  IconTrendingUp,
+  IconTrendingDown,
+} from "@tabler/icons-react";
 
 export interface LedgerLineViewModel {
   journalEntryId: number;
@@ -31,8 +45,11 @@ export interface LedgerAccountViewModel {
 }
 
 const formatNumber = (n: number) => {
-  if (n === 0) return '-';
-  const f = new Intl.NumberFormat('id-ID', { style: 'decimal', maximumFractionDigits: 0 }).format(Math.abs(n));
+  if (n === 0) return "-";
+  const f = new Intl.NumberFormat("id-ID", {
+    style: "decimal",
+    maximumFractionDigits: 0,
+  }).format(Math.abs(n));
   return n < 0 ? `(${f})` : f;
 };
 
@@ -48,7 +65,9 @@ export default function GeneralLedgerTemporaryPage() {
     setError(null);
     try {
       // Menembak endpoint temporary sesuai C# Controller: [HttpGet("temporary")]
-      const { data } = await apiClient.get('/api/v1/reports/general-ledger/temporary');
+      const { data } = await apiClient.get(
+        "/api/v1/reports/general-ledger/temporary",
+      );
 
       if (data?.hasPeriodSelected === false) {
         setNoPeriod(true);
@@ -62,7 +81,10 @@ export default function GeneralLedgerTemporaryPage() {
       if (err.response?.status === 404) {
         setNoPeriod(true);
       } else {
-        setError(err.response?.data?.message || 'Failed to load temporary ledger data.');
+        setError(
+          err.response?.data?.message ||
+            "Failed to load temporary ledger data.",
+        );
       }
     } finally {
       setLoading(false);
@@ -72,14 +94,15 @@ export default function GeneralLedgerTemporaryPage() {
   useEffect(() => {
     fetchData();
     const h = () => fetchData();
-    window.addEventListener('periodChanged', h);
-    return () => window.removeEventListener('periodChanged', h);
+    window.addEventListener("periodChanged", h);
+    return () => window.removeEventListener("periodChanged", h);
   }, [fetchData]);
 
   if (loading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
-        <IconLoader2 className="animate-spin" size={16} /> Loading Temporary Ledger...
+        <IconLoader2 className="animate-spin" size={16} /> Loading Temporary
+        Ledger...
       </div>
     );
   }
@@ -126,14 +149,18 @@ export default function GeneralLedgerTemporaryPage() {
       {/* Card Ringkasan Net Income Sebelum Penutupan */}
       <Card className="bg-muted/20">
         <CardContent className="py-4 flex items-center justify-between">
-          <span className="text-sm font-medium text-muted-foreground">Net Income (Before Closing)</span>
+          <span className="text-sm font-medium text-muted-foreground">
+            Net Income (Before Closing)
+          </span>
           <div className="flex items-center gap-2 font-mono text-base font-bold">
             {netIncome >= 0 ? (
               <IconTrendingUp className="text-emerald-500" size={20} />
             ) : (
               <IconTrendingDown className="text-red-500" size={20} />
             )}
-            <span className={netIncome >= 0 ? 'text-emerald-600' : 'text-red-600'}>
+            <span
+              className={netIncome >= 0 ? "text-emerald-600" : "text-red-600"}
+            >
               IDR {formatNumber(netIncome)}
             </span>
           </div>
@@ -145,10 +172,15 @@ export default function GeneralLedgerTemporaryPage() {
           <Card key={ledger.accountId} className="overflow-hidden">
             <CardHeader className="py-3 px-4 bg-muted/30 border-b flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="font-mono text-amber-500 text-xs">
+                <Badge
+                  variant="outline"
+                  className="font-mono text-amber-500 text-xs"
+                >
                   {ledger.referenceNumber}
                 </Badge>
-                <span className="font-semibold text-sm">{ledger.accountName}</span>
+                <span className="font-semibold text-sm">
+                  {ledger.accountName}
+                </span>
                 <Badge variant="secondary" className="text-xs">
                   {ledger.type}
                 </Badge>
@@ -176,13 +208,13 @@ export default function GeneralLedgerTemporaryPage() {
                           {line.entryDate}
                         </TableCell>
                         <TableCell className="text-xs text-muted-foreground">
-                          {line.description || '-'}
+                          {line.description || "-"}
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs text-emerald-500">
-                          {line.debit > 0 ? formatNumber(line.debit) : '-'}
+                          {line.debit > 0 ? formatNumber(line.debit) : "-"}
                         </TableCell>
                         <TableCell className="text-right font-mono text-xs text-red-500">
-                          {line.credit > 0 ? formatNumber(line.credit) : '-'}
+                          {line.credit > 0 ? formatNumber(line.credit) : "-"}
                         </TableCell>
                         <TableCell className="text-right pr-6 font-mono text-xs font-medium">
                           {formatNumber(line.runningBalance)}
@@ -191,7 +223,10 @@ export default function GeneralLedgerTemporaryPage() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6 text-xs text-muted-foreground">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-6 text-xs text-muted-foreground"
+                      >
                         No postings
                       </TableCell>
                     </TableRow>

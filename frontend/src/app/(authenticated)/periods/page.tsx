@@ -1,8 +1,8 @@
-import PeriodsManager from './Periods';
+import PeriodsManager from "./Periods";
 
 export const metadata = {
-  title: 'Accounting Periods | Aumo Finance',
-  description: 'Kelola periode akuntansi dan pembukaan saldo awal.',
+  title: "Accounting Periods | Aumo Finance",
+  description: "Kelola periode akuntansi dan pembukaan saldo awal.",
 };
 
 export default function PeriodsPage() {

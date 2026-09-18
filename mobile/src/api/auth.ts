@@ -1,5 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
-import { apiClient, tokenStorage } from '../../apiClient';
+import { useMutation } from "@tanstack/react-query";
+import { apiClient, tokenStorage } from "../../apiClient";
 
 export interface LoginPayload {
   email: string;
@@ -21,7 +21,10 @@ export const authService = {
   // field "token" (untuk mobile) - lihat AuthController.cs. Mobile pakai
   // token itu, cookie-nya diabaikan.
   login: async (payload: LoginPayload): Promise<LoginResponse> => {
-    const response = await apiClient.post<LoginResponse>('/api/v1/auth/login', payload);
+    const response = await apiClient.post<LoginResponse>(
+      "/api/v1/auth/login",
+      payload,
+    );
     return response.data;
   },
   logout: async () => {

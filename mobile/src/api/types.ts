@@ -1,4 +1,4 @@
-export type TrialBalanceType = 'unadjusted' | 'adjusted' | 'post-closing';
+export type TrialBalanceType = "unadjusted" | "adjusted" | "post-closing";
 
 export interface LedgerParams {
   periodId?: string;

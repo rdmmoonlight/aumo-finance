@@ -1,11 +1,11 @@
-import { Stack } from 'expo-router';
+import { Stack } from "expo-router";
 
 export default function ReportsLayout() {
   return (
     <Stack
       screenOptions={{
         headerShown: true,
-        headerBackTitle: 'Kembali',
+        headerBackTitle: "Kembali",
       }}
     />
   );

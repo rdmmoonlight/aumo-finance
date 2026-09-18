@@ -1,6 +1,6 @@
-import React from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
-import { Card, useTheme } from 'react-native-paper';
+import React from "react";
+import { StyleSheet, ViewStyle } from "react-native";
+import { Card, useTheme } from "react-native-paper";
 
 interface AppCardProps {
   title?: string;
@@ -16,7 +16,10 @@ export function AppCard({ title, subtitle, children, style }: AppCardProps) {
       mode="outlined"
       style={[
         styles.card,
-        { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline },
+        {
+          backgroundColor: theme.colors.surface,
+          borderColor: theme.colors.outline,
+        },
         style,
       ]}
     >
@@ -24,7 +27,7 @@ export function AppCard({ title, subtitle, children, style }: AppCardProps) {
         <Card.Title
           title={title}
           subtitle={subtitle}
-          titleStyle={{ color: theme.colors.onSurface, fontWeight: 'bold' }}
+          titleStyle={{ color: theme.colors.onSurface, fontWeight: "bold" }}
           subtitleStyle={{ color: theme.colors.onSurfaceVariant }}
         />
       )}

@@ -1,18 +1,20 @@
-import { useEffect } from 'react';
-import { Stack } from 'expo-router';
-import { PaperProvider } from 'react-native-paper';
-import { QueryClientProvider } from '@tanstack/react-query';
-import Constants from 'expo-constants';
-import * as Sentry from 'sentry-expo';
+import { useEffect } from "react";
+import { Stack } from "expo-router";
+import { PaperProvider } from "react-native-paper";
+import { QueryClientProvider } from "@tanstack/react-query";
+import Constants from "expo-constants";
+import * as Sentry from "sentry-expo";
 
-import { customDarkTheme } from '../src/theme/theme';
-import { queryClient } from '../queryClient';
-import { checkForUpdateSilently } from '../src/services/appUpdateService';
-import { ErrorBoundary } from '../src/components/ErrorBoundary';
+import { customDarkTheme } from "../src/theme/theme";
+import { queryClient } from "../queryClient";
+import { checkForUpdateSilently } from "../src/services/appUpdateService";
+import { ErrorBoundary } from "../src/components/ErrorBoundary";
 
 // Inisialisasi Sentry di module scope (di luar komponen)
 // Membaca dsn dari app.config.js (extra.sentryDsn)
-const sentryDsn = Constants.expoConfig?.extra?.sentryDsn || Constants.manifest?.extra?.sentryDsn;
+const sentryDsn =
+  Constants.expoConfig?.extra?.sentryDsn ||
+  Constants.manifest?.extra?.sentryDsn;
 
 Sentry.init({
   dsn: sentryDsn,

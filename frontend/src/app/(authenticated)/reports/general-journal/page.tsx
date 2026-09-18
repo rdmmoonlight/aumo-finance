@@ -1,8 +1,8 @@
-import GeneralJournalClient from './GeneralJournal';
+import GeneralJournalClient from "./GeneralJournal";
 
 export const metadata = {
-  title: 'General Journal | Aumo Finance',
-  description: 'Chronological record of all general journal entries.',
+  title: "General Journal | Aumo Finance",
+  description: "Chronological record of all general journal entries.",
 };
 
 export default function GeneralJournalPage() {
