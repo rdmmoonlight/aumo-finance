@@ -1,11 +1,17 @@
-import LoginForm from "./auth/LoginForm"; // Import Client Component LoginForm yang dipisah
+import { redirect } from "next/navigation";
+import { getAuthUser } from "@/lib/auth";
+import LoginForm from "@/app/auth/LoginForm";
 
 export const metadata = {
   title: "Aumo Finance - Sign In",
   description: "Operations, neatly organized.",
 };
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const user = await getAuthUser();
+  if (user) {
+    redirect("/home");
+  }
   return (
     <div className="min-h-screen w-full grid lg:grid-cols-[1.15fr_1fr] bg-black text-white">
       {/* LEFT PANEL */}

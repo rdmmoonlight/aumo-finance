@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
   IconLayoutDashboard,
@@ -39,21 +39,22 @@ interface MenuItem {
   path: string;
   icon: React.ElementType;
 }
-interface UserProfile {
+
+export interface UserProfile {
   userId?: string;
   email?: string;
   userName?: string;
   fullName?: string;
 }
 
+interface SidebarProps {
+  user?: UserProfile | null;
+}
+
 const mainNavItems: MenuItem[] = [
   { label: "Dashboard", path: "/dashboard", icon: IconLayoutDashboard },
   { label: "Periods", path: "/periods", icon: IconCalendarTime },
-  {
-    label: "Chart of Accounts",
-    path: "/chart-of-accounts",
-    icon: IconListDetails,
-  },
+  { label: "Chart of Accounts", path: "/chart-of-accounts", icon: IconListDetails },
   { label: "Journal Entry", path: "/journal-entry", icon: IconFilePencil },
   { label: "AI Assistant", path: "/aiassistant", icon: IconRobot },
   { label: "Guardian", path: "/guardian", icon: IconShieldCheck },
@@ -62,73 +63,24 @@ const mainNavItems: MenuItem[] = [
 ];
 
 const reportNavItems: MenuItem[] = [
-  {
-    label: "General Journal",
-    path: "/reports/general-journal",
-    icon: IconBook,
-  },
-  {
-    label: "Adjusting Journal",
-    path: "/reports/adjusting-journal",
-    icon: IconFileCheck,
-  },
-  {
-    label: "Closing Journal",
-    path: "/reports/closing-journal",
-    icon: IconLock,
-  },
-  {
-    label: "Permanent Ledger",
-    path: "/reports/general-ledger-permanent",
-    icon: IconNotebook,
-  },
-  {
-    label: "Temporary Ledger",
-    path: "/reports/general-ledger-temporary",
-    icon: IconNotebook,
-  },
-  {
-    label: "Unadjusted Trial Balance",
-    path: "/reports/unadjusted-trial-balance",
-    icon: IconScale,
-  },
-  {
-    label: "Adjusted Trial Balance",
-    path: "/reports/adjusted-trial-balance",
-    icon: IconScaleOff,
-  },
-  {
-    label: "Post-Closing Trial Balance",
-    path: "/reports/post-closing-trial-balance",
-    icon: IconReceipt2,
-  },
-  {
-    label: "Income Statement",
-    path: "/reports/income-statement",
-    icon: IconPigMoney,
-  },
-  {
-    label: "Retained Earnings",
-    path: "/reports/retained-earnings",
-    icon: IconBuildingBank,
-  },
-  {
-    label: "Financial Position",
-    path: "/reports/statement-of-financial-position",
-    icon: IconBuildingStore,
-  },
-  {
-    label: "Cash Flow",
-    path: "/reports/statement-of-cash-flow",
-    icon: IconCash,
-  },
+  { label: "General Journal", path: "/reports/general-journal", icon: IconBook },
+  { label: "Adjusting Journal", path: "/reports/adjusting-journal", icon: IconFileCheck },
+  { label: "Closing Journal", path: "/reports/closing-journal", icon: IconLock },
+  { label: "Permanent Ledger", path: "/reports/general-ledger-permanent", icon: IconNotebook },
+  { label: "Temporary Ledger", path: "/reports/general-ledger-temporary", icon: IconNotebook },
+  { label: "Unadjusted Trial Balance", path: "/reports/unadjusted-trial-balance", icon: IconScale },
+  { label: "Adjusted Trial Balance", path: "/reports/adjusted-trial-balance", icon: IconScaleOff },
+  { label: "Post-Closing Trial Balance", path: "/reports/post-closing-trial-balance", icon: IconReceipt2 },
+  { label: "Income Statement", path: "/reports/income-statement", icon: IconPigMoney },
+  { label: "Retained Earnings", path: "/reports/retained-earnings", icon: IconBuildingBank },
+  { label: "Financial Position", path: "/reports/statement-of-financial-position", icon: IconBuildingStore },
+  { label: "Cash Flow", path: "/reports/statement-of-cash-flow", icon: IconCash },
   { label: "Worksheet", path: "/reports/worksheet", icon: IconTable },
 ];
 
 function NavItemLink({ item }: { item: MenuItem }) {
   const pathname = usePathname();
-  const isActive =
-    pathname === item.path || pathname.startsWith(`${item.path}/`);
+  const isActive = pathname === item.path || pathname.startsWith(`${item.path}/`);
 
   return (
     <Link
@@ -137,7 +89,7 @@ function NavItemLink({ item }: { item: MenuItem }) {
         "group flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs leading-none transition-colors block",
         isActive
           ? "bg-[var(--color-matte-hover)] text-white font-medium"
-          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05]",
+          : "text-zinc-500 hover:text-zinc-200 hover:bg-white/[0.05]"
       )}
     >
       <item.icon
@@ -145,7 +97,7 @@ function NavItemLink({ item }: { item: MenuItem }) {
         stroke={1.7}
         className={cn(
           "shrink-0",
-          isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100",
+          isActive ? "opacity-100" : "opacity-60 group-hover:opacity-100"
         )}
       />
       <span className="truncate">{item.label}</span>
@@ -153,39 +105,19 @@ function NavItemLink({ item }: { item: MenuItem }) {
   );
 }
 
-export default function Sidebar() {
+export default function Sidebar({ user }: SidebarProps) {
   const router = useRouter();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(true);
   const [loggingOut, setLoggingOut] = useState(false);
-
-  useEffect(() => {
-    let m = true;
-    apiClient
-      .get("/api/v1/auth/me")
-      .then((r) => {
-        if (m && r.data) setUser(r.data);
-      })
-      .catch(() => {})
-      .finally(() => {
-        if (m) setLoading(false);
-      });
-    return () => {
-      m = false;
-    };
-  }, []);
 
   const handleLogout = async () => {
     try {
       setLoggingOut(true);
-      // Memanggil endpoint ASP.NET Core logout untuk menghapus cookie AumoFinance.Session
       await apiClient.post("/auth/logout");
     } catch (err) {
       console.error("Logout error:", err);
     } finally {
       localStorage.removeItem("isAuthenticated");
       setLoggingOut(false);
-      // Mengarahkan kembali ke halaman login dan refresh state halaman
       router.push("/auth/login");
       router.refresh();
     }
@@ -239,9 +171,7 @@ export default function Sidebar() {
           </div>
           <div className="flex flex-col min-w-0 flex-1">
             <span className="text-xs font-medium truncate text-white leading-none">
-              {loading
-                ? "Loading..."
-                : user?.fullName || user?.userName || "User"}
+              {user?.fullName || user?.userName || "User"}
             </span>
             <span className="text-[10px] text-zinc-500 truncate leading-none mt-1.5 font-mono">
               {user?.email || "Active Session"}

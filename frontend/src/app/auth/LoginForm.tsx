@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function LoginForm() {
-  const [email, setEmail] = useState("admin@aumo.com");
-  const [password, setPassword] = useState("Admin123!");
-  const [keepMe, setKeepMe] = useState(true);
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [keepMe, setKeepMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
@@ -37,7 +39,7 @@ export default function LoginForm() {
           rememberMe: keepMe,
           isMobileClient: false,
         },
-        { withCredentials: true },
+        { withCredentials: true }
       );
 
       const isOk =
@@ -48,7 +50,7 @@ export default function LoginForm() {
 
       if (!isOk) {
         throw new Error(
-          res.data?.Message || res.data?.message || "Login gagal",
+          res.data?.Message || res.data?.message || "Login gagal"
         );
       }
 
@@ -59,7 +61,9 @@ export default function LoginForm() {
         localStorage.removeItem("aumo_saved_email");
       }
 
-      window.location.href = "/home";
+      // Gunakan router bawaan Next.js agar tidak reload total
+      router.push("/home");
+      router.refresh();
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e.response?.data || e.message);
       const errorMessage =
@@ -94,7 +98,7 @@ export default function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="admin@aumo.com"
+            placeholder="nama@perusahaan.com"
             className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black"
             required
           />
