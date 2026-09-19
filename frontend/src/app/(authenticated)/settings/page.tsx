@@ -11,8 +11,11 @@ import {
   IconMail,
   IconId,
 } from "@tabler/icons-react";
-import { useTheme } from "@/hooks/useTheme";
-import apiClient from "@/lib/apiClient";
+import { useTheme } from "next-themes";
+
+// Import tipe data dan helper fungsi terpusat dari lib/auth
+import { getAuthUser, type UserProfile } from "@/lib/auth";
+
 import {
   Card,
   CardContent,
@@ -26,15 +29,6 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-interface UserProfile {
-  userId: string;
-  email: string;
-  userName: string;
-  fullName: string;
-  roles: string[];
-  customClaims?: Array<{ type: string; value: string }>;
-}
-
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -45,10 +39,8 @@ export default function SettingsPage() {
     setMounted(true);
     const fetchUserProfile = async () => {
       try {
-        const res = await apiClient.get("/api/v1/auth/me", {
-          withCredentials: true,
-        });
-        if (res.data?.success || res.data?.userId) setUser(res.data);
+        const data = await getAuthUser();
+        if (data) setUser(data);
       } catch (e) {
         console.error("[SETTINGS] Failed to fetch user profile:", e);
       } finally {
@@ -201,20 +193,6 @@ export default function SettingsPage() {
               );
             })}
           </RadioGroup>
-
-          <div className="mt-6 rounded-lg bg-muted p-3 text-xs font-mono text-muted-foreground">
-            current:{" "}
-            <span className="text-foreground font-bold">
-              {mounted ? theme : "loading..."}
-            </span>{" "}
-            • html class: "
-            {mounted &&
-            typeof document !== "undefined" &&
-            document.documentElement.classList.contains("dark")
-              ? "dark"
-              : "light"}
-            "
-          </div>
         </CardContent>
       </Card>
     </div>

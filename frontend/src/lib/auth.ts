@@ -1,18 +1,19 @@
 import apiClient from "@/lib/apiClient";
 
+export interface UserProfile {
+  userId?: string;
+  userName?: string;
+  fullName?: string;
+  email?: string;
+  roles?: string[];
+  avatarUrl?: string;
+}
+
 export async function getAuthUser(): Promise<UserProfile | null> {
   try {
-    const res = await apiClient.get<UserProfile>("/api/v1/auth/me");
-    return res.data;
+    const response = await apiClient.get("/auth/me");
+    return response.data;
   } catch (error) {
     return null;
   }
-}
-
-export interface UserProfile {
-  id?: string;
-  name?: string;
-  email?: string;
-  role?: string;
-  avatarUrl?: string;
 }
