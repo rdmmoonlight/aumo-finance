@@ -3,8 +3,8 @@ import path from "node:path";
 export const aumoConfig = {
   envPrefix: ["WEB_"],
 
-  // Gunakan getter agar selalu dievaluasi saat dipanggil, bukan saat file di-import
-  get backendTarget() {
+  // Getter tunggal sebagai sumber kebenaran (source of truth) untuk URL Backend
+  get backendTarget(): string {
     return (
       process.env.WEB_API_URL ||
       process.env.NEXT_PUBLIC_WEB_API_URL ||
@@ -16,15 +16,12 @@ export const aumoConfig = {
     "@": path.resolve(process.cwd(), "./src"),
   },
 
-  getRewrites: () => {
-    const target =
-      process.env.WEB_API_URL ||
-      process.env.NEXT_PUBLIC_WEB_API_URL ||
-      "http://localhost:5000";
+  getRewrites() {
     return [
       {
         source: "/api/:path*",
-        destination: `${target}/api/:path*`,
+        // Memanfaatkan getter backendTarget di atas
+        destination: `${this.backendTarget}/api/:path*`,
       },
     ];
   },
