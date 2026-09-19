@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+    <!-- Dipakai AppUpdateService untuk memasang APK hasil auto-update. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <application
+        android:name=".core.AumoApplication"
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:label="Aumo"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.AumoFinance">
+        <activity
+            android:name=".splash.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.AumoFinance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".auth.LoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.AumoFinance" />
+        <activity
+            android:name=".home.HomeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".dashboard.DashboardActivity"
+            android:exported="false" />
+        <activity
+            android:name=".periods.PeriodsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".coa.CoaActivity"
+            android:exported="false" />
+        <activity
+            android:name=".journal.JournalEntryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.journal.GeneralJournalReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.menu.ReportsMenuActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.journal.AdjustingJournalReportActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.ledger.permanent.GeneralLedgerPermanentActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.ledger.temporary.GeneralLedgerTemporaryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.trialbalance.unadjusted.TrialBalanceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.trialbalance.adjusted.AdjustedTrialBalanceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.trialbalance.postclosing.PostClosingTrialBalanceActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.worksheet.WorksheetActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.financials.incomestatement.IncomeStatementActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.financials.retainedearnings.RetainedEarningsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.financials.financialposition.FinancialPositionActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.financials.cashflow.CashFlowActivity"
+            android:exported="false" />
+        <activity
+            android:name=".reports.financials.closingjournal.ClosingJournalActivity"
+            android:exported="false" />
+        <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".logout.LogoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".crashlog.CrashLogActivity"
+            android:exported="false" />
+        <!-- Activities added incrementally per phase (Login, Home, Dashboard, etc.) -->
+        <!-- FileProvider untuk memberi akses APK hasil unduhan update ke
+             installer sistem — authorities harus persis "{applicationId}.fileprovider"
+             (dipakai apa adanya di AppUpdateService.kt). -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+    </application>
+</manifest>
