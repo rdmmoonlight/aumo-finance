@@ -1,11 +1,11 @@
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/side-bar"
-import { TopBar } from "@/components/top-bar"
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/side-bar";
+import { TopBar } from "@/components/top-bar";
 
 export default function AuthenticatedLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <SidebarProvider className="flex min-h-screen w-full">
@@ -23,5 +23,5 @@ export default function AuthenticatedLayout({
         </main>
       </div>
     </SidebarProvider>
-  )
+  );
 }
