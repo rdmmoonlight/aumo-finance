@@ -35,7 +35,7 @@ export function proxy(request: NextRequest) {
         message: "Terjadi kesalahan internal pada server proxy.",
         path: request.nextUrl.pathname,
       },
-      { status: 500 }
+      { status: 500 },
     );
 
     return response;
