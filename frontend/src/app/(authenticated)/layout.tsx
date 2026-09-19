@@ -1,6 +1,6 @@
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { Sidebar } from "@/components/side-bar"
-import { TopBar } from "@/components/top-bar"
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { Sidebar } from "@/components/side-bar";
+import { TopBar } from "@/components/top-bar";
 
 export default function AuthenticatedLayout({
   children,

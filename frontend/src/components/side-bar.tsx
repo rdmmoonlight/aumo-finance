@@ -110,9 +110,9 @@ const navigation = [
 ];
 
 export function Sidebar() {
-  const pathname = usePathname()
-  const router = useRouter()
-  const [user, setUser] = React.useState<UserProfile | null>(null)
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = React.useState<UserProfile | null>(null);
 
   React.useEffect(() => {
     async function loadUser() {
