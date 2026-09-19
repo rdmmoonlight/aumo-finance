@@ -36,7 +36,7 @@ export function middleware(request: NextRequest) {
         message: "Terjadi kesalahan internal pada server proxy/middleware.",
         path: request.nextUrl.pathname,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -47,4 +47,3 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-                            
