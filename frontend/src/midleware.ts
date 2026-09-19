@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-export function proxy(request: NextRequest) {
+// Wajib bernama 'middleware', bukan 'proxy'
+export function middleware(request: NextRequest) {
   try {
-    const { pathname } = request.nextUrl;
+    const { pathname, search } = request.nextUrl;
 
     // Ambil cookie session ASP.NET Core
     const sessionToken = request.cookies.get("AumoFinance.Session")?.value;
@@ -15,8 +16,8 @@ export function proxy(request: NextRequest) {
     // 1. Pengguna BELUM login & mencoba mengakses halaman terproteksi (selain '/' dan '/auth/*')
     if (!isAuthenticated && !isAuthPage && pathname !== "/") {
       const loginUrl = new URL("/auth", request.url);
-      // Simpan rute tujuan agar bisa diarahkan kembali setelah login
-      loginUrl.searchParams.set("redirectTo", pathname);
+      // Simpan rute tujuan beserta query-nya agar bisa diarahkan kembali setelah login
+      loginUrl.searchParams.set("redirectTo", `${pathname}${search}`);
       return NextResponse.redirect(loginUrl);
     }
 
@@ -27,31 +28,23 @@ export function proxy(request: NextRequest) {
 
     return NextResponse.next();
   } catch (error) {
-    console.error("[PROXY ERROR]", error);
+    console.error("[MIDDLEWARE ERROR]", error);
 
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         success: false,
-        message: "Terjadi kesalahan internal pada server proxy.",
+        message: "Terjadi kesalahan internal pada server proxy/middleware.",
         path: request.nextUrl.pathname,
       },
-      { status: 500 },
+      { status: 500 }
     );
-
-    return response;
   }
 }
 
-// Config Matcher: Hanya memproses rute utama web dan mengabaikan static asset, API, dan favicon
+// Config Matcher: Mengecualikan rute static asset, API backend, dan file media
 export const config = {
   matcher: [
-    /*
-     * Match semua request rute KECUALI:
-     * - api (Next.js API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico, sitemap.xml, robots.txt, asset gambar/svg
-     */
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+                            
