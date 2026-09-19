@@ -58,27 +58,84 @@ interface SidebarProps {
 const mainNavItems: MenuItem[] = [
   { label: "Dashboard", path: "/dashboard", icon: IconLayoutDashboard },
   { label: "Periods", path: "/periods", icon: IconCalendarTime },
-  { label: "Chart of Accounts", path: "/chart-of-accounts", icon: IconListDetails, },
+  {
+    label: "Chart of Accounts",
+    path: "/chart-of-accounts",
+    icon: IconListDetails,
+  },
   { label: "Journal Entry", path: "/journal-entry", icon: IconFilePencil },
-  { label: "AI Assistant", path: "/ai-assistant", icon: IconRobot, badge: "New", },
+  {
+    label: "AI Assistant",
+    path: "/ai-assistant",
+    icon: IconRobot,
+    badge: "New",
+  },
   { label: "Guardian", path: "/guardian", icon: IconShieldCheck },
   { label: "Tools", path: "/tools", icon: IconTools },
   { label: "Settings", path: "/settings", icon: IconSettings },
 ];
 
 const reportNavItems: MenuItem[] = [
-  { label: "General Journal", path: "/reports/general-journal", icon: IconBook },
-  { label: "Adjusting Journal", path: "/reports/adjusting-journal", icon: IconFileCheck },
-  { label: "Closing Journal", path: "/reports/closing-journal", icon: IconLock },
-  { label: "Permanent Ledger", path: "/reports/general-ledger-permanent", icon: IconNotebook },
-  { label: "Temporary Ledger", path: "/reports/general-ledger-temporary", icon: IconNotebook },
-  { label: "Unadjusted TB", path: "/reports/unadjusted-trial-balance", icon: IconScale },
-  { label: "Adjusted TB", path: "/reports/adjusted-trial-balance", icon: IconScaleOff },
-  { label: "Post-Closing TB", path: "/reports/post-closing-trial-balance", icon: IconReceipt2 },
-  { label: "Income Statement", path: "/reports/income-statement", icon: IconPigMoney },
-  { label: "Retained Earnings", path: "/reports/retained-earnings", icon: IconBuildingBank },
-  { label: "Financial Position", path: "/reports/statement-of-financial-position", icon: IconBuildingStore },
-  { label: "Cash Flow", path: "/reports/statement-of-cash-flow", icon: IconCash },
+  {
+    label: "General Journal",
+    path: "/reports/general-journal",
+    icon: IconBook,
+  },
+  {
+    label: "Adjusting Journal",
+    path: "/reports/adjusting-journal",
+    icon: IconFileCheck,
+  },
+  {
+    label: "Closing Journal",
+    path: "/reports/closing-journal",
+    icon: IconLock,
+  },
+  {
+    label: "Permanent Ledger",
+    path: "/reports/general-ledger-permanent",
+    icon: IconNotebook,
+  },
+  {
+    label: "Temporary Ledger",
+    path: "/reports/general-ledger-temporary",
+    icon: IconNotebook,
+  },
+  {
+    label: "Unadjusted TB",
+    path: "/reports/unadjusted-trial-balance",
+    icon: IconScale,
+  },
+  {
+    label: "Adjusted TB",
+    path: "/reports/adjusted-trial-balance",
+    icon: IconScaleOff,
+  },
+  {
+    label: "Post-Closing TB",
+    path: "/reports/post-closing-trial-balance",
+    icon: IconReceipt2,
+  },
+  {
+    label: "Income Statement",
+    path: "/reports/income-statement",
+    icon: IconPigMoney,
+  },
+  {
+    label: "Retained Earnings",
+    path: "/reports/retained-earnings",
+    icon: IconBuildingBank,
+  },
+  {
+    label: "Financial Position",
+    path: "/reports/statement-of-financial-position",
+    icon: IconBuildingStore,
+  },
+  {
+    label: "Cash Flow",
+    path: "/reports/statement-of-cash-flow",
+    icon: IconCash,
+  },
   { label: "Worksheet", path: "/reports/worksheet", icon: IconTable },
 ];
 
