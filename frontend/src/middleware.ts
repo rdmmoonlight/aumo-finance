@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const TIMEOUT_MS = 60000;
 
   const timeoutPromise = new Promise<NextResponse>((_, reject) =>
-    setTimeout(() => reject(new Error("Middleware Timeout")), TIMEOUT_MS)
+    setTimeout(() => reject(new Error("Middleware Timeout")), TIMEOUT_MS),
   );
 
   const handleMiddleware = async (): Promise<NextResponse> => {
@@ -49,7 +49,7 @@ export async function middleware(request: NextRequest) {
         message: "Request timeout pada server middleware (lebih dari 1 menit).",
         path: request.nextUrl.pathname,
       },
-      { status: 504 }
+      { status: 504 },
     );
 
     response.headers.set("X-Server-Timeout", "true");

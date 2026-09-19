@@ -34,7 +34,10 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     return null;
   } catch (err: any) {
     // 401 Unauthorized/404 Not Found akan masuk ke sini
-    console.error("[AUTH] Gagal mengambil profil user:", err.response?.data || err.message);
+    console.error(
+      "[AUTH] Gagal mengambil profil user:",
+      err.response?.data || err.message,
+    );
     return null;
   }
 }
