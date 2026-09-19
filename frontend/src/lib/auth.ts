@@ -1,5 +1,4 @@
 import apiClient from "@/lib/apiClient";
-import { UserProfile } from "@/components/side-bar";
 
 export async function getAuthUser(): Promise<UserProfile | null> {
   try {
@@ -8,4 +7,12 @@ export async function getAuthUser(): Promise<UserProfile | null> {
   } catch (error) {
     return null;
   }
+}
+
+export interface UserProfile {
+  id?: string;
+  name?: string;
+  email?: string;
+  role?: string;
+  avatarUrl?: string;
 }
