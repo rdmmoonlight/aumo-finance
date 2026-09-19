@@ -1,29 +1,18 @@
 import axios from "axios";
 
-// Strict Base URL: Mengembalikan URL murni sesuai env
-const getBaseURL = () => {
-  if (typeof window !== "undefined") {
-    // Di Client: Gunakan env client atau fallback string kosong (relatif)
-    return process.env.NEXT_PUBLIC_WEB_API_URL || "";
-  }
-  // Di Server (SSR): Gunakan env server atau fallback default
-  return (
-    process.env.WEB_API_URL ||
-    process.env.NEXT_PUBLIC_WEB_API_URL ||
-    "http://localhost:3000"
-  );
-};
+// Mengambil URL Backend .NET dari Environment Variable
+const BASE_URL = process.env.NEXT_PUBLIC_WEB_API_URL || "http://localhost:5000";
 
 export const apiClient = axios.create({
-  baseURL: getBaseURL(),
-  withCredentials: true,
+  baseURL: BASE_URL,
+  withCredentials: true, // WAJIB: Agar Cookie Session Identity terkirim secara otomatis
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-// Request Interceptor: Murni oper Cookie saat SSR
+// Request Interceptor: Meneruskan Cookie dari Request Browser saat Next.js SSR
 apiClient.interceptors.request.use(async (config) => {
   if (typeof window === "undefined") {
     try {
@@ -35,22 +24,21 @@ apiClient.interceptors.request.use(async (config) => {
         config.headers.Cookie = cookieHeader;
       }
     } catch {
-      // Mengabaikan error jika dipanggil di luar konteks request Next.js
+      // Abaikan jika dieksekusi di luar konteks Request Server Next.js
     }
   }
-
   return config;
 });
 
-// Response Interceptor: Menangani Unauthenticated Request (401)
+// Response Interceptor: Menangani sesi habis / 401 Unauthorized
 apiClient.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401 && typeof window !== "undefined") {
       const currentPath = window.location.pathname;
-      if (currentPath !== "/") {
-        localStorage.removeItem("isAuthenticated");
-        window.location.href = "/";
+      // Mencegah redirect berulang jika pengguna sudah berada di halaman login
+      if (currentPath !== "/login" && currentPath !== "/auth") {
+        window.location.href = "/login";
       }
     }
     return Promise.reject(err);

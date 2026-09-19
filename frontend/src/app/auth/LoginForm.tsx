@@ -31,45 +31,31 @@ export default function LoginForm() {
     setErr("");
 
     try {
-      const res = await apiClient.post(
-        "/api/v1/auth/login",
-        {
-          email,
-          password,
-          rememberMe: keepMe,
-          isMobileClient: false,
-        },
-        { withCredentials: true },
-      );
+      const res = await apiClient.post("/api/v1/auth/login", {
+        email,
+        password,
+        rememberMe: keepMe,
+        isMobileClient: false,
+      });
 
-      const isOk =
-        res.status === 200 ||
-        res.data?.Success ||
-        res.data?.success ||
-        res.data?.isSuccess;
-
-      if (!isOk) {
-        throw new Error(
-          res.data?.Message || res.data?.message || "Login gagal",
-        );
+      if (!res.data?.success) {
+        throw new Error(res.data?.message || "Login gagal");
       }
 
-      localStorage.setItem("isAuthenticated", "true");
+      // Kelola simpan/hapus email untuk fitur "Remember Email"
       if (keepMe) {
         localStorage.setItem("aumo_saved_email", email);
       } else {
         localStorage.removeItem("aumo_saved_email");
       }
 
-      // Gunakan router bawaan Next.js agar tidak reload total
       router.push("/home");
       router.refresh();
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e.response?.data || e.message);
       const errorMessage =
-        e.response?.data?.Message ||
         e.response?.data?.message ||
-        e.response?.data?.title ||
+        e.response?.data?.Message ||
         "Email atau password salah";
       setErr(errorMessage);
     } finally {
