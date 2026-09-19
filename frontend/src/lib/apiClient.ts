@@ -1,10 +1,12 @@
 import axios from "axios";
 
+// PENTING: Di browser, gunakan path relatif ("") agar request ditangani Next.js Rewrites.
+// Saat SSR (di server Node.js Next.js), panggil URL backend ASP.NET Core secara langsung.
 const BASE_URL =
   typeof window === "undefined"
     ? process.env.WEB_API_URL ||
       process.env.NEXT_PUBLIC_WEB_API_URL ||
-      "http://localhost:3000"
+      "http://localhost:5000" // FIX: Default dipatenkan ke backend (.NET), bukan frontend (3000)
     : "";
 
 export const apiClient = axios.create({
@@ -38,7 +40,12 @@ apiClient.interceptors.request.use(async (config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401 && typeof window !== "undefined") {
+    // Memastikan error berasal dari respon HTTP backend dengan status 401
+    if (
+      axios.isAxiosError(error) &&
+      error.response?.status === 401 &&
+      typeof window !== "undefined"
+    ) {
       const currentPath = window.location.pathname;
 
       // Samakan dengan rute login/auth frontend Anda (/auth)
@@ -47,7 +54,8 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default apiClient;
+          
