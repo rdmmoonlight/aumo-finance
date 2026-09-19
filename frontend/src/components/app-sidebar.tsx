@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -28,7 +27,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -48,9 +46,8 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 
-// Import tipe UserProfile dan API client
-import { type UserProfile } from "@/lib/auth";
-import apiClient from "@/lib/apiClient";
+// Impor tipe dan fungsi auth langsung dari @/lib/auth
+import { getUserProfile, logout, type UserProfile } from "@/lib/auth";
 
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
@@ -107,31 +104,27 @@ const navigation = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
+  const [user, setUser] = React.useState<UserProfile | null>(null);
 
-  // Fetch data profil user dari API
-  useEffect(() => {
-    const fetchUserProfile = async () => {
+  React.useEffect(() => {
+    // Ambil data user dari auth.ts saat komponen di-mount
+    async function fetchUser() {
       try {
-        const res = await apiClient.get("/api/v1/auth/me", {
-          withCredentials: true,
-        });
-        if (res.data) {
-          setUser(res.data);
-        }
-      } catch (e) {
-        console.error("[SIDEBAR] Gagal mengambil profil pengguna:", e);
-      } finally {
-        setLoadingUser(false);
+        const data = await getUserProfile();
+        setUser(data);
+      } catch (err) {
+        console.error("Gagal memuat profil user:", err);
       }
-    };
-
-    fetchUserProfile();
+    }
+    fetchUser();
   }, []);
 
-  const handleSignOut = () => {
-    console.log("Signing out...");
+  const handleSignOut = async () => {
+    if (typeof logout === "function") {
+      await logout();
+    } else {
+      console.log("Signing out...");
+    }
   };
 
   return (
@@ -229,7 +222,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer Sidebar (Tampilan Profil Satu Kali) */}
+      {/* Footer Sidebar */}
       <SidebarFooter className="p-2 border-t shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -237,12 +230,12 @@ export function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="w-full justify-between py-6">
                   <div className="flex items-center gap-3 overflow-hidden text-left">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
                       {user?.avatarUrl ? (
                         <img
                           src={user.avatarUrl}
-                          alt="Avatar"
-                          className="w-8 h-8 rounded-full object-cover"
+                          alt={user.fullName || "User Avatar"}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <User className="w-4 h-4" />
@@ -250,12 +243,10 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-sm leading-tight truncate">
-                        {loadingUser
-                          ? "Loading..."
-                          : user?.fullName || user?.userName}
+                        {user?.fullName || user?.userName || "Guest"}
                       </span>
                       <span className="text-xs text-muted-foreground truncate">
-                        {loadingUser ? "..." : user?.email}
+                        {user?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
@@ -269,7 +260,6 @@ export function AppSidebar() {
                     Settings
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleSignOut}
                   className="text-destructive focus:text-destructive cursor-pointer"
