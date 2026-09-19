@@ -12,12 +12,18 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { Search, Bell, Sparkles } from "lucide-react";
+import { usePeriodStore } from "@/lib/usePeriodStore";
 
 export function TopBar() {
   const pathname = usePathname();
+  const { selectedPeriod, fetchPeriods, loading } = usePeriodStore();
+
+  // Load status periode aktif dari API/store saat komponen pertama kali dirender
+  React.useEffect(() => {
+    fetchPeriods();
+  }, [fetchPeriods]);
 
   // Mengubah path URL menjadi breadcrumb sederhana
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -38,8 +44,8 @@ export function TopBar() {
           </div>
         </div>
 
-        {/* Sisi Kanan: Notifikasi & Profil */}
-        <div className="flex items-center gap-3">
+        {/* Sisi Kanan: Notifikasi */}
+        <div className="flex items-center">
           <Button
             variant="ghost"
             size="icon"
@@ -48,27 +54,10 @@ export function TopBar() {
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive" />
           </Button>
-
-          <Separator orientation="vertical" className="h-6" />
-
-          {/* User Avatar */}
-          <div className="flex items-center gap-3 pl-1">
-            <Avatar className="h-9 w-9 border">
-              <AvatarImage src="/avatar-placeholder.png" alt="Ghofur" />
-              <AvatarFallback className="font-semibold">GF</AvatarFallback>
-            </Avatar>
-            <div className="hidden md:flex flex-col text-left">
-              <span className="text-sm font-semibold leading-none">Ghofur</span>
-              <span className="text-xs text-muted-foreground mt-0.5">
-                Akuntan Utama
-              </span>
-            </div>
-          </div>
         </div>
       </div>
 
       {/* GARIS PEMISAH PUTIH / LIGHT BORDER */}
-      {/* Menggunakan border-white/border-slate-100 atau Separator */}
       <Separator className="bg-white/20 dark:bg-slate-800" />
 
       {/* KELOMPOK 2: Sekunder & Lebih Kecil (h-10 / 40px) */}
@@ -108,13 +97,39 @@ export function TopBar() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Sisi Kanan: Status/Info Cepat (Periode Aktif & AI Status) */}
+        {/* Sisi Kanan: Status/Info Cepat (Periode Real-time & AI Status) */}
         <div className="flex items-center gap-4 text-muted-foreground">
-          <div className="flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400">
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>Periode: 2026 / Aktif</span>
-          </div>
+          {selectedPeriod ? (
+            <div
+              className={`flex items-center gap-1.5 font-medium ${
+                selectedPeriod.isClosed
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-emerald-600 dark:text-emerald-400"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  selectedPeriod.isClosed
+                    ? "bg-amber-500"
+                    : "bg-emerald-500 animate-pulse"
+                }`}
+              />
+              <span>
+                Periode: {selectedPeriod.periodName}
+                {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
+              <span className="h-2 w-2 rounded-full bg-slate-400" />
+              <span>
+                {loading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+              </span>
+            </div>
+          )}
+
           <Separator orientation="vertical" className="h-3" />
+
           <div className="flex items-center gap-1 text-xs">
             <Sparkles className="h-3.5 w-3.5 text-amber-500" />
             <span>AI Guardian: Ready</span>
