@@ -131,17 +131,14 @@ export function AppSidebar() {
 
                 const isSubActive = item.items?.some(
                   (sub) =>
-                    pathname === sub.url ||
-                    pathname.startsWith(sub.url + "/"),
+                    pathname === sub.url || pathname.startsWith(sub.url + "/"),
                 );
 
                 if (item.items) {
                   return (
                     <Collapsible
                       key={item.title}
-                      defaultOpen={
-                        isSubActive || pathname.startsWith(item.url)
-                      }
+                      defaultOpen={isSubActive || pathname.startsWith(item.url)}
                       className="group/collapsible"
                     >
                       <SidebarMenuItem>
@@ -184,8 +181,7 @@ export function AppSidebar() {
 
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url !== "/home" &&
-                    pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -233,9 +229,7 @@ export function AppSidebar() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      Pengguna
-                    </p>
+                    <p className="text-sm font-medium leading-none">Pengguna</p>
                     <p className="text-xs leading-none text-muted-foreground">
                       user@aumofinance.com
                     </p>
