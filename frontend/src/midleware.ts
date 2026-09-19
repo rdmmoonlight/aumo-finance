@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-// Wajib bernama 'middleware', bukan 'proxy'
 export function middleware(request: NextRequest) {
   try {
     const { pathname, search } = request.nextUrl;
@@ -9,7 +8,6 @@ export function middleware(request: NextRequest) {
     // Ambil cookie session ASP.NET Core
     const sessionToken = request.cookies.get("AumoFinance.Session")?.value;
 
-    // Cek status autentikasi berdasarkan keberadaan cookie
     const isAuthenticated = Boolean(sessionToken);
     const isAuthPage = pathname.startsWith("/auth");
 
@@ -29,21 +27,23 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   } catch (error) {
     console.error("[MIDDLEWARE ERROR]", error);
-
-    return NextResponse.json(
-      {
-        success: false,
-        message: "Terjadi kesalahan internal pada server proxy/middleware.",
-        path: request.nextUrl.pathname,
-      },
-      { status: 500 },
-    );
+    // Jangan kembalikan JSON 500 saat middleware error agar tidak memutus navigasi user,
+    // biarkan request dilanjutkan ke halaman yang dituju.
+    return NextResponse.next();
   }
 }
 
 // Config Matcher: Mengecualikan rute static asset, API backend, dan file media
 export const config = {
   matcher: [
+    /*
+     * Match semua request rute KECUALI:
+     * - api (Next.js API routes & Rewrites proxy ke ASP.NET Core)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, sitemap.xml, robots.txt, asset gambar/svg
+     */
     "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
+        
