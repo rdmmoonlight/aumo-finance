@@ -126,6 +126,6 @@ export const usePeriodStore = create<PeriodState>()(
       name: "active-period-storage",
       // Hanya simpan id/data terpenting ke LocalStorage agar terhindar dari stale state
       partialize: (state) => ({ selectedPeriod: state.selectedPeriod }),
-    }
-  )
+    },
+  ),
 );
