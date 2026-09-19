@@ -112,7 +112,10 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar collapsible="none" className="border-r min-h-screen flex flex-col justify-between">
+    <Sidebar
+      collapsible="none"
+      className="border-r min-h-screen flex flex-col justify-between"
+    >
       <div>
         <SidebarHeader className="p-4 border-b">
           <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
@@ -130,7 +133,8 @@ export function AppSidebar() {
                   // Cek apakah user sedang berada di area halaman sub-menu (contoh: /reports/...)
                   const isSubActive = item.items?.some(
                     (sub) =>
-                      pathname === sub.url || pathname.startsWith(sub.url + "/"),
+                      pathname === sub.url ||
+                      pathname.startsWith(sub.url + "/"),
                   );
 
                   // Menu dengan Sub-item (Collapsible / Dropdown)
@@ -138,7 +142,9 @@ export function AppSidebar() {
                     return (
                       <Collapsible
                         key={item.title}
-                        defaultOpen={isSubActive || pathname.startsWith(item.url)}
+                        defaultOpen={
+                          isSubActive || pathname.startsWith(item.url)
+                        }
                         className="group/collapsible"
                       >
                         <SidebarMenuItem>
@@ -182,7 +188,8 @@ export function AppSidebar() {
                   // Cek status aktif untuk Single Menu
                   const isSingleActive =
                     pathname === item.url ||
-                    (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                    (item.url !== "/home" &&
+                      pathname.startsWith(item.url + "/"));
 
                   // Menu Utama Single
                   return (
