@@ -33,10 +33,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
-          cache-dependency-path: |
-            frontend/package-lock.json
-            mobile/package-lock.json
 
       # 3. BACKEND (.NET C#)
       - name: Restore .NET Dependencies
@@ -69,16 +65,7 @@ jobs:
         run: npx playwright test --pass-with-no-tests
         working-directory: frontend
 
-      # 5. MOBILE (React Native)
-      - name: Install Mobile Dependencies
-        run: npm install
-        working-directory: mobile
-
-      - name: Run Prettier (Mobile)
-        run: npx prettier --write .
-        working-directory: mobile
-
-      # 6. COMMIT AUTO-FORMATTED CHANGES & UPDATED PACKAGE-LOCK
+      # 5. COMMIT AUTO-FORMATTED CHANGES & UPDATED PACKAGE-LOCK
       - name: Commit Formatted Changes & Lockfiles
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -86,9 +73,9 @@ jobs:
           commit_message: "style: auto-correct formatting & sync package-lock.json [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          file_pattern: "backend/* frontend/* mobile/*"
+          file_pattern: "backend/* frontend/*"
 
-      # 7. UPLOAD PLAYWRIGHT REPORT
+      # 6. UPLOAD PLAYWRIGHT REPORT
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
