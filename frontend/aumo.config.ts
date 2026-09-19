@@ -8,7 +8,9 @@ export const aumoConfig = {
     return (
       process.env.WEB_API_URL ||
       process.env.NEXT_PUBLIC_WEB_API_URL ||
-      "http://localhost:3000"
+      (process.env.NODE_ENV === "production"
+        ? "https://aumonext-api.onrender.com"
+        : "http://localhost:5000") // FIX: Menggunakan port .NET (5000), bukan port Next.js (3000)
     );
   },
 
