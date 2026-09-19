@@ -78,7 +78,7 @@ export function TopBar() {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink href="/home" className="text-xs">
-                App
+                Home
               </BreadcrumbLink>
             </BreadcrumbItem>
             {pathSegments.map((segment, index) => {
