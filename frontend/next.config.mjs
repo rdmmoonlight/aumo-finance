@@ -6,10 +6,6 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
-  // Aktifkan pemeriksaan ESLint saat build
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
   env: {
     WEB_API_URL: aumoConfig.backendTarget,
   },
