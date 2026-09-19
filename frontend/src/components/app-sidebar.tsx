@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -23,6 +24,14 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
   LayoutDashboard,
   Home,
   Bot,
@@ -34,6 +43,9 @@ import {
   Wrench,
   Settings,
   ChevronRight,
+  User,
+  LogOut,
+  ChevronsUpDown,
 } from "lucide-react";
 
 // Data Navigasi disesuaikan dengan folder app/(authenticated)
@@ -93,98 +105,159 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
 
+  // Fungsi untuk penanganan Log Out (sesuaikan dengan auth handler Anda, e.g. NextAuth/Clerk/Supabase)
+  const handleSignOut = () => {
+    // Jalankan fungsi sign out di sini
+    console.log("Signing out...");
+  };
+
   return (
-    <Sidebar collapsible="none" className="border-r min-h-screen">
-      <SidebarHeader className="p-4 border-b">
-        <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
-      </SidebarHeader>
-      <SidebarContent className="p-2">
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-            Navigation
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navigation.map((item) => {
-                const Icon = item.icon;
+    <Sidebar collapsible="none" className="border-r min-h-screen flex flex-col justify-between">
+      <div>
+        <SidebarHeader className="p-4 border-b">
+          <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
+        </SidebarHeader>
+        <SidebarContent className="p-2">
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+              Navigation
+            </SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navigation.map((item) => {
+                  const Icon = item.icon;
 
-                // Cek apakah user sedang berada di area halaman sub-menu (contoh: /reports/...)
-                const isSubActive = item.items?.some(
-                  (sub) =>
-                    pathname === sub.url || pathname.startsWith(sub.url + "/"),
-                );
-
-                // Menu dengan Sub-item (Collapsible / Dropdown)
-                if (item.items) {
-                  return (
-                    <Collapsible
-                      key={item.title}
-                      defaultOpen={isSubActive || pathname.startsWith(item.url)}
-                      className="group/collapsible"
-                    >
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton
-                            isActive={isSubActive}
-                            className="text-base py-2.5 font-medium w-full justify-between"
-                          >
-                            <div className="flex items-center">
-                              <Icon className="w-5 h-5 mr-2 shrink-0" />
-                              <span>{item.title}</span>
-                            </div>
-                            <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-                        <CollapsibleContent>
-                          <SidebarMenuSub>
-                            {item.items.map((subItem) => {
-                              const isChildActive = pathname === subItem.url;
-                              return (
-                                <SidebarMenuSubItem key={subItem.title}>
-                                  <SidebarMenuSubButton
-                                    asChild
-                                    isActive={isChildActive}
-                                    className="text-sm py-1.5"
-                                  >
-                                    <Link href={subItem.url}>
-                                      {subItem.title}
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              );
-                            })}
-                          </SidebarMenuSub>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
+                  // Cek apakah user sedang berada di area halaman sub-menu (contoh: /reports/...)
+                  const isSubActive = item.items?.some(
+                    (sub) =>
+                      pathname === sub.url || pathname.startsWith(sub.url + "/"),
                   );
-                }
 
-                // Cek status aktif untuk Single Menu
-                const isSingleActive =
-                  pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  // Menu dengan Sub-item (Collapsible / Dropdown)
+                  if (item.items) {
+                    return (
+                      <Collapsible
+                        key={item.title}
+                        defaultOpen={isSubActive || pathname.startsWith(item.url)}
+                        className="group/collapsible"
+                      >
+                        <SidebarMenuItem>
+                          <CollapsibleTrigger asChild>
+                            <SidebarMenuButton
+                              isActive={isSubActive}
+                              className="text-base py-2.5 font-medium w-full justify-between"
+                            >
+                              <div className="flex items-center">
+                                <Icon className="w-5 h-5 mr-2 shrink-0" />
+                                <span>{item.title}</span>
+                              </div>
+                              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                          </CollapsibleTrigger>
+                          <CollapsibleContent>
+                            <SidebarMenuSub>
+                              {item.items.map((subItem) => {
+                                const isChildActive = pathname === subItem.url;
+                                return (
+                                  <SidebarMenuSubItem key={subItem.title}>
+                                    <SidebarMenuSubButton
+                                      asChild
+                                      isActive={isChildActive}
+                                      className="text-sm py-1.5"
+                                    >
+                                      <Link href={subItem.url}>
+                                        {subItem.title}
+                                      </Link>
+                                    </SidebarMenuSubButton>
+                                  </SidebarMenuSubItem>
+                                );
+                              })}
+                            </SidebarMenuSub>
+                          </CollapsibleContent>
+                        </SidebarMenuItem>
+                      </Collapsible>
+                    );
+                  }
 
-                // Menu Utama Single
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isSingleActive}
-                      className="text-base py-2.5 font-medium"
-                    >
-                      <Link href={item.url}>
-                        <Icon className="w-5 h-5 mr-2 shrink-0" />
-                        <span>{item.title}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
+                  // Cek status aktif untuk Single Menu
+                  const isSingleActive =
+                    pathname === item.url ||
+                    (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+
+                  // Menu Utama Single
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isSingleActive}
+                        className="text-base py-2.5 font-medium"
+                      >
+                        <Link href={item.url}>
+                          <Icon className="w-5 h-5 mr-2 shrink-0" />
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </div>
+
+      {/* Bagian Footer Sidebar (Profil User & Sign Out) */}
+      <SidebarFooter className="p-2 border-t">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton className="w-full justify-between py-6">
+                  <div className="flex items-center gap-3 overflow-hidden text-left">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col truncate">
+                      <span className="font-semibold text-sm leading-tight truncate">
+                        Pengguna
+                      </span>
+                      <span className="text-xs text-muted-foreground truncate">
+                        user@aumofinance.com
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0 ml-1" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Pengguna</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      user@aumofinance.com
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive focus:text-destructive cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
