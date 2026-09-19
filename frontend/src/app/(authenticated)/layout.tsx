@@ -1,12 +1,6 @@
-<<<<<<< HEAD
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { Sidebar } from "@/components/side-bar"
 import { TopBar } from "@/components/top-bar"
-=======
-import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/side-bar";
-import { TopBar } from "@/components/top-bar";
->>>>>>> f634fdcdf582086f3c347cc0091d3bbb1858d9c2
 
 export default function AuthenticatedLayout({
   children,
