@@ -48,7 +48,6 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 
-// Data Navigasi disesuaikan dengan folder app/(authenticated)
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
@@ -105,116 +104,111 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
 
-  // Fungsi untuk penanganan Log Out (sesuaikan dengan auth handler Anda, e.g. NextAuth/Clerk/Supabase)
   const handleSignOut = () => {
-    // Jalankan fungsi sign out di sini
     console.log("Signing out...");
   };
 
   return (
     <Sidebar
       collapsible="none"
-      className="border-r min-h-screen flex flex-col justify-between"
+      className="border-r h-screen sticky top-0 flex flex-col justify-between"
     >
-      <div>
-        <SidebarHeader className="p-4 border-b">
-          <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
-        </SidebarHeader>
-        <SidebarContent className="p-2">
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
-              Navigation
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigation.map((item) => {
-                  const Icon = item.icon;
+      {/* Header Utama */}
+      <SidebarHeader className="p-4 border-b shrink-0">
+        <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
+      </SidebarHeader>
 
-                  // Cek apakah user sedang berada di area halaman sub-menu (contoh: /reports/...)
-                  const isSubActive = item.items?.some(
-                    (sub) =>
-                      pathname === sub.url ||
-                      pathname.startsWith(sub.url + "/"),
-                  );
+      {/* Content Navigasi (Diberi flex-1 & overflow-y-auto agar bisa di-scroll sendiri) */}
+      <SidebarContent className="p-2 flex-1 overflow-y-auto">
+        <SidebarGroup>
+          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map((item) => {
+                const Icon = item.icon;
 
-                  // Menu dengan Sub-item (Collapsible / Dropdown)
-                  if (item.items) {
-                    return (
-                      <Collapsible
-                        key={item.title}
-                        defaultOpen={
-                          isSubActive || pathname.startsWith(item.url)
-                        }
-                        className="group/collapsible"
-                      >
-                        <SidebarMenuItem>
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuButton
-                              isActive={isSubActive}
-                              className="text-base py-2.5 font-medium w-full justify-between"
-                            >
-                              <div className="flex items-center">
-                                <Icon className="w-5 h-5 mr-2 shrink-0" />
-                                <span>{item.title}</span>
-                              </div>
-                              <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                            </SidebarMenuButton>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <SidebarMenuSub>
-                              {item.items.map((subItem) => {
-                                const isChildActive = pathname === subItem.url;
-                                return (
-                                  <SidebarMenuSubItem key={subItem.title}>
-                                    <SidebarMenuSubButton
-                                      asChild
-                                      isActive={isChildActive}
-                                      className="text-sm py-1.5"
-                                    >
-                                      <Link href={subItem.url}>
-                                        {subItem.title}
-                                      </Link>
-                                    </SidebarMenuSubButton>
-                                  </SidebarMenuSubItem>
-                                );
-                              })}
-                            </SidebarMenuSub>
-                          </CollapsibleContent>
-                        </SidebarMenuItem>
-                      </Collapsible>
-                    );
-                  }
+                const isSubActive = item.items?.some(
+                  (sub) =>
+                    pathname === sub.url ||
+                    pathname.startsWith(sub.url + "/"),
+                );
 
-                  // Cek status aktif untuk Single Menu
-                  const isSingleActive =
-                    pathname === item.url ||
-                    (item.url !== "/home" &&
-                      pathname.startsWith(item.url + "/"));
-
-                  // Menu Utama Single
+                if (item.items) {
                   return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isSingleActive}
-                        className="text-base py-2.5 font-medium"
-                      >
-                        <Link href={item.url}>
-                          <Icon className="w-5 h-5 mr-2 shrink-0" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    <Collapsible
+                      key={item.title}
+                      defaultOpen={
+                        isSubActive || pathname.startsWith(item.url)
+                      }
+                      className="group/collapsible"
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton
+                            isActive={isSubActive}
+                            className="text-base py-2.5 font-medium w-full justify-between"
+                          >
+                            <div className="flex items-center">
+                              <Icon className="w-5 h-5 mr-2 shrink-0" />
+                              <span>{item.title}</span>
+                            </div>
+                            <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.items.map((subItem) => {
+                              const isChildActive = pathname === subItem.url;
+                              return (
+                                <SidebarMenuSubItem key={subItem.title}>
+                                  <SidebarMenuSubButton
+                                    asChild
+                                    isActive={isChildActive}
+                                    className="text-sm py-1.5"
+                                  >
+                                    <Link href={subItem.url}>
+                                      {subItem.title}
+                                    </Link>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
                   );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </div>
+                }
 
-      {/* Bagian Footer Sidebar (Profil User & Sign Out) */}
-      <SidebarFooter className="p-2 border-t">
+                const isSingleActive =
+                  pathname === item.url ||
+                  (item.url !== "/home" &&
+                    pathname.startsWith(item.url + "/"));
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isSingleActive}
+                      className="text-base py-2.5 font-medium"
+                    >
+                      <Link href={item.url}>
+                        <Icon className="w-5 h-5 mr-2 shrink-0" />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      {/* Footer (Diberi shrink-0 agar ukurannya tidak mengecil atau tertekan) */}
+      <SidebarFooter className="p-2 border-t shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
@@ -239,7 +233,9 @@ export function AppSidebar() {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Pengguna</p>
+                    <p className="text-sm font-medium leading-none">
+                      Pengguna
+                    </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       user@aumofinance.com
                     </p>
