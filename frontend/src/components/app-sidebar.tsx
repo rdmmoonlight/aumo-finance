@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -27,7 +28,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -47,6 +47,10 @@ import {
   LogOut,
   ChevronsUpDown,
 } from "lucide-react";
+
+// Import tipe UserProfile dan API client
+import { type UserProfile } from "@/lib/auth";
+import apiClient from "@/lib/apiClient";
 
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
@@ -103,6 +107,28 @@ const navigation = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  // Fetch data profil user dari API
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const res = await apiClient.get("/api/v1/auth/me", {
+          withCredentials: true,
+        });
+        if (res.data) {
+          setUser(res.data);
+        }
+      } catch (e) {
+        console.error("[SIDEBAR] Gagal mengambil profil pengguna:", e);
+      } finally {
+        setLoadingUser(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
 
   const handleSignOut = () => {
     console.log("Signing out...");
@@ -118,7 +144,7 @@ export function AppSidebar() {
         <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
       </SidebarHeader>
 
-      {/* Content Navigasi (Diberi flex-1 & overflow-y-auto agar bisa di-scroll sendiri) */}
+      {/* Content Navigasi */}
       <SidebarContent className="p-2 flex-1 overflow-y-auto">
         <SidebarGroup>
           <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
@@ -203,7 +229,7 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer (Diberi shrink-0 agar ukurannya tidak mengecil atau tertekan) */}
+      {/* Footer Sidebar (Tampilan Profil Satu Kali) */}
       <SidebarFooter className="p-2 border-t shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
@@ -212,14 +238,24 @@ export function AppSidebar() {
                 <SidebarMenuButton className="w-full justify-between py-6">
                   <div className="flex items-center gap-3 overflow-hidden text-left">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4" />
+                      {user?.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt="Avatar"
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-4 h-4" />
+                      )}
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-sm leading-tight truncate">
-                        Pengguna
+                        {loadingUser
+                          ? "Loading..."
+                          : user?.fullName || user?.userName}
                       </span>
                       <span className="text-xs text-muted-foreground truncate">
-                        user@aumofinance.com
+                        {loadingUser ? "..." : user?.email}
                       </span>
                     </div>
                   </div>
@@ -227,15 +263,6 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Pengguna</p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      user@aumofinance.com
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem asChild className="cursor-pointer">
                   <Link href="/settings">
                     <Settings className="w-4 h-4 mr-2" />
