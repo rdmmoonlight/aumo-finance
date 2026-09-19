@@ -7,6 +7,7 @@ const nextConfig = {
     ignoreBuildErrors: false,
   },
   env: {
+    // Dipanggil dinamis lewat getter aumoConfig saat build/runtime
     WEB_API_URL: aumoConfig.backendTarget,
   },
   async rewrites() {
