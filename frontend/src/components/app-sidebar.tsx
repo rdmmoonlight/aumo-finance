@@ -45,8 +45,6 @@ import {
   LogOut,
   ChevronsUpDown,
 } from "lucide-react";
-
-// Impor tipe dan fungsi auth langsung dari @/lib/auth
 import { getUserProfile, logout, type UserProfile } from "@/lib/auth";
 
 const navigation = [
