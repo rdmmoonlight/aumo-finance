@@ -109,17 +109,10 @@ const navigation = [
   { title: "Settings", url: "/settings", icon: IconSettings },
 ];
 
-<<<<<<< HEAD
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = React.useState<UserProfile | null>(null)
-=======
-export function AppSidebar() {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [user, setUser] = React.useState<UserProfile | null>(null);
->>>>>>> f634fdcdf582086f3c347cc0091d3bbb1858d9c2
 
   React.useEffect(() => {
     async function loadUser() {
