@@ -88,7 +88,7 @@ const navigation = [
   { title: "Settings", url: "/settings", icon: IconSettings },
 ]
 
-export function AppSidebar() {
+export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = React.useState<UserProfile | null>(null)
