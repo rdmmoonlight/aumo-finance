@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { ThemeProvider } from "@/components/theme-provider"
 import { Inter } from "next/font/google";
 import "@/styles/index.css";
 
@@ -30,12 +31,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" suppressHydrationWarning>
-      <body
-        className={`min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground ${inter.className}`}
+  <html lang="en" suppressHydrationWarning>
+    <body>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
       >
-        {children}
-      </body>
-    </html>
-  );
+        <div className={`min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground ${inter.className}`}>
+          {children}
+        </div>
+      </ThemeProvider>
+    </body>
+  </html>
+);
 }
