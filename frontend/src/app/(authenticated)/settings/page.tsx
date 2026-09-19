@@ -14,7 +14,7 @@ import {
 import { useTheme } from "next-themes";
 
 // Import tipe data dan helper fungsi terpusat dari lib/auth
-import { getAuthUser, type UserProfile } from "@/lib/auth";
+import { getUserProfile, type UserProfile } from "@/lib/auth";
 
 import {
   Card,
@@ -39,7 +39,7 @@ export default function SettingsPage() {
     setMounted(true);
     const fetchUserProfile = async () => {
       try {
-        const data = await getAuthUser();
+        const data = await getUserProfile();
         if (data) setUser(data);
       } catch (e) {
         console.error("[SETTINGS] Failed to fetch user profile:", e);

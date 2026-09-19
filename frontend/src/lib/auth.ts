@@ -1,33 +1,53 @@
-import apiClient from "@/lib/apiClient";
+import apiClient from "./apiClient";
 
 export interface UserProfile {
-  userId?: string;
-  userName?: string;
-  fullName?: string;
-  email?: string;
-  roles?: string[];
+  userId: string;
+  email: string;
+  userName: string;
+  fullName: string;
+  roles: string[];
   avatarUrl?: string;
 }
 
-// Tambahkan alias ini agar kompatibel dengan import 'getUserProfile'
-export async function getUserProfile(): Promise<UserProfile | null> {
-  return getAuthUser();
+export interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
 }
 
-export async function getAuthUser(): Promise<UserProfile | null> {
+/**
+ * Mengambil profil user yang sedang login via Cookie Session (/api/v1/auth/me)
+ */
+export async function getUserProfile(): Promise<UserProfile | null> {
   try {
-    const response = await apiClient.get("/auth/me");
-    return response.data;
-  } catch (error) {
+    const res = await apiClient.get("/api/v1/auth/me");
+
+    if (res.data && res.data.success) {
+      return {
+        userId: res.data.userId,
+        email: res.data.email,
+        userName: res.data.userName,
+        fullName: res.data.fullName,
+        roles: res.data.roles || [],
+      };
+    }
+    return null;
+  } catch (err: any) {
+    // 401 Unauthorized/404 Not Found akan masuk ke sini
+    console.error("[AUTH] Gagal mengambil profil user:", err.response?.data || err.message);
     return null;
   }
 }
 
-// Tambahkan fungsi logout (karena menggunakan cookie, browser akan menangani penghapusan cookie via response backend)
-export async function logout(): Promise<void> {
+/**
+ * Melakukan logout session di server (/api/v1/auth/logout)
+ */
+export async function logout(): Promise<boolean> {
   try {
-    await apiClient.post("/auth/logout");
-  } catch (error) {
-    console.error("Logout failed:", error);
+    const res = await apiClient.post("/api/v1/auth/logout");
+    return res.data?.success ?? true;
+  } catch (err: any) {
+    console.error("[AUTH] Gagal logout:", err.response?.data || err.message);
+    return false;
   }
 }
