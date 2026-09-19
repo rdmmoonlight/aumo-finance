@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation"; // 1. Tambahkan useSearchParams
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function LoginForm() {
-  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [keepMe, setKeepMe] = useState(false);
@@ -49,8 +49,11 @@ export default function LoginForm() {
         localStorage.removeItem("aumo_saved_email");
       }
 
-      router.push("/home");
-      router.refresh();
+      // 2. Ambil tujuan redirect jika ada (default ke /home)
+      const targetUrl = searchParams.get("redirectTo") || "/home";
+
+      // 3. Gunakan hard navigation agar cookie sesi terbaca mulus oleh proxy.ts
+      window.location.href = targetUrl;
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e.response?.data || e.message);
       const errorMessage =
@@ -84,7 +87,7 @@ export default function LoginForm() {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="nama@perusahaan.com"
+            placeholder="nama@email.com"
             className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black"
             required
           />
@@ -156,4 +159,5 @@ export default function LoginForm() {
       </form>
     </div>
   );
-}
+                                           }
+    
