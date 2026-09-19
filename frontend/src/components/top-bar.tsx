@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,18 +9,18 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Separator } from "@/components/ui/separator"
-import { Search, Bell, Sparkles } from "lucide-react"
+} from "@/components/ui/breadcrumb";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { Search, Bell, Sparkles } from "lucide-react";
 
 export function TopBar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   // Mengubah path URL menjadi breadcrumb sederhana
-  const pathSegments = pathname.split("/").filter(Boolean)
+  const pathSegments = pathname.split("/").filter(Boolean);
 
   return (
     <header className="flex flex-col w-full border-b bg-background sticky top-0 z-10 shadow-sm">
@@ -40,7 +40,11 @@ export function TopBar() {
 
         {/* Sisi Kanan: Notifikasi & Profil */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative text-muted-foreground hover:text-foreground"
+          >
             <Bell className="h-5 w-5" />
             <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive" />
           </Button>
@@ -55,7 +59,9 @@ export function TopBar() {
             </Avatar>
             <div className="hidden md:flex flex-col text-left">
               <span className="text-sm font-semibold leading-none">Ghofur</span>
-              <span className="text-xs text-muted-foreground mt-0.5">Akuntan Utama</span>
+              <span className="text-xs text-muted-foreground mt-0.5">
+                Akuntan Utama
+              </span>
             </div>
           </div>
         </div>
@@ -71,27 +77,33 @@ export function TopBar() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href="/home" className="text-xs">App</BreadcrumbLink>
+              <BreadcrumbLink href="/home" className="text-xs">
+                App
+              </BreadcrumbLink>
             </BreadcrumbItem>
             {pathSegments.map((segment, index) => {
-              const url = `/${pathSegments.slice(0, index + 1).join("/")}`
-              const isLast = index === pathSegments.length - 1
+              const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
+              const isLast = index === pathSegments.length - 1;
               const formattedName = segment
                 .replace(/-/g, " ")
-                .replace(/\b\w/g, (l) => l.toUpperCase())
+                .replace(/\b\w/g, (l) => l.toUpperCase());
 
               return (
                 <React.Fragment key={url}>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     {isLast ? (
-                      <BreadcrumbPage className="text-xs font-semibold">{formattedName}</BreadcrumbPage>
+                      <BreadcrumbPage className="text-xs font-semibold">
+                        {formattedName}
+                      </BreadcrumbPage>
                     ) : (
-                      <BreadcrumbLink href={url} className="text-xs">{formattedName}</BreadcrumbLink>
+                      <BreadcrumbLink href={url} className="text-xs">
+                        {formattedName}
+                      </BreadcrumbLink>
                     )}
                   </BreadcrumbItem>
                 </React.Fragment>
-              )
+              );
             })}
           </BreadcrumbList>
         </Breadcrumb>
@@ -110,5 +122,5 @@ export function TopBar() {
         </div>
       </div>
     </header>
-  )
+  );
 }

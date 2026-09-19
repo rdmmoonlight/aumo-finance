@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -17,12 +17,12 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 import {
   IconHome,
   IconLayoutDashboard,
@@ -37,21 +37,21 @@ import {
   IconChevronRight,
   IconLogout,
   IconUser,
-} from "@tabler/icons-react"
-import apiClient from "@/lib/apiClient"
+} from "@tabler/icons-react";
+import apiClient from "@/lib/apiClient";
 
 export interface UserProfile {
-  name?: string
-  email?: string
-  username?: string
+  name?: string;
+  email?: string;
+  username?: string;
 }
 
 export async function getAuthUser(): Promise<UserProfile | null> {
   try {
-    const res = await apiClient.get<UserProfile>("/api/v1/auth/me")
-    return res.data
+    const res = await apiClient.get<UserProfile>("/api/v1/auth/me");
+    return res.data;
   } catch (error) {
-    return null
+    return null;
   }
 }
 
@@ -72,46 +72,74 @@ const navigation = [
       { title: "General Journal", url: "/reports/general-journal" },
       { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
       { title: "Closing Journal", url: "/reports/closing-journal" },
-      { title: "Unadjusted Trial Balance", url: "/reports/unadjusted-trial-balance" },
-      { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
-      { title: "Post-Closing Trial Balance", url: "/reports/post-closing-trial-balance" },
-      { title: "General Ledger (Temp)", url: "/reports/general-ledger-temporary" },
-      { title: "General Ledger (Perm)", url: "/reports/general-ledger-permanent" },
+      {
+        title: "Unadjusted Trial Balance",
+        url: "/reports/unadjusted-trial-balance",
+      },
+      {
+        title: "Adjusted Trial Balance",
+        url: "/reports/adjusted-trial-balance",
+      },
+      {
+        title: "Post-Closing Trial Balance",
+        url: "/reports/post-closing-trial-balance",
+      },
+      {
+        title: "General Ledger (Temp)",
+        url: "/reports/general-ledger-temporary",
+      },
+      {
+        title: "General Ledger (Perm)",
+        url: "/reports/general-ledger-permanent",
+      },
       { title: "Worksheet", url: "/reports/worksheet" },
       { title: "Income Statement", url: "/reports/income-statement" },
       { title: "Retained Earnings", url: "/reports/retained-earnings" },
-      { title: "Financial Position", url: "/reports/statement-of-financial-position" },
-      { title: "Statement of Cash Flow", url: "/reports/statement-of-cash-flow" },
+      {
+        title: "Financial Position",
+        url: "/reports/statement-of-financial-position",
+      },
+      {
+        title: "Statement of Cash Flow",
+        url: "/reports/statement-of-cash-flow",
+      },
     ],
   },
   { title: "Tools", url: "/tools", icon: IconTools },
   { title: "Settings", url: "/settings", icon: IconSettings },
-]
+];
 
+<<<<<<< HEAD
 export function Sidebar() {
   const pathname = usePathname()
   const router = useRouter()
   const [user, setUser] = React.useState<UserProfile | null>(null)
+=======
+export function AppSidebar() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const [user, setUser] = React.useState<UserProfile | null>(null);
+>>>>>>> f634fdcdf582086f3c347cc0091d3bbb1858d9c2
 
   React.useEffect(() => {
     async function loadUser() {
-      const data = await getAuthUser()
+      const data = await getAuthUser();
       if (data) {
-        setUser(data)
+        setUser(data);
       }
     }
-    loadUser()
-  }, [])
+    loadUser();
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await apiClient.post("/api/v1/auth/logout")
+      await apiClient.post("/api/v1/auth/logout");
     } catch (error) {
-      console.error("Logout error:", error)
+      console.error("Logout error:", error);
     } finally {
-      router.push("/auth")
+      router.push("/auth");
     }
-  }
+  };
 
   return (
     <Sidebar collapsible="none" className="h-screen border-r flex flex-col">
@@ -129,12 +157,17 @@ export function Sidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation.map((item) => {
-                const isActive = pathname === item.url || pathname.startsWith(item.url + "/")
+                const isActive =
+                  pathname === item.url || pathname.startsWith(item.url + "/");
 
                 // Menu dengan Sub-item (khusus Reports)
                 if (item.items) {
                   return (
-                    <Collapsible key={item.title} defaultOpen className="group/collapsible">
+                    <Collapsible
+                      key={item.title}
+                      defaultOpen
+                      className="group/collapsible"
+                    >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton className="text-base py-2 font-medium">
@@ -152,7 +185,9 @@ export function Sidebar() {
                                   isActive={pathname === subItem.url}
                                   className="text-sm py-1.5"
                                 >
-                                  <Link href={subItem.url}>{subItem.title}</Link>
+                                  <Link href={subItem.url}>
+                                    {subItem.title}
+                                  </Link>
                                 </SidebarMenuSubButton>
                               </SidebarMenuSubItem>
                             ))}
@@ -160,7 +195,7 @@ export function Sidebar() {
                         </CollapsibleContent>
                       </SidebarMenuItem>
                     </Collapsible>
-                  )
+                  );
                 }
 
                 // Menu Tunggal
@@ -177,7 +212,7 @@ export function Sidebar() {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )
+                );
               })}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -212,5 +247,5 @@ export function Sidebar() {
         </div>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }
