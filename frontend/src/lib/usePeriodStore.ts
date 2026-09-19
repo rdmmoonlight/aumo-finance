@@ -38,7 +38,7 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       const res = await apiClient.get("/api/v1/periods");
       if (res.data?.success) {
         const periodsList: PeriodItem[] = res.data.periods || [];
-        
+
         // Pencarian periode aktif berdasar flag isSelected atau selectedPeriodId dari controller
         const selected =
           periodsList.find((p) => p.isSelected) ||
@@ -126,4 +126,3 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     }
   },
 }));
-                                                                 
