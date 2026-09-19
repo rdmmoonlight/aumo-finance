@@ -15,7 +15,7 @@ export function middleware(request: NextRequest) {
 
   // 1. Jika pengguna BELUM login dan mencoba mengakses halaman selain '/' dan '/auth/*'
   if (!isAuthenticated && !isAuthPage && pathname !== "/") {
-    const loginUrl = new URL("/auth/login", request.url);
+    const loginUrl = new URL("/auth", request.url);
     // Simpan rute tujuan agar bisa diarahkan kembali setelah login
     loginUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(loginUrl);
