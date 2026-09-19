@@ -1,7 +1,22 @@
 import axios from "axios";
 
-// Mengambil URL Backend .NET dari Environment Variable
-const BASE_URL = process.env.NEXT_PUBLIC_WEB_API_URL || "http://localhost:5000";
+// PENTING: Di browser, jangan panggil backend langsung (cross-domain).
+// Gunakan path relatif ("") agar request tetap same-origin dan diteruskan
+// oleh Next.js rewrite proxy (lihat next.config.mjs / aumo.config.ts).
+// Alasan: jika browser memanggil domain backend secara langsung, cookie
+// sesi (AumoFinance.Session) akan ter-scope ke DOMAIN BACKEND, bukan
+// domain frontend — akibatnya middleware proxy.ts di frontend tidak
+// pernah menemukan cookie tsb dan user terus dilempar balik ke /auth,
+// walau email & password sudah benar dan login di backend sukses.
+//
+// Saat SSR (di server Next.js), rewrite tidak berlaku untuk fetch
+// internal, jadi kita tetap panggil backend langsung di sana.
+const BASE_URL =
+  typeof window === "undefined"
+    ? process.env.WEB_API_URL ||
+      process.env.NEXT_PUBLIC_WEB_API_URL ||
+      "http://localhost:5000"
+    : "";
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
