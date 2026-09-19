@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation"; // 1. Tambahkan useSearchParams
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-export default function LoginForm() {
+function LoginFormContent() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -42,17 +42,13 @@ export default function LoginForm() {
         throw new Error(res.data?.message || "Login gagal");
       }
 
-      // Kelola simpan/hapus email untuk fitur "Remember Email"
       if (keepMe) {
         localStorage.setItem("aumo_saved_email", email);
       } else {
         localStorage.removeItem("aumo_saved_email");
       }
 
-      // 2. Ambil tujuan redirect jika ada (default ke /home)
       const targetUrl = searchParams.get("redirectTo") || "/home";
-
-      // 3. Gunakan hard navigation agar cookie sesi terbaca mulus oleh proxy.ts
       window.location.href = targetUrl;
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e.response?.data || e.message);
@@ -160,3 +156,18 @@ export default function LoginForm() {
     </div>
   );
 }
+
+// Ekspor utama yang aman untuk Build Vercel / SSG Prerender
+export default function LoginForm() {
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full max-w-sm bg-white p-6 rounded-2xl border border-zinc-200 h-[420px] animate-pulse flex items-center justify-center text-sm text-zinc-400">
+          Loading workspace...
+        </div>
+      }
+    >
+      <LoginFormContent />
+    </Suspense>
+  );
+  }
