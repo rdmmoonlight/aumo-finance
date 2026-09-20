@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
-import LoginPage from "@/app/auth";
+import LoginPage from "@/app/auth/page";
 import { getUserProfile } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
