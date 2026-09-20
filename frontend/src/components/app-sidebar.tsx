@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
@@ -102,10 +102,10 @@ const navigation = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = React.useState<UserProfile | null>(null);
 
   React.useEffect(() => {
-    // Ambil data user dari auth.ts saat komponen di-mount
     async function fetchUser() {
       try {
         const data = await getUserProfile();
@@ -118,10 +118,11 @@ export function AppSidebar() {
   }, []);
 
   const handleSignOut = async () => {
-    if (typeof logout === "function") {
-      await logout();
+    const success = await logout();
+    if (success) {
+      window.location.href = "/login";
     } else {
-      console.log("Signing out...");
+      router.push("/login");
     }
   };
 
@@ -272,4 +273,5 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+  }
+  
