@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import LoginForm from "@/app/auth";
+import LoginPage from "@/app/auth";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -98,7 +98,7 @@ export default function LandingPage() {
               </DialogTitle>
             </DialogHeader>
             <div className="mt-4">
-              <LoginForm />
+              <LoginPage />
             </div>
           </DialogContent>
         </Dialog>
