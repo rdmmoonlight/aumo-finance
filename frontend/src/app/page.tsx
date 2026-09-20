@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import LoginForm from "@/app/auth/LoginForm";
+import LoginForm from "@/app/auth";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
