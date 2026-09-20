@@ -1,4 +1,5 @@
-import apiClient from "./apiClient";
+import axios from "axios";
+import apiClient from "@/lib/apiClient";
 
 export interface UserProfile {
   userId: string;
@@ -9,7 +10,7 @@ export interface UserProfile {
   avatarUrl?: string;
 }
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   message?: string;
   data?: T;
@@ -22,7 +23,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
   try {
     const res = await apiClient.get("/api/v1/auth/me");
 
-    if (res.data && res.data.success) {
+    if (res.data?.success) {
       return {
         userId: res.data.userId,
         email: res.data.email,
@@ -32,12 +33,15 @@ export async function getUserProfile(): Promise<UserProfile | null> {
       };
     }
     return null;
-  } catch (err: any) {
-    // 401 Unauthorized/404 Not Found akan masuk ke sini
-    console.error(
-      "[AUTH] Gagal mengambil profil user:",
-      err.response?.data || err.message,
-    );
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.error(
+        "[AUTH] Gagal mengambil profil user:",
+        err.response?.data || err.message,
+      );
+    } else {
+      console.error("[AUTH] Unknown error saat mengambil profil user:", err);
+    }
     return null;
   }
 }
@@ -49,8 +53,13 @@ export async function logout(): Promise<boolean> {
   try {
     const res = await apiClient.post("/api/v1/auth/logout");
     return res.data?.success ?? true;
-  } catch (err: any) {
-    console.error("[AUTH] Gagal logout:", err.response?.data || err.message);
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err)) {
+      console.error("[AUTH] Gagal logout:", err.response?.data || err.message);
+    } else {
+      console.error("[AUTH] Unknown error saat logout:", err);
+    }
     return false;
   }
 }
+  
