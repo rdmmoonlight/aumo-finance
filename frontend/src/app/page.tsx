@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import LoginPage from "@/app/auth";
+import { getUserProfile } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -16,13 +17,26 @@ import { IconArrowRight, IconLock } from "@tabler/icons-react";
 export default function LandingPage() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Pengecekan sesi pengguna di sisi client
+  // Pengecekan cookie session resmi dari server via auth.ts
   useEffect(() => {
-    const isAuth = localStorage.getItem("isAuthenticated");
-    if (isAuth) {
-      router.push("/home");
+    document.title = "Aumo Finance | Operations, neatly organized.";
+
+    async function checkSession() {
+      try {
+        const user = await getUserProfile();
+        if (user) {
+          router.replace("/home");
+        }
+      } catch (err) {
+        console.error("Gagal memeriksa sesi user:", err);
+      } finally {
+        setCheckingAuth(false);
+      }
     }
+
+    checkSession();
   }, [router]);
 
   return (
@@ -70,7 +84,7 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* RIGHT PANEL (BUTTON CALLING LOGIN FORM) */}
+      {/* RIGHT PANEL */}
       <div className="flex flex-col items-center justify-center gap-6 bg-black p-6 lg:p-12">
         <div className="max-w-sm text-center">
           <h2 className="text-2xl font-semibold tracking-tight">
@@ -84,9 +98,12 @@ export default function LandingPage() {
 
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2 rounded-xl border border-white/20 bg-white px-6 py-5 text-black hover:bg-zinc-200">
+            <Button
+              disabled={checkingAuth}
+              className="flex items-center gap-2 rounded-xl border border-white/20 bg-white px-6 py-5 text-black hover:bg-zinc-200 disabled:opacity-50"
+            >
               <IconLock size={18} />
-              <span>Sign In to Account</span>
+              <span>{checkingAuth ? "Checking Session..." : "Sign In to Account"}</span>
               <IconArrowRight size={18} />
             </Button>
           </DialogTrigger>
@@ -98,11 +115,20 @@ export default function LandingPage() {
               </DialogTitle>
             </DialogHeader>
             <div className="mt-4">
-              <LoginPage />
+              <Suspense
+                fallback={
+                  <div className="p-8 text-center text-sm text-zinc-400 animate-pulse">
+                    Loading form...
+                  </div>
+                }
+              >
+                <LoginPage />
+              </Suspense>
             </div>
           </DialogContent>
         </Dialog>
       </div>
     </div>
   );
-}
+  }
+  
