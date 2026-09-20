@@ -83,21 +83,11 @@ namespace AumoBackend
                 options.Cookie.Name = "AumoFinance.Session";
                 options.Cookie.HttpOnly = true;
 
-                // Lax sangat aman & bekerja sempurna baik via Rewrites maupun direct navigation
-                options.Cookie.SameSite = SameSiteMode.Lax;
+                // FIX CROSS-SITE COOKIE (VERCEL -> RENDER):
+                // Wajib None & Always agar cookie session bisa terkirim antar beda domain/subdomain!
+                options.Cookie.SameSite = SameSiteMode.None;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 
-                // PENTING: SameAsRequest (bukan Always). Dengan ForwardedHeaders + middleware
-                // override scheme di bawah, Request.IsHttps sudah benar-benar akurat baik di
-                // production (Render, di balik proxy HTTPS) maupun saat dev lokal di
-                // http://localhost:3000 (lihat daftar CORS allowedOrigins).
-                // SecurePolicy.Always akan tetap menandai cookie sebagai "Secure" walau request
-                // saat login berjalan di HTTP biasa (localhost) — browser modern langsung
-                // MEMBUANG Set-Cookie ber-atribut Secure yang diterima lewat koneksi non-HTTPS,
-                // sehingga cookie sesi tidak pernah benar-benar tersimpan dan setiap request
-                // berikutnya (mis. /api/v1/auth/me, /api/v1/periods) selalu dianggap anonymous
-                // (401) meski login sebelumnya sukses (200). SameAsRequest tetap menghasilkan
-                // Secure=true di production (HTTPS) dan Secure=false saat dev lokal (HTTP).
-                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
                 options.SlidingExpiration = true;
 
@@ -130,7 +120,6 @@ namespace AumoBackend
 
             var authBuilder = builder.Services.AddAuthentication(options =>
             {
-                // Tetapkan default scheme agar Identity Cookie diprioritaskan untuk web client
                 options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
                 options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
             })
@@ -232,7 +221,7 @@ namespace AumoBackend
                     policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials();
+                          .AllowCredentials(); // Penting untuk mengizinkan cookie terkirim
                 });
             });
 
@@ -264,11 +253,10 @@ namespace AumoBackend
             var app = builder.Build();
 
             // =====================================
-            // PENTING: MIDDLEWARE FORWARDED HEADERS & HTTPS FORCING
+            // PENTING: MIDDLEWARE FORWARDED HEADERS & HTTPS OVERRIDE
             // =====================================
             app.UseForwardedHeaders();
 
-            // Memaksa request scheme menjadi "https" jika diteruskan via proxy Render
             app.Use(async (context, next) =>
             {
                 if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https")
@@ -442,7 +430,7 @@ namespace AumoBackend
                 </div>
                 """;
 
-            return _emailSender.SendEmailAsync(email, "Password Reset Code - Aumo Finance", message);
+            return _emailSender.SendEmailAsync(email, "Reset password code - Aumo Finance", message);
         }
     }
 }
