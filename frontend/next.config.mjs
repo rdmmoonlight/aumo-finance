@@ -1,4 +1,4 @@
-import { aumoConfig } from "./aumo.config";
+import { aumoConfig } from "./aumo.config.ts";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
