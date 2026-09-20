@@ -3,15 +3,14 @@ import path from "node:path";
 export const aumoConfig = {
   envPrefix: ["WEB_"],
 
-  // Getter sebagai sumber kebenaran (source of truth) URL Backend tanpa manipulasi string otomatis
+  // Getter sebagai sumber kebenaran (source of truth) URL Backend
   get backendTarget(): string {
-    return (
+    const target =
       process.env.WEB_API_URL ||
       process.env.NEXT_PUBLIC_WEB_API_URL ||
-      (process.env.NODE_ENV === "production"
-        ? "https://aumonext-api.onrender.com"
-        : "http://localhost:5000") // FIX: Menggunakan port .NET (5000), bukan port Next.js (3000)
-    );
+      "http://localhost:5000";
+
+    return target;
   },
 
   alias: {
@@ -21,12 +20,12 @@ export const aumoConfig = {
   getRewrites() {
     return [
       {
-        // Menangani semua endpoint API V1 (misal: /api/v1/periods, /api/v1/auth, dll)
+        // Menangani semua endpoint API V1
         source: "/api/v1/:path*",
         destination: `${this.backendTarget}/api/v1/:path*`,
       },
       {
-        // Fallback untuk endpoint API tanpa prefix v1 jika ada
+        // Fallback untuk endpoint API tanpa prefix v1
         source: "/api/:path*",
         destination: `${this.backendTarget}/api/:path*`,
       },
@@ -35,3 +34,4 @@ export const aumoConfig = {
 };
 
 export default aumoConfig;
+  
