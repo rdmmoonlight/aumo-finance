@@ -53,7 +53,7 @@ function LoginFormContent() {
       const targetUrl = searchParams.get("redirectTo") || "/home";
 
       // CARA 1: Full Page Refresh / Hard Navigation
-      // Memaksa browser melakukan full reload agar cookie session terekam sempurna 
+      // Memaksa browser melakukan full reload agar cookie session terekam sempurna
       // sebelum request API pertama di halaman tujuan dijalankan.
       window.location.href = targetUrl;
     } catch (e: any) {
@@ -178,5 +178,4 @@ export default function LoginPage() {
       </Suspense>
     </main>
   );
-  }
-  
+}
