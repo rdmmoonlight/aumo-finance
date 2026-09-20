@@ -58,7 +58,7 @@ namespace AumoBackend
                 .SetApplicationName("AumoFinanceApp");
 
             // =====================================
-            // 3. ASP.NET CORE IDENTITY SETUP (FULL FEATURES)
+            // 3. ASP.NET CORE IDENTITY SETUP
             // =====================================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
@@ -73,17 +73,19 @@ namespace AumoBackend
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
             })
-            .AddRoles<IdentityRole<Guid>>() // Memungkinkan penggunaan AspNetRoles & AspNetUserRoles
+            .AddRoles<IdentityRole<Guid>>()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders()    // Memungkinkan penggunaan AspNetUserTokens (Token 2FA/Reset Pass)
+            .AddDefaultTokenProviders()
             .AddClaimsPrincipalFactory<AumoUserClaimsPrincipalFactory>();
 
             builder.Services.ConfigureApplicationCookie(options =>
             {
                 options.Cookie.Name = "AumoFinance.Session";
                 options.Cookie.HttpOnly = true;
-                options.Cookie.SameSite = SameSiteMode.None;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                
+                // Lax sangat aman & bekerja sempurna baik via Rewrites maupun direct navigation
+                options.Cookie.SameSite = SameSiteMode.Lax;
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Wajib HTTPS
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
                 options.SlidingExpiration = true;
 
@@ -100,7 +102,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 4. AUTHENTICATION & AUTHORIZATION (Cookie, JWT, OAuth, RBAC)
+            // 4. AUTHENTICATION & AUTHORIZATION
             // =====================================
             var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"]
                 ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
@@ -114,23 +116,28 @@ namespace AumoBackend
                 throw new InvalidOperationException("Fatal Error: Environment variable 'JWT_SIGNING_KEY' is missing.");
             }
 
-            var authBuilder = builder.Services.AddAuthentication()
-                .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            var authBuilder = builder.Services.AddAuthentication(options =>
+            {
+                // Tetapkan default scheme agar Identity Cookie diprioritaskan untuk web client
+                options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
+                options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
+            })
+            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    options.RequireHttpsMetadata = false;
-                    options.SaveToken = true;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidateIssuer = true,
-                        ValidateAudience = true,
-                        ValidateLifetime = true,
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = jwtIssuer,
-                        ValidAudience = jwtIssuer,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
-                        ClockSkew = TimeSpan.FromMinutes(5)
-                    };
-                });
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtIssuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey)),
+                    ClockSkew = TimeSpan.FromMinutes(5)
+                };
+            });
 
             var googleClientId = builder.Configuration["Authentication:Google:ClientId"]
                 ?? builder.Configuration["Google:ClientId"]
@@ -157,7 +164,6 @@ namespace AumoBackend
                     .AddAuthenticationSchemes(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme)
                     .Build();
 
-                // Policies berbasis Role & Claim
                 options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
                 options.AddPolicy("CanApproveTransaction", policy => policy.RequireClaim("Permission", "Transaction.Approve"));
             });
@@ -231,7 +237,7 @@ namespace AumoBackend
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
 
             // =====================================
-            // 7. FORWARDED HEADERS
+            // 7. FORWARDED HEADERS CONFIGURATION
             // =====================================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -246,6 +252,21 @@ namespace AumoBackend
             var app = builder.Build();
 
             // =====================================
+            // PENTING: MIDDLEWARE FORWARDED HEADERS & HTTPS FORCING
+            // =====================================
+            app.UseForwardedHeaders();
+
+            // Memaksa request scheme menjadi "https" jika diteruskan via proxy Render
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https")
+                {
+                    context.Request.Scheme = "https";
+                }
+                await next();
+            });
+
+            // =====================================
             // 8. AUTOMATIC DATABASE MIGRATION & SEEDING
             // =====================================
             using (var scope = app.Services.CreateScope())
@@ -256,7 +277,6 @@ namespace AumoBackend
                     var context = services.GetRequiredService<AppDbContext>();
                     await context.Database.MigrateAsync();
 
-                    // Seed Roles & RoleClaims ke AspNetRoles & AspNetRoleClaims
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
@@ -277,7 +297,6 @@ namespace AumoBackend
                         }
                     }
 
-                    // Assign role 'Admin' ke user utama (ndopoer@gmail.com) -> Memuat data ke AspNetUserRoles
                     var adminUser = await userManager.FindByEmailAsync("ndopoer@gmail.com");
                     if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
                     {
@@ -292,10 +311,8 @@ namespace AumoBackend
             }
 
             // =====================================
-            // 9. HTTP PIPELINE MIDDLEWARE
+            // 9. HTTP PIPELINE MIDDLEWARE ORDER
             // =====================================
-            app.UseForwardedHeaders();
-
             app.UseSwagger();
             app.UseSwaggerUI();
 
