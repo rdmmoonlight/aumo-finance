@@ -35,10 +35,13 @@ export async function getUserProfile(): Promise<UserProfile | null> {
     return null;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
-      console.error(
-        "[AUTH] Gagal mengambil profil user:",
-        err.response?.data || err.message,
-      );
+      // Abaikan log error jika 401 karena sudah ditangani oleh Interceptor apiClient
+      if (err.response?.status !== 401) {
+        console.error(
+          "[AUTH] Gagal mengambil profil user:",
+          err.response?.data || err.message,
+        );
+      }
     } else {
       console.error("[AUTH] Unknown error saat mengambil profil user:", err);
     }
@@ -47,12 +50,26 @@ export async function getUserProfile(): Promise<UserProfile | null> {
 }
 
 /**
- * Melakukan logout session di server (/api/v1/auth/logout)
+ * Melakukan logout session di server
+ * Mencoba ke /api/v1/auth/logout terlebih dahulu (Controller), 
+ * lalu fallback ke /auth/logout (Minimal API Program.cs)
  */
 export async function logout(): Promise<boolean> {
   try {
-    const res = await apiClient.post("/api/v1/auth/logout");
-    return res.data?.success ?? true;
+    let res;
+    try {
+      // Prioritas 1: Endpoint controller /api/v1/auth/logout jika ada
+      res = await apiClient.post("/api/v1/auth/logout");
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 404) {
+        // Fallback: Minimal API endpoint di Program.cs
+        res = await apiClient.post("/auth/logout");
+      } else {
+        throw err;
+      }
+    }
+
+    return res?.data?.success ?? true;
   } catch (err: unknown) {
     if (axios.isAxiosError(err)) {
       console.error("[AUTH] Gagal logout:", err.response?.data || err.message);
@@ -61,4 +78,5 @@ export async function logout(): Promise<boolean> {
     }
     return false;
   }
-}
+        }
+  
