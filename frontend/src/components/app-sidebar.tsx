@@ -120,9 +120,9 @@ export function AppSidebar() {
   const handleSignOut = async () => {
     const success = await logout();
     if (success) {
-      window.location.href = "/login";
+      window.location.href = "/auth";
     } else {
-      router.push("/login");
+      router.push("/auth");
     }
   };
 
