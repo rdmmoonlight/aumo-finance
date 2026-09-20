@@ -62,4 +62,3 @@ export async function logout(): Promise<boolean> {
     return false;
   }
 }
-  
