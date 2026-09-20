@@ -59,10 +59,7 @@ public class AuthController : ControllerBase
             ? request.UserAgent
             : (!string.IsNullOrWhiteSpace(headerUserAgent) ? headerUserAgent : "Aumo Client");
 
-        var isMobile = request.IsMobileClient ||
-                       safeUserAgent.Contains("Android", StringComparison.OrdinalIgnoreCase) ||
-                       safeUserAgent.Contains("iPhone", StringComparison.OrdinalIgnoreCase) ||
-                       safeUserAgent.Contains("Mobile", StringComparison.OrdinalIgnoreCase);
+        var isMobile = request.IsMobileClient;
 
         string deviceCategory = isMobile ? "Mobile" : "Web";
         string ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
