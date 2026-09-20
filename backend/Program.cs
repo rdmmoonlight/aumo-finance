@@ -85,7 +85,19 @@ namespace AumoBackend
 
                 // Lax sangat aman & bekerja sempurna baik via Rewrites maupun direct navigation
                 options.Cookie.SameSite = SameSiteMode.Lax;
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Wajib HTTPS
+
+                // PENTING: SameAsRequest (bukan Always). Dengan ForwardedHeaders + middleware
+                // override scheme di bawah, Request.IsHttps sudah benar-benar akurat baik di
+                // production (Render, di balik proxy HTTPS) maupun saat dev lokal di
+                // http://localhost:3000 (lihat daftar CORS allowedOrigins).
+                // SecurePolicy.Always akan tetap menandai cookie sebagai "Secure" walau request
+                // saat login berjalan di HTTP biasa (localhost) — browser modern langsung
+                // MEMBUANG Set-Cookie ber-atribut Secure yang diterima lewat koneksi non-HTTPS,
+                // sehingga cookie sesi tidak pernah benar-benar tersimpan dan setiap request
+                // berikutnya (mis. /api/v1/auth/me, /api/v1/periods) selalu dianggap anonymous
+                // (401) meski login sebelumnya sukses (200). SameAsRequest tetap menghasilkan
+                // Secure=true di production (HTTPS) dan Secure=false saat dev lokal (HTTP).
+                options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 options.ExpireTimeSpan = TimeSpan.FromDays(30);
                 options.SlidingExpiration = true;
 
