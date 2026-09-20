@@ -82,7 +82,7 @@ namespace AumoBackend
             {
                 options.Cookie.Name = "AumoFinance.Session";
                 options.Cookie.HttpOnly = true;
-                
+
                 // Lax sangat aman & bekerja sempurna baik via Rewrites maupun direct navigation
                 options.Cookie.SameSite = SameSiteMode.Lax;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Wajib HTTPS
