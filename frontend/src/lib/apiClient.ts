@@ -1,13 +1,9 @@
 import axios from "axios";
+import { aumoConfig } from "@/aumo.config";
 
-// PENTING: Di browser, gunakan path relatif ("") agar request melewati Next.js Rewrites (Same-Origin).
-// Saat SSR (Node.js Next.js Server), panggil URL backend ASP.NET Core secara langsung.
-const BASE_URL =
-  typeof window === "undefined"
-    ? process.env.WEB_API_URL ||
-      process.env.NEXT_PUBLIC_WEB_API_URL ||
-      "https://aumonext-api.onrender.com" // Default dimiringkan ke HTTPS Production Backend
-    : "";
+// PENTING: Di browser, gunakan path relatif ("") agar request melewati Next.js Rewrites.
+// Saat SSR (Node.js Server), gunakan aumoConfig.backendTarget sebagai sumber kebenaran URL.
+const BASE_URL = typeof window === "undefined" ? aumoConfig.backendTarget : "";
 
 export const apiClient = axios.create({
   baseURL: BASE_URL,
@@ -55,7 +51,8 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 export default apiClient;
+  
