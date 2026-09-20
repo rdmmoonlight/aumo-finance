@@ -1,5 +1,5 @@
 import axios from "axios";
-import { aumoConfig } from "@/aumo.config";
+import { aumoConfig } from "../../aumo.config";
 
 // PENTING: Di browser, gunakan path relatif ("") agar request melewati Next.js Rewrites.
 // Saat SSR (Node.js Server), gunakan aumoConfig.backendTarget sebagai sumber kebenaran URL.
