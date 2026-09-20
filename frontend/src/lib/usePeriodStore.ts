@@ -4,7 +4,7 @@ import apiClient from "@/lib/apiClient";
 // Tipe data item periode sesuai response GET /api/v1/periods
 export interface PeriodItem {
   id: number;
-  periodName: string; // Contoh: "September 2026"
+  periodName: string;
   startDate: string;
   endDate: string;
   isClosed: boolean;
@@ -55,10 +55,11 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       }
     } catch (err: any) {
       console.error("[PERIOD_STORE] Failed to fetch periods:", err);
-      set({
-        error: err.response?.data?.message || "Gagal memuat data periode.",
-        loading: false,
-      });
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.Message ||
+        "Gagal memuat data periode.";
+      set({ error: msg, loading: false });
     }
   },
 
@@ -76,10 +77,11 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       return false;
     } catch (err: any) {
       console.error("[PERIOD_STORE] Failed to select period:", err);
-      set({
-        error: err.response?.data?.message || "Gagal memilih periode.",
-        loading: false,
-      });
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.Message ||
+        "Gagal memilih periode.";
+      set({ error: msg, loading: false });
       return false;
     }
   },
@@ -97,10 +99,11 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       return false;
     } catch (err: any) {
       console.error("[PERIOD_STORE] Failed to clear selection:", err);
-      set({
-        error: err.response?.data?.message || "Gagal mengosongkan periode.",
-        loading: false,
-      });
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.Message ||
+        "Gagal mengosongkan periode.";
+      set({ error: msg, loading: false });
       return false;
     }
   },
@@ -118,10 +121,11 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       return false;
     } catch (err: any) {
       console.error("[PERIOD_STORE] Failed to close period:", err);
-      set({
-        error: err.response?.data?.message || "Gagal menutup periode.",
-        loading: false,
-      });
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.Message ||
+        "Gagal menutup periode.";
+      set({ error: msg, loading: false });
       return false;
     }
   },
