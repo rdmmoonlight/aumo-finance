@@ -54,8 +54,8 @@ export default function HomePage() {
         const resIhsg = await fetch(
           "https://api.allorigins.win/raw?url=" +
             encodeURIComponent(
-              "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
-            )
+              "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
+            ),
         );
 
         if (resIhsg.ok) {
@@ -190,4 +190,4 @@ export default function HomePage() {
       </Card>
     </div>
   );
-    }
+}
