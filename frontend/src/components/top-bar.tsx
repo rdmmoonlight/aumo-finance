@@ -20,17 +20,17 @@ export function TopBar() {
   const pathname = usePathname();
   const { selectedPeriod, fetchPeriods, loading } = usePeriodStore();
 
-  // Load status periode aktif dari API/store saat komponen pertama kali dirender
+  // Load status periode aktif dari store saat komponen di-mount
   React.useEffect(() => {
     fetchPeriods();
   }, [fetchPeriods]);
 
-  // Mengubah path URL menjadi breadcrumb sederhana
+  // Ekstrak segment dari URL untuk breadcrumb
   const pathSegments = pathname.split("/").filter(Boolean);
 
   return (
     <header className="flex flex-col w-full border-b bg-background sticky top-0 z-10 shadow-sm">
-      {/* KELOMPOK 1: Utama & Lebih Besar (h-16 / 64px) */}
+      {/* KELOMPOK 1: Bar Utama (Search & Notifications) */}
       <div className="flex h-16 items-center justify-between px-6 gap-4">
         {/* Sisi Kiri: Search Bar */}
         <div className="flex items-center flex-1 max-w-md">
@@ -38,7 +38,7 @@ export function TopBar() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Cari transaksi, akun, atau laporan..."
+              placeholder="Cari transaksi, akun, atau laporan"
               className="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
             />
           </div>
@@ -57,12 +57,11 @@ export function TopBar() {
         </div>
       </div>
 
-      {/* GARIS PEMISAH PUTIH / LIGHT BORDER */}
-      <Separator className="bg-white/20 dark:bg-slate-800" />
+      <Separator />
 
-      {/* KELOMPOK 2: Sekunder & Lebih Kecil (h-10 / 40px) */}
+      {/* KELOMPOK 2: Bar Sekunder (Breadcrumbs & Real-time Info) */}
       <div className="flex h-10 items-center justify-between px-6 bg-muted/20 text-xs">
-        {/* Sisi Kiri: Dynamic Breadcrumb */}
+        {/* Dynamic Breadcrumbs */}
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
@@ -71,6 +70,8 @@ export function TopBar() {
               </BreadcrumbLink>
             </BreadcrumbItem>
             {pathSegments.map((segment, index) => {
+              if (segment === "home" && index === 0) return null;
+
               const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
               const isLast = index === pathSegments.length - 1;
               const formattedName = segment
@@ -97,7 +98,7 @@ export function TopBar() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Sisi Kanan: Status/Info Cepat (Periode Real-time & AI Status) */}
+        {/* Sisi Kanan: Status Periode Real-time & Status AI */}
         <div className="flex items-center gap-4 text-muted-foreground">
           {selectedPeriod ? (
             <div
