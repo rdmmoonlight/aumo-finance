@@ -103,7 +103,9 @@ export default function LandingPage() {
               className="flex items-center gap-2 rounded-xl border border-white/20 bg-white px-6 py-5 text-black hover:bg-zinc-200 disabled:opacity-50"
             >
               <IconLock size={18} />
-              <span>{checkingAuth ? "Checking Session..." : "Sign In to Account"}</span>
+              <span>
+                {checkingAuth ? "Checking Session..." : "Sign In to Account"}
+              </span>
               <IconArrowRight size={18} />
             </Button>
           </DialogTrigger>
@@ -130,5 +132,4 @@ export default function LandingPage() {
       </div>
     </div>
   );
-  }
-  
+}
