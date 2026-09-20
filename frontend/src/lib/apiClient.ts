@@ -22,7 +22,8 @@ function enforceHttps(url: string): string {
 }
 
 // Menentukan BASE_URL dengan proteksi HTTPS
-const rawBaseUrl = typeof window === "undefined" ? aumoConfig.backendTarget : "";
+const rawBaseUrl =
+  typeof window === "undefined" ? aumoConfig.backendTarget : "";
 const BASE_URL = enforceHttps(rawBaseUrl);
 
 export const apiClient = axios.create({
@@ -41,14 +42,20 @@ apiClient.interceptors.request.use(async (config) => {
     config.baseURL = enforceHttps(config.baseURL);
   }
 
-  if (config.url && config.url.startsWith("http://") && !config.url.includes("localhost")) {
+  if (
+    config.url &&
+    config.url.startsWith("http://") &&
+    !config.url.includes("localhost")
+  ) {
     config.url = config.url.replace("http://", "https://");
   }
 
   // 2. BLOKIR KERAS jika masih ada request HTTP non-localhost yang lolos di sisi server
   const fullTarget = (config.baseURL || "") + (config.url || "");
   if (fullTarget.startsWith("http://") && !fullTarget.includes("localhost")) {
-    throw new Error(`[SECURITY ERROR] Request HTTP dilarang: ${fullTarget}. Wajib menggunakan HTTPS.`);
+    throw new Error(
+      `[SECURITY ERROR] Request HTTP dilarang: ${fullTarget}. Wajib menggunakan HTTPS.`,
+    );
   }
 
   // 3. Meneruskan Cookie dari Browser saat Next.js melakukan SSR (Server-Side)
@@ -92,4 +99,3 @@ apiClient.interceptors.response.use(
 );
 
 export default apiClient;
-  
