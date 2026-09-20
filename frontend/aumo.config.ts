@@ -39,4 +39,3 @@ export const aumoConfig = {
 };
 
 export default aumoConfig;
-      
