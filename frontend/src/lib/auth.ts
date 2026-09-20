@@ -51,7 +51,7 @@ export async function getUserProfile(): Promise<UserProfile | null> {
 
 /**
  * Melakukan logout session di server
- * Mencoba ke /api/v1/auth/logout terlebih dahulu (Controller), 
+ * Mencoba ke /api/v1/auth/logout terlebih dahulu (Controller),
  * lalu fallback ke /auth/logout (Minimal API Program.cs)
  */
 export async function logout(): Promise<boolean> {
@@ -78,5 +78,4 @@ export async function logout(): Promise<boolean> {
     }
     return false;
   }
-        }
-  
+}

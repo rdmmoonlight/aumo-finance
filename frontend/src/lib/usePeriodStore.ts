@@ -57,7 +57,10 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status !== 401) {
-          console.error("[PERIOD_STORE] Failed to fetch periods:", err.response?.data || err.message);
+          console.error(
+            "[PERIOD_STORE] Failed to fetch periods:",
+            err.response?.data || err.message,
+          );
         }
         const msg =
           err.response?.data?.message ||
@@ -85,7 +88,10 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status !== 401) {
-          console.error("[PERIOD_STORE] Failed to select period:", err.response?.data || err.message);
+          console.error(
+            "[PERIOD_STORE] Failed to select period:",
+            err.response?.data || err.message,
+          );
         }
         const msg =
           err.response?.data?.message ||
@@ -114,7 +120,10 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status !== 401) {
-          console.error("[PERIOD_STORE] Failed to clear selection:", err.response?.data || err.message);
+          console.error(
+            "[PERIOD_STORE] Failed to clear selection:",
+            err.response?.data || err.message,
+          );
         }
         const msg =
           err.response?.data?.message ||
@@ -141,7 +150,10 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status !== 401) {
-          console.error("[PERIOD_STORE] Failed to close period:", err.response?.data || err.message);
+          console.error(
+            "[PERIOD_STORE] Failed to close period:",
+            err.response?.data || err.message,
+          );
         }
         const msg =
           err.response?.data?.message ||
@@ -157,4 +169,3 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
 }));
 
 export default usePeriodStore;
-  
