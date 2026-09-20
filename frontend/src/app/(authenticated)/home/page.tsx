@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   IconDashboard,
@@ -10,9 +13,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
-// Memaksa halaman ini di-render secara dinamis di server agar tidak error saat 'next build'
-export const dynamic = "force-dynamic";
-
 interface MarketItem {
   symbol: string;
   name: string;
@@ -21,79 +21,82 @@ interface MarketItem {
   isUp: boolean;
 }
 
-async function fetchMarketData(): Promise<MarketItem[]> {
-  const items: MarketItem[] = [];
+export default function HomePage() {
+  const [marketData, setMarketData] = useState<MarketItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // 1. Fetch Kurs USD/IDR dari Open ER API
-  try {
-    const resUsd = await fetch("https://open.er-api.com/v6/latest/USD", {
-      next: { revalidate: 300 }, // Cache selama 5 menit
-    });
-    if (resUsd.ok) {
-      const usdData = await resUsd.json();
-      const rate = usdData?.rates?.IDR;
-      if (rate) {
+  useEffect(() => {
+    async function fetchMarketData() {
+      const items: MarketItem[] = [];
+
+      // 1. Fetch Kurs USD/IDR
+      try {
+        const resUsd = await fetch("https://open.er-api.com/v6/latest/USD");
+        if (resUsd.ok) {
+          const usdData = await resUsd.json();
+          const rate = usdData?.rates?.IDR;
+          if (rate) {
+            items.push({
+              symbol: "USD/IDR",
+              name: "Rupiah",
+              price: `Rp ${Math.round(rate).toLocaleString("id-ID")}`,
+              change: "Live",
+              isUp: true,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching USD/IDR:", error);
+      }
+
+      // 2. Fetch Data IHSG
+      try {
+        const resIhsg = await fetch(
+          "https://api.allorigins.win/raw?url=" +
+            encodeURIComponent(
+              "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
+            )
+        );
+
+        if (resIhsg.ok) {
+          const yahooData = await resIhsg.json();
+          const quote = yahooData?.quoteResponse?.result?.[0];
+
+          if (quote) {
+            const price = quote.regularMarketPrice;
+            const changePercent = quote.regularMarketChangePercent;
+            const isUp = changePercent >= 0;
+
+            items.push({
+              symbol: "IHSG",
+              name: "Indeks Saham",
+              price: price
+                ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
+                : "N/A",
+              change: changePercent
+                ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
+                : "0.00%",
+              isUp,
+            });
+          }
+        }
+      } catch {
+        // Fallback manual jika gagal
         items.push({
-          symbol: "USD/IDR",
-          name: "Rupiah",
-          price: `Rp ${Math.round(rate).toLocaleString("id-ID")}`,
-          change: "Live",
+          symbol: "IHSG",
+          name: "Indeks Saham (IDX)",
+          price: "7,300.50",
+          change: "+0.15%",
           isUp: true,
         });
       }
+
+      setMarketData(items);
+      setIsLoading(false);
     }
-  } catch (error) {
-    console.error("Error fetching USD/IDR:", error);
-  }
 
-  // 2. Fallback Data IHSG yang aman tanpa terblokir Yahoo Rate-Limit
-  try {
-    const resIhsg = await fetch(
-      "https://api.allorigins.win/raw?url=" +
-        encodeURIComponent(
-          "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
-        ),
-      { next: { revalidate: 300 } },
-    );
-
-    if (resIhsg.ok) {
-      const yahooData = await resIhsg.json();
-      const quote = yahooData?.quoteResponse?.result?.[0];
-
-      if (quote) {
-        const price = quote.regularMarketPrice;
-        const changePercent = quote.regularMarketChangePercent;
-        const isUp = changePercent >= 0;
-
-        items.push({
-          symbol: "IHSG",
-          name: "Indeks Saham",
-          price: price
-            ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
-            : "N/A",
-          change: changePercent
-            ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
-            : "0.00%",
-          isUp,
-        });
-      }
-    }
-  } catch {
-    // Fallback manual jika Yahoo terblokir total di server
-    items.push({
-      symbol: "IHSG",
-      name: "Indeks Saham (IDX)",
-      price: "7,300.50",
-      change: "+0.15%",
-      isUp: true,
-    });
-  }
-
-  return items;
-}
-
-export default async function HomePage() {
-  const marketData = await fetchMarketData();
+    fetchMarketData();
+  }, []);
 
   return (
     <div className="grid w-full place-items-center py-6">
@@ -114,7 +117,11 @@ export default async function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {marketData.length > 0 ? (
+              {isLoading ? (
+                <div className="col-span-2 text-center text-xs text-white/40 py-4">
+                  Memuat indikator pasar...
+                </div>
+              ) : marketData.length > 0 ? (
                 marketData.map((item) => (
                   <div
                     key={item.symbol}
@@ -147,7 +154,7 @@ export default async function HomePage() {
                 ))
               ) : (
                 <div className="col-span-2 text-center text-xs text-white/40 py-4">
-                  Gagal memuat indikator pasar dari server.
+                  Gagal memuat indikator pasar.
                 </div>
               )}
             </div>
@@ -183,4 +190,4 @@ export default async function HomePage() {
       </Card>
     </div>
   );
-}
+    }
