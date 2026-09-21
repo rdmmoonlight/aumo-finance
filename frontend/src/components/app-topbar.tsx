@@ -74,7 +74,7 @@ export function TopBar() {
 
               const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
               const isLast = index === pathSegments.length - 1;
-              const formattedName = segment
+              const formattedName = decodeURIComponent(segment)
                 .replace(/-/g, " ")
                 .replace(/\b\w/g, (l) => l.toUpperCase());
 
