@@ -21,6 +21,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
+using Scalar.AspNetCore;
 
 namespace AumoBackend
 {
@@ -171,45 +172,9 @@ namespace AumoBackend
             // 5. REST API CORE SETUP, OPENAPI & CORS
             // =====================================
             builder.Services.AddControllers();
-            builder.Services.AddEndpointsApiExplorer();
 
-            // --- Microsoft Native OpenAPI Support ---
-            builder.Services.AddOpenApi(); 
-
-            // Swashbuckle SwaggerGen (Menggunakan Fully Qualified Namespaces)
-            builder.Services.AddSwaggerGen(options =>
-            {
-                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo 
-                { 
-                    Title = "AumoFinance API", 
-                    Version = "v1" 
-                });
-
-                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                {
-                    Name = "Authorization",
-                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
-                    Scheme = "Bearer",
-                    BearerFormat = "JWT",
-                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                    Description = "Enter the JWT token in the format: Bearer <your_token>"
-                });
-
-                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
-                {
-                    {
-                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-                        {
-                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
-                            {
-                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        Array.Empty<string>()
-                    }
-                });
-            });
+            // Native Microsoft OpenAPI Support (.NET 10)
+            builder.Services.AddOpenApi();
 
             var originsList = new List<string>
             {
@@ -319,11 +284,6 @@ namespace AumoBackend
             // =====================================
             // 9. HTTP PIPELINE MIDDLEWARE ORDER
             // =====================================
-            app.MapOpenApi(); // Menghasilkan OpenAPI JSON di "/openapi/v1.json"
-
-            app.UseSwagger();
-            app.UseSwaggerUI();
-
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -353,6 +313,10 @@ namespace AumoBackend
                     });
                 });
             }
+
+            // Route Native OpenAPI JSON & UI Scalar
+            app.MapOpenApi(); // Dokumentasi skema JSON di "/openapi/v1.json"
+            app.MapScalarApiReference(); // Tampilan UI interaktif di "/scalar/v1"
 
             app.UseRouting();
             app.UseCors("AllowFrontend");
