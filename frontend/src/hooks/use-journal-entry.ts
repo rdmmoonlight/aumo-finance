@@ -42,14 +42,14 @@ export function useAccountOptions() {
 export function useNextTransactionNumber(
   journalType: string,
   entryDate: string,
-  enabled: boolean
+  enabled: boolean,
 ) {
   return useQuery({
     queryKey: ["next-tx-number", journalType, entryDate],
     queryFn: async () => {
       const { data } = await apiClient.get(
         "/api/v1/journal-entry/next-transaction-number",
-        { params: { journalType, entryDate } }
+        { params: { journalType, entryDate } },
       );
       return (data?.transactionNumber || "") as string;
     },
@@ -78,13 +78,13 @@ export function useSaveJournalEntry(entryId?: string | null) {
       if (entryId) {
         const { data } = await apiClient.put(
           `/api/v1/journal-entry/edit/${entryId}`,
-          payload
+          payload,
         );
         return data;
       } else {
         const { data } = await apiClient.post(
           `/api/v1/journal-entry/create`,
-          payload
+          payload,
         );
         return data;
       }

@@ -101,8 +101,10 @@ export default function PeriodsPage() {
 
   // Properti opsional jika tidak di-return langsung oleh usePeriods hook
   const openInfo = "openInfo" in periodsHook ? periodsHook.openInfo : null;
-  const fetchOpenInfo = "fetchOpenInfo" in periodsHook ? periodsHook.fetchOpenInfo : undefined;
-  const createPeriod = "createPeriod" in periodsHook ? periodsHook.createPeriod : undefined;
+  const fetchOpenInfo =
+    "fetchOpenInfo" in periodsHook ? periodsHook.fetchOpenInfo : undefined;
+  const createPeriod =
+    "createPeriod" in periodsHook ? periodsHook.createPeriod : undefined;
 
   const [viewMode, setViewMode] = useState<"list" | "create">("list");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -111,7 +113,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting"
+    "LoadExisting",
   );
 
   const [cashAccountId, setCashAccountId] = useState("");
@@ -145,15 +147,15 @@ export default function PeriodsPage() {
         setSetupMode(exists ? "LoadExisting" : "CreateNew");
         if (exists) {
           setCashAccountId(
-            info.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
+            info.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
           );
           setBankAccountId(
             info.availableCashAndBankAccounts?.[1]?.id?.toString() ||
               info.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-              ""
+              "",
           );
           setRetainedId(
-            info.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
+            info.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
           );
         }
       }
@@ -166,7 +168,9 @@ export default function PeriodsPage() {
       onSuccess: () => setSuccessMessage(`Viewing ${p.periodName}`),
       onError: (err: unknown) => {
         const error = err as ApiError;
-        setErrorMessage(error?.response?.data?.message || "Gagal memilih periode.");
+        setErrorMessage(
+          error?.response?.data?.message || "Gagal memilih periode.",
+        );
       },
     });
   };
@@ -177,7 +181,9 @@ export default function PeriodsPage() {
       onSuccess: () => setSuccessMessage("No period selected."),
       onError: (err: unknown) => {
         const error = err as ApiError;
-        setErrorMessage(error?.response?.data?.message || "Gagal menghapus pilihan periode.");
+        setErrorMessage(
+          error?.response?.data?.message || "Gagal menghapus pilihan periode.",
+        );
       },
     });
   };
@@ -188,12 +194,12 @@ export default function PeriodsPage() {
     closePeriod.mutate(p.id, {
       onSuccess: (res: ApiResponse) =>
         setSuccessMessage(
-          res?.message || `${p.periodName} closed successfully.`
+          res?.message || `${p.periodName} closed successfully.`,
         ),
       onError: (err: unknown) => {
         const error = err as ApiError;
         setErrorMessage(
-          error?.response?.data?.message || "Failed to close period."
+          error?.response?.data?.message || "Failed to close period.",
         );
       },
     });
@@ -230,16 +236,12 @@ export default function PeriodsPage() {
         setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
       retainedEarningsAccountId:
         setupMode === "LoadExisting" ? parseInt(retainedId, 10) : null,
-      cashAccountCode:
-        setupMode === "CreateNew" ? cashAccountCode : undefined,
-      cashAccountName:
-        setupMode === "CreateNew" ? cashAccountName : undefined,
+      cashAccountCode: setupMode === "CreateNew" ? cashAccountCode : undefined,
+      cashAccountName: setupMode === "CreateNew" ? cashAccountName : undefined,
       cashBalance:
         setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
-      bankAccountCode:
-        setupMode === "CreateNew" ? bankAccountCode : undefined,
-      bankAccountName:
-        setupMode === "CreateNew" ? bankAccountName : undefined,
+      bankAccountCode: setupMode === "CreateNew" ? bankAccountCode : undefined,
+      bankAccountName: setupMode === "CreateNew" ? bankAccountName : undefined,
       bankBalance:
         setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
       retainedEarningsAccountCode:
@@ -248,21 +250,18 @@ export default function PeriodsPage() {
         setupMode === "CreateNew" ? retainedName : undefined,
     };
 
-    createPeriod.mutate(
-      payload as any,
-      {
-        onSuccess: (res: ApiResponse) => {
-          setSuccessMessage(res?.message || "Period opened successfully.");
-          setViewMode("list");
-        },
-        onError: (err: unknown) => {
-          const error = err as ApiError;
-          setErrorMessage(
-            error?.response?.data?.message || "Failed to create period."
-          );
-        },
-      }
-    );
+    createPeriod.mutate(payload as any, {
+      onSuccess: (res: ApiResponse) => {
+        setSuccessMessage(res?.message || "Period opened successfully.");
+        setViewMode("list");
+      },
+      onError: (err: unknown) => {
+        const error = err as ApiError;
+        setErrorMessage(
+          error?.response?.data?.message || "Failed to create period.",
+        );
+      },
+    });
   };
 
   return (
@@ -571,7 +570,7 @@ export default function PeriodsPage() {
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -592,7 +591,7 @@ export default function PeriodsPage() {
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -610,7 +609,7 @@ export default function PeriodsPage() {
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -642,7 +641,7 @@ export default function PeriodsPage() {
                             setCashBalance(
                               e.target.value === ""
                                 ? ""
-                                : Number(e.target.value)
+                                : Number(e.target.value),
                             )
                           }
                         />
@@ -672,7 +671,7 @@ export default function PeriodsPage() {
                             setBankBalance(
                               e.target.value === ""
                                 ? ""
-                                : Number(e.target.value)
+                                : Number(e.target.value),
                             )
                           }
                         />

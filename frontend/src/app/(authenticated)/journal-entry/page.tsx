@@ -79,7 +79,7 @@ function JournalEntryContent() {
   // Form States
   const [journalType, setJournalType] = useState("General");
   const [entryDate, setEntryDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
   const [lines, setLines] = useState<LineItem[]>([
     { id: "1", accountId: 0, lineDescription: "", debit: "", credit: "" },
@@ -105,7 +105,8 @@ function JournalEntryContent() {
       const jData = editData.entry;
       setJournalType(jData.journalType || "General");
       setEntryDate(
-        jData.entryDate?.split("T")[0] || new Date().toISOString().split("T")[0]
+        jData.entryDate?.split("T")[0] ||
+          new Date().toISOString().split("T")[0],
       );
 
       if (jData.lines?.length) {
@@ -116,7 +117,7 @@ function JournalEntryContent() {
             lineDescription: l.lineDescription || "",
             debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
             credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-          }))
+          })),
         );
       }
     }
@@ -132,15 +133,15 @@ function JournalEntryContent() {
   // Calculators
   const totalDebit = useMemo(
     () => lines.reduce((s, l) => s + parseFormattedNumber(l.debit), 0),
-    [lines]
+    [lines],
   );
   const totalCredit = useMemo(
     () => lines.reduce((s, l) => s + parseFormattedNumber(l.credit), 0),
-    [lines]
+    [lines],
   );
   const isBalanced = useMemo(
     () => totalDebit > 0 && totalDebit === totalCredit,
-    [totalDebit, totalCredit]
+    [totalDebit, totalCredit],
   );
 
   // Form Actions
@@ -176,7 +177,7 @@ function JournalEntryContent() {
         if (field === "credit" && value !== "")
           return { ...l, credit: formatNumberWithDots(value), debit: "" };
         return { ...l, [field]: value };
-      })
+      }),
     );
   };
 
@@ -212,7 +213,8 @@ function JournalEntryContent() {
     const effective = lines.filter(
       (l) =>
         l.accountId !== 0 &&
-        (parseFormattedNumber(l.debit) > 0 || parseFormattedNumber(l.credit) > 0)
+        (parseFormattedNumber(l.debit) > 0 ||
+          parseFormattedNumber(l.credit) > 0),
     );
 
     if (effective.length < 2) {
@@ -351,8 +353,12 @@ function JournalEntryContent() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="General">General Journal (GJ)</SelectItem>
-                    <SelectItem value="Adjusting">Adjusting Entry (AJ)</SelectItem>
+                    <SelectItem value="General">
+                      General Journal (GJ)
+                    </SelectItem>
+                    <SelectItem value="Adjusting">
+                      Adjusting Entry (AJ)
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -397,7 +403,7 @@ function JournalEntryContent() {
                 <TableBody>
                   {lines.map((line) => {
                     const ref = availableAccounts.find(
-                      (a) => a.id === line.accountId
+                      (a) => a.id === line.accountId,
                     )?.referenceNumber;
 
                     return (
@@ -412,9 +418,7 @@ function JournalEntryContent() {
                         </TableCell>
                         <TableCell>
                           <Select
-                            value={
-                              line.accountId ? String(line.accountId) : ""
-                            }
+                            value={line.accountId ? String(line.accountId) : ""}
                             onValueChange={(v) =>
                               updateLine(line.id, "accountId", Number(v))
                             }
@@ -444,7 +448,7 @@ function JournalEntryContent() {
                               updateLine(
                                 line.id,
                                 "lineDescription",
-                                e.target.value
+                                e.target.value,
                               )
                             }
                           />

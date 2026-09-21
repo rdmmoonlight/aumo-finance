@@ -93,23 +93,19 @@ export default function GeneralJournalClient() {
   const router = useRouter();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [selectedPeriodName, setSelectedPeriodName] = useState<string | null>(
-    null
+    null,
   );
   const [isPeriodClosed, setIsPeriodClosed] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(
-    null
-  );
+  const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setErrorMessage(null);
     try {
-      const { data } = await apiClient.get(
-        "/api/v1/reports/journals/general"
-      );
+      const { data } = await apiClient.get("/api/v1/reports/journals/general");
       if (data.success) {
         setSelectedPeriodName(data.selectedPeriodName || null);
         setIsPeriodClosed(data.isPeriodClosed || false);
@@ -138,7 +134,7 @@ export default function GeneralJournalClient() {
   const handlePromptDelete = (entry: JournalEntry) => {
     if (isPeriodClosed) {
       setErrorMessage(
-        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`
+        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`,
       );
       return;
     }
@@ -149,13 +145,11 @@ export default function GeneralJournalClient() {
     if (!entryToDelete) return;
     try {
       await apiClient.delete(
-        `/api/v1/reports/journals/general/${entryToDelete.id}`
+        `/api/v1/reports/journals/general/${entryToDelete.id}`,
       );
       setEntries((prev) => prev.filter((e) => e.id !== entryToDelete.id));
     } catch (err: any) {
-      setErrorMessage(
-        err.response?.data?.message || "Failed to delete entry"
-      );
+      setErrorMessage(err.response?.data?.message || "Failed to delete entry");
     } finally {
       setEntryToDelete(null);
     }
@@ -240,14 +234,17 @@ export default function GeneralJournalClient() {
                       colSpan={6}
                       className="py-10 text-center text-muted-foreground"
                     >
-                      <IconLoader2 className="animate-spin inline mr-2" size={16} />{" "}
+                      <IconLoader2
+                        className="animate-spin inline mr-2"
+                        size={16}
+                      />{" "}
                       Loading general journal...
                     </TableCell>
                   </TableRow>
                 ) : entries.length > 0 ? (
                   entries.map((entry) => {
                     const sorted = [...(entry.lines || [])].sort(
-                      (a, b) => a.lineOrder - b.lineOrder
+                      (a, b) => a.lineOrder - b.lineOrder,
                     );
                     const curDate = formatDateDisplay(entry.entryDate);
                     const showHeader = curDate !== currentDateTracker;
@@ -408,8 +405,9 @@ export default function GeneralJournalClient() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Journal Entry</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete entry &quot;{entryToDelete?.transactionNumber}&quot;?
-              This action cannot be undone.
+              Are you sure you want to delete entry &quot;
+              {entryToDelete?.transactionNumber}&quot;? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
