@@ -13,14 +13,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Search, Bell, Sparkles } from "lucide-react";
+import { Search, Bell, Database, RefreshCw } from "lucide-react";
 import { usePeriods } from "@/hooks/use-periods";
+import { useHealthCheck } from "@/hooks/use-health-check";
 
 export function TopBar() {
   const pathname = usePathname();
 
-  // Ambil state selectedPeriod dan isLoading langsung dari TanStack Query hook
-  const { selectedPeriod, isLoading } = usePeriods();
+  // 1. Hook Periode Aktif
+  const { selectedPeriod, isLoading: isPeriodLoading } = usePeriods();
+
+  // 2. Hook Database Health Check (Wake-up call)
+  const { status: dbStatus, refetch: checkDb, isFetching: isDbChecking } = useHealthCheck();
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -56,7 +60,7 @@ export function TopBar() {
 
       <Separator />
 
-      {/* KELOMPOK 2: Bar Sekunder (Breadcrumbs & Real-time Info) */}
+      {/* KELOMPOK 2: Bar Sekunder (Breadcrumbs, Status Periode & DB Health) */}
       <div className="flex h-10 items-center justify-between px-6 bg-muted/20 text-xs">
         {/* Dynamic Breadcrumbs */}
         <Breadcrumb>
@@ -95,8 +99,9 @@ export function TopBar() {
           </BreadcrumbList>
         </Breadcrumb>
 
-        {/* Sisi Kanan: Status Periode Real-time & Status AI */}
+        {/* Sisi Kanan: Status Periode Real-time & Indikator Database */}
         <div className="flex items-center gap-4 text-muted-foreground">
+          {/* Status Periode */}
           {selectedPeriod ? (
             <div
               className={`flex items-center gap-1.5 font-medium ${
@@ -121,16 +126,45 @@ export function TopBar() {
             <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-slate-400" />
               <span>
-                {isLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+                {isPeriodLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
               </span>
             </div>
           )}
 
           <Separator orientation="vertical" className="h-3" />
 
-          <div className="flex items-center gap-1 text-xs">
-            <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-            <span>AI Guardian: Ready</span>
+          {/* Indikator Database menggantikan AI Guardian */}
+          <div className="flex items-center gap-2 text-xs">
+            <Database className="h-3.5 w-3.5 text-muted-foreground" />
+
+            {dbStatus === "online" && (
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span>DB: Connected</span>
+              </div>
+            )}
+
+            {dbStatus === "connecting" && (
+              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
+                <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
+                <span>DB: Connecting...</span>
+              </div>
+            )}
+
+            {dbStatus === "offline" && (
+              <div className="flex items-center gap-1.5 text-destructive font-medium">
+                <span className="h-2 w-2 rounded-full bg-destructive" />
+                <span>DB: Disconnected</span>
+                <button
+                  onClick={() => checkDb()}
+                  disabled={isDbChecking}
+                  className="ml-1 hover:underline flex items-center gap-0.5 text-[10px] text-muted-foreground"
+                  title="Coba hubungkan ulang"
+                >
+                  <RefreshCw className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`} />
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
