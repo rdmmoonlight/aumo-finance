@@ -6,6 +6,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.animateItemPlacement
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -54,7 +55,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {
-                Column(modifier = Modifier.animateItem()) {
+                Column(modifier = Modifier.animateItemPlacement()) {
                     Text(
                         text = "Assalaamu'alaikum wa rahmatullahi wa barakaatuh",
                         color = AumoColors.TextMuted,
@@ -71,14 +72,14 @@ fun HomeScreen(
                 }
             }
 
-            item { HeroDashboardCard(item = dashboard, modifier = Modifier.animateItem()) }
+            item { HeroDashboardCard(item = dashboard, modifier = Modifier.animateItemPlacement()) }
 
             item {
-                SectionLabel("MAIN MENU", modifier = Modifier.animateItem())
+                SectionLabel("MAIN MENU", modifier = Modifier.animateItemPlacement())
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.animateItem()) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.animateItemPlacement()) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                         BentoCard(item = journalEntry, modifier = Modifier.weight(1f))
                         BentoCard(item = generalJournal, modifier = Modifier.weight(1f))
@@ -90,9 +91,9 @@ fun HomeScreen(
                 }
             }
 
-            item { SectionLabel("REPORTS", modifier = Modifier.animateItem()) }
+            item { SectionLabel("REPORTS", modifier = Modifier.animateItemPlacement()) }
 
-            item { SecondaryHeroCard(item = reports, modifier = Modifier.animateItem()) }
+            item { SecondaryHeroCard(item = reports, modifier = Modifier.animateItemPlacement()) }
         }
     }
 }
