@@ -21,7 +21,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
 
 namespace AumoBackend
 {
@@ -84,7 +83,6 @@ namespace AumoBackend
                 options.Cookie.HttpOnly = true;
 
                 // FIX CROSS-SITE COOKIE (VERCEL -> RENDER):
-                // Wajib None & Always agar cookie session bisa terkirim antar beda domain/subdomain!
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 
@@ -170,33 +168,41 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 5. REST API CORE SETUP, SWAGGER & CORS
+            // 5. REST API CORE SETUP, OPENAPI & CORS
             // =====================================
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
 
+            // --- Microsoft Native OpenAPI Support ---
+            builder.Services.AddOpenApi(); 
+
+            // Swashbuckle SwaggerGen (Menggunakan Fully Qualified Namespaces)
             builder.Services.AddSwaggerGen(options =>
             {
-                options.SwaggerDoc("v1", new OpenApiInfo { Title = "AumoFinance API", Version = "v1" });
+                options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo 
+                { 
+                    Title = "AumoFinance API", 
+                    Version = "v1" 
+                });
 
-                options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                 {
                     Name = "Authorization",
-                    Type = SecuritySchemeType.Http,
+                    Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
                     Scheme = "Bearer",
                     BearerFormat = "JWT",
-                    In = ParameterLocation.Header,
+                    In = Microsoft.OpenApi.Models.ParameterLocation.Header,
                     Description = "Enter the JWT token in the format: Bearer <your_token>"
                 });
 
-                options.AddSecurityRequirement(new OpenApiSecurityRequirement
+                options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
                 {
                     {
-                        new OpenApiSecurityScheme
+                        new Microsoft.OpenApi.Models.OpenApiSecurityScheme
                         {
-                            Reference = new OpenApiReference
+                            Reference = new Microsoft.OpenApi.Models.OpenApiReference
                             {
-                                Type = ReferenceType.SecurityScheme,
+                                Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
                                 Id = "Bearer"
                             }
                         },
@@ -221,7 +227,7 @@ namespace AumoBackend
                     policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .AllowCredentials(); // Penting untuk mengizinkan cookie terkirim
+                          .AllowCredentials();
                 });
             });
 
@@ -253,7 +259,7 @@ namespace AumoBackend
             var app = builder.Build();
 
             // =====================================
-            // PENTING: MIDDLEWARE FORWARDED HEADERS & HTTPS OVERRIDE
+            // MIDDLEWARE FORWARDED HEADERS & HTTPS
             // =====================================
             app.UseForwardedHeaders();
 
@@ -313,6 +319,8 @@ namespace AumoBackend
             // =====================================
             // 9. HTTP PIPELINE MIDDLEWARE ORDER
             // =====================================
+            app.MapOpenApi(); // Menghasilkan OpenAPI JSON di "/openapi/v1.json"
+
             app.UseSwagger();
             app.UseSwaggerUI();
 

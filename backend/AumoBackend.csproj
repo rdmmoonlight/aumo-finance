@@ -20,11 +20,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
+    <!-- Native OpenAPI Support & Modern UI (.NET 10) -->
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-preview.1.25120.3" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.0.*" />
+
     <!-- PostgreSQL Provider -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.1" />
-
-    <!-- OpenAPI / Swagger Support (Diperlukan untuk Program.cs & SwaggerUI) -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 
     <!-- Utility & Third-Party Libraries -->
     <PackageReference Include="ClosedXML" Version="0.104.2" />
