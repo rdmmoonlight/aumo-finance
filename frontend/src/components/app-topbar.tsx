@@ -14,18 +14,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Search, Bell, Sparkles } from "lucide-react";
-import { usePeriodStore } from "@/lib/periodStore";
+import { usePeriods } from "@/hooks/use-periods";
 
 export function TopBar() {
   const pathname = usePathname();
-  const { selectedPeriod, fetchPeriods, loading } = usePeriodStore();
+  
+  // Ambil state selectedPeriod dan isLoading langsung dari TanStack Query hook
+  const { selectedPeriod, isLoading } = usePeriods();
 
-  // Load status periode aktif dari store saat komponen di-mount
-  React.useEffect(() => {
-    fetchPeriods();
-  }, [fetchPeriods]);
-
-  // Ekstrak segment dari URL untuk breadcrumb
+  // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
 
   return (
@@ -124,7 +121,7 @@ export function TopBar() {
             <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-slate-400" />
               <span>
-                {loading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+                {isLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
               </span>
             </div>
           )}
