@@ -2,10 +2,6 @@ import { create } from "zustand";
 import axios from "axios";
 import apiClient from "@/lib/apiClient";
 
-// ============================================================================
-// TYPES & INTERFACES (Menyesuaikan DTO Backend C#)
-// ============================================================================
-
 export interface PeriodItem {
   id: number;
   periodName: string;
@@ -31,52 +27,39 @@ export interface OpenPeriodInfoResponse {
 }
 
 export interface CreatePeriodPayload {
-  month: number; // 1 - 12
-  year: number; // 2000 - 2100
+  month: number;
+  year: number;
   setupMode: "LoadExisting" | "CreateNew" | string;
-
-  // Fields untuk Setup Mode "LoadExisting"
   cashAccountId?: number | null;
   bankAccountId?: number | null;
   retainedEarningsAccountId?: number | null;
-
-  // Fields untuk Setup Mode "CreateNew"
   cashAccountCode?: string;
   cashAccountName?: string;
   cashBalance?: number;
-
   bankAccountCode?: string;
   bankAccountName?: string;
   bankBalance?: number;
-
   retainedEarningsAccountCode?: string;
   retainedEarningsAccountName?: string;
 }
 
 interface PeriodState {
-  // State Utama
   periods: PeriodItem[];
   selectedPeriod: PeriodItem | null;
   openInfo: OpenPeriodInfoResponse | null;
-
-  // State Status UX
   loading: boolean;
   creating: boolean;
   error: string | null;
 
-  // Actions / Methods
   fetchPeriods: () => Promise<void>;
   fetchOpenInfo: () => Promise<OpenPeriodInfoResponse | null>;
-  createPeriod: (
-    payload: CreatePeriodPayload,
-  ) => Promise<{ success: boolean; message?: string }>;
+  createPeriod: (payload: CreatePeriodPayload) => Promise<{ success: boolean; message?: string }>;
   selectPeriod: (id: number) => Promise<boolean>;
   clearSelection: () => Promise<boolean>;
   closePeriod: (id: number) => Promise<{ success: boolean; message?: string }>;
   clearError: () => void;
 }
 
-// Helper untuk mengekstrak pesan error dari Axios Response
 const extractErrorMessage = (err: unknown, defaultMsg: string): string => {
   if (axios.isAxiosError(err)) {
     return (
@@ -89,10 +72,6 @@ const extractErrorMessage = (err: unknown, defaultMsg: string): string => {
   return defaultMsg;
 };
 
-// ============================================================================
-// ZUSTAND STORE
-// ============================================================================
-
 export const usePeriodStore = create<PeriodState>((set, get) => ({
   periods: [],
   selectedPeriod: null,
@@ -103,7 +82,7 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
 
   clearError: () => set({ error: null }),
 
-  // 1. GET: /api/v1/periods (Fetch List & Active Selection)
+  // 1. GET: /api/v1/periods
   fetchPeriods: async () => {
     set({ loading: true, error: null });
     try {
@@ -111,7 +90,6 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       if (res.data?.success) {
         const periodsList: PeriodItem[] = res.data.periods || [];
 
-        // Penentuan periode terpilih berdasarkan isSelected atau selectedPeriodId dari backend
         const selected =
           periodsList.find((p) => p.isSelected) ||
           periodsList.find((p) => p.id === res.data.selectedPeriodId) ||
@@ -136,19 +114,16 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     }
   },
 
-  // 2. GET: /api/v1/periods/open-info (Fetch Form Meta Data untuk Buat Periode Baru)
+  // 2. GET: /api/v1/periods/open-info
   fetchOpenInfo: async () => {
     set({ loading: true, error: null });
     try {
       const res = await apiClient.get("/api/v1/periods/open-info");
       if (res.data?.success) {
         const info: OpenPeriodInfoResponse = {
-          hasExistingPermanentAccounts:
-            res.data.hasExistingPermanentAccounts ?? false,
-          availableCashAndBankAccounts:
-            res.data.availableCashAndBankAccounts || [],
-          availableRetainedEarningsAccounts:
-            res.data.availableRetainedEarningsAccounts || [],
+          hasExistingPermanentAccounts: res.data.hasExistingPermanentAccounts ?? false,
+          availableCashAndBankAccounts: res.data.availableCashAndBankAccounts || [],
+          availableRetainedEarningsAccounts: res.data.availableRetainedEarningsAccounts || [],
           permanentAccounts: res.data.permanentAccounts || [],
         };
 
@@ -162,17 +137,14 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
         set({ loading: false });
         return null;
       }
-      const msg = extractErrorMessage(
-        err,
-        "Gagal memuat info pembukaan periode.",
-      );
+      const msg = extractErrorMessage(err, "Gagal memuat info pembukaan periode.");
       console.error("[PERIOD_STORE] fetchOpenInfo error:", err);
       set({ error: msg, loading: false });
       return null;
     }
   },
 
-  // 3. POST: /api/v1/periods (Buka / Buat Periode Baru)
+  // 3. POST: /api/v1/periods
   createPeriod: async (payload: CreatePeriodPayload) => {
     set({ creating: true, error: null });
     try {
@@ -195,50 +167,100 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
     }
   },
 
-  // 4. POST: /api/v1/periods/select/{id} (Pilih Periode Aktif)
+  // 4. POST: /api/v1/periods/select/{id} (OPTIMISTIC UPDATE INSTAN)
   selectPeriod: async (id: number) => {
     set({ error: null });
+
+    // Backup state lama jika sewaktu-waktu API gagal
+    const previousPeriods = get().periods;
+    const previousSelected = get().selectedPeriod;
+
+    // --- OPTIMISTIC UPDATE: Langsung ubah state lokal saat ini juga (0ms delay) ---
+    const targetPeriod = previousPeriods.find((p) => p.id === id) || null;
+    const updatedPeriods = previousPeriods.map((p) => ({
+      ...p,
+      isSelected: p.id === id,
+    }));
+
+    set({
+      selectedPeriod: targetPeriod
+        ? { ...targetPeriod, isSelected: true }
+        : previousSelected,
+      periods: updatedPeriods,
+    });
+
     try {
       const res = await apiClient.post(`/api/v1/periods/select/${id}`);
       if (res.data?.success) {
-        await get().fetchPeriods();
         return true;
       }
+      // Jika backend merespon gagal, kembalikan ke state semula
+      set({ periods: previousPeriods, selectedPeriod: previousSelected });
       return false;
     } catch (err: unknown) {
-      const msg = extractErrorMessage(err, "Gagal memilih periode.");
+      // Revert state ke semula jika API error
+      set({
+        periods: previousPeriods,
+        selectedPeriod: previousSelected,
+        error: extractErrorMessage(err, "Gagal memilih periode."),
+      });
       console.error("[PERIOD_STORE] selectPeriod error:", err);
-      set({ error: msg });
       return false;
     }
   },
 
-  // 5. POST: /api/v1/periods/clear-selection (Kosongkan Pilihan Periode)
+  // 5. POST: /api/v1/periods/clear-selection (OPTIMISTIC UPDATE INSTAN)
   clearSelection: async () => {
     set({ error: null });
+
+    const previousPeriods = get().periods;
+    const previousSelected = get().selectedPeriod;
+
+    // Langsung hapus seleksi di memori lokal
+    const updatedPeriods = previousPeriods.map((p) => ({
+      ...p,
+      isSelected: false,
+    }));
+
+    set({
+      selectedPeriod: null,
+      periods: updatedPeriods,
+    });
+
     try {
       const res = await apiClient.post("/api/v1/periods/clear-selection");
       if (res.data?.success) {
-        set({ selectedPeriod: null });
-        await get().fetchPeriods();
         return true;
       }
+      set({ periods: previousPeriods, selectedPeriod: previousSelected });
       return false;
     } catch (err: unknown) {
-      const msg = extractErrorMessage(err, "Gagal mengosongkan periode.");
+      set({
+        periods: previousPeriods,
+        selectedPeriod: previousSelected,
+        error: extractErrorMessage(err, "Gagal mengosongkan periode."),
+      });
       console.error("[PERIOD_STORE] clearSelection error:", err);
-      set({ error: msg });
       return false;
     }
   },
 
-  // 6. POST: /api/v1/periods/close/{id} (Tutup Periode)
+  // 6. POST: /api/v1/periods/close/{id}
   closePeriod: async (id: number) => {
     set({ error: null });
     try {
       const res = await apiClient.post(`/api/v1/periods/close/${id}`);
       if (res.data?.success) {
-        await get().fetchPeriods();
+        // Update status closed lokal secara instan
+        set((state) => ({
+          periods: state.periods.map((p) =>
+            p.id === id ? { ...p, isClosed: true } : p
+          ),
+          selectedPeriod:
+            state.selectedPeriod?.id === id
+              ? { ...state.selectedPeriod, isClosed: true }
+              : state.selectedPeriod,
+        }));
         return {
           success: true,
           message: res.data.message || "Periode berhasil ditutup.",
