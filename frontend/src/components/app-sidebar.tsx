@@ -45,7 +45,7 @@ import {
   LogOut,
   ChevronsUpDown,
 } from "lucide-react";
-import { getUserProfile, logout, type UserProfile } from "@/lib/auth";
+import { getUserProfile, logout, UserProfile } from "@/lib/auth";
 
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
