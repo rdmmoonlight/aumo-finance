@@ -45,7 +45,7 @@ import {
   LogOut,
   ChevronsUpDown,
 } from "lucide-react";
-import { getUserProfile, logout, UserProfile } from "@/lib/auth";
+import { getUserProfile, logout } from "@/lib/auth";
 
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
@@ -103,7 +103,11 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const [user, setUser] = React.useState<UserProfile | null>(null);
+
+  // Inisialisasi state user secara otomatis dari ReturnType getUserProfile
+  const [user, setUser] = React.useState<Awaited<
+    ReturnType<typeof getUserProfile>
+  >>(null);
 
   React.useEffect(() => {
     async function fetchUser() {
@@ -111,7 +115,7 @@ export function AppSidebar() {
         const data = await getUserProfile();
         setUser(data);
       } catch (err) {
-        console.error("Gagal memuat profil user:", err);
+        console.error("[SIDEBAR] Gagal memuat profil user:", err);
       }
     }
     fetchUser();
@@ -156,7 +160,9 @@ export function AppSidebar() {
                   return (
                     <Collapsible
                       key={item.title}
-                      defaultOpen={isSubActive || pathname.startsWith(item.url)}
+                      defaultOpen={
+                        isSubActive || pathname.startsWith(item.url)
+                      }
                       className="group/collapsible"
                     >
                       <SidebarMenuItem>
@@ -199,7 +205,8 @@ export function AppSidebar() {
 
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" &&
+                    pathname.startsWith(item.url + "/"));
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -230,15 +237,7 @@ export function AppSidebar() {
                 <SidebarMenuButton className="w-full justify-between py-6">
                   <div className="flex items-center gap-3 overflow-hidden text-left">
                     <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                      {user?.avatarUrl ? (
-                        <img
-                          src={user.avatarUrl}
-                          alt={user.fullName || "User Avatar"}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <User className="w-4 h-4" />
-                      )}
+                      <User className="w-4 h-4" />
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-sm leading-tight truncate">
