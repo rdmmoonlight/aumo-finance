@@ -53,7 +53,9 @@ interface PeriodState {
 
   fetchPeriods: () => Promise<void>;
   fetchOpenInfo: () => Promise<OpenPeriodInfoResponse | null>;
-  createPeriod: (payload: CreatePeriodPayload) => Promise<{ success: boolean; message?: string }>;
+  createPeriod: (
+    payload: CreatePeriodPayload,
+  ) => Promise<{ success: boolean; message?: string }>;
   selectPeriod: (id: number) => Promise<boolean>;
   clearSelection: () => Promise<boolean>;
   closePeriod: (id: number) => Promise<{ success: boolean; message?: string }>;
@@ -121,9 +123,12 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
       const res = await apiClient.get("/api/v1/periods/open-info");
       if (res.data?.success) {
         const info: OpenPeriodInfoResponse = {
-          hasExistingPermanentAccounts: res.data.hasExistingPermanentAccounts ?? false,
-          availableCashAndBankAccounts: res.data.availableCashAndBankAccounts || [],
-          availableRetainedEarningsAccounts: res.data.availableRetainedEarningsAccounts || [],
+          hasExistingPermanentAccounts:
+            res.data.hasExistingPermanentAccounts ?? false,
+          availableCashAndBankAccounts:
+            res.data.availableCashAndBankAccounts || [],
+          availableRetainedEarningsAccounts:
+            res.data.availableRetainedEarningsAccounts || [],
           permanentAccounts: res.data.permanentAccounts || [],
         };
 
@@ -137,7 +142,10 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
         set({ loading: false });
         return null;
       }
-      const msg = extractErrorMessage(err, "Gagal memuat info pembukaan periode.");
+      const msg = extractErrorMessage(
+        err,
+        "Gagal memuat info pembukaan periode.",
+      );
       console.error("[PERIOD_STORE] fetchOpenInfo error:", err);
       set({ error: msg, loading: false });
       return null;
@@ -254,7 +262,7 @@ export const usePeriodStore = create<PeriodState>((set, get) => ({
         // Update status closed lokal secara instan
         set((state) => ({
           periods: state.periods.map((p) =>
-            p.id === id ? { ...p, isClosed: true } : p
+            p.id === id ? { ...p, isClosed: true } : p,
           ),
           selectedPeriod:
             state.selectedPeriod?.id === id
