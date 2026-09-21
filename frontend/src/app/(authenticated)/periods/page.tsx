@@ -49,6 +49,28 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// Definisi tipe data untuk pengetikan eksplisit
+interface ApiResponse {
+  message?: string;
+  [key: string]: unknown;
+}
+
+interface ApiError {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+  message?: string;
+}
+
+interface AccountItem {
+  id: number | string;
+  displayLabel?: string;
+  referenceNumber?: string;
+  accountName?: string;
+}
+
 const MONTH_NAMES = [
   "January",
   "February",
@@ -65,17 +87,22 @@ const MONTH_NAMES = [
 ];
 
 export default function PeriodsPage() {
+  const periodsHook = usePeriods();
+
+  // Destructuring aman dari custom hook
   const {
-    periods,
-    isLoading,
-    selectedPeriod,
-    openInfo,
-    fetchOpenInfo,
-    createPeriod,
+    periods = [],
+    isLoading = false,
+    selectedPeriod = null,
     selectPeriod,
     clearSelection,
     closePeriod,
-  } = usePeriods();
+  } = periodsHook;
+
+  // Properti opsional jika tidak di-return langsung oleh usePeriods hook
+  const openInfo = "openInfo" in periodsHook ? periodsHook.openInfo : null;
+  const fetchOpenInfo = "fetchOpenInfo" in periodsHook ? periodsHook.fetchOpenInfo : undefined;
+  const createPeriod = "createPeriod" in periodsHook ? periodsHook.createPeriod : undefined;
 
   const [viewMode, setViewMode] = useState<"list" | "create">("list");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -110,22 +137,25 @@ export default function PeriodsPage() {
 
   const handleOpenCreateView = async () => {
     setViewMode("create");
-    const { data: info } = await fetchOpenInfo();
-    if (info) {
-      const exists = info.hasExistingPermanentAccounts;
-      setSetupMode(exists ? "LoadExisting" : "CreateNew");
-      if (exists) {
-        setCashAccountId(
-          info.availableCashAndBankAccounts[0]?.id.toString() || ""
-        );
-        setBankAccountId(
-          info.availableCashAndBankAccounts[1]?.id.toString() ||
-            info.availableCashAndBankAccounts[0]?.id.toString() ||
-            ""
-        );
-        setRetainedId(
-          info.availableRetainedEarningsAccounts[0]?.id.toString() || ""
-        );
+    if (typeof fetchOpenInfo === "function") {
+      const res = await fetchOpenInfo();
+      const info = res?.data;
+      if (info) {
+        const exists = info.hasExistingPermanentAccounts;
+        setSetupMode(exists ? "LoadExisting" : "CreateNew");
+        if (exists) {
+          setCashAccountId(
+            info.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
+          );
+          setBankAccountId(
+            info.availableCashAndBankAccounts?.[1]?.id?.toString() ||
+              info.availableCashAndBankAccounts?.[0]?.id?.toString() ||
+              ""
+          );
+          setRetainedId(
+            info.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
+          );
+        }
       }
     }
   };
@@ -134,7 +164,10 @@ export default function PeriodsPage() {
     setErrorMessage(null);
     selectPeriod.mutate(p.id, {
       onSuccess: () => setSuccessMessage(`Viewing ${p.periodName}`),
-      onError: () => setErrorMessage("Gagal memilih periode."),
+      onError: (err: unknown) => {
+        const error = err as ApiError;
+        setErrorMessage(error?.response?.data?.message || "Gagal memilih periode.");
+      },
     });
   };
 
@@ -142,6 +175,10 @@ export default function PeriodsPage() {
     setErrorMessage(null);
     clearSelection.mutate(undefined, {
       onSuccess: () => setSuccessMessage("No period selected."),
+      onError: (err: unknown) => {
+        const error = err as ApiError;
+        setErrorMessage(error?.response?.data?.message || "Gagal menghapus pilihan periode.");
+      },
     });
   };
 
@@ -149,20 +186,27 @@ export default function PeriodsPage() {
     if (!confirm(`Close ${p.periodName}?`)) return;
     setErrorMessage(null);
     closePeriod.mutate(p.id, {
-      onSuccess: (res) =>
+      onSuccess: (res: ApiResponse) =>
         setSuccessMessage(
           res?.message || `${p.periodName} closed successfully.`
         ),
-      onError: (err: any) =>
+      onError: (err: unknown) => {
+        const error = err as ApiError;
         setErrorMessage(
-          err?.response?.data?.message || "Failed to close period."
-        ),
+          error?.response?.data?.message || "Failed to close period."
+        );
+      },
     });
   };
 
   const handleCreateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    if (!createPeriod) {
+      setErrorMessage("Fungsi createPeriod belum tersedia.");
+      return;
+    }
 
     if (
       setupMode === "LoadExisting" &&
@@ -176,42 +220,45 @@ export default function PeriodsPage() {
       return;
     }
 
+    const payload: Record<string, unknown> = {
+      month,
+      year,
+      setupMode,
+      cashAccountId:
+        setupMode === "LoadExisting" ? parseInt(cashAccountId, 10) : null,
+      bankAccountId:
+        setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
+      retainedEarningsAccountId:
+        setupMode === "LoadExisting" ? parseInt(retainedId, 10) : null,
+      cashAccountCode:
+        setupMode === "CreateNew" ? cashAccountCode : undefined,
+      cashAccountName:
+        setupMode === "CreateNew" ? cashAccountName : undefined,
+      cashBalance:
+        setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
+      bankAccountCode:
+        setupMode === "CreateNew" ? bankAccountCode : undefined,
+      bankAccountName:
+        setupMode === "CreateNew" ? bankAccountName : undefined,
+      bankBalance:
+        setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
+      retainedEarningsAccountCode:
+        setupMode === "CreateNew" ? retainedCode : undefined,
+      retainedEarningsAccountName:
+        setupMode === "CreateNew" ? retainedName : undefined,
+    };
+
     createPeriod.mutate(
+      payload as any,
       {
-        month,
-        year,
-        setupMode,
-        cashAccountId:
-          setupMode === "LoadExisting" ? parseInt(cashAccountId, 10) : null,
-        bankAccountId:
-          setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
-        retainedEarningsAccountId:
-          setupMode === "LoadExisting" ? parseInt(retainedId, 10) : null,
-        cashAccountCode:
-          setupMode === "CreateNew" ? cashAccountCode : undefined,
-        cashAccountName:
-          setupMode === "CreateNew" ? cashAccountName : undefined,
-        cashBalance:
-          setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
-        bankAccountCode:
-          setupMode === "CreateNew" ? bankAccountCode : undefined,
-        bankAccountName:
-          setupMode === "CreateNew" ? bankAccountName : undefined,
-        bankBalance:
-          setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
-        retainedEarningsAccountCode:
-          setupMode === "CreateNew" ? retainedCode : undefined,
-        retainedEarningsAccountName:
-          setupMode === "CreateNew" ? retainedName : undefined,
-      },
-      {
-        onSuccess: (res) => {
+        onSuccess: (res: ApiResponse) => {
           setSuccessMessage(res?.message || "Period opened successfully.");
           setViewMode("list");
         },
-        onError: (err: any) => {
+        onError: (err: unknown) => {
+          const error = err as ApiError;
           setErrorMessage(
-            err?.response?.data?.message || "Failed to create period."
+            error?.response?.data?.message || "Failed to create period."
           );
         },
       }
@@ -322,7 +369,7 @@ export default function PeriodsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    periods.map((p) => {
+                    periods.map((p: PeriodItem) => {
                       const isSelected = selectedPeriod?.id === p.id;
                       return (
                         <TableRow
@@ -468,7 +515,9 @@ export default function PeriodsPage() {
               <CardContent className="space-y-4">
                 <RadioGroup
                   value={setupMode}
-                  onValueChange={(v: any) => setSetupMode(v)}
+                  onValueChange={(v: "LoadExisting" | "CreateNew") =>
+                    setSetupMode(v)
+                  }
                   className="flex gap-4"
                 >
                   <div className="flex items-center gap-2">
@@ -516,12 +565,14 @@ export default function PeriodsPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {openInfo?.availableCashAndBankAccounts.map((a) => (
-                            <SelectItem key={a.id} value={a.id.toString()}>
-                              {a.displayLabel ||
-                                `${a.referenceNumber} - ${a.accountName}`}
-                            </SelectItem>
-                          ))}
+                          {openInfo?.availableCashAndBankAccounts?.map(
+                            (a: AccountItem) => (
+                              <SelectItem key={a.id} value={a.id.toString()}>
+                                {a.displayLabel ||
+                                  `${a.referenceNumber} - ${a.accountName}`}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -535,14 +586,134 @@ export default function PeriodsPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {openInfo?.availableCashAndBankAccounts.map((a) => (
-                            <SelectItem key={a.id} value={a.id.toString()}>
-                              {a.displayLabel ||
-                                `${a.referenceNumber} - ${a.accountName}`}
-                            </SelectItem>
-                          ))}
+                          {openInfo?.availableCashAndBankAccounts?.map(
+                            (a: AccountItem) => (
+                              <SelectItem key={a.id} value={a.id.toString()}>
+                                {a.displayLabel ||
+                                  `${a.referenceNumber} - ${a.accountName}`}
+                              </SelectItem>
+                            )
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Retained Earnings</Lab
+                      <Label>Retained Earnings</Label>
+                      <Select value={retainedId} onValueChange={setRetainedId}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {openInfo?.availableRetainedEarningsAccounts?.map(
+                            (a: AccountItem) => (
+                              <SelectItem key={a.id} value={a.id.toString()}>
+                                {a.displayLabel ||
+                                  `${a.referenceNumber} - ${a.accountName}`}
+                              </SelectItem>
+                            )
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <Label>Cash Code</Label>
+                        <Input
+                          value={cashAccountCode}
+                          onChange={(e) => setCashAccountCode(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Cash Name</Label>
+                        <Input
+                          value={cashAccountName}
+                          onChange={(e) => setCashAccountName(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Cash Balance</Label>
+                        <Input
+                          type="number"
+                          value={cashBalance}
+                          onChange={(e) =>
+                            setCashBalance(
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="space-y-1.5">
+                        <Label>Bank Code</Label>
+                        <Input
+                          value={bankAccountCode}
+                          onChange={(e) => setBankAccountCode(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Bank Name</Label>
+                        <Input
+                          value={bankAccountName}
+                          onChange={(e) => setBankAccountName(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Bank Balance</Label>
+                        <Input
+                          type="number"
+                          value={bankBalance}
+                          onChange={(e) =>
+                            setBankBalance(
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value)
+                            )
+                          }
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label>Retained Code</Label>
+                        <Input
+                          value={retainedCode}
+                          onChange={(e) => setRetainedCode(e.target.value)}
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label>Retained Name</Label>
+                        <Input
+                          value={retainedName}
+                          onChange={(e) => setRetainedName(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setViewMode("list")}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={createPeriod?.isPending}>
+                {createPeriod?.isPending ? "Creating..." : "Submit Period"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}

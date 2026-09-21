@@ -12,6 +12,14 @@ export interface PeriodItem {
   isSelected?: boolean;
 }
 
+export interface CreatePeriodPayload {
+  year: number;
+  month: number;
+  periodName: string;
+  startDate: string;
+  endDate: string;
+}
+
 export function usePeriods() {
   const queryClient = useQueryClient();
   const { selectedPeriod, setSelectedPeriod, clearSelectedPeriod } =
@@ -22,7 +30,6 @@ export function usePeriods() {
     queryKey: ["accounting-periods"],
     queryFn: async () => {
       const { data } = await apiClient.get("/api/v1/periods");
-      // Handle jika format respon backend: data.periods atau data.data
       const periodsList: PeriodItem[] =
         data?.periods || data?.data || data || [];
       const selectedIdFromBackend = data?.selectedPeriodId;
@@ -36,10 +43,18 @@ export function usePeriods() {
 
   const periods = periodsQuery.data?.periodsList || [];
 
-  // 2. SINKRONISASI OTOMATIS SAAT RELOAD (Kunci Perbaikan)
+  // 2. Fetch Informasi Periode Terbuka (Open Info)
+  const openInfoQuery = useQuery({
+    queryKey: ["accounting-periods-open-info"],
+    queryFn: async () => {
+      const { data } = await apiClient.get("/api/v1/periods/open-info");
+      return data;
+    },
+  });
+
+  // 3. SINKRONISASI OTOMATIS SAAT RELOAD
   useEffect(() => {
     if (periods.length > 0) {
-      // Cari periode yang bernilai isSelected === true atau ID-nya sesuai selectedPeriodId backend
       const activePeriod =
         periods.find((p) => p.isSelected) ||
         periods.find((p) => p.id === periodsQuery.data?.selectedIdFromBackend);
@@ -50,11 +65,23 @@ export function usePeriods() {
     }
   }, [periods, periodsQuery.data?.selectedIdFromBackend, setSelectedPeriod]);
 
-  // 3. Mutation: Pilih Periode Aktif
+  // 4. Mutation: Buat Periode Baru (Create Period)
+  const createPeriodMutation = useMutation({
+    mutationFn: async (payload: CreatePeriodPayload) => {
+      const { data } = await apiClient.post("/api/v1/periods", payload);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounting-periods"] });
+      queryClient.invalidateQueries({ queryKey: ["accounting-periods-open-info"] });
+    },
+  });
+
+  // 5. Mutation: Pilih Periode Aktif
   const selectPeriodMutation = useMutation({
     mutationFn: async (periodId: number) => {
       const { data } = await apiClient.post(
-        `/api/v1/periods/select/${periodId}`,
+        `/api/v1/periods/select/${periodId}`
       );
       return data;
     },
@@ -68,7 +95,7 @@ export function usePeriods() {
     },
   });
 
-  // 4. Mutation: Hentikan Mode View Periode
+  // 6. Mutation: Hentikan Mode View Periode
   const clearSelectionMutation = useMutation({
     mutationFn: async () => {
       const { data } = await apiClient.post("/api/v1/periods/clear-selection");
@@ -81,16 +108,17 @@ export function usePeriods() {
     },
   });
 
-  // 5. Mutation: Tutup Periode (Close Period)
+  // 7. Mutation: Tutup Periode (Close Period)
   const closePeriodMutation = useMutation({
     mutationFn: async (periodId: number) => {
       const { data } = await apiClient.post(
-        `/api/v1/periods/close/${periodId}`,
+        `/api/v1/periods/close/${periodId}`
       );
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounting-periods"] });
+      queryClient.invalidateQueries({ queryKey: ["accounting-periods-open-info"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });
@@ -103,5 +131,8 @@ export function usePeriods() {
     selectPeriod: selectPeriodMutation,
     clearSelection: clearSelectionMutation,
     closePeriod: closePeriodMutation,
+    openInfo: openInfoQuery.data,
+    fetchOpenInfo: openInfoQuery.refetch,
+    createPeriod: createPeriodMutation,
   };
 }
