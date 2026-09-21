@@ -1,20 +1,20 @@
 using System;
 using System.Threading.Tasks;
+using AumoBackend.Core;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AumoBackend.Core;
 
 namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("api/v1/health")]
-[AllowAnonymous] // Bebas diakses tanpa butuh login/cookie/token
+[AllowAnonymous]
 public class HealthController : ControllerBase
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
 
-    public HealthController(ApplicationDbContext dbContext)
+    public HealthController(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -24,7 +24,7 @@ public class HealthController : ControllerBase
     {
         try
         {
-            // Mengecek apakah koneksi database PostgreSQL aktif
+            // Cek koneksi ke database PostgreSQL via AppDbContext
             bool canConnect = await _dbContext.Database.CanConnectAsync();
 
             if (canConnect)
