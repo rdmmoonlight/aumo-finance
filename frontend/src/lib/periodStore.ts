@@ -25,8 +25,8 @@ export const usePeriodStore = create<PeriodStoreState>()(
     }),
     {
       name: "selected-period-storage",
-    }
-  )
+    },
+  ),
 );
 
 export default usePeriodStore;

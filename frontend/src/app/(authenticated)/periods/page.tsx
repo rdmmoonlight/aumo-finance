@@ -50,8 +50,18 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 export default function PeriodsPage() {
@@ -73,7 +83,9 @@ export default function PeriodsPage() {
 
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
-  const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">("LoadExisting");
+  const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
+    "LoadExisting",
+  );
 
   const [cashAccountId, setCashAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -103,13 +115,17 @@ export default function PeriodsPage() {
       const exists = info.hasExistingPermanentAccounts;
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
-        setCashAccountId(info.availableCashAndBankAccounts[0]?.id.toString() || "");
+        setCashAccountId(
+          info.availableCashAndBankAccounts[0]?.id.toString() || "",
+        );
         setBankAccountId(
           info.availableCashAndBankAccounts[1]?.id.toString() ||
             info.availableCashAndBankAccounts[0]?.id.toString() ||
-            ""
+            "",
         );
-        setRetainedId(info.availableRetainedEarningsAccounts[0]?.id.toString() || "");
+        setRetainedId(
+          info.availableRetainedEarningsAccounts[0]?.id.toString() || "",
+        );
       }
     }
   };
@@ -134,9 +150,13 @@ export default function PeriodsPage() {
     setErrorMessage(null);
     closePeriod.mutate(p.id, {
       onSuccess: (res) =>
-        setSuccessMessage(res?.message || `${p.periodName} closed successfully.`),
+        setSuccessMessage(
+          res?.message || `${p.periodName} closed successfully.`,
+        ),
       onError: (err: any) =>
-        setErrorMessage(err?.response?.data?.message || "Failed to close period."),
+        setErrorMessage(
+          err?.response?.data?.message || "Failed to close period.",
+        ),
     });
   };
 
@@ -144,7 +164,10 @@ export default function PeriodsPage() {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (setupMode === "LoadExisting" && (!cashAccountId || !bankAccountId || !retainedId)) {
+    if (
+      setupMode === "LoadExisting" &&
+      (!cashAccountId || !bankAccountId || !retainedId)
+    ) {
       setErrorMessage("Select Cash, Bank, and Retained Earnings accounts.");
       return;
     }
@@ -158,18 +181,28 @@ export default function PeriodsPage() {
         month,
         year,
         setupMode,
-        cashAccountId: setupMode === "LoadExisting" ? parseInt(cashAccountId, 10) : null,
-        bankAccountId: setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
+        cashAccountId:
+          setupMode === "LoadExisting" ? parseInt(cashAccountId, 10) : null,
+        bankAccountId:
+          setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
         retainedEarningsAccountId:
           setupMode === "LoadExisting" ? parseInt(retainedId, 10) : null,
-        cashAccountCode: setupMode === "CreateNew" ? cashAccountCode : undefined,
-        cashAccountName: setupMode === "CreateNew" ? cashAccountName : undefined,
-        cashBalance: setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
-        bankAccountCode: setupMode === "CreateNew" ? bankAccountCode : undefined,
-        bankAccountName: setupMode === "CreateNew" ? bankAccountName : undefined,
-        bankBalance: setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
-        retainedEarningsAccountCode: setupMode === "CreateNew" ? retainedCode : undefined,
-        retainedEarningsAccountName: setupMode === "CreateNew" ? retainedName : undefined,
+        cashAccountCode:
+          setupMode === "CreateNew" ? cashAccountCode : undefined,
+        cashAccountName:
+          setupMode === "CreateNew" ? cashAccountName : undefined,
+        cashBalance:
+          setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
+        bankAccountCode:
+          setupMode === "CreateNew" ? bankAccountCode : undefined,
+        bankAccountName:
+          setupMode === "CreateNew" ? bankAccountName : undefined,
+        bankBalance:
+          setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
+        retainedEarningsAccountCode:
+          setupMode === "CreateNew" ? retainedCode : undefined,
+        retainedEarningsAccountName:
+          setupMode === "CreateNew" ? retainedName : undefined,
       },
       {
         onSuccess: (res) => {
@@ -177,9 +210,11 @@ export default function PeriodsPage() {
           setViewMode("list");
         },
         onError: (err: any) => {
-          setErrorMessage(err?.response?.data?.message || "Failed to create period.");
+          setErrorMessage(
+            err?.response?.data?.message || "Failed to create period.",
+          );
         },
-      }
+      },
     );
   };
 
@@ -188,7 +223,10 @@ export default function PeriodsPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center"
+        >
           <AlertDescription className="flex items-center gap-2 text-xs">
             <IconAlertTriangle size={16} />
             {errorMessage}
@@ -200,7 +238,9 @@ export default function PeriodsPage() {
       )}
       {successMessage && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex justify-between items-center">
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
           <button onClick={() => setSuccessMessage(null)}>
             <IconX size={14} />
           </button>
@@ -212,11 +252,12 @@ export default function PeriodsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
-                <IconCalendar className="text-primary" size={22} /> Accounting Periods
+                <IconCalendar className="text-primary" size={22} /> Accounting
+                Periods
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                Click <IconEye size={14} className="inline" /> to view period - whole app
-                follows it
+                Click <IconEye size={14} className="inline" /> to view period -
+                whole app follows it
               </p>
             </div>
             <div className="flex gap-2">
@@ -231,7 +272,11 @@ export default function PeriodsPage() {
                   <IconEyeOff size={14} /> Stop Viewing
                 </Button>
               )}
-              <Button size="sm" className="gap-1.5" onClick={handleOpenCreateView}>
+              <Button
+                size="sm"
+                className="gap-1.5"
+                onClick={handleOpenCreateView}
+              >
                 <IconPlus size={14} /> Open New Period
               </Button>
             </div>
@@ -257,15 +302,25 @@ export default function PeriodsPage() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                        <IconLoader2 className="animate-spin inline mr-2" size={16} /> Loading...
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        <IconLoader2
+                          className="animate-spin inline mr-2"
+                          size={16}
+                        />{" "}
+                        Loading...
                       </TableCell>
                     </TableRow>
                   ) : (
                     periods.map((p) => {
                       const isSelected = selectedPeriod?.id === p.id;
                       return (
-                        <TableRow key={p.id} className={isSelected ? "bg-muted/50" : ""}>
+                        <TableRow
+                          key={p.id}
+                          className={isSelected ? "bg-muted/50" : ""}
+                        >
                           <TableCell className="pl-6 font-bold flex items-center gap-2">
                             {p.periodName}
                             {isSelected && (
@@ -321,10 +376,15 @@ export default function PeriodsPage() {
                   )}
                   {!isLoading && periods.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-12 text-muted-foreground"
+                      >
                         <IconCalendarOff className="mx-auto mb-2" size={28} />
                         <p className="font-medium">No periods yet</p>
-                        <p className="text-xs">Click Open New Period to start</p>
+                        <p className="text-xs">
+                          Click Open New Period to start
+                        </p>
                       </TableCell>
                     </TableRow>
                   )}
@@ -338,7 +398,8 @@ export default function PeriodsPage() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
-                <IconCalendarPlus className="text-primary" size={22} /> Open New Period
+                <IconCalendarPlus className="text-primary" size={22} /> Open New
+                Period
               </h1>
               <p className="text-sm text-muted-foreground">
                 Start monthly cycle. Opening balance posted on day 1.
@@ -361,7 +422,10 @@ export default function PeriodsPage() {
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label>Month</Label>
-                  <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+                  <Select
+                    value={String(month)}
+                    onValueChange={(v) => setMonth(Number(v))}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -388,7 +452,9 @@ export default function PeriodsPage() {
 
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm">Permanent Accounts Setup</CardTitle>
+                <CardTitle className="text-sm">
+                  Permanent Accounts Setup
+                </CardTitle>
                 <CardDescription>Choose existing or create new</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -424,7 +490,8 @@ export default function PeriodsPage() {
                   <Alert className="bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-300">
                     <IconInfoCircle size={16} />
                     <AlertDescription className="text-xs">
-                      No existing Cash/Bank & Retained accounts found - new accounts required
+                      No existing Cash/Bank & Retained accounts found - new
+                      accounts required
                     </AlertDescription>
                   </Alert>
                 )}
@@ -433,14 +500,18 @@ export default function PeriodsPage() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       <Label>Cash Account</Label>
-                      <Select value={cashAccountId} onValueChange={setCashAccountId}>
+                      <Select
+                        value={cashAccountId}
+                        onValueChange={setCashAccountId}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {openInfo?.availableCashAndBankAccounts.map((a) => (
                             <SelectItem key={a.id} value={a.id.toString()}>
-                              {a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}
+                              {a.displayLabel ||
+                                `${a.referenceNumber} - ${a.accountName}`}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -448,14 +519,18 @@ export default function PeriodsPage() {
                     </div>
                     <div className="space-y-1.5">
                       <Label>Bank Account</Label>
-                      <Select value={bankAccountId} onValueChange={setBankAccountId}>
+                      <Select
+                        value={bankAccountId}
+                        onValueChange={setBankAccountId}
+                      >
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           {openInfo?.availableCashAndBankAccounts.map((a) => (
                             <SelectItem key={a.id} value={a.id.toString()}>
-                              {a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}
+                              {a.displayLabel ||
+                                `${a.referenceNumber} - ${a.accountName}`}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -468,11 +543,14 @@ export default function PeriodsPage() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {openInfo?.availableRetainedEarningsAccounts.map((a) => (
-                            <SelectItem key={a.id} value={a.id.toString()}>
-                              {a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}
-                            </SelectItem>
-                          ))}
+                          {openInfo?.availableRetainedEarningsAccounts.map(
+                            (a) => (
+                              <SelectItem key={a.id} value={a.id.toString()}>
+                                {a.displayLabel ||
+                                  `${a.referenceNumber} - ${a.accountName}`}
+                              </SelectItem>
+                            ),
+                          )}
                         </SelectContent>
                       </Select>
                     </div>
@@ -503,7 +581,9 @@ export default function PeriodsPage() {
                           value={cashBalance}
                           onChange={(e) =>
                             setCashBalance(
-                              e.target.value === "" ? "" : Number(e.target.value)
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value),
                             )
                           }
                           placeholder="0"
@@ -534,7 +614,9 @@ export default function PeriodsPage() {
                           value={bankBalance}
                           onChange={(e) =>
                             setBankBalance(
-                              e.target.value === "" ? "" : Number(e.target.value)
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value),
                             )
                           }
                           placeholder="0"
