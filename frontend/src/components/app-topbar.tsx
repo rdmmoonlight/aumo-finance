@@ -25,7 +25,11 @@ export function TopBar() {
   const { selectedPeriod, isLoading: isPeriodLoading } = usePeriods();
 
   // 2. Hook Database Health Check (Wake-up call)
-  const { status: dbStatus, refetch: checkDb, isFetching: isDbChecking } = useHealthCheck();
+  const {
+    status: dbStatus,
+    refetch: checkDb,
+    isFetching: isDbChecking,
+  } = useHealthCheck();
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -123,9 +127,14 @@ export function TopBar() {
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
             </Badge>
           ) : (
-            <Badge variant="outline" className="gap-1.5 font-medium text-muted-foreground">
+            <Badge
+              variant="outline"
+              className="gap-1.5 font-medium text-muted-foreground"
+            >
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-              {isPeriodLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+              {isPeriodLoading
+                ? "Memuat periode..."
+                : "Belum Ada Periode Dipilih"}
             </Badge>
           )}
 
@@ -157,10 +166,7 @@ export function TopBar() {
 
             {dbStatus === "offline" && (
               <div className="flex items-center gap-1.5">
-                <Badge
-                  variant="destructive"
-                  className="gap-1.5 font-medium"
-                >
+                <Badge variant="destructive" className="gap-1.5 font-medium">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
                   DB: Disconnected
                 </Badge>
@@ -173,7 +179,9 @@ export function TopBar() {
                   className="h-6 w-6 text-muted-foreground hover:text-foreground"
                   title="Coba hubungkan ulang"
                 >
-                  <RefreshCw className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`} />
+                  <RefreshCw
+                    className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`}
+                  />
                 </Button>
               </div>
             )}
@@ -182,4 +190,4 @@ export function TopBar() {
       </div>
     </header>
   );
-    }
+}
