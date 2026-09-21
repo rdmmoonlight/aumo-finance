@@ -147,7 +147,7 @@ export function TopBar() {
             {dbStatus === "connecting" && (
               <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
                 <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
-                <span>DB: Connecting...</span>
+                <span>DB: Connecting, please wait...</span>
               </div>
             )}
 
