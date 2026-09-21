@@ -84,7 +84,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting",
+    "LoadExisting"
   );
 
   const [cashAccountId, setCashAccountId] = useState("");
@@ -116,15 +116,15 @@ export default function PeriodsPage() {
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          info.availableCashAndBankAccounts[0]?.id.toString() || "",
+          info.availableCashAndBankAccounts[0]?.id.toString() || ""
         );
         setBankAccountId(
           info.availableCashAndBankAccounts[1]?.id.toString() ||
             info.availableCashAndBankAccounts[0]?.id.toString() ||
-            "",
+            ""
         );
         setRetainedId(
-          info.availableRetainedEarningsAccounts[0]?.id.toString() || "",
+          info.availableRetainedEarningsAccounts[0]?.id.toString() || ""
         );
       }
     }
@@ -151,11 +151,11 @@ export default function PeriodsPage() {
     closePeriod.mutate(p.id, {
       onSuccess: (res) =>
         setSuccessMessage(
-          res?.message || `${p.periodName} closed successfully.`,
+          res?.message || `${p.periodName} closed successfully.`
         ),
       onError: (err: any) =>
         setErrorMessage(
-          err?.response?.data?.message || "Failed to close period.",
+          err?.response?.data?.message || "Failed to close period."
         ),
     });
   };
@@ -211,39 +211,47 @@ export default function PeriodsPage() {
         },
         onError: (err: any) => {
           setErrorMessage(
-            err?.response?.data?.message || "Failed to create period.",
+            err?.response?.data?.message || "Failed to create period."
           );
         },
-      },
+      }
     );
   };
-
-  const totalOpening = (Number(cashBalance) || 0) + (Number(bankBalance) || 0);
 
   return (
     <div className="space-y-6 max-w-5xl">
       {errorMessage && (
         <Alert
           variant="destructive"
-          className="flex justify-between items-center"
+          className="flex justify-between items-center py-2"
         >
           <AlertDescription className="flex items-center gap-2 text-xs">
             <IconAlertTriangle size={16} />
             {errorMessage}
           </AlertDescription>
-          <button onClick={() => setErrorMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-destructive-foreground hover:bg-destructive/20"
+            onClick={() => setErrorMessage(null)}
+          >
             <IconX size={14} />
-          </button>
+          </Button>
         </Alert>
       )}
       {successMessage && (
-        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex justify-between items-center">
+        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex justify-between items-center py-2">
           <AlertDescription className="text-xs">
             {successMessage}
           </AlertDescription>
-          <button onClick={() => setSuccessMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-emerald-500/20"
+            onClick={() => setSuccessMessage(null)}
+          >
             <IconX size={14} />
-          </button>
+          </Button>
         </Alert>
       )}
 
@@ -537,137 +545,4 @@ export default function PeriodsPage() {
                       </Select>
                     </div>
                     <div className="space-y-1.5">
-                      <Label>Retained Earnings</Label>
-                      <Select value={retainedId} onValueChange={setRetainedId}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {openInfo?.availableRetainedEarningsAccounts.map(
-                            (a) => (
-                              <SelectItem key={a.id} value={a.id.toString()}>
-                                {a.displayLabel ||
-                                  `${a.referenceNumber} - ${a.accountName}`}
-                              </SelectItem>
-                            ),
-                          )}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <Label>Cash Code</Label>
-                        <Input
-                          value={cashAccountCode}
-                          onChange={(e) => setCashAccountCode(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Cash Name</Label>
-                        <Input
-                          value={cashAccountName}
-                          onChange={(e) => setCashAccountName(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Cash Balance</Label>
-                        <Input
-                          type="number"
-                          value={cashBalance}
-                          onChange={(e) =>
-                            setCashBalance(
-                              e.target.value === ""
-                                ? ""
-                                : Number(e.target.value),
-                            )
-                          }
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1.5">
-                        <Label>Bank Code</Label>
-                        <Input
-                          value={bankAccountCode}
-                          onChange={(e) => setBankAccountCode(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Bank Name</Label>
-                        <Input
-                          value={bankAccountName}
-                          onChange={(e) => setBankAccountName(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Bank Balance</Label>
-                        <Input
-                          type="number"
-                          value={bankBalance}
-                          onChange={(e) =>
-                            setBankBalance(
-                              e.target.value === ""
-                                ? ""
-                                : Number(e.target.value),
-                            )
-                          }
-                          placeholder="0"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1.5">
-                        <Label>Retained Code</Label>
-                        <Input
-                          value={retainedCode}
-                          onChange={(e) => setRetainedCode(e.target.value)}
-                          required
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label>Retained Name</Label>
-                        <Input
-                          value={retainedName}
-                          onChange={(e) => setRetainedName(e.target.value)}
-                          required
-                        />
-                      </div>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Opening Retained Earnings:{" "}
-                      <strong>{totalOpening.toLocaleString()}</strong>
-                    </p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setViewMode("list")}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={createPeriod.isPending}>
-                {createPeriod.isPending && (
-                  <IconLoader2 className="animate-spin mr-2" size={14} />
-                )}
-                Open Period
-              </Button>
-            </div>
-          </form>
-        </div>
-      )}
-    </div>
-  );
-}
+                      <Label>Retained Earnings</Lab
