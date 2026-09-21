@@ -15,9 +15,10 @@ import {
   IconDeviceFloppy,
   IconLoader2,
 } from "@tabler/icons-react";
-import apiClient from "@/lib/apiClient";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -38,11 +39,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-export interface ChartOfAccountOption {
-  id: number;
-  referenceNumber: number;
-  accountName: string;
-}
+import {
+  useAccountOptions,
+  useNextTransactionNumber,
+  useJournalEntryDetail,
+  useSaveJournalEntry,
+} from "@/hooks/use-journal-entry";
+
 export interface LineItem {
   id: string;
   accountId: number;
@@ -53,12 +56,14 @@ export interface LineItem {
 
 const formatIDR = (amount: number) =>
   new Intl.NumberFormat("id-ID").format(amount);
+
 const formatNumberWithDots = (val: string | number): string => {
   if (!val) return "";
   const clean = val.toString().replace(/\D/g, "");
   if (!clean) return "";
   return new Intl.NumberFormat("id-ID").format(parseInt(clean, 10));
 };
+
 const parseFormattedNumber = (val: string): number => {
   if (!val) return 0;
   const clean = val.replace(/\D/g, "");
@@ -71,46 +76,111 @@ function JournalEntryContent() {
   const entryIdParam = searchParams.get("id");
   const isEdit = Boolean(entryIdParam);
 
+  // Form States
   const [journalType, setJournalType] = useState("General");
   const [entryDate, setEntryDate] = useState(
-    new Date().toISOString().split("T")[0],
+    new Date().toISOString().split("T")[0]
   );
-  const [transactionNumber, setTransactionNumber] = useState("Loading...");
-  const [availableAccounts, setAvailableAccounts] = useState<
-    ChartOfAccountOption[]
-  >([]);
   const [lines, setLines] = useState<LineItem[]>([
     { id: "1", accountId: 0, lineDescription: "", debit: "", credit: "" },
     { id: "2", accountId: 0, lineDescription: "", debit: "", credit: "" },
   ]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [lockedMessage, setLockedMessage] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [txLoading, setTxLoading] = useState(false);
 
-  // 1. Fungsi Mengambil Transaction Number Terbaru dari Backend (Server-side Generation)
-  const fetchNextTxNumber = async (type: string, date: string) => {
-    if (isEdit) return; // Jika mode Edit, nomor transaksi menggunakan bawaan data lama
-    setTxLoading(true);
-    try {
-      const { data } = await apiClient.get(
-        "/api/v1/journal-entry/next-transaction-number",
-        {
-          params: { journalType: type, entryDate: date },
-        },
+  // 1. TanStack Query Hooks
+  const { data: availableAccounts = [], isLoading: isAccountsLoading } =
+    useAccountOptions();
+
+  const { data: nextTxNumber, isFetching: isTxLoading } =
+    useNextTransactionNumber(journalType, entryDate, !isEdit);
+
+  const { data: editData, isLoading: isEditLoading } =
+    useJournalEntryDetail(entryIdParam);
+  const saveMutation = useSaveJournalEntry(entryIdParam);
+
+  // Synchronize Form State saat data edit berhasil dimuat
+  useEffect(() => {
+    if (isEdit && editData?.entry) {
+      const jData = editData.entry;
+      setJournalType(jData.journalType || "General");
+      setEntryDate(
+        jData.entryDate?.split("T")[0] || new Date().toISOString().split("T")[0]
       );
-      if (data?.success && data?.transactionNumber) {
-        setTransactionNumber(data.transactionNumber);
+
+      if (jData.lines?.length) {
+        setLines(
+          jData.lines.map((l: any, i: number) => ({
+            id: l.id?.toString() || `${Date.now()}-${i}`,
+            accountId: l.accountId,
+            lineDescription: l.lineDescription || "",
+            debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
+            credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
+          }))
+        );
       }
-    } catch (err) {
-      console.error("Failed to fetch next transaction number", err);
-    } finally {
-      setTxLoading(false);
     }
+  }, [isEdit, editData]);
+
+  // Nomor Transaksi yang ditampilkan
+  const displayedTxNumber = isEdit
+    ? editData?.entry?.transactionNumber || "Loading..."
+    : nextTxNumber || "Loading...";
+
+  const isLocked = isEdit && editData?.isLocked;
+
+  // Calculators
+  const totalDebit = useMemo(
+    () => lines.reduce((s, l) => s + parseFormattedNumber(l.debit), 0),
+    [lines]
+  );
+  const totalCredit = useMemo(
+    () => lines.reduce((s, l) => s + parseFormattedNumber(l.credit), 0),
+    [lines]
+  );
+  const isBalanced = useMemo(
+    () => totalDebit > 0 && totalDebit === totalCredit,
+    [totalDebit, totalCredit]
+  );
+
+  // Form Actions
+  const addLine = () => {
+    setValidationErrors([]);
+    setLines((prev) => [
+      ...prev,
+      {
+        id: `${Date.now()}-${Math.random()}`,
+        accountId: 0,
+        lineDescription: "",
+        debit: "",
+        credit: "",
+      },
+    ]);
   };
 
-  const resetForm = async () => {
+  const removeLine = (id: string) => {
+    if (lines.length <= 2) {
+      setValidationErrors(["Minimal 2 baris jurnal wajib ada."]);
+      return;
+    }
+    setValidationErrors([]);
+    setLines((prev) => prev.filter((l) => l.id !== id));
+  };
+
+  const updateLine = (id: string, field: keyof LineItem, value: any) => {
+    setLines((prev) =>
+      prev.map((l) => {
+        if (l.id !== id) return l;
+        if (field === "debit" && value !== "")
+          return { ...l, debit: formatNumberWithDots(value), credit: "" };
+        if (field === "credit" && value !== "")
+          return { ...l, credit: formatNumberWithDots(value), debit: "" };
+        return { ...l, [field]: value };
+      })
+    );
+  };
+
+  const resetForm = () => {
     const defaultDate = new Date().toISOString().split("T")[0];
     setJournalType("General");
     setEntryDate(defaultDate);
@@ -132,130 +202,9 @@ function JournalEntryContent() {
     ]);
     setValidationErrors([]);
     setSuccessMessage(null);
-    await fetchNextTxNumber("General", defaultDate);
   };
 
-  // 2. Kunci Efek: Ambil Transaction Number Baru Setiap Tipe atau Tanggal Berubah (Hanya Mode Create)
-  useEffect(() => {
-    if (!isEdit && !loading) {
-      fetchNextTxNumber(journalType, entryDate);
-    }
-  }, [journalType, entryDate, isEdit]);
-
-  // 3. Load Data Awal (Akun & Detail Journal jika Edit)
-  useEffect(() => {
-    const init = async () => {
-      setLoading(true);
-      try {
-        const { data: accRes } = await apiClient.get(
-          `/api/v1/chart-of-accounts`,
-        );
-        const accountsData = Array.isArray(accRes)
-          ? accRes
-          : accRes?.accounts || accRes?.data || [];
-        setAvailableAccounts(
-          accountsData.map((a: any) => ({
-            id: a.id,
-            referenceNumber: a.referenceNumber,
-            accountName: a.accountName,
-          })),
-        );
-
-        if (isEdit && entryIdParam) {
-          // Sesuaikan Endpoint dengan Controller Backend (/api/v1/journal-entry/{id})
-          const { data: res } = await apiClient.get(
-            `/api/v1/journal-entry/${entryIdParam}`,
-          );
-          const jData = res?.entry;
-
-          if (jData) {
-            if (res.isLocked) {
-              setLockedMessage(
-                `Journal ${jData.transactionNumber} is in closed period`,
-              );
-            } else {
-              setTransactionNumber(jData.transactionNumber);
-              setJournalType(jData.journalType || "General");
-              setEntryDate(
-                jData.entryDate?.split("T")[0] ||
-                  new Date().toISOString().split("T")[0],
-              );
-
-              const rawLines = jData.lines || [];
-              if (rawLines.length) {
-                setLines(
-                  rawLines.map((l: any, i: number) => ({
-                    id: l.id?.toString() || `${Date.now()}-${i}`,
-                    accountId: l.accountId,
-                    lineDescription: l.lineDescription || "",
-                    debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
-                    credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-                  })),
-                );
-              }
-            }
-          }
-        } else {
-          // Mode Tambah Baru: Minta nomor terbaru dari Backend
-          await fetchNextTxNumber(journalType, entryDate);
-        }
-      } catch (err: any) {
-        setValidationErrors([
-          err?.response?.data?.message || "Failed to load initial data",
-        ]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, [isEdit, entryIdParam]);
-
-  const totalDebit = useMemo(
-    () => lines.reduce((s, l) => s + parseFormattedNumber(l.debit), 0),
-    [lines],
-  );
-  const totalCredit = useMemo(
-    () => lines.reduce((s, l) => s + parseFormattedNumber(l.credit), 0),
-    [lines],
-  );
-  const isBalanced = useMemo(
-    () => totalDebit > 0 && totalDebit === totalCredit,
-    [totalDebit, totalCredit],
-  );
-
-  const addLine = () =>
-    setLines((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random()}`,
-        accountId: 0,
-        lineDescription: "",
-        debit: "",
-        credit: "",
-      },
-    ]);
-  const removeLine = (id: string) => {
-    if (lines.length <= 2) {
-      alert("Min 2 lines required");
-      return;
-    }
-    setLines((prev) => prev.filter((l) => l.id !== id));
-  };
-
-  const updateLine = (id: string, field: keyof LineItem, value: any) => {
-    setLines((prev) =>
-      prev.map((l) => {
-        if (l.id !== id) return l;
-        if (field === "debit" && value !== "")
-          return { ...l, debit: formatNumberWithDots(value), credit: "" };
-        if (field === "credit" && value !== "")
-          return { ...l, credit: formatNumberWithDots(value), debit: "" };
-        return { ...l, [field]: value };
-      }),
-    );
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setValidationErrors([]);
     setSuccessMessage(null);
@@ -263,9 +212,9 @@ function JournalEntryContent() {
     const effective = lines.filter(
       (l) =>
         l.accountId !== 0 &&
-        (parseFormattedNumber(l.debit) > 0 ||
-          parseFormattedNumber(l.credit) > 0),
+        (parseFormattedNumber(l.debit) > 0 || parseFormattedNumber(l.credit) > 0)
     );
+
     if (effective.length < 2) {
       setValidationErrors(["Min 2 valid lines required"]);
       return;
@@ -275,49 +224,44 @@ function JournalEntryContent() {
       return;
     }
 
-    try {
-      const payload = {
-        journalType,
-        entryDate,
-        lines: effective.map((l) => ({
-          accountId: l.accountId,
-          lineDescription: l.lineDescription,
-          debit: parseFormattedNumber(l.debit),
-          credit: parseFormattedNumber(l.credit),
-        })),
-      };
+    const payload = {
+      journalType,
+      entryDate,
+      lines: effective.map((l) => ({
+        accountId: l.accountId,
+        lineDescription: l.lineDescription,
+        debit: parseFormattedNumber(l.debit),
+        credit: parseFormattedNumber(l.credit),
+      })),
+    };
 
-      // Disesuaikan dengan Endpoint Controller Backend: /api/v1/journal-entry/create & edit/{id}
-      if (isEdit) {
-        await apiClient.put(
-          `/api/v1/journal-entry/edit/${entryIdParam}`,
-          payload,
-        );
-        setSuccessMessage(`Updated ${transactionNumber}`);
-        setTimeout(() => router.push("/reports/general-journal"), 1200);
-      } else {
-        const res = await apiClient.post(
-          `/api/v1/journal-entry/create`,
-          payload,
-        );
-        const postedTxNumber = res.data?.transactionNumber || transactionNumber;
-        setSuccessMessage(`Posted ${postedTxNumber}`);
-        await resetForm();
-      }
-    } catch (err: any) {
-      setValidationErrors([
-        err?.response?.data?.message || "Failed to post journal entry",
-      ]);
-    }
+    saveMutation.mutate(payload, {
+      onSuccess: (res) => {
+        const txNum = res?.transactionNumber || displayedTxNumber;
+        if (isEdit) {
+          setSuccessMessage(`Updated ${txNum}`);
+          setTimeout(() => router.push("/reports/general-journal"), 1200);
+        } else {
+          setSuccessMessage(`Posted ${txNum}`);
+          resetForm();
+        }
+      },
+      onError: (err: any) => {
+        setValidationErrors([
+          err?.response?.data?.message || "Failed to post journal entry",
+        ]);
+      },
+    });
   };
 
-  if (loading)
+  if (isAccountsLoading || (isEdit && isEditLoading)) {
     return (
       <div className="flex flex-col items-center py-16 gap-3 text-muted-foreground">
         <IconLoader2 className="h-8 w-8 animate-spin text-primary" />
         <span className="text-sm">Loading...</span>
       </div>
     );
+  }
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -332,7 +276,7 @@ function JournalEntryContent() {
             {isEdit ? "Edit Journal Entry" : "Create Journal Entry"}
             {isEdit && (
               <Badge variant="secondary" className="font-mono text-xs">
-                {transactionNumber}
+                {displayedTxNumber}
               </Badge>
             )}
           </h2>
@@ -353,6 +297,7 @@ function JournalEntryContent() {
           <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
+
       {validationErrors.length > 0 && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
@@ -366,11 +311,11 @@ function JournalEntryContent() {
         </Alert>
       )}
 
-      {lockedMessage ? (
+      {isLocked ? (
         <Alert>
           <IconLock size={16} />
           <AlertDescription>
-            {lockedMessage}{" "}
+            Journal {displayedTxNumber} is in closed period.{" "}
             <Link href="/reports/general-journal" className="underline">
               Back
             </Link>
@@ -384,39 +329,35 @@ function JournalEntryContent() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-medium flex items-center justify-between">
+                <Label className="text-xs font-medium flex items-center justify-between">
                   <span>Transaction No.</span>
-                  {txLoading && (
+                  {isTxLoading && (
                     <IconLoader2
                       size={12}
                       className="animate-spin text-muted-foreground"
                     />
                   )}
-                </label>
+                </Label>
                 <Input
                   className="h-9 font-mono bg-muted"
-                  value={transactionNumber}
+                  value={displayedTxNumber}
                   readOnly
                 />
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium">Journal Type</label>
+                <Label className="text-xs font-medium">Journal Type</Label>
                 <Select value={journalType} onValueChange={setJournalType}>
                   <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="General">
-                      General Journal (GJ)
-                    </SelectItem>
-                    <SelectItem value="Adjusting">
-                      Adjusting Entry (AJ)
-                    </SelectItem>
+                    <SelectItem value="General">General Journal (GJ)</SelectItem>
+                    <SelectItem value="Adjusting">Adjusting Entry (AJ)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs font-medium">Date</label>
+                <Label className="text-xs font-medium">Date</Label>
                 <Input
                   type="date"
                   className="h-9"
@@ -456,8 +397,9 @@ function JournalEntryContent() {
                 <TableBody>
                   {lines.map((line) => {
                     const ref = availableAccounts.find(
-                      (a) => a.id === line.accountId,
+                      (a) => a.id === line.accountId
                     )?.referenceNumber;
+
                     return (
                       <TableRow key={line.id}>
                         <TableCell>
@@ -470,7 +412,9 @@ function JournalEntryContent() {
                         </TableCell>
                         <TableCell>
                           <Select
-                            value={line.accountId ? String(line.accountId) : ""}
+                            value={
+                              line.accountId ? String(line.accountId) : ""
+                            }
                             onValueChange={(v) =>
                               updateLine(line.id, "accountId", Number(v))
                             }
@@ -500,7 +444,7 @@ function JournalEntryContent() {
                               updateLine(
                                 line.id,
                                 "lineDescription",
-                                e.target.value,
+                                e.target.value
                               )
                             }
                           />
@@ -530,7 +474,7 @@ function JournalEntryContent() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-destructive"
+                            className="h-8 w-8 text-destructive hover:text-destructive"
                             onClick={() => removeLine(line.id)}
                           >
                             <IconTrash size={14} />
@@ -583,8 +527,16 @@ function JournalEntryContent() {
             <Button type="button" variant="outline" onClick={resetForm}>
               Reset
             </Button>
-            <Button type="submit" disabled={!isBalanced} className="gap-2">
-              <IconDeviceFloppy size={16} />
+            <Button
+              type="submit"
+              disabled={!isBalanced || saveMutation.isPending}
+              className="gap-2"
+            >
+              {saveMutation.isPending ? (
+                <IconLoader2 className="animate-spin" size={16} />
+              ) : (
+                <IconDeviceFloppy size={16} />
+              )}
               {isEdit ? "Save Changes" : "Post Journal Entry"}
             </Button>
           </div>

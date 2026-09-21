@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   IconSitemap,
   IconPlus,
@@ -13,10 +13,8 @@ import {
   IconSearch,
 } from "@tabler/icons-react";
 
-import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
@@ -28,13 +26,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
   Select,
   SelectContent,
   SelectItem,
@@ -44,24 +35,12 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
-export interface ChartOfAccount {
-  id: number;
-  referenceNumber: number;
-  accountName: string;
-  type: string;
-  role: string;
-  balance: number;
-  isActive: boolean;
-}
-
-interface ApiErrorResponse {
-  response?: {
-    status?: number;
-    data?: {
-      message?: string;
-    };
-  };
-}
+import { useChartOfAccounts, ChartOfAccount } from "@/hooks/use-coa";
+import {
+  AddAccountDialog,
+  EditAccountDialog,
+  DeleteAccountAlertDialog,
+} from "./_components/coa-dialogs";
 
 const ACCOUNT_TYPES = [
   "Assets",
@@ -80,65 +59,30 @@ const ACCOUNT_RANGES: Record<
   Assets: { start: 100, end: 199, label: "Assets (100-199)" },
   Liabilities: { start: 200, end: 299, label: "Liabilities (200-299)" },
   Equity: { start: 300, end: 399, label: "Equity (300-399)" },
-  OperatingIncome: {
-    start: 400,
-    end: 499,
-    label: "Operating Income (400-499)",
-  },
-  OperatingExpenses: {
-    start: 500,
-    end: 599,
-    label: "Operating Expenses (500-599)",
-  },
+  OperatingIncome: { start: 400, end: 499, label: "Operating Income (400-499)" },
+  OperatingExpenses: { start: 500, end: 599, label: "Operating Expenses (500-599)" },
   OtherIncome: { start: 600, end: 799, label: "Other Income (600-799)" },
   OtherExpenses: { start: 800, end: 999, label: "Other Expenses (800-999)" },
 };
 
 function ChartOfAccountsContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
 
-  const [accounts, setAccounts] = useState<ChartOfAccount[]>([]);
-  const [loading, setLoading] = useState(true);
+  // TanStack Query Hook
+  const { accounts, isLoading } = useChartOfAccounts();
+
+  // Local UI Filter States
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [createError, setCreateError] = useState<string | null>(null);
-  const [editError, setEditError] = useState<string | null>(null);
+
+  // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [newAccount, setNewAccount] = useState<Partial<ChartOfAccount>>({
-    type: "",
-    referenceNumber: 0,
-    accountName: "",
-    role: "Default",
-  });
   const [editAccount, setEditAccount] = useState<ChartOfAccount | null>(null);
-
-  const fetchAccounts = async () => {
-    setLoading(true);
-    try {
-      const { data } = await apiClient.get("/api/v1/chart-of-accounts");
-      const loaded: ChartOfAccount[] = data?.accounts || [];
-      setAccounts(loaded.sort((a, b) => a.referenceNumber - b.referenceNumber));
-    } catch (err: unknown) {
-      const apiErr = err as ApiErrorResponse;
-      if (apiErr.response?.status === 401) {
-        router.push("/auth");
-      }
-      setErrorMessage(
-        apiErr.response?.data?.message || "Failed to load accounts",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAccounts();
-  }, []);
+  const [accountToDelete, setAccountToDelete] = useState<ChartOfAccount | null>(null);
 
   const filteredAccounts = useMemo(() => {
     return accounts.filter((acc) => {
@@ -151,85 +95,6 @@ function ChartOfAccountsContent() {
     });
   }, [accounts, searchText, categoryFilter]);
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCreateError(null);
-
-    const refNum = Number(newAccount.referenceNumber);
-    const currentType = newAccount.type || "";
-    const range = ACCOUNT_RANGES[currentType];
-
-    if (range && (refNum < range.start || refNum > range.end)) {
-      setCreateError(
-        `Ref ${refNum} not valid for ${currentType} (${range.start}-${range.end})`,
-      );
-      return;
-    }
-
-    if (accounts.some((a) => a.referenceNumber === refNum)) {
-      setCreateError(`Code ${refNum} already used`);
-      return;
-    }
-
-    try {
-      await apiClient.post("/api/v1/chart-of-accounts", {
-        referenceNumber: refNum,
-        accountName: newAccount.accountName,
-        type: newAccount.type,
-        role: newAccount.role || "Default",
-      });
-      setSuccessMessage(`Account '${newAccount.accountName}' created`);
-      setIsAddModalOpen(false);
-      setNewAccount({
-        type: "",
-        referenceNumber: 0,
-        accountName: "",
-        role: "Default",
-      });
-      fetchAccounts();
-    } catch (err: unknown) {
-      const apiErr = err as ApiErrorResponse;
-      setCreateError(apiErr.response?.data?.message || "Failed to create");
-    }
-  };
-
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editAccount) return;
-    setEditError(null);
-
-    try {
-      await apiClient.put(
-        `/api/v1/chart-of-accounts/${editAccount.id}`,
-        editAccount,
-      );
-      setSuccessMessage(`Account '${editAccount.accountName}' updated`);
-      setIsEditModalOpen(false);
-      fetchAccounts();
-    } catch (err: unknown) {
-      const apiErr = err as ApiErrorResponse;
-      setEditError(apiErr.response?.data?.message || "Failed to update");
-    }
-  };
-
-  const confirmAndDelete = async (account: ChartOfAccount) => {
-    if (
-      typeof window !== "undefined" &&
-      !window.confirm(`Delete "${account.accountName}"?`)
-    ) {
-      return;
-    }
-
-    try {
-      await apiClient.delete(`/api/v1/chart-of-accounts/${account.id}`);
-      setSuccessMessage(`Deleted '${account.accountName}'`);
-      fetchAccounts();
-    } catch (err: unknown) {
-      const apiErr = err as ApiErrorResponse;
-      setErrorMessage(apiErr.response?.data?.message || "Failed to delete");
-    }
-  };
-
   return (
     <div className="space-y-6 max-w-7xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -238,39 +103,39 @@ function ChartOfAccountsContent() {
             <IconSitemap className="text-primary" size={24} /> Chart of Accounts
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Master list of financial accounts • {filteredAccounts.length}{" "}
-            accounts
+            Master list of financial accounts • {filteredAccounts.length} accounts
           </p>
         </div>
-        <Button
-          onClick={() => {
-            setCreateError(null);
-            setIsAddModalOpen(true);
-          }}
-          className="gap-2"
-        >
+        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
           <IconPlus size={16} /> New Account
         </Button>
       </div>
 
       {errorMessage && (
-        <Alert
-          variant="destructive"
-          className="flex justify-between items-center"
-        >
+        <Alert variant="destructive" className="flex justify-between items-center py-2">
           <AlertDescription>{errorMessage}</AlertDescription>
-          <button type="button" onClick={() => setErrorMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-destructive-foreground hover:bg-destructive/20"
+            onClick={() => setErrorMessage(null)}
+          >
             <IconX size={14} />
-          </button>
+          </Button>
         </Alert>
       )}
 
       {successMessage && (
-        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex justify-between items-center">
+        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex justify-between items-center py-2">
           <AlertDescription>{successMessage}</AlertDescription>
-          <button type="button" onClick={() => setSuccessMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-emerald-500/20"
+            onClick={() => setSuccessMessage(null)}
+          >
             <IconX size={14} />
-          </button>
+          </Button>
         </Alert>
       )}
 
@@ -330,7 +195,7 @@ function ChartOfAccountsContent() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {isLoading ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -344,7 +209,7 @@ function ChartOfAccountsContent() {
                   <TableRow
                     key={acc.id}
                     className={cn(
-                      highlightId === String(acc.id) && "bg-primary/10",
+                      highlightId === String(acc.id) && "bg-primary/10"
                     )}
                   >
                     <TableCell className="pl-6 font-mono text-primary font-medium">
@@ -372,7 +237,7 @@ function ChartOfAccountsContent() {
                     <TableCell
                       className={cn(
                         "text-right font-medium font-mono",
-                        acc.balance >= 0 ? "text-emerald-500" : "text-red-500",
+                        acc.balance >= 0 ? "text-emerald-500" : "text-red-500"
                       )}
                     >
                       Rp {acc.balance.toLocaleString("en-US")}
@@ -383,7 +248,7 @@ function ChartOfAccountsContent() {
                         className={cn(
                           "text-xs",
                           acc.isActive &&
-                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
+                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
                         )}
                       >
                         {acc.isActive ? "Active" : "Inactive"}
@@ -418,7 +283,7 @@ function ChartOfAccountsContent() {
                           variant="ghost"
                           size="icon"
                           className="h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => confirmAndDelete(acc)}
+                          onClick={() => setAccountToDelete(acc)}
                         >
                           <IconTrash size={14} />
                         </Button>
@@ -427,7 +292,7 @@ function ChartOfAccountsContent() {
                   </TableRow>
                 ))
               )}
-              {!loading && filteredAccounts.length === 0 && (
+              {!isLoading && filteredAccounts.length === 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -442,143 +307,29 @@ function ChartOfAccountsContent() {
         </CardContent>
       </Card>
 
-      {/* ADD DIALOG */}
-      <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <IconPlus size={18} className="text-primary" /> Add New Account
-            </DialogTitle>
-          </DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-4">
-            {createError && (
-              <Alert variant="destructive" className="text-xs">
-                <AlertDescription>{createError}</AlertDescription>
-              </Alert>
-            )}
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Select
-                value={newAccount.type}
-                onValueChange={(v) =>
-                  setNewAccount({
-                    ...newAccount,
-                    type: v,
-                    referenceNumber: ACCOUNT_RANGES[v]?.start || 0,
-                  })
-                }
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {ACCOUNT_TYPES.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {ACCOUNT_RANGES[t].label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>Reference Number</Label>
-              <Input
-                type="number"
-                value={newAccount.referenceNumber || ""}
-                onChange={(e) =>
-                  setNewAccount({
-                    ...newAccount,
-                    referenceNumber: Number(e.target.value),
-                  })
-                }
-                disabled={!newAccount.type}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                {newAccount.type
-                  ? `Valid: ${ACCOUNT_RANGES[newAccount.type].start}-${ACCOUNT_RANGES[newAccount.type].end}`
-                  : "Select category first"}
-              </p>
-            </div>
-            <div className="space-y-2">
-              <Label>Account Name</Label>
-              <Input
-                value={newAccount.accountName || ""}
-                onChange={(e) =>
-                  setNewAccount({ ...newAccount, accountName: e.target.value })
-                }
-                required
-              />
-            </div>
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setIsAddModalOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Save Account</Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Sub-components Modal Dialogs */}
+      <AddAccountDialog
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        accounts={accounts}
+        onSuccess={(msg) => setSuccessMessage(msg)}
+      />
 
-      {/* EDIT DIALOG */}
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Edit Account</DialogTitle>
-          </DialogHeader>
-          {editAccount && (
-            <form onSubmit={handleEdit} className="space-y-4">
-              {editError && (
-                <Alert variant="destructive" className="text-xs">
-                  <AlertDescription>{editError}</AlertDescription>
-                </Alert>
-              )}
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input
-                  value={editAccount.accountName}
-                  onChange={(e) =>
-                    setEditAccount({
-                      ...editAccount,
-                      accountName: e.target.value,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Ref Number</Label>
-                <Input
-                  type="number"
-                  value={editAccount.referenceNumber}
-                  onChange={(e) =>
-                    setEditAccount({
-                      ...editAccount,
-                      referenceNumber: Number(e.target.value),
-                    })
-                  }
-                  required
-                />
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setIsEditModalOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit">Update</Button>
-              </DialogFooter>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      {editAccount && (
+        <EditAccountDialog
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          account={editAccount}
+          onSuccess={(msg) => setSuccessMessage(msg)}
+        />
+      )}
+
+      <DeleteAccountAlertDialog
+        account={accountToDelete}
+        onOpenChange={(open) => !open && setAccountToDelete(null)}
+        onSuccess={(msg) => setSuccessMessage(msg)}
+        onError={(msg) => setErrorMessage(msg)}
+      />
     </div>
   );
 }
