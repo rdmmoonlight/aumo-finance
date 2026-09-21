@@ -100,11 +100,4 @@ class HomeActivity : ComponentActivity() {
     private inline fun <reified T : ComponentActivity> open() {
         startActivity(Intent(this, T::class.java))
     }
-
-    override fun onDestroy() {
-        // Biar heartbeat gak nyangkut kalo app beneran di-kill
-        // kalo di DbConnectionManager lu belum ada stopHeartbeat(), hapus aja baris ini
-        DbConnectionManager.stopHeartbeat()
-        super.onDestroy()
-    }
 }
