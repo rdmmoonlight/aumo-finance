@@ -59,8 +59,16 @@ const ACCOUNT_RANGES: Record<
   Assets: { start: 100, end: 199, label: "Assets (100-199)" },
   Liabilities: { start: 200, end: 299, label: "Liabilities (200-299)" },
   Equity: { start: 300, end: 399, label: "Equity (300-399)" },
-  OperatingIncome: { start: 400, end: 499, label: "Operating Income (400-499)" },
-  OperatingExpenses: { start: 500, end: 599, label: "Operating Expenses (500-599)" },
+  OperatingIncome: {
+    start: 400,
+    end: 499,
+    label: "Operating Income (400-499)",
+  },
+  OperatingExpenses: {
+    start: 500,
+    end: 599,
+    label: "Operating Expenses (500-599)",
+  },
   OtherIncome: { start: 600, end: 799, label: "Other Income (600-799)" },
   OtherExpenses: { start: 800, end: 999, label: "Other Expenses (800-999)" },
 };
@@ -82,7 +90,9 @@ function ChartOfAccountsContent() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<ChartOfAccount | null>(null);
-  const [accountToDelete, setAccountToDelete] = useState<ChartOfAccount | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<ChartOfAccount | null>(
+    null,
+  );
 
   const filteredAccounts = useMemo(() => {
     return accounts.filter((acc) => {
@@ -103,7 +113,8 @@ function ChartOfAccountsContent() {
             <IconSitemap className="text-primary" size={24} /> Chart of Accounts
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Master list of financial accounts • {filteredAccounts.length} accounts
+            Master list of financial accounts • {filteredAccounts.length}{" "}
+            accounts
           </p>
         </div>
         <Button onClick={() => setIsAddModalOpen(true)} className="gap-2">
@@ -112,7 +123,10 @@ function ChartOfAccountsContent() {
       </div>
 
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center py-2">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center py-2"
+        >
           <AlertDescription>{errorMessage}</AlertDescription>
           <Button
             variant="ghost"
@@ -209,7 +223,7 @@ function ChartOfAccountsContent() {
                   <TableRow
                     key={acc.id}
                     className={cn(
-                      highlightId === String(acc.id) && "bg-primary/10"
+                      highlightId === String(acc.id) && "bg-primary/10",
                     )}
                   >
                     <TableCell className="pl-6 font-mono text-primary font-medium">
@@ -237,7 +251,7 @@ function ChartOfAccountsContent() {
                     <TableCell
                       className={cn(
                         "text-right font-medium font-mono",
-                        acc.balance >= 0 ? "text-emerald-500" : "text-red-500"
+                        acc.balance >= 0 ? "text-emerald-500" : "text-red-500",
                       )}
                     >
                       Rp {acc.balance.toLocaleString("en-US")}
@@ -248,7 +262,7 @@ function ChartOfAccountsContent() {
                         className={cn(
                           "text-xs",
                           acc.isActive &&
-                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
                         )}
                       >
                         {acc.isActive ? "Active" : "Inactive"}

@@ -73,7 +73,9 @@ export function usePeriods() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounting-periods"] });
-      queryClient.invalidateQueries({ queryKey: ["accounting-periods-open-info"] });
+      queryClient.invalidateQueries({
+        queryKey: ["accounting-periods-open-info"],
+      });
     },
   });
 
@@ -81,7 +83,7 @@ export function usePeriods() {
   const selectPeriodMutation = useMutation({
     mutationFn: async (periodId: number) => {
       const { data } = await apiClient.post(
-        `/api/v1/periods/select/${periodId}`
+        `/api/v1/periods/select/${periodId}`,
       );
       return data;
     },
@@ -112,13 +114,15 @@ export function usePeriods() {
   const closePeriodMutation = useMutation({
     mutationFn: async (periodId: number) => {
       const { data } = await apiClient.post(
-        `/api/v1/periods/close/${periodId}`
+        `/api/v1/periods/close/${periodId}`,
       );
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["accounting-periods"] });
-      queryClient.invalidateQueries({ queryKey: ["accounting-periods-open-info"] });
+      queryClient.invalidateQueries({
+        queryKey: ["accounting-periods-open-info"],
+      });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
     },
   });

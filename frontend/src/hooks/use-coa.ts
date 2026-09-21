@@ -46,7 +46,7 @@ export function useChartOfAccounts() {
     mutationFn: async (account: ChartOfAccount) => {
       return await apiClient.put(
         `/api/v1/chart-of-accounts/${account.id}`,
-        account
+        account,
       );
     },
     onSuccess: () => {
