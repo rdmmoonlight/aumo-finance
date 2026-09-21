@@ -57,7 +57,7 @@ public class CloudinaryService : ICloudStorageService
         using var stream = file.OpenReadStream();
         var uploadParams = new RawUploadParams { File = new FileDescription(file.FileName, stream), Folder = folderName, UseFilename = true, UniqueFilename = true };
         var uploadResult = await _cloudinary.UploadAsync(uploadParams);
-        if (uploadResult.Error!= null) throw new Exception($"Cloudinary Upload Error: {uploadResult.Error.Message}");
+        if (uploadResult.Error != null) throw new Exception($"Cloudinary Upload Error: {uploadResult.Error.Message}");
         return (uploadResult.PublicId, uploadResult.SecureUrl.ToString(), uploadResult.Bytes);
     }
 
@@ -84,7 +84,7 @@ public class EmailSender : IEmailSender
     public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, CancellationToken ct = default)
     {
         var host = _config["Smtp:Host"];
-        var port = int.Parse(_config["Smtp:Port"]?? "587");
+        var port = int.Parse(_config["Smtp:Port"] ?? "587");
         var username = _config["Smtp:Username"];
         var password = _config["Smtp:Password"];
         if (string.IsNullOrEmpty(host) || string.IsNullOrEmpty(username))
@@ -109,7 +109,7 @@ public class ResendEmailSender : IEmailSender
 
     public async Task SendEmailAsync(string toEmail, string subject, string htmlMessage, CancellationToken ct = default)
     {
-        var apiKey = _configuration["Resend:ApiKey"]?? _configuration["Resend__ApiKey"];
+        var apiKey = _configuration["Resend:ApiKey"] ?? _configuration["Resend__ApiKey"];
         if (string.IsNullOrEmpty(apiKey) || apiKey.Contains("xxxxxxxxx"))
         {
             _logger.LogError("Resend API Key is missing!");
@@ -171,10 +171,10 @@ public static class EmailTemplates
     private const string MutedColor = "#6c757d";
 
     public static string EmailConfirmation(string? fullName, string confirmUrl) => Layout("Confirm your email to activate your Aumo Finance account.", "Confirm your email",
-        $@"<p>Hi {(string.IsNullOrWhiteSpace(fullName)? "there" : fullName)},</p><p>Thanks for signing up for Aumo Finance. Confirm your email address to activate your account.</p>", "Confirm Email Address", confirmUrl);
+        $@"<p>Hi {(string.IsNullOrWhiteSpace(fullName) ? "there" : fullName)},</p><p>Thanks for signing up for Aumo Finance. Confirm your email address to activate your account.</p>", "Confirm Email Address", confirmUrl);
 
     public static string PasswordReset(string? fullName, string resetUrl) => Layout("Reset the password for your Aumo Finance account.", "Reset your password",
-        $@"<p>Hi {(string.IsNullOrWhiteSpace(fullName)? "there" : fullName)},</p><p>We received a request to reset the password for your Aumo Finance account.</p>", "Reset Password", resetUrl);
+        $@"<p>Hi {(string.IsNullOrWhiteSpace(fullName) ? "there" : fullName)},</p><p>We received a request to reset the password for your Aumo Finance account.</p>", "Reset Password", resetUrl);
 
     private static string Layout(string previewText, string heading, string bodyHtml, string buttonText, string buttonUrl)
     {
@@ -200,7 +200,7 @@ public class GuardianService : IGuardianService
 
     public async Task CreateLoginActivityAsync(Guid userId, string activityType, string device, string browser, string ipAddress, string country, bool isSuccess, string operatingSystem = "Web", string userAgent = "Web")
     {
-        var activity = new LoginActivity { Id = Guid.NewGuid(), UserId = userId, ActivityType = activityType, Device = string.IsNullOrWhiteSpace(device)? "Web" : device, OperatingSystem = string.IsNullOrWhiteSpace(operatingSystem)? "Web" : operatingSystem, UserAgent = string.IsNullOrWhiteSpace(userAgent)? "Web" : userAgent, Browser = string.IsNullOrWhiteSpace(browser)? "Browser" : browser, IpAddress = string.IsNullOrWhiteSpace(ipAddress)? "0.0.0.0" : ipAddress, Country = string.IsNullOrWhiteSpace(country)? "ID" : country, IsSuccess = isSuccess, CreatedAt = DateTime.UtcNow };
+        var activity = new LoginActivity { Id = Guid.NewGuid(), UserId = userId, ActivityType = activityType, Device = string.IsNullOrWhiteSpace(device) ? "Web" : device, OperatingSystem = string.IsNullOrWhiteSpace(operatingSystem) ? "Web" : operatingSystem, UserAgent = string.IsNullOrWhiteSpace(userAgent) ? "Web" : userAgent, Browser = string.IsNullOrWhiteSpace(browser) ? "Browser" : browser, IpAddress = string.IsNullOrWhiteSpace(ipAddress) ? "0.0.0.0" : ipAddress, Country = string.IsNullOrWhiteSpace(country) ? "ID" : country, IsSuccess = isSuccess, CreatedAt = DateTime.UtcNow };
         _context.LoginActivities.Add(activity);
         await _context.SaveChangesAsync();
     }
@@ -212,7 +212,7 @@ public class GuardianService : IGuardianService
         foreach (var oldSession in sessionsToRevoke) { oldSession.IsActive = false; oldSession.IsCurrent = false; oldSession.RevokedAt = DateTime.UtcNow; }
         foreach (var session in activeSessions) session.IsCurrent = false;
 
-        var newSession = new UserSession { Id = Guid.NewGuid(), UserId = userId, DeviceName = string.IsNullOrWhiteSpace(deviceName)? "Web" : deviceName, OperatingSystem = string.IsNullOrWhiteSpace(operatingSystem)? "Web" : operatingSystem, Browser = string.IsNullOrWhiteSpace(browser)? "Browser" : browser, UserAgent = string.IsNullOrWhiteSpace(userAgent)? "Web" : userAgent, IpAddress = string.IsNullOrWhiteSpace(ipAddress)? "0.0.0.0" : ipAddress, Country = string.IsNullOrWhiteSpace(country)? "ID" : country, RefreshTokenHash = string.IsNullOrWhiteSpace(refreshTokenHash)? "COOKIE_SESSION" : refreshTokenHash, IsActive = true, IsCurrent = true, CreatedAt = DateTime.UtcNow, LastActivityAt = DateTime.UtcNow };
+        var newSession = new UserSession { Id = Guid.NewGuid(), UserId = userId, DeviceName = string.IsNullOrWhiteSpace(deviceName) ? "Web" : deviceName, OperatingSystem = string.IsNullOrWhiteSpace(operatingSystem) ? "Web" : operatingSystem, Browser = string.IsNullOrWhiteSpace(browser) ? "Browser" : browser, UserAgent = string.IsNullOrWhiteSpace(userAgent) ? "Web" : userAgent, IpAddress = string.IsNullOrWhiteSpace(ipAddress) ? "0.0.0.0" : ipAddress, Country = string.IsNullOrWhiteSpace(country) ? "ID" : country, RefreshTokenHash = string.IsNullOrWhiteSpace(refreshTokenHash) ? "COOKIE_SESSION" : refreshTokenHash, IsActive = true, IsCurrent = true, CreatedAt = DateTime.UtcNow, LastActivityAt = DateTime.UtcNow };
         _context.UserSessions.Add(newSession);
         await _context.SaveChangesAsync();
     }
