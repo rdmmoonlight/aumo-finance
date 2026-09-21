@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AumoBackend.Data; // Sesuaikan namespace ApplicationDbContext Anda
+using AumoBackend.Core;
 
 namespace AumoBackend.Controllers;
 
