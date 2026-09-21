@@ -4,8 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.collectAsState
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.aumofinance.app.coa.CoaActivity
 import com.aumofinance.app.dashboard.DashboardActivity
@@ -21,84 +23,88 @@ import io.ktor.client.request.get
 import kotlinx.coroutines.launch
 
 class HomeActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Modern splash + edge to edge, biar HomeScreen lu yang sebelumnya bisa full bleed
+        installSplashScreen()
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         initDatabaseConnection()
 
         setContent {
-            val isDbConnected by DbConnectionManager.isDbConnected.collectAsState()
+            // Paling muthakir: collectAsStateWithLifecycle, bukan collectAsState biasa
+            // biar gak leak pas background
+            val isDbConnected by DbConnectionManager.isDbConnected.collectAsStateWithLifecycle()
 
             AumoTheme {
                 HomeScreen(
-                    dashboard =
-                        HomeMenuItem(
-                            title = "Dashboard",
-                            subtitle = "Ringkasan posisi keuangan periode berjalan",
-                            icon = HomeIcons.Dashboard,
-                            onClick = { open(DashboardActivity::class.java) },
-                        ),
-                    journalEntry =
-                        HomeMenuItem(
-                            title = "Journal Entry",
-                            subtitle = "Catat transaksi baru",
-                            icon = HomeIcons.JournalEntry,
-                            onClick = { open(JournalEntryActivity::class.java) },
-                        ),
-                    generalJournal =
-                        HomeMenuItem(
-                            title = "General Journal",
-                            subtitle = "Riwayat jurnal umum",
-                            icon = HomeIcons.GeneralJournal,
-                            onClick = { open(GeneralJournalReportActivity::class.java) },
-                        ),
-                    periods =
-                        HomeMenuItem(
-                            title = "Periode",
-                            subtitle = "Kelola periode akuntansi",
-                            icon = HomeIcons.Periods,
-                            onClick = { open(PeriodsActivity::class.java) },
-                        ),
-                    coa =
-                        HomeMenuItem(
-                            title = "Chart of Accounts",
-                            subtitle = "Daftar & kategori akun",
-                            icon = HomeIcons.Coa,
-                            onClick = { open(CoaActivity::class.java) },
-                        ),
-                    reports =
-                        HomeMenuItem(
-                            title = "Reports",
-                            subtitle = "Buku besar, neraca saldo, laporan keuangan",
-                            icon = HomeIcons.Reports,
-                            onClick = { open(ReportsMenuActivity::class.java) },
-                        ),
+                    dashboard = HomeMenuItem(
+                        title = "Dashboard",
+                        subtitle = "Ringkasan posisi keuangan periode berjalan",
+                        icon = HomeIcons.Dashboard,
+                        onClick = { open<DashboardActivity>() }
+                    ),
+                    journalEntry = HomeMenuItem(
+                        title = "Journal Entry",
+                        subtitle = "Catat transaksi baru",
+                        icon = HomeIcons.JournalEntry,
+                        onClick = { open<JournalEntryActivity>() }
+                    ),
+                    generalJournal = HomeMenuItem(
+                        title = "General Journal",
+                        subtitle = "Riwayat jurnal umum",
+                        icon = HomeIcons.GeneralJournal,
+                        onClick = { open<GeneralJournalReportActivity>() }
+                    ),
+                    periods = HomeMenuItem(
+                        title = "Periode",
+                        subtitle = "Kelola periode akuntansi",
+                        icon = HomeIcons.Periods,
+                        onClick = { open<PeriodsActivity>() }
+                    ),
+                    coa = HomeMenuItem(
+                        title = "Chart of Accounts",
+                        subtitle = "Daftar & kategori akun",
+                        icon = HomeIcons.Coa,
+                        onClick = { open<CoaActivity>() }
+                    ),
+                    reports = HomeMenuItem(
+                        title = "Reports",
+                        subtitle = "Buku besar, neraca saldo, laporan keuangan",
+                        icon = HomeIcons.Reports,
+                        onClick = { open<ReportsMenuActivity>() }
+                    ),
                     isDbConnected = isDbConnected,
-                    onSettingsClick = { open(SettingsActivity::class.java) },
+                    onSettingsClick = { open<SettingsActivity>() }
                 )
             }
         }
     }
 
     private fun initDatabaseConnection() {
+        // Warmup Render cold-start
         lifecycleScope.launch {
             DbConnectionManager.ensureConnected {
-                // Tembak endpoint API Render lewat Ktor Client.
-                // Jika server Render masih 'cold start'/tidur, request ini akan menunggu/delay
-                // sampai server benar-benar merespon.
-                ApiClient.client.get("/api/v1/periods")
+                runCatching { ApiClient.client.get("/api/v1/periods") }
             }
         }
 
-        // Heartbeat berkala (di scope milik DbConnectionManager sendiri, bukan
-        // lifecycleScope Activity ini) supaya server Render tidak sempat idle
-        // 15 menit dan status koneksi selalu akurat, walau user pindah halaman.
+        // Heartbeat di scope DbConnectionManager sendiri, biar tetep jalan walau pindah Activity
         DbConnectionManager.startHeartbeat {
-            ApiClient.client.get("/api/v1/periods")
+            runCatching { ApiClient.client.get("/api/v1/periods") }
         }
     }
 
-    private fun open(activity: Class<*>) {
-        startActivity(Intent(this, activity))
+    // Inline reified = paling muthakir, type-safe, gak perlu Class<*>
+    private inline fun <reified T : ComponentActivity> open() {
+        startActivity(Intent(this, T::class.java))
+    }
+
+    override fun onDestroy() {
+        // Biar heartbeat gak nyangkut kalo app beneran di-kill
+        // kalo di DbConnectionManager lu belum ada stopHeartbeat(), hapus aja baris ini
+        DbConnectionManager.stopHeartbeat()
+        super.onDestroy()
     }
 }
