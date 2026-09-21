@@ -32,5 +32,4 @@ export function useHealthCheck() {
     refetch: query.refetch,
     isFetching: query.isFetching,
   };
-    }
-  
+}

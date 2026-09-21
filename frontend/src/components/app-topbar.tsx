@@ -24,7 +24,11 @@ export function TopBar() {
   const { selectedPeriod, isLoading: isPeriodLoading } = usePeriods();
 
   // 2. Hook Database Health Check (Wake-up call)
-  const { status: dbStatus, refetch: checkDb, isFetching: isDbChecking } = useHealthCheck();
+  const {
+    status: dbStatus,
+    refetch: checkDb,
+    isFetching: isDbChecking,
+  } = useHealthCheck();
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -126,7 +130,9 @@ export function TopBar() {
             <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
               <span className="h-2 w-2 rounded-full bg-slate-400" />
               <span>
-                {isPeriodLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+                {isPeriodLoading
+                  ? "Memuat periode..."
+                  : "Belum Ada Periode Dipilih"}
               </span>
             </div>
           )}
@@ -161,7 +167,9 @@ export function TopBar() {
                   className="ml-1 hover:underline flex items-center gap-0.5 text-[10px] text-muted-foreground"
                   title="Coba hubungkan ulang"
                 >
-                  <RefreshCw className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`} />
+                  <RefreshCw
+                    className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`}
+                  />
                 </button>
               </div>
             )}
