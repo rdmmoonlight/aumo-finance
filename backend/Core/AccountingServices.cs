@@ -27,7 +27,7 @@ public class AiService : IAiService
     public AiService(HttpClient httpClient, IConfiguration configuration, ILogger<AiService> logger)
     {
         _httpClient = httpClient;
-        _apiKey = configuration["Gemini:ApiKey"]?? string.Empty;
+        _apiKey = configuration["Gemini:ApiKey"] ?? string.Empty;
         _logger = logger;
     }
 
@@ -75,7 +75,7 @@ CURRENCY MANDATE:
             using var doc = await JsonDocument.ParseAsync(stream);
 
             var text = doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
-            return string.IsNullOrWhiteSpace(text)? "Unable to generate AI analysis at this moment. Please try again later." : text;
+            return string.IsNullOrWhiteSpace(text) ? "Unable to generate AI analysis at this moment. Please try again later." : text;
         }
         catch (Exception ex)
         {
@@ -125,13 +125,13 @@ public class DashboardDataService
 
         var accounts = await _db.ChartOfAccounts.Where(a => a.IsActive && a.UserId == userId).OrderBy(a => a.ReferenceNumber).ToListAsync();
         var lines = await _db.JournalEntryLines.Include(l => l.JournalEntry).Include(l => l.Account)
-           .Where(l => l.JournalEntry!= null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate <= periodEnd).ToListAsync();
+           .Where(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate <= periodEnd).ToListAsync();
 
         var accountBalances = accounts.ToDictionary(a => a.Id, a =>
         {
             var normalDebit = IsNormalBalanceDebitSafe(a.Type);
             var accountLines = lines.Where(l => l.AccountId == a.Id);
-            return normalDebit? accountLines.Sum(l => l.Debit - l.Credit) : accountLines.Sum(l => l.Credit - l.Debit);
+            return normalDebit ? accountLines.Sum(l => l.Debit - l.Credit) : accountLines.Sum(l => l.Credit - l.Debit);
         });
 
         newModel.TotalCashAndEquivalents = accounts.Where(a => a.Role == "CashAndEquivalents").Sum(a => accountBalances.GetValueOrDefault(a.Id));
@@ -145,15 +145,15 @@ public class DashboardDataService
             var ids = accounts.Where(a => a.Type == type).Select(a => a.Id).ToHashSet();
             var normalDebit = IsNormalBalanceDebitSafe(type);
             var relevant = filteredLines.Where(l => ids.Contains(l.AccountId));
-            return normalDebit? relevant.Sum(l => l.Debit - l.Credit) : relevant.Sum(l => l.Credit - l.Debit);
+            return normalDebit ? relevant.Sum(l => l.Debit - l.Credit) : relevant.Sum(l => l.Credit - l.Debit);
         }
 
         newModel.RevenueThisPeriod = SumByType("OperatingIncome") + SumByType("OtherIncome");
         newModel.OperatingExpenses = SumByType("OperatingExpenses") + SumByType("OtherExpenses");
         newModel.NetIncome = newModel.RevenueThisPeriod - newModel.OperatingExpenses;
 
-        DateTime priorStart = isAnnual? periodStart.AddYears(-1) : periodStart.AddMonths(-1);
-        DateTime priorEnd = isAnnual? periodEnd.AddYears(-1) : periodStart.AddDays(-1);
+        DateTime priorStart = isAnnual ? periodStart.AddYears(-1) : periodStart.AddMonths(-1);
+        DateTime priorEnd = isAnnual ? periodEnd.AddYears(-1) : periodStart.AddDays(-1);
         var priorLines = lines.Where(l => l.JournalEntry!.EntryDate >= priorStart && l.JournalEntry!.EntryDate <= priorEnd).ToList();
 
         decimal PriorSumByType(string type)
@@ -161,7 +161,7 @@ public class DashboardDataService
             var ids = accounts.Where(a => a.Type == type).Select(a => a.Id).ToHashSet();
             var normalDebit = IsNormalBalanceDebitSafe(type);
             var relevant = priorLines.Where(l => ids.Contains(l.AccountId));
-            return normalDebit? relevant.Sum(l => l.Debit - l.Credit) : relevant.Sum(l => l.Credit - l.Debit);
+            return normalDebit ? relevant.Sum(l => l.Debit - l.Credit) : relevant.Sum(l => l.Credit - l.Debit);
         }
 
         var priorRevenue = PriorSumByType("OperatingIncome") + PriorSumByType("OtherIncome");
@@ -173,7 +173,7 @@ public class DashboardDataService
         newModel.NetIncomeTrendPercent = CalcTrend(newModel.NetIncome, priorNet);
 
         var monthly = lines.GroupBy(l => new { l.JournalEntry!.EntryDate.Year, l.JournalEntry!.EntryDate.Month })
-           .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month).TakeLast(isAnnual? 12 : 7).ToList();
+           .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month).TakeLast(isAnnual ? 12 : 7).ToList();
 
         foreach (var g in monthly)
         {
@@ -187,7 +187,7 @@ public class DashboardDataService
         foreach (var acc in accounts.Where(a => a.Type is "OperatingExpenses" or "OtherExpenses"))
         {
             var amount = filteredLines.Where(l => l.AccountId == acc.Id).Sum(l => l.Debit - l.Credit);
-            if (amount!= 0)
+            if (amount != 0)
             {
                 newModel.ExpenseCategoryLabels.Add(acc.AccountName);
                 newModel.ExpenseCategoryValues.Add(amount);
@@ -195,13 +195,13 @@ public class DashboardDataService
         }
 
         var keyRoles = new[] { "CashAndEquivalents", "AccountsReceivable", "AccountsPayable" };
-        foreach (var acc in accounts.Where(a => (a.Role!= null && keyRoles.Contains(a.Role)) || a.Type == "Equity").OrderBy(a => a.ReferenceNumber).Take(6))
+        foreach (var acc in accounts.Where(a => (a.Role != null && keyRoles.Contains(a.Role)) || a.Type == "Equity").OrderBy(a => a.ReferenceNumber).Take(6))
         {
             newModel.MainCoaBalances.Add(new CoaBalanceDto
             {
                 AccountCode = acc.ReferenceNumber.ToString(),
                 AccountName = acc.AccountName,
-                Category = acc.Type?? "Other",
+                Category = acc.Type ?? "Other",
                 Balance = accountBalances.GetValueOrDefault(acc.Id)
             });
         }
@@ -210,8 +210,8 @@ public class DashboardDataService
            .OrderByDescending(j => j.EntryDate).ThenByDescending(j => j.Id).Take(8)
            .Select(j => new JournalEntryDto { Date = j.EntryDate, TotalDebit = j.Lines.Sum(l => l.Debit), TotalCredit = j.Lines.Sum(l => l.Credit) }).ToListAsync();
 
-        newModel.MonthlyBurnRate = isAnnual? (newModel.OperatingExpenses / 12m) : newModel.OperatingExpenses;
-        newModel.CashRunwayMonths = newModel.MonthlyBurnRate > 0? (double)Math.Round(newModel.TotalCashAndEquivalents / newModel.MonthlyBurnRate, 1) : 99;
+        newModel.MonthlyBurnRate = isAnnual ? (newModel.OperatingExpenses / 12m) : newModel.OperatingExpenses;
+        newModel.CashRunwayMonths = newModel.MonthlyBurnRate > 0 ? (double)Math.Round(newModel.TotalCashAndEquivalents / newModel.MonthlyBurnRate, 1) : 99;
 
         int healthScore = 50;
         if (newModel.TotalLiabilities > 0)
@@ -238,7 +238,7 @@ public class DashboardDataService
     }
     private static decimal? CalcTrend(decimal current, decimal prior)
     {
-        if (prior == 0) return current == 0? 0 : null;
+        if (prior == 0) return current == 0 ? 0 : null;
         return Math.Round((current - prior) / Math.Abs(prior) * 100m, 1);
     }
 }
@@ -257,10 +257,10 @@ public class TransactionNumberService : ITransactionNumberService
 
     public async Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate)
     {
-        string prefix = journalType == "Adjusting"? "AJ" : "GJ";
+        string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
         string counterKey = $"{prefix}{entryDate:yyMM}";
         var connection = _db.Database.GetDbConnection();
-        if (connection.State!= ConnectionState.Open) await connection.OpenAsync();
+        if (connection.State != ConnectionState.Open) await connection.OpenAsync();
         using var command = connection.CreateCommand();
         command.CommandText = @"
                 INSERT INTO ""TransactionCounters"" (""UserId"", ""CounterKey"", ""LastSequence"")
@@ -270,7 +270,7 @@ public class TransactionNumberService : ITransactionNumberService
                 RETURNING ""LastSequence"";";
         var userIdParam = command.CreateParameter(); userIdParam.ParameterName = "userId"; userIdParam.Value = userId; command.Parameters.Add(userIdParam);
         var counterKeyParam = command.CreateParameter(); counterKeyParam.ParameterName = "counterKey"; counterKeyParam.Value = counterKey; command.Parameters.Add(counterKeyParam);
-        var rawResult = await command.ExecuteScalarAsync()?? throw new InvalidOperationException($"Transaction counter upsert for {counterKey} returned no result.");
+        var rawResult = await command.ExecuteScalarAsync() ?? throw new InvalidOperationException($"Transaction counter upsert for {counterKey} returned no result.");
         int nextSeq = Convert.ToInt32(rawResult);
         if (nextSeq > 9999) throw new InvalidOperationException($"Transaction number sequence for {counterKey} has reached its 9999 capacity.");
         return $"{counterKey}{nextSeq:D4}";
@@ -278,10 +278,10 @@ public class TransactionNumberService : ITransactionNumberService
 
     public async Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate)
     {
-        string prefix = journalType == "Adjusting"? "AJ" : "GJ";
+        string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
         string counterKey = $"{prefix}{entryDate:yyMM}";
         var current = await _db.TransactionCounters.Where(c => c.UserId == userId && c.CounterKey == counterKey).Select(c => (int?)c.LastSequence).FirstOrDefaultAsync();
-        var previewSeq = (current?? 0) + 1;
+        var previewSeq = (current ?? 0) + 1;
         return $"{counterKey}{previewSeq:D4}";
     }
 }
@@ -310,7 +310,7 @@ public class MarketService : IMarketService
             response.Usd = await usdTask;
             response.Ihsg = await ihsgTask;
             response.BiRate = await biRateTask;
-            response.Success = response.Usd!= null || response.Ihsg!= null ||!string.IsNullOrEmpty(response.BiRate);
+            response.Success = response.Usd != null || response.Ihsg != null || !string.IsNullOrEmpty(response.BiRate);
         }
         catch (Exception ex) { Console.WriteLine($"[MarketService Error] {ex.Message}"); response.Success = false; }
         return response;
