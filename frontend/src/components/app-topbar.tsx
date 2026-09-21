@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
 import { Search, Bell, Database, RefreshCw } from "lucide-react";
 import { usePeriods } from "@/hooks/use-periods";
 import { useHealthCheck } from "@/hooks/use-health-check";
@@ -24,11 +25,7 @@ export function TopBar() {
   const { selectedPeriod, isLoading: isPeriodLoading } = usePeriods();
 
   // 2. Hook Database Health Check (Wake-up call)
-  const {
-    status: dbStatus,
-    refetch: checkDb,
-    isFetching: isDbChecking,
-  } = useHealthCheck();
+  const { status: dbStatus, refetch: checkDb, isFetching: isDbChecking } = useHealthCheck();
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -107,70 +104,77 @@ export function TopBar() {
         <div className="flex items-center gap-4 text-muted-foreground">
           {/* Status Periode */}
           {selectedPeriod ? (
-            <div
-              className={`flex items-center gap-1.5 font-medium ${
+            <Badge
+              variant="outline"
+              className={`gap-1.5 font-medium ${
                 selectedPeriod.isClosed
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-emerald-600 dark:text-emerald-400"
+                  ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                  : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
               }`}
             >
               <span
-                className={`h-2 w-2 rounded-full ${
+                className={`h-1.5 w-1.5 rounded-full ${
                   selectedPeriod.isClosed
                     ? "bg-amber-500"
                     : "bg-emerald-500 animate-pulse"
                 }`}
               />
-              <span>
-                Periode: {selectedPeriod.periodName}
-                {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
-              </span>
-            </div>
+              Periode: {selectedPeriod.periodName}
+              {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
+            </Badge>
           ) : (
-            <div className="flex items-center gap-1.5 font-medium text-muted-foreground">
-              <span className="h-2 w-2 rounded-full bg-slate-400" />
-              <span>
-                {isPeriodLoading
-                  ? "Memuat periode..."
-                  : "Belum Ada Periode Dipilih"}
-              </span>
-            </div>
+            <Badge variant="outline" className="gap-1.5 font-medium text-muted-foreground">
+              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+              {isPeriodLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+            </Badge>
           )}
 
           <Separator orientation="vertical" className="h-3" />
 
-          {/* Indikator Database menggantikan AI Guardian */}
+          {/* Indikator Database */}
           <div className="flex items-center gap-2 text-xs">
             <Database className="h-3.5 w-3.5 text-muted-foreground" />
 
             {dbStatus === "online" && (
-              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span>DB: Connected</span>
-              </div>
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-medium"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                DB: Connected
+              </Badge>
             )}
 
             {dbStatus === "connecting" && (
-              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-medium">
-                <span className="h-2 w-2 rounded-full bg-amber-500 animate-ping" />
-                <span>DB: Connecting, please wait...</span>
-              </div>
+              <Badge
+                variant="outline"
+                className="gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-medium"
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
+                DB: Connecting...
+              </Badge>
             )}
 
             {dbStatus === "offline" && (
-              <div className="flex items-center gap-1.5 text-destructive font-medium">
-                <span className="h-2 w-2 rounded-full bg-destructive" />
-                <span>DB: Disconnected</span>
-                <button
+              <div className="flex items-center gap-1.5">
+                <Badge
+                  variant="destructive"
+                  className="gap-1.5 font-medium"
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
+                  DB: Disconnected
+                </Badge>
+                {/* Menggunakan Button shadcn varian ghost & icon */}
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => checkDb()}
                   disabled={isDbChecking}
-                  className="ml-1 hover:underline flex items-center gap-0.5 text-[10px] text-muted-foreground"
+                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
                   title="Coba hubungkan ulang"
                 >
-                  <RefreshCw
-                    className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`}
-                  />
-                </button>
+                  <RefreshCw className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`} />
+                </Button>
               </div>
             )}
           </div>
@@ -178,4 +182,4 @@ export function TopBar() {
       </div>
     </header>
   );
-}
+    }
