@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Search, Bell, Sparkles } from "lucide-react";
-import { usePeriodStore } from "@/lib/usePeriodStore";
+import { usePeriodStore } from "@/lib/periodStore";
 
 export function TopBar() {
   const pathname = usePathname();
