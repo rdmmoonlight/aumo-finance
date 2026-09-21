@@ -2,6 +2,9 @@
   "name": "aumo-finance",
   "private": true,
   "type": "module",
+  "allowScripts": {
+    "unrs-resolver": true
+  },
   "imports": {
     "#/*": "./src/*",
     "@/*": "./src/*"
