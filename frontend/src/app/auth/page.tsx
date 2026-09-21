@@ -2,7 +2,7 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import apiClient from "@/lib/apiClient";
+import { login } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,17 +33,21 @@ function LoginFormContent() {
     setErr("");
 
     try {
-      const res = await apiClient.post("/api/v1/auth/login", {
+      // Memanggil helper login dari @/lib/auth
+      const result = await login({
         email,
         password,
         rememberMe: keepMe,
         isMobileClient: false,
       });
 
-      if (!res.data?.success) {
-        throw new Error(res.data?.message || "Login gagal");
+      if (!result.success) {
+        setErr(result.message || "Email atau password salah");
+        setLoading(false);
+        return;
       }
 
+      // Simpan/hapus email terimpan di local storage
       if (keepMe) {
         localStorage.setItem("aumo_saved_email", email);
       } else {
@@ -52,17 +56,11 @@ function LoginFormContent() {
 
       const targetUrl = searchParams.get("redirectTo") || "/home";
 
-      // CARA 1: Full Page Refresh / Hard Navigation
-      // Memaksa browser melakukan full reload agar cookie session terekam sempurna
-      // sebelum request API pertama di halaman tujuan dijalankan.
+      // Hard navigation agar cookie session terekam sempurna di browser
       window.location.href = targetUrl;
-    } catch (e: any) {
-      console.error("[LOGIN FAIL]", e.response?.data || e.message);
-      const errorMessage =
-        e.response?.data?.message ||
-        e.response?.data?.Message ||
-        "Email atau password salah";
-      setErr(errorMessage);
+    } catch (e: unknown) {
+      console.error("[LOGIN FAIL]", e);
+      setErr("Terjadi kesalahan sistem saat mencoba login.");
       setLoading(false);
     }
   };
