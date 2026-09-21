@@ -18,7 +18,7 @@ import { usePeriods } from "@/hooks/use-periods";
 
 export function TopBar() {
   const pathname = usePathname();
-  
+
   // Ambil state selectedPeriod dan isLoading langsung dari TanStack Query hook
   const { selectedPeriod, isLoading } = usePeriods();
 

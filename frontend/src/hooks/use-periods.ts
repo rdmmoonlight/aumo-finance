@@ -14,7 +14,8 @@ export interface PeriodItem {
 
 export function usePeriods() {
   const queryClient = useQueryClient();
-  const { selectedPeriod, setSelectedPeriod, clearSelectedPeriod } = usePeriodStore();
+  const { selectedPeriod, setSelectedPeriod, clearSelectedPeriod } =
+    usePeriodStore();
 
   // 1. Fetch Daftar Periode
   const periodsQuery = useQuery({
@@ -22,7 +23,8 @@ export function usePeriods() {
     queryFn: async () => {
       const { data } = await apiClient.get("/api/v1/periods");
       // Handle jika format respon backend: data.periods atau data.data
-      const periodsList: PeriodItem[] = data?.periods || data?.data || data || [];
+      const periodsList: PeriodItem[] =
+        data?.periods || data?.data || data || [];
       const selectedIdFromBackend = data?.selectedPeriodId;
 
       return {
@@ -51,7 +53,9 @@ export function usePeriods() {
   // 3. Mutation: Pilih Periode Aktif
   const selectPeriodMutation = useMutation({
     mutationFn: async (periodId: number) => {
-      const { data } = await apiClient.post(`/api/v1/periods/select/${periodId}`);
+      const { data } = await apiClient.post(
+        `/api/v1/periods/select/${periodId}`,
+      );
       return data;
     },
     onSuccess: (_, periodId) => {
@@ -80,7 +84,9 @@ export function usePeriods() {
   // 5. Mutation: Tutup Periode (Close Period)
   const closePeriodMutation = useMutation({
     mutationFn: async (periodId: number) => {
-      const { data } = await apiClient.post(`/api/v1/periods/close/${periodId}`);
+      const { data } = await apiClient.post(
+        `/api/v1/periods/close/${periodId}`,
+      );
       return data;
     },
     onSuccess: () => {
