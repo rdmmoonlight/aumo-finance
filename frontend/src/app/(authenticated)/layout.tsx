@@ -6,10 +6,9 @@ import {
   useGetApiV1PeriodsOpenInfoQuery,
 } from "@/lib/generatedApi";
 import { AppSidebar } from "@/components/app-sidebar";
-import { TopBar } from "@/components/app-topbar";
+import { AppTopBar } from "@/components/app-topbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Footer } from "@/components/app-footer"; // <-- INI YANG BENER
-
+import { AppFooter } from "@/components/app-footer";
 export default function AuthenticatedLayout({
   children,
 }: {
@@ -64,9 +63,9 @@ export default function AuthenticatedLayout({
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex flex-1 flex-col min-w-0">
-          <TopBar />
+          <AppTopBar />
           <main className="flex-1 p-6">{children}</main>
-          <Footer />
+          <AppFooter />
         </div>
       </div>
     </SidebarProvider>
