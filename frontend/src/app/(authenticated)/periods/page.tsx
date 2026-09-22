@@ -48,7 +48,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-// Import RTK Query auto-generated hooks & Types
+// Import RTK Query auto-generated hooks
 import {
   useGetApiV1PeriodsQuery,
   useGetApiV1PeriodsOpenInfoQuery,
@@ -56,7 +56,6 @@ import {
   usePostApiV1PeriodsSelectByIdMutation,
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
-  type AccountMappingDetailDto,
 } from "@/lib/generatedApi";
 
 interface ApiError {
@@ -66,15 +65,14 @@ interface ApiError {
   message?: string;
 }
 
-// Interface lokal untuk mapping kustom jika diperlukan
-interface LocalAccountItem {
+interface AccountItem {
   id?: number | string;
   displayLabel?: string;
   referenceNumber?: string;
   accountName?: string;
 }
 
-interface LocalPeriodItem {
+interface PeriodItem {
   id: number;
   periodName?: string;
   startDate?: string;
@@ -118,15 +116,22 @@ export default function PeriodsPage() {
   const [createPeriodMutation, { isLoading: isCreating }] =
     usePostApiV1PeriodsMutation();
 
-  // Parsing data aman
-  const periods = (rawPeriodsData as unknown as LocalPeriodItem[]) || [];
-  const selectedPeriod = periods.find((p) => p.isSelected) || null;
+  // FIX PENTING: Ekstraksi Array dengan ekstra proteksi fallback jika response berupa Objek { items: [] } atau { periods: [] }
+  const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
+    ? rawPeriodsData
+    : (rawPeriodsData as { items?: PeriodItem[]; periods?: PeriodItem[] })?.items ||
+      (rawPeriodsData as { items?: PeriodItem[]; periods?: PeriodItem[] })?.periods ||
+      [];
 
-  const openInfo = rawOpenInfoData as unknown as {
+  const selectedPeriod = Array.isArray(periods)
+    ? periods.find((p) => p.isSelected) || null
+    : null;
+
+  const openInfo = (rawOpenInfoData as {
     hasExistingPermanentAccounts?: boolean;
-    availableCashAndBankAccounts?: LocalAccountItem[];
-    availableRetainedEarningsAccounts?: LocalAccountItem[];
-  } | null;
+    availableCashAndBankAccounts?: AccountItem[];
+    availableRetainedEarningsAccounts?: AccountItem[];
+  }) || null;
 
   const [viewMode, setViewMode] = useState<"list" | "create">("list");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -135,7 +140,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting",
+    "LoadExisting"
   );
 
   const [cashAccountId, setCashAccountId] = useState("");
@@ -159,28 +164,32 @@ export default function PeriodsPage() {
     setYear(d.getFullYear());
   }, []);
 
-  // Sync mode setup saat info akun permanen dimuat
+  // Update dropdown pilihan otomatis setelah data openInfo didapatkan
   useEffect(() => {
     if (openInfo) {
       const exists = !!openInfo.hasExistingPermanentAccounts;
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            "",
+            ""
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
         );
       }
     }
   }, [openInfo]);
 
-  const handleSelectPeriod = async (p: LocalPeriodItem) => {
+  const handleOpenCreateView = () => {
+    setViewMode("create");
+  };
+
+  const handleSelectPeriod = async (p: PeriodItem) => {
     setErrorMessage(null);
     try {
       await selectPeriodMutation({ id: p.id }).unwrap();
@@ -201,12 +210,12 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(
-        error?.data?.message || "Gagal menghapus pilihan periode.",
+        error?.data?.message || "Gagal menghapus pilihan periode."
       );
     }
   };
 
-  const handleClosePeriod = async (p: LocalPeriodItem) => {
+  const handleClosePeriod = async (p: PeriodItem) => {
     if (!confirm(`Close ${p.periodName}?`)) return;
     setErrorMessage(null);
     try {
@@ -340,7 +349,7 @@ export default function PeriodsPage() {
               <Button
                 size="sm"
                 className="gap-1.5"
-                onClick={() => setViewMode("create")}
+                onClick={handleOpenCreateView}
               >
                 <IconPlus size={14} /> Open New Period
               </Button>
@@ -379,7 +388,7 @@ export default function PeriodsPage() {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    periods.map((p: LocalPeriodItem) => {
+                    periods.map((p: PeriodItem) => {
                       const isSelected = selectedPeriod?.id === p.id;
                       return (
                         <TableRow
@@ -590,7 +599,7 @@ export default function PeriodsPage() {
                             </SelectTrigger>
                             <SelectContent>
                               {openInfo?.availableCashAndBankAccounts?.map(
-                                (a: LocalAccountItem) => (
+                                (a: AccountItem) => (
                                   <SelectItem
                                     key={a.id}
                                     value={a.id?.toString() || ""}
@@ -598,7 +607,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                ),
+                                )
                               )}
                             </SelectContent>
                           </Select>
@@ -614,7 +623,7 @@ export default function PeriodsPage() {
                             </SelectTrigger>
                             <SelectContent>
                               {openInfo?.availableCashAndBankAccounts?.map(
-                                (a: LocalAccountItem) => (
+                                (a: AccountItem) => (
                                   <SelectItem
                                     key={a.id}
                                     value={a.id?.toString() || ""}
@@ -622,7 +631,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                ),
+                                )
                               )}
                             </SelectContent>
                           </Select>
@@ -638,7 +647,7 @@ export default function PeriodsPage() {
                             </SelectTrigger>
                             <SelectContent>
                               {openInfo?.availableRetainedEarningsAccounts?.map(
-                                (a: LocalAccountItem) => (
+                                (a: AccountItem) => (
                                   <SelectItem
                                     key={a.id}
                                     value={a.id?.toString() || ""}
@@ -646,7 +655,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                ),
+                                )
                               )}
                             </SelectContent>
                           </Select>
@@ -682,7 +691,7 @@ export default function PeriodsPage() {
                                 setCashBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value),
+                                    : Number(e.target.value)
                                 )
                               }
                             />
@@ -716,7 +725,7 @@ export default function PeriodsPage() {
                                 setBankBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value),
+                                    : Number(e.target.value)
                                 )
                               }
                             />
