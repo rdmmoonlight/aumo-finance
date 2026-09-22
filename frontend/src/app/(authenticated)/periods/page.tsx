@@ -121,7 +121,7 @@ export default function PeriodsPage() {
   // Parsing data aman
   const periods = (rawPeriodsData as unknown as LocalPeriodItem[]) || [];
   const selectedPeriod = periods.find((p) => p.isSelected) || null;
-  
+
   const openInfo = rawOpenInfoData as unknown as {
     hasExistingPermanentAccounts?: boolean;
     availableCashAndBankAccounts?: LocalAccountItem[];
@@ -135,7 +135,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting"
+    "LoadExisting",
   );
 
   const [cashAccountId, setCashAccountId] = useState("");
@@ -166,15 +166,15 @@ export default function PeriodsPage() {
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            ""
+            "",
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
         );
       }
     }
@@ -201,7 +201,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(
-        error?.data?.message || "Gagal menghapus pilihan periode."
+        error?.data?.message || "Gagal menghapus pilihan periode.",
       );
     }
   };
@@ -598,7 +598,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectContent>
                           </Select>
@@ -622,7 +622,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectContent>
                           </Select>
@@ -646,7 +646,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectContent>
                           </Select>
@@ -682,7 +682,7 @@ export default function PeriodsPage() {
                                 setCashBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value)
+                                    : Number(e.target.value),
                                 )
                               }
                             />
@@ -716,7 +716,7 @@ export default function PeriodsPage() {
                                 setBankBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value)
+                                    : Number(e.target.value),
                                 )
                               }
                             />
