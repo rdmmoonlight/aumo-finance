@@ -1,10 +1,12 @@
 export function AppFooter() {
   return (
-    <footer className="w-full border-t border-border/40 py-4">
-      <div className="flex flex-col items-center justify-between gap-2 px-6 text-sm text-muted-foreground md:flex-row">
-        <p>© {new Date().getFullYear()} Aumo Finance. All rights reserved.</p>
-        <p>
-          by <span className="font-semibold text-foreground">rdmmoonlight</span>
+    <footer className="w-full border-t border-border/40 py-3">
+      <div className="flex flex-col items-center justify-center gap-1 px-6 text-center">
+        <p className="text-[9px] leading-[1.5] text-muted-foreground">
+          © {new Date().getFullYear()} Aumo Finance. All rights reserved.
+        </p>
+        <p className="text- leading-[1.5] text-muted-foreground">
+          by <span className="font-medium text-foreground">rdmmoonlight</span>
         </p>
       </div>
     </footer>
