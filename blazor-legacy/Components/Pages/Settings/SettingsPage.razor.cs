@@ -4,7 +4,7 @@ using Microsoft.JSInterop;
 using Microsoft.AspNetCore.Identity;
 using AumoFinance.Models;
 
-namespace AumoFinance.Components.Pages.Settings
+namespace AumoBlazor.Components.Pages.Settings
 {
     public partial class SettingsPage
     {

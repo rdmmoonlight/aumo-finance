@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.EntityFrameworkCore;
 
-namespace AumoFinance.Components.Layout
+namespace AumoBlazor.Components.Layout
 {
     public partial class TopBar
     {

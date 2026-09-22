@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components;
 
-namespace AumoFinance.Components.Layout
+namespace AumoBlazor.Components.Layout
 {
     public partial class Sidebar
     {
