@@ -13,12 +13,7 @@ import {
   IconSparkles,
 } from "@tabler/icons-react";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -82,10 +77,18 @@ export default function AiAssistantPage() {
 
     let aiReply = "";
     const low = message.toLowerCase();
-    if (low.includes("cash") || low.includes("kas") || low.includes("liquidity")) {
+    if (
+      low.includes("cash") ||
+      low.includes("kas") ||
+      low.includes("liquidity")
+    ) {
       aiReply =
         "**Analisis Likuiditas:** Total setara kas saat ini adalah **Rp 45.500.000**. Rasio cakupan sangat baik untuk 3 bulan ke depan.";
-    } else if (low.includes("overspending") || low.includes("expense") || low.includes("beban")) {
+    } else if (
+      low.includes("overspending") ||
+      low.includes("expense") ||
+      low.includes("beban")
+    ) {
       aiReply =
         "**Peringatan Pengeluaran:** Pengeluaran terbesar berada pada **Gaji & Sewa Kantor**. Belum terdeteksi adanya anomali.";
     } else if (
@@ -131,7 +134,8 @@ export default function AiAssistantPage() {
       icon: IconBulb,
       title: "Tips Efisiensi",
       desc: "Saran penghematan",
-      prompt: "Berikan 3 langkah konkret untuk mengoptimalkan kinerja keuangan.",
+      prompt:
+        "Berikan 3 langkah konkret untuk mengoptimalkan kinerja keuangan.",
       color: "text-amber-500 bg-amber-500/10",
     },
   ];
@@ -140,7 +144,8 @@ export default function AiAssistantPage() {
     <div className="max-w-5xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <IconRobot size={26} className="text-primary" /> AI Financial Assistant
+          <IconRobot size={26} className="text-primary" /> AI Financial
+          Assistant
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
           Analisis bisnis, deteksi pengeluaran, dan saran keuangan instan.
@@ -179,7 +184,9 @@ export default function AiAssistantPage() {
       {/* PRESETS */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">Rekomendasi Pertanyaan Cepat</h3>
+          <h3 className="text-sm font-semibold">
+            Rekomendasi Pertanyaan Cepat
+          </h3>
           <span className="text-xs text-muted-foreground">
             Klik untuk langsung bertanya
           </span>
@@ -232,7 +239,8 @@ export default function AiAssistantPage() {
               <div className="py-16 text-center text-muted-foreground">
                 <IconRobot size={36} className="mx-auto mb-3 opacity-20" />
                 <p className="text-sm">
-                  Klik rekomendasi pertanyaan di atas atau ketik pertanyaan di bawah.
+                  Klik rekomendasi pertanyaan di atas atau ketik pertanyaan di
+                  bawah.
                 </p>
               </div>
             )}

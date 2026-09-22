@@ -43,10 +43,18 @@ export default function IncomeStatementPage() {
   const vm = useMemo(() => {
     return {
       asOfDate: rawData?.asOfDate || "",
-      revenues: (rawData?.revenueAccounts || rawData?.revenues || []) as IncomeStatementLine[],
-      operatingExpenses: (rawData?.expenseAccounts || rawData?.operatingExpenses || []) as IncomeStatementLine[],
-      otherIncome: (rawData?.otherIncomeAccounts || rawData?.otherIncome || []) as IncomeStatementLine[],
-      otherExpenses: (rawData?.otherExpenseAccounts || rawData?.otherExpenses || []) as IncomeStatementLine[],
+      revenues: (rawData?.revenueAccounts ||
+        rawData?.revenues ||
+        []) as IncomeStatementLine[],
+      operatingExpenses: (rawData?.expenseAccounts ||
+        rawData?.operatingExpenses ||
+        []) as IncomeStatementLine[],
+      otherIncome: (rawData?.otherIncomeAccounts ||
+        rawData?.otherIncome ||
+        []) as IncomeStatementLine[],
+      otherExpenses: (rawData?.otherExpenseAccounts ||
+        rawData?.otherExpenses ||
+        []) as IncomeStatementLine[],
     };
   }, [rawData]);
 
@@ -81,7 +89,9 @@ export default function IncomeStatementPage() {
 
   // Format error message dari RTK Query
   const errorMessage = isError
-    ? (error as any)?.data?.message || (error as any)?.message || "Gagal mengambil data Laporan Laba Rugi."
+    ? (error as any)?.data?.message ||
+      (error as any)?.message ||
+      "Gagal mengambil data Laporan Laba Rugi."
     : null;
 
   return (

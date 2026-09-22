@@ -28,7 +28,7 @@ export type GoogleLoginPayload = GoogleLoginRequest;
 export function useUserProfile(options?: { skip?: boolean }) {
   const { data, isLoading, isError, error, refetch } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip: options?.skip }
+    { skip: options?.skip },
   );
 
   const responseData = data as

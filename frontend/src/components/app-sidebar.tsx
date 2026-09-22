@@ -127,8 +127,7 @@ export function AppSidebar() {
 
   // Type-casting opsional jika response dari backend memiliki properti user
   const userData = user as
-    | { fullName?: string; userName?: string; email?: string }
-    | undefined;
+    { fullName?: string; userName?: string; email?: string } | undefined;
 
   return (
     <Sidebar

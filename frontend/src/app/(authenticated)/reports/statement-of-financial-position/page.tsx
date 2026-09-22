@@ -50,50 +50,53 @@ export default function StatementOfFinancialPositionPage() {
   const noPeriod = (data as any)?.hasPeriodSelected === false;
 
   // Parsing data Assets, Liabilities, & Equity secara declarative
-  const { assets, liabilities, equityExcludingRE, retainedEarningsEnding, asOfDate } =
-    useMemo(() => {
-      const rawData = data as any;
-      const assetsList: FinancialPositionLine[] =
-        rawData?.assetAccounts || rawData?.assets || [];
-      const liabList: FinancialPositionLine[] =
-        rawData?.liabilityAccounts || rawData?.liabilities || [];
-      const rawEquity: FinancialPositionLine[] =
-        rawData?.equityAccounts || rawData?.equityExcludingRetainedEarnings || [];
+  const {
+    assets,
+    liabilities,
+    equityExcludingRE,
+    retainedEarningsEnding,
+    asOfDate,
+  } = useMemo(() => {
+    const rawData = data as any;
+    const assetsList: FinancialPositionLine[] =
+      rawData?.assetAccounts || rawData?.assets || [];
+    const liabList: FinancialPositionLine[] =
+      rawData?.liabilityAccounts || rawData?.liabilities || [];
+    const rawEquity: FinancialPositionLine[] =
+      rawData?.equityAccounts || rawData?.equityExcludingRetainedEarnings || [];
 
-      const equityExcludingRE = rawEquity.filter(
-        (e) => e.accountName !== "Retained Earnings"
-      );
-      const reItem = rawEquity.find(
-        (e) => e.accountName === "Retained Earnings"
-      );
+    const equityExcludingRE = rawEquity.filter(
+      (e) => e.accountName !== "Retained Earnings",
+    );
+    const reItem = rawEquity.find((e) => e.accountName === "Retained Earnings");
 
-      return {
-        assets: assetsList,
-        liabilities: liabList,
-        equityExcludingRE,
-        retainedEarningsEnding: reItem
-          ? Number(reItem.amount)
-          : Number(rawData?.retainedEarningsEnding) || 0,
-        asOfDate: rawData?.asOfDate || "",
-      };
-    }, [data]);
+    return {
+      assets: assetsList,
+      liabilities: liabList,
+      equityExcludingRE,
+      retainedEarningsEnding: reItem
+        ? Number(reItem.amount)
+        : Number(rawData?.retainedEarningsEnding) || 0,
+      asOfDate: rawData?.asOfDate || "",
+    };
+  }, [data]);
 
   // Kalkulasi Total Finansial
   const totalAssets = useMemo(
     () => assets.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [assets]
+    [assets],
   );
 
   const totalLiabilities = useMemo(
     () => liabilities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [liabilities]
+    [liabilities],
   );
 
   const totalEquity = useMemo(
     () =>
       equityExcludingRE.reduce((s, i) => s + (Number(i.amount) || 0), 0) +
       retainedEarningsEnding,
-    [equityExcludingRE, retainedEarningsEnding]
+    [equityExcludingRE, retainedEarningsEnding],
   );
 
   const totalLiabEquity = totalLiabilities + totalEquity;
@@ -102,7 +105,8 @@ export default function StatementOfFinancialPositionPage() {
   if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
-        <IconLoader2 className="animate-spin" size={16} /> Loading Balance Sheet...
+        <IconLoader2 className="animate-spin" size={16} /> Loading Balance
+        Sheet...
       </div>
     );
   }
@@ -141,7 +145,8 @@ export default function StatementOfFinancialPositionPage() {
                 Statement of Financial Position
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                As of {formatDateDisplay(asOfDate) || "current period"} • IAS 1 • IDR
+                As of {formatDateDisplay(asOfDate) || "current period"} • IAS 1
+                • IDR
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -182,7 +187,10 @@ export default function StatementOfFinancialPositionPage() {
                         className="flex items-center justify-between p-3 px-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-xs">
+                          <Badge
+                            variant="outline"
+                            className="font-mono text-xs"
+                          >
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}
@@ -224,7 +232,10 @@ export default function StatementOfFinancialPositionPage() {
                           className="flex items-center justify-between p-3 px-4"
                         >
                           <span className="flex items-center gap-2">
-                            <Badge variant="outline" className="font-mono text-xs">
+                            <Badge
+                              variant="outline"
+                              className="font-mono text-xs"
+                            >
                               {l.referenceNumber}
                             </Badge>
                             {l.accountName}
@@ -259,7 +270,10 @@ export default function StatementOfFinancialPositionPage() {
                         className="flex items-center justify-between p-3 px-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-xs">
+                          <Badge
+                            variant="outline"
+                            className="font-mono text-xs"
+                          >
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}

@@ -91,7 +91,7 @@ export default function AdjustingJournalPage() {
       await deleteJournalEntry({ id: entry.id }).unwrap();
     } catch (err: any) {
       setErrorMessage(
-        err?.data?.message || err?.message || "Gagal menghapus entri jurnal."
+        err?.data?.message || err?.message || "Gagal menghapus entri jurnal.",
       );
     }
   };
@@ -122,7 +122,9 @@ export default function AdjustingJournalPage() {
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             Menyelaraskan pendapatan & beban{" "}
-            {selectedPeriodName ? `(Melihat Periode: ${selectedPeriodName})` : ""}
+            {selectedPeriodName
+              ? `(Melihat Periode: ${selectedPeriodName})`
+              : ""}
           </p>
         </div>
 
@@ -180,7 +182,7 @@ export default function AdjustingJournalPage() {
                   entries.map((entry) => {
                     const sortedLines = [...(entry.lines || [])].sort(
                       (a: any, b: any) =>
-                        (a.lineOrder || 0) - (b.lineOrder || 0)
+                        (a.lineOrder || 0) - (b.lineOrder || 0),
                     );
 
                     const curDate = formatDateDisplay(entry.entryDate);

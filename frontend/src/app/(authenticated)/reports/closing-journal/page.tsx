@@ -111,7 +111,7 @@ export default function ClosingJournalReportPage() {
         const totalCredit = lines.reduce((s, l) => s + (l.credit || 0), 0);
         return { totalDebit, totalCredit };
       }),
-    [vm.groups]
+    [vm.groups],
   );
 
   // Error Message Handler
@@ -218,7 +218,8 @@ export default function ClosingJournalReportPage() {
                                 variant="outline"
                                 className="font-mono text-amber-500"
                               >
-                                {line.referenceNumber && line.referenceNumber > 0
+                                {line.referenceNumber &&
+                                line.referenceNumber > 0
                                   ? line.referenceNumber
                                   : "-"}
                               </Badge>
