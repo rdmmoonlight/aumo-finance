@@ -61,7 +61,8 @@ const formatNumber = (n: number) =>
 
 export default function WorksheetPage() {
   // Panggil hook RTK Query
-  const { data, isLoading, isError, error } = useGetApiV1ReportsWorksheetQuery();
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsWorksheetQuery();
 
   // Mapping data dari respon API RTK Query
   const vm: WorksheetViewModel = useMemo(() => {

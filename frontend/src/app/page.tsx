@@ -19,7 +19,11 @@ export default function LandingPage() {
   const [open, setOpen] = useState(false);
 
   // Menggunakan RTK Query menggantikan getUserProfile() dari auth.ts
-  const { data: user, isLoading: checkingAuth, isSuccess } = useGetApiV1AuthMeQuery();
+  const {
+    data: user,
+    isLoading: checkingAuth,
+    isSuccess,
+  } = useGetApiV1AuthMeQuery();
 
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";

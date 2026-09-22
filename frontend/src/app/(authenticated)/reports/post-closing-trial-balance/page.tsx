@@ -2,9 +2,7 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
-import {
-  useGetApiV1ReportsStatementOfFinancialPositionQuery,
-} from "@/lib/generatedApi";
+import { useGetApiV1ReportsStatementOfFinancialPositionQuery } from "@/lib/generatedApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,

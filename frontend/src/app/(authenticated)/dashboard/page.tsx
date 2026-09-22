@@ -181,12 +181,16 @@ function DashboardContent() {
   const expenseChartData = useMemo(
     () => ({
       labels: resData?.expenseAccountsList?.length
-        ? resData.expenseAccountsList.map((i: AccountBalanceItem) => i.accountName)
+        ? resData.expenseAccountsList.map(
+            (i: AccountBalanceItem) => i.accountName,
+          )
         : ["No Expenses"],
       datasets: [
         {
           data: resData?.expenseAccountsList?.length
-            ? resData.expenseAccountsList.map((i: AccountBalanceItem) => i.balance)
+            ? resData.expenseAccountsList.map(
+                (i: AccountBalanceItem) => i.balance,
+              )
             : [1],
           backgroundColor: [
             "#ef4444",
@@ -292,7 +296,10 @@ function DashboardContent() {
   return (
     <div className="space-y-6 p-4 md:p-6">
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center"
+        >
           <AlertDescription className="flex gap-2 items-center">
             <IconAlertTriangle size={16} />
             {errorMessage}

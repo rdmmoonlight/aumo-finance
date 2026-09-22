@@ -171,7 +171,7 @@ export default function SettingsPage() {
                     "relative flex flex-col rounded-xl border-2 p-4 cursor-pointer transition-all hover:bg-accent/50",
                     isActive
                       ? "border-primary bg-primary/5"
-                      : "border-muted bg-card"
+                      : "border-muted bg-card",
                   )}
                 >
                   <RadioGroupItem

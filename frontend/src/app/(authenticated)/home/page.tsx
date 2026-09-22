@@ -30,16 +30,21 @@ export default function HomePage() {
     async function fetchBIRate(): Promise<MarketItem | null> {
       // Layer 1: FRED - Indonesia Central Bank Rate (paling reliable, no API key)
       try {
-        const fredCsv = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCB01IDQ156N";
+        const fredCsv =
+          "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCB01IDQ156N";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`,
         );
         if (res.ok) {
           const text = await res.text();
-          const rows = text.trim().split("\n").filter((r) => /^\d{4}-\d{2}-\d{2}/.test(r));
+          const rows = text
+            .trim()
+            .split("\n")
+            .filter((r) => /^\d{4}-\d{2}-\d{2}/.test(r));
           if (rows.length) {
             const last = rows[rows.length - 1].split(",");
-            const prev = rows.length > 1? rows[rows.length - 2].split(",") : last;
+            const prev =
+              rows.length > 1 ? rows[rows.length - 2].split(",") : last;
             const val = parseFloat(last[1]);
             const prevVal = parseFloat(prev[1]);
             if (!isNaN(val)) {
@@ -48,7 +53,10 @@ export default function HomePage() {
                 symbol: "BI RATE",
                 name: `Suku Bunga BI • ${last[0]}`,
                 price: `${val.toFixed(2)}%`,
-                change: diff === 0? "HOLD" : `${diff > 0? "+" : ""}${diff.toFixed(2)}%`,
+                change:
+                  diff === 0
+                    ? "HOLD"
+                    : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`,
                 isUp: diff <= 0, // turun = hijau
               };
             }
@@ -58,9 +66,10 @@ export default function HomePage() {
 
       // Layer 2: Scrape bi.go.id official
       try {
-        const biUrl = "https://www.bi.go.id/en/publikasi/ruang-media/news-release/default.aspx";
+        const biUrl =
+          "https://www.bi.go.id/en/publikasi/ruang-media/news-release/default.aspx";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`,
         );
         if (res.ok) {
           const html = await res.text();
@@ -81,7 +90,7 @@ export default function HomePage() {
       try {
         const teUrl = "https://tradingeconomics.com/indonesia/interest-rate";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`,
         );
         if (res.ok) {
           const html = await res.text();
@@ -128,8 +137,8 @@ export default function HomePage() {
       try {
         const resIhsg = await fetch(
           `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
-          )}&t=${Date.now()}`
+            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
+          )}&t=${Date.now()}`,
         );
         if (resIhsg.ok) {
           const yahooData = await resIhsg.json();
@@ -142,10 +151,10 @@ export default function HomePage() {
               symbol: "IHSG",
               name: "Indeks Saham",
               price: price
-               ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
+                ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
                 : "N/A",
               change: changePercent
-               ? `${isUp? "+" : ""}${changePercent.toFixed(2)}%`
+                ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
                 : "0.00%",
               isUp,
             });
@@ -184,11 +193,11 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {isLoading? (
+              {isLoading ? (
                 <div className="col-span-3 text-center text-xs text-white/40 py-4">
                   Memuat indikator pasar...
                 </div>
-              ) : marketData.length > 0? (
+              ) : marketData.length > 0 ? (
                 marketData.map((item) => {
                   const isBIRate = item.symbol.includes("BI");
                   return (
@@ -196,23 +205,28 @@ export default function HomePage() {
                       key={item.symbol}
                       className={`flex min-h- flex-col justify-between rounded-lg border p-2.5 ${
                         isBIRate
-                         ? "border-amber-500/20 bg-amber-500/5"
+                          ? "border-amber-500/20 bg-amber-500/5"
                           : "border-white/10 bg-black/40"
                       }`}
                     >
                       <div className="flex justify-between items-center">
                         <span className="flex items-center gap-1 text-xs font-bold text-white">
-                          {isBIRate && <IconBuildingBank size={12} className="text-amber-400" />}
+                          {isBIRate && (
+                            <IconBuildingBank
+                              size={12}
+                              className="text-amber-400"
+                            />
+                          )}
                           {item.symbol}
                         </span>
                         <Badge
                           className={`text- ${
                             item.isUp
-                             ? "bg-emerald-500/15 text-emerald-400"
+                              ? "bg-emerald-500/15 text-emerald-400"
                               : "bg-red-500/15 text-red-400"
                           } border-0 flex items-center px-1.5 py-0.5`}
                         >
-                          {item.isUp? (
+                          {item.isUp ? (
                             <IconTrendingUp size={10} className="mr-0.5" />
                           ) : (
                             <IconTrendingDown size={10} className="mr-0.5" />

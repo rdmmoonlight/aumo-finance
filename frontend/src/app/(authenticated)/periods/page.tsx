@@ -106,10 +106,8 @@ export default function PeriodsPage() {
 
   // FIX: Query hook returns an object `{ data, isLoading }`, not an array tuple `[...]`
   // Parameter dibiarkan kosong karena tidak menerima argumen (void)
-  const {
-    data: openInfoData,
-    isLoading: isLoadingOpenInfo,
-  } = useGetApiV1PeriodsOpenInfoQuery();
+  const { data: openInfoData, isLoading: isLoadingOpenInfo } =
+    useGetApiV1PeriodsOpenInfoQuery();
 
   const [selectPeriodMutation, { isLoading: isSelecting }] =
     usePostApiV1PeriodsSelectByIdMutation();
@@ -204,7 +202,9 @@ export default function PeriodsPage() {
       refetchPeriods();
     } catch (err) {
       const error = err as ApiError;
-      setErrorMessage(error?.data?.message || "Gagal menghapus pilihan periode.");
+      setErrorMessage(
+        error?.data?.message || "Gagal menghapus pilihan periode.",
+      );
     }
   };
 
@@ -249,12 +249,16 @@ export default function PeriodsPage() {
             setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
           retainedEarningsAccountId:
             setupMode === "LoadExisting" ? parseInt(retainedId, 10) : null,
-          cashAccountCode: setupMode === "CreateNew" ? cashAccountCode : undefined,
-          cashAccountName: setupMode === "CreateNew" ? cashAccountName : undefined,
+          cashAccountCode:
+            setupMode === "CreateNew" ? cashAccountCode : undefined,
+          cashAccountName:
+            setupMode === "CreateNew" ? cashAccountName : undefined,
           cashBalance:
             setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
-          bankAccountCode: setupMode === "CreateNew" ? bankAccountCode : undefined,
-          bankAccountName: setupMode === "CreateNew" ? bankAccountName : undefined,
+          bankAccountCode:
+            setupMode === "CreateNew" ? bankAccountCode : undefined,
+          bankAccountName:
+            setupMode === "CreateNew" ? bankAccountName : undefined,
           bankBalance:
             setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
           retainedEarningsAccountCode:
@@ -527,7 +531,10 @@ export default function PeriodsPage() {
               <CardContent className="space-y-4">
                 {isLoadingOpenInfo ? (
                   <div className="text-center py-4 text-xs text-muted-foreground">
-                    <IconLoader2 className="animate-spin inline mr-1" size={14} />{" "}
+                    <IconLoader2
+                      className="animate-spin inline mr-1"
+                      size={14}
+                    />{" "}
                     Memuat informasi akun...
                   </div>
                 ) : (

@@ -232,8 +232,7 @@ export default function ToolsPage() {
     targetRef: number,
   ) => {
     const opt = dbAccounts.find(
-      (o: any) =>
-        Number(o.referenceNumber || o.code) === Number(targetRef),
+      (o: any) => Number(o.referenceNumber || o.code) === Number(targetRef),
     );
     setAccountMappings((prev) =>
       prev.map((m) =>

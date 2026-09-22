@@ -17,7 +17,7 @@ export const baseApi = createApi({
     baseUrl: BASE_URL,
     // WAJIB: Agar Cookie Session (.NET Identity) dikirim otomatis pada request Client-Side
     credentials: "include",
-    
+
     prepareHeaders: async (headers) => {
       // FIX 2: Penanganan SSR Cookie untuk Next.js App Router
       if (typeof window === "undefined") {
@@ -36,12 +36,12 @@ export const baseApi = createApi({
       return headers;
     },
   }),
-  
+
   // Durasi default simpan tandon (misal: 300 detik / 5 menit)
   keepUnusedDataFor: 300,
-  
+
   // Tag Invalidation untuk menguras tandon secara otomatis
   tagTypes: ["Auth", "User", "Transaction"],
-  
+
   endpoints: () => ({}),
 });

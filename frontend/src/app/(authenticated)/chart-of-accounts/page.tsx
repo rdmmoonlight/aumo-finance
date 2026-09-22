@@ -48,7 +48,9 @@ import {
 } from "./_components/coa-dialogs";
 
 // Tipe untuk satu item akun berdasarkan response API
-type AccountItem = NonNullable<GetApiV1ChartOfAccountsApiResponse & any[]>[number];
+type AccountItem = NonNullable<
+  GetApiV1ChartOfAccountsApiResponse & any[]
+>[number];
 
 interface AccountRangeInfo {
   start: number;
@@ -116,7 +118,7 @@ function ChartOfAccountsContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
-    null
+    null,
   );
 
   // Client-side fallback filter untuk memastikan reactivity cepat
@@ -155,7 +157,8 @@ function ChartOfAccountsContent() {
           className="flex justify-between items-center py-2"
         >
           <AlertDescription>
-            {errorMessage || "Gagal mengambil data Chart of Accounts dari server."}
+            {errorMessage ||
+              "Gagal mengambil data Chart of Accounts dari server."}
           </AlertDescription>
           <Button
             variant="ghost"
@@ -254,7 +257,7 @@ function ChartOfAccountsContent() {
                     <TableRow
                       key={acc.id}
                       className={cn(
-                        highlightId === String(acc.id) && "bg-primary/10"
+                        highlightId === String(acc.id) && "bg-primary/10",
                       )}
                     >
                       <TableCell className="pl-6 font-mono text-primary font-medium">
@@ -282,7 +285,7 @@ function ChartOfAccountsContent() {
                       <TableCell
                         className={cn(
                           "text-right font-medium font-mono",
-                          balance >= 0 ? "text-emerald-500" : "text-red-500"
+                          balance >= 0 ? "text-emerald-500" : "text-red-500",
                         )}
                       >
                         Rp {balance.toLocaleString("en-US")}
@@ -293,7 +296,7 @@ function ChartOfAccountsContent() {
                           className={cn(
                             "text-xs",
                             acc.isActive &&
-                              "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                              "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
                           )}
                         >
                           {acc.isActive ? "Active" : "Inactive"}

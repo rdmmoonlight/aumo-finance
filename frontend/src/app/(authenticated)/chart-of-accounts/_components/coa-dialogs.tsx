@@ -357,9 +357,7 @@ export function DeleteAccountAlertDialog({
       onSuccess(`Deleted '${account.accountName}'`);
       onOpenChange(false);
     } catch (err: any) {
-      onError(
-        err?.data?.message || err?.message || "Failed to delete account",
-      );
+      onError(err?.data?.message || err?.message || "Failed to delete account");
       onOpenChange(false);
     }
   };

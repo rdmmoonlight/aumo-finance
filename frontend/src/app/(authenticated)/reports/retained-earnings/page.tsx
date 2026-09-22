@@ -67,8 +67,7 @@ export default function RetainedEarningsPage() {
           rawData?.beginningRetainedEarnings ?? rawData?.beginningBalance,
         ) || 0,
       netIncome: Number(rawData?.netIncome) || 0,
-      dividends:
-        Number(rawData?.dividendsOrDraws ?? rawData?.dividends) || 0,
+      dividends: Number(rawData?.dividendsOrDraws ?? rawData?.dividends) || 0,
     };
   }, [rawData]);
 
