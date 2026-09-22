@@ -1,6 +1,10 @@
 // src/lib/apiClient.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query";
 import { aumoConfig } from "../../aumo.config";
 
 function enforceHttps(url: string): string {
@@ -38,13 +42,19 @@ const baseQueryWithReauth: BaseQueryFn<
   const result = await rawBaseQuery(args, api, extraOptions);
 
   // PENTING: Hanya lakukan redirect SEKALI di browser jika 401
-  if (result.error && result.error.status === 401 && typeof window !== "undefined") {
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    typeof window !== "undefined"
+  ) {
     const currentPath = window.location.pathname;
 
     // Pastikan HANYA redirect jika BELUM di /auth agar tidak loop
     if (!currentPath.startsWith("/auth") && currentPath !== "/") {
       // Gunakan window.location.replace agar tidak menyimpan history loop
-      window.location.replace(`/auth?redirectTo=${encodeURIComponent(currentPath)}`);
+      window.location.replace(
+        `/auth?redirectTo=${encodeURIComponent(currentPath)}`,
+      );
     }
   }
 

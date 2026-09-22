@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useGetApiV1AuthMeQuery, useGetApiV1PeriodsOpenInfoQuery } from "@/lib/generatedApi";
+import {
+  useGetApiV1AuthMeQuery,
+  useGetApiV1PeriodsOpenInfoQuery,
+} from "@/lib/generatedApi";
 import { AppSidebar } from "@/components/app-sidebar";
 // Perbaikan impor: Ganti AppTopbar menjadi TopBar (atau sesuai ekspor komponen Anda)
 import { TopBar } from "@/components/app-topbar";
@@ -28,12 +31,16 @@ export default function AuthenticatedLayout({
   });
 
   // 2. Ambil info periode HANYA jika autentikasi sukses
-  const isAuthenticated = isMounted && !isAuthLoading && !isAuthError && !!authData;
+  const isAuthenticated =
+    isMounted && !isAuthLoading && !isAuthError && !!authData;
 
-  const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(undefined, {
-    skip: !isAuthenticated,
-    refetchOnMountOrArgChange: false,
-  });
+  const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(
+    undefined,
+    {
+      skip: !isAuthenticated,
+      refetchOnMountOrArgChange: false,
+    },
+  );
 
   if (!isMounted || isAuthLoading) {
     return (
@@ -46,7 +53,9 @@ export default function AuthenticatedLayout({
   if (isAuthError) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
-        <p className="text-sm text-muted-foreground">Sesi berakhir, mengalihkan ke halaman login...</p>
+        <p className="text-sm text-muted-foreground">
+          Sesi berakhir, mengalihkan ke halaman login...
+        </p>
       </div>
     );
   }
