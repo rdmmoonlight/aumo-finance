@@ -36,9 +36,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
 // RTK Query Auto-Generated Hooks & Types
-import {
-  useGetApiV1ChartOfAccountsQuery,
-} from "@/lib/generatedApi";
+import { useGetApiV1ChartOfAccountsQuery } from "@/lib/generatedApi";
 
 import {
   AddAccountDialog,
