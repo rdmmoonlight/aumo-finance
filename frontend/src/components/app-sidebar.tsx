@@ -65,16 +65,37 @@ const navigation = [
       { title: "General Journal", url: "/reports/general-journal" },
       { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
       { title: "Closing Journal", url: "/reports/closing-journal" },
-      { title: "Unadjusted Trial Balance", url: "/reports/unadjusted-trial-balance" },
-      { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
-      { title: "Post-Closing Trial Balance", url: "/reports/post-closing-trial-balance" },
-      { title: "General Ledger (Temp)", url: "/reports/general-ledger-temporary" },
-      { title: "General Ledger (Perm)", url: "/reports/general-ledger-permanent" },
+      {
+        title: "Unadjusted Trial Balance",
+        url: "/reports/unadjusted-trial-balance",
+      },
+      {
+        title: "Adjusted Trial Balance",
+        url: "/reports/adjusted-trial-balance",
+      },
+      {
+        title: "Post-Closing Trial Balance",
+        url: "/reports/post-closing-trial-balance",
+      },
+      {
+        title: "General Ledger (Temp)",
+        url: "/reports/general-ledger-temporary",
+      },
+      {
+        title: "General Ledger (Perm)",
+        url: "/reports/general-ledger-permanent",
+      },
       { title: "Worksheet", url: "/reports/worksheet" },
       { title: "Income Statement", url: "/reports/income-statement" },
       { title: "Retained Earnings", url: "/reports/retained-earnings" },
-      { title: "Financial Position", url: "/reports/statement-of-financial-position" },
-      { title: "Statement of Cash Flow", url: "/reports/statement-of-cash-flow" },
+      {
+        title: "Financial Position",
+        url: "/reports/statement-of-financial-position",
+      },
+      {
+        title: "Statement of Cash Flow",
+        url: "/reports/statement-of-cash-flow",
+      },
     ],
   },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
@@ -88,23 +109,33 @@ export function AppSidebar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => { setIsMounted(true); }, []);
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(undefined, { skip:!isMounted });
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
+    undefined,
+    { skip: !isMounted },
+  );
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
-    try { await logoutApi().unwrap(); } catch (err) { console.error(err); }
-    finally {
+    try {
+      await logoutApi().unwrap();
+    } catch (err) {
+      console.error(err);
+    } finally {
       dispatch(baseApi.util.resetApiState());
-      if (typeof window!== "undefined") {
-        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      if (typeof window !== "undefined") {
+        document.cookie =
+          "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
       }
     }
   };
 
-  const userData = user as { fullName?: string; userName?: string; email?: string } | undefined;
+  const userData = user as
+    { fullName?: string; userName?: string; email?: string } | undefined;
   const ICON_CLASS = "w- h- mr-2.5 shrink-0";
 
   return (
@@ -127,7 +158,8 @@ export function AppSidebar() {
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const isSubActive = item.items?.some(
-                  (sub) => pathname === sub.url || pathname.startsWith(sub.url + "/")
+                  (sub) =>
+                    pathname === sub.url || pathname.startsWith(sub.url + "/"),
                 );
 
                 if (item.items) {
@@ -162,7 +194,9 @@ export function AppSidebar() {
                                     isActive={isChildActive}
                                     className="text- leading-[1.5] h-auto min-h- py-1.5 pl- pr-2 font-normal text-left whitespace-normal justify-start"
                                   >
-                                    <Link href={subItem.url}>{subItem.title}</Link>
+                                    <Link href={subItem.url}>
+                                      {subItem.title}
+                                    </Link>
                                   </SidebarMenuSubButton>
                                 </SidebarMenuSubItem>
                               );
@@ -175,11 +209,16 @@ export function AppSidebar() {
                 }
 
                 const isSingleActive =
-                  pathname === item.url || (item.url!== "/home" && pathname.startsWith(item.url + "/"));
+                  pathname === item.url ||
+                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isSingleActive} className="text- h- font-normal px-2">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isSingleActive}
+                      className="text- h- font-normal px-2"
+                    >
                       <Link href={item.url}>
                         <Icon className={ICON_CLASS} />
                         <span>{item.title}</span>
@@ -205,10 +244,14 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-medium text-[13.5px] leading-tight truncate">
-                        {!isMounted || isUserLoading? "Memuat..." : userData?.fullName || userData?.userName || "Guest"}
+                        {!isMounted || isUserLoading
+                          ? "Memuat..."
+                          : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text- text-muted-foreground truncate">
-                        {!isMounted || isUserLoading? "..." : userData?.email || "Tidak ada email"}
+                        {!isMounted || isUserLoading
+                          ? "..."
+                          : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
@@ -217,10 +260,17 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem asChild className="text-">
-                  <Link href="/settings"><Settings className="w-4 h-4 mr-2" />Settings</Link>
+                  <Link href="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive text-">
-                  <LogOut className="w-4 h-4 mr-2" />Sign Out
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive text-"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
