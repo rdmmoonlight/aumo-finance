@@ -8,17 +8,17 @@ ENV ASPNETCORE_URLS=http://+:8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy file .csproj dari folder blazor-legacy dan backend
+# Copy kedua file .csproj
 COPY ["blazor-legacy/AumoBlazor.csproj", "blazor-legacy/"]
 COPY ["backend/AumoBackend.csproj", "backend/"]
 
-# Restore paket NuGet
+# Restore proyek utama (otomatis me-restore dependensinya jika Project Reference sudah benar)
 RUN dotnet restore "blazor-legacy/AumoBlazor.csproj"
 
-# Copy seluruh source code repositori
+# Copy seluruh source code
 COPY . .
 
-# Pindah ke direktori blazor-legacy dan jalankan publish
+# Build & Publish
 WORKDIR "/src/blazor-legacy"
 RUN dotnet publish "AumoBlazor.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
