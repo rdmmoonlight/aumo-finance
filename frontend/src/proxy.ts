@@ -3,16 +3,8 @@ import type { NextRequest } from "next/server";
 
 export function proxy(request: NextRequest) {
   try {
-    const { pathname } = request.nextUrl;
-
-    // Cek cookie sesi jika ada
-    const sessionToken = request.cookies.get("AumoFinance.Session")?.value;
-    const isAuthenticated = Boolean(sessionToken);
-
-    if (isAuthenticated && pathname.startsWith("/auth")) {
-      return NextResponse.redirect(new URL("/home", request.url));
-    }
-
+    // Serahkan seluruh validasi sesi & proteksi ke RTK Query (Client-Side)
+    // agar Edge Proxy tidak terkecoh oleh cookie cross-domain yang expired
     return NextResponse.next();
   } catch (error) {
     console.error("[MIDDLEWARE ERROR]", error);
