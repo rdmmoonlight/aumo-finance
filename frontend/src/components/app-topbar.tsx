@@ -16,18 +16,26 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Search, Bell, Database, RefreshCw } from "lucide-react";
 
-// RTK Query Hooks dari auto-generated file
+// RTK Query Hooks & Types dari auto-generated file
 import {
   useGetApiV1PeriodsOpenInfoQuery,
   useGetApiV1HealthQuery,
 } from "@/lib/generatedApi";
+import { useUserProfile } from "@/lib/auth";
 
 export function TopBar() {
   const pathname = usePathname();
 
-  // 1. Hook Periode Aktif via RTK Query
+  // Cek profil user untuk memastikan token/cookie valid sebelum polling API
+  const { profile, isLoading: isProfileLoading } = useUserProfile();
+  const isAuthenticated = !isProfileLoading && !!profile;
+
+  // 1. Hook Periode Aktif via RTK Query (Skip jika belum terverifikasi)
   const { data: periodData, isLoading: isPeriodLoading } =
-    useGetApiV1PeriodsOpenInfoQuery();
+    useGetApiV1PeriodsOpenInfoQuery(undefined, {
+      skip: !isAuthenticated,
+      refetchOnMountOrArgChange: false,
+    });
 
   // 2. Hook Database Health Check via RTK Query
   const {
@@ -37,21 +45,31 @@ export function TopBar() {
     isError: isHealthError,
     refetch: checkDb,
   } = useGetApiV1HealthQuery(undefined, {
-    // Polling otomatis setiap 30 detik untuk memantau status DB
-    pollingInterval: 30000,
+    // Skip health query jika belum login agar tidak memicu 401 spam
+    skip: !isAuthenticated,
+    // Polling setiap 30 detik HANYA saat user aktif terautentikasi
+    pollingInterval: isAuthenticated ? 30000 : 0,
+    refetchOnFocus: false,
   });
 
   // Penentuan status database berdasarkan kondisi RTK Query
   const dbStatus = isHealthError
     ? "offline"
-    : isHealthLoading || isHealthFetching
+    : isHealthLoading
       ? "connecting"
       : healthData
         ? "online"
         : "offline";
 
-  // Ambil periode terpilih/aktif jika ada dari response backend
-  const selectedPeriod = periodData as any;
+  // Ekstrak data periode secara aman
+  const selectedPeriod = periodData as
+    | {
+        id?: number;
+        periodName?: string;
+        name?: string;
+        isClosed?: boolean;
+      }
+    | undefined;
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -66,7 +84,7 @@ export function TopBar() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               type="search"
-              placeholder="Cari transaksi, akun, atau laporan"
+              placeholder="Cari transaksi, akun, atau laporan..."
               className="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
             />
           </div>
