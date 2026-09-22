@@ -1,9 +1,6 @@
+// src/lib/apiClient.ts
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type {
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError,
-} from "@reduxjs/toolkit/query";
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { aumoConfig } from "../../aumo.config";
 
 function enforceHttps(url: string): string {
@@ -17,31 +14,22 @@ const BASE_URL = enforceHttps(aumoConfig.backendTarget);
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  // WAJIB: Mengirim cookie 'AumoFinance.Session' saat request di Browser Client
   credentials: "include",
   prepareHeaders: async (headers) => {
-    // Meneruskan Cookie jika request dieksekusi di Next.js Server (SSR)
     if (typeof window === "undefined") {
       try {
         const { cookies } = await import("next/headers");
         const cookieStore = await cookies();
         const cookieHeader = cookieStore.toString();
-
-        if (cookieHeader) {
-          // Gunakan 'Cookie' dengan huruf C kapital agar terbaca sempurna oleh ASP.NET Core
-          headers.set("Cookie", cookieHeader);
-        }
+        if (cookieHeader) headers.set("Cookie", cookieHeader);
       } catch {
-        // Safe fallback jika dipanggil saat build-time / static site generation
+        // Fallback saat build-time
       }
     }
     return headers;
   },
 });
 
-/**
- * Interceptor Global 401 Unauthorized
- */
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -49,16 +37,14 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  // Jika 401 terjadi di Browser (Client-Side), redirect ke login
-  if (
-    result.error &&
-    result.error.status === 401 &&
-    typeof window !== "undefined"
-  ) {
+  // PENTING: Hanya lakukan redirect SEKALI di browser jika 401
+  if (result.error && result.error.status === 401 && typeof window !== "undefined") {
     const currentPath = window.location.pathname;
 
+    // Pastikan HANYA redirect jika BELUM di /auth agar tidak loop
     if (!currentPath.startsWith("/auth") && currentPath !== "/") {
-      window.location.href = `/auth?redirectTo=${encodeURIComponent(currentPath)}`;
+      // Gunakan window.location.replace agar tidak menyimpan history loop
+      window.location.replace(`/auth?redirectTo=${encodeURIComponent(currentPath)}`);
     }
   }
 
@@ -68,6 +54,9 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
+  // Matikan refetch pada fokus jendela untuk mencegah spam saat tab aktif/inaktif
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
   keepUnusedDataFor: 300,
   tagTypes: [
     "AumoBackend",
