@@ -9,9 +9,9 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 # Copy kedua file .csproj agar restore layer dapat di-cache dengan benar
-COPY ["blazor/AumoBlazor.csproj", "blazor/"]
+COPY ["blazor/AumoBlazor.csproj", "blazor-legacy/"]
 COPY ["backend/AumoBackend.csproj", "backend/"]
-RUN dotnet restore "blazor/AumoBlazor.csproj"
+RUN dotnet restore "blazor-legacy/AumoBlazor.csproj"
 
 # Copy seluruh source code repositori
 COPY . .
