@@ -16,12 +16,20 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Search, Bell, Database, RefreshCw } from "lucide-react";
 
-// RTK Query Hooks & Types dari auto-generated file
+// RTK Query Hooks & Types
 import {
-  useGetApiV1PeriodsOpenInfoQuery,
+  useGetApiV1PeriodsQuery,
   useGetApiV1HealthQuery,
 } from "@/lib/generatedApi";
 import { useUserProfile } from "@/lib/auth";
+
+interface PeriodItem {
+  id: number;
+  periodName?: string;
+  name?: string;
+  isClosed?: boolean;
+  isSelected?: boolean;
+}
 
 export function TopBar() {
   const pathname = usePathname();
@@ -30,11 +38,10 @@ export function TopBar() {
   const { profile, isLoading: isProfileLoading } = useUserProfile();
   const isAuthenticated = !isProfileLoading && !!profile;
 
-  // 1. Hook Periode Aktif via RTK Query (Skip jika belum terverifikasi)
-  const { data: periodData, isLoading: isPeriodLoading } =
-    useGetApiV1PeriodsOpenInfoQuery(undefined, {
+  // 1. Fetch seluruh periode untuk mencari item dengan isSelected === true
+  const { data: rawPeriodsData, isLoading: isPeriodLoading } =
+    useGetApiV1PeriodsQuery(undefined, {
       skip: !isAuthenticated,
-      refetchOnMountOrArgChange: false,
     });
 
   // 2. Hook Database Health Check via RTK Query
@@ -45,14 +52,12 @@ export function TopBar() {
     isError: isHealthError,
     refetch: checkDb,
   } = useGetApiV1HealthQuery(undefined, {
-    // Skip health query jika belum login agar tidak memicu 401 spam
     skip: !isAuthenticated,
-    // Polling setiap 30 detik HANYA saat user aktif terautentikasi
     pollingInterval: isAuthenticated ? 30000 : 0,
     refetchOnFocus: false,
   });
 
-  // Penentuan status database berdasarkan kondisi RTK Query
+  // Penentuan status database
   const dbStatus = isHealthError
     ? "offline"
     : isHealthLoading
@@ -61,15 +66,13 @@ export function TopBar() {
         ? "online"
         : "offline";
 
-  // Ekstrak data periode secara aman
-  const selectedPeriod = periodData as
-    | {
-        id?: number;
-        periodName?: string;
-        name?: string;
-        isClosed?: boolean;
-      }
-    | undefined;
+  // Parsing array periods secara aman
+  const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
+    ? rawPeriodsData
+    : (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
+
+  // Cari periode yang sedang dipilih/viewing di app
+  const selectedPeriod = periods.find((p) => p.isSelected);
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
