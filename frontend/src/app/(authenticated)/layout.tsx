@@ -7,8 +7,8 @@ import {
 } from "@/lib/generatedApi";
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/app-topbar";
-// Impor SidebarProvider dari shadcn UI sidebar
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Footer } from "@/components/footer";
 
 export default function AuthenticatedLayout({
   children,
@@ -21,7 +21,6 @@ export default function AuthenticatedLayout({
     setIsMounted(true);
   }, []);
 
-  // 1. Verifikasi profil user lebih dulu
   const {
     data: authData,
     isLoading: isAuthLoading,
@@ -31,7 +30,6 @@ export default function AuthenticatedLayout({
     refetchOnMountOrArgChange: false,
   });
 
-  // 2. Ambil info periode HANYA jika autentikasi sukses
   const isAuthenticated =
     isMounted && !isAuthLoading && !isAuthError && !!authData;
 
@@ -62,13 +60,13 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    // Pembungkus SidebarProvider wajib dipasang di tingkat teratas layout terautentikasi
     <SidebarProvider>
       <div className="flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex flex-1 flex-col min-w-0">
           <TopBar />
           <main className="flex-1 p-6">{children}</main>
+          <Footer />
         </div>
       </div>
     </SidebarProvider>
