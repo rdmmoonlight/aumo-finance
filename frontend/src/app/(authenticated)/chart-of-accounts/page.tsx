@@ -38,7 +38,6 @@ import { cn } from "@/lib/utils";
 // RTK Query Auto-Generated Hooks & Types
 import {
   useGetApiV1ChartOfAccountsQuery,
-  GetApiV1ChartOfAccountsApiResponse,
 } from "@/lib/generatedApi";
 
 import {
@@ -47,15 +46,15 @@ import {
   DeleteAccountAlertDialog,
 } from "./_components/coa-dialogs";
 
-// Tipe presisi untuk satu item akun berdasarkan response API
+// Tipe presisi yang cocok dengan ekspektasi ChartOfAccount pada coa-dialogs.tsx
 type AccountItem = {
-  id?: number | string;
-  referenceNumber?: number | string;
-  accountName?: string;
-  type?: string;
+  id: number;
+  referenceNumber: number | string;
+  accountName: string;
+  type: string;
   role?: string;
   balance?: number | string;
-  isActive?: boolean;
+  isActive: boolean;
   [key: string]: any;
 };
 
@@ -115,9 +114,11 @@ function ChartOfAccountsContent() {
     category: categoryFilter || undefined,
   });
 
-  // Ekstraksi Data Aman (Menangani Object Wrapper { data: [...] } & Array Direct [...])
+  // Ekstraksi & Normalisasi Data Aman
   const rawAccounts = useMemo<AccountItem[]>(() => {
     if (!rawAccountsData) return [];
+
+    let list: any[] = [];
 
     // Jika response backend berupa object wrapper { success: true, data: [...] }
     if (
@@ -125,15 +126,20 @@ function ChartOfAccountsContent() {
       "data" in rawAccountsData &&
       Array.isArray((rawAccountsData as any).data)
     ) {
-      return (rawAccountsData as any).data as AccountItem[];
+      list = (rawAccountsData as any).data;
+    } else if (Array.isArray(rawAccountsData)) {
+      // Jika response backend berupa Array langsung [...]
+      list = rawAccountsData;
     }
 
-    // Jika response backend berupa Array langsung [...]
-    if (Array.isArray(rawAccountsData)) {
-      return rawAccountsData as AccountItem[];
-    }
-
-    return [];
+    return list.map((item) => ({
+      ...item,
+      id: Number(item.id || 0),
+      referenceNumber: item.referenceNumber ?? "",
+      accountName: item.accountName ?? "",
+      type: item.type ?? "",
+      isActive: Boolean(item.isActive),
+    })) as AccountItem[];
   }, [rawAccountsData]);
 
   // Modal States
@@ -383,7 +389,7 @@ function ChartOfAccountsContent() {
       <AddAccountDialog
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
-        accounts={rawAccounts}
+        accounts={rawAccounts as any}
         onSuccess={(msg) => setSuccessMessage(msg)}
       />
 
@@ -391,13 +397,13 @@ function ChartOfAccountsContent() {
         <EditAccountDialog
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
-          account={editAccount}
+          account={editAccount as any}
           onSuccess={(msg) => setSuccessMessage(msg)}
         />
       )}
 
       <DeleteAccountAlertDialog
-        account={accountToDelete}
+        account={accountToDelete as any}
         onOpenChange={(open) => !open && setAccountToDelete(null)}
         onSuccess={(msg) => setSuccessMessage(msg)}
         onError={(msg) => setErrorMessage(msg)}
