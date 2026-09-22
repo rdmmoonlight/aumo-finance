@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,16 +14,12 @@ import {
   IconLoader2,
   IconInfoCircle,
 } from "@tabler/icons-react";
+// Import Hook RTK Query hasil auto-generate
+import { useGetApiV1ReportsStatementOfCashFlowQuery } from "@/lib/generatedApi";
 
 export interface CashFlowLine {
   description: string;
   amount: number;
-}
-export interface CashFlowStatementViewModel {
-  operatingActivities: CashFlowLine[];
-  investingActivities: CashFlowLine[];
-  financingActivities: CashFlowLine[];
-  beginningCash: number;
 }
 
 const formatNumber = (n: number) => {
@@ -36,72 +31,62 @@ const formatNumber = (n: number) => {
 };
 
 export default function StatementOfCashFlowPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [vm, setVm] = useState<CashFlowStatementViewModel>({
-    operatingActivities: [],
-    investingActivities: [],
-    financingActivities: [],
-    beginningCash: 0,
-  });
+  // Panggil RTK Query Hook
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsStatementOfCashFlowQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get(
-        "/api/v1/reports/statement-of-cash-flow",
-      );
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-      setNoPeriod(false);
-      setVm({
-        operatingActivities: data?.operatingActivities || [],
-        investingActivities: data?.investingActivities || [],
-        financingActivities: data?.financingActivities || [],
-        beginningCash: Number(data?.beginningCash) || 0,
-      });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Parsing data API secara aman
+  const responseData = data as any;
+  const noPeriod = responseData?.hasPeriodSelected === false;
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
+  const operatingActivities: CashFlowLine[] = useMemo(
+    () => responseData?.operatingActivities || [],
+    [responseData],
+  );
+  const investingActivities: CashFlowLine[] = useMemo(
+    () => responseData?.investingActivities || [],
+    [responseData],
+  );
+  const financingActivities: CashFlowLine[] = useMemo(
+    () => responseData?.financingActivities || [],
+    [responseData],
+  );
+  const beginningCash = useMemo(
+    () => Number(responseData?.beginningCash) || 0,
+    [responseData],
+  );
 
   const netOperating = useMemo(
-    () =>
-      vm.operatingActivities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [vm.operatingActivities],
+    () => operatingActivities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    [operatingActivities],
   );
   const netInvesting = useMemo(
-    () =>
-      vm.investingActivities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [vm.investingActivities],
+    () => investingActivities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    [investingActivities],
   );
   const netFinancing = useMemo(
-    () =>
-      vm.financingActivities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [vm.financingActivities],
+    () => financingActivities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    [financingActivities],
   );
-  const netChange = netOperating + netInvesting + netFinancing;
-  const endingCash = vm.beginningCash + netChange;
 
-  if (loading)
+  const netChange = netOperating + netInvesting + netFinancing;
+  const endingCash = beginningCash + netChange;
+
+  const errorMessage = useMemo(() => {
+    if (!isError || !error) return null;
+    if ("data" in error) {
+      return (error.data as any)?.message || "Gagal memuat Laporan Arus Kas.";
+    }
+    return error.message || "Terjadi kesalahan jaringan.";
+  }, [isError, error]);
+
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading Cash Flow...
       </div>
     );
+  }
 
   const Section = ({
     title,
@@ -115,7 +100,7 @@ export default function StatementOfCashFlowPage() {
     total: number;
   }) => (
     <div className="space-y-2">
-      <div className="text- font-bold tracking-widest text-amber-500 uppercase">
+      <div className="text-xs font-bold tracking-widest text-amber-500 uppercase">
         {title}
       </div>
       {lines.length === 0 ? (
@@ -150,10 +135,10 @@ export default function StatementOfCashFlowPage() {
 
   return (
     <div className="space-y-6">
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -192,14 +177,14 @@ export default function StatementOfCashFlowPage() {
             <CardContent className="p-4 space-y-6 divide-y">
               <Section
                 title="Cash Flows from Operating Activities"
-                lines={vm.operatingActivities}
+                lines={operatingActivities}
                 totalLabel="Net Cash from Operating"
                 total={netOperating}
               />
               <div className="pt-6">
                 <Section
                   title="Cash Flows from Investing Activities"
-                  lines={vm.investingActivities}
+                  lines={investingActivities}
                   totalLabel="Net Cash from Investing"
                   total={netInvesting}
                 />
@@ -207,7 +192,7 @@ export default function StatementOfCashFlowPage() {
               <div className="pt-6">
                 <Section
                   title="Cash Flows from Financing Activities"
-                  lines={vm.financingActivities}
+                  lines={financingActivities}
                   totalLabel="Net Cash from Financing"
                   total={netFinancing}
                 />
@@ -225,7 +210,7 @@ export default function StatementOfCashFlowPage() {
                 <div className="flex items-center justify-between text-sm text-muted-foreground pl-3">
                   <span>Cash, Beginning of Period</span>
                   <span className="font-mono">
-                    {formatNumber(vm.beginningCash)}
+                    {formatNumber(beginningCash)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between font-bold text-base pt-2 border-t">

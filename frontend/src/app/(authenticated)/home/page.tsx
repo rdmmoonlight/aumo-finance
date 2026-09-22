@@ -8,6 +8,7 @@ import {
   IconChartLine,
   IconTrendingUp,
   IconTrendingDown,
+  IconBuildingBank,
 } from "@tabler/icons-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,10 +27,84 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    async function fetchBIRate(): Promise<MarketItem | null> {
+      // Layer 1: FRED - Indonesia Central Bank Rate (paling reliable, no API key)
+      try {
+        const fredCsv = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCB01IDQ156N";
+        const res = await fetch(
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`
+        );
+        if (res.ok) {
+          const text = await res.text();
+          const rows = text.trim().split("\n").filter((r) => /^\d{4}-\d{2}-\d{2}/.test(r));
+          if (rows.length) {
+            const last = rows[rows.length - 1].split(",");
+            const prev = rows.length > 1? rows[rows.length - 2].split(",") : last;
+            const val = parseFloat(last[1]);
+            const prevVal = parseFloat(prev[1]);
+            if (!isNaN(val)) {
+              const diff = val - prevVal;
+              return {
+                symbol: "BI RATE",
+                name: `Suku Bunga BI • ${last[0]}`,
+                price: `${val.toFixed(2)}%`,
+                change: diff === 0? "HOLD" : `${diff > 0? "+" : ""}${diff.toFixed(2)}%`,
+                isUp: diff <= 0, // turun = hijau
+              };
+            }
+          }
+        }
+      } catch {}
+
+      // Layer 2: Scrape bi.go.id official
+      try {
+        const biUrl = "https://www.bi.go.id/en/publikasi/ruang-media/news-release/default.aspx";
+        const res = await fetch(
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`
+        );
+        if (res.ok) {
+          const html = await res.text();
+          const match = html.match(/BI-Rate[^%]*?(\d+\.\d+)\s*%/i);
+          if (match) {
+            return {
+              symbol: "BI RATE",
+              name: "Suku Bunga BI",
+              price: `${match[1]}%`,
+              change: "BI Official",
+              isUp: true,
+            };
+          }
+        }
+      } catch {}
+
+      // Layer 3: TradingEconomics backup
+      try {
+        const teUrl = "https://tradingeconomics.com/indonesia/interest-rate";
+        const res = await fetch(
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`
+        );
+        if (res.ok) {
+          const html = await res.text();
+          const match = html.match(/(\d+\.\d+)\s*%/);
+          if (match) {
+            return {
+              symbol: "BI RATE",
+              name: "Suku Bunga BI",
+              price: `${match[1]}%`,
+              change: "Live",
+              isUp: true,
+            };
+          }
+        }
+      } catch {}
+
+      return null;
+    }
+
     async function fetchMarketData() {
       const items: MarketItem[] = [];
 
-      // 1. Fetch Kurs USD/IDR
+      // 1. USD/IDR - realtime
       try {
         const resUsd = await fetch("https://open.er-api.com/v6/latest/USD");
         if (resUsd.ok) {
@@ -45,51 +120,44 @@ export default function HomePage() {
             });
           }
         }
-      } catch (error) {
-        console.error("Error fetching USD/IDR:", error);
+      } catch (e) {
+        console.error("USD/IDR fail:", e);
       }
 
-      // 2. Fetch Data IHSG
+      // 2. IHSG - realtime, tanpa fallback hardcode
       try {
         const resIhsg = await fetch(
-          "https://api.allorigins.win/raw?url=" +
-            encodeURIComponent(
-              "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
-            ),
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(
+            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
+          )}&t=${Date.now()}`
         );
-
         if (resIhsg.ok) {
           const yahooData = await resIhsg.json();
           const quote = yahooData?.quoteResponse?.result?.[0];
-
           if (quote) {
             const price = quote.regularMarketPrice;
             const changePercent = quote.regularMarketChangePercent;
             const isUp = changePercent >= 0;
-
             items.push({
               symbol: "IHSG",
               name: "Indeks Saham",
               price: price
-                ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
+               ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
                 : "N/A",
               change: changePercent
-                ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
+               ? `${isUp? "+" : ""}${changePercent.toFixed(2)}%`
                 : "0.00%",
               isUp,
             });
           }
         }
-      } catch {
-        // Fallback manual jika gagal
-        items.push({
-          symbol: "IHSG",
-          name: "Indeks Saham (IDX)",
-          price: "7,300.50",
-          change: "+0.15%",
-          isUp: true,
-        });
+      } catch (e) {
+        console.error("IHSG fail:", e);
       }
+
+      // 3. BI RATE - realtime, tanpa hardcode
+      const biItem = await fetchBIRate();
+      if (biItem) items.push(biItem);
 
       setMarketData(items);
       setIsLoading(false);
@@ -102,7 +170,6 @@ export default function HomePage() {
     <div className="grid w-full place-items-center py-6">
       <Card className="w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0F172A] p-6 text-white shadow-2xl">
         <CardContent className="p-6 md:p-8">
-          {/* Market Widget Component */}
           <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
             <div className="mb-3 flex items-center justify-between">
               <h6 className="flex items-center gap-2 text-sm font-bold text-amber-400">
@@ -110,50 +177,58 @@ export default function HomePage() {
               </h6>
               <Badge
                 variant="outline"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-[10px]"
+                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-"
               >
                 LIVE
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {isLoading ? (
-                <div className="col-span-2 text-center text-xs text-white/40 py-4">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              {isLoading? (
+                <div className="col-span-3 text-center text-xs text-white/40 py-4">
                   Memuat indikator pasar...
                 </div>
-              ) : marketData.length > 0 ? (
-                marketData.map((item) => (
-                  <div
-                    key={item.symbol}
-                    className="flex min-h-[76px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-white">
-                        {item.symbol}
-                      </span>
-                      <Badge
-                        className={`text-[10px] ${
-                          item.isUp
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-red-500/15 text-red-400"
-                        } border-0 flex items-center px-1.5 py-0.5`}
-                      >
-                        {item.isUp ? (
-                          <IconTrendingUp size={10} className="mr-0.5" />
-                        ) : (
-                          <IconTrendingDown size={10} className="mr-0.5" />
-                        )}
-                        {item.change}
-                      </Badge>
+              ) : marketData.length > 0? (
+                marketData.map((item) => {
+                  const isBIRate = item.symbol.includes("BI");
+                  return (
+                    <div
+                      key={item.symbol}
+                      className={`flex min-h- flex-col justify-between rounded-lg border p-2.5 ${
+                        isBIRate
+                         ? "border-amber-500/20 bg-amber-500/5"
+                          : "border-white/10 bg-black/40"
+                      }`}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="flex items-center gap-1 text-xs font-bold text-white">
+                          {isBIRate && <IconBuildingBank size={12} className="text-amber-400" />}
+                          {item.symbol}
+                        </span>
+                        <Badge
+                          className={`text- ${
+                            item.isUp
+                             ? "bg-emerald-500/15 text-emerald-400"
+                              : "bg-red-500/15 text-red-400"
+                          } border-0 flex items-center px-1.5 py-0.5`}
+                        >
+                          {item.isUp? (
+                            <IconTrendingUp size={10} className="mr-0.5" />
+                          ) : (
+                            <IconTrendingDown size={10} className="mr-0.5" />
+                          )}
+                          {item.change}
+                        </Badge>
+                      </div>
+                      <div className="mt-1 text-sm font-semibold text-white">
+                        {item.price}
+                      </div>
+                      <div className="text- text-white/50">{item.name}</div>
                     </div>
-                    <div className="mt-1 text-sm font-semibold text-white">
-                      {item.price}
-                    </div>
-                    <div className="text-[11px] text-white/50">{item.name}</div>
-                  </div>
-                ))
+                  );
+                })
               ) : (
-                <div className="col-span-2 text-center text-xs text-white/40 py-4">
+                <div className="col-span-3 text-center text-xs text-white/40 py-4">
                   Gagal memuat indikator pasar.
                 </div>
               )}

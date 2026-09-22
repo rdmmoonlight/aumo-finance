@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { ThemeProvider } from "@/components/theme-provider";
-import QueryProvider from "@/components/query-provider";
+import { ReduxProvider } from "@/components/redux-provider";
 import { Inter } from "next/font/google";
 import "@/styles/index.css";
 
@@ -34,7 +34,8 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
-        <QueryProvider>
+        {/* Mengganti QueryProvider dengan ReduxProvider */}
+        <ReduxProvider>
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -45,7 +46,7 @@ export default function RootLayout({
               {children}
             </div>
           </ThemeProvider>
-        </QueryProvider>
+        </ReduxProvider>
       </body>
     </html>
   );

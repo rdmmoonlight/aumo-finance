@@ -39,12 +39,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
+// RTK Query Hooks Auto-Generated
 import {
-  useAccountOptions,
-  useNextTransactionNumber,
-  useJournalEntryDetail,
-  useSaveJournalEntry,
-} from "@/hooks/use-journal-entry";
+  useGetApiV1ChartOfAccountsQuery,
+  useGetApiV1JournalEntryNextTransactionNumberQuery,
+  useGetApiV1JournalEntryByIdQuery,
+  usePostApiV1JournalEntryCreateMutation,
+  usePutApiV1JournalEntryEditByIdMutation,
+} from "@/lib/generatedApi";
 
 export interface LineItem {
   id: string;
@@ -75,6 +77,7 @@ function JournalEntryContent() {
   const searchParams = useSearchParams();
   const entryIdParam = searchParams.get("id");
   const isEdit = Boolean(entryIdParam);
+  const entryId = entryIdParam ? parseInt(entryIdParam, 10) : 0;
 
   // Form States
   const [journalType, setJournalType] = useState("General");
@@ -88,16 +91,35 @@ function JournalEntryContent() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
-  // 1. TanStack Query Hooks
+  // 1. RTK Query Hooks Integration
+  // Ambil opsi COA
   const { data: availableAccounts = [], isLoading: isAccountsLoading } =
-    useAccountOptions();
+    useGetApiV1ChartOfAccountsQuery({});
 
+  // Ambil nomor transaksi berikutnya (hanya dipanggil jika mode pembuatan baru)
   const { data: nextTxNumber, isFetching: isTxLoading } =
-    useNextTransactionNumber(journalType, entryDate, !isEdit);
+    useGetApiV1JournalEntryNextTransactionNumberQuery(
+      { journalType, entryDate },
+      { skip: isEdit },
+    );
 
-  const { data: editData, isLoading: isEditLoading } =
-    useJournalEntryDetail(entryIdParam);
-  const saveMutation = useSaveJournalEntry(entryIdParam);
+  // Detail entri jurnal jika dalam mode Edit
+  const { data: editDataResponse, isLoading: isEditLoading } =
+    useGetApiV1JournalEntryByIdQuery(
+      { id: entryId },
+      { skip: !isEdit || isNaN(entryId) },
+    );
+
+  // Mutations
+  const [createJournalEntry, { isLoading: isCreating }] =
+    usePostApiV1JournalEntryCreateMutation();
+  const [updateJournalEntry, { isLoading: isUpdating }] =
+    usePutApiV1JournalEntryEditByIdMutation();
+
+  const isSubmitting = isCreating || isUpdating;
+
+  // Extract data edit dari respon API
+  const editData = (editDataResponse as any) || null;
 
   // Synchronize Form State saat data edit berhasil dimuat
   useEffect(() => {
@@ -126,7 +148,7 @@ function JournalEntryContent() {
   // Nomor Transaksi yang ditampilkan
   const displayedTxNumber = isEdit
     ? editData?.entry?.transactionNumber || "Loading..."
-    : nextTxNumber || "Loading...";
+    : (nextTxNumber as any)?.transactionNumber || nextTxNumber || "Loading...";
 
   const isLocked = isEdit && editData?.isLocked;
 
@@ -205,7 +227,7 @@ function JournalEntryContent() {
     setSuccessMessage(null);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationErrors([]);
     setSuccessMessage(null);
@@ -226,34 +248,51 @@ function JournalEntryContent() {
       return;
     }
 
-    const payload = {
-      journalType,
-      entryDate,
-      lines: effective.map((l) => ({
-        accountId: l.accountId,
-        lineDescription: l.lineDescription,
-        debit: parseFormattedNumber(l.debit),
-        credit: parseFormattedNumber(l.credit),
-      })),
-    };
+    try {
+      if (isEdit) {
+        const updatePayload = {
+          id: entryId,
+          updateJournalEntryRequest: {
+            entryDate,
+            journalType,
+            transactionNumber: displayedTxNumber,
+            lines: effective.map((l) => ({
+              accountId: l.accountId,
+              lineDescription: l.lineDescription,
+              debit: parseFormattedNumber(l.debit),
+              credit: parseFormattedNumber(l.credit),
+            })),
+          },
+        };
 
-    saveMutation.mutate(payload, {
-      onSuccess: (res) => {
+        const res: any = await updateJournalEntry(updatePayload).unwrap();
         const txNum = res?.transactionNumber || displayedTxNumber;
-        if (isEdit) {
-          setSuccessMessage(`Updated ${txNum}`);
-          setTimeout(() => router.push("/reports/general-journal"), 1200);
-        } else {
-          setSuccessMessage(`Posted ${txNum}`);
-          resetForm();
-        }
-      },
-      onError: (err: any) => {
-        setValidationErrors([
-          err?.response?.data?.message || "Failed to post journal entry",
-        ]);
-      },
-    });
+        setSuccessMessage(`Updated ${txNum}`);
+        setTimeout(() => router.push("/reports/general-journal"), 1200);
+      } else {
+        const createPayload = {
+          createJournalEntryRequest: {
+            journalType,
+            entryDate,
+            lines: effective.map((l) => ({
+              accountId: l.accountId,
+              lineDescription: l.lineDescription,
+              debit: parseFormattedNumber(l.debit),
+              credit: parseFormattedNumber(l.credit),
+            })),
+          },
+        };
+
+        const res: any = await createJournalEntry(createPayload).unwrap();
+        const txNum = res?.transactionNumber || displayedTxNumber;
+        setSuccessMessage(`Posted ${txNum}`);
+        resetForm();
+      }
+    } catch (err: any) {
+      setValidationErrors([
+        err?.data?.message || err?.message || "Failed to post journal entry",
+      ]);
+    }
   };
 
   if (isAccountsLoading || (isEdit && isEditLoading)) {
@@ -402,7 +441,7 @@ function JournalEntryContent() {
                 </TableHeader>
                 <TableBody>
                   {lines.map((line) => {
-                    const ref = availableAccounts.find(
+                    const ref = (availableAccounts as any[])?.find(
                       (a) => a.id === line.accountId,
                     )?.referenceNumber;
 
@@ -427,7 +466,7 @@ function JournalEntryContent() {
                               <SelectValue placeholder="Select Account" />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableAccounts.map((acc) => (
+                              {(availableAccounts as any[])?.map((acc) => (
                                 <SelectItem
                                   key={acc.id}
                                   value={String(acc.id)}
@@ -533,10 +572,10 @@ function JournalEntryContent() {
             </Button>
             <Button
               type="submit"
-              disabled={!isBalanced || saveMutation.isPending}
+              disabled={!isBalanced || isSubmitting}
               className="gap-2"
             >
-              {saveMutation.isPending ? (
+              {isSubmitting ? (
                 <IconLoader2 className="animate-spin" size={16} />
               ) : (
                 <IconDeviceFloppy size={16} />

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
+import {
+  useGetApiV1ReportsTrialBalanceUnadjustedQuery,
+} from "@/lib/generatedApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -45,78 +47,6 @@ const formatNumber = (n: number) =>
         maximumFractionDigits: 0,
       }).format(Math.abs(n));
 
-function useTrialBalance(endpoint: string) {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [rows, setRows] = useState<TrialRow[]>([]);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get(endpoint);
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        setRows([]);
-        return;
-      }
-      const raw: any[] = Array.isArray(data)
-        ? data
-        : data?.data || data?.rows || [];
-      const computed = raw.map((r: any) => {
-        const net = r.netBalance ?? r.amount ?? 0;
-        let debit = r.debit ?? 0;
-        let credit = r.credit ?? 0;
-        if (r.debit === undefined && r.credit === undefined) {
-          if (r.normalBalanceIsDebit) {
-            debit = net >= 0 ? net : 0;
-            credit = net < 0 ? Math.abs(net) : 0;
-          } else {
-            credit = net >= 0 ? net : 0;
-            debit = net < 0 ? Math.abs(net) : 0;
-          }
-        }
-        return { ...r, debit, credit };
-      });
-      setNoPeriod(false);
-      setRows(computed);
-    } catch (err: any) {
-      if (err.response?.status === 404) setNoPeriod(true);
-      else setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [endpoint]);
-
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
-
-  const totalDebit = useMemo(
-    () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
-    [rows],
-  );
-  const totalCredit = useMemo(
-    () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
-    [rows],
-  );
-  const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
-
-  return {
-    noPeriod,
-    loading,
-    error,
-    rows,
-    totalDebit,
-    totalCredit,
-    isBalanced,
-  };
-}
-
 function TrialTable({
   rows,
   totalDebit,
@@ -141,8 +71,8 @@ function TrialTable({
           </TableHeader>
           <TableBody>
             {rows.length ? (
-              rows.map((r) => (
-                <TableRow key={r.accountId}>
+              rows.map((r, idx) => (
+                <TableRow key={r.accountId || idx}>
                   <TableCell className="text-center pl-6">
                     <Badge
                       variant="outline"
@@ -196,23 +126,71 @@ function TrialTable({
 }
 
 export default function UnadjustedTrialBalancePage() {
-  const {
-    noPeriod,
-    loading,
-    error,
-    rows,
-    totalDebit,
-    totalCredit,
-    isBalanced,
-  } = useTrialBalance("/api/v1/reports/trial-balance/unadjusted");
+  // Panggil RTK Query auto-generated hook
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsTrialBalanceUnadjustedQuery();
 
-  if (loading)
+  // Evaluasi jika belum ada periode dipilih (Response 404 / Object status khusus)
+  const noPeriod = useMemo(() => {
+    if (!data) return false;
+    if ((data as any)?.hasPeriodSelected === false) return true;
+    if (isError && (error as any)?.status === 404) return true;
+    return false;
+  }, [data, isError, error]);
+
+  // Kalkulasi & Normalisasi Debit / Credit Baris
+  const rows = useMemo(() => {
+    if (!data || noPeriod) return [];
+    const raw: any[] = Array.isArray(data)
+      ? data
+      : (data as any)?.data || (data as any)?.rows || [];
+
+    return raw.map((r: any) => {
+      const net = r.netBalance ?? r.amount ?? 0;
+      let debit = r.debit ?? 0;
+      let credit = r.credit ?? 0;
+
+      if (r.debit === undefined && r.credit === undefined) {
+        if (r.normalBalanceIsDebit) {
+          debit = net >= 0 ? net : 0;
+          credit = net < 0 ? Math.abs(net) : 0;
+        } else {
+          credit = net >= 0 ? net : 0;
+          debit = net < 0 ? Math.abs(net) : 0;
+        }
+      }
+      return { ...r, debit, credit };
+    });
+  }, [data, noPeriod]);
+
+  // Total Debit & Credit
+  const totalDebit = useMemo(
+    () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
+    [rows],
+  );
+
+  const totalCredit = useMemo(
+    () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
+    [rows],
+  );
+
+  const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
+
+  // Render State Loading
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading unadjusted
         trial balance...
       </div>
     );
+  }
+
+  // Menentukan Pesan Error
+  const errorMessage =
+    isError && !noPeriod
+      ? (error as any)?.data?.message || "Gagal memuat laporan trial balance."
+      : null;
 
   return (
     <div className="space-y-6">
@@ -227,12 +205,14 @@ export default function UnadjustedTrialBalancePage() {
           </p>
         </div>
       </div>
-      {error && (
+
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
+
       {noPeriod ? (
         <Card className="py-16 text-center border-dashed">
           <CardContent className="space-y-3">

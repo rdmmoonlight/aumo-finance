@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -25,6 +24,8 @@ import {
   IconLoader2,
   IconInfoCircle,
 } from "@tabler/icons-react";
+// Import hook RTK Query dari generatedApi
+import { useGetApiV1ReportsWorksheetQuery } from "@/lib/generatedApi";
 
 export interface WorksheetRow {
   accountId: number;
@@ -43,9 +44,11 @@ export interface WorksheetRow {
   financialPositionDebit: number;
   financialPositionCredit: number;
 }
+
 export interface WorksheetViewModel {
   rows: WorksheetRow[];
   netIncome: number;
+  hasPeriodSelected: boolean;
 }
 
 const formatNumber = (n: number) =>
@@ -57,54 +60,43 @@ const formatNumber = (n: number) =>
       }).format(Math.abs(n));
 
 export default function WorksheetPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [vm, setVm] = useState<WorksheetViewModel>({ rows: [], netIncome: 0 });
+  // Panggil hook RTK Query
+  const { data, isLoading, isError, error } = useGetApiV1ReportsWorksheetQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get("/api/v1/reports/worksheet");
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-      const rawRows = data?.rows || [];
-      const mapped: WorksheetRow[] = rawRows.map((r: any) => ({
-        accountId: r.accountId,
-        referenceNumber: r.referenceNumber,
-        accountName: r.accountName,
-        type: r.type,
-        normalBalanceIsDebit: r.normalBalanceIsDebit ?? true,
-        unadjustedDebit: Number(r.tbDebit) || 0,
-        unadjustedCredit: Number(r.tbCredit) || 0,
-        adjustmentDebit: Number(r.adjDebit) || 0,
-        adjustmentCredit: Number(r.adjCredit) || 0,
-        adjustedDebit: Number(r.adjTbDebit) || 0,
-        adjustedCredit: Number(r.adjTbCredit) || 0,
-        incomeStatementDebit: Number(r.isDebit) || 0,
-        incomeStatementCredit: Number(r.isCredit) || 0,
-        financialPositionDebit: Number(r.bsDebit) || 0,
-        financialPositionCredit: Number(r.bsCredit) || 0,
-      }));
-      setNoPeriod(false);
-      setVm({ rows: mapped, netIncome: Number(data?.totals?.netIncome) || 0 });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
+  // Mapping data dari respon API RTK Query
+  const vm: WorksheetViewModel = useMemo(() => {
+    const rawData = data as any;
+    if (!rawData) {
+      return { rows: [], netIncome: 0, hasPeriodSelected: true };
     }
-  }, []);
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
+    const rawRows = rawData.rows || [];
+    const mappedRows: WorksheetRow[] = rawRows.map((r: any) => ({
+      accountId: Number(r.accountId) || 0,
+      referenceNumber: Number(r.referenceNumber) || 0,
+      accountName: r.accountName || "",
+      type: r.type || "",
+      normalBalanceIsDebit: r.normalBalanceIsDebit ?? true,
+      unadjustedDebit: Number(r.tbDebit) || 0,
+      unadjustedCredit: Number(r.tbCredit) || 0,
+      adjustmentDebit: Number(r.adjDebit) || 0,
+      adjustmentCredit: Number(r.adjCredit) || 0,
+      adjustedDebit: Number(r.adjTbDebit) || 0,
+      adjustedCredit: Number(r.adjTbCredit) || 0,
+      incomeStatementDebit: Number(r.isDebit) || 0,
+      incomeStatementCredit: Number(r.isCredit) || 0,
+      financialPositionDebit: Number(r.bsDebit) || 0,
+      financialPositionCredit: Number(r.bsCredit) || 0,
+    }));
 
+    return {
+      rows: mappedRows,
+      netIncome: Number(rawData.totals?.netIncome) || 0,
+      hasPeriodSelected: rawData.hasPeriodSelected !== false,
+    };
+  }, [data]);
+
+  // Hitung total tiap kolom
   const totals = useMemo(
     () =>
       vm.rows.reduce(
@@ -137,23 +129,33 @@ export default function WorksheetPage() {
     [vm.rows],
   );
 
-  if (loading)
+  // Ambil pesan error jika ada
+  const errorMessage = useMemo(() => {
+    if (!isError || !error) return null;
+    if ("data" in error) {
+      return (error.data as any)?.message || "Gagal memuat data worksheet.";
+    }
+    return "Terjadi kesalahan koneksi.";
+  }, [isError, error]);
+
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading Worksheet...
       </div>
     );
+  }
 
   return (
     <div className="space-y-6">
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
-      {noPeriod ? (
+      {!vm.hasPeriodSelected ? (
         <Card className="py-16 text-center border-dashed">
           <CardContent className="space-y-3">
             <IconEyeOff size={36} className="mx-auto text-muted-foreground" />
@@ -192,7 +194,7 @@ export default function WorksheetPage() {
                   <TableRow className="bg-muted/50">
                     <TableHead
                       rowSpan={2}
-                      className="sticky left-0 bg-muted/50 z-10 min-w-"
+                      className="sticky left-0 bg-muted/50 z-10 min-w-[200px]"
                     >
                       Account
                     </TableHead>
@@ -230,7 +232,7 @@ export default function WorksheetPage() {
                     vm.rows.map((row) => (
                       <TableRow key={row.accountId}>
                         <TableCell className="sticky left-0 bg-background font-medium flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono">
                             {row.referenceNumber}
                           </Badge>
                           {row.accountName}

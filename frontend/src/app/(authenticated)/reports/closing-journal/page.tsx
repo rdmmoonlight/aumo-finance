@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -25,16 +24,21 @@ import {
   IconLoader2,
 } from "@tabler/icons-react";
 
+// Import Auto-Generated Hook dari RTK Query
+import { useGetApiV1ReportsJournalsClosingQuery } from "@/lib/generatedApi";
+
 export interface ClosingJournalLine {
   referenceNumber?: number;
   accountName: string;
   debit: number;
   credit: number;
 }
+
 export interface ClosingJournalEntryGroup {
   description: string;
   lines: ClosingJournalLine[];
 }
+
 export interface ClosingJournalViewModel {
   netIncome: number;
   retainedEarningsAccountName: string;
@@ -50,82 +54,83 @@ const formatNumber = (amount: number) => {
 };
 
 export default function ClosingJournalReportPage() {
-  const [noPeriodSelected, setNoPeriodSelected] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [vm, setVm] = useState<ClosingJournalViewModel>({
-    netIncome: 0,
-    retainedEarningsAccountName: "Retained Earnings",
-    groups: [],
-  });
+  // 1. Konsumsi RTK Query Hook
+  const {
+    data: rawResponse,
+    isLoading,
+    isError,
+    error,
+  } = useGetApiV1ReportsJournalsClosingQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    try {
-      const { data } = await apiClient.get("/api/v1/reports/journals/closing");
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriodSelected(true);
-        setVm({
+  // 2. Extrak & Normalisasi Response Data
+  const { noPeriodSelected, vm } = useMemo(() => {
+    const data = rawResponse as any;
+
+    if (!data || data?.hasPeriodSelected === false) {
+      return {
+        noPeriodSelected: true,
+        vm: {
           netIncome: 0,
           retainedEarningsAccountName: "Retained Earnings",
           groups: [],
-        });
-        return;
-      }
-      const cjData = data?.closingJournal || data;
-      const rawGroups = Array.isArray(cjData?.groups) ? cjData.groups : [];
-      const safeGroups = rawGroups.map((g: any) => ({
-        description: g.description || "Closing Entry",
-        lines: Array.isArray(g.lines) ? g.lines : [],
-      }));
-      setNoPeriodSelected(false);
-      setVm({
+        } as ClosingJournalViewModel,
+      };
+    }
+
+    const cjData = data?.closingJournal || data;
+    const rawGroups = Array.isArray(cjData?.groups) ? cjData.groups : [];
+    const safeGroups: ClosingJournalEntryGroup[] = rawGroups.map((g: any) => ({
+      description: g.description || "Closing Entry",
+      lines: Array.isArray(g.lines)
+        ? g.lines.map((l: any) => ({
+            referenceNumber: Number(l.referenceNumber) || undefined,
+            accountName: l.accountName || "-",
+            debit: Number(l.debit) || 0,
+            credit: Number(l.credit) || 0,
+          }))
+        : [],
+    }));
+
+    return {
+      noPeriodSelected: false,
+      vm: {
         netIncome: Number(cjData?.netIncome) || 0,
         retainedEarningsAccountName:
           cjData?.retainedEarningsAccountName || "Retained Earnings",
         groups: safeGroups,
-      });
-    } catch (err: any) {
-      setErrorMessage(
-        err.response?.data?.message || err.message || "Failed to connect",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      } as ClosingJournalViewModel,
+    };
+  }, [rawResponse]);
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
-
+  // 3. Hitung Totals per Group
   const groupTotals = useMemo(
     () =>
       vm.groups.map((g) => {
         const lines = g.lines || [];
-        const totalDebit = lines.reduce(
-          (s, l) => s + (Number(l.debit) || 0),
-          0,
-        );
-        const totalCredit = lines.reduce(
-          (s, l) => s + (Number(l.credit) || 0),
-          0,
-        );
+        const totalDebit = lines.reduce((s, l) => s + (l.debit || 0), 0);
+        const totalCredit = lines.reduce((s, l) => s + (l.credit || 0), 0);
         return { totalDebit, totalCredit };
       }),
-    [vm.groups],
+    [vm.groups]
   );
 
-  if (loading)
+  // Error Message Handler
+  const errorMessage = useMemo(() => {
+    if (!isError) return null;
+    const err = error as any;
+    return (
+      err?.data?.message || err?.message || "Failed to load closing journal"
+    );
+  }, [isError, error]);
+
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading closing
         entries...
       </div>
     );
+  }
 
   return (
     <div className="space-y-6 w-full">
@@ -213,14 +218,17 @@ export default function ClosingJournalReportPage() {
                                 variant="outline"
                                 className="font-mono text-amber-500"
                               >
-                                {line.referenceNumber &&
-                                line.referenceNumber > 0
+                                {line.referenceNumber && line.referenceNumber > 0
                                   ? line.referenceNumber
                                   : "-"}
                               </Badge>
                             </TableCell>
                             <TableCell
-                              className={`text-xs ${line.credit > 0 ? "pl-6 text-muted-foreground" : "font-medium"}`}
+                              className={`text-xs ${
+                                line.credit > 0
+                                  ? "pl-6 text-muted-foreground"
+                                  : "font-medium"
+                              }`}
                             >
                               {line.accountName}
                             </TableCell>

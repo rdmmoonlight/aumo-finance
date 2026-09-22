@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
+import {
+  useGetApiV1ReportsStatementOfFinancialPositionQuery,
+} from "@/lib/generatedApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -34,6 +36,7 @@ export interface TrialRow {
   debit?: number;
   credit?: number;
 }
+
 const formatNumber = (n: number) =>
   n === 0
     ? "-"
@@ -41,115 +44,6 @@ const formatNumber = (n: number) =>
         style: "decimal",
         maximumFractionDigits: 0,
       }).format(Math.abs(n));
-
-function usePostClosingTrialBalance() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [rows, setRows] = useState<TrialRow[]>([]);
-
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get(
-        "/api/v1/reports/statement-of-financial-position?isPostClosing=true",
-      );
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        setRows([]);
-        return;
-      }
-
-      const assets = data?.assetAccounts || data?.assets || [];
-      const liabs = data?.liabilityAccounts || data?.liabilities || [];
-      const rawEquity =
-        data?.equityAccounts || data?.equityExcludingRetainedEarnings || [];
-      const reItem = rawEquity.find(
-        (e: any) => e.accountName === "Retained Earnings",
-      );
-      const reEnding = reItem
-        ? Number(reItem.amount)
-        : Number(data?.retainedEarningsEnding) || 0;
-      const equityEx = rawEquity.filter(
-        (e: any) => e.accountName !== "Retained Earnings",
-      );
-
-      const computed: TrialRow[] = [
-        ...assets.map((a: any) => ({
-          accountId: a.accountId || a.referenceNumber,
-          referenceNumber: a.referenceNumber,
-          accountName: a.accountName,
-          type: "Assets",
-          normalBalanceIsDebit: true,
-          debit: Number(a.amount) || 0,
-          credit: 0,
-        })),
-        ...liabs.map((l: any) => ({
-          accountId: l.accountId || l.referenceNumber,
-          referenceNumber: l.referenceNumber,
-          accountName: l.accountName,
-          type: "Liabilities",
-          normalBalanceIsDebit: false,
-          debit: 0,
-          credit: Number(l.amount) || 0,
-        })),
-        ...equityEx.map((e: any) => ({
-          accountId: e.accountId || e.referenceNumber,
-          referenceNumber: e.referenceNumber,
-          accountName: e.accountName,
-          type: "Equity",
-          normalBalanceIsDebit: false,
-          debit: 0,
-          credit: Number(e.amount) || 0,
-        })),
-        {
-          accountId: 0,
-          referenceNumber: 0,
-          accountName: "Retained Earnings",
-          type: "Equity",
-          normalBalanceIsDebit: false,
-          debit: reEnding < 0 ? Math.abs(reEnding) : 0,
-          credit: reEnding >= 0 ? reEnding : 0,
-        },
-      ];
-      setNoPeriod(false);
-      setRows(computed);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setNoPeriod(true);
-      } else setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
-
-  const totalDebit = useMemo(
-    () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
-    [rows],
-  );
-  const totalCredit = useMemo(
-    () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
-    [rows],
-  );
-
-  return {
-    noPeriod,
-    loading,
-    error,
-    rows,
-    totalDebit,
-    totalCredit,
-    isBalanced: Math.abs(totalDebit - totalCredit) < 0.01,
-  };
-}
 
 function TrialTable({
   rows,
@@ -230,22 +124,111 @@ function TrialTable({
 }
 
 export default function PostClosingTrialBalancePage() {
-  const {
-    noPeriod,
-    loading,
-    error,
-    rows,
-    totalDebit,
-    totalCredit,
-    isBalanced,
-  } = usePostClosingTrialBalance();
-  if (loading)
+  // 1. Eksekusi Query RTK dengan isPostClosing: true
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsStatementOfFinancialPositionQuery({
+      isPostClosing: true,
+    });
+
+  // 2. Format error message
+  const errorMessage = useMemo(() => {
+    if (!isError || !error) return null;
+    if ("data" in error && (error.data as any)?.message) {
+      return (error.data as any).message;
+    }
+    return "Failed to load post-closing trial balance.";
+  }, [isError, error]);
+
+  // 3. Cek apakah ada periode yang dipilih
+  const noPeriod = useMemo(() => {
+    if ((error as any)?.status === 404) return true;
+    return (data as any)?.hasPeriodSelected === false;
+  }, [data, error]);
+
+  // 4. Transformasi data Neraca ke format Post-Closing Trial Balance
+  const rows = useMemo<TrialRow[]>(() => {
+    if (!data || noPeriod) return [];
+
+    const rawData = data as any;
+    const assets = rawData?.assetAccounts || rawData?.assets || [];
+    const liabs = rawData?.liabilityAccounts || rawData?.liabilities || [];
+    const rawEquity =
+      rawData?.equityAccounts || rawData?.equityExcludingRetainedEarnings || [];
+
+    const reItem = rawEquity.find(
+      (e: any) => e.accountName === "Retained Earnings",
+    );
+    const reEnding = reItem
+      ? Number(reItem.amount)
+      : Number(rawData?.retainedEarningsEnding) || 0;
+
+    const equityEx = rawEquity.filter(
+      (e: any) => e.accountName !== "Retained Earnings",
+    );
+
+    return [
+      ...assets.map((a: any) => ({
+        accountId: a.accountId || a.referenceNumber,
+        referenceNumber: a.referenceNumber,
+        accountName: a.accountName,
+        type: "Assets",
+        normalBalanceIsDebit: true,
+        debit: Number(a.amount) || 0,
+        credit: 0,
+      })),
+      ...liabs.map((l: any) => ({
+        accountId: l.accountId || l.referenceNumber,
+        referenceNumber: l.referenceNumber,
+        accountName: l.accountName,
+        type: "Liabilities",
+        normalBalanceIsDebit: false,
+        debit: 0,
+        credit: Number(l.amount) || 0,
+      })),
+      ...equityEx.map((e: any) => ({
+        accountId: e.accountId || e.referenceNumber,
+        referenceNumber: e.referenceNumber,
+        accountName: e.accountName,
+        type: "Equity",
+        normalBalanceIsDebit: false,
+        debit: 0,
+        credit: Number(e.amount) || 0,
+      })),
+      {
+        accountId: 0,
+        referenceNumber: 0,
+        accountName: "Retained Earnings",
+        type: "Equity",
+        normalBalanceIsDebit: false,
+        debit: reEnding < 0 ? Math.abs(reEnding) : 0,
+        credit: reEnding >= 0 ? reEnding : 0,
+      },
+    ];
+  }, [data, noPeriod]);
+
+  // 5. Hitung total Debit, Credit & Balance
+  const totalDebit = useMemo(
+    () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
+    [rows],
+  );
+  const totalCredit = useMemo(
+    () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
+    [rows],
+  );
+  const isBalanced = useMemo(
+    () => Math.abs(totalDebit - totalCredit) < 0.01,
+    [totalDebit, totalCredit],
+  );
+
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading post-closing
         trial balance...
       </div>
     );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -257,12 +240,14 @@ export default function PostClosingTrialBalancePage() {
           After closing entries • Only permanent accounts • IDR
         </p>
       </div>
-      {error && (
+
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
+
       {noPeriod ? (
         <Card className="py-16 text-center border-dashed">
           <CardContent className="space-y-3">

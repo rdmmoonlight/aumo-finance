@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
+import { useGetApiV1ReportsStatementOfFinancialPositionQuery } from "@/lib/generatedApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,17 +19,9 @@ import {
 } from "@tabler/icons-react";
 
 export interface FinancialPositionLine {
-  referenceNumber: number;
-  accountName: string;
-  amount: number;
-}
-export interface StatementOfFinancialPositionViewModel {
-  asOfDate: string;
-  isPostClosing: boolean;
-  assets: FinancialPositionLine[];
-  liabilities: FinancialPositionLine[];
-  equityExcludingRetainedEarnings: FinancialPositionLine[];
-  retainedEarningsEnding: number;
+  referenceNumber?: number | string;
+  accountName?: string;
+  amount?: number | string;
 }
 
 const formatNumber = (n: number) => {
@@ -39,6 +31,7 @@ const formatNumber = (n: number) => {
   }).format(Math.abs(n));
   return n < 0 ? `(${f})` : f;
 };
+
 const formatDateDisplay = (s?: string) =>
   !s
     ? ""
@@ -49,97 +42,81 @@ const formatDateDisplay = (s?: string) =>
       }).format(new Date(s));
 
 export default function StatementOfFinancialPositionPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [vm, setVm] = useState<StatementOfFinancialPositionViewModel>({
-    asOfDate: "",
-    isPostClosing: false,
-    assets: [],
-    liabilities: [],
-    equityExcludingRetainedEarnings: [],
-    retainedEarningsEnding: 0,
-  });
+  // Menggunakan Hook Auto-Generated RTK Query
+  const { data, isLoading, isError, error, refetch } =
+    useGetApiV1ReportsStatementOfFinancialPositionQuery({});
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get(
-        "/api/v1/reports/statement-of-financial-position",
-      );
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-      const assetsList = data?.assetAccounts || data?.assets || [];
-      const liabList = data?.liabilityAccounts || data?.liabilities || [];
-      const rawEquity =
-        data?.equityAccounts || data?.equityExcludingRetainedEarnings || [];
+  // Mengecek apakah periode belum dipilih dari respon API
+  const noPeriod = (data as any)?.hasPeriodSelected === false;
+
+  // Parsing data Assets, Liabilities, & Equity secara declarative
+  const { assets, liabilities, equityExcludingRE, retainedEarningsEnding, asOfDate } =
+    useMemo(() => {
+      const rawData = data as any;
+      const assetsList: FinancialPositionLine[] =
+        rawData?.assetAccounts || rawData?.assets || [];
+      const liabList: FinancialPositionLine[] =
+        rawData?.liabilityAccounts || rawData?.liabilities || [];
+      const rawEquity: FinancialPositionLine[] =
+        rawData?.equityAccounts || rawData?.equityExcludingRetainedEarnings || [];
+
       const equityExcludingRE = rawEquity.filter(
-        (e: any) => e.accountName !== "Retained Earnings",
+        (e) => e.accountName !== "Retained Earnings"
       );
       const reItem = rawEquity.find(
-        (e: any) => e.accountName === "Retained Earnings",
+        (e) => e.accountName === "Retained Earnings"
       );
-      setNoPeriod(false);
-      setVm({
-        asOfDate: data?.asOfDate || "",
-        isPostClosing: !!data?.isPostClosing,
+
+      return {
         assets: assetsList,
         liabilities: liabList,
-        equityExcludingRetainedEarnings: equityExcludingRE,
+        equityExcludingRE,
         retainedEarningsEnding: reItem
           ? Number(reItem.amount)
-          : Number(data?.retainedEarningsEnding) || 0,
-      });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+          : Number(rawData?.retainedEarningsEnding) || 0,
+        asOfDate: rawData?.asOfDate || "",
+      };
+    }, [data]);
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
-
+  // Kalkulasi Total Finansial
   const totalAssets = useMemo(
-    () => vm.assets.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [vm.assets],
+    () => assets.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    [assets]
   );
+
   const totalLiabilities = useMemo(
-    () => vm.liabilities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
-    [vm.liabilities],
+    () => liabilities.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    [liabilities]
   );
+
   const totalEquity = useMemo(
     () =>
-      vm.equityExcludingRetainedEarnings.reduce(
-        (s, i) => s + (Number(i.amount) || 0),
-        0,
-      ) + vm.retainedEarningsEnding,
-    [vm],
+      equityExcludingRE.reduce((s, i) => s + (Number(i.amount) || 0), 0) +
+      retainedEarningsEnding,
+    [equityExcludingRE, retainedEarningsEnding]
   );
+
   const totalLiabEquity = totalLiabilities + totalEquity;
   const isBalanced = Math.abs(totalAssets - totalLiabEquity) < 0.01;
 
-  if (loading)
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
-        <IconLoader2 className="animate-spin" size={16} /> Loading Balance
-        Sheet...
+        <IconLoader2 className="animate-spin" size={16} /> Loading Balance Sheet...
       </div>
     );
+  }
+
+  const errorMessage = isError
+    ? (error as any)?.data?.message || "Gagal memuat laporan posisi keuangan."
+    : null;
 
   return (
     <div className="space-y-6">
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -164,45 +141,54 @@ export default function StatementOfFinancialPositionPage() {
                 Statement of Financial Position
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                As of {formatDateDisplay(vm.asOfDate) || "current period"} • IAS
-                1 • IDR
+                As of {formatDateDisplay(asOfDate) || "current period"} • IAS 1 • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5">
-              <Link href="/reports/closing-journal">
-                <IconArrowRight size={14} /> Closing Journal
-              </Link>
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => refetch()}
+                className="text-xs"
+              >
+                Refresh Data
+              </Button>
+              <Button asChild variant="outline" size="sm" className="gap-1.5">
+                <Link href="/reports/closing-journal">
+                  <IconArrowRight size={14} /> Closing Journal
+                </Link>
+              </Button>
+            </div>
           </div>
 
           <div className="grid lg:grid-cols-2 gap-4 items-start">
-            {/* Assets */}
+            {/* Aktiva / Assets */}
             <Card className="overflow-hidden">
               <CardHeader className="py-3 bg-muted/30 border-b">
-                <CardTitle className="text- tracking-widest uppercase text-amber-500">
+                <CardTitle className="tracking-widest uppercase text-amber-500 text-sm">
                   Assets
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="divide-y text-sm">
-                  {vm.assets.length === 0 ? (
+                  {assets.length === 0 ? (
                     <div className="p-4 text-xs text-muted-foreground italic">
                       No assets.
                     </div>
                   ) : (
-                    vm.assets.map((l, i) => (
+                    assets.map((l, i) => (
                       <div
                         key={i}
                         className="flex items-center justify-between p-3 px-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono text-xs">
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}
                         </span>
                         <span className="font-mono text-xs">
-                          {formatNumber(l.amount)}
+                          {formatNumber(Number(l.amount) || 0)}
                         </span>
                       </div>
                     ))
@@ -217,36 +203,34 @@ export default function StatementOfFinancialPositionPage() {
               </CardContent>
             </Card>
 
+            {/* Kewajiban & Ekuitas / Liabilities & Equity */}
             <div className="space-y-4">
               <Card className="overflow-hidden">
                 <CardHeader className="py-3 bg-muted/30 border-b">
-                  <CardTitle className="text- tracking-widest uppercase text-amber-500">
+                  <CardTitle className="tracking-widest uppercase text-amber-500 text-sm">
                     Liabilities
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y text-sm">
-                    {vm.liabilities.length === 0 ? (
+                    {liabilities.length === 0 ? (
                       <div className="p-4 text-xs text-muted-foreground italic">
                         No liabilities.
                       </div>
                     ) : (
-                      vm.liabilities.map((l, i) => (
+                      liabilities.map((l, i) => (
                         <div
                           key={i}
                           className="flex items-center justify-between p-3 px-4"
                         >
                           <span className="flex items-center gap-2">
-                            <Badge
-                              variant="outline"
-                              className="font-mono text-"
-                            >
+                            <Badge variant="outline" className="font-mono text-xs">
                               {l.referenceNumber}
                             </Badge>
                             {l.accountName}
                           </span>
                           <span className="font-mono text-xs">
-                            {formatNumber(l.amount)}
+                            {formatNumber(Number(l.amount) || 0)}
                           </span>
                         </div>
                       ))
@@ -263,34 +247,34 @@ export default function StatementOfFinancialPositionPage() {
 
               <Card className="overflow-hidden">
                 <CardHeader className="py-3 bg-muted/30 border-b">
-                  <CardTitle className="text- tracking-widest uppercase text-amber-500">
+                  <CardTitle className="tracking-widest uppercase text-amber-500 text-sm">
                     Equity
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="divide-y text-sm">
-                    {vm.equityExcludingRetainedEarnings.map((l, i) => (
+                    {equityExcludingRE.map((l, i) => (
                       <div
                         key={i}
                         className="flex items-center justify-between p-3 px-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono text-xs">
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}
                         </span>
                         <span className="font-mono text-xs">
-                          {formatNumber(l.amount)}
+                          {formatNumber(Number(l.amount) || 0)}
                         </span>
                       </div>
                     ))}
                     <div className="flex items-center justify-between p-3 px-4">
                       <span>
-                        Retained earnings, {formatDateDisplay(vm.asOfDate)}
+                        Retained earnings, {formatDateDisplay(asOfDate)}
                       </span>
                       <span className="font-mono text-xs">
-                        {formatNumber(vm.retainedEarningsEnding)}
+                        {formatNumber(retainedEarningsEnding)}
                       </span>
                     </div>
                   </div>

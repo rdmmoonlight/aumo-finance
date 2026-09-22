@@ -35,12 +35,20 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
-import { useChartOfAccounts, ChartOfAccount } from "@/hooks/use-coa";
+// RTK Query Auto-Generated Hooks & Types
+import {
+  useGetApiV1ChartOfAccountsQuery,
+  GetApiV1ChartOfAccountsApiResponse,
+} from "@/lib/generatedApi";
+
 import {
   AddAccountDialog,
   EditAccountDialog,
   DeleteAccountAlertDialog,
 } from "./_components/coa-dialogs";
+
+// Tipe untuk satu item akun berdasarkan response API
+type AccountItem = NonNullable<GetApiV1ChartOfAccountsApiResponse>[number];
 
 const ACCOUNT_TYPES = [
   "Assets",
@@ -77,33 +85,42 @@ function ChartOfAccountsContent() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
 
-  // TanStack Query Hook
-  const { accounts, isLoading } = useChartOfAccounts();
-
   // Local UI Filter States
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  // RTK Query Hook (menggantikan useChartOfAccounts)
+  const {
+    data: rawAccounts = [],
+    isLoading,
+    isError,
+  } = useGetApiV1ChartOfAccountsQuery({
+    search: searchText || undefined,
+    category: categoryFilter || undefined,
+  });
+
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editAccount, setEditAccount] = useState<ChartOfAccount | null>(null);
-  const [accountToDelete, setAccountToDelete] = useState<ChartOfAccount | null>(
-    null,
+  const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
+    null
   );
 
+  // Client-side fallback filter untuk memastikan reactivity cepat
   const filteredAccounts = useMemo(() => {
-    return accounts.filter((acc) => {
+    if (!Array.isArray(rawAccounts)) return [];
+    return rawAccounts.filter((acc) => {
       const matchSearch =
         !searchText ||
-        acc.accountName.toLowerCase().includes(searchText.toLowerCase()) ||
-        acc.referenceNumber.toString().includes(searchText);
+        acc.accountName?.toLowerCase().includes(searchText.toLowerCase()) ||
+        acc.referenceNumber?.toString().includes(searchText);
       const matchCat = !categoryFilter || acc.type === categoryFilter;
       return matchSearch && matchCat;
     });
-  }, [accounts, searchText, categoryFilter]);
+  }, [rawAccounts, searchText, categoryFilter]);
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -122,12 +139,14 @@ function ChartOfAccountsContent() {
         </Button>
       </div>
 
-      {errorMessage && (
+      {(errorMessage || isError) && (
         <Alert
           variant="destructive"
           className="flex justify-between items-center py-2"
         >
-          <AlertDescription>{errorMessage}</AlertDescription>
+          <AlertDescription>
+            {errorMessage || "Gagal mengambil data Chart of Accounts dari server."}
+          </AlertDescription>
           <Button
             variant="ghost"
             size="icon"
@@ -175,7 +194,7 @@ function ChartOfAccountsContent() {
               <SelectContent>
                 {ACCOUNT_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
-                    {ACCOUNT_RANGES[t].label}
+                    {ACCOUNT_RANGES[t]?.label || t}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -219,92 +238,95 @@ function ChartOfAccountsContent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAccounts.map((acc) => (
-                  <TableRow
-                    key={acc.id}
-                    className={cn(
-                      highlightId === String(acc.id) && "bg-primary/10",
-                    )}
-                  >
-                    <TableCell className="pl-6 font-mono text-primary font-medium">
-                      {acc.referenceNumber}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {acc.accountName}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {acc.type}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {acc.role !== "Default" ? (
-                        <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
-                          {acc.role}
-                        </Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">
-                          Standard
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell
+                filteredAccounts.map((acc: any) => {
+                  const balance = Number(acc.balance || 0);
+                  return (
+                    <TableRow
+                      key={acc.id}
                       className={cn(
-                        "text-right font-medium font-mono",
-                        acc.balance >= 0 ? "text-emerald-500" : "text-red-500",
+                        highlightId === String(acc.id) && "bg-primary/10"
                       )}
                     >
-                      Rp {acc.balance.toLocaleString("en-US")}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant={acc.isActive ? "default" : "secondary"}
+                      <TableCell className="pl-6 font-mono text-primary font-medium">
+                        {acc.referenceNumber}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {acc.accountName}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {acc.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {acc.role && acc.role !== "Default" ? (
+                          <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
+                            {acc.role}
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">
+                            Standard
+                          </span>
+                        )}
+                      </TableCell>
+                      <TableCell
                         className={cn(
-                          "text-xs",
-                          acc.isActive &&
-                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
+                          "text-right font-medium font-mono",
+                          balance >= 0 ? "text-emerald-500" : "text-red-500"
                         )}
                       >
-                        {acc.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="pr-6">
-                      <div className="flex justify-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          onClick={() => {
-                            setEditAccount({ ...acc });
-                            setIsEditModalOpen(true);
-                          }}
+                        Rp {balance.toLocaleString("en-US")}
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <Badge
+                          variant={acc.isActive ? "default" : "secondary"}
+                          className={cn(
+                            "text-xs",
+                            acc.isActive &&
+                              "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                          )}
                         >
-                          <IconPencil size={14} />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7"
-                          asChild
-                        >
-                          <Link
-                            href={`/reports/general-ledger/permanent#account-${acc.id}`}
+                          {acc.isActive ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="pr-6">
+                        <div className="flex justify-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            onClick={() => {
+                              setEditAccount({ ...acc });
+                              setIsEditModalOpen(true);
+                            }}
                           >
-                            <IconNotebook size={14} />
-                          </Link>
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-destructive hover:text-destructive"
-                          onClick={() => setAccountToDelete(acc)}
-                        >
-                          <IconTrash size={14} />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
+                            <IconPencil size={14} />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            asChild
+                          >
+                            <Link
+                              href={`/reports/general-ledger/permanent#account-${acc.id}`}
+                            >
+                              <IconNotebook size={14} />
+                            </Link>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive hover:text-destructive"
+                            onClick={() => setAccountToDelete(acc)}
+                          >
+                            <IconTrash size={14} />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               )}
               {!isLoading && filteredAccounts.length === 0 && (
                 <TableRow>
@@ -325,7 +347,7 @@ function ChartOfAccountsContent() {
       <AddAccountDialog
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
-        accounts={accounts}
+        accounts={rawAccounts as any}
         onSuccess={(msg) => setSuccessMessage(msg)}
       />
 
@@ -333,13 +355,13 @@ function ChartOfAccountsContent() {
         <EditAccountDialog
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
-          account={editAccount}
+          account={editAccount as any}
           onSuccess={(msg) => setSuccessMessage(msg)}
         />
       )}
 
       <DeleteAccountAlertDialog
-        account={accountToDelete}
+        account={accountToDelete as any}
         onOpenChange={(open) => !open && setAccountToDelete(null)}
         onSuccess={(msg) => setSuccessMessage(msg)}
         onError={(msg) => setErrorMessage(msg)}

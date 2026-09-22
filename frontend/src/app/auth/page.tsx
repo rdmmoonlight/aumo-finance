@@ -2,7 +2,7 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { login } from "@/lib/auth";
+import { usePostApiV1AuthLoginMutation } from "@/lib/generatedApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,8 +14,10 @@ function LoginFormContent() {
   const [password, setPassword] = useState("");
   const [keepMe, setKeepMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
+
+  // Panggil mutation hook dari RTK Query
+  const [loginMutation, { isLoading }] = usePostApiV1AuthLoginMutation();
 
   useEffect(() => {
     document.title = "Sign In | Aumo Workspace";
@@ -29,25 +31,20 @@ function LoginFormContent() {
 
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setErr("");
 
     try {
-      // Memanggil helper login dari @/lib/auth
-      const result = await login({
-        email,
-        password,
-        rememberMe: keepMe,
-        isMobileClient: false,
-      });
+      // Eksekusi mutasi login lewat RTK Query
+      await loginMutation({
+        loginRequest: {
+          email,
+          password,
+          rememberMe: keepMe,
+          isMobileClient: false,
+        },
+      }).unwrap();
 
-      if (!result.success) {
-        setErr(result.message || "Email atau password salah");
-        setLoading(false);
-        return;
-      }
-
-      // Simpan/hapus email terimpan di local storage
+      // Simpan/hapus email di local storage jika checkbox diset
       if (keepMe) {
         localStorage.setItem("aumo_saved_email", email);
       } else {
@@ -56,12 +53,16 @@ function LoginFormContent() {
 
       const targetUrl = searchParams.get("redirectTo") || "/home";
 
-      // Hard navigation agar cookie session terekam sempurna di browser
+      // Hard navigation agar cookie session 'AumoFinance.Session' aktif sempurna di browser
       window.location.href = targetUrl;
-    } catch (e: unknown) {
+    } catch (e: any) {
       console.error("[LOGIN FAIL]", e);
-      setErr("Terjadi kesalahan sistem saat mencoba login.");
-      setLoading(false);
+      // Ambil pesan error dari response backend jika ada
+      const errorMessage =
+        e?.data?.message ||
+        e?.data?.title ||
+        "Email atau password salah / terjadi kesalahan sistem.";
+      setErr(errorMessage);
     }
   };
 
@@ -146,10 +147,10 @@ function LoginFormContent() {
         )}
         <Button
           type="submit"
-          disabled={loading}
+          disabled={isLoading}
           className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800"
         >
-          {loading ? "Processing..." : "Sign In"}
+          {isLoading ? "Processing..." : "Sign In"}
         </Button>
         <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>

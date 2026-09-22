@@ -1,9 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import apiClient from "@/lib/apiClient";
+import {
+  useGetApiV1ReportsJournalsGeneralQuery,
+  useDeleteApiV1JournalEntryDeleteByIdMutation,
+} from "@/lib/generatedApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -91,45 +94,47 @@ const formatDateTimeDisplay = (s?: string) => {
 
 export default function GeneralJournalClient() {
   const router = useRouter();
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [selectedPeriodName, setSelectedPeriodName] = useState<string | null>(
-    null,
-  );
-  const [isPeriodClosed, setIsPeriodClosed] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    try {
-      const { data } = await apiClient.get("/api/v1/reports/journals/general");
-      if (data.success) {
-        setSelectedPeriodName(data.selectedPeriodName || null);
-        setIsPeriodClosed(data.isPeriodClosed || false);
-        setEntries(data.entries || []);
-      } else {
-        throw new Error(data.message);
-      }
-    } catch (err: any) {
-      if (err.response?.status === 401) {
-        router.push("/");
-      }
-      setErrorMessage(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+  // 1. Fetching data menggunakan Hook RTK Query
+  const {
+    data: responseData,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetApiV1ReportsJournalsGeneralQuery();
 
+  // 2. Mutation Hook untuk hapus jurnal
+  const [deleteJournalEntry, { isLoading: isDeleting }] =
+    useDeleteApiV1JournalEntryDeleteByIdMutation();
+
+  // Casting data dari response API RTK
+  const data = responseData as any;
+  const selectedPeriodName = data?.selectedPeriodName || null;
+  const isPeriodClosed = data?.isPeriodClosed || false;
+  const entries: JournalEntry[] = data?.entries || [];
+
+  // Re-fetch jika ada event kustom perubahan periode
   useEffect(() => {
-    fetchData();
-    const handlePeriodChange = () => fetchData();
+    const handlePeriodChange = () => refetch();
     window.addEventListener("periodChanged", handlePeriodChange);
     return () =>
       window.removeEventListener("periodChanged", handlePeriodChange);
-  }, [fetchData]);
+  }, [refetch]);
+
+  // Handle 401 Unauthorized secara terpusat
+  useEffect(() => {
+    if (isError && error && "status" in error && error.status === 401) {
+      router.push("/");
+    } else if (isError && error) {
+      const msg =
+        (error as any)?.data?.message || "Gagal mengambil data jurnal umum.";
+      setErrorMessage(msg);
+    }
+  }, [isError, error, router]);
 
   const handlePromptDelete = (entry: JournalEntry) => {
     if (isPeriodClosed) {
@@ -144,12 +149,12 @@ export default function GeneralJournalClient() {
   const handleDeleteConfirm = async () => {
     if (!entryToDelete) return;
     try {
-      await apiClient.delete(
-        `/api/v1/reports/journals/general/${entryToDelete.id}`,
-      );
-      setEntries((prev) => prev.filter((e) => e.id !== entryToDelete.id));
+      await deleteJournalEntry({ id: entryToDelete.id }).unwrap();
+      refetch(); // Trigger re-fetch otomatis untuk memperbarui cache
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || "Failed to delete entry");
+      setErrorMessage(
+        err?.data?.message || err?.message || "Gagal menghapus entri jurnal.",
+      );
     } finally {
       setEntryToDelete(null);
     }
@@ -228,7 +233,7 @@ export default function GeneralJournalClient() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {loading ? (
+                {isLoading ? (
                   <TableRow>
                     <TableCell
                       colSpan={6}
@@ -316,6 +321,7 @@ export default function GeneralJournalClient() {
                                       size="icon"
                                       className="h-6 w-6 text-destructive hover:text-destructive"
                                       onClick={() => handlePromptDelete(entry)}
+                                      disabled={isDeleting}
                                     >
                                       <IconTrash size={12} />
                                     </Button>
@@ -411,12 +417,13 @@ export default function GeneralJournalClient() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDeleteConfirm}
+              disabled={isDeleting}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
-              Delete
+              {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
+import { useGetApiV1ReportsGeneralLedgerPermanentQuery } from "@/lib/generatedApi";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
@@ -52,49 +51,17 @@ const formatNumber = (n: number) => {
 };
 
 export default function GeneralLedgerPermanentPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [ledgers, setLedgers] = useState<LedgerAccountViewModel[]>([]);
+  // Menggunakan RTK Query Hook bawaan generatedApi
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsGeneralLedgerPermanentQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Sesuaikan dengan rute Controller: [Route("/api/v1/reports/general-ledger")] -> [HttpGet("permanent")]
-      const { data } = await apiClient.get(
-        "/api/v1/reports/general-ledger/permanent",
-      );
+  // Parsing tipe data response
+  const rawData = data as any;
+  const noPeriod = rawData?.hasPeriodSelected === false;
+  const ledgers: LedgerAccountViewModel[] =
+    rawData?.ledgers || (Array.isArray(rawData) ? rawData : []);
 
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-
-      const raw = data?.ledgers || (Array.isArray(data) ? data : []);
-      setLedgers(raw);
-      setNoPeriod(false);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setNoPeriod(true);
-      } else {
-        setError(
-          err.response?.data?.message || "Failed to load general ledger data.",
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading Permanent
@@ -119,12 +86,18 @@ export default function GeneralLedgerPermanentPage() {
     );
   }
 
+  // Formatting error message
+  const errorMessage =
+    isError && error
+      ? (error as any)?.data?.message || "Failed to load general ledger data."
+      : null;
+
   return (
     <div className="space-y-6">
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -137,7 +110,6 @@ export default function GeneralLedgerPermanentPage() {
             Assets, Liabilities, Equity • {ledgers.length} accounts • IDR
           </p>
         </div>
-        {/* Navigasi ke rute temporary */}
         <Button asChild variant="outline" size="sm">
           <Link href="/reports/general-ledger/temporary">View Temporary</Link>
         </Button>
