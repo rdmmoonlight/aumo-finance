@@ -1,15 +1,10 @@
-import {
-  createApi,
-  fetchBaseQuery,
-  type BaseQueryFn,
-  type FetchArgs,
-  type FetchBaseQueryError,
-} from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { aumoConfig } from "../../aumo.config";
 
 /**
- * Normalisasi URL agar wajib HTTPS untuk koneksi luar.
- * Mencegah server Next.js / browser melakukan request via HTTP biasa.
+ * Normalisasi URL agar wajib menggunakan HTTPS untuk koneksi luar.
+ * Diperlukan untuk keamanan SameSite=None cookie pada Next.js / Browser.
  */
 function enforceHttps(url: string): string {
   if (!url) return url;
@@ -20,14 +15,13 @@ function enforceHttps(url: string): string {
 
 const BASE_URL = enforceHttps(aumoConfig.backendTarget);
 
-// Base query utama dengan konfigurasi credentials & SSR cookie forwarding
+// Raw Base Query bawaan RTK Query
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  // WAJIB: Memaksa browser melampirkan Cookie SameSite=None (.NET Identity Session)
+  // WAJIB: Mengirim cookie 'AumoFinance.Session' (.NET Identity) pada request Client-Side
   credentials: "include",
-
   prepareHeaders: async (headers) => {
-    // Meneruskan Cookie dari Browser saat Next.js melakukan SSR (Server-Side)
+    // Penanganan SSR Cookie untuk Next.js App Router saat dijalankan di server-side
     if (typeof window === "undefined") {
       try {
         const { cookies } = await import("next/headers");
@@ -35,10 +29,10 @@ const rawBaseQuery = fetchBaseQuery({
         const cookieHeader = cookieStore.toString();
 
         if (cookieHeader) {
-          headers.set("Cookie", cookieHeader);
+          headers.set("cookie", cookieHeader);
         }
       } catch {
-        // Abaikan jika dieksekusi di luar konteks HTTP Request Next.js (misal: build time)
+        // Safe fallback jika dieksekusi di luar konteks HTTP Request Next.js (misal: build time)
       }
     }
     return headers;
@@ -46,8 +40,8 @@ const rawBaseQuery = fetchBaseQuery({
 });
 
 /**
- * Custom BaseQuery dengan logika Response Interceptor:
- * Menangani 401 Unauthorized secara global di sisi Client-Side.
+ * Custom Base Query dengan Interceptor 401 Unauthorized Global
+ * Menggantikan perilaku Axios Interceptor terdahulu.
  */
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
@@ -56,15 +50,11 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  // Jika terjadi 401 Unauthorized & dieksekusi di browser
-  if (
-    result.error &&
-    result.error.status === 401 &&
-    typeof window !== "undefined"
-  ) {
+  // Jika response 401 Unauthorized dan dieksekusi di sisi Browser (Client)
+  if (result.error && result.error.status === 401 && typeof window !== "undefined") {
     const currentPath = window.location.pathname;
 
-    // Mencegah infinite loop redirect jika sudah di rute /auth atau /
+    // Mencegah infinite loop redirect jika sudah berada di halaman /auth atau /
     if (!currentPath.startsWith("/auth") && currentPath !== "/") {
       const redirectUrl = `/auth?redirectTo=${encodeURIComponent(currentPath)}`;
       window.location.href = redirectUrl;
@@ -77,12 +67,28 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-
-  // Durasi penyimpanan cache (5 menit)
+  // Durasi cache default (300 detik / 5 menit)
   keepUnusedDataFor: 300,
-
-  // Daftar Tag Types untuk pembersihan/invalidation cache otomatis
-  tagTypes: ["Auth", "User", "Transaction"],
-
+  // Daftar tagTypes diselaraskan dengan addTagTypes di generatedApi.ts
+  tagTypes: [
+    "AumoBackend",
+    "Auth",
+    "ChartOfAccounts",
+    "Dashboard",
+    "Guardian",
+    "Health",
+    "JournalEntry",
+    "Periods",
+    "Tools",
+    "TestEmail",
+    "GeneralLedger",
+    "IncomeStatement",
+    "Journal",
+    "RetainedEarnings",
+    "StatementOfCashFlow",
+    "StatementOfFinancialPosition",
+    "TrialBalance",
+    "Worksheet",
+  ],
   endpoints: () => ({}),
 });
