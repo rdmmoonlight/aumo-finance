@@ -1,4 +1,4 @@
-export function Footer() {
+export function AppFooter() {
   return (
     <footer className="w-full border-t border-border/40 py-4">
       <div className="flex flex-col items-center justify-between gap-2 px-6 text-sm text-muted-foreground md:flex-row">
