@@ -26,91 +26,129 @@ public class DashboardController : ControllerBase
 
         var activePeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
 
-        DateTime startDate, endDate;
-        string displayPeriodName;
+        int year = activePeriod?.StartDate.Year?? DateTime.UtcNow.Year;
 
-        if (string.Equals(period, "annual", StringComparison.OrdinalIgnoreCase))
-        {
-            int year = activePeriod?.StartDate.Year ?? DateTime.UtcNow.Year;
-            startDate = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-            endDate = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
-            displayPeriodName = $"Annual {year}";
-        }
-        else
-        {
-            startDate = activePeriod?.StartDate ?? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
-            endDate = activePeriod?.EndDate ?? startDate.AddMonths(1).AddDays(-1).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
-            displayPeriodName = activePeriod?.PeriodName ?? "Current Period";
-        }
+        DateTime monthlyStart = activePeriod?.StartDate?? new DateTime(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        DateTime monthlyEnd = activePeriod?.EndDate?? monthlyStart.AddMonths(1).AddDays(-1).Date.AddHours(23).AddMinutes(59).AddSeconds(59);
 
-        // Period scope: untuk Laba Rugi
-        var periodLines = await _db.JournalEntryLines
-           .AsNoTracking()
-           .Where(l => l.JournalEntry!.UserId == userId
-                     && l.JournalEntry.EntryDate >= startDate
-                     && l.JournalEntry.EntryDate <= endDate)
-           .Select(l => new { l.AccountId, l.Debit, l.Credit, l.JournalEntry!.EntryDate })
-           .ToListAsync();
+        DateTime annualStart = new DateTime(year, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        DateTime annualEnd = new DateTime(year, 12, 31, 23, 59, 59, DateTimeKind.Utc);
 
-        // Cumulative scope: untuk Neraca (Kas, Hutang, Modal)
+        bool isAnnual = string.Equals(period, "annual", StringComparison.OrdinalIgnoreCase);
+        DateTime reqStart = isAnnual? annualStart : monthlyStart;
+        DateTime reqEnd = isAnnual? annualEnd : monthlyEnd;
+        string displayPeriodName = isAnnual? $"Annual {year}" : activePeriod?.PeriodName?? "Current Period";
+
+        // Scope per tab - REAL, bukan kumulatif
+        var monthlyLines = await _db.JournalEntryLines
+          .AsNoTracking()
+          .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate >= monthlyStart && l.JournalEntry.EntryDate <= monthlyEnd)
+          .Select(l => new { l.AccountId, l.Debit, l.Credit, l.JournalEntry!.EntryDate })
+          .ToListAsync();
+
+        var annualLines = await _db.JournalEntryLines
+          .AsNoTracking()
+          .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate >= annualStart && l.JournalEntry.EntryDate <= annualEnd)
+          .Select(l => new { l.AccountId, l.Debit, l.Credit, l.JournalEntry!.EntryDate })
+          .ToListAsync();
+
+        var periodLines = isAnnual? annualLines : monthlyLines;
+
+        // Kumulatif tetap diambil untuk referensi (kalau masih butuh)
         var cumulativeLines = await _db.JournalEntryLines
-           .AsNoTracking()
-           .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate <= endDate)
-           .Select(l => new { l.AccountId, l.Debit, l.Credit })
-           .ToListAsync();
+          .AsNoTracking()
+          .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate <= reqEnd)
+          .Select(l => new { l.AccountId, l.Debit, l.Credit })
+          .ToListAsync();
 
-        // --- 1. KAS & BANK (FIX: Harus Kumulatif) ---
+        // --- 1. KAS & BANK (FIX: Harus REAL per tab) ---
         var cashBankAccounts = await _db.ChartOfAccounts
-           .Where(a => a.UserId == userId && a.IsActive && a.Role == "CashAndEquivalents")
-           .OrderBy(a => a.ReferenceNumber)
-           .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName })
-           .ToListAsync();
+          .Where(a => a.UserId == userId && a.IsActive && a.Role == "CashAndEquivalents")
+          .OrderBy(a => a.ReferenceNumber)
+          .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName })
+          .ToListAsync();
 
-        var cashBankBreakdown = cashBankAccounts.Select(a =>
+        Func<List<dynamic>, List<dynamic>> buildCashBreakdown = (lines) =>
         {
-            var bal = cumulativeLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
-            bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase)
-                       || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
+            // lines is List of {AccountId, Debit, Credit}
+            return cashBankAccounts.Select(a =>
+            {
+                var bal = lines.Where(l => l.AccountId == a.Id).Sum(l => (decimal)(l.Debit - l.Credit));
+                bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase)
+                           || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
+                return new { accountId = a.Id, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, balance = bal, isBank } as dynamic;
+            }).ToList();
+        };
+
+        var monthlyCashBreakdown = cashBankAccounts.Select(a =>
+        {
+            var bal = monthlyLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
+            bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase) || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
             return new { accountId = a.Id, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, balance = bal, isBank };
         }).ToList();
 
-        var totalCashOnHand = cashBankBreakdown.Where(x => !x.isBank).Sum(x => x.balance);
-        var totalBankBalance = cashBankBreakdown.Where(x => x.isBank).Sum(x => x.balance);
-        var totalAssets = cashBankBreakdown.Sum(x => x.balance); // Kumulatif
+        var annualCashBreakdown = cashBankAccounts.Select(a =>
+        {
+            var bal = annualLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
+            bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase) || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
+            return new { accountId = a.Id, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, balance = bal, isBank };
+        }).ToList();
 
-        // --- 2. PENDAPATAN & BEBAN (Period) ---
+        var cumulativeCashBreakdown = cashBankAccounts.Select(a =>
+        {
+            var bal = cumulativeLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
+            bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase) || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
+            return new { accountId = a.Id, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, balance = bal, isBank };
+        }).ToList();
+
+        var totalCashOnHandMonthly = monthlyCashBreakdown.Where(x =>!x.isBank).Sum(x => x.balance);
+        var totalBankBalanceMonthly = monthlyCashBreakdown.Where(x => x.isBank).Sum(x => x.balance);
+        var totalAssetsMonthly = monthlyCashBreakdown.Sum(x => x.balance);
+
+        var totalCashOnHandAnnual = annualCashBreakdown.Where(x =>!x.isBank).Sum(x => x.balance);
+        var totalBankBalanceAnnual = annualCashBreakdown.Where(x => x.isBank).Sum(x => x.balance);
+        var totalAssetsAnnual = annualCashBreakdown.Sum(x => x.balance);
+
+        // Field utama yang dipakai frontend lama - sekarang REAL per tab
+        var totalCashOnHand = isAnnual? totalCashOnHandAnnual : totalCashOnHandMonthly;
+        var totalBankBalance = isAnnual? totalBankBalanceAnnual : totalBankBalanceMonthly;
+        var totalAssets = isAnnual? totalAssetsAnnual : totalAssetsMonthly;
+
+        // --- 2. PENDAPATAN & BEBAN (Period - sudah benar) ---
         var incomeTypes = new[] { "OperatingIncome", "Income", "Revenue" };
         var incomeIds = await _db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && incomeTypes.Contains(a.Type)).Select(a => a.Id).ToListAsync();
         var totalIncome = periodLines.Where(l => incomeIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
 
         var expenseTypes = new[] { "OperatingExpenses", "Expense", "Expenses" };
         var expenseAccountsMeta = await _db.ChartOfAccounts
-           .Where(a => a.UserId == userId && a.IsActive && expenseTypes.Contains(a.Type))
-           .OrderBy(a => a.ReferenceNumber)
-           .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName })
-           .ToListAsync();
+          .Where(a => a.UserId == userId && a.IsActive && expenseTypes.Contains(a.Type))
+          .OrderBy(a => a.ReferenceNumber)
+          .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName })
+          .ToListAsync();
 
         var expenseBreakdown = expenseAccountsMeta
-           .Select(a => new { accountId = a.Id, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, balance = periodLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit) })
-           .Where(a => a.balance != 0)
-           .ToList();
+          .Select(a => new { accountId = a.Id, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, balance = periodLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit) })
+          .Where(a => a.balance!= 0)
+          .ToList();
 
         var totalExpense = expenseBreakdown.Where(x => x.balance > 0).Sum(x => x.balance);
         var netIncome = totalIncome - totalExpense;
 
-        // --- 3. LIABILITIES & EQUITY (Kumulatif) ---
+        // --- 3. LIABILITIES - kasih 2 versi: Real per tab + Kumulatif ---
         var liabilityTypes = new[] { "Liabilities", "Liability" };
         var liabilityIds = await _db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && liabilityTypes.Contains(a.Type)).Select(a => a.Id).ToListAsync();
-        var totalLiabilities = cumulativeLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
+
+        var totalLiabilitiesMonthly = monthlyLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
+        var totalLiabilitiesAnnual = annualLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
+        var totalLiabilities = isAnnual? totalLiabilitiesAnnual : totalLiabilitiesMonthly;
+        var totalLiabilitiesCumulative = cumulativeLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
 
         var equityIds = await _db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && a.Type == "Equity").Select(a => a.Id).ToListAsync();
         var totalEquity = cumulativeLines.Where(l => equityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
 
-        // --- 4. DATA UNTUK CHARTJS (Monthly Trend) ---
-        // Jika annual -> group per bulan, jika monthly -> group per hari
-        var isAnnual = string.Equals(period, "annual", StringComparison.OrdinalIgnoreCase);
+        // --- 4. CHARTJS ---
         var trendData = isAnnual
-           ? Enumerable.Range(1, 12).Select(m =>
+          ? Enumerable.Range(1, 12).Select(m =>
            {
                var monthLines = periodLines.Where(l => l.EntryDate.Month == m);
                var rev = monthLines.Where(l => incomeIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
@@ -127,19 +165,45 @@ public class DashboardController : ControllerBase
         return Ok(new
         {
             success = true,
-            hasPeriodSelected = activePeriod != null,
+            hasPeriodSelected = activePeriod!= null,
             selectedPeriodName = displayPeriodName,
-            isPeriodClosed = activePeriod?.IsClosed ?? false,
+            isPeriodClosed = activePeriod?.IsClosed?? false,
+
+            // REAL per tab - ini yang dipakai frontend baru
             totalAssets,
+            totalCashOnHand,
+            totalBankBalance,
             totalLiabilities,
+
+            // Explicit monthly / annual biar frontend gak perlu fetch 2x
+            totalAssetsMonthly,
+            totalAssetsAnnual,
+            totalCashOnHandMonthly,
+            totalCashOnHandAnnual,
+            totalBankBalanceMonthly,
+            totalBankBalanceAnnual,
+            totalLiabilitiesMonthly,
+            totalLiabilitiesAnnual,
+
+            // Kumulatif tetap dikirim buat audit / kalau butuh
+            totalAssetsCumulative = cumulativeCashBreakdown.Sum(x => x.balance),
+            totalCashOnHandCumulative = cumulativeCashBreakdown.Where(x =>!x.isBank).Sum(x => x.balance),
+            totalBankBalanceCumulative = cumulativeCashBreakdown.Where(x => x.isBank).Sum(x => x.balance),
+            totalLiabilitiesCumulative,
+
             totalEquity,
             totalRevenue = totalIncome,
             totalExpenses = totalExpense,
             netIncome,
-            cashAccounts = cashBankBreakdown.Where(x => !x.isBank),
-            totalCashOnHand,
-            bankAccounts = cashBankBreakdown.Where(x => x.isBank),
-            totalBankBalance,
+
+            // breakdown sesuai tab
+            cashAccounts = (isAnnual? annualCashBreakdown : monthlyCashBreakdown).Where(x =>!x.isBank),
+            bankAccounts = (isAnnual? annualCashBreakdown : monthlyCashBreakdown).Where(x => x.isBank),
+            cashAccountsMonthly = monthlyCashBreakdown.Where(x =>!x.isBank),
+            bankAccountsMonthly = monthlyCashBreakdown.Where(x => x.isBank),
+            cashAccountsAnnual = annualCashBreakdown.Where(x =>!x.isBank),
+            bankAccountsAnnual = annualCashBreakdown.Where(x => x.isBank),
+
             expenseAccountsList = expenseBreakdown,
             chartTrend = trendData,
             recentEntries = Array.Empty<object>()
@@ -148,7 +212,7 @@ public class DashboardController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
-        return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
+        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)?? User.FindFirstValue("sub");
+        return Guid.TryParse(userIdStr, out Guid userId)? userId : Guid.Empty;
     }
 }
