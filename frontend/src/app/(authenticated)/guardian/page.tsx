@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   IconShieldCheck,
   IconHeartbeat,
@@ -14,7 +14,6 @@ import {
   IconDownload,
   IconLoader2,
 } from "@tabler/icons-react";
-import apiClient from "@/lib/apiClient";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -28,83 +27,51 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-export interface ActiveSessionViewModel {
-  id: string;
-  deviceName: string;
-  operatingSystem: string;
-  browser: string;
-  ipAddress: string;
-  country: string;
-  isCurrent: boolean;
-  lastActivityAt: string;
-}
-export interface LoginActivityViewModel {
-  id: string;
-  activityType: string;
-  device: string;
-  operatingSystem: string;
-  browser: string;
-  ipAddress: string;
-  country: string;
-  isSuccess: boolean;
-  createdAt: string;
-}
-export interface SecurityStatusViewModel {
-  statusLevel: string;
-  activeSessionsCount: number;
-  failedAttemptsLast24Hours: number;
-  lastSuccessfulLogin: string | null;
-}
-export interface GuardianDashboardViewModel {
-  securityStatus: SecurityStatusViewModel;
-  recentActivities: LoginActivityViewModel[];
-  activeSessions: ActiveSessionViewModel[];
-}
+import {
+  useGetApiV1GuardianDashboardQuery,
+  usePostApiV1GuardianRevokeSessionBySessionIdMutation,
+  usePostApiV1GuardianRevokeAllSessionsMutation,
+} from "@/lib/generatedApi";
 
 export default function GuardianSecurityPage() {
   const [activeTab, setActiveTab] = useState("health");
-  const [dashboard, setDashboard] = useState<GuardianDashboardViewModel | null>(
-    null,
-  );
-  const [sessions, setSessions] = useState<ActiveSessionViewModel[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        setErrorMessage(null);
-        const { data } = await apiClient.get(`/api/v1/guardian/dashboard`);
-        if (data?.success) {
-          setDashboard(data.data);
-          setSessions(data.data.activeSessions || []);
-        }
-      } catch (err: any) {
-        setErrorMessage(
-          err?.response?.data?.message ||
-            err.message ||
-            "Gagal memuat data guardian",
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
+  // RTK Query: Fetch data Guardian Dashboard
+  const {
+    data: dashboardResponse,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useGetApiV1GuardianDashboardQuery();
+
+  // RTK Query: Mutations untuk Revoke Session
+  const [revokeSession, { isLoading: isRevokingSession }] =
+    usePostApiV1GuardianRevokeSessionBySessionIdMutation();
+  const [revokeAllSessions, { isLoading: isRevokingAll }] =
+    usePostApiV1GuardianRevokeAllSessionsMutation();
+
+  // Cast data dari response API
+  const dashboardData = (dashboardResponse as any)?.data || dashboardResponse;
+  const security = dashboardData?.securityStatus;
+  const activities = (dashboardData?.recentActivities || []).slice(0, 5);
+  const displayedSessions = (dashboardData?.activeSessions || []).slice(0, 5);
+  const isHealthy = security?.statusLevel === "Good";
 
   const handleRevokeSession = async (id?: string, device?: string) => {
     if (!id || !confirm(`Akhiri sesi "${device}"?`)) return;
     try {
       setErrorMessage(null);
-      await apiClient.post(`/api/v1/guardian/revoke-session/${id}`);
-      setSessions((prev) => prev.filter((s) => s.id !== id));
+      await revokeSession({ sessionId: id }).unwrap();
       setSuccessMessage("Sesi berhasil diakhiri");
+      refetch(); // Refresh data otomatis setelah aksi sukses
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      setErrorMessage(err?.response?.data?.message || "Gagal mengakhiri sesi");
+      setErrorMessage(
+        err?.data?.message || err?.message || "Gagal mengakhiri sesi",
+      );
     }
   };
 
@@ -112,29 +79,25 @@ export default function GuardianSecurityPage() {
     if (!confirm("Emergency Lockout semua device lain?")) return;
     try {
       setErrorMessage(null);
-      await apiClient.post(`/api/v1/guardian/revoke-all-sessions`);
-      setSessions((prev) => prev.filter((s) => s.isCurrent));
+      await revokeAllSessions().unwrap();
       setSuccessMessage("Semua sesi lain berhasil diakhiri");
+      refetch(); // Refresh data otomatis setelah aksi sukses
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
       setErrorMessage(
-        err?.response?.data?.message || "Gagal mengakhiri semua sesi",
+        err?.data?.message || err?.message || "Gagal mengakhiri semua sesi",
       );
     }
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[300px] gap-3 text-muted-foreground">
         <IconLoader2 className="w-8 h-8 animate-spin text-primary" />
         <p className="text-xs">Memuat Guardian...</p>
       </div>
     );
-
-  const security = dashboard?.securityStatus;
-  const activities = (dashboard?.recentActivities || []).slice(0, 5);
-  const displayedSessions = sessions.slice(0, 5);
-  const isHealthy = security?.statusLevel === "Good";
+  }
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -150,7 +113,11 @@ export default function GuardianSecurityPage() {
         </div>
         <Badge
           variant="outline"
-          className={`gap-2 px-3 py-1.5 ${isHealthy ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500" : "border-amber-500/20 bg-amber-500/10 text-amber-500"}`}
+          className={`gap-2 px-3 py-1.5 ${
+            isHealthy
+              ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+              : "border-amber-500/20 bg-amber-500/10 text-amber-500"
+          }`}
         >
           <IconHeartbeat size={16} /> Status:{" "}
           {security?.statusLevel || "Unknown"}
@@ -163,10 +130,15 @@ export default function GuardianSecurityPage() {
           <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
-      {errorMessage && (
+
+      {(errorMessage || isError) && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{errorMessage}</AlertDescription>
+          <AlertDescription>
+            {errorMessage ||
+              (error as any)?.data?.message ||
+              "Gagal memuat data guardian"}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -209,7 +181,7 @@ export default function GuardianSecurityPage() {
                   </Badge>
                 ) : (
                   <Badge variant="destructive">
-                    {security?.failedAttemptsLast24Hours} Attempts
+                    {security?.failedAttemptsLast24Hours ?? 0} Attempts
                   </Badge>
                 )}
               </div>
@@ -243,8 +215,14 @@ export default function GuardianSecurityPage() {
                 size="sm"
                 className="h-7 text-xs gap-1"
                 onClick={handleRevokeAll}
+                disabled={isRevokingAll}
               >
-                <IconAlertOctagon size={14} /> Revoke All
+                {isRevokingAll ? (
+                  <IconLoader2 size={14} className="animate-spin" />
+                ) : (
+                  <IconAlertOctagon size={14} />
+                )}
+                Revoke All
               </Button>
             </CardHeader>
             <CardContent className="p-0">
@@ -259,7 +237,7 @@ export default function GuardianSecurityPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {displayedSessions.map((s, i) => (
+                  {displayedSessions.map((s: any, i: number) => (
                     <TableRow key={s.id || i}>
                       <TableCell className="font-medium flex items-center gap-2">
                         {s.deviceName}
@@ -289,10 +267,11 @@ export default function GuardianSecurityPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-6 text-xs text-destructive hover:text-destructive"
+                            className="h-6 text-xs text-destructive hover:text-destructive gap-1"
                             onClick={() =>
                               handleRevokeSession(s.id, s.deviceName)
                             }
+                            disabled={isRevokingSession}
                           >
                             <IconLogout size={12} /> Out
                           </Button>
@@ -337,7 +316,7 @@ export default function GuardianSecurityPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {activities.map((a, i) => (
+                  {activities.map((a: any, i: number) => (
                     <TableRow key={a.id || i}>
                       <TableCell className="font-medium text-xs">
                         {a.activityType}

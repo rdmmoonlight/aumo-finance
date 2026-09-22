@@ -45,7 +45,12 @@ import {
   LogOut,
   ChevronsUpDown,
 } from "lucide-react";
-import { getUserProfile, logout } from "@/lib/auth";
+
+// Import RTK Query Hooks dari generatedApi
+import {
+  useGetApiV1AuthMeQuery,
+  usePostApiV1AuthLogoutMutation,
+} from "@/lib/generatedApi";
 
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
@@ -104,30 +109,26 @@ export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Inisialisasi state user secara otomatis dari ReturnType getUserProfile
-  const [user, setUser] =
-    React.useState<Awaited<ReturnType<typeof getUserProfile>>>(null);
+  // 1. Fetch User Profile via RTK Query
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery();
 
-  React.useEffect(() => {
-    async function fetchUser() {
-      try {
-        const data = await getUserProfile();
-        setUser(data);
-      } catch (err) {
-        console.error("[SIDEBAR] Gagal memuat profil user:", err);
-      }
-    }
-    fetchUser();
-  }, []);
+  // 2. Mutation Logout via RTK Query
+  const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
-    const success = await logout();
-    if (success) {
+    try {
+      await logoutApi().unwrap();
       window.location.href = "/auth";
-    } else {
+    } catch (err) {
+      console.error("[SIDEBAR] Logout gagal, meredirect paksa:", err);
       router.push("/auth");
     }
   };
+
+  // Type-casting opsional jika response dari backend memiliki properti user
+  const userData = user as
+    | { fullName?: string; userName?: string; email?: string }
+    | undefined;
 
   return (
     <Sidebar
@@ -237,10 +238,14 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-sm leading-tight truncate">
-                        {user?.fullName || user?.userName || "Guest"}
+                        {isUserLoading
+                          ? "Memuat..."
+                          : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text-xs text-muted-foreground truncate">
-                        {user?.email || "Tidak ada email"}
+                        {isUserLoading
+                          ? "..."
+                          : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>

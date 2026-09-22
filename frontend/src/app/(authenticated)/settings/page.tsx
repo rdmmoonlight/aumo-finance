@@ -29,12 +29,24 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+// 1. Definisikan interface sesuai skema data dari ASP.NET Core Identity
+interface UserProfile {
+  userId?: string;
+  userName?: string;
+  fullName?: string;
+  email?: string;
+  roles?: string[];
+}
+
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // RTK Query menggantikan useState + useEffect fetchUserProfile
-  const { data: user, isLoading: loadingUser } = useGetApiV1AuthMeQuery();
+  const { data: rawUser, isLoading: loadingUser } = useGetApiV1AuthMeQuery();
+
+  // 2. Cast tipe data ke UserProfile agar properti terdeteksi oleh TypeScript
+  const user = rawUser as UserProfile | undefined;
 
   useEffect(() => {
     setMounted(true);
@@ -100,7 +112,8 @@ export default function SettingsPage() {
                   </Label>
                   <div className="flex flex-wrap gap-1.5 mt-1">
                     {user.roles && user.roles.length > 0 ? (
-                      user.roles.map((r) => (
+                      // 3. Tambahkan anotasi tipe (r: string) secara eksplisit
+                      user.roles.map((r: string) => (
                         <Badge
                           key={r}
                           variant="secondary"
@@ -158,7 +171,7 @@ export default function SettingsPage() {
                     "relative flex flex-col rounded-xl border-2 p-4 cursor-pointer transition-all hover:bg-accent/50",
                     isActive
                       ? "border-primary bg-primary/5"
-                      : "border-muted bg-card",
+                      : "border-muted bg-card"
                   )}
                 >
                   <RadioGroupItem

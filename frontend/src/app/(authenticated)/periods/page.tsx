@@ -104,12 +104,12 @@ export default function PeriodsPage() {
     refetch: refetchPeriods,
   } = useGetApiV1PeriodsQuery();
 
-  const [
-    fetchOpenInfoTrigger,
-    { data: openInfoData, isLoading: isLoadingOpenInfo },
-  ] = useGetApiV1PeriodsOpenInfoQuery({
-    // Lazy or standard query setup
-  });
+  // FIX: Query hook returns an object `{ data, isLoading }`, not an array tuple `[...]`
+  // Parameter dibiarkan kosong karena tidak menerima argumen (void)
+  const {
+    data: openInfoData,
+    isLoading: isLoadingOpenInfo,
+  } = useGetApiV1PeriodsOpenInfoQuery();
 
   const [selectPeriodMutation, { isLoading: isSelecting }] =
     usePostApiV1PeriodsSelectByIdMutation();

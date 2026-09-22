@@ -8,17 +8,18 @@ function enforceHttps(url: string): string {
   return url;
 }
 
-const rawBaseUrl = typeof window === "undefined" ? aumoConfig.backendTarget : "";
-const BASE_URL = enforceHttps(rawBaseUrl);
+// FIX 1: BASE_URL harus tetap mengarah ke backendTarget baik di Server maupun Client
+const BASE_URL = enforceHttps(aumoConfig.backendTarget);
 
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({
     baseUrl: BASE_URL,
-    // WAJIB: Agar Cookie Session 'AumoFinance.Session' (.NET Identity) dikirim otomatis
+    // WAJIB: Agar Cookie Session (.NET Identity) dikirim otomatis pada request Client-Side
     credentials: "include",
+    
     prepareHeaders: async (headers) => {
-      // Meneruskan Cookie dari Browser saat Next.js melakukan SSR (Server-Side)
+      // FIX 2: Penanganan SSR Cookie untuk Next.js App Router
       if (typeof window === "undefined") {
         try {
           const { cookies } = await import("next/headers");
@@ -26,15 +27,21 @@ export const baseApi = createApi({
           const cookieHeader = cookieStore.toString();
 
           if (cookieHeader) {
-            headers.set("Cookie", cookieHeader);
+            headers.set("cookie", cookieHeader);
           }
-        } catch {
-          // Abaikan jika dieksekusi di luar konteks HTTP Request Next.js
+        } catch (error) {
+          // Tetap aman jika dipanggil di luar konteks Request Next.js (misal: build time)
         }
       }
       return headers;
     },
   }),
-  tagTypes: ["Auth", "User", "Transaction"], // Sesuaikan Tag Invalidation jika ada
+  
+  // Durasi default simpan tandon (misal: 300 detik / 5 menit)
+  keepUnusedDataFor: 300,
+  
+  // Tag Invalidation untuk menguras tandon secara otomatis
+  tagTypes: ["Auth", "User", "Transaction"],
+  
   endpoints: () => ({}),
 });

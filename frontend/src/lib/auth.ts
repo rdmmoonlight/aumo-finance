@@ -1,139 +1,146 @@
-import axios from "axios";
-import apiClient from "@/lib/apiClient";
+import {
+  useGetApiV1AuthMeQuery,
+  usePostApiV1AuthLoginMutation,
+  usePostApiV1AuthGoogleLoginMutation,
+  usePostApiV1AuthLogoutMutation,
+  LoginRequest,
+  GoogleLoginRequest,
+} from "@/lib/generatedApi";
 
-export interface UserProfile {
-  userId: string;
-  email: string;
-  userName: string;
-  fullName: string;
-  roles: string[];
-  customClaims?: Record<string, string>[];
-}
-
-export interface LoginPayload {
-  email: string;
-  password: string;
-  rememberMe?: boolean;
-  isMobileClient?: boolean;
-  userAgent?: string;
-  operatingSystem?: string;
-}
-
-export interface GoogleLoginPayload {
-  idToken: string;
-  isMobileClient?: boolean;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  message?: string;
+/**
+ * Re-export tipe payload & response dari generatedApi agar tetap konsisten
+ */
+export type UserProfile = {
   userId?: string;
+  email?: string;
+  userName?: string;
   fullName?: string;
-  token?: string; // Hanya diisi jika Mobile / JWT Flow
-}
+  roles?: string[];
+  customClaims?: Array<Record<string, string>>;
+};
+
+export type LoginPayload = LoginRequest;
+export type GoogleLoginPayload = GoogleLoginRequest;
 
 /**
- * Mengambil profil user yang sedang login (/api/v1/auth/me)
+ * Hook untuk mengambil profil user aktif (`/api/v1/auth/me`)
  */
-export async function getUserProfile(): Promise<UserProfile | null> {
-  try {
-    // Sesuai dengan bentuk Anonymous Object pada AuthController.cs
-    const res = await apiClient.get<{
-      success: boolean;
-      userId: string;
-      email: string;
-      userName: string;
-      fullName: string;
-      roles: string[];
-      customClaims?: Record<string, string>[];
-    }>("/api/v1/auth/me");
+export function useUserProfile(options?: { skip?: boolean }) {
+  const { data, isLoading, isError, error, refetch } = useGetApiV1AuthMeQuery(
+    undefined,
+    { skip: options?.skip }
+  );
 
-    if (res.data?.success) {
-      return {
-        userId: res.data.userId,
-        email: res.data.email,
-        userName: res.data.userName,
-        fullName: res.data.fullName,
-        roles: res.data.roles || [],
-        customClaims: res.data.customClaims || [],
-      };
-    }
-    return null;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      if (err.response?.status !== 401) {
-        console.error(
-          "[AUTH] Gagal mengambil profil user:",
-          err.response?.data || err.message,
-        );
+  const responseData = data as
+    | {
+        success?: boolean;
+        userId?: string;
+        email?: string;
+        userName?: string;
+        fullName?: string;
+        roles?: string[];
+        customClaims?: Array<Record<string, string>>;
       }
-    } else {
-      console.error("[AUTH] Unknown error saat mengambil profil user:", err);
-    }
-    return null;
-  }
+    | undefined;
+
+  const profile: UserProfile | null = responseData?.success
+    ? {
+        userId: responseData.userId,
+        email: responseData.email,
+        userName: responseData.userName,
+        fullName: responseData.fullName,
+        roles: responseData.roles || [],
+        customClaims: responseData.customClaims || [],
+      }
+    : null;
+
+  return {
+    profile,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  };
 }
 
 /**
- * Login akun menggunakan Email & Password
+ * Hook untuk Login Email & Password
  */
-export async function login(payload: LoginPayload): Promise<AuthResponse> {
-  try {
-    const res = await apiClient.post<AuthResponse>(
-      "/api/v1/auth/login",
-      payload,
-    );
-    return res.data;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
+export function useAuthLogin() {
+  const [loginMutation, result] = usePostApiV1AuthLoginMutation();
+
+  const login = async (payload: LoginPayload) => {
+    try {
+      const response = await loginMutation({
+        loginRequest: payload,
+      }).unwrap();
+
+      return {
+        success: true,
+        data: response,
+      };
+    } catch (err: any) {
       return {
         success: false,
-        message: err.response?.data?.message || "Gagal melakukan login.",
+        message: err?.data?.message || "Gagal melakukan login.",
+        error: err,
       };
     }
-    return { success: false, message: "Terjadi kesalahan tidak terduga." };
-  }
+  };
+
+  return [login, result] as const;
 }
 
 /**
- * Login menggunakan Google OAuth (ID Token)
+ * Hook untuk Login Google OAuth
  */
-export async function googleLogin(
-  payload: GoogleLoginPayload,
-): Promise<AuthResponse> {
-  try {
-    const res = await apiClient.post<AuthResponse>(
-      "/api/v1/auth/google-login",
-      payload,
-    );
-    return res.data;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
+export function useGoogleLogin() {
+  const [googleLoginMutation, result] = usePostApiV1AuthGoogleLoginMutation();
+
+  const googleLogin = async (payload: GoogleLoginPayload) => {
+    try {
+      const response = await googleLoginMutation({
+        googleLoginRequest: payload,
+      }).unwrap();
+
+      return {
+        success: true,
+        data: response,
+      };
+    } catch (err: any) {
       return {
         success: false,
-        message:
-          err.response?.data?.message || "Gagal login menggunakan Google.",
+        message: err?.data?.message || "Gagal login menggunakan Google.",
+        error: err,
       };
     }
-    return { success: false, message: "Terjadi kesalahan tidak terduga." };
-  }
+  };
+
+  return [googleLogin, result] as const;
 }
 
 /**
- * Melakukan logout session di server (/api/v1/auth/logout)
+ * Hook untuk Logout
  */
-export async function logout(): Promise<boolean> {
-  try {
-    const res = await apiClient.post<{ success: boolean; message: string }>(
-      "/api/v1/auth/logout",
-    );
-    return res.data?.success ?? true;
-  } catch (err: unknown) {
-    if (axios.isAxiosError(err)) {
-      console.error("[AUTH] Gagal logout:", err.response?.data || err.message);
-    } else {
-      console.error("[AUTH] Unknown error saat logout:", err);
+export function useAuthLogout() {
+  const [logoutMutation, result] = usePostApiV1AuthLogoutMutation();
+
+  const logout = async () => {
+    try {
+      const response = await logoutMutation().unwrap();
+      return {
+        success: true,
+        data: response,
+      };
+    } catch (err: any) {
+      console.error("[AUTH] Gagal logout:", err);
+      return {
+        success: false,
+        message: err?.data?.message || "Gagal melakukan logout.",
+        error: err,
+      };
     }
-    return false;
-  }
+  };
+
+  return [logout, result] as const;
 }

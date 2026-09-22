@@ -48,7 +48,13 @@ import {
 } from "./_components/coa-dialogs";
 
 // Tipe untuk satu item akun berdasarkan response API
-type AccountItem = NonNullable<GetApiV1ChartOfAccountsApiResponse>[number];
+type AccountItem = NonNullable<GetApiV1ChartOfAccountsApiResponse & any[]>[number];
+
+interface AccountRangeInfo {
+  start: number;
+  end: number;
+  label: string;
+}
 
 const ACCOUNT_TYPES = [
   "Assets",
@@ -58,12 +64,11 @@ const ACCOUNT_TYPES = [
   "OperatingExpenses",
   "OtherIncome",
   "OtherExpenses",
-];
+] as const;
 
-const ACCOUNT_RANGES: Record<
-  string,
-  { start: number; end: number; label: string }
-> = {
+type AccountType = (typeof ACCOUNT_TYPES)[number];
+
+const ACCOUNT_RANGES: Record<AccountType, AccountRangeInfo> = {
   Assets: { start: 100, end: 199, label: "Assets (100-199)" },
   Liabilities: { start: 200, end: 299, label: "Liabilities (200-299)" },
   Equity: { start: 300, end: 399, label: "Equity (300-399)" },
@@ -91,15 +96,20 @@ function ChartOfAccountsContent() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // RTK Query Hook (menggantikan useChartOfAccounts)
+  // RTK Query Hook
   const {
-    data: rawAccounts = [],
+    data: rawAccountsData,
     isLoading,
     isError,
   } = useGetApiV1ChartOfAccountsQuery({
     search: searchText || undefined,
     category: categoryFilter || undefined,
   });
+
+  // Type Assertion aman untuk rawAccounts
+  const rawAccounts = useMemo(() => {
+    return (rawAccountsData as AccountItem[]) ?? [];
+  }, [rawAccountsData]);
 
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -194,7 +204,7 @@ function ChartOfAccountsContent() {
               <SelectContent>
                 {ACCOUNT_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
-                    {ACCOUNT_RANGES[t]?.label || t}
+                    {ACCOUNT_RANGES[t]?.label ?? t}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -238,7 +248,7 @@ function ChartOfAccountsContent() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredAccounts.map((acc: any) => {
+                filteredAccounts.map((acc: AccountItem) => {
                   const balance = Number(acc.balance || 0);
                   return (
                     <TableRow
@@ -347,7 +357,7 @@ function ChartOfAccountsContent() {
       <AddAccountDialog
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
-        accounts={rawAccounts as any}
+        accounts={rawAccounts}
         onSuccess={(msg) => setSuccessMessage(msg)}
       />
 
@@ -355,13 +365,13 @@ function ChartOfAccountsContent() {
         <EditAccountDialog
           open={isEditModalOpen}
           onOpenChange={setIsEditModalOpen}
-          account={editAccount as any}
+          account={editAccount}
           onSuccess={(msg) => setSuccessMessage(msg)}
         />
       )}
 
       <DeleteAccountAlertDialog
-        account={accountToDelete as any}
+        account={accountToDelete}
         onOpenChange={(open) => !open && setAccountToDelete(null)}
         onSuccess={(msg) => setSuccessMessage(msg)}
         onError={(msg) => setErrorMessage(msg)}

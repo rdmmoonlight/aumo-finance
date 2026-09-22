@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import LoginPage from "@/app/auth/page";
-import { getUserProfile } from "@/lib/auth";
+import { useGetApiV1AuthMeQuery } from "@/lib/generatedApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,27 +17,18 @@ import { IconArrowRight, IconLock } from "@tabler/icons-react";
 export default function LandingPage() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [checkingAuth, setCheckingAuth] = useState(true);
 
-  // Pengecekan cookie session resmi dari server via auth.ts
+  // Menggunakan RTK Query menggantikan getUserProfile() dari auth.ts
+  const { data: user, isLoading: checkingAuth, isSuccess } = useGetApiV1AuthMeQuery();
+
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";
 
-    async function checkSession() {
-      try {
-        const user = await getUserProfile();
-        if (user) {
-          router.replace("/home");
-        }
-      } catch (err) {
-        console.error("Gagal memeriksa sesi user:", err);
-      } finally {
-        setCheckingAuth(false);
-      }
+    // Jika fetching sukses dan user terautentikasi, redirect ke /home
+    if (isSuccess && user) {
+      router.replace("/home");
     }
-
-    checkSession();
-  }, [router]);
+  }, [isSuccess, user, router]);
 
   return (
     <div className="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]">
