@@ -31,7 +31,7 @@ interface PeriodItem {
   isSelected?: boolean;
 }
 
-export function TopBar() {
+export function AppTopBar() {
   const pathname = usePathname();
 
   // Cek profil user untuk memastikan token/cookie valid sebelum polling API
