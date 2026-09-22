@@ -13,10 +13,10 @@ const BASE_URL = enforceHttps(aumoConfig.backendTarget);
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  // WAJIB: Memaksa browser mengirimkan Cookie SameSite=None/Secure ke Render
+  // WAJIB: Mengirim cookie 'AumoFinance.Session' saat request di Browser Client
   credentials: "include",
   prepareHeaders: async (headers) => {
-    // Meneruskan Cookie dari Browser pengguna saat Next.js melakukan Server-Side Rendering (SSR)
+    // Meneruskan Cookie jika request dieksekusi di Next.js Server (SSR)
     if (typeof window === "undefined") {
       try {
         const { cookies } = await import("next/headers");
@@ -24,16 +24,20 @@ const rawBaseQuery = fetchBaseQuery({
         const cookieHeader = cookieStore.toString();
 
         if (cookieHeader) {
-          headers.set("cookie", cookieHeader);
+          // Gunakan 'Cookie' dengan huruf C kapital agar terbaca sempurna oleh ASP.NET Core
+          headers.set("Cookie", cookieHeader);
         }
       } catch {
-        // Safe fallback jika dipanggil di luar konteks HTTP Request Next.js
+        // Safe fallback jika dipanggil saat build-time / static site generation
       }
     }
     return headers;
   },
 });
 
+/**
+ * Interceptor Global 401 Unauthorized
+ */
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -41,9 +45,10 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  // Jika response 401 Unauthorized di sisi Browser Client, arahkan ke halaman login
+  // Jika 401 terjadi di Browser (Client-Side), redirect ke login
   if (result.error && result.error.status === 401 && typeof window !== "undefined") {
     const currentPath = window.location.pathname;
+
     if (!currentPath.startsWith("/auth") && currentPath !== "/") {
       window.location.href = `/auth?redirectTo=${encodeURIComponent(currentPath)}`;
     }
