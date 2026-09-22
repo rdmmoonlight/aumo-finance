@@ -58,8 +58,11 @@
                             <tbody>
                                 @foreach (var line in group.Lines)
                                 {
+                                    var refStr = line.ReferenceNumber?.ToString();
+                                    var hasRef = !string.IsNullOrWhiteSpace(refStr) && refStr != "0";
+                                    
                                     <tr>
-                                        <td class="text-center"><code>@(line.ReferenceNumber > 0 ? line.ReferenceNumber.ToString() : "-")</code></td>
+                                        <td class="text-center"><code>@(hasRef ? refStr : "-")</code></td>
                                         <td class="@(line.Credit > 0 ? "ps-4" : "fw-semibold")">@line.AccountName</td>
                                         <td class="text-end text-success">@(line.Debit > 0 ? line.Debit.ToString("N0", Idr) : "-")</td>
                                         <td class="text-end text-danger">@(line.Credit > 0 ? line.Credit.ToString("N0", Idr) : "-")</td>
