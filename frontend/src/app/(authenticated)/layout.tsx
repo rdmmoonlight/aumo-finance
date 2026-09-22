@@ -8,7 +8,7 @@ import {
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/app-topbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { AppFooter } from "@/components/app-footer"; // <-- INI YANG BENER
+import { Footer } from "@/components/app-footer"; // <-- INI YANG BENER
 
 export default function AuthenticatedLayout({
   children,
@@ -66,7 +66,7 @@ export default function AuthenticatedLayout({
         <div className="flex flex-1 flex-col min-w-0">
           <TopBar />
           <main className="flex-1 p-6">{children}</main>
-          <AppFooter />
+          <Footer />
         </div>
       </div>
     </SidebarProvider>
