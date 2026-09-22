@@ -189,7 +189,9 @@ function JournalEntryContent() {
     return "Loading...";
   }, [isEdit, editData, rawNextTxNumber]);
 
-  const isLocked = Boolean(isEdit && (editData?.isLocked || editData?.entry?.isLocked));
+  const isLocked = Boolean(
+    isEdit && (editData?.isLocked || editData?.entry?.isLocked),
+  );
 
   // Calculators
   const totalDebit = useMemo(
@@ -323,7 +325,10 @@ function JournalEntryContent() {
         };
 
         const res: any = await createJournalEntry(createPayload).unwrap();
-        const txNum = res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber;
+        const txNum =
+          res?.transactionNumber ||
+          res?.data?.transactionNumber ||
+          displayedTxNumber;
         setSuccessMessage(`Posted ${txNum}`);
         resetForm();
       }

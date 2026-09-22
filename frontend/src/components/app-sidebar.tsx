@@ -56,8 +56,14 @@ const REPORT_SECTIONS = [
   {
     title: "General Ledger",
     items: [
-      { title: "General Ledger — Permanent", url: "/reports/general-ledger-permanent" },
-      { title: "General Ledger — Temporary", url: "/reports/general-ledger-temporary" },
+      {
+        title: "General Ledger — Permanent",
+        url: "/reports/general-ledger-permanent",
+      },
+      {
+        title: "General Ledger — Temporary",
+        url: "/reports/general-ledger-temporary",
+      },
     ],
   },
   {
@@ -66,7 +72,10 @@ const REPORT_SECTIONS = [
       { title: "General Journal", url: "/reports/general-journal" },
       { title: "Trial Balance", url: "/reports/unadjusted-trial-balance" },
       { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
-      { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
+      {
+        title: "Adjusted Trial Balance",
+        url: "/reports/adjusted-trial-balance",
+      },
     ],
   },
   {
@@ -77,16 +86,28 @@ const REPORT_SECTIONS = [
     title: "Financial Statements",
     items: [
       { title: "Income Statement", url: "/reports/income-statement" },
-      { title: "Retained Earnings Statement", url: "/reports/retained-earnings" },
-      { title: "Statement of Financial Position", url: "/reports/statement-of-financial-position" },
-      { title: "Statement of Cash Flows", url: "/reports/statement-of-cash-flow" },
+      {
+        title: "Retained Earnings Statement",
+        url: "/reports/retained-earnings",
+      },
+      {
+        title: "Statement of Financial Position",
+        url: "/reports/statement-of-financial-position",
+      },
+      {
+        title: "Statement of Cash Flows",
+        url: "/reports/statement-of-cash-flow",
+      },
     ],
   },
   {
     title: "Closing",
     items: [
       { title: "Closing Journal", url: "/reports/closing-journal" },
-      { title: "Post-Closing Trial Balance", url: "/reports/post-closing-trial-balance" },
+      {
+        title: "Post-Closing Trial Balance",
+        url: "/reports/post-closing-trial-balance",
+      },
     ],
   },
 ] as const;
@@ -108,26 +129,38 @@ export function AppSidebar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => { setIsMounted(true); }, []);
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
-  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(undefined, { skip:!isMounted });
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
+    undefined,
+    { skip: !isMounted },
+  );
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
-    try { await logoutApi().unwrap(); } catch (err) { console.error(err); }
-    finally {
+    try {
+      await logoutApi().unwrap();
+    } catch (err) {
+      console.error(err);
+    } finally {
       dispatch(baseApi.util.resetApiState());
-      if (typeof window!== "undefined") {
-        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      if (typeof window !== "undefined") {
+        document.cookie =
+          "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
       }
     }
   };
 
-  const userData = user as { fullName?: string; userName?: string; email?: string } | undefined;
+  const userData = user as
+    { fullName?: string; userName?: string; email?: string } | undefined;
   const ICON_CLASS = "w- h- mr-2.5 shrink-0 stroke-[1.75]";
 
-  const isReportsActive = REPORT_SECTIONS.some(s => s.items.some(i => pathname === i.url || pathname.startsWith(i.url + "/")));
+  const isReportsActive = REPORT_SECTIONS.some((s) =>
+    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/")),
+  );
 
   return (
     <Sidebar
@@ -152,10 +185,19 @@ export function AppSidebar() {
                 // @ts-ignore - grouped reports
                 if (item.isGrouped) {
                   return (
-                    <Collapsible key={item.title} defaultOpen={isReportsActive || pathname.startsWith(item.url)} className="group/collapsible">
+                    <Collapsible
+                      key={item.title}
+                      defaultOpen={
+                        isReportsActive || pathname.startsWith(item.url)
+                      }
+                      className="group/collapsible"
+                    >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton isActive={isReportsActive} className="text- h- font-normal w-full justify-between px-2">
+                          <SidebarMenuButton
+                            isActive={isReportsActive}
+                            className="text- h- font-normal w-full justify-between px-2"
+                          >
                             <div className="flex items-center">
                               <Icon className={ICON_CLASS} />
                               <span>{item.title}</span>
@@ -183,7 +225,9 @@ export function AppSidebar() {
                                           isActive={isActive}
                                           className="text- leading-[1.5] h-auto min-h- py-1 px-2 ml-2 pl-6 font-normal justify-start whitespace-normal text-left"
                                         >
-                                          <Link href={sub.url}>{sub.title}</Link>
+                                          <Link href={sub.url}>
+                                            {sub.title}
+                                          </Link>
                                         </SidebarMenuSubButton>
                                       </SidebarMenuSubItem>
                                     );
@@ -198,10 +242,16 @@ export function AppSidebar() {
                   );
                 }
 
-                const isSingleActive = pathname === item.url || (item.url!== "/home" && pathname.startsWith(item.url + "/"));
+                const isSingleActive =
+                  pathname === item.url ||
+                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={isSingleActive} className="text- h- font-normal px-2">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isSingleActive}
+                      className="text- h- font-normal px-2"
+                    >
                       <Link href={item.url}>
                         <Icon className={ICON_CLASS} />
                         <span>{item.title}</span>
@@ -227,10 +277,14 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-medium text-[13.5px] leading-tight truncate">
-                        {!isMounted || isUserLoading? "Memuat..." : userData?.fullName || userData?.userName || "Guest"}
+                        {!isMounted || isUserLoading
+                          ? "Memuat..."
+                          : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text- text-muted-foreground truncate">
-                        {!isMounted || isUserLoading? "..." : userData?.email || "Tidak ada email"}
+                        {!isMounted || isUserLoading
+                          ? "..."
+                          : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
@@ -239,10 +293,17 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem asChild className="text-">
-                  <Link href="/settings"><Settings className="w-4 h-4 mr-2" />Settings</Link>
+                  <Link href="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive text-">
-                  <LogOut className="w-4 h-4 mr-2" />Sign Out
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive text-"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
