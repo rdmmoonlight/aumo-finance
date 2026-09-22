@@ -108,7 +108,10 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
     )
 
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 14.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .statusBarsPadding()
+            .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -245,7 +248,7 @@ private fun SecondaryHeroCard(item: HomeMenuItem, modifier: Modifier = Modifier)
     ) {
         Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
             Box(
-                Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(AumoColors.TextPrimary),
+                Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(AumoColors.Primary),
                 contentAlignment = Alignment.Center
             ) {
                 TablerIcon(item.icon, tint = Color.White, size = 24.dp)
