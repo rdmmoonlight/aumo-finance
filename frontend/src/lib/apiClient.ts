@@ -1,5 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query";
 import { aumoConfig } from "../../aumo.config";
 
 /**
@@ -51,7 +55,11 @@ const baseQueryWithReauth: BaseQueryFn<
   const result = await rawBaseQuery(args, api, extraOptions);
 
   // Jika response 401 Unauthorized dan dieksekusi di sisi Browser (Client)
-  if (result.error && result.error.status === 401 && typeof window !== "undefined") {
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    typeof window !== "undefined"
+  ) {
     const currentPath = window.location.pathname;
 
     // Mencegah infinite loop redirect jika sudah berada di halaman /auth atau /
