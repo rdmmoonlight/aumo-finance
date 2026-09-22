@@ -56,6 +56,13 @@ export interface LineItem {
   credit: string;
 }
 
+type AccountOption = {
+  id: number;
+  referenceNumber: number | string;
+  accountName: string;
+  [key: string]: any;
+};
+
 const formatIDR = (amount: number) =>
   new Intl.NumberFormat("id-ID").format(amount);
 
@@ -93,11 +100,29 @@ function JournalEntryContent() {
 
   // 1. RTK Query Hooks Integration
   // Ambil opsi COA
-  const { data: availableAccounts = [], isLoading: isAccountsLoading } =
+  const { data: rawAccountsData, isLoading: isAccountsLoading } =
     useGetApiV1ChartOfAccountsQuery({});
 
+  // Ekstraksi Opsi Akun Aman (Menangani wrapper .NET)
+  const availableAccounts = useMemo<AccountOption[]>(() => {
+    if (!rawAccountsData) return [];
+    let list: any[] = [];
+    if (typeof rawAccountsData === "object") {
+      const res = rawAccountsData as any;
+      if (Array.isArray(res.accounts)) list = res.accounts;
+      else if (Array.isArray(res.data)) list = res.data;
+      else if (Array.isArray(rawAccountsData)) list = rawAccountsData;
+    }
+    return list.map((a) => ({
+      ...a,
+      id: Number(a.id || 0),
+      referenceNumber: a.referenceNumber ?? "",
+      accountName: a.accountName ?? "",
+    }));
+  }, [rawAccountsData]);
+
   // Ambil nomor transaksi berikutnya (hanya dipanggil jika mode pembuatan baru)
-  const { data: nextTxNumber, isFetching: isTxLoading } =
+  const { data: rawNextTxNumber, isFetching: isTxLoading } =
     useGetApiV1JournalEntryNextTransactionNumberQuery(
       { journalType, entryDate },
       { skip: isEdit },
@@ -123,34 +148,48 @@ function JournalEntryContent() {
 
   // Synchronize Form State saat data edit berhasil dimuat
   useEffect(() => {
-    if (isEdit && editData?.entry) {
-      const jData = editData.entry;
-      setJournalType(jData.journalType || "General");
-      setEntryDate(
-        jData.entryDate?.split("T")[0] ||
-          new Date().toISOString().split("T")[0],
-      );
+    if (isEdit && editData) {
+      const jData = editData.entry || editData.data || editData;
+      if (jData && typeof jData === "object") {
+        if (jData.journalType) setJournalType(jData.journalType);
+        if (jData.entryDate) setEntryDate(jData.entryDate.split("T")[0]);
 
-      if (jData.lines?.length) {
-        setLines(
-          jData.lines.map((l: any, i: number) => ({
-            id: l.id?.toString() || `${Date.now()}-${i}`,
-            accountId: l.accountId,
-            lineDescription: l.lineDescription || "",
-            debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
-            credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-          })),
-        );
+        if (Array.isArray(jData.lines) && jData.lines.length > 0) {
+          setLines(
+            jData.lines.map((l: any, i: number) => ({
+              id: l.id?.toString() || `${Date.now()}-${i}`,
+              accountId: Number(l.accountId || 0),
+              lineDescription: l.lineDescription || "",
+              debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
+              credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
+            })),
+          );
+        }
       }
     }
   }, [isEdit, editData]);
 
-  // Nomor Transaksi yang ditampilkan
-  const displayedTxNumber = isEdit
-    ? editData?.entry?.transactionNumber || "Loading..."
-    : (nextTxNumber as any)?.transactionNumber || nextTxNumber || "Loading...";
+  // Nomor Transaksi yang ditampilkan (dengan penanganan object / string)
+  const displayedTxNumber = useMemo(() => {
+    if (isEdit) {
+      const jData = editData?.entry || editData?.data || editData;
+      return jData?.transactionNumber || "Loading...";
+    }
+    if (rawNextTxNumber) {
+      if (typeof rawNextTxNumber === "string") return rawNextTxNumber;
+      if (typeof rawNextTxNumber === "object") {
+        return (
+          (rawNextTxNumber as any).transactionNumber ||
+          (rawNextTxNumber as any).nextTransactionNumber ||
+          (rawNextTxNumber as any).data ||
+          "Loading..."
+        );
+      }
+    }
+    return "Loading...";
+  }, [isEdit, editData, rawNextTxNumber]);
 
-  const isLocked = isEdit && editData?.isLocked;
+  const isLocked = Boolean(isEdit && (editData?.isLocked || editData?.entry?.isLocked));
 
   // Calculators
   const totalDebit = useMemo(
@@ -284,7 +323,7 @@ function JournalEntryContent() {
         };
 
         const res: any = await createJournalEntry(createPayload).unwrap();
-        const txNum = res?.transactionNumber || displayedTxNumber;
+        const txNum = res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber;
         setSuccessMessage(`Posted ${txNum}`);
         resetForm();
       }
@@ -441,7 +480,7 @@ function JournalEntryContent() {
                 </TableHeader>
                 <TableBody>
                   {lines.map((line) => {
-                    const ref = (availableAccounts as any[])?.find(
+                    const ref = availableAccounts.find(
                       (a) => a.id === line.accountId,
                     )?.referenceNumber;
 
@@ -449,7 +488,7 @@ function JournalEntryContent() {
                       <TableRow key={line.id}>
                         <TableCell>
                           <Input
-                            className="h-8 text-center text-xs bg-muted"
+                            className="h-8 text-center text-xs bg-muted font-mono"
                             readOnly
                             value={ref || ""}
                             placeholder="---"
@@ -466,7 +505,7 @@ function JournalEntryContent() {
                               <SelectValue placeholder="Select Account" />
                             </SelectTrigger>
                             <SelectContent>
-                              {(availableAccounts as any[])?.map((acc) => (
+                              {availableAccounts.map((acc) => (
                                 <SelectItem
                                   key={acc.id}
                                   value={String(acc.id)}
