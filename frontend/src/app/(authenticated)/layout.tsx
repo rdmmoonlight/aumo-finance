@@ -8,7 +8,7 @@ import {
 import { AppSidebar } from "@/components/app-sidebar";
 import { TopBar } from "@/components/app-topbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/app-footer";
 
 export default function AuthenticatedLayout({
   children,
