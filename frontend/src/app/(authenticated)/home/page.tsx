@@ -28,12 +28,12 @@ export default function HomePage() {
 
   useEffect(() => {
     async function fetchBIRate(): Promise<MarketItem | null> {
-      // Layer 1: FRED - Indonesia Central Bank Rate (paling reliable, no API key)
+      // Layer 1: FRED - Indonesia Central Bank Rate
       try {
         const fredCsv =
           "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCB01IDQ156N";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`
         );
         if (res.ok) {
           const text = await res.text();
@@ -57,7 +57,7 @@ export default function HomePage() {
                   diff === 0
                     ? "HOLD"
                     : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`,
-                isUp: diff <= 0, // turun = hijau
+                isUp: diff <= 0, // Turun/Tetap = Positif bagi pasar
               };
             }
           }
@@ -69,7 +69,7 @@ export default function HomePage() {
         const biUrl =
           "https://www.bi.go.id/en/publikasi/ruang-media/news-release/default.aspx";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`
         );
         if (res.ok) {
           const html = await res.text();
@@ -90,7 +90,7 @@ export default function HomePage() {
       try {
         const teUrl = "https://tradingeconomics.com/indonesia/interest-rate";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`,
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`
         );
         if (res.ok) {
           const html = await res.text();
@@ -110,35 +110,34 @@ export default function HomePage() {
       return null;
     }
 
-    async function fetchMarketData() {
-      const items: MarketItem[] = [];
-
-      // 1. USD/IDR - realtime
+    async function fetchUsdRate(): Promise<MarketItem | null> {
       try {
         const resUsd = await fetch("https://open.er-api.com/v6/latest/USD");
         if (resUsd.ok) {
           const usdData = await resUsd.json();
           const rate = usdData?.rates?.IDR;
           if (rate) {
-            items.push({
+            return {
               symbol: "USD/IDR",
               name: "Rupiah",
               price: `Rp ${Math.round(rate).toLocaleString("id-ID")}`,
               change: "Live",
               isUp: true,
-            });
+            };
           }
         }
       } catch (e) {
         console.error("USD/IDR fail:", e);
       }
+      return null;
+    }
 
-      // 2. IHSG - realtime, tanpa fallback hardcode
+    async function fetchIhsg(): Promise<MarketItem | null> {
       try {
         const resIhsg = await fetch(
           `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
-          )}&t=${Date.now()}`,
+            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
+          )}&t=${Date.now()}`
         );
         if (resIhsg.ok) {
           const yahooData = await resIhsg.json();
@@ -147,7 +146,7 @@ export default function HomePage() {
             const price = quote.regularMarketPrice;
             const changePercent = quote.regularMarketChangePercent;
             const isUp = changePercent >= 0;
-            items.push({
+            return {
               symbol: "IHSG",
               name: "Indeks Saham",
               price: price
@@ -157,22 +156,35 @@ export default function HomePage() {
                 ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
                 : "0.00%",
               isUp,
-            });
+            };
           }
         }
       } catch (e) {
         console.error("IHSG fail:", e);
       }
+      return null;
+    }
 
-      // 3. BI RATE - realtime, tanpa hardcode
-      const biItem = await fetchBIRate();
-      if (biItem) items.push(biItem);
+    async function fetchAllMarketData() {
+      // Fetch ketiga indikator secara eksekusi paralel untuk kecepatan optimal
+      const results = await Promise.allSettled([
+        fetchUsdRate(),
+        fetchIhsg(),
+        fetchBIRate(),
+      ]);
+
+      const items: MarketItem[] = [];
+      results.forEach((res) => {
+        if (res.status === "fulfilled" && res.value) {
+          items.push(res.value);
+        }
+      });
 
       setMarketData(items);
       setIsLoading(false);
     }
 
-    fetchMarketData();
+    fetchAllMarketData();
   }, []);
 
   return (
@@ -186,7 +198,7 @@ export default function HomePage() {
               </h6>
               <Badge
                 variant="outline"
-                className="bg-emerald-500/10 text-emerald-400 border-emerald-500/20 text-"
+                className="border-emerald-500/20 bg-emerald-500/10 text-xs text-emerald-400"
               >
                 LIVE
               </Badge>
@@ -194,7 +206,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
               {isLoading ? (
-                <div className="col-span-3 text-center text-xs text-white/40 py-4">
+                <div className="col-span-3 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
                 </div>
               ) : marketData.length > 0 ? (
@@ -203,13 +215,13 @@ export default function HomePage() {
                   return (
                     <div
                       key={item.symbol}
-                      className={`flex min-h- flex-col justify-between rounded-lg border p-2.5 ${
+                      className={`flex min-h-[90px] flex-col justify-between rounded-lg border p-2.5 ${
                         isBIRate
                           ? "border-amber-500/20 bg-amber-500/5"
                           : "border-white/10 bg-black/40"
                       }`}
                     >
-                      <div className="flex justify-between items-center">
+                      <div className="flex items-center justify-between">
                         <span className="flex items-center gap-1 text-xs font-bold text-white">
                           {isBIRate && (
                             <IconBuildingBank
@@ -220,11 +232,11 @@ export default function HomePage() {
                           {item.symbol}
                         </span>
                         <Badge
-                          className={`text- ${
+                          className={`flex items-center border-0 px-1.5 py-0.5 text-[10px] ${
                             item.isUp
                               ? "bg-emerald-500/15 text-emerald-400"
                               : "bg-red-500/15 text-red-400"
-                          } border-0 flex items-center px-1.5 py-0.5`}
+                          }`}
                         >
                           {item.isUp ? (
                             <IconTrendingUp size={10} className="mr-0.5" />
@@ -237,12 +249,14 @@ export default function HomePage() {
                       <div className="mt-1 text-sm font-semibold text-white">
                         {item.price}
                       </div>
-                      <div className="text- text-white/50">{item.name}</div>
+                      <div className="text-[11px] text-white/50">
+                        {item.name}
+                      </div>
                     </div>
                   );
                 })
               ) : (
-                <div className="col-span-3 text-center text-xs text-white/40 py-4">
+                <div className="col-span-3 py-4 text-center text-xs text-white/40">
                   Gagal memuat indikator pasar.
                 </div>
               )}
