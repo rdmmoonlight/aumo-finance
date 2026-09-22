@@ -14,7 +14,6 @@ import {
   IconLoader2,
   IconInfoCircle,
 } from "@tabler/icons-react";
-// Import Hook RTK Query hasil auto-generate
 import { useGetApiV1ReportsStatementOfCashFlowQuery } from "@/lib/generatedApi";
 
 export interface CashFlowLine {
@@ -31,11 +30,9 @@ const formatNumber = (n: number) => {
 };
 
 export default function StatementOfCashFlowPage() {
-  // Panggil RTK Query Hook
   const { data, isLoading, isError, error } =
     useGetApiV1ReportsStatementOfCashFlowQuery();
 
-  // Parsing data API secara aman
   const responseData = data as any;
   const noPeriod = responseData?.hasPeriodSelected === false;
 
@@ -72,12 +69,24 @@ export default function StatementOfCashFlowPage() {
   const netChange = netOperating + netInvesting + netFinancing;
   const endingCash = beginningCash + netChange;
 
+  // Type-safe error message extraction
   const errorMessage = useMemo(() => {
     if (!isError || !error) return null;
-    if ("data" in error) {
-      return (error.data as any)?.message || "Gagal memuat Laporan Arus Kas.";
+
+    if ("status" in error) {
+      // Handled as FetchBaseQueryError
+      if ("data" in error && error.data) {
+        return (error.data as any)?.message || "Gagal memuat Laporan Arus Kas.";
+      }
+      if ("error" in error) {
+        return error.error;
+      }
+    } else if ("message" in error) {
+      // Handled as SerializedError
+      return error.message || "Terjadi kesalahan jaringan.";
     }
-    return error.message || "Terjadi kesalahan jaringan.";
+
+    return "Terjadi kesalahan yang tidak diketahui.";
   }, [isError, error]);
 
   if (isLoading) {

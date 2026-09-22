@@ -7,6 +7,7 @@ const config = {
   outputFile: "./src/lib/generatedApi.ts",
   exportName: "generatedApi",
   hooks: true,
+  tag: true,
 };
 
 module.exports = config;

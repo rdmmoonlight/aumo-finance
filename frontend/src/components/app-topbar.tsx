@@ -15,21 +15,43 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Search, Bell, Database, RefreshCw } from "lucide-react";
-import { usePeriods } from "@/hooks/use-periods";
-import { useHealthCheck } from "@/hooks/use-health-check";
+
+// RTK Query Hooks dari auto-generated file
+import {
+  useGetApiV1PeriodsOpenInfoQuery,
+  useGetApiV1HealthQuery,
+} from "@/lib/generatedApi";
 
 export function TopBar() {
   const pathname = usePathname();
 
-  // 1. Hook Periode Aktif
-  const { selectedPeriod, isLoading: isPeriodLoading } = usePeriods();
+  // 1. Hook Periode Aktif via RTK Query
+  const { data: periodData, isLoading: isPeriodLoading } =
+    useGetApiV1PeriodsOpenInfoQuery();
 
-  // 2. Hook Database Health Check (Wake-up call)
+  // 2. Hook Database Health Check via RTK Query
   const {
-    status: dbStatus,
+    data: healthData,
+    isLoading: isHealthLoading,
+    isFetching: isHealthFetching,
+    isError: isHealthError,
     refetch: checkDb,
-    isFetching: isDbChecking,
-  } = useHealthCheck();
+  } = useGetApiV1HealthQuery(undefined, {
+    // Polling otomatis setiap 30 detik untuk memantau status DB
+    pollingInterval: 30000,
+  });
+
+  // Penentuan status database berdasarkan kondisi RTK Query
+  const dbStatus = isHealthError
+    ? "offline"
+    : isHealthLoading || isHealthFetching
+      ? "connecting"
+      : healthData
+        ? "online"
+        : "offline";
+
+  // Ambil periode terpilih/aktif jika ada dari response backend
+  const selectedPeriod = periodData as any;
 
   // Ekstrak segment dari URL untuk breadcrumbs
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -123,7 +145,7 @@ export function TopBar() {
                     : "bg-emerald-500 animate-pulse"
                 }`}
               />
-              Periode: {selectedPeriod.periodName}
+              Periode: {selectedPeriod.periodName || selectedPeriod.name}
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
             </Badge>
           ) : (
@@ -170,17 +192,16 @@ export function TopBar() {
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
                   DB: Disconnected
                 </Badge>
-                {/* Menggunakan Button shadcn varian ghost & icon */}
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => checkDb()}
-                  disabled={isDbChecking}
+                  disabled={isHealthFetching}
                   className="h-6 w-6 text-muted-foreground hover:text-foreground"
                   title="Coba hubungkan ulang"
                 >
                   <RefreshCw
-                    className={`h-3 w-3 ${isDbChecking ? "animate-spin" : ""}`}
+                    className={`h-3 w-3 ${isHealthFetching ? "animate-spin" : ""}`}
                   />
                 </Button>
               </div>

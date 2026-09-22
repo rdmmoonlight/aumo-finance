@@ -16,7 +16,7 @@ function LoginFormContent() {
   const [showPass, setShowPass] = useState(false);
   const [err, setErr] = useState("");
 
-  // Panggil mutation hook dari RTK Query
+  // Panggil mutation hook dari RTK Query auto-generated
   const [loginMutation, { isLoading }] = usePostApiV1AuthLoginMutation();
 
   useEffect(() => {
@@ -57,11 +57,15 @@ function LoginFormContent() {
       window.location.href = targetUrl;
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e);
-      // Ambil pesan error dari response backend jika ada
+      // Fallback bertingkat untuk menangkap error dari .NET Identity / ProblemDetails
       const errorMessage =
         e?.data?.message ||
         e?.data?.title ||
-        "Email atau password salah / terjadi kesalahan sistem.";
+        e?.data?.errors?.Email?.[0] ||
+        (e?.status === "FETCH_ERROR"
+          ? "Gagal terhubung ke server backend."
+          : "Email atau password salah / terjadi kesalahan sistem.");
+          
       setErr(errorMessage);
     }
   };

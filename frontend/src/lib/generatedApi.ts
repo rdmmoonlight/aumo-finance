@@ -1,378 +1,452 @@
 import { baseApi as api } from "./apiClient";
-const injectedRtkApi = api.injectEndpoints({
-  endpoints: (build) => ({
-    $get: build.query<$getApiResponse, $getApiArg>({
-      query: () => ({ url: `/` }),
-    }),
-    head: build.mutation<HeadApiResponse, HeadApiArg>({
-      query: () => ({ url: `/`, method: "HEAD" }),
-    }),
-    postAuthLogout: build.mutation<
-      PostAuthLogoutApiResponse,
-      PostAuthLogoutApiArg
-    >({
-      query: () => ({ url: `/auth/logout`, method: "POST" }),
-    }),
-    postApiV1AuthLogin: build.mutation<
-      PostApiV1AuthLoginApiResponse,
-      PostApiV1AuthLoginApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/auth/login`,
-        method: "POST",
-        body: queryArg.loginRequest,
+export const addTagTypes = [
+  "AumoBackend",
+  "Auth",
+  "ChartOfAccounts",
+  "Dashboard",
+  "Guardian",
+  "Health",
+  "JournalEntry",
+  "Periods",
+  "Tools",
+  "TestEmail",
+  "GeneralLedger",
+  "IncomeStatement",
+  "Journal",
+  "RetainedEarnings",
+  "StatementOfCashFlow",
+  "StatementOfFinancialPosition",
+  "TrialBalance",
+  "Worksheet",
+] as const;
+const injectedRtkApi = api
+  .enhanceEndpoints({
+    addTagTypes,
+  })
+  .injectEndpoints({
+    endpoints: (build) => ({
+      $get: build.query<$getApiResponse, $getApiArg>({
+        query: () => ({ url: `/` }),
+        providesTags: ["AumoBackend"],
+      }),
+      head: build.mutation<HeadApiResponse, HeadApiArg>({
+        query: () => ({ url: `/`, method: "HEAD" }),
+        invalidatesTags: ["AumoBackend"],
+      }),
+      postAuthLogout: build.mutation<
+        PostAuthLogoutApiResponse,
+        PostAuthLogoutApiArg
+      >({
+        query: () => ({ url: `/auth/logout`, method: "POST" }),
+        invalidatesTags: ["AumoBackend"],
+      }),
+      postApiV1AuthLogin: build.mutation<
+        PostApiV1AuthLoginApiResponse,
+        PostApiV1AuthLoginApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/auth/login`,
+          method: "POST",
+          body: queryArg.loginRequest,
+        }),
+        invalidatesTags: ["Auth"],
+      }),
+      postApiV1AuthGoogleLogin: build.mutation<
+        PostApiV1AuthGoogleLoginApiResponse,
+        PostApiV1AuthGoogleLoginApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/auth/google-login`,
+          method: "POST",
+          body: queryArg.googleLoginRequest,
+        }),
+        invalidatesTags: ["Auth"],
+      }),
+      getApiV1AuthMe: build.query<
+        GetApiV1AuthMeApiResponse,
+        GetApiV1AuthMeApiArg
+      >({
+        query: () => ({ url: `/api/v1/auth/me` }),
+        providesTags: ["Auth"],
+      }),
+      postApiV1AuthLogout: build.mutation<
+        PostApiV1AuthLogoutApiResponse,
+        PostApiV1AuthLogoutApiArg
+      >({
+        query: () => ({ url: `/api/v1/auth/logout`, method: "POST" }),
+        invalidatesTags: ["Auth"],
+      }),
+      getApiV1ChartOfAccounts: build.query<
+        GetApiV1ChartOfAccountsApiResponse,
+        GetApiV1ChartOfAccountsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/chart-of-accounts`,
+          params: {
+            search: queryArg.search,
+            category: queryArg.category,
+          },
+        }),
+        providesTags: ["ChartOfAccounts"],
+      }),
+      postApiV1ChartOfAccounts: build.mutation<
+        PostApiV1ChartOfAccountsApiResponse,
+        PostApiV1ChartOfAccountsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/chart-of-accounts`,
+          method: "POST",
+          body: queryArg.createAccountRequest,
+        }),
+        invalidatesTags: ["ChartOfAccounts"],
+      }),
+      putApiV1ChartOfAccountsById: build.mutation<
+        PutApiV1ChartOfAccountsByIdApiResponse,
+        PutApiV1ChartOfAccountsByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/chart-of-accounts/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.updateAccountRequest,
+        }),
+        invalidatesTags: ["ChartOfAccounts"],
+      }),
+      deleteApiV1ChartOfAccountsById: build.mutation<
+        DeleteApiV1ChartOfAccountsByIdApiResponse,
+        DeleteApiV1ChartOfAccountsByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/chart-of-accounts/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["ChartOfAccounts"],
+      }),
+      getApiV1Dashboard: build.query<
+        GetApiV1DashboardApiResponse,
+        GetApiV1DashboardApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/dashboard`,
+          params: {
+            period: queryArg.period,
+          },
+        }),
+        providesTags: ["Dashboard"],
+      }),
+      getApiV1GuardianDashboard: build.query<
+        GetApiV1GuardianDashboardApiResponse,
+        GetApiV1GuardianDashboardApiArg
+      >({
+        query: () => ({ url: `/api/v1/guardian/dashboard` }),
+        providesTags: ["Guardian"],
+      }),
+      postApiV1GuardianRevokeSessionBySessionId: build.mutation<
+        PostApiV1GuardianRevokeSessionBySessionIdApiResponse,
+        PostApiV1GuardianRevokeSessionBySessionIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/guardian/revoke-session/${queryArg.sessionId}`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Guardian"],
+      }),
+      postApiV1GuardianRevokeAllSessions: build.mutation<
+        PostApiV1GuardianRevokeAllSessionsApiResponse,
+        PostApiV1GuardianRevokeAllSessionsApiArg
+      >({
+        query: () => ({
+          url: `/api/v1/guardian/revoke-all-sessions`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Guardian"],
+      }),
+      getApiV1Health: build.query<
+        GetApiV1HealthApiResponse,
+        GetApiV1HealthApiArg
+      >({
+        query: () => ({ url: `/api/v1/health` }),
+        providesTags: ["Health"],
+      }),
+      getApiV1JournalEntryById: build.query<
+        GetApiV1JournalEntryByIdApiResponse,
+        GetApiV1JournalEntryByIdApiArg
+      >({
+        query: (queryArg) => ({ url: `/api/v1/journal-entry/${queryArg.id}` }),
+        providesTags: ["JournalEntry"],
+      }),
+      postApiV1JournalEntryCreate: build.mutation<
+        PostApiV1JournalEntryCreateApiResponse,
+        PostApiV1JournalEntryCreateApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/journal-entry/create`,
+          method: "POST",
+          body: queryArg.createJournalEntryRequest,
+        }),
+        invalidatesTags: ["JournalEntry"],
+      }),
+      putApiV1JournalEntryEditById: build.mutation<
+        PutApiV1JournalEntryEditByIdApiResponse,
+        PutApiV1JournalEntryEditByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/journal-entry/edit/${queryArg.id}`,
+          method: "PUT",
+          body: queryArg.updateJournalEntryRequest,
+        }),
+        invalidatesTags: ["JournalEntry"],
+      }),
+      deleteApiV1JournalEntryDeleteById: build.mutation<
+        DeleteApiV1JournalEntryDeleteByIdApiResponse,
+        DeleteApiV1JournalEntryDeleteByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/journal-entry/delete/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["JournalEntry"],
+      }),
+      getApiV1JournalEntrySearchDescriptions: build.query<
+        GetApiV1JournalEntrySearchDescriptionsApiResponse,
+        GetApiV1JournalEntrySearchDescriptionsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/journal-entry/search-descriptions`,
+          params: {
+            q: queryArg.q,
+          },
+        }),
+        providesTags: ["JournalEntry"],
+      }),
+      getApiV1JournalEntryNextTransactionNumber: build.query<
+        GetApiV1JournalEntryNextTransactionNumberApiResponse,
+        GetApiV1JournalEntryNextTransactionNumberApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/journal-entry/next-transaction-number`,
+          params: {
+            journalType: queryArg.journalType,
+            entryDate: queryArg.entryDate,
+          },
+        }),
+        providesTags: ["JournalEntry"],
+      }),
+      getApiV1Periods: build.query<
+        GetApiV1PeriodsApiResponse,
+        GetApiV1PeriodsApiArg
+      >({
+        query: () => ({ url: `/api/v1/periods` }),
+        providesTags: ["Periods"],
+      }),
+      postApiV1Periods: build.mutation<
+        PostApiV1PeriodsApiResponse,
+        PostApiV1PeriodsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/periods`,
+          method: "POST",
+          body: queryArg.createPeriodRequest,
+        }),
+        invalidatesTags: ["Periods"],
+      }),
+      getApiV1PeriodsOpenInfo: build.query<
+        GetApiV1PeriodsOpenInfoApiResponse,
+        GetApiV1PeriodsOpenInfoApiArg
+      >({
+        query: () => ({ url: `/api/v1/periods/open-info` }),
+        providesTags: ["Periods"],
+      }),
+      postApiV1PeriodsSelectById: build.mutation<
+        PostApiV1PeriodsSelectByIdApiResponse,
+        PostApiV1PeriodsSelectByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/periods/select/${queryArg.id}`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Periods"],
+      }),
+      postApiV1PeriodsClearSelection: build.mutation<
+        PostApiV1PeriodsClearSelectionApiResponse,
+        PostApiV1PeriodsClearSelectionApiArg
+      >({
+        query: () => ({
+          url: `/api/v1/periods/clear-selection`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Periods"],
+      }),
+      postApiV1PeriodsCloseById: build.mutation<
+        PostApiV1PeriodsCloseByIdApiResponse,
+        PostApiV1PeriodsCloseByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/periods/close/${queryArg.id}`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Periods"],
+      }),
+      getApiV1ToolsDownloadJournalTemplate: build.query<
+        GetApiV1ToolsDownloadJournalTemplateApiResponse,
+        GetApiV1ToolsDownloadJournalTemplateApiArg
+      >({
+        query: () => ({ url: `/api/v1/tools/download-journal-template` }),
+        providesTags: ["Tools"],
+      }),
+      postApiV1ToolsPreviewJournalImport: build.mutation<
+        PostApiV1ToolsPreviewJournalImportApiResponse,
+        PostApiV1ToolsPreviewJournalImportApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/tools/preview-journal-import`,
+          method: "POST",
+          body: queryArg.journalImportRequestDto,
+        }),
+        invalidatesTags: ["Tools"],
+      }),
+      postApiV1ToolsImportJournalEntries: build.mutation<
+        PostApiV1ToolsImportJournalEntriesApiResponse,
+        PostApiV1ToolsImportJournalEntriesApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/tools/import-journal-entries`,
+          method: "POST",
+          body: queryArg.journalImportRequestDto,
+        }),
+        invalidatesTags: ["Tools"],
+      }),
+      postApiV1TestEmailResendVerification: build.mutation<
+        PostApiV1TestEmailResendVerificationApiResponse,
+        PostApiV1TestEmailResendVerificationApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/test-email/resend-verification`,
+          method: "POST",
+          body: queryArg.resendRequest,
+        }),
+        invalidatesTags: ["TestEmail"],
+      }),
+      getApiV1ReportsGeneralLedgerPermanent: build.query<
+        GetApiV1ReportsGeneralLedgerPermanentApiResponse,
+        GetApiV1ReportsGeneralLedgerPermanentApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/general-ledger/permanent` }),
+        providesTags: ["GeneralLedger"],
+      }),
+      getApiV1ReportsGeneralLedgerTemporary: build.query<
+        GetApiV1ReportsGeneralLedgerTemporaryApiResponse,
+        GetApiV1ReportsGeneralLedgerTemporaryApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/general-ledger/temporary` }),
+        providesTags: ["GeneralLedger"],
+      }),
+      getApiV1ReportsIncomeStatement: build.query<
+        GetApiV1ReportsIncomeStatementApiResponse,
+        GetApiV1ReportsIncomeStatementApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/income-statement` }),
+        providesTags: ["IncomeStatement"],
+      }),
+      getApiV1ReportsJournalsGeneral: build.query<
+        GetApiV1ReportsJournalsGeneralApiResponse,
+        GetApiV1ReportsJournalsGeneralApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/journals/general` }),
+        providesTags: ["Journal"],
+      }),
+      getApiV1ReportsJournalsAdjusting: build.query<
+        GetApiV1ReportsJournalsAdjustingApiResponse,
+        GetApiV1ReportsJournalsAdjustingApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/journals/adjusting` }),
+        providesTags: ["Journal"],
+      }),
+      deleteApiV1ReportsJournalsAdjustingById: build.mutation<
+        DeleteApiV1ReportsJournalsAdjustingByIdApiResponse,
+        DeleteApiV1ReportsJournalsAdjustingByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/reports/journals/adjusting/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Journal"],
+      }),
+      getApiV1ReportsJournalsClosing: build.query<
+        GetApiV1ReportsJournalsClosingApiResponse,
+        GetApiV1ReportsJournalsClosingApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/journals/closing` }),
+        providesTags: ["Journal"],
+      }),
+      getApiV1ReportsRetainedEarnings: build.query<
+        GetApiV1ReportsRetainedEarningsApiResponse,
+        GetApiV1ReportsRetainedEarningsApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/retained-earnings` }),
+        providesTags: ["RetainedEarnings"],
+      }),
+      getApiV1ReportsStatementOfCashFlow: build.query<
+        GetApiV1ReportsStatementOfCashFlowApiResponse,
+        GetApiV1ReportsStatementOfCashFlowApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/statement-of-cash-flow` }),
+        providesTags: ["StatementOfCashFlow"],
+      }),
+      getApiV1ReportsStatementOfFinancialPosition: build.query<
+        GetApiV1ReportsStatementOfFinancialPositionApiResponse,
+        GetApiV1ReportsStatementOfFinancialPositionApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/reports/statement-of-financial-position`,
+          params: {
+            isPostClosing: queryArg.isPostClosing,
+          },
+        }),
+        providesTags: ["StatementOfFinancialPosition"],
+      }),
+      getApiV1ReportsTrialBalance: build.query<
+        GetApiV1ReportsTrialBalanceApiResponse,
+        GetApiV1ReportsTrialBalanceApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/reports/trial-balance`,
+          params: {
+            type: queryArg["type"],
+          },
+        }),
+        providesTags: ["TrialBalance"],
+      }),
+      getApiV1ReportsTrialBalanceUnadjusted: build.query<
+        GetApiV1ReportsTrialBalanceUnadjustedApiResponse,
+        GetApiV1ReportsTrialBalanceUnadjustedApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/trial-balance/unadjusted` }),
+        providesTags: ["TrialBalance"],
+      }),
+      getApiV1ReportsTrialBalanceAdjusted: build.query<
+        GetApiV1ReportsTrialBalanceAdjustedApiResponse,
+        GetApiV1ReportsTrialBalanceAdjustedApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/trial-balance/adjusted` }),
+        providesTags: ["TrialBalance"],
+      }),
+      getApiV1ReportsTrialBalancePostClosing: build.query<
+        GetApiV1ReportsTrialBalancePostClosingApiResponse,
+        GetApiV1ReportsTrialBalancePostClosingApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/trial-balance/post-closing` }),
+        providesTags: ["TrialBalance"],
+      }),
+      getApiV1ReportsWorksheet: build.query<
+        GetApiV1ReportsWorksheetApiResponse,
+        GetApiV1ReportsWorksheetApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/worksheet` }),
+        providesTags: ["Worksheet"],
       }),
     }),
-    postApiV1AuthGoogleLogin: build.mutation<
-      PostApiV1AuthGoogleLoginApiResponse,
-      PostApiV1AuthGoogleLoginApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/auth/google-login`,
-        method: "POST",
-        body: queryArg.googleLoginRequest,
-      }),
-    }),
-    getApiV1AuthMe: build.query<
-      GetApiV1AuthMeApiResponse,
-      GetApiV1AuthMeApiArg
-    >({
-      query: () => ({ url: `/api/v1/auth/me` }),
-    }),
-    postApiV1AuthLogout: build.mutation<
-      PostApiV1AuthLogoutApiResponse,
-      PostApiV1AuthLogoutApiArg
-    >({
-      query: () => ({ url: `/api/v1/auth/logout`, method: "POST" }),
-    }),
-    getApiV1ChartOfAccounts: build.query<
-      GetApiV1ChartOfAccountsApiResponse,
-      GetApiV1ChartOfAccountsApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/chart-of-accounts`,
-        params: {
-          search: queryArg.search,
-          category: queryArg.category,
-        },
-      }),
-    }),
-    postApiV1ChartOfAccounts: build.mutation<
-      PostApiV1ChartOfAccountsApiResponse,
-      PostApiV1ChartOfAccountsApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/chart-of-accounts`,
-        method: "POST",
-        body: queryArg.createAccountRequest,
-      }),
-    }),
-    putApiV1ChartOfAccountsById: build.mutation<
-      PutApiV1ChartOfAccountsByIdApiResponse,
-      PutApiV1ChartOfAccountsByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/chart-of-accounts/${queryArg.id}`,
-        method: "PUT",
-        body: queryArg.updateAccountRequest,
-      }),
-    }),
-    deleteApiV1ChartOfAccountsById: build.mutation<
-      DeleteApiV1ChartOfAccountsByIdApiResponse,
-      DeleteApiV1ChartOfAccountsByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/chart-of-accounts/${queryArg.id}`,
-        method: "DELETE",
-      }),
-    }),
-    getApiV1Dashboard: build.query<
-      GetApiV1DashboardApiResponse,
-      GetApiV1DashboardApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/dashboard`,
-        params: {
-          period: queryArg.period,
-        },
-      }),
-    }),
-    getApiV1GuardianDashboard: build.query<
-      GetApiV1GuardianDashboardApiResponse,
-      GetApiV1GuardianDashboardApiArg
-    >({
-      query: () => ({ url: `/api/v1/guardian/dashboard` }),
-    }),
-    postApiV1GuardianRevokeSessionBySessionId: build.mutation<
-      PostApiV1GuardianRevokeSessionBySessionIdApiResponse,
-      PostApiV1GuardianRevokeSessionBySessionIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/guardian/revoke-session/${queryArg.sessionId}`,
-        method: "POST",
-      }),
-    }),
-    postApiV1GuardianRevokeAllSessions: build.mutation<
-      PostApiV1GuardianRevokeAllSessionsApiResponse,
-      PostApiV1GuardianRevokeAllSessionsApiArg
-    >({
-      query: () => ({
-        url: `/api/v1/guardian/revoke-all-sessions`,
-        method: "POST",
-      }),
-    }),
-    getApiV1Health: build.query<
-      GetApiV1HealthApiResponse,
-      GetApiV1HealthApiArg
-    >({
-      query: () => ({ url: `/api/v1/health` }),
-    }),
-    getApiV1JournalEntryById: build.query<
-      GetApiV1JournalEntryByIdApiResponse,
-      GetApiV1JournalEntryByIdApiArg
-    >({
-      query: (queryArg) => ({ url: `/api/v1/journal-entry/${queryArg.id}` }),
-    }),
-    postApiV1JournalEntryCreate: build.mutation<
-      PostApiV1JournalEntryCreateApiResponse,
-      PostApiV1JournalEntryCreateApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/journal-entry/create`,
-        method: "POST",
-        body: queryArg.createJournalEntryRequest,
-      }),
-    }),
-    putApiV1JournalEntryEditById: build.mutation<
-      PutApiV1JournalEntryEditByIdApiResponse,
-      PutApiV1JournalEntryEditByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/journal-entry/edit/${queryArg.id}`,
-        method: "PUT",
-        body: queryArg.updateJournalEntryRequest,
-      }),
-    }),
-    deleteApiV1JournalEntryDeleteById: build.mutation<
-      DeleteApiV1JournalEntryDeleteByIdApiResponse,
-      DeleteApiV1JournalEntryDeleteByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/journal-entry/delete/${queryArg.id}`,
-        method: "DELETE",
-      }),
-    }),
-    getApiV1JournalEntrySearchDescriptions: build.query<
-      GetApiV1JournalEntrySearchDescriptionsApiResponse,
-      GetApiV1JournalEntrySearchDescriptionsApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/journal-entry/search-descriptions`,
-        params: {
-          q: queryArg.q,
-        },
-      }),
-    }),
-    getApiV1JournalEntryNextTransactionNumber: build.query<
-      GetApiV1JournalEntryNextTransactionNumberApiResponse,
-      GetApiV1JournalEntryNextTransactionNumberApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/journal-entry/next-transaction-number`,
-        params: {
-          journalType: queryArg.journalType,
-          entryDate: queryArg.entryDate,
-        },
-      }),
-    }),
-    getApiV1Periods: build.query<
-      GetApiV1PeriodsApiResponse,
-      GetApiV1PeriodsApiArg
-    >({
-      query: () => ({ url: `/api/v1/periods` }),
-    }),
-    postApiV1Periods: build.mutation<
-      PostApiV1PeriodsApiResponse,
-      PostApiV1PeriodsApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/periods`,
-        method: "POST",
-        body: queryArg.createPeriodRequest,
-      }),
-    }),
-    getApiV1PeriodsOpenInfo: build.query<
-      GetApiV1PeriodsOpenInfoApiResponse,
-      GetApiV1PeriodsOpenInfoApiArg
-    >({
-      query: () => ({ url: `/api/v1/periods/open-info` }),
-    }),
-    postApiV1PeriodsSelectById: build.mutation<
-      PostApiV1PeriodsSelectByIdApiResponse,
-      PostApiV1PeriodsSelectByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/periods/select/${queryArg.id}`,
-        method: "POST",
-      }),
-    }),
-    postApiV1PeriodsClearSelection: build.mutation<
-      PostApiV1PeriodsClearSelectionApiResponse,
-      PostApiV1PeriodsClearSelectionApiArg
-    >({
-      query: () => ({ url: `/api/v1/periods/clear-selection`, method: "POST" }),
-    }),
-    postApiV1PeriodsCloseById: build.mutation<
-      PostApiV1PeriodsCloseByIdApiResponse,
-      PostApiV1PeriodsCloseByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/periods/close/${queryArg.id}`,
-        method: "POST",
-      }),
-    }),
-    getApiV1ToolsDownloadJournalTemplate: build.query<
-      GetApiV1ToolsDownloadJournalTemplateApiResponse,
-      GetApiV1ToolsDownloadJournalTemplateApiArg
-    >({
-      query: () => ({ url: `/api/v1/tools/download-journal-template` }),
-    }),
-    postApiV1ToolsPreviewJournalImport: build.mutation<
-      PostApiV1ToolsPreviewJournalImportApiResponse,
-      PostApiV1ToolsPreviewJournalImportApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/tools/preview-journal-import`,
-        method: "POST",
-        body: queryArg.journalImportRequestDto,
-      }),
-    }),
-    postApiV1ToolsImportJournalEntries: build.mutation<
-      PostApiV1ToolsImportJournalEntriesApiResponse,
-      PostApiV1ToolsImportJournalEntriesApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/tools/import-journal-entries`,
-        method: "POST",
-        body: queryArg.journalImportRequestDto,
-      }),
-    }),
-    postApiV1TestEmailResendVerification: build.mutation<
-      PostApiV1TestEmailResendVerificationApiResponse,
-      PostApiV1TestEmailResendVerificationApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/test-email/resend-verification`,
-        method: "POST",
-        body: queryArg.resendRequest,
-      }),
-    }),
-    getApiV1ReportsGeneralLedgerPermanent: build.query<
-      GetApiV1ReportsGeneralLedgerPermanentApiResponse,
-      GetApiV1ReportsGeneralLedgerPermanentApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/general-ledger/permanent` }),
-    }),
-    getApiV1ReportsGeneralLedgerTemporary: build.query<
-      GetApiV1ReportsGeneralLedgerTemporaryApiResponse,
-      GetApiV1ReportsGeneralLedgerTemporaryApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/general-ledger/temporary` }),
-    }),
-    getApiV1ReportsIncomeStatement: build.query<
-      GetApiV1ReportsIncomeStatementApiResponse,
-      GetApiV1ReportsIncomeStatementApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/income-statement` }),
-    }),
-    getApiV1ReportsJournalsGeneral: build.query<
-      GetApiV1ReportsJournalsGeneralApiResponse,
-      GetApiV1ReportsJournalsGeneralApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/journals/general` }),
-    }),
-    getApiV1ReportsJournalsAdjusting: build.query<
-      GetApiV1ReportsJournalsAdjustingApiResponse,
-      GetApiV1ReportsJournalsAdjustingApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/journals/adjusting` }),
-    }),
-    deleteApiV1ReportsJournalsAdjustingById: build.mutation<
-      DeleteApiV1ReportsJournalsAdjustingByIdApiResponse,
-      DeleteApiV1ReportsJournalsAdjustingByIdApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reports/journals/adjusting/${queryArg.id}`,
-        method: "DELETE",
-      }),
-    }),
-    getApiV1ReportsJournalsClosing: build.query<
-      GetApiV1ReportsJournalsClosingApiResponse,
-      GetApiV1ReportsJournalsClosingApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/journals/closing` }),
-    }),
-    getApiV1ReportsRetainedEarnings: build.query<
-      GetApiV1ReportsRetainedEarningsApiResponse,
-      GetApiV1ReportsRetainedEarningsApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/retained-earnings` }),
-    }),
-    getApiV1ReportsStatementOfCashFlow: build.query<
-      GetApiV1ReportsStatementOfCashFlowApiResponse,
-      GetApiV1ReportsStatementOfCashFlowApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/statement-of-cash-flow` }),
-    }),
-    getApiV1ReportsStatementOfFinancialPosition: build.query<
-      GetApiV1ReportsStatementOfFinancialPositionApiResponse,
-      GetApiV1ReportsStatementOfFinancialPositionApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reports/statement-of-financial-position`,
-        params: {
-          isPostClosing: queryArg.isPostClosing,
-        },
-      }),
-    }),
-    getApiV1ReportsTrialBalance: build.query<
-      GetApiV1ReportsTrialBalanceApiResponse,
-      GetApiV1ReportsTrialBalanceApiArg
-    >({
-      query: (queryArg) => ({
-        url: `/api/v1/reports/trial-balance`,
-        params: {
-          type: queryArg["type"],
-        },
-      }),
-    }),
-    getApiV1ReportsTrialBalanceUnadjusted: build.query<
-      GetApiV1ReportsTrialBalanceUnadjustedApiResponse,
-      GetApiV1ReportsTrialBalanceUnadjustedApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/trial-balance/unadjusted` }),
-    }),
-    getApiV1ReportsTrialBalanceAdjusted: build.query<
-      GetApiV1ReportsTrialBalanceAdjustedApiResponse,
-      GetApiV1ReportsTrialBalanceAdjustedApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/trial-balance/adjusted` }),
-    }),
-    getApiV1ReportsTrialBalancePostClosing: build.query<
-      GetApiV1ReportsTrialBalancePostClosingApiResponse,
-      GetApiV1ReportsTrialBalancePostClosingApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/trial-balance/post-closing` }),
-    }),
-    getApiV1ReportsWorksheet: build.query<
-      GetApiV1ReportsWorksheetApiResponse,
-      GetApiV1ReportsWorksheetApiArg
-    >({
-      query: () => ({ url: `/api/v1/reports/worksheet` }),
-    }),
-  }),
-  overrideExisting: false,
-});
+    overrideExisting: false,
+  });
 export { injectedRtkApi as generatedApi };
 export type $getApiResponse = unknown;
 export type $getApiArg = void;
