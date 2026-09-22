@@ -1,13 +1,10 @@
+// app/(authenticated)/layout.tsx
 "use client";
 
 import { useEffect, useState } from "react";
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { useGetApiV1AuthMeQuery, useGetApiV1PeriodsOpenInfoQuery } from "@/lib/generatedApi";
 import { AppSidebar } from "@/components/app-sidebar";
-import { TopBar } from "@/components/app-topbar";
-import {
-  useGetApiV1AuthMeQuery,
-  useGetApiV1PeriodsOpenInfoQuery,
-} from "@/lib/generatedApi";
+import { AppTopbar } from "@/components/app-topbar";
 
 export default function AuthenticatedLayout({
   children,
@@ -16,50 +13,54 @@ export default function AuthenticatedLayout({
 }) {
   const [isMounted, setIsMounted] = useState(false);
 
-  // Pastikan eksekusi kueri terproteksi HANYA berjalan setelah komponen ter-mount di Browser (Client-Side)
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // skip: !isMounted mencegah Next.js Server menembak API tanpa Cookie saat SSR
-  const { isLoading: isAuthLoading } = useGetApiV1AuthMeQuery(undefined, {
+  // 1. Cek profil user terlebih dahulu
+  const {
+    data: authData,
+    isLoading: isAuthLoading,
+    isError: isAuthError,
+  } = useGetApiV1AuthMeQuery(undefined, {
     skip: !isMounted,
+    // PENTING: Jangan re-fetch otomatis jika gagal
+    refetchOnMountOrArgChange: false,
   });
 
-  const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(
-    undefined,
-    {
-      skip: !isMounted,
-    },
-  );
+  // 2. HANYA panggil periods/open-info JIKA auth/me SUDAH BERHASIL
+  const isAuthenticated = isMounted && !isAuthLoading && !isAuthError && !!authData;
 
-  // Tampilkan UI Skeleton/Loading minimalis saat aplikasi memverifikasi sesi di awal
-  if (!isMounted || isAuthLoading || isPeriodsLoading) {
+  const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(undefined, {
+    skip: !isAuthenticated, // Skip jika belum terverifikasi login
+    refetchOnMountOrArgChange: false,
+  });
+
+  // Tampilan Loading
+  if (!isMounted || isAuthLoading) {
     return (
-      <div className="flex h-svh w-full items-center justify-center bg-background">
-        <div className="flex flex-col items-center gap-2">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-          <p className="text-xs text-muted-foreground">Memverifikasi sesi...</p>
-        </div>
+      <div className="flex h-screen w-full items-center justify-center">
+        <p className="text-sm text-muted-foreground">Memverifikasi sesi...</p>
+      </div>
+    );
+  }
+
+  // Jika error (401), tahan tampilan agar interceptor di apiClient meredirect ke /auth
+  if (isAuthError) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <p className="text-sm text-muted-foreground">Sesi berakhir, mengalihkan ke halaman login...</p>
       </div>
     );
   }
 
   return (
-    <SidebarProvider>
-      {/* Sidebar Permanen Kiri */}
+    <div className="flex min-h-screen">
       <AppSidebar />
-
-      {/* Area Kanan: TopBar + Main Content */}
-      <SidebarInset className="flex flex-1 flex-col min-w-0 h-svh overflow-hidden">
-        {/* TopBar 2 Kelompok */}
-        <TopBar />
-
-        {/* Halaman Konten Utama */}
-        <main className="flex-1 overflow-y-auto p-6 bg-background">
-          {children}
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+      <div className="flex flex-1 flex-col">
+        <AppTopbar />
+        <main className="flex-1 p-6">{children}</main>
+      </div>
+    </div>
   );
 }
