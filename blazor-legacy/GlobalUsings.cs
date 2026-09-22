@@ -1,10 +1,9 @@
-// 1. Mapping Alias Namespace
+// 1. Alias Namespace (Sintaks: global using ALIAS = TARGET;)
 global using AumoFinance = AumoBackend;
-global using AumoFinance.Controllers = AumoBackend.Controllers;
-global using AumoFinance.Models = AumoBackend.Core;
-global using AumoFinance.Services = AumoBackend.Core;
-global using AumoFinance.Migrations = AumoBackend.Core;
+global using AumoFinanceModels = AumoBackend.Core;
+global using AumoFinanceServices = AumoBackend.Core;
+global using AumoFinanceControllers = AumoBackend.Controllers;
 
-// 2. Import langsung namespace baru
+// 2. Direct Namespace Imports
 global using AumoBackend.Controllers;
 global using AumoBackend.Core;

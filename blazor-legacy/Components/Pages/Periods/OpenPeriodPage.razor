@@ -3,10 +3,9 @@
 @attribute [Authorize]
 
 @using System.Security.Claims
-@using AumoFinance.Models
 @using Microsoft.EntityFrameworkCore
+@inject global::AumoFinance.Services.TxNumberService TxNumberService
 @inject AppDbContext DbContext
-@inject AumoFinance.Services.ITransactionNumberService TxNumberService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager Nav
 
@@ -393,7 +392,7 @@
                 // General Journal (diurutkan berdasarkan EntryDate).
                 if (totalOpeningBalance != 0)
                 {
-                    var transactionNumber = await TxNumberService.GenerateAsync(UserId, "General", startDate);
+                    var transactionNumber = TxNumberService.GetNextTxNumber();
 
                     var journalEntry = new JournalEntry
                     {
@@ -436,5 +435,4 @@
             isSubmitting = false;
         }
     }
-
 }
