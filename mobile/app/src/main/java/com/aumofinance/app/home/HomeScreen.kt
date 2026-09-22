@@ -74,6 +74,8 @@ fun HomeScreen(
 
             item { HeroDashboardCard(item = dashboard, modifier = Modifier.animateItemPlacement()) }
 
+            item { HeroDashboardCard(item = reports, modifier = Modifier.animateItemPlacement()) }
+
             item {
                 SectionLabel("MAIN MENU", modifier = Modifier.animateItemPlacement())
             }
@@ -90,10 +92,6 @@ fun HomeScreen(
                     }
                 }
             }
-
-            item { SectionLabel("REPORTS", modifier = Modifier.animateItemPlacement()) }
-
-            item { SecondaryHeroCard(item = reports, modifier = Modifier.animateItemPlacement()) }
         }
     }
 }
@@ -233,32 +231,6 @@ private fun BentoCard(item: HomeMenuItem, modifier: Modifier = Modifier) {
                 Spacer(Modifier.height(2.dp))
                 Text(item.subtitle, color = AumoColors.TextMuted, style = MaterialTheme.typography.labelSmall, maxLines = 2)
             }
-        }
-    }
-}
-
-@Composable
-private fun SecondaryHeroCard(item: HomeMenuItem, modifier: Modifier = Modifier) {
-    Card(
-        onClick = item.onClick,
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = AumoColors.SurfaceElevated),
-        border = androidx.compose.foundation.BorderStroke(1.dp, AumoColors.TextPrimary.copy(0.06f)),
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)).background(AumoColors.Primary),
-                contentAlignment = Alignment.Center
-            ) {
-                TablerIcon(item.icon, tint = Color.White, size = 24.dp)
-            }
-            Spacer(Modifier.width(14.dp))
-            Column(Modifier.weight(1f)) {
-                Text(item.title, fontWeight = FontWeight.Bold, color = AumoColors.TextPrimary, style = MaterialTheme.typography.titleMedium)
-                Text(item.subtitle, color = AumoColors.TextMuted, style = MaterialTheme.typography.bodySmall)
-            }
-            TablerIcon(TablerIcons.ChevronRight, tint = AumoColors.TextMuted, size = 18.dp)
         }
     }
 }
