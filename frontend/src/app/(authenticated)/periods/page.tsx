@@ -121,9 +121,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(error?.data?.message || "Gagal memilih periode.");
-    } finally {
-      setSelectingId(null);
-    }
+    } finally { setSelectingId(null); }
   };
 
   const handleClearSelection = async () => {
@@ -149,9 +147,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(error?.data?.message || "Failed to close period.");
-    } finally {
-      setClosingId(null);
-    }
+    } finally { setClosingId(null); }
   };
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
@@ -192,15 +188,15 @@ export default function PeriodsPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center py-2">
+        <Alert variant="destructive" className="flex justify-between items-center py-2 bg-red-950/50 border-red-900/50 text-red-200">
           <AlertDescription className="flex items-center gap-2 text-xs"><IconAlertTriangle size={16} />{errorMessage}</AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setErrorMessage(null)}><IconX size={14} /></Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 text-red-200 hover:bg-red-900/30" onClick={() => setErrorMessage(null)}><IconX size={14} /></Button>
         </Alert>
       )}
       {successMessage && (
-        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300 flex justify-between items-center py-2">
+        <Alert className="bg-white/[0.06] border-white/10 text-white flex justify-between items-center py-2">
           <AlertDescription className="text-xs">{successMessage}</AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-emerald-500/20" onClick={() => setSuccessMessage(null)}><IconX size={14} /></Button>
+          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-white/10 text-white" onClick={() => setSuccessMessage(null)}><IconX size={14} /></Button>
         </Alert>
       )}
 
@@ -208,71 +204,77 @@ export default function PeriodsPage() {
         <>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2"><IconCalendar className="text-primary" size={22} /> Accounting Periods</h1>
-              <p className="text-sm text-muted-foreground mt-1">Period yang aktif akan dipakai di semua halaman dashboard</p>
+              <h1 className="text-xl font-bold flex items-center gap-2 text-white"><IconCalendar className="text-white" size={22} /> Accounting Periods</h1>
+              <p className="text-sm text-zinc-400 mt-1">Period yang aktif akan dipakai di semua halaman</p>
             </div>
             <div className="flex gap-2">
               {selectedPeriod && (
-                <Button variant="outline" size="sm" className="gap-1.5 border-primary/30 text-primary hover:bg-primary/10" onClick={handleClearSelection} disabled={isClearing}>
+                <Button variant="outline" size="sm" className="gap-1.5 bg-transparent border-white/15 text-zinc-300 hover:bg-white/10 hover:text-white" onClick={handleClearSelection} disabled={isClearing}>
                   {isClearing? <IconLoader2 size={14} className="animate-spin" /> : <IconEyeOff size={14} />} Stop Viewing
                 </Button>
               )}
-              <Button size="sm" className="gap-1.5" onClick={() => setViewMode("create")}><IconPlus size={14} /> Open New Period</Button>
+              <Button size="sm" className="gap-1.5 bg-white text-black hover:bg-zinc-200" onClick={() => setViewMode("create")}><IconPlus size={14} /> Open New Period</Button>
             </div>
           </div>
 
-          <Card className="overflow-hidden">
-            <CardHeader className="flex-row items-center justify-between space-y-0 py-3">
-              <CardTitle className="text-sm">Period List</CardTitle>
-              <Badge variant="secondary" className="font-mono text-xs">{periods.length} total</Badge>
+          <Card className="overflow-hidden bg-[#151519] border-white/[0.07]">
+            <CardHeader className="flex-row items-center justify-between space-y-0 py-3 border-b border-white/[0.06]">
+              <CardTitle className="text-sm text-white">Period List</CardTitle>
+              <Badge variant="secondary" className="font-mono text-xs bg-white/10 text-zinc-300 border-white/10">{periods.length} total</Badge>
             </CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow>
-                    <TableHead className="pl-6">Period Name</TableHead>
-                    <TableHead>Start</TableHead>
-                    <TableHead>End</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                    <TableHead className="text-center pr-6 w-">Action</TableHead>
+                  <TableRow className="border-white/[0.06] hover:bg-transparent">
+                    <TableHead className="pl-6 text-zinc-500">Period Name</TableHead>
+                    <TableHead className="text-zinc-500">Start</TableHead>
+                    <TableHead className="text-zinc-500">End</TableHead>
+                    <TableHead className="text-center text-zinc-500">Status</TableHead>
+                    <TableHead className="text-center pr-6 w- text-zinc-500">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading? (
-                    <TableRow><TableCell colSpan={5} className="text-center py-8 text-muted-foreground"><IconLoader2 className="animate-spin inline mr-2" size={16} /> Loading...</TableCell></TableRow>
+                    <TableRow className="border-white/[0.06]"><TableCell colSpan={5} className="text-center py-8 text-zinc-500"><IconLoader2 className="animate-spin inline mr-2" size={16} /> Loading...</TableCell></TableRow>
                   ) : (
                     periods.map((p) => {
                       const isSelected = selectedPeriod?.id === p.id;
                       const isSelectingThis = selectingId === p.id;
                       const isClosingThis = closingId === p.id;
                       return (
-                        <TableRow key={p.id} className={cn("transition-colors", isSelected && "bg-primary/5 hover:bg-primary/10 border-l-4 border-l-primary", p.isClosed &&!isSelected && "opacity-60 bg-muted/30")}>
+                        <TableRow key={p.id} className={cn("border-white/[0.06] transition-colors", isSelected? "bg-white/[0.06] hover:bg-white/[0.08] border-l-4 border-l-white" : "hover:bg-white/[0.03]", p.isClosed &&!isSelected && "opacity-50")}>
                           <TableCell className="pl-6 font-medium">
                             <div className="flex items-center gap-2">
-                              <span className={cn("font-bold", isSelected && "text-primary")}>{p.periodName}</span>
-                              {isSelected && <Badge className="gap-1 bg-primary text-white border-0 h-5 text-"><IconEye size={10} /> VIEWING</Badge>}
+                              <span className={cn("font-bold", isSelected? "text-white" : "text-zinc-200")}>{p.periodName}</span>
+                              {isSelected && <Badge className="h-5 text- bg-white text-black border-0 px-1.5 font-bold tracking-wider">VIEWING</Badge>}
                             </div>
                           </TableCell>
-                          <TableCell className="text-xs">{p.startDate? new Date(p.startDate).toLocaleDateString() : "-"}</TableCell>
-                          <TableCell className="text-xs">{p.endDate? new Date(p.endDate).toLocaleDateString() : "-"}</TableCell>
+                          <TableCell className="text-xs text-zinc-400">{p.startDate? new Date(p.startDate).toLocaleDateString() : "-"}</TableCell>
+                          <TableCell className="text-xs text-zinc-400">{p.endDate? new Date(p.endDate).toLocaleDateString() : "-"}</TableCell>
                           <TableCell className="text-center">
-                            {p.isClosed? <Badge variant="secondary" className="gap-1 h-6"><IconLock size={10} /> Closed</Badge> : <Badge className="gap-1 h-6 bg-emerald-500/15 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/15"><IconLockOpen size={10} /> Active</Badge>}
+                            {p.isClosed? <Badge className="h-6 bg-white/10 text-zinc-400 border-white/10"><IconLock size={10} /> Closed</Badge> : <Badge className="h-6 bg-emerald-500/15 text-emerald-400 border-emerald-500/20"><IconLockOpen size={10} /> Active</Badge>}
                           </TableCell>
                           <TableCell className="text-center pr-6">
                             <div className="flex justify-center gap-1.5">
+                              {/* TOMBOL VIEW - INI KUNCINYA */}
                               <Button
                                 type="button"
-                                variant={isSelected? "default" : "outline"}
                                 size="sm"
-                                className={cn("h-7 min-w- gap-1.5 font-medium", isSelected? "bg-primary text-white shadow-sm hover:bg-primary/90" : "hover:bg-primary hover:text-white")}
+                                className={cn(
+                                  "h-7 min-w- gap-1.5 font-bold tracking-wide border transition-all",
+                                  isSelected
+                                  ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
+                                    : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white"
+                                )}
                                 onClick={() => handleSelectPeriod(p)}
                                 disabled={isSelectingThis}
                               >
                                 {isSelectingThis? <IconLoader2 size={14} className="animate-spin" /> : isSelected? <IconEyeOff size={14} /> : <IconEye size={14} />}
-                                {isSelected? "Viewing" : "View"}
+                                {isSelected? "VIEWING" : "VIEW"}
                               </Button>
+
                               {!p.isClosed && (
-                                <Button type="button" variant="ghost" size="sm" className="h-7 w-7 px-0 hover:text-amber-600 hover:bg-amber-50 border hover:border-amber-200" onClick={() => handleClosePeriod(p)} disabled={isClosingThis}>
+                                <Button type="button" variant="ghost" size="sm" className="h-7 w-7 px-0 bg-transparent border border-transparent text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/10" onClick={() => handleClosePeriod(p)} disabled={isClosingThis}>
                                   {isClosingThis? <IconLoader2 size={14} className="animate-spin" /> : <IconLock size={14} />}
                                 </Button>
                               )}
@@ -283,7 +285,7 @@ export default function PeriodsPage() {
                     })
                   )}
                   {!isLoading && periods.length === 0 && (
-                    <TableRow><TableCell colSpan={5} className="text-center py-12 text-muted-foreground"><IconCalendarOff className="mx-auto mb-2" size={28} /><p className="font-medium">No periods yet</p><p className="text-xs">Click Open New Period to start</p></TableCell></TableRow>
+                    <TableRow className="border-white/[0.06]"><TableCell colSpan={5} className="text-center py-12 text-zinc-500"><IconCalendarOff className="mx-auto mb-2" size={28} /><p className="font-medium text-zinc-300">No periods yet</p><p className="text-xs">Click Open New Period to start</p></TableCell></TableRow>
                   )}
                 </TableBody>
               </Table>
@@ -294,54 +296,49 @@ export default function PeriodsPage() {
         <div className="max-w-4xl mx-auto space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2"><IconCalendarPlus className="text-primary" size={22} /> Open New Period</h1>
-              <p className="text-sm text-muted-foreground">Start monthly cycle. Opening balance posted on day 1.</p>
+              <h1 className="text-xl font-bold flex items-center gap-2 text-white"><IconCalendarPlus className="text-white" size={22} /> Open New Period</h1>
+              <p className="text-sm text-zinc-400">Start monthly cycle. Opening balance posted on day 1.</p>
             </div>
-            <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setViewMode("list")}><IconArrowLeft size={14} /> Back</Button>
+            <Button variant="outline" size="sm" className="gap-1.5 bg-transparent border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white" onClick={() => setViewMode("list")}><IconArrowLeft size={14} /> Back</Button>
           </div>
           <form onSubmit={handleCreateSubmit} className="space-y-6">
-            <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-sm">Period</CardTitle></CardHeader>
+            <Card className="bg-[#151519] border-white/[0.07]">
+              <CardHeader className="pb-3"><CardTitle className="text-sm text-white">Period</CardTitle></CardHeader>
               <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1.5"><Label>Month</Label><Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{MONTH_NAMES.map((n, i) => (<SelectItem key={i + 1} value={String(i + 1)}>{n}</SelectItem>))}</SelectContent></Select></div>
-                <div className="space-y-1.5"><Label>Year</Label><Input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} required /></div>
+                <div className="space-y-1.5"><Label className="text-zinc-300">Month</Label><Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}><SelectTrigger className="bg-[#0e0e10] border-white/10 text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#1e1e22] border-white/10 text-white">{MONTH_NAMES.map((n, i) => (<SelectItem key={i + 1} value={String(i + 1)}>{n}</SelectItem>))}</SelectContent></Select></div>
+                <div className="space-y-1.5"><Label className="text-zinc-300">Year</Label><Input type="number" value={year} onChange={(e) => setYear(Number(e.target.value))} required className="bg-[#0e0e10] border-white/10 text-white" /></div>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="pb-3"><CardTitle className="text-sm">Permanent Accounts Setup</CardTitle><CardDescription>Choose existing or create new</CardDescription></CardHeader>
+            <Card className="bg-[#151519] border-white/[0.07]">
+              <CardHeader className="pb-3"><CardTitle className="text-sm text-white">Permanent Accounts Setup</CardTitle><CardDescription className="text-zinc-500">Choose existing or create new</CardDescription></CardHeader>
               <CardContent className="space-y-4">
-                {isLoadingOpenInfo? (
-                  <div className="text-center py-4 text-xs text-muted-foreground"><IconLoader2 className="animate-spin inline mr-1" size={14} /> Memuat informasi akun...</div>
-                ) : (
+                {isLoadingOpenInfo? (<div className="text-center py-4 text-xs text-zinc-500"><IconLoader2 className="animate-spin inline mr-1" size={14} /> Memuat informasi akun...</div>) : (
                   <>
                     <RadioGroup value={setupMode} onValueChange={(v: "LoadExisting" | "CreateNew") => setSetupMode(v)} className="flex gap-4">
-                      <div className="flex items-center gap-2"><RadioGroupItem value="LoadExisting" id="load" disabled={!openInfo?.hasExistingPermanentAccounts} /><Label htmlFor="load" className="flex items-center gap-1 text-xs cursor-pointer"><IconRefresh size={12} /> Use Existing</Label></div>
-                      <div className="flex items-center gap-2"><RadioGroupItem value="CreateNew" id="create" /><Label htmlFor="create" className="flex items-center gap-1 text-xs cursor-pointer"><IconCirclePlus size={12} /> Register New</Label></div>
+                      <div className="flex items-center gap-2"><RadioGroupItem value="LoadExisting" id="load" disabled={!openInfo?.hasExistingPermanentAccounts} className="border-white/20 text-white" /><Label htmlFor="load" className="flex items-center gap-1 text-xs cursor-pointer text-zinc-300"><IconRefresh size={12} /> Use Existing</Label></div>
+                      <div className="flex items-center gap-2"><RadioGroupItem value="CreateNew" id="create" className="border-white/20 text-white" /><Label htmlFor="create" className="flex items-center gap-1 text-xs cursor-pointer text-zinc-300"><IconCirclePlus size={12} /> Register New</Label></div>
                     </RadioGroup>
-                    {!openInfo?.hasExistingPermanentAccounts && (
-                      <Alert className="bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-300"><IconInfoCircle size={16} /><AlertDescription className="text-xs">No existing Cash/Bank & Retained accounts found - new accounts required</AlertDescription></Alert>
-                    )}
                     {setupMode === "LoadExisting"? (
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="space-y-1.5"><Label>Cash Account</Label><Select value={cashAccountId} onValueChange={setCashAccountId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{openInfo?.availableCashAndBankAccounts?.map((a: AccountItem) => (<SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>))}</SelectContent></Select></div>
-                        <div className="space-y-1.5"><Label>Bank Account</Label><Select value={bankAccountId} onValueChange={setBankAccountId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{openInfo?.availableCashAndBankAccounts?.map((a: AccountItem) => (<SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>))}</SelectContent></Select></div>
-                        <div className="space-y-1.5"><Label>Retained Earnings</Label><Select value={retainedId} onValueChange={setRetainedId}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{openInfo?.availableRetainedEarningsAccounts?.map((a: AccountItem) => (<SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>))}</SelectContent></Select></div>
+                        <div className="space-y-1.5"><Label className="text-zinc-300">Cash Account</Label><Select value={cashAccountId} onValueChange={setCashAccountId}><SelectTrigger className="bg-[#0e0e10] border-white/10 text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#1e1e22] border-white/10">{openInfo?.availableCashAndBankAccounts?.map((a: AccountItem) => (<SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>))}</SelectContent></Select></div>
+                        <div className="space-y-1.5"><Label className="text-zinc-300">Bank Account</Label><Select value={bankAccountId} onValueChange={setBankAccountId}><SelectTrigger className="bg-[#0e0e10] border-white/10 text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#1e1e22] border-white/10">{openInfo?.availableCashAndBankAccounts?.map((a: AccountItem) => (<SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>))}</SelectContent></Select></div>
+                        <div className="space-y-1.5"><Label className="text-zinc-300">Retained Earnings</Label><Select value={retainedId} onValueChange={setRetainedId}><SelectTrigger className="bg-[#0e0e10] border-white/10 text-white"><SelectValue /></SelectTrigger><SelectContent className="bg-[#1e1e22] border-white/10">{openInfo?.availableRetainedEarningsAccounts?.map((a: AccountItem) => (<SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>))}</SelectContent></Select></div>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="space-y-1.5"><Label>Cash Code</Label><Input value={cashAccountCode} onChange={(e) => setCashAccountCode(e.target.value)} /></div>
-                          <div className="space-y-1.5"><Label>Cash Name</Label><Input value={cashAccountName} onChange={(e) => setCashAccountName(e.target.value)} /></div>
-                          <div className="space-y-1.5"><Label>Cash Balance</Label><Input type="number" value={cashBalance} onChange={(e) => setCashBalance(e.target.value === ""? "" : Number(e.target.value))} /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Cash Code</Label><Input value={cashAccountCode} onChange={(e) => setCashAccountCode(e.target.value)} className="bg-[#0e0e10] border-white/10 text-white" /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Cash Name</Label><Input value={cashAccountName} onChange={(e) => setCashAccountName(e.target.value)} className="bg-[#0e0e10] border-white/10 text-white" /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Cash Balance</Label><Input type="number" value={cashBalance} onChange={(e) => setCashBalance(e.target.value === ""? "" : Number(e.target.value))} className="bg-[#0e0e10] border-white/10 text-white" /></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          <div className="space-y-1.5"><Label>Bank Code</Label><Input value={bankAccountCode} onChange={(e) => setBankAccountCode(e.target.value)} /></div>
-                          <div className="space-y-1.5"><Label>Bank Name</Label><Input value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} /></div>
-                          <div className="space-y-1.5"><Label>Bank Balance</Label><Input type="number" value={bankBalance} onChange={(e) => setBankBalance(e.target.value === ""? "" : Number(e.target.value))} /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Bank Code</Label><Input value={bankAccountCode} onChange={(e) => setBankAccountCode(e.target.value)} className="bg-[#0e0e10] border-white/10 text-white" /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Bank Name</Label><Input value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} className="bg-[#0e0e10] border-white/10 text-white" /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Bank Balance</Label><Input type="number" value={bankBalance} onChange={(e) => setBankBalance(e.target.value === ""? "" : Number(e.target.value))} className="bg-[#0e0e10] border-white/10 text-white" /></div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-1.5"><Label>Retained Code</Label><Input value={retainedCode} onChange={(e) => setRetainedCode(e.target.value)} /></div>
-                          <div className="space-y-1.5"><Label>Retained Name</Label><Input value={retainedName} onChange={(e) => setRetainedName(e.target.value)} /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Retained Code</Label><Input value={retainedCode} onChange={(e) => setRetainedCode(e.target.value)} className="bg-[#0e0e10] border-white/10 text-white" /></div>
+                          <div className="space-y-1.5"><Label className="text-zinc-300">Retained Name</Label><Input value={retainedName} onChange={(e) => setRetainedName(e.target.value)} className="bg-[#0e0e10] border-white/10 text-white" /></div>
                         </div>
                       </div>
                     )}
@@ -349,7 +346,7 @@ export default function PeriodsPage() {
                 )}
               </CardContent>
             </Card>
-            <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setViewMode("list")}>Cancel</Button><Button type="submit" disabled={isCreating}>{isCreating? "Creating..." : "Submit Period"}</Button></div>
+            <div className="flex justify-end gap-2"><Button type="button" variant="outline" onClick={() => setViewMode("list")} className="bg-transparent border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white">Cancel</Button><Button type="submit" disabled={isCreating} className="bg-white text-black hover:bg-zinc-200">{isCreating? "Creating..." : "Submit Period"}</Button></div>
           </form>
         </div>
       )}
