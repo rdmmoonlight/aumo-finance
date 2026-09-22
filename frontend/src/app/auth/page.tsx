@@ -25,7 +25,8 @@ function LoginFormContent() {
   const { profile, isLoading: isProfileLoading } = useUserProfile();
 
   // Panggil mutation hook dari RTK Query auto-generated
-  const [loginMutation, { isLoading: isLoggingIn }] = usePostApiV1AuthLoginMutation();
+  const [loginMutation, { isLoading: isLoggingIn }] =
+    usePostApiV1AuthLoginMutation();
 
   // Auto-redirect jika pengguna TERVERIFIKASI SUDAH LOGIN di backend .NET
   useEffect(() => {
