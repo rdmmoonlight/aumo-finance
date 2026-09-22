@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import apiClient from "@/lib/apiClient";
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -40,6 +39,13 @@ import {
   IconCalendar,
 } from "@tabler/icons-react";
 
+// Import RTK Query Hooks dari file hasil auto-generate
+import {
+  useGetApiV1ChartOfAccountsQuery,
+  usePostApiV1ToolsImportJournalEntriesMutation,
+  AccountMappingDetailDto,
+} from "@/lib/generatedApi";
+
 interface JournalLineImport {
   rowIndex: number;
   refNumber: number;
@@ -48,30 +54,27 @@ interface JournalLineImport {
   debit: number | null;
   credit: number | null;
 }
+
 interface JournalTransactionImport {
   transactionNumber?: string;
   date: string;
   journalType: string;
   lines: JournalLineImport[];
 }
+
 interface JournalImportResult {
   isSuccess: boolean;
   totalTransactionsRead: number;
   totalLinesRead: number;
   transactions: JournalTransactionImport[];
 }
+
 interface AccountMappingDetail {
   excelRef: number;
   excelAccountName: string;
   mappedRef: number;
   mappedAccountName: string;
   status: string;
-}
-interface DbAccount {
-  id: number;
-  referenceNumber: number;
-  accountName: string;
-  type: string;
 }
 
 const MONTHS = [
@@ -92,7 +95,7 @@ const MONTHS = [
 export default function ToolsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [isBusy, setIsBusy] = useState(false);
+  const [isParsing, setIsParsing] = useState(false);
   const [targetMonth, setTargetMonth] = useState(new Date().getMonth() + 1);
   const [targetYear, setTargetYear] = useState(new Date().getFullYear());
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -102,21 +105,21 @@ export default function ToolsPage() {
   const [accountMappings, setAccountMappings] = useState<
     AccountMappingDetail[]
   >([]);
-  const [dbAccounts, setDbAccounts] = useState<DbAccount[]>([]);
-  const [isLoadingCoa, setIsLoadingCoa] = useState(false);
 
-  useEffect(() => {
-    (async () => {
-      setIsLoadingCoa(true);
-      try {
-        const { data } = await apiClient.get("/api/v1/chart-of-accounts");
-        setDbAccounts(data.accounts || data.data || []);
-      } catch {
-      } finally {
-        setIsLoadingCoa(false);
-      }
-    })();
-  }, []);
+  // 1. Fetch COA menggunakan RTK Query
+  const { data: coaData, isLoading: isLoadingCoa } =
+    useGetApiV1ChartOfAccountsQuery({});
+
+  // Parse list COA dari respon RTK Query
+  const dbAccounts = Array.isArray(coaData)
+    ? coaData
+    : (coaData as any)?.accounts || (coaData as any)?.data || [];
+
+  // 2. Mutation Hook untuk Import Journal
+  const [importJournalEntries, { isLoading: isImporting }] =
+    usePostApiV1ToolsImportJournalEntriesMutation();
+
+  const isBusy = isParsing || isImporting;
 
   const formatIDR = (n: number) =>
     new Intl.NumberFormat("id-ID", {
@@ -130,7 +133,7 @@ export default function ToolsPage() {
       setErrorMessage("Select Excel first");
       return;
     }
-    setIsBusy(true);
+    setIsParsing(true);
     setErrorMessage(null);
     try {
       if (!(window as any).XLSX) {
@@ -217,9 +220,9 @@ export default function ToolsPage() {
         transactions: parsed,
       });
     } catch (err: any) {
-      setErrorMessage(err.message);
+      setErrorMessage(err.message || "Failed to parse Excel file.");
     } finally {
-      setIsBusy(false);
+      setIsParsing(false);
     }
   };
 
@@ -228,14 +231,17 @@ export default function ToolsPage() {
     excelName: string,
     targetRef: number,
   ) => {
-    const opt = dbAccounts.find((o) => o.referenceNumber === targetRef);
+    const opt = dbAccounts.find(
+      (o: any) =>
+        Number(o.referenceNumber || o.code) === Number(targetRef),
+    );
     setAccountMappings((prev) =>
       prev.map((m) =>
         m.excelRef === excelRef && m.excelAccountName === excelName
           ? {
               ...m,
               mappedRef: targetRef,
-              mappedAccountName: opt?.accountName || "",
+              mappedAccountName: opt?.accountName || opt?.name || "",
               status: targetRef ? "REALLOCATED" : "UNMAPPED",
             }
           : m,
@@ -245,24 +251,41 @@ export default function ToolsPage() {
 
   const handleConfirmImport = async () => {
     if (!parseResult) return;
-    setIsBusy(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
     try {
-      await apiClient.post("/api/v1/tools/import-journal-entries", {
-        targetMonth,
-        targetYear,
-        customMappings: accountMappings,
-        transactions: parseResult.transactions.map((tx) => ({
-          date: tx.date,
-          journalType: tx.journalType,
-          lines: tx.lines.map((l) => ({
-            refNumber: l.refNumber,
-            accountName: l.accountName,
-            description: l.description,
-            debit: l.debit,
-            credit: l.credit,
+      // Format DTO customMappings agar sesuai dengan kontrak RTK Query
+      const customMappingsDto: AccountMappingDetailDto[] = accountMappings.map(
+        (m) => ({
+          excelRef: m.excelRef,
+          excelAccountName: m.excelAccountName,
+          mappedRef: m.mappedRef,
+          mappedAccountName: m.mappedAccountName,
+          status: m.status,
+        }),
+      );
+
+      // Eksekusi API via RTK Query Mutation
+      await importJournalEntries({
+        journalImportRequestDto: {
+          targetMonth,
+          targetYear,
+          customMappings: customMappingsDto,
+          transactions: parseResult.transactions.map((tx) => ({
+            entryDate: tx.date,
+            journalType: tx.journalType,
+            lines: tx.lines.map((l) => ({
+              accountReferenceNumber: l.refNumber,
+              accountName: l.accountName,
+              description: l.description,
+              debit: l.debit,
+              credit: l.credit,
+            })),
           })),
-        })),
-      });
+        },
+      }).unwrap();
+
       setSuccessMessage(
         `Imported ${parseResult.totalTransactionsRead} entries for ${targetMonth}/${targetYear}`,
       );
@@ -270,9 +293,9 @@ export default function ToolsPage() {
       setSelectedFile(null);
       setAccountMappings([]);
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || err.message);
-    } finally {
-      setIsBusy(false);
+      setErrorMessage(
+        err.data?.message || err.message || "Gagal melakukan import jurnal.",
+      );
     }
   };
 
@@ -357,8 +380,11 @@ export default function ToolsPage() {
                   variant="link"
                   size="sm"
                   className="h-auto p-0 text-xs gap-1"
-                  onClick={async () => {
-                    const XLSX = (window as any).XLSX || (await import("xlsx")); // fallback
+                  onClick={() => {
+                    window.open(
+                      "/api/v1/tools/download-journal-template",
+                      "_blank",
+                    );
                   }}
                 >
                   <IconDownload size={12} /> Download Template
@@ -396,14 +422,14 @@ export default function ToolsPage() {
             <Card>
               <CardHeader className="py-3 flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-xs">Mapping Status</CardTitle>
-                <Badge variant="secondary" className="text-">
+                <Badge variant="secondary" className="text-xs">
                   {accountMappings.length} akun
                 </Badge>
               </CardHeader>
-              <CardContent className="p-0 max-h- overflow-auto">
+              <CardContent className="p-0 max-h-60 overflow-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="text-">
+                    <TableRow className="text-xs">
                       <TableHead>Excel Input</TableHead>
                       <TableHead>Target COA</TableHead>
                     </TableRow>
@@ -417,7 +443,7 @@ export default function ToolsPage() {
                         <TableCell className="text-xs">
                           <Badge
                             variant="outline"
-                            className="font-mono text- mr-1"
+                            className="font-mono text-xs mr-1"
                           >
                             {m.excelRef}
                           </Badge>
@@ -439,15 +465,19 @@ export default function ToolsPage() {
                               <SelectValue placeholder="Pilih COA" />
                             </SelectTrigger>
                             <SelectContent>
-                              {dbAccounts.map((o) => (
-                                <SelectItem
-                                  key={o.id}
-                                  value={String(o.referenceNumber)}
-                                  className="text-xs"
-                                >
-                                  [{o.referenceNumber}] {o.accountName}
-                                </SelectItem>
-                              ))}
+                              {dbAccounts.map((o: any) => {
+                                const refNum = o.referenceNumber || o.code;
+                                const accName = o.accountName || o.name;
+                                return (
+                                  <SelectItem
+                                    key={o.id || refNum}
+                                    value={String(refNum)}
+                                    className="text-xs"
+                                  >
+                                    [{refNum}] {accName}
+                                  </SelectItem>
+                                );
+                              })}
                             </SelectContent>
                           </Select>
                         </TableCell>
@@ -474,8 +504,8 @@ export default function ToolsPage() {
                 <Card key={txIdx} className="overflow-hidden">
                   <CardHeader className="py-2 px-3 flex-row items-center justify-between space-y-0 bg-muted/30">
                     <div className="flex items-center gap-2">
-                      <Badge className="text-">{tx.journalType}</Badge>
-                      <Badge variant="outline" className="font-mono text-">
+                      <Badge className="text-xs">{tx.journalType}</Badge>
+                      <Badge variant="outline" className="font-mono text-xs">
                         {tx.date}
                       </Badge>
                     </div>
@@ -486,7 +516,7 @@ export default function ToolsPage() {
                   <CardContent className="p-0">
                     <Table>
                       <TableHeader>
-                        <TableRow className="text-">
+                        <TableRow className="text-xs">
                           <TableHead className="w-10">#</TableHead>
                           <TableHead className="w-20">Ref</TableHead>
                           <TableHead>Account</TableHead>
@@ -513,7 +543,7 @@ export default function ToolsPage() {
                               <TableCell>
                                 <Badge
                                   variant="secondary"
-                                  className="font-mono text-"
+                                  className="font-mono text-xs"
                                 >
                                   {l.refNumber}
                                 </Badge>
@@ -522,18 +552,18 @@ export default function ToolsPage() {
                                 <div className="font-medium">
                                   {l.accountName}
                                 </div>
-                                <div className="text- text-muted-foreground truncate">
+                                <div className="text-xs text-muted-foreground truncate">
                                   {l.description}
                                 </div>
                                 {mapping?.mappedRef ? (
-                                  <Badge className="mt-1 bg-amber-500/15 text-amber-600 border-amber-500/20 text-">
+                                  <Badge className="mt-1 bg-amber-500/15 text-amber-600 border-amber-500/20 text-xs">
                                     → [{mapping.mappedRef}]{" "}
                                     {mapping.mappedAccountName}
                                   </Badge>
                                 ) : (
                                   <Badge
                                     variant="destructive"
-                                    className="mt-1 text-"
+                                    className="mt-1 text-xs"
                                   >
                                     Unmapped
                                   </Badge>
@@ -575,7 +605,7 @@ export default function ToolsPage() {
               ))}
             </div>
           ) : (
-            <Card className="h- grid place-items-center border-dashed">
+            <Card className="h-64 grid place-items-center border-dashed">
               <CardContent className="text-center text-muted-foreground">
                 <IconUpload size={32} className="mx-auto mb-2 opacity-50" />
                 <p className="text-sm font-medium">No Preview Yet</p>

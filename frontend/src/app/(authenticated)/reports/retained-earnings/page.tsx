@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
+import { useGetApiV1ReportsRetainedEarningsQuery } from "@/lib/generatedApi";
 import {
   Card,
   CardContent,
@@ -37,6 +37,7 @@ const formatNumber = (n: number) => {
   }).format(Math.abs(n));
   return n < 0 ? `(${f})` : f;
 };
+
 const formatDateDisplay = (s?: string) =>
   !s
     ? ""
@@ -47,58 +48,44 @@ const formatDateDisplay = (s?: string) =>
       }).format(new Date(s));
 
 export default function RetainedEarningsPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [vm, setVm] = useState<RetainedEarningsViewModel>({
-    accountName: "Retained Earnings",
-    startDate: "",
-    endDate: "",
-    beginningBalance: 0,
-    netIncome: 0,
-    dividends: 0,
-  });
+  // Menggunakan RTK Query Hook bawaan dari generatedApi.ts
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsRetainedEarningsQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get("/api/v1/reports/retained-earnings");
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-      setNoPeriod(false);
-      setVm({
-        accountName: data?.accountName || "Retained Earnings",
-        startDate: data?.startDate || "",
-        endDate: data?.endDate || "",
-        beginningBalance:
-          Number(data?.beginningRetainedEarnings ?? data?.beginningBalance) ||
-          0,
-        netIncome: Number(data?.netIncome) || 0,
-        dividends: Number(data?.dividendsOrDraws ?? data?.dividends) || 0,
-      });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Cast respon API ke tipe data ViewModel
+  const rawData = data as any;
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
+  const noPeriod = rawData?.hasPeriodSelected === false;
+
+  const vm: RetainedEarningsViewModel = useMemo(() => {
+    return {
+      accountName: rawData?.accountName || "Retained Earnings",
+      startDate: rawData?.startDate || "",
+      endDate: rawData?.endDate || "",
+      beginningBalance:
+        Number(
+          rawData?.beginningRetainedEarnings ?? rawData?.beginningBalance,
+        ) || 0,
+      netIncome: Number(rawData?.netIncome) || 0,
+      dividends:
+        Number(rawData?.dividendsOrDraws ?? rawData?.dividends) || 0,
+    };
+  }, [rawData]);
 
   const endingBalance = useMemo(
     () => vm.beginningBalance + vm.netIncome - vm.dividends,
     [vm],
   );
 
-  if (loading)
+  const errorMessage = useMemo(() => {
+    if (!isError || !error) return null;
+    if ("data" in error) {
+      return (error.data as any)?.message || "Gagal memuat laporan.";
+    }
+    return "Terjadi kesalahan jaringan.";
+  }, [isError, error]);
+
+  if (isLoading)
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading Retained
@@ -108,10 +95,10 @@ export default function RetainedEarningsPage() {
 
   return (
     <div className="space-y-6">
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -149,7 +136,7 @@ export default function RetainedEarningsPage() {
             </Button>
           </div>
 
-          <Card className="max-w- overflow-hidden">
+          <Card className="max-w-2xl overflow-hidden">
             <CardHeader>
               <CardTitle className="text-base">{vm.accountName}</CardTitle>
               <CardDescription>
@@ -171,7 +158,9 @@ export default function RetainedEarningsPage() {
                 <div className="flex items-center justify-between p-4 pl-8">
                   <span className="text-muted-foreground">Add: Net Income</span>
                   <span
-                    className={`font-mono font-medium ${vm.netIncome >= 0 ? "text-emerald-500" : "text-red-500"}`}
+                    className={`font-mono font-medium ${
+                      vm.netIncome >= 0 ? "text-emerald-500" : "text-red-500"
+                    }`}
                   >
                     {formatNumber(vm.netIncome)}
                   </span>

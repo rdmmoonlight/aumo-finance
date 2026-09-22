@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,7 +30,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useChartOfAccounts, ChartOfAccount } from "@/hooks/use-coa";
+// Import RTK Query auto-generated hooks
+import {
+  usePostApiV1ChartOfAccountsMutation,
+  usePutApiV1ChartOfAccountsByIdMutation,
+  useDeleteApiV1ChartOfAccountsByIdMutation,
+} from "@/lib/generatedApi";
+
+// Tipe DTO lokal untuk UI dialog (sepadan dengan respons API)
+export interface ChartOfAccount {
+  id: number;
+  referenceNumber: number;
+  accountName: string;
+  type: string;
+  role?: string;
+  isActive?: boolean;
+}
 
 const ACCOUNT_TYPES = [
   "Assets",
@@ -75,7 +90,9 @@ export function AddAccountDialog({
   accounts: ChartOfAccount[];
   onSuccess: (msg: string) => void;
 }) {
-  const { createAccount } = useChartOfAccounts();
+  const [createAccount, { isLoading: isCreating }] =
+    usePostApiV1ChartOfAccountsMutation();
+
   const [error, setError] = useState<string | null>(null);
   const [newAccount, setNewAccount] = useState({
     type: "",
@@ -84,7 +101,7 @@ export function AddAccountDialog({
     role: "Default",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -98,34 +115,34 @@ export function AddAccountDialog({
       return;
     }
 
-    if (accounts.some((a) => a.referenceNumber === refNum)) {
+    if (accounts.some((a) => Number(a.referenceNumber) === refNum)) {
       setError(`Code ${refNum} already used`);
       return;
     }
 
-    createAccount.mutate(
-      {
-        referenceNumber: refNum,
-        accountName: newAccount.accountName,
-        type: newAccount.type,
-        role: newAccount.role,
-      },
-      {
-        onSuccess: () => {
-          onSuccess(`Account '${newAccount.accountName}' created`);
-          onOpenChange(false);
-          setNewAccount({
-            type: "",
-            referenceNumber: 0,
-            accountName: "",
-            role: "Default",
-          });
+    try {
+      await createAccount({
+        createAccountRequest: {
+          referenceNumber: refNum,
+          accountName: newAccount.accountName,
+          type: newAccount.type,
+          role: newAccount.role,
         },
-        onError: (err: any) => {
-          setError(err?.response?.data?.message || "Failed to create account");
-        },
-      },
-    );
+      }).unwrap();
+
+      onSuccess(`Account '${newAccount.accountName}' created`);
+      onOpenChange(false);
+      setNewAccount({
+        type: "",
+        referenceNumber: 0,
+        accountName: "",
+        role: "Default",
+      });
+    } catch (err: any) {
+      setError(
+        err?.data?.message || err?.message || "Failed to create account",
+      );
+    }
   };
 
   return (
@@ -205,8 +222,8 @@ export function AddAccountDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={createAccount.isPending}>
-              {createAccount.isPending ? "Saving..." : "Save Account"}
+            <Button type="submit" disabled={isCreating}>
+              {isCreating ? "Saving..." : "Save Account"}
             </Button>
           </DialogFooter>
         </form>
@@ -227,23 +244,40 @@ export function EditAccountDialog({
   account: ChartOfAccount;
   onSuccess: (msg: string) => void;
 }) {
-  const { updateAccount } = useChartOfAccounts();
+  const [updateAccount, { isLoading: isUpdating }] =
+    usePutApiV1ChartOfAccountsByIdMutation();
+
   const [error, setError] = useState<string | null>(null);
   const [editData, setEditData] = useState<ChartOfAccount>(account);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Sinkronkan state lokal jika props account berubah
+  useEffect(() => {
+    setEditData(account);
+  }, [account]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    updateAccount.mutate(editData, {
-      onSuccess: () => {
-        onSuccess(`Account '${editData.accountName}' updated`);
-        onOpenChange(false);
-      },
-      onError: (err: any) => {
-        setError(err?.response?.data?.message || "Failed to update account");
-      },
-    });
+    try {
+      await updateAccount({
+        id: editData.id,
+        updateAccountRequest: {
+          referenceNumber: editData.referenceNumber,
+          accountName: editData.accountName,
+          type: editData.type,
+          role: editData.role,
+          isActive: editData.isActive,
+        },
+      }).unwrap();
+
+      onSuccess(`Account '${editData.accountName}' updated`);
+      onOpenChange(false);
+    } catch (err: any) {
+      setError(
+        err?.data?.message || err?.message || "Failed to update account",
+      );
+    }
   };
 
   return (
@@ -290,8 +324,8 @@ export function EditAccountDialog({
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={updateAccount.isPending}>
-              {updateAccount.isPending ? "Updating..." : "Update"}
+            <Button type="submit" disabled={isUpdating}>
+              {isUpdating ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>
         </form>
@@ -312,21 +346,22 @@ export function DeleteAccountAlertDialog({
   onSuccess: (msg: string) => void;
   onError: (msg: string) => void;
 }) {
-  const { deleteAccount } = useChartOfAccounts();
+  const [deleteAccount, { isLoading: isDeleting }] =
+    useDeleteApiV1ChartOfAccountsByIdMutation();
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (!account) return;
 
-    deleteAccount.mutate(account.id, {
-      onSuccess: () => {
-        onSuccess(`Deleted '${account.accountName}'`);
-        onOpenChange(false);
-      },
-      onError: (err: any) => {
-        onError(err?.response?.data?.message || "Failed to delete account");
-        onOpenChange(false);
-      },
-    });
+    try {
+      await deleteAccount({ id: account.id }).unwrap();
+      onSuccess(`Deleted '${account.accountName}'`);
+      onOpenChange(false);
+    } catch (err: any) {
+      onError(
+        err?.data?.message || err?.message || "Failed to delete account",
+      );
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -340,15 +375,13 @@ export function DeleteAccountAlertDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteAccount.isPending}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
-            disabled={deleteAccount.isPending}
+            disabled={isDeleting}
             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
-            {deleteAccount.isPending ? "Deleting..." : "Delete"}
+            {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

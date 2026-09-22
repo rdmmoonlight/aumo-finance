@@ -1,8 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
@@ -24,25 +22,7 @@ import {
   IconTrendingUp,
   IconTrendingDown,
 } from "@tabler/icons-react";
-
-export interface LedgerLineViewModel {
-  journalEntryId: number;
-  entryDate: string;
-  description?: string;
-  debit: number;
-  credit: number;
-  runningBalance: number;
-}
-
-export interface LedgerAccountViewModel {
-  accountId: number;
-  referenceNumber: number;
-  accountName: string;
-  type: string;
-  normalBalanceIsDebit: boolean;
-  endingBalance: number;
-  lines: LedgerLineViewModel[];
-}
+import { useGetApiV1ReportsGeneralLedgerTemporaryQuery } from "@/lib/generatedApi";
 
 const formatNumber = (n: number) => {
   if (n === 0) return "-";
@@ -54,51 +34,16 @@ const formatNumber = (n: number) => {
 };
 
 export default function GeneralLedgerTemporaryPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [ledgers, setLedgers] = useState<LedgerAccountViewModel[]>([]);
-  const [netIncome, setNetIncome] = useState<number>(0);
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsGeneralLedgerTemporaryQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      // Menembak endpoint temporary sesuai C# Controller: [HttpGet("temporary")]
-      const { data } = await apiClient.get(
-        "/api/v1/reports/general-ledger/temporary",
-      );
+  // Parsing data dari respon API RTK Query
+  const responseData = data as any;
+  const hasNoPeriod = responseData?.hasPeriodSelected === false;
+  const ledgers = responseData?.ledgers || [];
+  const netIncome = responseData?.netIncomeBeforeClosing ?? 0;
 
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-
-      setLedgers(data?.ledgers || []);
-      setNetIncome(data?.netIncomeBeforeClosing ?? 0);
-      setNoPeriod(false);
-    } catch (err: any) {
-      if (err.response?.status === 404) {
-        setNoPeriod(true);
-      } else {
-        setError(
-          err.response?.data?.message ||
-            "Failed to load temporary ledger data.",
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading Temporary
@@ -107,7 +52,7 @@ export default function GeneralLedgerTemporaryPage() {
     );
   }
 
-  if (noPeriod) {
+  if (hasNoPeriod) {
     return (
       <Card className="py-16 text-center border-dashed">
         <CardContent className="space-y-3">
@@ -123,12 +68,17 @@ export default function GeneralLedgerTemporaryPage() {
     );
   }
 
+  const errorMessage =
+    isError && "data" in (error as any)
+      ? (error as any).data?.message || "Failed to load temporary ledger data."
+      : "Failed to load temporary ledger data.";
+
   return (
     <div className="space-y-6">
-      {error && (
+      {isError && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -168,7 +118,7 @@ export default function GeneralLedgerTemporaryPage() {
       </Card>
 
       <div className="space-y-4">
-        {ledgers.map((ledger) => (
+        {ledgers.map((ledger: any) => (
           <Card key={ledger.accountId} className="overflow-hidden">
             <CardHeader className="py-3 px-4 bg-muted/30 border-b flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-2">
@@ -202,7 +152,7 @@ export default function GeneralLedgerTemporaryPage() {
                 </TableHeader>
                 <TableBody>
                   {ledger.lines?.length ? (
-                    ledger.lines.map((line, idx) => (
+                    ledger.lines.map((line: any, idx: number) => (
                       <TableRow key={idx}>
                         <TableCell className="pl-6 text-xs text-muted-foreground">
                           {line.entryDate}

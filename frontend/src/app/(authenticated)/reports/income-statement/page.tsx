@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
-import apiClient from "@/lib/apiClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,18 +14,13 @@ import {
   IconAlertTriangle,
   IconLoader2,
 } from "@tabler/icons-react";
+// Import hook RTK Query dari generatedApi
+import { useGetApiV1ReportsIncomeStatementQuery } from "@/lib/generatedApi";
 
 export interface IncomeStatementLine {
   referenceNumber: number;
   accountName: string;
   amount: number;
-}
-export interface IncomeStatementViewModel {
-  asOfDate: string;
-  revenues: IncomeStatementLine[];
-  operatingExpenses: IncomeStatementLine[];
-  otherIncome: IncomeStatementLine[];
-  otherExpenses: IncomeStatementLine[];
 }
 
 const formatNumber = (n: number) => {
@@ -38,48 +32,23 @@ const formatNumber = (n: number) => {
 };
 
 export default function IncomeStatementPage() {
-  const [noPeriod, setNoPeriod] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [vm, setVm] = useState<IncomeStatementViewModel>({
-    asOfDate: "",
-    revenues: [],
-    operatingExpenses: [],
-    otherIncome: [],
-    otherExpenses: [],
-  });
+  // Panggil Hook RTK Query
+  const { data, isLoading, isError, error } =
+    useGetApiV1ReportsIncomeStatementQuery();
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const { data } = await apiClient.get("/api/v1/reports/income-statement");
-      if (data?.hasPeriodSelected === false) {
-        setNoPeriod(true);
-        return;
-      }
-      setNoPeriod(false);
-      setVm({
-        asOfDate: data?.asOfDate || "",
-        revenues: data?.revenueAccounts || data?.revenues || [],
-        operatingExpenses:
-          data?.expenseAccounts || data?.operatingExpenses || [],
-        otherIncome: data?.otherIncomeAccounts || data?.otherIncome || [],
-        otherExpenses: data?.otherExpenseAccounts || data?.otherExpenses || [],
-      });
-    } catch (err: any) {
-      setError(err.response?.data?.message || err.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  // Parsing data dari response API backend .NET
+  const rawData = data as any;
+  const noPeriod = rawData?.hasPeriodSelected === false;
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
+  const vm = useMemo(() => {
+    return {
+      asOfDate: rawData?.asOfDate || "",
+      revenues: (rawData?.revenueAccounts || rawData?.revenues || []) as IncomeStatementLine[],
+      operatingExpenses: (rawData?.expenseAccounts || rawData?.operatingExpenses || []) as IncomeStatementLine[],
+      otherIncome: (rawData?.otherIncomeAccounts || rawData?.otherIncome || []) as IncomeStatementLine[],
+      otherExpenses: (rawData?.otherExpenseAccounts || rawData?.otherExpenses || []) as IncomeStatementLine[],
+    };
+  }, [rawData]);
 
   const totalRevenue = useMemo(
     () => vm.revenues.reduce((s, i) => s + (Number(i.amount) || 0), 0),
@@ -100,20 +69,27 @@ export default function IncomeStatementPage() {
   );
   const netIncome = operatingIncome + totalOtherIncome - totalOtherExpenses;
 
-  if (loading)
+  // Render State Loading
+  if (isLoading) {
     return (
       <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
         <IconLoader2 className="animate-spin" size={16} /> Loading Income
         Statement...
       </div>
     );
+  }
+
+  // Format error message dari RTK Query
+  const errorMessage = isError
+    ? (error as any)?.data?.message || (error as any)?.message || "Gagal mengambil data Laporan Laba Rugi."
+    : null;
 
   return (
     <div className="space-y-6">
-      {error && (
+      {errorMessage && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
 
@@ -164,7 +140,7 @@ export default function IncomeStatementPage() {
               <div className="divide-y">
                 {/* Revenue */}
                 <div className="p-4 space-y-2">
-                  <div className="text- font-bold tracking-widest text-amber-500 uppercase">
+                  <div className="font-bold tracking-widest text-amber-500 uppercase text-xs">
                     Revenue
                   </div>
                   {vm.revenues.length === 0 ? (
@@ -178,7 +154,7 @@ export default function IncomeStatementPage() {
                         className="flex items-center justify-between text-sm pl-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono">
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}
@@ -197,9 +173,9 @@ export default function IncomeStatementPage() {
                   </div>
                 </div>
 
-                {/* Opex */}
+                {/* Operating Expenses */}
                 <div className="p-4 space-y-2">
-                  <div className="text- font-bold tracking-widest text-amber-500 uppercase">
+                  <div className="font-bold tracking-widest text-amber-500 uppercase text-xs">
                     Operating Expenses
                   </div>
                   {vm.operatingExpenses.length === 0 ? (
@@ -213,7 +189,7 @@ export default function IncomeStatementPage() {
                         className="flex items-center justify-between text-sm pl-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono">
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}
@@ -245,7 +221,7 @@ export default function IncomeStatementPage() {
                 {/* Other Income/Expenses */}
                 {(vm.otherIncome.length > 0 || vm.otherExpenses.length > 0) && (
                   <div className="p-4 space-y-2">
-                    <div className="text- font-bold tracking-widest text-amber-500 uppercase">
+                    <div className="font-bold tracking-widest text-amber-500 uppercase text-xs">
                       Other Income & Expenses
                     </div>
                     {vm.otherIncome.map((l, i) => (
@@ -254,7 +230,7 @@ export default function IncomeStatementPage() {
                         className="flex items-center justify-between text-sm pl-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono">
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}
@@ -270,7 +246,7 @@ export default function IncomeStatementPage() {
                         className="flex items-center justify-between text-sm pl-4"
                       >
                         <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-">
+                          <Badge variant="outline" className="font-mono">
                             {l.referenceNumber}
                           </Badge>
                           {l.accountName}

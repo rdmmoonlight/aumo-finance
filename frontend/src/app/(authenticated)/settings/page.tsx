@@ -13,8 +13,8 @@ import {
 } from "@tabler/icons-react";
 import { useTheme } from "next-themes";
 
-// Import tipe data dan helper fungsi terpusat dari lib/auth
-import { getUserProfile, type UserProfile } from "@/lib/auth";
+// Import RTK Query auto-generated hook
+import { useGetApiV1AuthMeQuery } from "@/lib/generatedApi";
 
 import {
   Card,
@@ -31,23 +31,13 @@ import { cn } from "@/lib/utils";
 
 export default function SettingsPage() {
   const { theme, setTheme } = useTheme();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loadingUser, setLoadingUser] = useState(true);
   const [mounted, setMounted] = useState(false);
+
+  // RTK Query menggantikan useState + useEffect fetchUserProfile
+  const { data: user, isLoading: loadingUser } = useGetApiV1AuthMeQuery();
 
   useEffect(() => {
     setMounted(true);
-    const fetchUserProfile = async () => {
-      try {
-        const data = await getUserProfile();
-        if (data) setUser(data);
-      } catch (e) {
-        console.error("[SETTINGS] Failed to fetch user profile:", e);
-      } finally {
-        setLoadingUser(false);
-      }
-    };
-    fetchUserProfile();
   }, []);
 
   const options = [

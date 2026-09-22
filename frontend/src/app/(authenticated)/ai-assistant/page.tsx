@@ -18,7 +18,6 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,16 +25,20 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 
+// CATATAN: Jika backend sudah menyediakan endpoint AI di generatedApi.ts,
+// uncomment import di bawah ini:
+// import { useGetApiV1DashboardQuery } from "@/lib/generatedApi";
+
 interface ChatMessage {
   isUser: boolean;
   text: string;
 }
 
 function formatBold(text: string) {
-  return text.split(/(\*\*.*?\*\*)/).map((part, i) => {
+  return text.split(/(\*\*.*?\スカ*)/).map((part, i) => {
     if (part.startsWith("**") && part.endsWith("**")) {
       return (
-        <strong key={i} className="text-foreground">
+        <strong key={i} className="text-foreground font-semibold">
           {part.slice(2, -2)}
         </strong>
       );
@@ -51,10 +54,14 @@ export default function AiAssistantPage() {
   const [summaryText, setSummaryText] = useState("");
   const [summaryLoaded, setSummaryLoaded] = useState(false);
 
+  // CONTOH INTEGRASI RTK QUERY:
+  // Anda bisa memanfaatkan data dashboard nyata sebagai konteks AI Live Summary
+  // const { data: dashboardData } = useGetApiV1DashboardQuery({});
+
   useEffect(() => {
     const t = setTimeout(() => {
       setSummaryText(
-        "Your cash position and liquidity are very stable, positive surplus for Jan 2026. Operating expenses below risk threshold.",
+        "Likuiditas dan posisi kas Anda dalam kondisi sangat stabil dengan surplus positif untuk periode ini. Beban operasional masih berada di bawah ambang batas risiko.",
       );
       setSummaryLoaded(true);
     }, 1200);
@@ -70,26 +77,28 @@ export default function AiAssistantPage() {
     if (!promptText) setUserInput("");
     setIsLoading(true);
 
+    // Simulasi penanganan pesan (Ganti dengan RTK Query Mutation kelak)
     await new Promise((r) => setTimeout(r, 1000));
 
     let aiReply = "";
     const low = message.toLowerCase();
-    if (low.includes("cash") || low.includes("liquidity")) {
+    if (low.includes("cash") || low.includes("kas") || low.includes("liquidity")) {
       aiReply =
-        "**Liquidity Analysis:** Total cash equivalent **Rp 45,500,000**. Coverage ratio excellent for next 3 months.";
-    } else if (low.includes("overspending") || low.includes("expense")) {
+        "**Analisis Likuiditas:** Total setara kas saat ini adalah **Rp 45.500.000**. Rasio cakupan sangat baik untuk 3 bulan ke depan.";
+    } else if (low.includes("overspending") || low.includes("expense") || low.includes("beban")) {
       aiReply =
-        "**Expense Alert:** Largest expense is **Payroll & Office Rent**. No anomalies detected.";
+        "**Peringatan Pengeluaran:** Pengeluaran terbesar berada pada **Gaji & Sewa Kantor**. Belum terdeteksi adanya anomali.";
     } else if (
       low.includes("net income") ||
       low.includes("revenue") ||
-      low.includes("profit")
+      low.includes("profit") ||
+      low.includes("laba")
     ) {
       aiReply =
-        "**Revenue Forecast:** Gross revenue **Rp 85,000,000** with net profit **Rp 32,400,000**.";
+        "**Proyeksi Pendapatan:** Pendapatan kotor sebesar **Rp 85.000.000** dengan perkiraan laba bersih **Rp 32.400.000**.";
     } else {
       aiReply =
-        "Based on active period data, financial stability is consistent. Want in-depth audit on adjusting entries?";
+        "Berdasarkan data periode aktif, stabilitas keuangan konsisten. Apakah Anda ingin audit mendalam pada jurnal penyesuaian?";
     }
 
     setMessages((prev) => [...prev, { isUser: false, text: aiReply }]);
@@ -99,31 +108,30 @@ export default function AiAssistantPage() {
   const presets = [
     {
       icon: IconCashBanknote,
-      title: "Cash Health",
-      desc: "Check liquid cash safety",
-      prompt: "How is my cash position and liquidity looking right now?",
+      title: "Kesehatan Kas",
+      desc: "Cek keamanan kas liquid",
+      prompt: "Bagaimana posisi kas dan likuiditas saya saat ini?",
       color: "text-blue-500 bg-blue-500/10",
     },
     {
       icon: IconTrendingUp,
-      title: "Overspending Alert",
-      desc: "Detect highest expense",
-      prompt: "Are there any overspending areas or expenses that need review?",
+      title: "Deteksi Pengeluaran",
+      desc: "Cek beban tertinggi",
+      prompt: "Apakah ada area pengeluaran berlebih yang perlu direview?",
       color: "text-red-500 bg-red-500/10",
     },
     {
       icon: IconChartPie,
-      title: "Profit Forecast",
-      desc: "Project net profit",
-      prompt:
-        "What is the estimated net income and revenue trend for this period?",
+      title: "Proyeksi Laba",
+      desc: "Estimasi laba bersih",
+      prompt: "Berapa estimasi laba bersih dan tren pendapatan periode ini?",
       color: "text-emerald-500 bg-emerald-500/10",
     },
     {
       icon: IconBulb,
-      title: "Efficiency Tips",
-      desc: "Cost-saving insights",
-      prompt: "Give me 3 actionable tips to optimize financial performance.",
+      title: "Tips Efisiensi",
+      desc: "Saran penghematan",
+      prompt: "Berikan 3 langkah konkret untuk mengoptimalkan kinerja keuangan.",
       color: "text-amber-500 bg-amber-500/10",
     },
   ];
@@ -132,11 +140,10 @@ export default function AiAssistantPage() {
     <div className="max-w-5xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-          <IconRobot size={26} className="text-primary" /> AI Financial
-          Assistant
+          <IconRobot size={26} className="text-primary" /> AI Financial Assistant
         </h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Business analysis, expense detection, and instant financial advice.
+          Analisis bisnis, deteksi pengeluaran, dan saran keuangan instan.
         </p>
       </div>
 
@@ -148,11 +155,11 @@ export default function AiAssistantPage() {
               variant="outline"
               className="gap-1.5 border-primary/30 text-primary"
             >
-              <IconBolt size={12} /> LIVE SUMMARY
+              <IconBolt size={12} /> RINGKASAN LANGSUNG
             </Badge>
             {summaryLoaded && (
-              <span className="text- text-muted-foreground">
-                Updated just now
+              <span className="text-xs text-muted-foreground">
+                Diperbarui baru saja
               </span>
             )}
           </div>
@@ -161,7 +168,7 @@ export default function AiAssistantPage() {
           {!summaryLoaded ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              Analyzing your current cash flow & transactions...
+              Menganalisis arus kas & transaksi aktif Anda...
             </div>
           ) : (
             <p className="text-sm leading-relaxed">{summaryText}</p>
@@ -172,9 +179,9 @@ export default function AiAssistantPage() {
       {/* PRESETS */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold">Recommended Quick Questions</h3>
+          <h3 className="text-sm font-semibold">Rekomendasi Pertanyaan Cepat</h3>
           <span className="text-xs text-muted-foreground">
-            Click to ask instantly
+            Klik untuk langsung bertanya
           </span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -203,11 +210,11 @@ export default function AiAssistantPage() {
         </div>
       </div>
 
-      {/* CHAT */}
-      <Card className="flex flex-col h-">
+      {/* CHAT CONTAINER */}
+      <Card className="flex flex-col h-[500px]">
         <CardHeader className="py-3 px-4 flex-row items-center justify-between space-y-0 border-b">
           <CardTitle className="text-sm flex items-center gap-2">
-            <IconSparkles size={16} className="text-primary" /> Conversation
+            <IconSparkles size={16} className="text-primary" /> Percakapan
           </CardTitle>
           <Button
             variant="ghost"
@@ -215,7 +222,7 @@ export default function AiAssistantPage() {
             className="h-7 text-xs gap-1"
             onClick={() => setMessages([])}
           >
-            <IconTrash size={14} /> Clear
+            <IconTrash size={14} /> Bersihkan
           </Button>
         </CardHeader>
 
@@ -225,7 +232,7 @@ export default function AiAssistantPage() {
               <div className="py-16 text-center text-muted-foreground">
                 <IconRobot size={36} className="mx-auto mb-3 opacity-20" />
                 <p className="text-sm">
-                  Click any card above or type a question below.
+                  Klik rekomendasi pertanyaan di atas atau ketik pertanyaan di bawah.
                 </p>
               </div>
             )}
@@ -253,7 +260,7 @@ export default function AiAssistantPage() {
               <div className="flex justify-start">
                 <div className="bg-muted rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm flex items-center gap-2">
                   <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                  AI is analyzing data...
+                  AI sedang menganalisis data...
                 </div>
               </div>
             )}
@@ -262,7 +269,7 @@ export default function AiAssistantPage() {
 
         <div className="p-3 border-t flex gap-2">
           <Input
-            placeholder="Ask anything or request custom analysis..."
+            placeholder="Tanyakan sesuatu atau minta analisis khusus..."
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
@@ -274,7 +281,7 @@ export default function AiAssistantPage() {
             disabled={isLoading}
             className="h-10 px-4 gap-1.5"
           >
-            <IconSend size={16} /> Send
+            <IconSend size={16} /> Kirim
           </Button>
         </div>
       </Card>

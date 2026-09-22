@@ -1,10 +1,7 @@
 "use client";
 
 import Link from "next/link";
-
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import apiClient from "@/lib/apiClient";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -28,34 +25,17 @@ import {
   IconAlertTriangle,
 } from "@tabler/icons-react";
 
-export interface Account {
-  id: number;
-  referenceNumber: number;
-  accountName: string;
-}
-export interface JournalLine {
-  id: number;
-  lineOrder: number;
-  debit: number;
-  credit: number;
-  lineDescription?: string;
-  accountName?: string;
-  referenceNumber?: number;
-  account?: Account;
-}
-export interface JournalEntry {
-  id: number;
-  transactionNumber: string;
-  journalType: string;
-  entryDate: string;
-  createdAt: string;
-  updatedAt?: string;
-  lines: JournalLine[];
-}
+// Import Hooks & Types dari auto-generated RTK Query
+import {
+  useGetApiV1ReportsJournalsAdjustingQuery,
+  useDeleteApiV1ReportsJournalsAdjustingByIdMutation,
+} from "@/lib/generatedApi";
 
+// Format Helpers
 const formatNumber = (n: number) =>
   new Intl.NumberFormat("id-ID").format(Math.abs(n));
-const formatDateDisplay = (s: string) =>
+
+const formatDateDisplay = (s?: string) =>
   !s
     ? "-"
     : new Intl.DateTimeFormat("id-ID", {
@@ -63,6 +43,7 @@ const formatDateDisplay = (s: string) =>
         month: "short",
         year: "numeric",
       }).format(new Date(s));
+
 const formatDateTimeDisplay = (s?: string) =>
   !s
     ? null
@@ -75,55 +56,43 @@ const formatDateTimeDisplay = (s?: string) =>
       }).format(new Date(s));
 
 export default function AdjustingJournalPage() {
-  const router = useRouter();
-  const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const [selectedPeriodName, setSelectedPeriodName] = useState<string | null>(
-    null,
-  );
-  const [isPeriodClosed, setIsPeriodClosed] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    setErrorMessage(null);
-    try {
-      const { data } = await apiClient.get(
-        "/api/v1/reports/journals/adjusting",
-      );
-      if (data.success) {
-        setSelectedPeriodName(data.selectedPeriodName || null);
-        setIsPeriodClosed(data.isPeriodClosed || false);
-        setEntries(data.entries || []);
-      } else throw new Error(data.message);
-    } catch (err: any) {
-      if (err.response?.status === 401) router.push("/");
-      setErrorMessage(err.response?.data?.message || err.message);
-      setEntries([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [router]);
+  // 1. RTK Query Fetching Data Jurnal Penyesuaian
+  const {
+    data: rawResponse,
+    isLoading,
+    isError,
+    error,
+  } = useGetApiV1ReportsJournalsAdjustingQuery();
 
-  useEffect(() => {
-    fetchData();
-    const h = () => fetchData();
-    window.addEventListener("periodChanged", h);
-    return () => window.removeEventListener("periodChanged", h);
-  }, [fetchData]);
+  // 2. RTK Query Mutation Hapus Entri
+  const [deleteJournalEntry, { isLoading: isDeleting }] =
+    useDeleteApiV1ReportsJournalsAdjustingByIdMutation();
 
-  const deleteEntry = async (entry: JournalEntry) => {
+  // Mapping Response Data dari Backend
+  const responseData = rawResponse as any;
+  const selectedPeriodName = responseData?.selectedPeriodName || null;
+  const isPeriodClosed = responseData?.isPeriodClosed || false;
+  const entries: any[] = responseData?.entries || [];
+
+  // Action Hapus Entri Jurnal
+  const handleDeleteEntry = async (entry: any) => {
     if (isPeriodClosed) {
-      alert(`${entry.transactionNumber} in closed period`);
+      alert(`${entry.transactionNumber} berada di periode yang sudah ditutup.`);
       return;
     }
-    if (!confirm(`Delete ${entry.transactionNumber}?`)) return;
+
+    if (!confirm(`Hapus entri ${entry.transactionNumber}?`)) return;
+
+    setErrorMessage(null);
     try {
-      await apiClient.delete(`/api/v1/reports/journals/adjusting/${entry.id}`);
-      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+      await deleteJournalEntry({ id: entry.id }).unwrap();
     } catch (err: any) {
-      setErrorMessage(err.response?.data?.message || "Failed delete");
+      setErrorMessage(
+        err?.data?.message || err?.message || "Gagal menghapus entri jurnal."
+      );
     }
   };
 
@@ -132,13 +101,19 @@ export default function AdjustingJournalPage() {
 
   return (
     <div className="max-w-5xl space-y-6 w-full">
-      {errorMessage && (
+      {/* Alert Error dari Fetching atau Deleting */}
+      {(errorMessage || isError) && (
         <Alert variant="destructive">
           <IconAlertTriangle size={16} />
-          <AlertDescription>{errorMessage}</AlertDescription>
+          <AlertDescription>
+            {errorMessage ||
+              (error as any)?.data?.message ||
+              "Gagal memuat laporan Jurnal Penyesuaian."}
+          </AlertDescription>
         </Alert>
       )}
 
+      {/* Header Bar */}
       <div className="flex flex-wrap sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-xl font-bold">
@@ -146,10 +121,11 @@ export default function AdjustingJournalPage() {
             Journal
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Align revenues & expenses{" "}
-            {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ""}
+            Menyelaraskan pendapatan & beban{" "}
+            {selectedPeriodName ? `(Melihat Periode: ${selectedPeriodName})` : ""}
           </p>
         </div>
+
         <div className="flex gap-2">
           <Button asChild size="sm" className="gap-1.5">
             <Link href="/adjusting-journal-entry">
@@ -168,24 +144,26 @@ export default function AdjustingJournalPage() {
         </div>
       </div>
 
+      {/* Table Card */}
       <Card className="w-full">
         <CardContent className="p-0">
           <div className="w-full overflow-x-auto">
             <Table className="min-w-[650px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[16%] pl-6">Date & Ref</TableHead>
-                  <TableHead className="w-[26%]">Account</TableHead>
-                  <TableHead className="w-[26%]">Description</TableHead>
+                  <TableHead className="w-[16%] pl-6">Tanggal & Ref</TableHead>
+                  <TableHead className="w-[26%]">Akun</TableHead>
+                  <TableHead className="w-[26%]">Keterangan</TableHead>
                   <TableHead className="w-[10%] text-center">Ref #</TableHead>
                   <TableHead className="w-[11%] text-right">Debit</TableHead>
                   <TableHead className="w-[11%] pr-6 text-right">
-                    Credit
+                    Kredit
                   </TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
-                {loading ? (
+                {isLoading ? (
                   <TableRow>
                     <TableCell
                       colSpan={6}
@@ -195,32 +173,41 @@ export default function AdjustingJournalPage() {
                         className="mr-2 inline animate-spin"
                         size={16}
                       />{" "}
-                      Loading adjusting journal...
+                      Memuat data Jurnal Penyesuaian...
                     </TableCell>
                   </TableRow>
                 ) : entries.length > 0 ? (
                   entries.map((entry) => {
-                    const sorted = [...(entry.lines || [])].sort(
-                      (a, b) => a.lineOrder - b.lineOrder,
+                    const sortedLines = [...(entry.lines || [])].sort(
+                      (a: any, b: any) =>
+                        (a.lineOrder || 0) - (b.lineOrder || 0)
                     );
+
                     const curDate = formatDateDisplay(entry.entryDate);
                     const showHeader = curDate !== currentDateTracker;
+
                     if (showHeader) {
                       currentDateTracker = curDate;
                       groupIdx++;
                     }
+
                     const shade = groupIdx % 2 === 0 ? "bg-muted/20" : "";
-                    return sorted.map((line, i) => {
+
+                    return sortedLines.map((line: any, i: number) => {
                       const isFirst = i === 0;
-                      const isDebit = line.debit > 0;
+                      const debitNum = Number(line.debit || 0);
+                      const creditNum = Number(line.credit || 0);
+                      const isDebit = debitNum > 0;
+
                       const accName =
                         line.accountName ||
                         line.account?.accountName ||
-                        "Unknown";
-                      const ref =
+                        "Tidak Diketahui";
+                      const refNumber =
                         line.referenceNumber ||
                         line.account?.referenceNumber ||
                         "-";
+
                       return (
                         <TableRow
                           key={`${entry.id}-${line.id || i}`}
@@ -251,6 +238,7 @@ export default function AdjustingJournalPage() {
                                     {formatDateTimeDisplay(entry.updatedAt)}
                                   </span>
                                 )}
+
                                 {editMode && (
                                   <div className="mt-1 flex gap-1">
                                     <Button
@@ -269,7 +257,8 @@ export default function AdjustingJournalPage() {
                                       variant="outline"
                                       size="icon"
                                       className="h-6 w-6 text-destructive"
-                                      onClick={() => deleteEntry(entry)}
+                                      onClick={() => handleDeleteEntry(entry)}
+                                      disabled={isDeleting}
                                     >
                                       <IconTrash size={12} />
                                     </Button>
@@ -278,27 +267,36 @@ export default function AdjustingJournalPage() {
                               </div>
                             )}
                           </TableCell>
+
                           <TableCell
-                            className={`align-top py-2 text-xs ${isDebit ? "align-top py-2 text-xs font-semibold" : "align-top py-2 pl-6 text-xs text-muted-foreground"}`}
+                            className={`align-top py-2 text-xs ${
+                              isDebit
+                                ? "font-semibold"
+                                : "pl-6 text-muted-foreground"
+                            }`}
                           >
                             {accName}
                           </TableCell>
+
                           <TableCell className="align-top py-2 text-xs text-muted-foreground">
                             {line.lineDescription || "-"}
                           </TableCell>
+
                           <TableCell className="align-top py-2 text-center">
                             <Badge
                               variant="outline"
                               className="font-mono text-amber-500"
                             >
-                              {ref}
+                              {refNumber}
                             </Badge>
                           </TableCell>
+
                           <TableCell className="align-top py-2 text-right font-mono text-xs font-medium text-emerald-500">
-                            {line.debit > 0 ? formatNumber(line.debit) : "-"}
+                            {debitNum > 0 ? formatNumber(debitNum) : "-"}
                           </TableCell>
+
                           <TableCell className="align-top py-2 pr-6 text-right font-mono text-xs font-medium text-red-500">
-                            {line.credit > 0 ? formatNumber(line.credit) : "-"}
+                            {creditNum > 0 ? formatNumber(creditNum) : "-"}
                           </TableCell>
                         </TableRow>
                       );
@@ -312,27 +310,27 @@ export default function AdjustingJournalPage() {
                           <>
                             <IconEyeOff size={28} />
                             <p className="text-sm font-medium">
-                              No Period Selected
+                              Belum Ada Periode Dipilih
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              Go to{" "}
+                              Buka halaman{" "}
                               <Link
                                 href="/periods"
                                 className="text-primary underline"
                               >
-                                Periods
+                                Periode
                               </Link>{" "}
-                              to select one.
+                              untuk memilih salah satu.
                             </p>
                           </>
                         ) : (
                           <>
                             <IconFileX size={28} />
                             <p className="text-sm font-medium">
-                              No Adjusting Entries
+                              Belum Ada Jurnal Penyesuaian
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              No entries in{" "}
+                              Tidak ada entri jurnal pada periode{" "}
                               <strong>{selectedPeriodName}</strong>.
                             </p>
                           </>
