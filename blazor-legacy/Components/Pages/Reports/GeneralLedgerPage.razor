@@ -215,7 +215,7 @@
             result.Add(new LedgerAccountViewModel
             {
                 AccountId = account.Id,
-                ReferenceNumber = account.ReferenceNumber,
+                ReferenceNumber = account.ReferenceNumber.ToString(),
                 AccountName = account.AccountName,
                 Type = account.Type,
                 NormalBalanceIsDebit = normalDebit,
