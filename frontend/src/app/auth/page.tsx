@@ -2,7 +2,10 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { baseApi } from "@/lib/apiClient";
 import { usePostApiV1AuthLoginMutation } from "@/lib/generatedApi";
+import { useUserProfile } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,14 +13,27 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 function LoginFormContent() {
   const searchParams = useSearchParams();
+  const dispatch = useDispatch();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [keepMe, setKeepMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [err, setErr] = useState("");
 
+  // Cek profil user aktif lewat RTK Query
+  const { profile, isLoading: isProfileLoading } = useUserProfile();
+
   // Panggil mutation hook dari RTK Query auto-generated
-  const [loginMutation, { isLoading }] = usePostApiV1AuthLoginMutation();
+  const [loginMutation, { isLoading: isLoggingIn }] = usePostApiV1AuthLoginMutation();
+
+  // Auto-redirect jika pengguna TERVERIFIKASI SUDAH LOGIN di backend .NET
+  useEffect(() => {
+    if (!isProfileLoading && profile) {
+      const targetUrl = searchParams.get("redirectTo") || "/home";
+      window.location.replace(targetUrl);
+    }
+  }, [profile, isProfileLoading, searchParams]);
 
   useEffect(() => {
     document.title = "Sign In | Aumo Workspace";
@@ -34,6 +50,9 @@ function LoginFormContent() {
     setErr("");
 
     try {
+      // Bersihkan tandon cache RTK Query lama sebelum melakukan login baru
+      dispatch(baseApi.util.resetApiState());
+
       // Eksekusi mutasi login lewat RTK Query
       await loginMutation({
         loginRequest: {
@@ -54,7 +73,7 @@ function LoginFormContent() {
       const targetUrl = searchParams.get("redirectTo") || "/home";
 
       // Hard navigation agar cookie session 'AumoFinance.Session' aktif sempurna di browser
-      window.location.href = targetUrl;
+      window.location.replace(targetUrl);
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e);
       // Fallback bertingkat untuk menangkap error dari .NET Identity / ProblemDetails
@@ -69,6 +88,11 @@ function LoginFormContent() {
       setErr(errorMessage);
     }
   };
+
+  // Jika sedang memverifikasi profil user aktif, tampilkan loader halus
+  if (isProfileLoading) {
+    return <LoginFormSkeleton />;
+  }
 
   return (
     <div className="w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200">
@@ -151,10 +175,10 @@ function LoginFormContent() {
         )}
         <Button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoggingIn}
           className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800"
         >
-          {isLoading ? "Processing..." : "Sign In"}
+          {isLoggingIn ? "Processing..." : "Sign In"}
         </Button>
         <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>
