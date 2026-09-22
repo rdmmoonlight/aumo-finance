@@ -33,7 +33,7 @@ export default function HomePage() {
         const fredCsv =
           "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCB01IDQ156N";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`,
         );
         if (res.ok) {
           const text = await res.text();
@@ -69,7 +69,7 @@ export default function HomePage() {
         const biUrl =
           "https://www.bi.go.id/en/publikasi/ruang-media/news-release/default.aspx";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`,
         );
         if (res.ok) {
           const html = await res.text();
@@ -90,7 +90,7 @@ export default function HomePage() {
       try {
         const teUrl = "https://tradingeconomics.com/indonesia/interest-rate";
         const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`,
         );
         if (res.ok) {
           const html = await res.text();
@@ -136,8 +136,8 @@ export default function HomePage() {
       try {
         const resIhsg = await fetch(
           `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE"
-          )}&t=${Date.now()}`
+            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
+          )}&t=${Date.now()}`,
         );
         if (resIhsg.ok) {
           const yahooData = await resIhsg.json();
