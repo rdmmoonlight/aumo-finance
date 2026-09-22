@@ -120,7 +120,7 @@ export function AppSidebar() {
 
   const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip:!isMounted },
+    { skip: !isMounted },
   );
 
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
@@ -135,7 +135,7 @@ export function AppSidebar() {
       );
     } finally {
       dispatch(baseApi.util.resetApiState());
-      if (typeof window!== "undefined") {
+      if (typeof window !== "undefined") {
         document.cookie =
           "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
@@ -144,8 +144,7 @@ export function AppSidebar() {
   };
 
   const userData = user as
-    | { fullName?: string; userName?: string; email?: string }
-    | undefined;
+    { fullName?: string; userName?: string; email?: string } | undefined;
 
   return (
     <Sidebar
@@ -218,7 +217,7 @@ export function AppSidebar() {
 
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url!== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -253,12 +252,12 @@ export function AppSidebar() {
                     <div className="flex flex-col truncate">
                       <span className="font-medium text-[12.5px] leading-tight truncate">
                         {!isMounted || isUserLoading
-                         ? "Memuat..."
+                          ? "Memuat..."
                           : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text- text-muted-foreground truncate">
                         {!isMounted || isUserLoading
-                         ? "..."
+                          ? "..."
                           : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
@@ -267,7 +266,10 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild className="cursor-pointer text-[12.5px]">
+                <DropdownMenuItem
+                  asChild
+                  className="cursor-pointer text-[12.5px]"
+                >
                   <Link href="/settings">
                     <Settings className="w-3.5 h-3.5 mr-2" />
                     Settings
