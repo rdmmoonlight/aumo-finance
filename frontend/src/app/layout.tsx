@@ -3,7 +3,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { ReduxProvider } from "@/components/redux-provider";
 import { Inter } from "next/font/google";
 import "@/styles/index.css";
-import { Footer } from "@/components/app-footer";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -42,9 +41,8 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="flex min-h-screen flex-col bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
-              <div className="flex-1">{children}</div>
-              <Footer />
+            <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+              {children}
             </div>
           </ThemeProvider>
         </ReduxProvider>
