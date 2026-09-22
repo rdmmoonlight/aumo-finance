@@ -1,8 +1,10 @@
 package com.aumofinance.app.home
 
 import android.content.Intent
+import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
@@ -27,7 +29,14 @@ class HomeActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         // Modern splash + edge to edge, biar HomeScreen lu yang sebelumnya bisa full bleed
         installSplashScreen()
-        enableEdgeToEdge()
+        // dark(...) = paksa ikon status bar/nav bar TERANG selamanya, gak ikut mode
+        // terang/gelap sistem HP - soalnya tema app ini emang sengaja selalu gelap.
+        // Kalo pake enableEdgeToEdge() polos, di HP mode terang (default kayak Oppo A12)
+        // ikonnya jadi hitam dan ilang ketiban background gelap kita.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(AndroidColor.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.dark(AndroidColor.TRANSPARENT),
+        )
         super.onCreate(savedInstanceState)
 
         initDatabaseConnection()
