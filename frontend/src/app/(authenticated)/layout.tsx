@@ -1,10 +1,10 @@
-// app/(authenticated)/layout.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { useGetApiV1AuthMeQuery, useGetApiV1PeriodsOpenInfoQuery } from "@/lib/generatedApi";
 import { AppSidebar } from "@/components/app-sidebar";
-import { AppTopbar } from "@/components/app-topbar";
+// Perbaikan impor: Ganti AppTopbar menjadi TopBar (atau sesuai ekspor komponen Anda)
+import { TopBar } from "@/components/app-topbar";
 
 export default function AuthenticatedLayout({
   children,
@@ -17,26 +17,24 @@ export default function AuthenticatedLayout({
     setIsMounted(true);
   }, []);
 
-  // 1. Cek profil user terlebih dahulu
+  // 1. Verifikasi profil user lebih dulu
   const {
     data: authData,
     isLoading: isAuthLoading,
     isError: isAuthError,
   } = useGetApiV1AuthMeQuery(undefined, {
     skip: !isMounted,
-    // PENTING: Jangan re-fetch otomatis jika gagal
     refetchOnMountOrArgChange: false,
   });
 
-  // 2. HANYA panggil periods/open-info JIKA auth/me SUDAH BERHASIL
+  // 2. Ambil info periode HANYA jika autentikasi sukses
   const isAuthenticated = isMounted && !isAuthLoading && !isAuthError && !!authData;
 
   const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(undefined, {
-    skip: !isAuthenticated, // Skip jika belum terverifikasi login
+    skip: !isAuthenticated,
     refetchOnMountOrArgChange: false,
   });
 
-  // Tampilan Loading
   if (!isMounted || isAuthLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -45,7 +43,6 @@ export default function AuthenticatedLayout({
     );
   }
 
-  // Jika error (401), tahan tampilan agar interceptor di apiClient meredirect ke /auth
   if (isAuthError) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
@@ -58,7 +55,8 @@ export default function AuthenticatedLayout({
     <div className="flex min-h-screen">
       <AppSidebar />
       <div className="flex flex-1 flex-col">
-        <AppTopbar />
+        {/* Gunakan komponen TopBar yang sesuai */}
+        <TopBar />
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
