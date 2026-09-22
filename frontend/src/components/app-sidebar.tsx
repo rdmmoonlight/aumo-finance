@@ -48,20 +48,17 @@ import {
   ChevronsUpDown,
 } from "lucide-react";
 
-// Import RTK Query Hooks dari generatedApi
 import {
   useGetApiV1AuthMeQuery,
   usePostApiV1AuthLogoutMutation,
 } from "@/lib/generatedApi";
 
+// URUTAN BARU: Home, Dashboard, Periods, Chart of Accounts, Reports, Journal Entry, AI Assistant, Guardian, Tools, Settings
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
-  { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
-  { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
   { title: "Periods", url: "/periods", icon: Calendar },
-  { title: "Guardian", url: "/guardian", icon: ShieldAlert },
+  { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
   {
     title: "Reports",
     icon: FileText,
@@ -103,6 +100,9 @@ const navigation = [
       },
     ],
   },
+  { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
+  { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+  { title: "Guardian", url: "/guardian", icon: ShieldAlert },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
@@ -118,13 +118,11 @@ export function AppSidebar() {
     setIsMounted(true);
   }, []);
 
-  // 1. Fetch User Profile via RTK Query (Skip saat SSR)
   const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip: !isMounted },
+    { skip:!isMounted },
   );
 
-  // 2. Mutation Logout via RTK Query
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
@@ -136,11 +134,8 @@ export function AppSidebar() {
         err,
       );
     } finally {
-      // Bersihkan seluruh tandon cache RTK Query
       dispatch(baseApi.util.resetApiState());
-
-      // Hapus cookie lokal di browser untuk memutus infinite loop
-      if (typeof window !== "undefined") {
+      if (typeof window!== "undefined") {
         document.cookie =
           "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
@@ -148,24 +143,22 @@ export function AppSidebar() {
     }
   };
 
-  // Type-casting response dari backend
   const userData = user as
-    { fullName?: string; userName?: string; email?: string } | undefined;
+    | { fullName?: string; userName?: string; email?: string }
+    | undefined;
 
   return (
     <Sidebar
       collapsible="none"
       className="border-r h-screen sticky top-0 flex flex-col justify-between"
     >
-      {/* Header Utama */}
-      <SidebarHeader className="p-4 border-b shrink-0">
-        <h2 className="text-xl font-bold tracking-tight">Aumo Finance</h2>
+      <SidebarHeader className="p-3.5 border-b shrink-0">
+        <h2 className="text- font-bold tracking-tight">Aumo Finance</h2>
       </SidebarHeader>
 
-      {/* Content Navigasi */}
       <SidebarContent className="p-2 flex-1 overflow-y-auto">
         <SidebarGroup>
-          <SidebarGroupLabel className="text-xs uppercase tracking-wider text-muted-foreground mb-2">
+          <SidebarGroupLabel className="text- uppercase tracking-wider text-muted-foreground mb-1.5">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -189,13 +182,13 @@ export function AppSidebar() {
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
                             isActive={isSubActive}
-                            className="text-base py-2.5 font-medium w-full justify-between"
+                            className="text- py-2 font-normal w-full justify-between"
                           >
                             <div className="flex items-center">
-                              <Icon className="w-5 h-5 mr-2 shrink-0" />
+                              <Icon className="w- h- mr-2.5 shrink-0" />
                               <span>{item.title}</span>
                             </div>
-                            <ChevronRight className="w-4 h-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                            <ChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
@@ -207,7 +200,7 @@ export function AppSidebar() {
                                   <SidebarMenuSubButton
                                     asChild
                                     isActive={isChildActive}
-                                    className="text-sm py-1.5"
+                                    className="text- py-1 font-normal"
                                   >
                                     <Link href={subItem.url}>
                                       {subItem.title}
@@ -225,17 +218,17 @@ export function AppSidebar() {
 
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url!== "/home" && pathname.startsWith(item.url + "/"));
 
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
                       isActive={isSingleActive}
-                      className="text-base py-2.5 font-medium"
+                      className="text- py-2 font-normal"
                     >
                       <Link href={item.url}>
-                        <Icon className="w-5 h-5 mr-2 shrink-0" />
+                        <Icon className="w- h- mr-2.5 shrink-0" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -247,45 +240,44 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer Sidebar */}
       <SidebarFooter className="p-2 border-t shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full justify-between py-6">
-                  <div className="flex items-center gap-3 overflow-hidden text-left">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
-                      <User className="w-4 h-4" />
+                <SidebarMenuButton className="w-full justify-between py-5">
+                  <div className="flex items-center gap-2.5 overflow-hidden text-left">
+                    <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center shrink-0 overflow-hidden">
+                      <User className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex flex-col truncate">
-                      <span className="font-semibold text-sm leading-tight truncate">
+                      <span className="font-medium text-[12.5px] leading-tight truncate">
                         {!isMounted || isUserLoading
-                          ? "Memuat..."
+                         ? "Memuat..."
                           : userData?.fullName || userData?.userName || "Guest"}
                       </span>
-                      <span className="text-xs text-muted-foreground truncate">
+                      <span className="text- text-muted-foreground truncate">
                         {!isMounted || isUserLoading
-                          ? "..."
+                         ? "..."
                           : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
-                  <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0 ml-1" />
+                  <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground shrink-0 ml-1" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild className="cursor-pointer">
+                <DropdownMenuItem asChild className="cursor-pointer text-[12.5px]">
                   <Link href="/settings">
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Settings className="w-3.5 h-3.5 mr-2" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="text-destructive focus:text-destructive cursor-pointer"
+                  className="text-destructive focus:text-destructive cursor-pointer text-[12.5px]"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="w-3.5 h-3.5 mr-2" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
