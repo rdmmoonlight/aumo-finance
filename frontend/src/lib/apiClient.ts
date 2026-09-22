@@ -1,15 +1,7 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type {
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError,
-} from "@reduxjs/toolkit/query";
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { aumoConfig } from "../../aumo.config";
 
-/**
- * Normalisasi URL agar wajib menggunakan HTTPS untuk koneksi luar.
- * Diperlukan untuk keamanan SameSite=None cookie pada Next.js / Browser.
- */
 function enforceHttps(url: string): string {
   if (!url) return url;
   if (url.includes("localhost") || url.includes("127.0.0.1")) return url;
@@ -19,13 +11,12 @@ function enforceHttps(url: string): string {
 
 const BASE_URL = enforceHttps(aumoConfig.backendTarget);
 
-// Raw Base Query bawaan RTK Query
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
-  // WAJIB: Mengirim cookie 'AumoFinance.Session' (.NET Identity) pada request Client-Side
+  // WAJIB: Memaksa browser mengirimkan Cookie SameSite=None/Secure ke Render
   credentials: "include",
   prepareHeaders: async (headers) => {
-    // Penanganan SSR Cookie untuk Next.js App Router saat dijalankan di server-side
+    // Meneruskan Cookie dari Browser pengguna saat Next.js melakukan Server-Side Rendering (SSR)
     if (typeof window === "undefined") {
       try {
         const { cookies } = await import("next/headers");
@@ -36,17 +27,13 @@ const rawBaseQuery = fetchBaseQuery({
           headers.set("cookie", cookieHeader);
         }
       } catch {
-        // Safe fallback jika dieksekusi di luar konteks HTTP Request Next.js (misal: build time)
+        // Safe fallback jika dipanggil di luar konteks HTTP Request Next.js
       }
     }
     return headers;
   },
 });
 
-/**
- * Custom Base Query dengan Interceptor 401 Unauthorized Global
- * Menggantikan perilaku Axios Interceptor terdahulu.
- */
 const baseQueryWithReauth: BaseQueryFn<
   string | FetchArgs,
   unknown,
@@ -54,18 +41,11 @@ const baseQueryWithReauth: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  // Jika response 401 Unauthorized dan dieksekusi di sisi Browser (Client)
-  if (
-    result.error &&
-    result.error.status === 401 &&
-    typeof window !== "undefined"
-  ) {
+  // Jika response 401 Unauthorized di sisi Browser Client, arahkan ke halaman login
+  if (result.error && result.error.status === 401 && typeof window !== "undefined") {
     const currentPath = window.location.pathname;
-
-    // Mencegah infinite loop redirect jika sudah berada di halaman /auth atau /
     if (!currentPath.startsWith("/auth") && currentPath !== "/") {
-      const redirectUrl = `/auth?redirectTo=${encodeURIComponent(currentPath)}`;
-      window.location.href = redirectUrl;
+      window.location.href = `/auth?redirectTo=${encodeURIComponent(currentPath)}`;
     }
   }
 
@@ -75,9 +55,7 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  // Durasi cache default (300 detik / 5 menit)
   keepUnusedDataFor: 300,
-  // Daftar tagTypes diselaraskan dengan addTagTypes di generatedApi.ts
   tagTypes: [
     "AumoBackend",
     "Auth",
