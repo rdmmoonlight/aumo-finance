@@ -43,7 +43,7 @@ export function useUserProfile(options?: { skip?: boolean }) {
 
   const { data, isLoading, isError, error, refetch } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip: shouldSkip }
+    { skip: shouldSkip },
   );
 
   const responseData = data as
@@ -103,7 +103,9 @@ export function useAuthLogin() {
     } catch (err: any) {
       return {
         success: false,
-        message: err?.data?.message || "Gagal melakukan login. Periksa email dan kata sandi Anda.",
+        message:
+          err?.data?.message ||
+          "Gagal melakukan login. Periksa email dan kata sandi Anda.",
         error: err,
       };
     }
@@ -118,7 +120,10 @@ export function useAuthLogin() {
 export function useGoogleLogin() {
   const [googleLoginMutation, result] = usePostApiV1AuthGoogleLoginMutation();
 
-  const googleLogin = async (payload: GoogleLoginPayload, redirectTo = "/dashboard") => {
+  const googleLogin = async (
+    payload: GoogleLoginPayload,
+    redirectTo = "/dashboard",
+  ) => {
     try {
       const response = await googleLoginMutation({
         googleLoginRequest: payload,

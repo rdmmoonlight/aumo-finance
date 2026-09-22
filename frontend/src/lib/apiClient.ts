@@ -1,5 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from "@reduxjs/toolkit/query";
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query";
 import { aumoConfig } from "../../aumo.config";
 
 function enforceHttps(url: string): string {
@@ -46,7 +50,11 @@ const baseQueryWithReauth: BaseQueryFn<
   const result = await rawBaseQuery(args, api, extraOptions);
 
   // Jika 401 terjadi di Browser (Client-Side), redirect ke login
-  if (result.error && result.error.status === 401 && typeof window !== "undefined") {
+  if (
+    result.error &&
+    result.error.status === 401 &&
+    typeof window !== "undefined"
+  ) {
     const currentPath = window.location.pathname;
 
     if (!currentPath.startsWith("/auth") && currentPath !== "/") {

@@ -26,9 +26,12 @@ export default function AuthenticatedLayout({
     skip: !isMounted,
   });
 
-  const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(undefined, {
-    skip: !isMounted,
-  });
+  const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(
+    undefined,
+    {
+      skip: !isMounted,
+    },
+  );
 
   // Tampilkan UI Skeleton/Loading minimalis saat aplikasi memverifikasi sesi di awal
   if (!isMounted || isAuthLoading || isPeriodsLoading) {
