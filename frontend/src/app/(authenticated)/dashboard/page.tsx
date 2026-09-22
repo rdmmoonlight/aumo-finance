@@ -65,7 +65,7 @@ const formatNumber = (amount: number) => {
   const formatted = new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 0,
   }).format(Math.abs(amount));
-  return isNeg? `(${formatted})` : formatted;
+  return isNeg ? `(${formatted})` : formatted;
 };
 
 export interface AccountBalanceItem {
@@ -88,7 +88,7 @@ function DashboardContent() {
   const [periodType, setPeriodType] = useState<"monthly" | "annual">(() => {
     if (typeof window === "undefined") return "monthly";
     const p = searchParams.get("period");
-    return p?.toLowerCase() === "annual"? "annual" : "monthly";
+    return p?.toLowerCase() === "annual" ? "annual" : "monthly";
   });
 
   const [dismissError, setDismissError] = useState(false);
@@ -118,7 +118,7 @@ function DashboardContent() {
     const net = Number(resData.netIncome) || 0;
 
     if (totalRev === 0 && totalExp === 0) return 100;
-    const margin = totalRev > 0? (net / totalRev) * 100 : 0;
+    const margin = totalRev > 0 ? (net / totalRev) * 100 : 0;
     if (margin >= 20) return 90;
     if (margin >= 10) return 75;
     if (margin >= 0) return 60;
@@ -128,7 +128,7 @@ function DashboardContent() {
   // --- FIX UTAMA: Total Real per Tab (Monthly / Annual) bukan kumulatif ---
   const periodTotals = useMemo(() => {
     if (!resData) return { cash: 0, bank: 0, assets: 0, liabilities: 0 };
-    const suffix = periodType === "monthly"? "Monthly" : "Annual";
+    const suffix = periodType === "monthly" ? "Monthly" : "Annual";
 
     const get = (base: string) => {
       // Support 4 format backend biar fleksibel:
@@ -137,9 +137,11 @@ function DashboardContent() {
       // 3. resData.totals.monthly.totalCashOnHand
       // 4. resData.totalCashOnHand (fallback lama - kumulatif)
       const direct = resData[`${base}${suffix}`];
-      if (direct!== undefined && direct!== null) return Number(direct) || 0;
-      if (resData[periodType]?.[base]!== undefined) return Number(resData[periodType][base]) || 0;
-      if (resData.totals?.[periodType]?.[base]!== undefined) return Number(resData.totals[periodType][base]) || 0;
+      if (direct !== undefined && direct !== null) return Number(direct) || 0;
+      if (resData[periodType]?.[base] !== undefined)
+        return Number(resData[periodType][base]) || 0;
+      if (resData.totals?.[periodType]?.[base] !== undefined)
+        return Number(resData.totals[periodType][base]) || 0;
       return Number(resData[base]) || 0;
     };
 
@@ -160,8 +162,9 @@ function DashboardContent() {
   const totalExpenses = Number(resData?.totalExpenses) || 0;
   const netIncome = Number(resData?.netIncome) || 0;
 
-  const periodLabel = periodType === "monthly"? "Monthly" : "Annual";
-  const periodLabelReal = periodType === "monthly"? "Monthly Real" : "Annual Real";
+  const periodLabel = periodType === "monthly" ? "Monthly" : "Annual";
+  const periodLabelReal =
+    periodType === "monthly" ? "Monthly Real" : "Annual Real";
 
   const chartOptions = useMemo(
     () => ({
@@ -213,14 +216,14 @@ function DashboardContent() {
   const expenseChartData = useMemo(
     () => ({
       labels: resData?.expenseAccountsList?.length
-       ? resData.expenseAccountsList.map(
+        ? resData.expenseAccountsList.map(
             (i: AccountBalanceItem) => i.accountName,
           )
         : ["No Expenses"],
       datasets: [
         {
           data: resData?.expenseAccountsList?.length
-           ? resData.expenseAccountsList.map(
+            ? resData.expenseAccountsList.map(
                 (i: AccountBalanceItem) => i.balance,
               )
             : [1],
@@ -360,7 +363,7 @@ function DashboardContent() {
               className={cn(
                 "h-7 text-xs px-4 transition-all border-0 shadow-none",
                 periodType === "monthly"
-                 ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
+                  ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
                   : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100",
               )}
             >
@@ -374,7 +377,7 @@ function DashboardContent() {
               className={cn(
                 "h-7 text-xs px-4 transition-all border-0 shadow-none",
                 periodType === "annual"
-                 ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
+                  ? "bg-white text-black hover:bg-white hover:text-black shadow-sm dark:bg-white dark:text-black dark:hover:bg-white dark:hover:text-black"
                   : "bg-transparent text-muted-foreground hover:bg-transparent hover:text-foreground dark:text-zinc-400 dark:hover:text-zinc-100",
               )}
             >
@@ -409,16 +412,16 @@ function DashboardContent() {
                 className={cn(
                   "text-sm font-semibold",
                   healthScore >= 80
-                   ? "text-emerald-500"
+                    ? "text-emerald-500"
                     : healthScore >= 60
-                     ? "text-sky-500"
+                      ? "text-sky-500"
                       : "text-amber-500",
                 )}
               >
                 {healthScore >= 80
-                 ? "Excellent"
+                  ? "Excellent"
                   : healthScore >= 60
-                   ? "Stable"
+                    ? "Stable"
                     : "Attention"}
               </p>
               <p className="text-xs text-muted-foreground">
@@ -429,7 +432,9 @@ function DashboardContent() {
         </Card>
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription>Total Cash & Bank ({periodLabelReal})</CardDescription>
+            <CardDescription>
+              Total Cash & Bank ({periodLabelReal})
+            </CardDescription>
             <IconWallet size={18} className="text-amber-500" />
           </CardHeader>
           <CardContent>
@@ -495,7 +500,7 @@ function DashboardContent() {
               {formatNumber(netIncome)}
             </div>
             <p className="text-xs text-primary-foreground/70">
-              {netIncome >= 0? "Profit" : "Loss"} for Period
+              {netIncome >= 0 ? "Profit" : "Loss"} for Period
             </p>
           </CardContent>
         </Card>
@@ -510,7 +515,9 @@ function DashboardContent() {
             <div className="text-xl font-bold font-mono">
               {formatNumber(totalLiabilities)}
             </div>
-            <p className="text-xs text-muted-foreground">Hutang {periodLabel}</p>
+            <p className="text-xs text-muted-foreground">
+              Hutang {periodLabel}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -523,7 +530,7 @@ function DashboardContent() {
                 Revenue vs Expense Trend
               </CardTitle>
               <CardDescription>
-                {periodType === "annual"? "Jan - Dec" : "Daily in period"}
+                {periodType === "annual" ? "Jan - Dec" : "Daily in period"}
               </CardDescription>
             </div>
             <IconChartPie size={18} className="text-muted-foreground" />
@@ -551,7 +558,9 @@ function DashboardContent() {
           <CardHeader className="flex-row items-center justify-between">
             <div>
               <CardTitle className="text-sm">Asset Composition</CardTitle>
-              <CardDescription>Cash vs Bank ({periodLabelReal})</CardDescription>
+              <CardDescription>
+                Cash vs Bank ({periodLabelReal})
+              </CardDescription>
             </div>
             <IconChartPie size={18} className="text-muted-foreground" />
           </CardHeader>
@@ -566,7 +575,9 @@ function DashboardContent() {
           <CardHeader className="flex-row items-center justify-between">
             <div>
               <CardTitle className="text-sm">Expense Composition</CardTitle>
-              <CardDescription>Operating Breakdown ({periodLabel})</CardDescription>
+              <CardDescription>
+                Operating Breakdown ({periodLabel})
+              </CardDescription>
             </div>
             <IconChartPie size={18} className="text-muted-foreground" />
           </CardHeader>
