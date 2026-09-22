@@ -5,8 +5,8 @@ export function AppFooter() {
         <p className="text-[9px] leading-[1.5] text-muted-foreground">
           © {new Date().getFullYear()} Aumo Finance. All rights reserved.
         </p>
-        <p className="text- leading-[1.5] text-muted-foreground">
-          by <span className="font-medium text-foreground">rdmmoonlight</span>
+        <p className="text-[9px] leading-[1.5] text-muted-foreground">
+          by <span className="text-[9px] text-foreground">rdmmoonlight</span>
         </p>
       </div>
     </footer>
