@@ -3,6 +3,8 @@
 import * as React from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { baseApi } from "@/lib/apiClient";
 import {
   Sidebar,
   SidebarContent,
@@ -108,9 +110,19 @@ const navigation = [
 export function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
 
-  // 1. Fetch User Profile via RTK Query
-  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery();
+  const [isMounted, setIsMounted] = React.useState(false);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  // 1. Fetch User Profile via RTK Query (Skip saat SSR)
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
+    undefined,
+    { skip: !isMounted }
+  );
 
   // 2. Mutation Logout via RTK Query
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
@@ -118,16 +130,24 @@ export function AppSidebar() {
   const handleSignOut = async () => {
     try {
       await logoutApi().unwrap();
-      window.location.href = "/auth";
     } catch (err) {
-      console.error("[SIDEBAR] Logout gagal, meredirect paksa:", err);
-      router.push("/auth");
+      console.error("[SIDEBAR] Logout gagal di backend, tetap bersihkan state:", err);
+    } finally {
+      // Bersihkan seluruh tandon cache RTK Query
+      dispatch(baseApi.util.resetApiState());
+      
+      // Hapus cookie lokal di browser untuk memutus infinite loop
+      if (typeof window !== "undefined") {
+        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.replace("/auth");
+      }
     }
   };
 
-  // Type-casting opsional jika response dari backend memiliki properti user
+  // Type-casting response dari backend
   const userData = user as
-    { fullName?: string; userName?: string; email?: string } | undefined;
+    | { fullName?: string; userName?: string; email?: string }
+    | undefined;
 
   return (
     <Sidebar
@@ -152,7 +172,7 @@ export function AppSidebar() {
 
                 const isSubActive = item.items?.some(
                   (sub) =>
-                    pathname === sub.url || pathname.startsWith(sub.url + "/"),
+                    pathname === sub.url || pathname.startsWith(sub.url + "/")
                 );
 
                 if (item.items) {
@@ -237,12 +257,12 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-semibold text-sm leading-tight truncate">
-                        {isUserLoading
+                        {!isMounted || isUserLoading
                           ? "Memuat..."
                           : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text-xs text-muted-foreground truncate">
-                        {isUserLoading
+                        {!isMounted || isUserLoading
                           ? "..."
                           : userData?.email || "Tidak ada email"}
                       </span>
