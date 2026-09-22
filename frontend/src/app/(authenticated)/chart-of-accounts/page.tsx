@@ -114,22 +114,21 @@ function ChartOfAccountsContent() {
     category: categoryFilter || undefined,
   });
 
-  // Ekstraksi & Normalisasi Data Aman
+  // Ekstraksi Data Aman (Menangani { accounts: [...] }, { data: [...] }, dan Array)
   const rawAccounts = useMemo<AccountItem[]>(() => {
     if (!rawAccountsData) return [];
 
     let list: any[] = [];
 
-    // Jika response backend berupa object wrapper { success: true, data: [...] }
-    if (
-      typeof rawAccountsData === "object" &&
-      "data" in rawAccountsData &&
-      Array.isArray((rawAccountsData as any).data)
-    ) {
-      list = (rawAccountsData as any).data;
-    } else if (Array.isArray(rawAccountsData)) {
-      // Jika response backend berupa Array langsung [...]
-      list = rawAccountsData;
+    if (typeof rawAccountsData === "object") {
+      const res = rawAccountsData as any;
+      if (Array.isArray(res.accounts)) {
+        list = res.accounts;
+      } else if (Array.isArray(res.data)) {
+        list = res.data;
+      } else if (Array.isArray(rawAccountsData)) {
+        list = rawAccountsData;
+      }
     }
 
     return list.map((item) => ({
@@ -138,6 +137,8 @@ function ChartOfAccountsContent() {
       referenceNumber: item.referenceNumber ?? "",
       accountName: item.accountName ?? "",
       type: item.type ?? "",
+      role: item.role ?? "Default",
+      balance: item.balance ?? 0,
       isActive: Boolean(item.isActive),
     })) as AccountItem[];
   }, [rawAccountsData]);
