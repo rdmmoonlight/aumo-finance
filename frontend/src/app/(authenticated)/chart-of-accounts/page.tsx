@@ -47,10 +47,17 @@ import {
   DeleteAccountAlertDialog,
 } from "./_components/coa-dialogs";
 
-// Tipe untuk satu item akun berdasarkan response API
-type AccountItem = NonNullable<
-  GetApiV1ChartOfAccountsApiResponse & any[]
->[number];
+// Tipe presisi untuk satu item akun berdasarkan response API
+type AccountItem = {
+  id?: number | string;
+  referenceNumber?: number | string;
+  accountName?: string;
+  type?: string;
+  role?: string;
+  balance?: number | string;
+  isActive?: boolean;
+  [key: string]: any;
+};
 
 interface AccountRangeInfo {
   start: number;
@@ -108,9 +115,25 @@ function ChartOfAccountsContent() {
     category: categoryFilter || undefined,
   });
 
-  // Type Assertion aman untuk rawAccounts
-  const rawAccounts = useMemo(() => {
-    return (rawAccountsData as AccountItem[]) ?? [];
+  // Ekstraksi Data Aman (Menangani Object Wrapper { data: [...] } & Array Direct [...])
+  const rawAccounts = useMemo<AccountItem[]>(() => {
+    if (!rawAccountsData) return [];
+
+    // Jika response backend berupa object wrapper { success: true, data: [...] }
+    if (
+      typeof rawAccountsData === "object" &&
+      "data" in rawAccountsData &&
+      Array.isArray((rawAccountsData as any).data)
+    ) {
+      return (rawAccountsData as any).data as AccountItem[];
+    }
+
+    // Jika response backend berupa Array langsung [...]
+    if (Array.isArray(rawAccountsData)) {
+      return rawAccountsData as AccountItem[];
+    }
+
+    return [];
   }, [rawAccountsData]);
 
   // Modal States
@@ -121,7 +144,7 @@ function ChartOfAccountsContent() {
     null,
   );
 
-  // Client-side fallback filter untuk memastikan reactivity cepat
+  // Client-side fallback filter
   const filteredAccounts = useMemo(() => {
     if (!Array.isArray(rawAccounts)) return [];
     return rawAccounts.filter((acc) => {
