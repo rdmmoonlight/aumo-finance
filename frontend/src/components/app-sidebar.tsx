@@ -16,7 +16,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
@@ -52,52 +51,52 @@ import {
   usePostApiV1AuthLogoutMutation,
 } from "@/lib/generatedApi";
 
+// Rujukan dari ReportsMenuActivity.kt
+const REPORT_SECTIONS = [
+  {
+    title: "General Ledger",
+    items: [
+      { title: "General Ledger — Permanent", url: "/reports/general-ledger-permanent" },
+      { title: "General Ledger — Temporary", url: "/reports/general-ledger-temporary" },
+    ],
+  },
+  {
+    title: "Trial Balance & Adjustments",
+    items: [
+      { title: "General Journal", url: "/reports/general-journal" },
+      { title: "Trial Balance", url: "/reports/unadjusted-trial-balance" },
+      { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
+      { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
+    ],
+  },
+  {
+    title: "Worksheet",
+    items: [{ title: "Worksheet", url: "/reports/worksheet" }],
+  },
+  {
+    title: "Financial Statements",
+    items: [
+      { title: "Income Statement", url: "/reports/income-statement" },
+      { title: "Retained Earnings Statement", url: "/reports/retained-earnings" },
+      { title: "Statement of Financial Position", url: "/reports/statement-of-financial-position" },
+      { title: "Statement of Cash Flows", url: "/reports/statement-of-cash-flow" },
+    ],
+  },
+  {
+    title: "Closing",
+    items: [
+      { title: "Closing Journal", url: "/reports/closing-journal" },
+      { title: "Post-Closing Trial Balance", url: "/reports/post-closing-trial-balance" },
+    ],
+  },
+] as const;
+
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Periods", url: "/periods", icon: Calendar },
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
-  {
-    title: "Reports",
-    icon: FileText,
-    url: "/reports",
-    items: [
-      { title: "General Journal", url: "/reports/general-journal" },
-      { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
-      { title: "Closing Journal", url: "/reports/closing-journal" },
-      {
-        title: "Unadjusted Trial Balance",
-        url: "/reports/unadjusted-trial-balance",
-      },
-      {
-        title: "Adjusted Trial Balance",
-        url: "/reports/adjusted-trial-balance",
-      },
-      {
-        title: "Post-Closing Trial Balance",
-        url: "/reports/post-closing-trial-balance",
-      },
-      {
-        title: "General Ledger (Temp)",
-        url: "/reports/general-ledger-temporary",
-      },
-      {
-        title: "General Ledger (Perm)",
-        url: "/reports/general-ledger-permanent",
-      },
-      { title: "Worksheet", url: "/reports/worksheet" },
-      { title: "Income Statement", url: "/reports/income-statement" },
-      { title: "Retained Earnings", url: "/reports/retained-earnings" },
-      {
-        title: "Financial Position",
-        url: "/reports/statement-of-financial-position",
-      },
-      {
-        title: "Statement of Cash Flow",
-        url: "/reports/statement-of-cash-flow",
-      },
-    ],
-  },
+  { title: "Reports", icon: FileText, url: "/reports", isGrouped: true },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
   { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
   { title: "Guardian", url: "/guardian", icon: ShieldAlert },
@@ -109,34 +108,26 @@ export function AppSidebar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => {
-    setIsMounted(true);
-  }, []);
+  React.useEffect(() => { setIsMounted(true); }, []);
 
-  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
-    undefined,
-    { skip: !isMounted },
-  );
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(undefined, { skip:!isMounted });
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
-    try {
-      await logoutApi().unwrap();
-    } catch (err) {
-      console.error(err);
-    } finally {
+    try { await logoutApi().unwrap(); } catch (err) { console.error(err); }
+    finally {
       dispatch(baseApi.util.resetApiState());
-      if (typeof window !== "undefined") {
-        document.cookie =
-          "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      if (typeof window!== "undefined") {
+        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
       }
     }
   };
 
-  const userData = user as
-    { fullName?: string; userName?: string; email?: string } | undefined;
-  const ICON_CLASS = "w- h- mr-2.5 shrink-0";
+  const userData = user as { fullName?: string; userName?: string; email?: string } | undefined;
+  const ICON_CLASS = "w- h- mr-2.5 shrink-0 stroke-[1.75]";
+
+  const isReportsActive = REPORT_SECTIONS.some(s => s.items.some(i => pathname === i.url || pathname.startsWith(i.url + "/")));
 
   return (
     <Sidebar
@@ -157,24 +148,14 @@ export function AppSidebar() {
             <SidebarMenu className="gap-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                const isSubActive = item.items?.some(
-                  (sub) =>
-                    pathname === sub.url || pathname.startsWith(sub.url + "/"),
-                );
 
-                if (item.items) {
+                // @ts-ignore - grouped reports
+                if (item.isGrouped) {
                   return (
-                    <Collapsible
-                      key={item.title}
-                      defaultOpen={isSubActive || pathname.startsWith(item.url)}
-                      className="group/collapsible"
-                    >
+                    <Collapsible key={item.title} defaultOpen={isReportsActive || pathname.startsWith(item.url)} className="group/collapsible">
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton
-                            isActive={isSubActive}
-                            className="text- h- font-normal w-full justify-between px-2"
-                          >
+                          <SidebarMenuButton isActive={isReportsActive} className="text- h- font-normal w-full justify-between px-2">
                             <div className="flex items-center">
                               <Icon className={ICON_CLASS} />
                               <span>{item.title}</span>
@@ -183,42 +164,44 @@ export function AppSidebar() {
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                          {/* RATA - tanpa border, padding disamain dengan text menu utama */}
-                          <SidebarMenuSub className="m-0 p-0 border-0 gap-0.5 mt-1">
-                            {item.items.map((subItem) => {
-                              const isChildActive = pathname === subItem.url;
-                              return (
-                                <SidebarMenuSubItem key={subItem.title}>
-                                  <SidebarMenuSubButton
-                                    asChild
-                                    isActive={isChildActive}
-                                    className="text- leading-[1.5] h-auto min-h- py-1.5 pl- pr-2 font-normal text-left whitespace-normal justify-start"
-                                  >
-                                    <Link href={subItem.url}>
-                                      {subItem.title}
-                                    </Link>
-                                  </SidebarMenuSubButton>
-                                </SidebarMenuSubItem>
-                              );
-                            })}
-                          </SidebarMenuSub>
+                          <div className="mt-1 flex flex-col gap-3 px-1">
+                            {REPORT_SECTIONS.map((section) => (
+                              <div key={section.title}>
+                                {/* TEKS UNCLICKABLE */}
+                                <div className="px-2 py-1 select-none cursor-default">
+                                  <p className="text- font-bold uppercase tracking-widest text-muted-foreground/60 leading-none">
+                                    {section.title}
+                                  </p>
+                                </div>
+                                <div className="mt-1 flex flex-col gap-0.5">
+                                  {section.items.map((sub) => {
+                                    const isActive = pathname === sub.url;
+                                    return (
+                                      <SidebarMenuSubItem key={sub.url}>
+                                        <SidebarMenuSubButton
+                                          asChild
+                                          isActive={isActive}
+                                          className="text- leading-[1.5] h-auto min-h- py-1 px-2 ml-2 pl-6 font-normal justify-start whitespace-normal text-left"
+                                        >
+                                          <Link href={sub.url}>{sub.title}</Link>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
                         </CollapsibleContent>
                       </SidebarMenuItem>
                     </Collapsible>
                   );
                 }
 
-                const isSingleActive =
-                  pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
-
+                const isSingleActive = pathname === item.url || (item.url!== "/home" && pathname.startsWith(item.url + "/"));
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isSingleActive}
-                      className="text- h- font-normal px-2"
-                    >
+                    <SidebarMenuButton asChild isActive={isSingleActive} className="text- h- font-normal px-2">
                       <Link href={item.url}>
                         <Icon className={ICON_CLASS} />
                         <span>{item.title}</span>
@@ -244,14 +227,10 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate">
                       <span className="font-medium text-[13.5px] leading-tight truncate">
-                        {!isMounted || isUserLoading
-                          ? "Memuat..."
-                          : userData?.fullName || userData?.userName || "Guest"}
+                        {!isMounted || isUserLoading? "Memuat..." : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text- text-muted-foreground truncate">
-                        {!isMounted || isUserLoading
-                          ? "..."
-                          : userData?.email || "Tidak ada email"}
+                        {!isMounted || isUserLoading? "..." : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
@@ -260,17 +239,10 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem asChild className="text-">
-                  <Link href="/settings">
-                    <Settings className="w-4 h-4 mr-2" />
-                    Settings
-                  </Link>
+                  <Link href="/settings"><Settings className="w-4 h-4 mr-2" />Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={handleSignOut}
-                  className="text-destructive text-"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Sign Out
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive text-">
+                  <LogOut className="w-4 h-4 mr-2" />Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
