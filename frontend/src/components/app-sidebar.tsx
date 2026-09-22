@@ -121,7 +121,7 @@ export function AppSidebar() {
   // 1. Fetch User Profile via RTK Query (Skip saat SSR)
   const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip: !isMounted }
+    { skip: !isMounted },
   );
 
   // 2. Mutation Logout via RTK Query
@@ -131,14 +131,18 @@ export function AppSidebar() {
     try {
       await logoutApi().unwrap();
     } catch (err) {
-      console.error("[SIDEBAR] Logout gagal di backend, tetap bersihkan state:", err);
+      console.error(
+        "[SIDEBAR] Logout gagal di backend, tetap bersihkan state:",
+        err,
+      );
     } finally {
       // Bersihkan seluruh tandon cache RTK Query
       dispatch(baseApi.util.resetApiState());
-      
+
       // Hapus cookie lokal di browser untuk memutus infinite loop
       if (typeof window !== "undefined") {
-        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie =
+          "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
       }
     }
@@ -146,8 +150,7 @@ export function AppSidebar() {
 
   // Type-casting response dari backend
   const userData = user as
-    | { fullName?: string; userName?: string; email?: string }
-    | undefined;
+    { fullName?: string; userName?: string; email?: string } | undefined;
 
   return (
     <Sidebar
@@ -172,7 +175,7 @@ export function AppSidebar() {
 
                 const isSubActive = item.items?.some(
                   (sub) =>
-                    pathname === sub.url || pathname.startsWith(sub.url + "/")
+                    pathname === sub.url || pathname.startsWith(sub.url + "/"),
                 );
 
                 if (item.items) {
