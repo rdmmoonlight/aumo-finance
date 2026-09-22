@@ -6,8 +6,9 @@ import {
   useGetApiV1PeriodsOpenInfoQuery,
 } from "@/lib/generatedApi";
 import { AppSidebar } from "@/components/app-sidebar";
-// Perbaikan impor: Ganti AppTopbar menjadi TopBar (atau sesuai ekspor komponen Anda)
 import { TopBar } from "@/components/app-topbar";
+// Impor SidebarProvider dari shadcn UI sidebar
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 export default function AuthenticatedLayout({
   children,
@@ -61,13 +62,15 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <div className="flex min-h-screen">
-      <AppSidebar />
-      <div className="flex flex-1 flex-col">
-        {/* Gunakan komponen TopBar yang sesuai */}
-        <TopBar />
-        <main className="flex-1 p-6">{children}</main>
+    // Pembungkus SidebarProvider wajib dipasang di tingkat teratas layout terautentikasi
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-1 flex-col min-w-0">
+          <TopBar />
+          <main className="flex-1 p-6">{children}</main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 }
