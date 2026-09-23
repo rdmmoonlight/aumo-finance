@@ -54,8 +54,14 @@ const REPORT_SECTIONS = [
   {
     title: "General Ledger",
     items: [
-      { title: "General Ledger — Permanent", url: "/reports/general-ledger-permanent" },
-      { title: "General Ledger — Temporary", url: "/reports/general-ledger-temporary" },
+      {
+        title: "General Ledger — Permanent",
+        url: "/reports/general-ledger-permanent",
+      },
+      {
+        title: "General Ledger — Temporary",
+        url: "/reports/general-ledger-temporary",
+      },
     ],
   },
   {
@@ -64,7 +70,10 @@ const REPORT_SECTIONS = [
       { title: "General Journal", url: "/reports/general-journal" },
       { title: "Trial Balance", url: "/reports/unadjusted-trial-balance" },
       { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
-      { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
+      {
+        title: "Adjusted Trial Balance",
+        url: "/reports/adjusted-trial-balance",
+      },
     ],
   },
   {
@@ -75,16 +84,28 @@ const REPORT_SECTIONS = [
     title: "Financial Statements",
     items: [
       { title: "Income Statement", url: "/reports/income-statement" },
-      { title: "Retained Earnings Statement", url: "/reports/retained-earnings" },
-      { title: "Statement of Financial Position", url: "/reports/statement-of-financial-position" },
-      { title: "Statement of Cash Flows", url: "/reports/statement-of-cash-flow" },
+      {
+        title: "Retained Earnings Statement",
+        url: "/reports/retained-earnings",
+      },
+      {
+        title: "Statement of Financial Position",
+        url: "/reports/statement-of-financial-position",
+      },
+      {
+        title: "Statement of Cash Flows",
+        url: "/reports/statement-of-cash-flow",
+      },
     ],
   },
   {
     title: "Closing",
     items: [
       { title: "Closing Journal", url: "/reports/closing-journal" },
-      { title: "Post-Closing Trial Balance", url: "/reports/post-closing-trial-balance" },
+      {
+        title: "Post-Closing Trial Balance",
+        url: "/reports/post-closing-trial-balance",
+      },
     ],
   },
 ] as const;
@@ -107,29 +128,41 @@ export function AppSidebar() {
   const [isMounted, setIsMounted] = React.useState(false);
   React.useEffect(() => setIsMounted(true), []);
 
-  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(undefined, { skip:!isMounted });
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
+    undefined,
+    { skip: !isMounted },
+  );
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
-    try { await logoutApi().unwrap(); } catch (err) { console.error(err); }
-    finally {
+    try {
+      await logoutApi().unwrap();
+    } catch (err) {
+      console.error(err);
+    } finally {
       dispatch(baseApi.util.resetApiState());
-      if (typeof window!== "undefined") {
-        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      if (typeof window !== "undefined") {
+        document.cookie =
+          "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         window.location.replace("/auth");
       }
     }
   };
 
-  const userData = user as { fullName?: string; userName?: string; email?: string } | undefined;
+  const userData = user as
+    { fullName?: string; userName?: string; email?: string } | undefined;
   const ICON_CLASS = "w-4 h-4 mr-2.5 shrink-0";
 
   const isReportsActive = REPORT_SECTIONS.some((s) =>
-    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/"))
+    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/")),
   );
 
   return (
-    <Sidebar collapsible="none" className="border-r h-screen sticky top-0 flex flex-col justify-between" style={{ "--sidebar-width": "285px" } as React.CSSProperties}>
+    <Sidebar
+      collapsible="none"
+      className="border-r h-screen sticky top-0 flex flex-col justify-between"
+      style={{ "--sidebar-width": "285px" } as React.CSSProperties}
+    >
       <SidebarHeader className="p-3.5 border-b shrink-0">
         <h2 className="text- font-bold tracking-tight">Aumo Finance</h2>
       </SidebarHeader>
@@ -146,10 +179,19 @@ export function AppSidebar() {
                 // @ts-ignore
                 if (item.isGrouped) {
                   return (
-                    <Collapsible key={item.title} defaultOpen={isReportsActive || pathname.startsWith(item.url)} className="group/collapsible">
+                    <Collapsible
+                      key={item.title}
+                      defaultOpen={
+                        isReportsActive || pathname.startsWith(item.url)
+                      }
+                      className="group/collapsible"
+                    >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                          <SidebarMenuButton isActive={isReportsActive} className="text-[13.5px] h-8 font-normal w-full justify-between px-2 overflow-hidden">
+                          <SidebarMenuButton
+                            isActive={isReportsActive}
+                            className="text-[13.5px] h-8 font-normal w-full justify-between px-2 overflow-hidden"
+                          >
                             <div className="flex items-center min-w-0 overflow-hidden">
                               <Icon className={ICON_CLASS} />
                               <span className="truncate">{item.title}</span>
@@ -170,14 +212,21 @@ export function AppSidebar() {
                                   {section.items.map((sub) => {
                                     const isActive = pathname === sub.url;
                                     return (
-                                      <SidebarMenuSubItem key={sub.url} className="overflow-hidden">
+                                      <SidebarMenuSubItem
+                                        key={sub.url}
+                                        className="overflow-hidden"
+                                      >
                                         <SidebarMenuSubButton
                                           asChild
                                           isActive={isActive}
                                           className="text- h-7 px-2 ml-2 pl-6 font-normal w-full overflow-hidden"
                                         >
                                           {/* truncate + title biar hover keliatan full */}
-                                          <Link href={sub.url} title={sub.title} className="truncate block w-full">
+                                          <Link
+                                            href={sub.url}
+                                            title={sub.title}
+                                            className="truncate block w-full"
+                                          >
                                             {sub.title}
                                           </Link>
                                         </SidebarMenuSubButton>
@@ -194,11 +243,21 @@ export function AppSidebar() {
                   );
                 }
 
-                const isSingleActive = pathname === item.url || (item.url!== "/home" && pathname.startsWith(item.url + "/"));
+                const isSingleActive =
+                  pathname === item.url ||
+                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
                 return (
                   <SidebarMenuItem key={item.title} className="overflow-hidden">
-                    <SidebarMenuButton asChild isActive={isSingleActive} className="text-[13.5px] h-8 font-normal px-2 overflow-hidden">
-                      <Link href={item.url} title={item.title} className="flex items-center min-w-0 overflow-hidden w-full">
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isSingleActive}
+                      className="text-[13.5px] h-8 font-normal px-2 overflow-hidden"
+                    >
+                      <Link
+                        href={item.url}
+                        title={item.title}
+                        className="flex items-center min-w-0 overflow-hidden w-full"
+                      >
                         <Icon className={ICON_CLASS} />
                         <span className="truncate">{item.title}</span>
                       </Link>
@@ -223,10 +282,14 @@ export function AppSidebar() {
                     </div>
                     <div className="flex flex-col truncate min-w-0">
                       <span className="font-medium text-[13.5px] leading-tight truncate">
-                        {!isMounted || isUserLoading? "Memuat..." : userData?.fullName || userData?.userName || "Guest"}
+                        {!isMounted || isUserLoading
+                          ? "Memuat..."
+                          : userData?.fullName || userData?.userName || "Guest"}
                       </span>
                       <span className="text-[11.5px] text-muted-foreground truncate">
-                        {!isMounted || isUserLoading? "..." : userData?.email || "Tidak ada email"}
+                        {!isMounted || isUserLoading
+                          ? "..."
+                          : userData?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
@@ -235,10 +298,17 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem asChild className="text-[13.5px]">
-                  <Link href="/settings"><Settings className="w-4 h-4 mr-2" />Settings</Link>
+                  <Link href="/settings">
+                    <Settings className="w-4 h-4 mr-2" />
+                    Settings
+                  </Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleSignOut} className="text-destructive text-[13.5px]">
-                  <LogOut className="w-4 h-4 mr-2" />Sign Out
+                <DropdownMenuItem
+                  onClick={handleSignOut}
+                  className="text-destructive text-[13.5px]"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
