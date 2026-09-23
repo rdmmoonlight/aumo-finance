@@ -21,14 +21,11 @@ function LoginFormContent() {
   const [showPass, setShowPass] = useState(false);
   const [err, setErr] = useState("");
 
-  // Cek profil user aktif lewat RTK Query
   const { profile, isLoading: isProfileLoading } = useUserProfile();
 
-  // Panggil mutation hook dari RTK Query auto-generated
   const [loginMutation, { isLoading: isLoggingIn }] =
     usePostApiV1AuthLoginMutation();
 
-  // Auto-redirect jika pengguna TERVERIFIKASI SUDAH LOGIN di backend .NET
   useEffect(() => {
     if (!isProfileLoading && profile) {
       const targetUrl = searchParams.get("redirectTo") || "/home";
@@ -38,7 +35,6 @@ function LoginFormContent() {
 
   useEffect(() => {
     document.title = "Sign In | Aumo Workspace";
-
     const saved = localStorage.getItem("aumo_saved_email");
     if (saved) {
       setEmail(saved);
@@ -49,12 +45,8 @@ function LoginFormContent() {
   const onLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErr("");
-
     try {
-      // Bersihkan tandon cache RTK Query lama sebelum melakukan login baru
       dispatch(baseApi.util.resetApiState());
-
-      // Eksekusi mutasi login lewat RTK Query
       await loginMutation({
         loginRequest: {
           email,
@@ -64,7 +56,6 @@ function LoginFormContent() {
         },
       }).unwrap();
 
-      // Simpan/hapus email di local storage jika checkbox diset
       if (keepMe) {
         localStorage.setItem("aumo_saved_email", email);
       } else {
@@ -72,31 +63,26 @@ function LoginFormContent() {
       }
 
       const targetUrl = searchParams.get("redirectTo") || "/home";
-
-      // Hard navigation agar cookie session 'AumoFinance.Session' aktif sempurna di browser
       window.location.replace(targetUrl);
     } catch (e: any) {
       console.error("[LOGIN FAIL]", e);
-      // Fallback bertingkat untuk menangkap error dari .NET Identity / ProblemDetails
       const errorMessage =
         e?.data?.message ||
         e?.data?.title ||
         e?.data?.errors?.Email?.[0] ||
         (e?.status === "FETCH_ERROR"
-          ? "Gagal terhubung ke server backend."
+         ? "Gagal terhubung ke server backend."
           : "Email atau password salah / terjadi kesalahan sistem.");
-
       setErr(errorMessage);
     }
   };
 
-  // Jika sedang memverifikasi profil user aktif, tampilkan loader halus
   if (isProfileLoading) {
     return <LoginFormSkeleton />;
   }
 
   return (
-    <div className="w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200">
+    <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200 selection:bg-black selection:text-white [&_*::selection]:bg-black [&_*::selection]:text-white">
       <div className="mb-8">
         <h2 className="text-2xl font-semibold tracking-tight text-black">
           Sign in
@@ -117,7 +103,7 @@ function LoginFormContent() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="nama@email.com"
-            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black"
+            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white"
             required
           />
         </div>
@@ -134,16 +120,16 @@ function LoginFormContent() {
               onClick={() => setShowPass(!showPass)}
               className="text-xs uppercase tracking-wide text-zinc-600 hover:text-black font-medium"
             >
-              {showPass ? "Hide" : "Show"}
+              {showPass? "Hide" : "Show"}
             </button>
           </div>
           <Input
             id="password"
-            type={showPass ? "text" : "password"}
+            type={showPass? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
-            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black"
+            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white"
             required
           />
         </div>
@@ -152,8 +138,8 @@ function LoginFormContent() {
             <Checkbox
               id="keepMe"
               checked={keepMe}
-              onCheckedChange={(v) => setKeepMe(v as boolean)}
-              className="rounded border-zinc-400 data-[state=checked]:bg-black data-[state=checked]:text-white"
+              onCheckedChange={(v) => setKeepMe(v === true)}
+              className="h- w- rounded- border border-zinc-400 bg-white shadow-none data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white [&_svg]:h-3 [&_svg]:w-3 [&_svg]:stroke-[3]"
             />
             <Label
               htmlFor="keepMe"
@@ -179,7 +165,7 @@ function LoginFormContent() {
           disabled={isLoggingIn}
           className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800"
         >
-          {isLoggingIn ? "Processing..." : "Sign In"}
+          {isLoggingIn? "Processing..." : "Sign In"}
         </Button>
         <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>
@@ -192,7 +178,7 @@ function LoginFormContent() {
 
 function LoginFormSkeleton() {
   return (
-    <div className="w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-zinc-200 animate-pulse h-[420px] flex flex-col justify-center items-center">
+    <div className="light w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-zinc-200 animate-pulse h- flex flex-col justify-center items-center">
       <p className="text-sm font-medium text-zinc-400">Loading workspace...</p>
     </div>
   );
