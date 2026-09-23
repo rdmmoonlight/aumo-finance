@@ -3,13 +3,12 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  IconDashboard,
-  IconNotebook,
-  IconChartLine,
-  IconTrendingUp,
-  IconTrendingDown,
-  IconBuildingBank,
-} from "@tabler/icons-react";
+  LayoutDashboard,
+  Notebook,
+  LineChart,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -27,95 +26,14 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    async function fetchBIRate(): Promise<MarketItem | null> {
-      // Layer 1: FRED - Indonesia Central Bank Rate
-      try {
-        const fredCsv =
-          "https://fred.stlouisfed.org/graph/fredgraph.csv?id=IRSTCB01IDQ156N";
-        const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(fredCsv)}&t=${Date.now()}`,
-        );
-        if (res.ok) {
-          const text = await res.text();
-          const rows = text
-            .trim()
-            .split("\n")
-            .filter((r) => /^\d{4}-\d{2}-\d{2}/.test(r));
-          if (rows.length) {
-            const last = rows[rows.length - 1].split(",");
-            const prev =
-              rows.length > 1 ? rows[rows.length - 2].split(",") : last;
-            const val = parseFloat(last[1]);
-            const prevVal = parseFloat(prev[1]);
-            if (!isNaN(val)) {
-              const diff = val - prevVal;
-              return {
-                symbol: "BI RATE",
-                name: `Suku Bunga BI • ${last[0]}`,
-                price: `${val.toFixed(2)}%`,
-                change:
-                  diff === 0
-                    ? "HOLD"
-                    : `${diff > 0 ? "+" : ""}${diff.toFixed(2)}%`,
-                isUp: diff <= 0, // Turun/Tetap = Positif bagi pasar
-              };
-            }
-          }
-        }
-      } catch {}
-
-      // Layer 2: Scrape bi.go.id official
-      try {
-        const biUrl =
-          "https://www.bi.go.id/en/publikasi/ruang-media/news-release/default.aspx";
-        const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(biUrl)}&t=${Date.now()}`,
-        );
-        if (res.ok) {
-          const html = await res.text();
-          const match = html.match(/BI-Rate[^%]*?(\d+\.\d+)\s*%/i);
-          if (match) {
-            return {
-              symbol: "BI RATE",
-              name: "Suku Bunga BI",
-              price: `${match[1]}%`,
-              change: "BI Official",
-              isUp: true,
-            };
-          }
-        }
-      } catch {}
-
-      // Layer 3: TradingEconomics backup
-      try {
-        const teUrl = "https://tradingeconomics.com/indonesia/interest-rate";
-        const res = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(teUrl)}&t=${Date.now()}`,
-        );
-        if (res.ok) {
-          const html = await res.text();
-          const match = html.match(/(\d+\.\d+)\s*%/);
-          if (match) {
-            return {
-              symbol: "BI RATE",
-              name: "Suku Bunga BI",
-              price: `${match[1]}%`,
-              change: "Live",
-              isUp: true,
-            };
-          }
-        }
-      } catch {}
-
-      return null;
-    }
-
     async function fetchUsdRate(): Promise<MarketItem | null> {
       try {
-        const resUsd = await fetch("https://open.er-api.com/v6/latest/USD");
-        if (resUsd.ok) {
-          const usdData = await resUsd.json();
-          const rate = usdData?.rates?.IDR;
+        const res = await fetch("https://open.er-api.com/v6/latest/USD", {
+          cache: "no-store",
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const rate = data?.rates?.IDR;
           if (rate) {
             return {
               symbol: "USD/IDR",
@@ -126,65 +44,85 @@ export default function HomePage() {
             };
           }
         }
-      } catch (e) {
-        console.error("USD/IDR fail:", e);
-      }
+      } catch {}
       return null;
     }
 
     async function fetchIhsg(): Promise<MarketItem | null> {
-      try {
-        const resIhsg = await fetch(
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(
-            "https://query1.finance.yahoo.com/v7/finance/quote?symbols=^JKSE",
-          )}&t=${Date.now()}`,
-        );
-        if (resIhsg.ok) {
-          const yahooData = await resIhsg.json();
-          const quote = yahooData?.quoteResponse?.result?.[0];
-          if (quote) {
-            const price = quote.regularMarketPrice;
-            const changePercent = quote.regularMarketChangePercent;
-            const isUp = changePercent >= 0;
-            return {
-              symbol: "IHSG",
-              name: "Indeks Saham",
-              price: price
-                ? price.toLocaleString("id-ID", { minimumFractionDigits: 2 })
-                : "N/A",
-              change: changePercent
-                ? `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`
-                : "0.00%",
-              isUp,
-            };
-          }
+      const yahooEndpoints = [
+        "https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE",
+        "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EJKSE",
+      ];
+
+      const proxies = [
+        (url: string) =>
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
+        (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url: string) =>
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      ];
+
+      for (const yahooUrl of yahooEndpoints) {
+        for (const proxyFn of proxies) {
+          try {
+            const res = await fetch(proxyFn(yahooUrl), { cache: "no-store" });
+            if (!res.ok) continue;
+            const data = await res.json();
+
+            // v8 chart
+            const meta = data?.chart?.result?.[0]?.meta;
+            if (meta?.regularMarketPrice) {
+              const price = meta.regularMarketPrice;
+              const prevClose = meta.chartPreviousClose || meta.previousClose;
+              const changePercent = prevClose
+               ? ((price - prevClose) / prevClose) * 100
+                : 0;
+              const isUp = changePercent >= 0;
+              return {
+                symbol: "IHSG",
+                name: "Indeks Saham",
+                price: price.toLocaleString("id-ID", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }),
+                change: `${isUp? "+" : ""}${changePercent.toFixed(2)}%`,
+                isUp,
+              };
+            }
+
+            // v7 quote
+            const quote = data?.quoteResponse?.result?.[0];
+            if (quote?.regularMarketPrice) {
+              const isUp = (quote.regularMarketChangePercent?? 0) >= 0;
+              return {
+                symbol: "IHSG",
+                name: "Indeks Saham",
+                price: quote.regularMarketPrice.toLocaleString("id-ID", {
+                  minimumFractionDigits: 2,
+                }),
+                change: quote.regularMarketChangePercent
+                 ? `${isUp? "+" : ""}${quote.regularMarketChangePercent.toFixed(2)}%`
+                  : "0.00%",
+                isUp,
+              };
+            }
+          } catch {}
         }
-      } catch (e) {
-        console.error("IHSG fail:", e);
       }
       return null;
     }
 
-    async function fetchAllMarketData() {
-      // Fetch ketiga indikator secara eksekusi paralel untuk kecepatan optimal
-      const results = await Promise.allSettled([
-        fetchUsdRate(),
-        fetchIhsg(),
-        fetchBIRate(),
-      ]);
-
+    async function fetchAll() {
+      const results = await Promise.allSettled([fetchUsdRate(), fetchIhsg()]);
       const items: MarketItem[] = [];
-      results.forEach((res) => {
-        if (res.status === "fulfilled" && res.value) {
-          items.push(res.value);
-        }
+      results.forEach((r) => {
+        if (r.status === "fulfilled" && r.value) items.push(r.value);
       });
-
       setMarketData(items);
       setIsLoading(false);
     }
 
-    fetchAllMarketData();
+    fetchAll();
   }, []);
 
   return (
@@ -194,7 +132,7 @@ export default function HomePage() {
           <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
             <div className="mb-3 flex items-center justify-between">
               <h6 className="flex items-center gap-2 text-sm font-bold text-amber-400">
-                <IconChartLine size={16} /> Market Indicators
+                <LineChart size={16} /> Market Indicators
               </h6>
               <Badge
                 variant="outline"
@@ -204,59 +142,44 @@ export default function HomePage() {
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {isLoading ? (
-                <div className="col-span-3 py-4 text-center text-xs text-white/40">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              {isLoading? (
+                <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
                 </div>
-              ) : marketData.length > 0 ? (
-                marketData.map((item) => {
-                  const isBIRate = item.symbol.includes("BI");
-                  return (
-                    <div
-                      key={item.symbol}
-                      className={`flex min-h-[90px] flex-col justify-between rounded-lg border p-2.5 ${
-                        isBIRate
-                          ? "border-amber-500/20 bg-amber-500/5"
-                          : "border-white/10 bg-black/40"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="flex items-center gap-1 text-xs font-bold text-white">
-                          {isBIRate && (
-                            <IconBuildingBank
-                              size={12}
-                              className="text-amber-400"
-                            />
-                          )}
-                          {item.symbol}
-                        </span>
-                        <Badge
-                          className={`flex items-center border-0 px-1.5 py-0.5 text-[10px] ${
-                            item.isUp
-                              ? "bg-emerald-500/15 text-emerald-400"
-                              : "bg-red-500/15 text-red-400"
-                          }`}
-                        >
-                          {item.isUp ? (
-                            <IconTrendingUp size={10} className="mr-0.5" />
-                          ) : (
-                            <IconTrendingDown size={10} className="mr-0.5" />
-                          )}
-                          {item.change}
-                        </Badge>
-                      </div>
-                      <div className="mt-1 text-sm font-semibold text-white">
-                        {item.price}
-                      </div>
-                      <div className="text-[11px] text-white/50">
-                        {item.name}
-                      </div>
+              ) : marketData.length > 0? (
+                marketData.map((item) => (
+                  <div
+                    key={item.symbol}
+                    className="flex min-h- flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-bold text-white">
+                        {item.symbol}
+                      </span>
+                      <Badge
+                        className={`flex items-center border-0 px-1.5 py-0.5 text- ${
+                          item.isUp
+                           ? "bg-emerald-500/15 text-emerald-400"
+                            : "bg-red-500/15 text-red-400"
+                        }`}
+                      >
+                        {item.isUp? (
+                          <TrendingUp size={10} className="mr-0.5" />
+                        ) : (
+                          <TrendingDown size={10} className="mr-0.5" />
+                        )}
+                        {item.change}
+                      </Badge>
                     </div>
-                  );
-                })
+                    <div className="mt-1 text-sm font-semibold text-white">
+                      {item.price}
+                    </div>
+                    <div className="text- text-white/50">{item.name}</div>
+                  </div>
+                ))
               ) : (
-                <div className="col-span-3 py-4 text-center text-xs text-white/40">
+                <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Gagal memuat indikator pasar.
                 </div>
               )}
@@ -275,7 +198,7 @@ export default function HomePage() {
                 className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
               >
                 <Link href="/dashboard">
-                  <IconDashboard size={16} /> Dashboard
+                  <LayoutDashboard size={16} /> Dashboard
                 </Link>
               </Button>
               <Button
@@ -284,7 +207,7 @@ export default function HomePage() {
                 className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-white hover:bg-white/15"
               >
                 <Link href="/journal-entry">
-                  <IconNotebook size={16} /> Journal Entry
+                  <Notebook size={16} /> Journal Entry
                 </Link>
               </Button>
             </div>
