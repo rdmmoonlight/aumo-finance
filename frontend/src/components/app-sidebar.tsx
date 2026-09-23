@@ -120,7 +120,6 @@ const navigation = [
   { title: "Reports", icon: FileText, url: "/reports", isGrouped: true },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
   { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
-  { title: "Guardian", url: "/guardian", icon: ShieldAlert },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
