@@ -1,12 +1,17 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
+@using System.Net.Http.Json
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject ILogger<NavMenu> Logger
 
 <AuthorizeView>
     <Authorized>
         <div class="sidebar-wrapper d-flex sidebar-sticky-neon">
             
-            <!-- MAIN ICON DOCK (KOTAK UNGU DENGAN BORDER WHITE NEON) -->
+            <!-- MAIN ICON DOCK -->
             <nav id="sidebar-icons" class="sidebar-icons text-white d-flex flex-column align-items-center py-3">
 
                 <!-- BRAND / HOME ICON -->
@@ -88,7 +93,7 @@
                             id="userDropdown" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false" 
-                            title="@context.User.Identity?.Name">
+                            title="@(context.User.Identity?.Name ?? "User Profile")">
                         <i class="bi bi-person-circle fs-5"></i>
                     </button>
                     <!-- Status LED Micro Glow -->
@@ -108,12 +113,9 @@
                         </li>
 
                         <li>
-                            <form action="/auth/logout" method="post" class="d-inline">
-                                <AntiforgeryToken />
-                                <button type="submit" class="dropdown-item d-flex align-items-center text-danger border-0 bg-transparent w-100">
-                                    <i class="bi bi-box-arrow-right me-2"></i> Sign Out
-                                </button>
-                            </form>
+                            <button type="button" @onclick="HandleSignOutAsync" class="dropdown-item d-flex align-items-center text-danger border-0 bg-transparent w-100">
+                                <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                            </button>
                         </li>
                     </ul>
                 </div>
@@ -191,6 +193,39 @@
     </Authorized>
 </AuthorizeView>
 
+@code {
+    private bool showReportsFlyout = false;
+
+    private void ToggleReportsFlyout()
+    {
+        showReportsFlyout = !showReportsFlyout;
+    }
+
+    private void CloseFlyout()
+    {
+        showReportsFlyout = false;
+    }
+
+    private async Task HandleSignOutAsync()
+    {
+        CloseFlyout();
+        try
+        {
+            // Panggil API Backend Sign Out
+            await Http.PostAsync("api/v1/auth/logout", null);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Failed to call logout API.");
+        }
+        finally
+        {
+            // Direct redirect ke login page
+            Navigation.NavigateTo("/auth/login", forceLoad: true);
+        }
+    }
+}
+
 <style>
     /* STICKY CONTAINER UTAMA */
     .sidebar-sticky-neon {
@@ -208,9 +243,7 @@
     .sidebar-icons {
         width: 65px;
         height: 100vh;
-        background-color: #1a1625; /* Warna ungu gelap asli */
-        
-        /* BORDER NEON PUTIH MENGELILINGI KOTAK IKON */
+        background-color: #1a1625;
         border: 2px solid #ffffff;
         border-radius: 8px;
         box-shadow: 
@@ -227,8 +260,6 @@
         background-color: rgba(26, 22, 37, 0.95);
         backdrop-filter: blur(8px);
         margin-left: 6px;
-        
-        /* BORDER NEON PUTIH UNTUK PANEL FLYOUT */
         border: 2px solid #ffffff;
         border-radius: 8px;
         box-shadow: 
