@@ -16,8 +16,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarMenuSubButton,
-  SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import {
   Collapsible,
@@ -67,7 +65,10 @@ const REPORT_SECTIONS = [
       { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
     ],
   },
-  { title: "Worksheet", items: [{ title: "Worksheet", url: "/reports/worksheet" }] },
+  {
+    title: "Worksheet",
+    items: [{ title: "Worksheet", url: "/reports/worksheet" }],
+  },
   {
     title: "Financial Statements",
     items: [
@@ -120,12 +121,15 @@ export function AppSidebar() {
 
   const userData = user as { fullName?: string; userName?: string; email?: string } | undefined;
   const ICON_CLASS = "w-4 h-4 mr-2.5 shrink-0";
-  const isReportsActive = REPORT_SECTIONS.some((s) => s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/")));
+
+  const isReportsActive = REPORT_SECTIONS.some((s) =>
+    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/"))
+  );
 
   return (
     <Sidebar collapsible="none" className="border-r h-screen sticky top-0 flex flex-col justify-between" style={{ "--sidebar-width": "285px" } as React.CSSProperties}>
       <SidebarHeader className="p-3.5 border-b shrink-0">
-        <h2 className="text- font-bold tracking-tight">Aumo Finance</h2>
+        <h2 className="text-lg font-bold tracking-tight">Aumo Finance</h2>
       </SidebarHeader>
 
       <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
@@ -152,30 +156,30 @@ export function AppSidebar() {
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                          {/* RATA KIRI: gak ada px-1 / ml-2 / pl-6 lagi */}
-                          <div className="mt-2 flex flex-col gap-4">
+                          <div className="mt-1 flex flex-col gap-3">
                             {REPORT_SECTIONS.map((section) => (
                               <div key={section.title}>
-                                <div className="px-2 py-1 select-none cursor-default overflow-hidden">
+                                <div className="px-2 py-1 select-none">
                                   <p className="text- font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
                                     {section.title}
                                   </p>
                                 </div>
-                                <div className="flex flex-col gap-0.5">
+                                {/* INI YANG BIKIN RATA - SAMA KAYAK COA */}
+                                <div className="mt-1 flex flex-col gap-1">
                                   {section.items.map((sub) => {
                                     const isActive = pathname === sub.url;
                                     return (
-                                      <SidebarMenuSubItem key={sub.url} className="overflow-hidden">
-                                        <SidebarMenuSubButton
+                                      <SidebarMenuItem key={sub.url} className="overflow-hidden">
+                                        <SidebarMenuButton
                                           asChild
                                           isActive={isActive}
-                                          className="text- h-7 px-2 font-normal w-full justify-start overflow-hidden"
+                                          className="text-[13.5px] h-8 font-normal px-2 overflow-hidden w-full"
                                         >
                                           <Link href={sub.url} title={sub.title} className="truncate block w-full">
                                             {sub.title}
                                           </Link>
-                                        </SidebarMenuSubButton>
-                                      </SidebarMenuSubItem>
+                                        </SidebarMenuButton>
+                                      </SidebarMenuItem>
                                     );
                                   })}
                                 </div>
