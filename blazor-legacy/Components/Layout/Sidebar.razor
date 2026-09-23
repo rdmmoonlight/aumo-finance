@@ -2,11 +2,10 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
 @using System.Net.Http.Json
-@using AumoBlazor.Components.Layout
 
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@inject ILogger<NavMenu> Logger
+@inject ILogger<Sidebar> Logger
 
 <AuthorizeView>
     <Authorized>
@@ -212,7 +211,7 @@
         CloseFlyout();
         try
         {
-            // Panggil API Backend Sign Out
+            // Panggil API Backend Sign Out (sesuai endpoint rujukan backend)
             await Http.PostAsync("api/v1/auth/logout", null);
         }
         catch (Exception ex)
@@ -221,7 +220,7 @@
         }
         finally
         {
-            // Direct redirect ke login page
+            // Direct redirect ke login page dengan force reload
             Navigation.NavigateTo("/auth/login", forceLoad: true);
         }
     }
