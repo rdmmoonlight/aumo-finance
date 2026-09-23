@@ -72,7 +72,7 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // Delegating Handler untuk meneruskan Cookie browser ke Backend API (jika ada)
+            // Delegating Handler untuk meneruskan Cookie browser ke Backend API
             builder.Services.AddScoped(sp =>
             {
                 var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
@@ -110,7 +110,7 @@ namespace AumoBlazor
             {
                 options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
-                options.Secure = CookieSecurePolicy.Always; // Memaksa Cookie hanya berjalan di HTTPS
+                options.Secure = CookieSecurePolicy.Always; // Memaksa Cookie hanya berjalan via HTTPS
             });
 
             // =====================================
@@ -128,9 +128,9 @@ namespace AumoBlazor
                     options.AccessDeniedPath = accessDeniedPath;
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
-                    options.Cookie.HttpOnly = true;                             // Mencegah XSS membaca cookie
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;   // WAJIB HTTPS
-                    options.Cookie.SameSite = SameSiteMode.Lax;                // Proteksi CSRF yang fleksibel untuk Blazor
+                    options.Cookie.HttpOnly = true;                           // Mencegah XSS
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // WAJIB HTTPS
+                    options.Cookie.SameSite = SameSiteMode.Lax;              // Proteksi CSRF yang fleksibel untuk Blazor
                 });
 
             builder.Services.AddAuthorization();
@@ -248,6 +248,7 @@ namespace AumoBlazor
             app.UseRouting();
             app.UseAntiforgery();
 
+            // Wajib UseAuthentication SEBELUM UseAuthorization
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -322,7 +323,7 @@ namespace AumoBlazor
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // 1. Cek dulu apakah user sudah terautentikasi langsung via Cookie di HttpContext
+            // 1. Cek terlebih dahulu apakah user sudah terautentikasi langsung via Cookie di HttpContext
             var httpContextUser = _httpContextAccessor.HttpContext?.User;
             if (httpContextUser?.Identity?.IsAuthenticated == true)
             {
@@ -368,7 +369,7 @@ namespace AumoBlazor
                 _logger.LogError(ex, "Gagal memverifikasi sesi cookie autentikasi dari backend API.");
             }
 
-            // User dianggap belum login jika tidak ada cookie yang valid
+            // Return status unauthenticated jika cookie tidak valid
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
@@ -434,12 +435,12 @@ namespace AumoBlazor
 
         public Task RevokeSessionAsync(Guid userId, Guid sessionId)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public Task RevokeAllSessionsAsync(Guid userId)
         {
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
 
         public Task<List<LoginActivity>> GetLoginActivitiesAsync(Guid userId)
