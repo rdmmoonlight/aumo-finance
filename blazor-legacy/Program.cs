@@ -52,6 +52,7 @@ namespace AumoBlazor
             // Shared CookieContainer agar session cookie tersimpan di tingkat circuit/session
             builder.Services.AddSingleton<CookieContainer>();
 
+            // HttpClient for backend API calls (cookie-aware)
             builder.Services.AddScoped(sp =>
             {
                 var cookieContainer = sp.GetRequiredService<CookieContainer>();
@@ -93,13 +94,14 @@ namespace AumoBlazor
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SameSite = SameSiteMode.None;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;  // FIX: Lax lebih aman untuk development dan production
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // FIX: Sesuaikan dengan request (http/https)
                 });
 
             builder.Services.AddAuthorization();
+            builder.Services.AddHttpContextAccessor();  // FIX: Diperlukan untuk ApiAuthenticationStateProvider
 
-            // ✅ MENGGUNAKAN API AUTHENTICATION STATE PROVIDER KUSTOM (MEMANGGIL /api/v1/auth/me)
+            // ✅ MENGGUNAKAN API AUTHENTICATION STATE PROVIDER KUSTOM
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
@@ -127,8 +129,8 @@ namespace AumoBlazor
             builder.Services.AddScoped<DashboardDataService>();
 
             // --- MARKET SERVICE SETUP ---
-            var marketUserAgent = builder.Configuration["MARKET_USER_AGENT"] 
-                ?? Environment.GetEnvironmentVariable("MARKET_USER_AGENT") 
+            var marketUserAgent = builder.Configuration["MARKET_USER_AGENT"]
+                ?? Environment.GetEnvironmentVariable("MARKET_USER_AGENT")
                 ?? $"{appName}/1.0";
 
             builder.Services.AddHttpClient("MarketApiClient", client =>
@@ -206,7 +208,7 @@ namespace AumoBlazor
             app.UseStaticFiles();
             app.UseRouting();
             app.UseAntiforgery();
-            
+
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -268,18 +270,30 @@ namespace AumoBlazor
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ApiAuthenticationStateProvider> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;  // FIX: Tambahkan HttpContextAccessor
 
-        public ApiAuthenticationStateProvider(HttpClient httpClient, ILogger<ApiAuthenticationStateProvider> logger)
+        public ApiAuthenticationStateProvider(
+            HttpClient httpClient,
+            ILogger<ApiAuthenticationStateProvider> logger,
+            IHttpContextAccessor httpContextAccessor)  // FIX: Inject HttpContextAccessor
         {
             _httpClient = httpClient;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
+            // FIX: Cek dulu dari HttpContext (cookie auth ASP.NET Core)
+            var httpContextUser = _httpContextAccessor.HttpContext?.User;
+            if (httpContextUser?.Identity?.IsAuthenticated == true)
+            {
+                return new AuthenticationState(httpContextUser);
+            }
+
+            // Fallback: Cek dari backend API jika tidak ada di HttpContext
             try
             {
-                // Memanggil endpoint rujukan backend: GET /api/v1/auth/me
                 var response = await _httpClient.GetAsync("api/v1/auth/me");
 
                 if (response.IsSuccessStatusCode)
@@ -318,6 +332,11 @@ namespace AumoBlazor
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
+        public void NotifyAuthenticationStateChanged()
+        {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        }
+
         public class UserProfileResponse
         {
             public bool Success { get; set; }
@@ -342,27 +361,27 @@ namespace AumoBlazor
         }
 
         public Task CreateLoginActivityAsync(
-            Guid userId, 
-            string ipAddress, 
-            string userAgent, 
-            string deviceType, 
-            string location, 
-            string authMethod, 
-            bool isSuccess, 
-            string? failureReason = null, 
+            Guid userId,
+            string ipAddress,
+            string userAgent,
+            string deviceType,
+            string location,
+            string authMethod,
+            bool isSuccess,
+            string? failureReason = null,
             string? sessionToken = null)
         {
             return Task.CompletedTask;
         }
 
         public Task CreateSessionAsync(
-            Guid userId, 
-            string sessionToken, 
-            string ipAddress, 
-            string userAgent, 
-            string deviceType, 
-            string location, 
-            string deviceName, 
+            Guid userId,
+            string sessionToken,
+            string ipAddress,
+            string userAgent,
+            string deviceType,
+            string location,
+            string deviceName,
             string operatingSystem)
         {
             return Task.CompletedTask;
