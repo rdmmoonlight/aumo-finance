@@ -1,4 +1,7 @@
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Components.Authorization
+@using AumoBackend.Core
 
 <script>
     window.triggerSyncProcess = function(isSuccess = true, queueTimeMs = 10000) {
@@ -32,7 +35,7 @@
 <header class="navbar navbar-expand topbar-solid py-2 sticky-top position-relative" style="min-height: 56px;">
     <div class="container-xxl px-3 d-flex align-items-center justify-content-between h-100 position-relative">
         
-        <!-- CENTER SECTION: QURAN VERSE (Posisikan Absolut Presisi di Tengah) -->
+        <!-- CENTER SECTION: QURAN VERSE -->
         <div class="d-none d-md-flex flex-column align-items-center justify-content-center quran-center-wrapper text-center">
             <QuranVerse />
         </div>
@@ -64,6 +67,7 @@
 
 <AuthorizeView>
     <Authorized>
+        <!-- STATUS STRIP -->
         <div class="status-strip px-3 py-1 d-flex justify-content-center align-items-center gap-3 text-nowrap" style="min-height: 30px; font-size: 0.75rem;">
             <div class="dropdown">
                 <button class="btn btn-sm btn-link text-decoration-none p-0 fw-medium d-flex align-items-center gap-2 dropdown-toggle shadow-none status-badge" type="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -116,11 +120,8 @@
                 </button>
             </div>
         </div>
-    </Authorized>
-</AuthorizeView>
 
-<AuthorizeView>
-    <Authorized>
+        <!-- SEARCH MODAL -->
         <div class="modal fade" id="searchModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-top modal-md mt-5">
                 <div class="modal-content topbar-solid border border-secondary border-opacity-25 shadow-lg">
@@ -136,3 +137,45 @@
         </div>
     </Authorized>
 </AuthorizeView>
+
+@code {
+    [Inject]
+    private IDbContextFactory<AppDbContext> DbFactory { get; set; } = default!;
+
+    [Inject]
+    private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
+
+    private string? activePeriodName;
+    private bool hasActivePeriod;
+    private bool isViewingClosed;
+    private string periodText = "No Period Selected";
+    private string iconClass = "bi-calendar-x text-warning";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            var currentUserIdStr = user.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (Guid.TryParse(currentUserIdStr, out var currentUserId))
+            {
+                await using var context = await DbFactory.CreateDbContextAsync();
+                var activePeriodObj = await context.Periods
+                    .FirstOrDefaultAsync(p => p.UserId == currentUserId && p.IsSelected);
+
+                if (activePeriodObj != null)
+                {
+                    activePeriodName = activePeriodObj.PeriodName;
+                    hasActivePeriod = !string.IsNullOrEmpty(activePeriodName);
+                    isViewingClosed = activePeriodObj.IsClosed;
+                    periodText = hasActivePeriod ? activePeriodName : "No Period Selected";
+                    iconClass = !hasActivePeriod
+                        ? "bi-calendar-x text-warning"
+                        : (isViewingClosed ? "bi-lock-fill text-secondary" : "bi-calendar2-check text-success");
+                }
+            }
+        }
+    }
+}
