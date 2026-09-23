@@ -1,21 +1,23 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 
-<!-- ==========================================
-     Aumo Finance - Main Layout
-     Cosmic / Nebula Theme
-     ========================================== -->
-
 <div class="d-flex flex-column min-vh-100 min-vw-0 aumo-main-shell">
 
-    <!-- SHELL UTAMA -->
     <div class="d-flex flex-grow-1 position-relative">
         
-        <!-- NAVIGATION MENU (Sidebar / Header Nav) -->
+        <!-- NAVIGATION MENU -->
         <AuthorizeView>
             <Authorized>
                 <AumoBlazor.Components.Layout.NavMenu />
             </Authorized>
+            <Authorizing>
+                <!-- Tampilan sementara saat memeriksa cookie auth -->
+                <div class="p-3 text-muted">Memuat navigasi...</div>
+            </Authorizing>
+            <NotAuthorized>
+                <!-- Tampilan alternatif jika belum login / tamu -->
+                <!-- Biarkan kosong atau tampilkan menu publik -->
+            </NotAuthorized>
         </AuthorizeView>
 
         <!-- MAIN CONTENT AREA -->
