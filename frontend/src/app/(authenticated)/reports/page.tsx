@@ -179,7 +179,7 @@ export default function ReportsPage() {
   const [q, setQ] = useState("");
 
   const filtered = REPORTS.filter((r) =>
-    `${r.title} ${r.desc} ${r.slug}`.toLowerCase().includes(q.toLowerCase())
+    `${r.title} ${r.desc} ${r.slug}`.toLowerCase().includes(q.toLowerCase()),
   );
 
   return (
@@ -191,7 +191,9 @@ export default function ReportsPage() {
             <BreadcrumbList className="text-white/50">
               <BreadcrumbItem>
                 <BreadcrumbLink asChild>
-                  <Link href="/" className="hover:text-white">Home</Link>
+                  <Link href="/" className="hover:text-white">
+                    Home
+                  </Link>
                 </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="text-white/20" />
@@ -212,7 +214,9 @@ export default function ReportsPage() {
                   Reports Center
                 </h1>
                 <p className="mt-1 max-w-xl text-sm leading-relaxed text-white/60">
-                  Akses 13 laporan siklus akuntansi lengkap. Dari unadjusted trial balance sampai post-closing. Pilih laporan untuk melihat detail & export.
+                  Akses 13 laporan siklus akuntansi lengkap. Dari unadjusted
+                  trial balance sampai post-closing. Pilih laporan untuk melihat
+                  detail & export.
                 </p>
               </div>
             </div>
@@ -260,9 +264,7 @@ export default function ReportsPage() {
                     <h2 className="text-sm font-semibold tracking-wide text-white/90">
                       {cat.label}
                     </h2>
-                    <span className="text- text-white/40">
-                      {cat.hint}
-                    </span>
+                    <span className="text- text-white/40">{cat.hint}</span>
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -319,15 +321,25 @@ export default function ReportsPage() {
           <div className="mt-8 rounded-xl border border-white/10 bg-slate-900/80 p-4">
             <div className="flex flex-wrap items-center gap-2 text- text-white/40">
               <span className="text-white/60">Flow:</span>
-              <Badge className="border-0 bg-white/10 text- text-white/60">UTB</Badge>
+              <Badge className="border-0 bg-white/10 text- text-white/60">
+                UTB
+              </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-white/10 text- text-white/60">Worksheet</Badge>
+              <Badge className="border-0 bg-white/10 text- text-white/60">
+                Worksheet
+              </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-amber-500/15 text- text-amber-300">ATB</Badge>
+              <Badge className="border-0 bg-amber-500/15 text- text-amber-300">
+                ATB
+              </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-indigo-500/20 text- text-indigo-300">Financial Statements</Badge>
+              <Badge className="border-0 bg-indigo-500/20 text- text-indigo-300">
+                Financial Statements
+              </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-emerald-500/15 text- text-emerald-300">PCTB</Badge>
+              <Badge className="border-0 bg-emerald-500/15 text- text-emerald-300">
+                PCTB
+              </Badge>
             </div>
           </div>
         </CardContent>

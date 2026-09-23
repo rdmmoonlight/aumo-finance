@@ -30,14 +30,14 @@ namespace AumoBackend.Controllers
             var activeSessions = await _guardianService.GetActiveSessionsAsync(user.Id);
             var loginActivities = await _guardianService.GetLoginActivitiesAsync(user.Id);
 
-            var failedAttempts = loginActivities.Count(a =>!a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
+            var failedAttempts = loginActivities.Count(a => !a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
             var lastSuccess = loginActivities.FirstOrDefault(a => a.IsSuccess)?.CreatedAt;
 
             var dashboard = new GuardianDashboardViewModel
             {
                 SecurityStatus = new SecurityStatusViewModel
                 {
-                    StatusLevel = failedAttempts > 3? "Warning" : "Good",
+                    StatusLevel = failedAttempts > 3 ? "Warning" : "Good",
                     ActiveSessionsCount = activeSessions.Count,
                     FailedAttemptsLast24Hours = failedAttempts,
                     LastSuccessfulLogin = lastSuccess
