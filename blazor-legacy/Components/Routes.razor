@@ -13,18 +13,8 @@
                     </div>
                 </Authorizing>
                 <NotAuthorized Context="authContext">
-                    @{
-                        // Lakukan auto-redirect ke /auth/login tanpa memutus WebSocket circuit
-                        var returnUrl = Uri.EscapeDataString(NavigationManager.ToBaseRelativePath(NavigationManager.Uri));
-                        NavigationManager.NavigateTo($"/auth/login?ReturnUrl=%2F{returnUrl}", forceLoad: true);
-                    }
-                    <div class="container text-center mt-5 py-5">
-                        <div class="card shadow-sm border-0 rounded-4 max-w-md mx-auto p-4">
-                            <i class="bi bi-shield-lock text-warning display-4 mb-3"></i>
-                            <h3 class="fw-bold">Access Denied</h3>
-                            <p class="text-secondary">Redirecting to sign in...</p>
-                        </div>
-                    </div>
+                    @* Gunakan komponen RedirectToLogin agar redirect berjalan aman tanpa merusak circuit *@
+                    <AumoBlazor.Components.Layout.RedirectToLogin />
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
@@ -46,7 +36,3 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
-
-@code {
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-}
