@@ -71,7 +71,7 @@ function LoginFormContent() {
         e?.data?.title ||
         e?.data?.errors?.Email?.[0] ||
         (e?.status === "FETCH_ERROR"
-         ? "Gagal terhubung ke server backend."
+          ? "Gagal terhubung ke server backend."
           : "Email atau password salah / terjadi kesalahan sistem.");
       setErr(errorMessage);
     }
@@ -120,12 +120,12 @@ function LoginFormContent() {
               onClick={() => setShowPass(!showPass)}
               className="text-xs uppercase tracking-wide text-zinc-600 hover:text-black font-medium"
             >
-              {showPass? "Hide" : "Show"}
+              {showPass ? "Hide" : "Show"}
             </button>
           </div>
           <Input
             id="password"
-            type={showPass? "text" : "password"}
+            type={showPass ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -165,7 +165,7 @@ function LoginFormContent() {
           disabled={isLoggingIn}
           className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800"
         >
-          {isLoggingIn? "Processing..." : "Sign In"}
+          {isLoggingIn ? "Processing..." : "Sign In"}
         </Button>
         <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>
