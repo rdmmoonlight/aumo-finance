@@ -180,7 +180,7 @@
             var account = accounts.First(a => a.Id == accountId);
             var u = unadjusted.FirstOrDefault(r => r.AccountId == accountId);
             var a = adjusted.FirstOrDefault(r => r.AccountId == accountId);
-            var normalDebit = AccountClassification.NormalBalanceIsDebit(account.Type);
+            var normalDebit = AccountClassification.NormalBalanceIsDebit(account.Type ?? string.Empty);
 
             var uDebit = u?.Debit ?? 0;
             var uCredit = u?.Credit ?? 0;
@@ -192,7 +192,7 @@
             var row = new WorksheetRow
             {
                 AccountId = accountId,
-                ReferenceNumber = account.ReferenceNumber,
+                ReferenceNumber = account.ReferenceNumber.ToString(), // Konversi int ke string di sini
                 AccountName = account.AccountName,
                 Type = account.Type,
                 NormalBalanceIsDebit = normalDebit,
@@ -204,7 +204,7 @@
                 AdjustedCredit = aCredit
             };
 
-            var isTemporary = AccountClassification.IsTemporary(account.Type);
+            var isTemporary = AccountClassification.IsTemporary(account.Type ?? string.Empty);
             if (isTemporary)
             {
                 row.IncomeStatementDebit = aDebit;
