@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Core; // ✅ DITAMBAHKAN: Namespace AppDbContext Anda
 using AumoFinance.Components;
 using AumoFinance.Models;
 using AumoFinance.Services;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore; // ✅ DITAMBAHKAN: Namespace Entity Framework Core
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -38,7 +40,30 @@ namespace AumoBlazor
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. WEB API CONFIGURATION & HTTPCLIENT WITH SINGLETON COOKIE CONTAINER
+            // 1. DATABASE & EFC CONTEXT FACTORY (SOLUSI TOPBAR ERROR)
+            // =====================================
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+                ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+                ?? builder.Configuration["DATABASE_URL"];
+
+            if (!string.IsNullOrEmpty(connectionString))
+            {
+                // ✅ DAFTARKAN DbContextFactory UNTUK BLAZOR COMPONENTS (TopBar.razor, dll.)
+                builder.Services.AddDbContextFactory<AppDbContext>(options =>
+                {
+                    // Sesuaikan provider jika bukan PostgreSQL (misal: UseSqlServer)
+                    options.UseNpgsql(connectionString);
+                });
+
+                // Standard Scoped DbContext jika ada service lain yang membutuhkan
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                {
+                    options.UseNpgsql(connectionString);
+                });
+            }
+
+            // =====================================
+            // 2. WEB API CONFIGURATION & HTTPCLIENT WITH SINGLETON COOKIE CONTAINER
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
@@ -69,7 +94,7 @@ namespace AumoBlazor
             });
 
             // =====================================
-            // 2. DATA PROTECTION & APP CONFIG
+            // 3. DATA PROTECTION & APP CONFIG
             // =====================================
             var appName = builder.Configuration["APP_NAME"]
                 ?? Environment.GetEnvironmentVariable("APP_NAME")
@@ -79,7 +104,7 @@ namespace AumoBlazor
                 .SetApplicationName(appName);
 
             // =====================================
-            // 3. COOKIE AUTHENTICATION & CUSTOM API BLAZOR AUTH STATE
+            // 4. COOKIE AUTHENTICATION & CUSTOM API BLAZOR AUTH STATE
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -94,19 +119,19 @@ namespace AumoBlazor
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SameSite = SameSiteMode.Lax;  // FIX: Lax lebih aman untuk development dan production
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;  // FIX: Sesuaikan dengan request (http/https)
+                    options.Cookie.SameSite = SameSiteMode.Lax;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
                 });
 
             builder.Services.AddAuthorization();
-            builder.Services.AddHttpContextAccessor();  // FIX: Diperlukan untuk ApiAuthenticationStateProvider
+            builder.Services.AddHttpContextAccessor();
 
-            // ✅ MENGGUNAKAN API AUTHENTICATION STATE PROVIDER KUSTOM
+            // MENGGUNAKAN API AUTHENTICATION STATE PROVIDER KUSTOM
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
             // =====================================
-            // 4. BLAZOR CORE & CONTROLLERS
+            // 5. BLAZOR CORE & CONTROLLERS
             // =====================================
             builder.Services.AddControllers();
 
@@ -114,7 +139,7 @@ namespace AumoBlazor
                 .AddInteractiveServerComponents();
 
             // =====================================
-            // 5. APPLICATION SERVICES & HEALTH CHECKS
+            // 6. APPLICATION SERVICES & HEALTH CHECKS
             // =====================================
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
@@ -142,7 +167,7 @@ namespace AumoBlazor
             builder.Services.AddScoped<IMarketService, MarketService>();
 
             // =====================================
-            // 6. FORWARDED HEADERS (Reverse Proxy / Render)
+            // 7. FORWARDED HEADERS (Reverse Proxy / Render)
             // =====================================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -157,7 +182,7 @@ namespace AumoBlazor
             var app = builder.Build();
 
             // =====================================
-            // 7. HTTP PIPELINE MIDDLEWARE & FORWARDED HEADERS
+            // 8. HTTP PIPELINE MIDDLEWARE & FORWARDED HEADERS
             // =====================================
             app.UseForwardedHeaders();
 
@@ -213,7 +238,7 @@ namespace AumoBlazor
             app.UseAuthorization();
 
             // =====================================
-            // 8. ENDPOINTS & MAP CONTROLLERS
+            // 9. ENDPOINTS & MAP CONTROLLERS
             // =====================================
             app.MapHealthChecks("/health");
 
@@ -223,7 +248,7 @@ namespace AumoBlazor
                 .AddInteractiveServerRenderMode();
 
             // =====================================
-            // 9. RUN APPLICATION
+            // 10. RUN APPLICATION
             // =====================================
             app.Run();
         }
@@ -270,12 +295,12 @@ namespace AumoBlazor
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ApiAuthenticationStateProvider> _logger;
-        private readonly IHttpContextAccessor _httpContextAccessor;  // FIX: Tambahkan HttpContextAccessor
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public ApiAuthenticationStateProvider(
             HttpClient httpClient,
             ILogger<ApiAuthenticationStateProvider> logger,
-            IHttpContextAccessor httpContextAccessor)  // FIX: Inject HttpContextAccessor
+            IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _logger = logger;
@@ -284,14 +309,12 @@ namespace AumoBlazor
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // FIX: Cek dulu dari HttpContext (cookie auth ASP.NET Core)
             var httpContextUser = _httpContextAccessor.HttpContext?.User;
             if (httpContextUser?.Identity?.IsAuthenticated == true)
             {
                 return new AuthenticationState(httpContextUser);
             }
 
-            // Fallback: Cek dari backend API jika tidak ada di HttpContext
             try
             {
                 var response = await _httpClient.GetAsync("api/v1/auth/me");
