@@ -7,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.Core; // ✅ DITAMBAHKAN: Namespace AppDbContext Anda
 using AumoFinance.Components;
 using AumoFinance.Models;
 using AumoFinance.Services;
@@ -17,7 +16,6 @@ using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore; // ✅ DITAMBAHKAN: Namespace Entity Framework Core
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -40,34 +38,11 @@ namespace AumoBlazor
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. DATABASE & EFC CONTEXT FACTORY (SOLUSI TOPBAR ERROR)
-            // =====================================
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-                ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-                ?? builder.Configuration["DATABASE_URL"];
-
-            if (!string.IsNullOrEmpty(connectionString))
-            {
-                // ✅ DAFTARKAN DbContextFactory UNTUK BLAZOR COMPONENTS (TopBar.razor, dll.)
-                builder.Services.AddDbContextFactory<AppDbContext>(options =>
-                {
-                    // Sesuaikan provider jika bukan PostgreSQL (misal: UseSqlServer)
-                    options.UseNpgsql(connectionString);
-                });
-
-                // Standard Scoped DbContext jika ada service lain yang membutuhkan
-                builder.Services.AddDbContext<AppDbContext>(options =>
-                {
-                    options.UseNpgsql(connectionString);
-                });
-            }
-
-            // =====================================
-            // 2. WEB API CONFIGURATION & HTTPCLIENT WITH SINGLETON COOKIE CONTAINER
+            // 1. WEB API CONFIGURATION & HTTPCLIENT (NO DIRECT DB CONNECTION)
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
-                ?? "https://localhost:5001/"; // Fallback URL Backend
+                ?? "https://localhost:5001/"; // Fallback URL Backend API
 
             if (!webApiUrl.EndsWith("/"))
             {
@@ -77,7 +52,7 @@ namespace AumoBlazor
             // Shared CookieContainer agar session cookie tersimpan di tingkat circuit/session
             builder.Services.AddSingleton<CookieContainer>();
 
-            // HttpClient for backend API calls (cookie-aware)
+            // HttpClient utama untuk memanggil Backend API (Cookie-aware)
             builder.Services.AddScoped(sp =>
             {
                 var cookieContainer = sp.GetRequiredService<CookieContainer>();
@@ -94,7 +69,7 @@ namespace AumoBlazor
             });
 
             // =====================================
-            // 3. DATA PROTECTION & APP CONFIG
+            // 2. DATA PROTECTION & APP CONFIG
             // =====================================
             var appName = builder.Configuration["APP_NAME"]
                 ?? Environment.GetEnvironmentVariable("APP_NAME")
@@ -104,7 +79,7 @@ namespace AumoBlazor
                 .SetApplicationName(appName);
 
             // =====================================
-            // 4. COOKIE AUTHENTICATION & CUSTOM API BLAZOR AUTH STATE
+            // 3. COOKIE AUTHENTICATION & CUSTOM API BLAZOR AUTH STATE
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -126,25 +101,27 @@ namespace AumoBlazor
             builder.Services.AddAuthorization();
             builder.Services.AddHttpContextAccessor();
 
-            // MENGGUNAKAN API AUTHENTICATION STATE PROVIDER KUSTOM
+            // Authentication state provider via WEB API
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
             // =====================================
-            // 5. BLAZOR CORE & CONTROLLERS
+            // 4. BLAZOR CORE & CONTROLLERS
             // =====================================
             builder.Services.AddControllers();
 
             builder.Services.AddRazorComponents()
-                .AddInteractiveServerComponents();
+                .AddInteractiveServerComponents(options =>
+                {
+                    options.DetailedErrors = builder.Environment.IsDevelopment();
+                });
 
             // =====================================
-            // 6. APPLICATION SERVICES & HEALTH CHECKS
+            // 5. APPLICATION SERVICES (PURE HTTP CLIENT DECOUPLED SERVICES)
             // =====================================
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
 
-            // --- DECOUPLED SERVICES (HTTP / STUB - NO DIRECT DB DEPENDENCY) ---
             builder.Services.AddScoped<IGuardianService, WebApiGuardianService>();
             builder.Services.AddHttpClient<IAiService, AiService>();
             builder.Services.AddScoped<IJournalImportService, JournalImportService>();
@@ -167,7 +144,7 @@ namespace AumoBlazor
             builder.Services.AddScoped<IMarketService, MarketService>();
 
             // =====================================
-            // 7. FORWARDED HEADERS (Reverse Proxy / Render)
+            // 6. FORWARDED HEADERS (Reverse Proxy / Render)
             // =====================================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -182,7 +159,7 @@ namespace AumoBlazor
             var app = builder.Build();
 
             // =====================================
-            // 8. HTTP PIPELINE MIDDLEWARE & FORWARDED HEADERS
+            // 7. HTTP PIPELINE MIDDLEWARE & FORWARDED HEADERS
             // =====================================
             app.UseForwardedHeaders();
 
@@ -238,17 +215,16 @@ namespace AumoBlazor
             app.UseAuthorization();
 
             // =====================================
-            // 9. ENDPOINTS & MAP CONTROLLERS
+            // 8. ENDPOINTS & MAP CONTROLLERS
             // =====================================
             app.MapHealthChecks("/health");
-
             app.MapControllers();
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
             // =====================================
-            // 10. RUN APPLICATION
+            // 9. RUN APPLICATION
             // =====================================
             app.Run();
         }
@@ -372,7 +348,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // COMPLETE IMPLEMENTATION FOR IGUARDIANSERVICE
+    // COMPLETE IMPLEMENTATION FOR IGUARDIANSERVICE VIA WEB API
     // =====================================
     public class WebApiGuardianService : IGuardianService
     {
