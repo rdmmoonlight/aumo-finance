@@ -5,6 +5,7 @@
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [AllowAnonymous]
+@rendermode InteractiveServer
 
 @inject HttpClient Http
 @inject IGuardianService GuardianService
@@ -60,9 +61,8 @@
                             </div>
                         }
 
-                        <!-- Login Form dengan AntiforgeryToken (Mencegah HTTP 400) -->
-                        <EditForm Model="Input" OnValidSubmit="HandleLoginAsync" FormName="LoginForm" method="post">
-                            <AntiforgeryToken />
+                        <!-- Interactive EditForm (Murni SPA Event Submit tanpa SSR HTTP POST) -->
+                        <EditForm Model="Input" OnValidSubmit="HandleLoginAsync">
                             <DataAnnotationsValidator />
                             <ValidationSummary class="text-danger small mb-3" />
 
@@ -150,8 +150,7 @@
     [SupplyParameterFromQuery(Name = "infoMessage")]
     private string? QueryInfoMessage { get; set; }
 
-    [SupplyParameterFromForm(FormName = "LoginForm")]
-    private LoginInputModel Input { get; set; } = default!;
+    private LoginInputModel Input { get; set; } = new();
 
     private string? successMessage;
     private string? errorMessage;
@@ -160,8 +159,6 @@
 
     protected override void OnInitialized()
     {
-        Input ??= new LoginInputModel();
-
         successMessage = QuerySuccessMessage ?? QueryMessage;
         errorMessage = QueryErrorMessage;
         infoMessage = QueryInfoMessage;
@@ -185,7 +182,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                // Unpack Flat Response dari AuthController backend
+                // Read Flat Response dari AuthController
                 var result = await response.Content.ReadFromJsonAsync<BackendLoginResponse>();
 
                 if (result?.Success == true)
@@ -194,7 +191,7 @@
 
                     Guid.TryParse(result.UserId, out var parsedUserId);
 
-                    // Logging ke GuardianService UI (Menggunakan argumen posisional)
+                    // Logging ke GuardianService UI
                     await GuardianService.CreateSessionAsync(
                         parsedUserId != Guid.Empty ? parsedUserId : Guid.NewGuid(),
                         "COOKIE_SESSION",
