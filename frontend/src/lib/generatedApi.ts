@@ -4,12 +4,11 @@ export const addTagTypes = [
   "Auth",
   "ChartOfAccounts",
   "Dashboard",
-  "Guardian",
   "Health",
   "JournalEntry",
   "Periods",
+  "Settings",
   "Tools",
-  "TestEmail",
   "GeneralLedger",
   "IncomeStatement",
   "Journal",
@@ -132,33 +131,6 @@ const injectedRtkApi = api
           },
         }),
         providesTags: ["Dashboard"],
-      }),
-      getApiV1GuardianDashboard: build.query<
-        GetApiV1GuardianDashboardApiResponse,
-        GetApiV1GuardianDashboardApiArg
-      >({
-        query: () => ({ url: `/api/v1/guardian/dashboard` }),
-        providesTags: ["Guardian"],
-      }),
-      postApiV1GuardianRevokeSessionBySessionId: build.mutation<
-        PostApiV1GuardianRevokeSessionBySessionIdApiResponse,
-        PostApiV1GuardianRevokeSessionBySessionIdApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/guardian/revoke-session/${queryArg.sessionId}`,
-          method: "POST",
-        }),
-        invalidatesTags: ["Guardian"],
-      }),
-      postApiV1GuardianRevokeAllSessions: build.mutation<
-        PostApiV1GuardianRevokeAllSessionsApiResponse,
-        PostApiV1GuardianRevokeAllSessionsApiArg
-      >({
-        query: () => ({
-          url: `/api/v1/guardian/revoke-all-sessions`,
-          method: "POST",
-        }),
-        invalidatesTags: ["Guardian"],
       }),
       getApiV1Health: build.query<
         GetApiV1HealthApiResponse,
@@ -286,6 +258,33 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Periods"],
       }),
+      getApiV1SettingsGuardianDashboard: build.query<
+        GetApiV1SettingsGuardianDashboardApiResponse,
+        GetApiV1SettingsGuardianDashboardApiArg
+      >({
+        query: () => ({ url: `/api/v1/settings/guardian/dashboard` }),
+        providesTags: ["Settings"],
+      }),
+      postApiV1SettingsGuardianRevokeSessionBySessionId: build.mutation<
+        PostApiV1SettingsGuardianRevokeSessionBySessionIdApiResponse,
+        PostApiV1SettingsGuardianRevokeSessionBySessionIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/settings/guardian/revoke-session/${queryArg.sessionId}`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Settings"],
+      }),
+      postApiV1SettingsGuardianRevokeAllSessions: build.mutation<
+        PostApiV1SettingsGuardianRevokeAllSessionsApiResponse,
+        PostApiV1SettingsGuardianRevokeAllSessionsApiArg
+      >({
+        query: () => ({
+          url: `/api/v1/settings/guardian/revoke-all-sessions`,
+          method: "POST",
+        }),
+        invalidatesTags: ["Settings"],
+      }),
       getApiV1ToolsDownloadJournalTemplate: build.query<
         GetApiV1ToolsDownloadJournalTemplateApiResponse,
         GetApiV1ToolsDownloadJournalTemplateApiArg
@@ -314,17 +313,6 @@ const injectedRtkApi = api
           body: queryArg.journalImportRequestDto,
         }),
         invalidatesTags: ["Tools"],
-      }),
-      postApiV1TestEmailResendVerification: build.mutation<
-        PostApiV1TestEmailResendVerificationApiResponse,
-        PostApiV1TestEmailResendVerificationApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/test-email/resend-verification`,
-          method: "POST",
-          body: queryArg.resendRequest,
-        }),
-        invalidatesTags: ["TestEmail"],
       }),
       getApiV1ReportsGeneralLedgerPermanent: build.query<
         GetApiV1ReportsGeneralLedgerPermanentApiResponse,
@@ -488,14 +476,6 @@ export type GetApiV1DashboardApiResponse = unknown;
 export type GetApiV1DashboardApiArg = {
   period?: string;
 };
-export type GetApiV1GuardianDashboardApiResponse = unknown;
-export type GetApiV1GuardianDashboardApiArg = void;
-export type PostApiV1GuardianRevokeSessionBySessionIdApiResponse = unknown;
-export type PostApiV1GuardianRevokeSessionBySessionIdApiArg = {
-  sessionId: string;
-};
-export type PostApiV1GuardianRevokeAllSessionsApiResponse = unknown;
-export type PostApiV1GuardianRevokeAllSessionsApiArg = void;
 export type GetApiV1HealthApiResponse = unknown;
 export type GetApiV1HealthApiArg = void;
 export type GetApiV1JournalEntryByIdApiResponse = unknown;
@@ -542,6 +522,15 @@ export type PostApiV1PeriodsCloseByIdApiResponse = unknown;
 export type PostApiV1PeriodsCloseByIdApiArg = {
   id: number;
 };
+export type GetApiV1SettingsGuardianDashboardApiResponse = unknown;
+export type GetApiV1SettingsGuardianDashboardApiArg = void;
+export type PostApiV1SettingsGuardianRevokeSessionBySessionIdApiResponse =
+  unknown;
+export type PostApiV1SettingsGuardianRevokeSessionBySessionIdApiArg = {
+  sessionId: string;
+};
+export type PostApiV1SettingsGuardianRevokeAllSessionsApiResponse = unknown;
+export type PostApiV1SettingsGuardianRevokeAllSessionsApiArg = void;
 export type GetApiV1ToolsDownloadJournalTemplateApiResponse = unknown;
 export type GetApiV1ToolsDownloadJournalTemplateApiArg = void;
 export type PostApiV1ToolsPreviewJournalImportApiResponse = unknown;
@@ -551,10 +540,6 @@ export type PostApiV1ToolsPreviewJournalImportApiArg = {
 export type PostApiV1ToolsImportJournalEntriesApiResponse = unknown;
 export type PostApiV1ToolsImportJournalEntriesApiArg = {
   journalImportRequestDto: JournalImportRequestDto;
-};
-export type PostApiV1TestEmailResendVerificationApiResponse = unknown;
-export type PostApiV1TestEmailResendVerificationApiArg = {
-  resendRequest: ResendRequest;
 };
 export type GetApiV1ReportsGeneralLedgerPermanentApiResponse = unknown;
 export type GetApiV1ReportsGeneralLedgerPermanentApiArg = void;
@@ -697,9 +682,6 @@ export type JournalImportRequestDto = {
   customMappings?: AccountMappingDetailDto[];
   transactions?: JournalTransactionDto[];
 };
-export type ResendRequest = {
-  email: string;
-};
 export const {
   use$getQuery,
   useHeadMutation,
@@ -713,9 +695,6 @@ export const {
   usePutApiV1ChartOfAccountsByIdMutation,
   useDeleteApiV1ChartOfAccountsByIdMutation,
   useGetApiV1DashboardQuery,
-  useGetApiV1GuardianDashboardQuery,
-  usePostApiV1GuardianRevokeSessionBySessionIdMutation,
-  usePostApiV1GuardianRevokeAllSessionsMutation,
   useGetApiV1HealthQuery,
   useGetApiV1JournalEntryByIdQuery,
   usePostApiV1JournalEntryCreateMutation,
@@ -729,10 +708,12 @@ export const {
   usePostApiV1PeriodsSelectByIdMutation,
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
+  useGetApiV1SettingsGuardianDashboardQuery,
+  usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation,
+  usePostApiV1SettingsGuardianRevokeAllSessionsMutation,
   useGetApiV1ToolsDownloadJournalTemplateQuery,
   usePostApiV1ToolsPreviewJournalImportMutation,
   usePostApiV1ToolsImportJournalEntriesMutation,
-  usePostApiV1TestEmailResendVerificationMutation,
   useGetApiV1ReportsGeneralLedgerPermanentQuery,
   useGetApiV1ReportsGeneralLedgerTemporaryQuery,
   useGetApiV1ReportsIncomeStatementQuery,
