@@ -37,18 +37,18 @@ namespace AumoBlazor
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. WEB API CONFIGURATION (HTTPS DEFAULT)
+            // 1. WEB API CONFIGURATION & HTTPCLIENT
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
-                ?? "https://localhost:5001/"; // Fallback HTTPS lokal
+                ?? "https://localhost:5001/"; // Fallback URL Backend
 
             if (!webApiUrl.EndsWith("/"))
             {
                 webApiUrl += "/";
             }
 
-            // Register HttpClient terpusat yang mendukung Cookies & Credentials ke Backend API
+            // Register HttpClient terpusat yang mendukung Cross-Site Cookies & Credentials ke Backend API
             builder.Services.AddScoped(sp =>
             {
                 var handler = new HttpClientHandler
@@ -83,16 +83,16 @@ namespace AumoBlazor
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
+                    options.Cookie.Name = "AumoFinance.Session"; // Diselaraskan dengan Backend Session Cookie
                     options.LoginPath = loginPath;
                     options.AccessDeniedPath = accessDeniedPath;
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
-                    options.Cookie.Name = $"{appName}.Session";
                     options.Cookie.HttpOnly = true;
-                    // Flexible Secure Policy untuk Dev (HTTP) & Production (HTTPS)
-                    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
-                        ? CookieSecurePolicy.SameAsRequest 
-                        : CookieSecurePolicy.Always;
+
+                    // Pengaturan Cookie Cross-Site (Disesuaikan dengan AumoBackend):
+                    options.Cookie.SameSite = SameSiteMode.None;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 });
 
             builder.Services.AddAuthorization();
@@ -153,9 +153,18 @@ namespace AumoBlazor
             var app = builder.Build();
 
             // =====================================
-            // 7. HTTP PIPELINE MIDDLEWARE
+            // 7. HTTP PIPELINE MIDDLEWARE & FORWARDED HEADERS
             // =====================================
             app.UseForwardedHeaders();
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https")
+                {
+                    context.Request.Scheme = "https";
+                }
+                await next();
+            });
 
             if (app.Environment.IsDevelopment())
             {
@@ -164,7 +173,7 @@ namespace AumoBlazor
             else
             {
                 app.UseHsts();
-                app.UseHttpsRedirection(); // Paksa HTTPS di cloud deployment
+                app.UseHttpsRedirection();
 
                 app.Use(async (context, next) =>
                 {
