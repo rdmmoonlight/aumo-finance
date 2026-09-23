@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AumoFinance.Components;
 using AumoFinance.Models;
@@ -11,7 +13,6 @@ using AumoFinance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
-using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -37,7 +38,7 @@ namespace AumoBlazor
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. WEB API CONFIGURATION & HTTPCLIENT
+            // 1. WEB API CONFIGURATION & HTTPCLIENT WITH SINGLETON COOKIE CONTAINER
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
@@ -48,13 +49,16 @@ namespace AumoBlazor
                 webApiUrl += "/";
             }
 
-            // Register HttpClient terpusat yang mendukung Cross-Site Cookies & Credentials ke Backend API
+            // Shared CookieContainer agar session cookie tersimpan di tingkat circuit/session
+            builder.Services.AddSingleton<CookieContainer>();
+
             builder.Services.AddScoped(sp =>
             {
+                var cookieContainer = sp.GetRequiredService<CookieContainer>();
                 var handler = new HttpClientHandler
                 {
                     UseCookies = true,
-                    CookieContainer = new CookieContainer()
+                    CookieContainer = cookieContainer
                 };
 
                 return new HttpClient(handler)
@@ -74,7 +78,7 @@ namespace AumoBlazor
                 .SetApplicationName(appName);
 
             // =====================================
-            // 3. COOKIE AUTHENTICATION & BLAZOR AUTH STATE
+            // 3. COOKIE AUTHENTICATION & CUSTOM API BLAZOR AUTH STATE
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -83,22 +87,20 @@ namespace AumoBlazor
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
-                    options.Cookie.Name = "AumoFinance.Session"; // Diselaraskan dengan Backend Session Cookie
+                    options.Cookie.Name = "AumoFinance.Session";
                     options.LoginPath = loginPath;
                     options.AccessDeniedPath = accessDeniedPath;
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
                     options.Cookie.HttpOnly = true;
-
-                    // Pengaturan Cookie Cross-Site (Disesuaikan dengan AumoBackend):
                     options.Cookie.SameSite = SameSiteMode.None;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 });
 
             builder.Services.AddAuthorization();
 
-            // Register AuthenticationStateProvider wajib untuk Blazor Server
-            builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
+            // ✅ MENGGUNAKAN API AUTHENTICATION STATE PROVIDER KUSTOM (MEMANGGIL /api/v1/auth/me)
+            builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
             // =====================================
@@ -224,9 +226,6 @@ namespace AumoBlazor
             app.Run();
         }
 
-        /// <summary>
-        /// Pembaca file .env lokal tanpa ketergantungan library luar
-        /// </summary>
         private static void LoadDotEnv()
         {
             var pathsToTry = new[]
@@ -259,6 +258,74 @@ namespace AumoBlazor
                     Environment.SetEnvironmentVariable(key, value);
                 }
             }
+        }
+    }
+
+    // =====================================
+    // CUSTOM AUTHENTICATION STATE PROVIDER FOR REST API
+    // =====================================
+    public class ApiAuthenticationStateProvider : AuthenticationStateProvider
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<ApiAuthenticationStateProvider> _logger;
+
+        public ApiAuthenticationStateProvider(HttpClient httpClient, ILogger<ApiAuthenticationStateProvider> logger)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+        }
+
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            try
+            {
+                // Memanggil endpoint rujukan backend: GET /api/v1/auth/me
+                var response = await _httpClient.GetAsync("api/v1/auth/me");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var userProfile = await response.Content.ReadFromJsonAsync<UserProfileResponse>();
+
+                    if (userProfile?.Success == true && !string.IsNullOrEmpty(userProfile.Email))
+                    {
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, userProfile.UserId ?? string.Empty),
+                            new Claim(ClaimTypes.Name, userProfile.FullName ?? userProfile.UserName ?? "User"),
+                            new Claim(ClaimTypes.Email, userProfile.Email)
+                        };
+
+                        if (userProfile.Roles != null)
+                        {
+                            foreach (var role in userProfile.Roles)
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, role));
+                            }
+                        }
+
+                        var identity = new ClaimsIdentity(claims, "ApiAuth");
+                        var user = new ClaimsPrincipal(identity);
+
+                        return new AuthenticationState(user);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Gagal memverifikasi autentikasi dari backend API.");
+            }
+
+            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        }
+
+        public class UserProfileResponse
+        {
+            public bool Success { get; set; }
+            public string? UserId { get; set; }
+            public string? Email { get; set; }
+            public string? UserName { get; set; }
+            public string? FullName { get; set; }
+            public List<string>? Roles { get; set; }
         }
     }
 
