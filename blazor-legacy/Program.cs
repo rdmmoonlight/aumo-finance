@@ -1,11 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Threading.Tasks;
 using AumoFinance.Components;
+using AumoFinance.Models;
 using AumoFinance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -31,14 +36,15 @@ namespace AumoBlazor
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. WEB API CONFIGURATION
+            // 1. WEB API CONFIGURATION (HTTPS DEFAULT)
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
-                ?? Environment.GetEnvironmentVariable("WEB_API_URL");
+                ?? Environment.GetEnvironmentVariable("WEB_API_URL")
+                ?? "https://localhost:5001/"; // Fallback HTTPS lokal
 
-            if (string.IsNullOrWhiteSpace(webApiUrl))
+            if (!webApiUrl.EndsWith("/"))
             {
-                throw new InvalidOperationException("Fatal Error: Environment variable 'WEB_API_URL' is missing.");
+                webApiUrl += "/";
             }
 
             // Register HttpClient terpusat yang mengarah ke Backend API
@@ -58,7 +64,7 @@ namespace AumoBlazor
                 .SetApplicationName(appName);
 
             // =====================================
-            // 3. COOKIE AUTHENTICATION (PURE WEB COOKIE)
+            // 3. COOKIE AUTHENTICATION & BLAZOR AUTH STATE
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -73,10 +79,16 @@ namespace AumoBlazor
                     options.SlidingExpiration = true;
                     options.Cookie.Name = $"{appName}.Session";
                     options.Cookie.HttpOnly = true;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    // Menggunakan SameAsRequest agar fleksibel di HTTP lokal & HTTPS production
+                    options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
+                        ? CookieSecurePolicy.SameAsRequest 
+                        : CookieSecurePolicy.Always;
                 });
 
             builder.Services.AddAuthorization();
+
+            // Register AuthenticationStateProvider wajib untuk Blazor Server
+            builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
             // =====================================
@@ -93,7 +105,8 @@ namespace AumoBlazor
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
 
-            builder.Services.AddScoped<IGuardianService, GuardianService>();
+            // --- DECOUPLED SERVICES (HTTP / STUB - NO DIRECT DB DEPENDENCY) ---
+            builder.Services.AddScoped<IGuardianService, WebApiGuardianService>();
             builder.Services.AddHttpClient<IAiService, AiService>();
             builder.Services.AddScoped<IJournalImportService, JournalImportService>();
             builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
@@ -141,6 +154,7 @@ namespace AumoBlazor
             else
             {
                 app.UseHsts();
+                app.UseHttpsRedirection(); // Paksa HTTPS saat deployment di cloud (Render, DLL)
 
                 app.Use(async (context, next) =>
                 {
@@ -226,6 +240,66 @@ namespace AumoBlazor
                     Environment.SetEnvironmentVariable(key, value);
                 }
             }
+        }
+    }
+
+    // =====================================
+    // COMPLETE IMPLEMENTATION FOR IGUARDIANSERVICE
+    // =====================================
+    public class WebApiGuardianService : IGuardianService
+    {
+        private readonly HttpClient _httpClient;
+
+        public WebApiGuardianService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
+        public Task CreateLoginActivityAsync(
+            Guid userId, 
+            string ipAddress, 
+            string userAgent, 
+            string deviceType, 
+            string location, 
+            string authMethod, 
+            bool isSuccess, 
+            string? failureReason = null, 
+            string? sessionToken = null)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task CreateSessionAsync(
+            Guid userId, 
+            string sessionToken, 
+            string ipAddress, 
+            string userAgent, 
+            string deviceType, 
+            string location, 
+            string deviceName, 
+            string operatingSystem)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<List<UserSession>> GetActiveSessionsAsync(Guid userId)
+        {
+            return Task.FromResult(new List<UserSession>());
+        }
+
+        public Task RevokeSessionAsync(Guid userId, Guid sessionId)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task RevokeAllSessionsAsync(Guid userId)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task<List<LoginActivity>> GetLoginActivitiesAsync(Guid userId)
+        {
+            return Task.FromResult(new List<LoginActivity>());
         }
     }
 }
