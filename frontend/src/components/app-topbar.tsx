@@ -1,235 +1,250 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { baseApi } from "@/lib/apiClient";
 import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { Search, Bell, Database, RefreshCw } from "lucide-react";
-
-// RTK Query Hooks & Types
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
 import {
-  useGetApiV1PeriodsQuery,
-  useGetApiV1HealthQuery,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  LayoutDashboard,
+  Home,
+  Bot,
+  BookOpen,
+  FileBarChart,
+  Calendar,
+  FileSpreadsheet,
+  Wrench,
+  Settings,
+  ChevronRight,
+  User,
+  LogOut,
+  ChevronsUpDown,
+} from "lucide-react";
+import {
+  useGetApiV1AuthMeQuery,
+  usePostApiV1AuthLogoutMutation,
 } from "@/lib/generatedApi";
-import { useUserProfile } from "@/lib/auth";
 
-interface PeriodItem {
-  id: number;
-  periodName?: string;
-  name?: string;
-  isClosed?: boolean;
-  isSelected?: boolean;
-}
+const REPORT_SECTIONS = [
+  {
+    title: "General Ledger",
+    items: [
+      { title: "General Ledger — Permanent", url: "/reports/general-ledger-permanent" },
+      { title: "General Ledger — Temporary", url: "/reports/general-ledger-temporary" },
+    ],
+  },
+  {
+    title: "Trial Balance & Adjustments",
+    items: [
+      { title: "General Journal", url: "/reports/general-journal" },
+      { title: "Trial Balance", url: "/reports/unadjusted-trial-balance" },
+      { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
+      { title: "Adjusted Trial Balance", url: "/reports/adjusted-trial-balance" },
+    ],
+  },
+  {
+    title: "Worksheet",
+    items: [{ title: "Worksheet", url: "/reports/worksheet" }],
+  },
+  {
+    title: "Financial Statements",
+    items: [
+      { title: "Income Statement", url: "/reports/income-statement" },
+      { title: "Retained Earnings Statement", url: "/reports/retained-earnings" },
+      { title: "Statement of Financial Position", url: "/reports/statement-of-financial-position" },
+      { title: "Statement of Cash Flows", url: "/reports/statement-of-cash-flow" },
+    ],
+  },
+  {
+    title: "Closing",
+    items: [
+      { title: "Closing Journal", url: "/reports/closing-journal" },
+      { title: "Post-Closing Trial Balance", url: "/reports/post-closing-trial-balance" },
+    ],
+  },
+] as const;
 
-export function AppTopBar() {
+const navigation = [
+  { title: "Home", url: "/home", icon: Home },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Periods", url: "/periods", icon: Calendar },
+  { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
+  { title: "Reports", icon: FileBarChart, url: "/reports", isGrouped: true },
+  { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
+  { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
+  { title: "Tools", url: "/tools", icon: Wrench },
+  { title: "Settings", url: "/settings", icon: Settings },
+];
+
+export function AppSidebar() {
   const pathname = usePathname();
+  const dispatch = useDispatch();
+  const [isMounted, setIsMounted] = React.useState(false);
+  React.useEffect(() => setIsMounted(true), []);
 
-  // Cek profil user untuk memastikan token/cookie valid sebelum polling API
-  const { profile, isLoading: isProfileLoading } = useUserProfile();
-  const isAuthenticated = !isProfileLoading && !!profile;
+  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(undefined, { skip:!isMounted });
+  const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
-  // 1. Fetch seluruh periode untuk mencari item dengan isSelected === true
-  const { data: rawPeriodsData, isLoading: isPeriodLoading } =
-    useGetApiV1PeriodsQuery(undefined, {
-      skip: !isAuthenticated,
-    });
+  const handleSignOut = async () => {
+    try { await logoutApi().unwrap(); } catch (err) { console.error(err); }
+    finally {
+      dispatch(baseApi.util.resetApiState());
+      if (typeof window!== "undefined") {
+        document.cookie = "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.replace("/auth");
+      }
+    }
+  };
 
-  // 2. Hook Database Health Check via RTK Query
-  const {
-    data: healthData,
-    isLoading: isHealthLoading,
-    isFetching: isHealthFetching,
-    isError: isHealthError,
-    refetch: checkDb,
-  } = useGetApiV1HealthQuery(undefined, {
-    skip: !isAuthenticated,
-    pollingInterval: isAuthenticated ? 30000 : 0,
-    refetchOnFocus: false,
-  });
+  const userData = user as { fullName?: string; userName?: string; email?: string } | undefined;
+  const ICON_CLASS = "w-4 h-4 mr-2.5 shrink-0";
 
-  // Penentuan status database
-  const dbStatus = isHealthError
-    ? "offline"
-    : isHealthLoading
-      ? "connecting"
-      : healthData
-        ? "online"
-        : "offline";
-
-  // Parsing array periods secara aman
-  const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
-    ? rawPeriodsData
-    : (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
-
-  // Cari periode yang sedang dipilih/viewing di app
-  const selectedPeriod = periods.find((p) => p.isSelected);
-
-  // Ekstrak segment dari URL untuk breadcrumbs
-  const pathSegments = pathname.split("/").filter(Boolean);
+  const isReportsActive = REPORT_SECTIONS.some((s) =>
+    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/"))
+  );
 
   return (
-    <header className="flex flex-col w-full border-b bg-background sticky top-0 z-10 shadow-sm">
-      {/* KELOMPOK 1: Bar Utama (Search & Notifications) */}
-      <div className="flex h-16 items-center justify-between px-6 gap-4">
-        {/* Sisi Kiri: Search Bar */}
-        <div className="flex items-center flex-1 max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Cari transaksi, akun, atau laporan..."
-              className="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
-            />
-          </div>
-        </div>
+    <Sidebar collapsible="none" className="border-r h-screen sticky top-0 flex flex-col justify-between" style={{ "--sidebar-width": "285px" } as React.CSSProperties}>
+      <SidebarHeader className="p-3.5 border-b shrink-0">
+        <h2 className="text- font-bold tracking-tight">Aumo Finance</h2>
+      </SidebarHeader>
 
-        {/* Sisi Kanan: Notifikasi */}
-        <div className="flex items-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative text-muted-foreground hover:text-foreground"
-          >
-            <Bell className="h-5 w-5" />
-            <span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive" />
-          </Button>
-        </div>
-      </div>
+      <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
+        <SidebarGroup>
+          <SidebarGroupLabel className="text- uppercase tracking-widest text-muted-foreground mb-2 px-2">
+            Navigation
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="gap-1">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                // @ts-ignore
+                if (item.isGrouped) {
+                  return (
+                    <Collapsible key={item.title} defaultOpen={isReportsActive || pathname.startsWith(item.url)} className="group/collapsible">
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger asChild>
+                          <SidebarMenuButton isActive={isReportsActive} className="text-[13.5px] h-8 font-normal w-full justify-between px-2 overflow-hidden">
+                            <div className="flex items-center min-w-0 overflow-hidden">
+                              <Icon className={ICON_CLASS} />
+                              <span className="truncate">{item.title}</span>
+                            </div>
+                            <ChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 opacity-60 shrink-0" />
+                          </SidebarMenuButton>
+                        </CollapsibleTrigger>
+                        <CollapsibleContent>
+                          <div className="mt-1 flex flex-col gap-3 px-1">
+                            {REPORT_SECTIONS.map((section) => (
+                              <div key={section.title}>
+                                <div className="px-2 py-1 select-none cursor-default overflow-hidden">
+                                  <p className="text- font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
+                                    {section.title}
+                                  </p>
+                                </div>
+                                <div className="mt-1 flex flex-col gap-0.5">
+                                  {section.items.map((sub) => {
+                                    const isActive = pathname === sub.url;
+                                    return (
+                                      <SidebarMenuSubItem key={sub.url} className="overflow-hidden">
+                                        <SidebarMenuSubButton
+                                          asChild
+                                          isActive={isActive}
+                                          className="text- h-7 px-2 ml-2 pl-6 font-normal w-full overflow-hidden"
+                                        >
+                                          {/* truncate + title biar hover keliatan full */}
+                                          <Link href={sub.url} title={sub.title} className="truncate block w-full">
+                                            {sub.title}
+                                          </Link>
+                                        </SidebarMenuSubButton>
+                                      </SidebarMenuSubItem>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
 
-      <Separator />
+                const isSingleActive = pathname === item.url || (item.url!== "/home" && pathname.startsWith(item.url + "/"));
+                return (
+                  <SidebarMenuItem key={item.title} className="overflow-hidden">
+                    <SidebarMenuButton asChild isActive={isSingleActive} className="text-[13.5px] h-8 font-normal px-2 overflow-hidden">
+                      <Link href={item.url} title={item.title} className="flex items-center min-w-0 overflow-hidden w-full">
+                        <Icon className={ICON_CLASS} />
+                        <span className="truncate">{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-      {/* KELOMPOK 2: Bar Sekunder (Breadcrumbs, Status Periode & DB Health) */}
-      <div className="flex h-10 items-center justify-between px-6 bg-muted/20 text-xs">
-        {/* Dynamic Breadcrumbs */}
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink href="/home" className="text-xs">
-                Home
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            {pathSegments.map((segment, index) => {
-              if (segment === "home" && index === 0) return null;
-
-              const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
-              const isLast = index === pathSegments.length - 1;
-              const formattedName = decodeURIComponent(segment)
-                .replace(/-/g, " ")
-                .replace(/\b\w/g, (l) => l.toUpperCase());
-
-              return (
-                <React.Fragment key={url}>
-                  <BreadcrumbSeparator />
-                  <BreadcrumbItem>
-                    {isLast ? (
-                      <BreadcrumbPage className="text-xs font-semibold">
-                        {formattedName}
-                      </BreadcrumbPage>
-                    ) : (
-                      <BreadcrumbLink href={url} className="text-xs">
-                        {formattedName}
-                      </BreadcrumbLink>
-                    )}
-                  </BreadcrumbItem>
-                </React.Fragment>
-              );
-            })}
-          </BreadcrumbList>
-        </Breadcrumb>
-
-        {/* Sisi Kanan: Status Periode Real-time & Indikator Database */}
-        <div className="flex items-center gap-4 text-muted-foreground">
-          {/* Status Periode */}
-          {selectedPeriod ? (
-            <Badge
-              variant="outline"
-              className={`gap-1.5 font-medium ${
-                selectedPeriod.isClosed
-                  ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
-                  : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-              }`}
-            >
-              <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  selectedPeriod.isClosed
-                    ? "bg-amber-500"
-                    : "bg-emerald-500 animate-pulse"
-                }`}
-              />
-              Periode: {selectedPeriod.periodName || selectedPeriod.name}
-              {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
-            </Badge>
-          ) : (
-            <Badge
-              variant="outline"
-              className="gap-1.5 font-medium text-muted-foreground"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-              {isPeriodLoading
-                ? "Memuat periode..."
-                : "Belum Ada Periode Dipilih"}
-            </Badge>
-          )}
-
-          <Separator orientation="vertical" className="h-3" />
-
-          {/* Indikator Database */}
-          <div className="flex items-center gap-2 text-xs">
-            <Database className="h-3.5 w-3.5 text-muted-foreground" />
-
-            {dbStatus === "online" && (
-              <Badge
-                variant="outline"
-                className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-medium"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                DB: Connected
-              </Badge>
-            )}
-
-            {dbStatus === "connecting" && (
-              <Badge
-                variant="outline"
-                className="gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-medium"
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
-                DB: Connecting...
-              </Badge>
-            )}
-
-            {dbStatus === "offline" && (
-              <div className="flex items-center gap-1.5">
-                <Badge variant="destructive" className="gap-1.5 font-medium">
-                  <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
-                  DB: Disconnected
-                </Badge>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => checkDb()}
-                  disabled={isHealthFetching}
-                  className="h-6 w-6 text-muted-foreground hover:text-foreground"
-                  title="Coba hubungkan ulang"
-                >
-                  <RefreshCw
-                    className={`h-3 w-3 ${isHealthFetching ? "animate-spin" : ""}`}
-                  />
-                </Button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </header>
+      <SidebarFooter className="p-2.5 border-t shrink-0">
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton className="w-full justify-between h-auto py-3 overflow-hidden">
+                  <div className="flex items-center gap-2.5 overflow-hidden text-left min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
+                      <User className="w-4 h-4" />
+                    </div>
+                    <div className="flex flex-col truncate min-w-0">
+                      <span className="font-medium text-[13.5px] leading-tight truncate">
+                        {!isMounted || isUserLoading? "Memuat..." : userData?.fullName || userData?.userName || "Guest"}
+                      </span>
+                      <span className="text-[11.5px] text-muted-foreground truncate">
+                        {!isMounted || isUserLoading? "..." : userData?.email || "Tidak ada email"}
+                      </span>
+                    </div>
+                  </div>
+                  <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem asChild className="text-[13.5px]">
+                  <Link href="/settings"><Settings className="w-4 h-4 mr-2" />Settings</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleSignOut} className="text-destructive text-[13.5px]">
+                  <LogOut className="w-4 h-4 mr-2" />Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+    </Sidebar>
   );
 }
