@@ -75,7 +75,7 @@ export default function HomePage() {
               const price = meta.regularMarketPrice;
               const prevClose = meta.chartPreviousClose || meta.previousClose;
               const changePercent = prevClose
-               ? ((price - prevClose) / prevClose) * 100
+                ? ((price - prevClose) / prevClose) * 100
                 : 0;
               const isUp = changePercent >= 0;
               return {
@@ -85,7 +85,7 @@ export default function HomePage() {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 }),
-                change: `${isUp? "+" : ""}${changePercent.toFixed(2)}%`,
+                change: `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`,
                 isUp,
               };
             }
@@ -93,7 +93,7 @@ export default function HomePage() {
             // v7 quote
             const quote = data?.quoteResponse?.result?.[0];
             if (quote?.regularMarketPrice) {
-              const isUp = (quote.regularMarketChangePercent?? 0) >= 0;
+              const isUp = (quote.regularMarketChangePercent ?? 0) >= 0;
               return {
                 symbol: "IHSG",
                 name: "Indeks Saham",
@@ -101,7 +101,7 @@ export default function HomePage() {
                   minimumFractionDigits: 2,
                 }),
                 change: quote.regularMarketChangePercent
-                 ? `${isUp? "+" : ""}${quote.regularMarketChangePercent.toFixed(2)}%`
+                  ? `${isUp ? "+" : ""}${quote.regularMarketChangePercent.toFixed(2)}%`
                   : "0.00%",
                 isUp,
               };
@@ -143,11 +143,11 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {isLoading? (
+              {isLoading ? (
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
                 </div>
-              ) : marketData.length > 0? (
+              ) : marketData.length > 0 ? (
                 marketData.map((item) => (
                   <div
                     key={item.symbol}
@@ -160,11 +160,11 @@ export default function HomePage() {
                       <Badge
                         className={`flex items-center border-0 px-1.5 py-0.5 text- ${
                           item.isUp
-                           ? "bg-emerald-500/15 text-emerald-400"
+                            ? "bg-emerald-500/15 text-emerald-400"
                             : "bg-red-500/15 text-red-400"
                         }`}
                       >
-                        {item.isUp? (
+                        {item.isUp ? (
                           <TrendingUp size={10} className="mr-0.5" />
                         ) : (
                           <TrendingDown size={10} className="mr-0.5" />
