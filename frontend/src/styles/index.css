@@ -55,7 +55,7 @@
 }
 
 @layer base {
-  * {
+    * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
@@ -77,9 +77,34 @@
     letter-spacing: -0.011em;
   }
 
+  /* SELECTION - selalu kebalik */
   ::selection {
     background-color: white;
     color: black;
+  }
+  ::-moz-selection {
+    background-color: white;
+    color: black;
+  }
+
+  /* Area terang (card login bg-white) -> dibalik lagi jadi hitam */
+  .bg-white::selection,
+  .bg-white ::selection,
+  .bg-zinc-50::selection,
+  .bg-zinc-50 ::selection,
+  input::selection,
+  textarea::selection {
+    background-color: black;
+    color: white;
+  }
+  .bg-white::-moz-selection,
+  .bg-white ::-moz-selection,
+  .bg-zinc-50::-moz-selection,
+  .bg-zinc-50 ::-moz-selection,
+  input::-moz-selection,
+  textarea::-moz-selection {
+    background-color: black;
+    color: white;
   }
 
   /* Scrollbar Webkit */
