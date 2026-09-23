@@ -173,26 +173,30 @@
 
         try
         {
-            // Panggil API Backend (SSOT)
-            var response = await Http.PostAsJsonAsync("api/auth/login", new
+            // Panggil API Backend (SSOT) via Endpoint Rujukan Resmi: /api/v1/auth/login
+            var response = await Http.PostAsJsonAsync("api/v1/auth/login", new
             {
-                email = Input.Email,
-                password = Input.Password,
-                rememberMe = Input.RememberMe
+                Email = Input.Email,
+                Password = Input.Password,
+                RememberMe = Input.RememberMe,
+                IsMobileClient = false
             });
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadFromJsonAsync<ApiResponse<LoginResponseData>>();
+                // Unpack Flat Response dari AuthController
+                var result = await response.Content.ReadFromJsonAsync<BackendLoginResponse>();
 
                 if (result?.Success == true)
                 {
                     Logger.LogInformation("User logged in successfully via API.");
 
-                    // Logging ke GuardianService UI (Positional parameters - Tanpa Named Arguments)
+                    Guid.TryParse(result.UserId, out var parsedUserId);
+
+                    // Logging ke GuardianService UI (Positional parameters)
                     await GuardianService.CreateSessionAsync(
-                        result.Data?.UserId ?? Guid.NewGuid(),
-                        result.Data?.Token ?? string.Empty,
+                        parsedUserId != Guid.Empty ? parsedUserId : Guid.NewGuid(),
+                        "COOKIE_SESSION",
                         "127.0.0.1",
                         "Mozilla/5.0 (Blazor Web)",
                         "Web",
@@ -211,7 +215,7 @@
             }
             else
             {
-                var errorResult = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
+                var errorResult = await response.Content.ReadFromJsonAsync<BackendLoginResponse>();
                 errorMessage = errorResult?.Message ?? "Invalid email or password.";
             }
         }
@@ -239,16 +243,12 @@
         public bool RememberMe { get; set; }
     }
 
-    public class ApiResponse<T>
+    public class BackendLoginResponse
     {
         public bool Success { get; set; }
         public string Message { get; set; } = string.Empty;
-        public T? Data { get; set; }
-    }
-
-    public class LoginResponseData
-    {
-        public Guid UserId { get; set; }
-        public string Token { get; set; } = string.Empty;
+        public string? UserId { get; set; }
+        public string? FullName { get; set; }
+        public string? Token { get; set; }
     }
 }
