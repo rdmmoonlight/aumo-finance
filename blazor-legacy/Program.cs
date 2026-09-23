@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
@@ -34,30 +33,52 @@ namespace AumoBlazor
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // Menambahkan Environment Variables ke Configuration Pipeline
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. WEB API CONFIGURATION & HTTPCLIENT
+            // 1. FORWARDED HEADERS & HTTPS REDIRECTION (RENDER PROXY)
+            // =====================================
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownIPNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
+            builder.Services.AddHttpsRedirection(options =>
+            {
+                options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
+                options.HttpsPort = 443;
+            });
+
+            builder.Services.AddHsts(options =>
+            {
+                options.Preload = true;
+                options.IncludeSubDomains = true;
+                options.MaxAge = TimeSpan.FromDays(365);
+            });
+
+            // =====================================
+            // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
-                ?? "https://localhost:5001/"; // Fallback URL Backend API
+                ?? "https://localhost:5001/";
 
             if (!webApiUrl.EndsWith("/"))
             {
                 webApiUrl += "/";
             }
 
-            // Delegating Handler untuk meluruskan Cookie/Header per-user scope (terisolasi antar-circuit)
             builder.Services.AddHttpContextAccessor();
 
+            // Delegating Handler untuk meneruskan Cookie browser ke Backend API (jika ada)
             builder.Services.AddScoped(sp =>
             {
                 var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
                 var handler = new HttpClientHandler
                 {
-                    UseCookies = false // Menggunakan Header Cookie manual dari HttpContext agar terisolasi per user
+                    UseCookies = false // Mengirimkan header cookie secara terisolasi per HttpContext
                 };
 
                 var client = new HttpClient(handler)
@@ -65,7 +86,6 @@ namespace AumoBlazor
                     BaseAddress = new Uri(webApiUrl)
                 };
 
-                // Teruskan cookie dari browser request saat ini jika ada
                 var request = httpContextAccessor.HttpContext?.Request;
                 if (request != null && request.Headers.TryGetValue("Cookie", out var cookie))
                 {
@@ -76,7 +96,7 @@ namespace AumoBlazor
             });
 
             // =====================================
-            // 2. DATA PROTECTION & APP CONFIG
+            // 3. DATA PROTECTION & COOKIE POLICY
             // =====================================
             var appName = builder.Configuration["APP_NAME"]
                 ?? Environment.GetEnvironmentVariable("APP_NAME")
@@ -85,8 +105,16 @@ namespace AumoBlazor
             builder.Services.AddDataProtection()
                 .SetApplicationName(appName);
 
+            // Menegaskan seluruh Cookie di aplikasi WAJIB Secure (HTTPS) & HttpOnly
+            builder.Services.Configure<CookiePolicyOptions>(options =>
+            {
+                options.CheckConsentNeeded = context => false;
+                options.MinimumSameSitePolicy = SameSiteMode.Lax;
+                options.Secure = CookieSecurePolicy.Always; // Memaksa Cookie hanya berjalan di HTTPS
+            });
+
             // =====================================
-            // 3. COOKIE AUTHENTICATION & CUSTOM API BLAZOR AUTH STATE
+            // 4. COOKIE AUTHENTICATION & BLAZOR AUTH STATE
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -100,19 +128,19 @@ namespace AumoBlazor
                     options.AccessDeniedPath = accessDeniedPath;
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
-                    options.Cookie.HttpOnly = true;
-                    options.Cookie.SameSite = SameSiteMode.Lax;
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+                    options.Cookie.HttpOnly = true;                             // Mencegah XSS membaca cookie
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;   // WAJIB HTTPS
+                    options.Cookie.SameSite = SameSiteMode.Lax;                // Proteksi CSRF yang fleksibel untuk Blazor
                 });
 
             builder.Services.AddAuthorization();
 
-            // Authentication state provider via WEB API
+            // Authentication state provider berbasis Cookie / HttpContext User
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
             // =====================================
-            // 4. BLAZOR CORE, SIGNALR & STABILITY FIX (RENDER PROXY)
+            // 5. BLAZOR CORE & SIGNALR STABILITY
             // =====================================
             builder.Services.AddControllers();
 
@@ -123,7 +151,7 @@ namespace AumoBlazor
                     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
                 });
 
-            // MENCEGAH WEBSOCKET ABORTED DI RENDER: Set KeepAlive & Timeout Sinyal
+            // Stabilisasi WebSocket di Render (mencegah Connection Aborted)
             builder.Services.AddSignalR(hubOptions =>
             {
                 hubOptions.EnableDetailedErrors = builder.Environment.IsDevelopment();
@@ -133,7 +161,7 @@ namespace AumoBlazor
             });
 
             // =====================================
-            // 5. APPLICATION SERVICES
+            // 6. APPLICATION SERVICES
             // =====================================
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
@@ -146,7 +174,6 @@ namespace AumoBlazor
             builder.Services.AddScoped<ICloudStorageService, CloudinaryService>();
             builder.Services.AddScoped<DashboardDataService>();
 
-            // --- MARKET SERVICE SETUP ---
             var marketUserAgent = builder.Configuration["MARKET_USER_AGENT"]
                 ?? Environment.GetEnvironmentVariable("MARKET_USER_AGENT")
                 ?? $"{appName}/1.0";
@@ -160,25 +187,17 @@ namespace AumoBlazor
             builder.Services.AddScoped<IMarketService, MarketService>();
 
             // =====================================
-            // 6. FORWARDED HEADERS (Reverse Proxy / Render)
-            // =====================================
-            builder.Services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-                options.KnownIPNetworks.Clear();
-                options.KnownProxies.Clear();
-            });
-
-            // =====================================
             // BUILD APPLICATION
             // =====================================
             var app = builder.Build();
 
             // =====================================
-            // 7. HTTP PIPELINE MIDDLEWARE & FORWARDED HEADERS
+            // 7. HTTP PIPELINE MIDDLEWARE (URUTAN PENTING)
             // =====================================
+            // 1. Ekstrak Header Reverse Proxy (Render)
             app.UseForwardedHeaders();
 
+            // 2. Tangani skema HTTPS jika ditransfer via SSL Termination
             app.Use(async (context, next) =>
             {
                 if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https")
@@ -195,7 +214,7 @@ namespace AumoBlazor
             else
             {
                 app.UseHsts();
-                app.UseHttpsRedirection();
+                app.UseHttpsRedirection(); // Paksa HTTP ke HTTPS
 
                 app.Use(async (context, next) =>
                 {
@@ -224,6 +243,8 @@ namespace AumoBlazor
             }
 
             app.UseStaticFiles();
+            app.UseCookiePolicy(); // Menerapkan kebijakan Cookie Secure & HttpOnly
+
             app.UseRouting();
             app.UseAntiforgery();
 
@@ -231,7 +252,7 @@ namespace AumoBlazor
             app.UseAuthorization();
 
             // =====================================
-            // 8. ENDPOINTS & MAP CONTROLLERS
+            // 8. ENDPOINTS
             // =====================================
             app.MapHealthChecks("/health");
             app.MapControllers();
@@ -281,7 +302,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // CUSTOM AUTHENTICATION STATE PROVIDER FOR REST API
+    // AUTHENTICATION STATE PROVIDER UNTUK COOKIES
     // =====================================
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
@@ -301,12 +322,14 @@ namespace AumoBlazor
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
+            // 1. Cek dulu apakah user sudah terautentikasi langsung via Cookie di HttpContext
             var httpContextUser = _httpContextAccessor.HttpContext?.User;
             if (httpContextUser?.Identity?.IsAuthenticated == true)
             {
                 return new AuthenticationState(httpContextUser);
             }
 
+            // 2. Jika via WebSocket/Blazor Circuit, lakukan verifikasi sesi Cookie ke API
             try
             {
                 var response = await _httpClient.GetAsync("api/v1/auth/me");
@@ -332,7 +355,8 @@ namespace AumoBlazor
                             }
                         }
 
-                        var identity = new ClaimsIdentity(claims, "ApiAuth");
+                        // Menggunakan skema Cookie Authentication
+                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                         var user = new ClaimsPrincipal(identity);
 
                         return new AuthenticationState(user);
@@ -341,9 +365,10 @@ namespace AumoBlazor
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Gagal memverifikasi autentikasi dari backend API.");
+                _logger.LogError(ex, "Gagal memverifikasi sesi cookie autentikasi dari backend API.");
             }
 
+            // User dianggap belum login jika tidak ada cookie yang valid
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
@@ -364,7 +389,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // COMPLETE IMPLEMENTATION FOR IGUARDIANSERVICE VIA WEB API
+    // GUARDIAN SERVICE IMPLEMENTATION
     // =====================================
     public class WebApiGuardianService : IGuardianService
     {
