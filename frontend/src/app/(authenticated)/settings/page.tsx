@@ -31,14 +31,27 @@ import {
   usePostApiV1GuardianRevokeAllSessionsMutation,
 } from "@/lib/generatedApi";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 
@@ -72,7 +85,7 @@ export default function SettingsPage() {
     error: guardianError,
     refetch: refetchGuardian,
   } = useGetApiV1GuardianDashboardQuery(undefined, {
-    skip: mainTab!== "security", // fetch hanya saat tab security dibuka
+    skip: mainTab !== "security", // fetch hanya saat tab security dibuka
   });
 
   const [revokeSession, { isLoading: isRevokingSession }] =
@@ -90,7 +103,7 @@ export default function SettingsPage() {
   const isHealthy = security?.statusLevel === "Good";
 
   const handleRevokeSession = async (id?: string, device?: string) => {
-    if (!id ||!confirm(`Akhiri sesi "${device}"?`)) return;
+    if (!id || !confirm(`Akhiri sesi "${device}"?`)) return;
     try {
       setErrorMessage(null);
       await revokeSession({ sessionId: id }).unwrap();
@@ -98,7 +111,9 @@ export default function SettingsPage() {
       refetchGuardian();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      setErrorMessage(err?.data?.message || err?.message || "Gagal mengakhiri sesi");
+      setErrorMessage(
+        err?.data?.message || err?.message || "Gagal mengakhiri sesi",
+      );
     }
   };
 
@@ -111,14 +126,21 @@ export default function SettingsPage() {
       refetchGuardian();
       setTimeout(() => setSuccessMessage(null), 3000);
     } catch (err: any) {
-      setErrorMessage(err?.data?.message || err?.message || "Gagal mengakhiri semua sesi");
+      setErrorMessage(
+        err?.data?.message || err?.message || "Gagal mengakhiri semua sesi",
+      );
     }
   };
 
   const appearanceOptions = [
     { id: "light", label: "Light", desc: "Tampilan terang", icon: IconSun },
     { id: "dark", label: "Dark", desc: "Mata gak perih", icon: IconMoon },
-    { id: "system", label: "System", desc: "Ngikutin OS", icon: IconDeviceDesktop },
+    {
+      id: "system",
+      label: "System",
+      desc: "Ngikutin OS",
+      icon: IconDeviceDesktop,
+    },
   ] as const;
 
   return (
@@ -152,19 +174,25 @@ export default function SettingsPage() {
               <CardTitle className="text-base flex items-center gap-2">
                 <IconUser size={18} /> Account Profile
               </CardTitle>
-              <CardDescription>Informasi akun dari ASP.NET Core Identity.</CardDescription>
+              <CardDescription>
+                Informasi akun dari ASP.NET Core Identity.
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              {loadingUser? (
-                <div className="text-sm text-muted-foreground font-mono">Loading profile data...</div>
-              ) : user? (
+              {loadingUser ? (
+                <div className="text-sm text-muted-foreground font-mono">
+                  Loading profile data...
+                </div>
+              ) : user ? (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground flex items-center gap-1">
                         <IconUser size={14} /> Full Name
                       </Label>
-                      <p className="text-sm font-medium">{user.fullName || user.userName}</p>
+                      <p className="text-sm font-medium">
+                        {user.fullName || user.userName}
+                      </p>
                     </div>
                     <div className="space-y-1">
                       <Label className="text-xs text-muted-foreground flex items-center gap-1">
@@ -177,14 +205,20 @@ export default function SettingsPage() {
                         <IconShieldCheck size={14} /> Assigned Roles
                       </Label>
                       <div className="flex flex-wrap gap-1.5 mt-1">
-                        {user.roles && user.roles.length > 0? (
+                        {user.roles && user.roles.length > 0 ? (
                           user.roles.map((r: string) => (
-                            <Badge key={r} variant="secondary" className="text-xs font-mono">
+                            <Badge
+                              key={r}
+                              variant="secondary"
+                              className="text-xs font-mono"
+                            >
                               {r}
                             </Badge>
                           ))
                         ) : (
-                          <span className="text-xs text-muted-foreground">No roles assigned</span>
+                          <span className="text-xs text-muted-foreground">
+                            No roles assigned
+                          </span>
                         )}
                       </div>
                     </div>
@@ -192,12 +226,16 @@ export default function SettingsPage() {
                       <Label className="text-xs text-muted-foreground flex items-center gap-1">
                         <IconId size={14} /> User Identity ID
                       </Label>
-                      <p className="text-xs font-mono text-muted-foreground truncate">{user.userId}</p>
+                      <p className="text-xs font-mono text-muted-foreground truncate">
+                        {user.userId}
+                      </p>
                     </div>
                   </div>
                 </div>
               ) : (
-                <div className="text-sm text-destructive font-mono">Sesi pengguna tidak terautentikasi.</div>
+                <div className="text-sm text-destructive font-mono">
+                  Sesi pengguna tidak terautentikasi.
+                </div>
               )}
             </CardContent>
           </Card>
@@ -208,11 +246,13 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="text-base">Appearance</CardTitle>
-              <CardDescription>Pilih tema Aumo Finance. Disimpan otomatis di local storage.</CardDescription>
+              <CardDescription>
+                Pilih tema Aumo Finance. Disimpan otomatis di local storage.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <RadioGroup
-                value={mounted? theme : "system"}
+                value={mounted ? theme : "system"}
                 onValueChange={(v) => setTheme(v as any)}
                 className="grid grid-cols-1 sm:grid-cols-3 gap-3"
               >
@@ -224,13 +264,24 @@ export default function SettingsPage() {
                       htmlFor={opt.id}
                       className={cn(
                         "relative flex flex-col rounded-xl border-2 p-4 cursor-pointer transition-all hover:bg-accent/50",
-                        isActive? "border-primary bg-primary/5" : "border-muted bg-card"
+                        isActive
+                          ? "border-primary bg-primary/5"
+                          : "border-muted bg-card",
                       )}
                     >
-                      <RadioGroupItem value={opt.id} id={opt.id} className="sr-only" />
-                      <opt.icon size={20} className={cn("mb-3", isActive && "text-primary")} />
+                      <RadioGroupItem
+                        value={opt.id}
+                        id={opt.id}
+                        className="sr-only"
+                      />
+                      <opt.icon
+                        size={20}
+                        className={cn("mb-3", isActive && "text-primary")}
+                      />
                       <span className="font-medium text-sm">{opt.label}</span>
-                      <span className="text-xs text-muted-foreground mt-1">{opt.desc}</span>
+                      <span className="text-xs text-muted-foreground mt-1">
+                        {opt.desc}
+                      </span>
                       {isActive && (
                         <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-primary text-primary-foreground grid place-items-center">
                           <IconCheck size={12} stroke={3} />
@@ -249,20 +300,24 @@ export default function SettingsPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h2 className="text-base font-bold flex items-center gap-2">
-                <IconShieldCheck className="text-primary" size={20} /> Guardian Security
+                <IconShieldCheck className="text-primary" size={20} /> Guardian
+                Security
               </h2>
-              <p className="text-xs text-muted-foreground">Security health, sessions, and logs</p>
+              <p className="text-xs text-muted-foreground">
+                Security health, sessions, and logs
+              </p>
             </div>
             <Badge
               variant="outline"
               className={cn(
                 "gap-2 px-3 py-1.5 w-fit",
                 isHealthy
-                 ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
-                  : "border-amber-500/20 bg-amber-500/10 text-amber-500"
+                  ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500"
+                  : "border-amber-500/20 bg-amber-500/10 text-amber-500",
               )}
             >
-              <IconHeartbeat size={16} /> Status: {security?.statusLevel || "Unknown"}
+              <IconHeartbeat size={16} /> Status:{" "}
+              {security?.statusLevel || "Unknown"}
             </Badge>
           </div>
 
@@ -276,12 +331,14 @@ export default function SettingsPage() {
             <Alert variant="destructive">
               <IconAlertTriangle size={16} />
               <AlertDescription>
-                {errorMessage || (guardianError as any)?.data?.message || "Gagal memuat data guardian"}
+                {errorMessage ||
+                  (guardianError as any)?.data?.message ||
+                  "Gagal memuat data guardian"}
               </AlertDescription>
             </Alert>
           )}
 
-          {loadingGuardian? (
+          {loadingGuardian ? (
             <div className="flex flex-col items-center justify-center min-h- gap-3 text-muted-foreground">
               <IconLoader2 className="w-8 h-8 animate-spin text-primary" />
               <p className="text-xs">Memuat Guardian...</p>
@@ -307,30 +364,47 @@ export default function SettingsPage() {
                 <Card>
                   <CardHeader className="py-3 border-b flex-row items-center justify-between space-y-0">
                     <div className="flex items-center gap-2 text-sm font-semibold">
-                      <IconHeartbeat size={16} className="text-rose-400" /> Account Health Checkup
+                      <IconHeartbeat size={16} className="text-rose-400" />{" "}
+                      Account Health Checkup
                     </div>
-                    <span className="text-xs text-muted-foreground">Automated</span>
+                    <span className="text-xs text-muted-foreground">
+                      Automated
+                    </span>
                   </CardHeader>
                   <CardContent className="p-4 space-y-4">
                     <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
                       <div>
-                        <p className="text-sm font-medium">Failed Attempts (24h)</p>
-                        <p className="text-xs text-muted-foreground">Jumlah kegagalan login</p>
+                        <p className="text-sm font-medium">
+                          Failed Attempts (24h)
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Jumlah kegagalan login
+                        </p>
                       </div>
-                      {security?.failedAttemptsLast24Hours === 0? (
-                        <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20">0 Attempts</Badge>
+                      {security?.failedAttemptsLast24Hours === 0 ? (
+                        <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20">
+                          0 Attempts
+                        </Badge>
                       ) : (
-                        <Badge variant="destructive">{security?.failedAttemptsLast24Hours?? 0} Attempts</Badge>
+                        <Badge variant="destructive">
+                          {security?.failedAttemptsLast24Hours ?? 0} Attempts
+                        </Badge>
                       )}
                     </div>
                     <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
                       <div>
-                        <p className="text-sm font-medium">Last Successful Login</p>
-                        <p className="text-xs text-muted-foreground">Waktu login terakhir</p>
+                        <p className="text-sm font-medium">
+                          Last Successful Login
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Waktu login terakhir
+                        </p>
                       </div>
                       <span className="text-sm font-mono text-muted-foreground">
                         {security?.lastSuccessfulLogin
-                         ? new Date(security.lastSuccessfulLogin).toLocaleString("id-ID")
+                          ? new Date(
+                              security.lastSuccessfulLogin,
+                            ).toLocaleString("id-ID")
                           : "-"}
                       </span>
                     </div>
@@ -341,7 +415,9 @@ export default function SettingsPage() {
               <TabsContent value="sessions" className="mt-4">
                 <Card>
                   <CardHeader className="py-3 flex-row items-center justify-between space-y-0 border-b">
-                    <span className="text-sm font-semibold">Active Sessions (Max 5)</span>
+                    <span className="text-sm font-semibold">
+                      Active Sessions (Max 5)
+                    </span>
                     <Button
                       variant="destructive"
                       size="sm"
@@ -349,7 +425,11 @@ export default function SettingsPage() {
                       onClick={handleRevokeAll}
                       disabled={isRevokingAll}
                     >
-                      {isRevokingAll? <IconLoader2 size={14} className="animate-spin" /> : <IconAlertOctagon size={14} />}
+                      {isRevokingAll ? (
+                        <IconLoader2 size={14} className="animate-spin" />
+                      ) : (
+                        <IconAlertOctagon size={14} />
+                      )}
                       Revoke All
                     </Button>
                   </CardHeader>
@@ -370,7 +450,9 @@ export default function SettingsPage() {
                             <TableCell className="font-medium flex items-center gap-2">
                               {s.deviceName}
                               {s.isCurrent && (
-                                <Badge className="text-xs bg-emerald-500/15 text-emerald-600">Current</Badge>
+                                <Badge className="text-xs bg-emerald-500/15 text-emerald-600">
+                                  Current
+                                </Badge>
                               )}
                             </TableCell>
                             <TableCell className="text-muted-foreground text-xs">
@@ -379,24 +461,34 @@ export default function SettingsPage() {
                             </TableCell>
                             <TableCell className="font-mono text-xs text-primary">
                               {s.ipAddress} <br />
-                              <span className="text- text-muted-foreground">{s.country}</span>
+                              <span className="text- text-muted-foreground">
+                                {s.country}
+                              </span>
                             </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
-                              {s.lastActivityAt? new Date(s.lastActivityAt).toLocaleString("id-ID") : "-"}
+                              {s.lastActivityAt
+                                ? new Date(s.lastActivityAt).toLocaleString(
+                                    "id-ID",
+                                  )
+                                : "-"}
                             </TableCell>
                             <TableCell className="text-right">
-                              {!s.isCurrent? (
+                              {!s.isCurrent ? (
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="h-6 text-xs text-destructive hover:text-destructive gap-1"
-                                  onClick={() => handleRevokeSession(s.id, s.deviceName)}
+                                  onClick={() =>
+                                    handleRevokeSession(s.id, s.deviceName)
+                                  }
                                   disabled={isRevokingSession}
                                 >
                                   <IconLogout size={12} /> Out
                                 </Button>
                               ) : (
-                                <span className="text-xs text-emerald-500 font-medium">Active</span>
+                                <span className="text-xs text-emerald-500 font-medium">
+                                  Active
+                                </span>
                               )}
                             </TableCell>
                           </TableRow>
@@ -404,7 +496,9 @@ export default function SettingsPage() {
                       </TableBody>
                     </Table>
                     {displayedSessions.length === 0 && (
-                      <div className="p-8 text-center text-sm text-muted-foreground">No sessions</div>
+                      <div className="p-8 text-center text-sm text-muted-foreground">
+                        No sessions
+                      </div>
                     )}
                   </CardContent>
                 </Card>
@@ -413,8 +507,14 @@ export default function SettingsPage() {
               <TabsContent value="logs" className="mt-4">
                 <Card>
                   <CardHeader className="py-3 flex-row items-center justify-between space-y-0 border-b">
-                    <span className="text-sm font-semibold">Recent Login History (Max 5)</span>
-                    <Button variant="outline" size="sm" className="h-7 text-xs gap-1">
+                    <span className="text-sm font-semibold">
+                      Recent Login History (Max 5)
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs gap-1"
+                    >
                       <IconDownload size={14} /> Export CSV
                     </Button>
                   </CardHeader>
@@ -432,20 +532,31 @@ export default function SettingsPage() {
                       <TableBody>
                         {activities.map((a: any, i: number) => (
                           <TableRow key={a.id || i}>
-                            <TableCell className="font-medium text-xs">{a.activityType}</TableCell>
+                            <TableCell className="font-medium text-xs">
+                              {a.activityType}
+                            </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
                               {a.device} <br />
                               <span className="text-">{a.operatingSystem}</span>
                             </TableCell>
-                            <TableCell className="font-mono text-xs text-primary">{a.ipAddress}</TableCell>
+                            <TableCell className="font-mono text-xs text-primary">
+                              {a.ipAddress}
+                            </TableCell>
                             <TableCell className="text-xs text-muted-foreground">
-                              {a.createdAt? new Date(a.createdAt).toLocaleString("id-ID") : "-"}
+                              {a.createdAt
+                                ? new Date(a.createdAt).toLocaleString("id-ID")
+                                : "-"}
                             </TableCell>
                             <TableCell className="text-right">
-                              {a.isSuccess? (
-                                <Badge className="text-xs bg-emerald-500/15 text-emerald-600">Success</Badge>
+                              {a.isSuccess ? (
+                                <Badge className="text-xs bg-emerald-500/15 text-emerald-600">
+                                  Success
+                                </Badge>
                               ) : (
-                                <Badge variant="destructive" className="text-xs">
+                                <Badge
+                                  variant="destructive"
+                                  className="text-xs"
+                                >
                                   Failed
                                 </Badge>
                               )}
@@ -455,7 +566,9 @@ export default function SettingsPage() {
                       </TableBody>
                     </Table>
                     {activities.length === 0 && (
-                      <div className="p-8 text-center text-sm text-muted-foreground">No logs</div>
+                      <div className="p-8 text-center text-sm text-muted-foreground">
+                        No logs
+                      </div>
                     )}
                   </CardContent>
                 </Card>
