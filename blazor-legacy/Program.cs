@@ -38,7 +38,7 @@ namespace AumoBlazor
             builder.Configuration.AddEnvironmentVariables();
 
             // =====================================
-            // 1. WEB API CONFIGURATION & HTTPCLIENT (NO DIRECT DB CONNECTION)
+            // 1. WEB API CONFIGURATION & HTTPCLIENT
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
@@ -49,23 +49,30 @@ namespace AumoBlazor
                 webApiUrl += "/";
             }
 
-            // Shared CookieContainer agar session cookie tersimpan di tingkat circuit/session
-            builder.Services.AddSingleton<CookieContainer>();
+            // Delegating Handler untuk meluruskan Cookie/Header per-user scope (terisolasi antar-circuit)
+            builder.Services.AddHttpContextAccessor();
 
-            // HttpClient utama untuk memanggil Backend API (Cookie-aware)
             builder.Services.AddScoped(sp =>
             {
-                var cookieContainer = sp.GetRequiredService<CookieContainer>();
+                var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
                 var handler = new HttpClientHandler
                 {
-                    UseCookies = true,
-                    CookieContainer = cookieContainer
+                    UseCookies = false // Menggunakan Header Cookie manual dari HttpContext agar terisolasi per user
                 };
 
-                return new HttpClient(handler)
+                var client = new HttpClient(handler)
                 {
                     BaseAddress = new Uri(webApiUrl)
                 };
+
+                // Teruskan cookie dari browser request saat ini jika ada
+                var request = httpContextAccessor.HttpContext?.Request;
+                if (request != null && request.Headers.TryGetValue("Cookie", out var cookie))
+                {
+                    client.DefaultRequestHeaders.Add("Cookie", cookie.ToString());
+                }
+
+                return client;
             });
 
             // =====================================
@@ -99,14 +106,13 @@ namespace AumoBlazor
                 });
 
             builder.Services.AddAuthorization();
-            builder.Services.AddHttpContextAccessor();
 
             // Authentication state provider via WEB API
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
             // =====================================
-            // 4. BLAZOR CORE & CONTROLLERS
+            // 4. BLAZOR CORE, SIGNALR & STABILITY FIX (RENDER PROXY)
             // =====================================
             builder.Services.AddControllers();
 
@@ -114,10 +120,20 @@ namespace AumoBlazor
                 .AddInteractiveServerComponents(options =>
                 {
                     options.DetailedErrors = builder.Environment.IsDevelopment();
+                    options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
                 });
 
+            // MENCEGAH WEBSOCKET ABORTED DI RENDER: Set KeepAlive & Timeout Sinyal
+            builder.Services.AddSignalR(hubOptions =>
+            {
+                hubOptions.EnableDetailedErrors = builder.Environment.IsDevelopment();
+                hubOptions.KeepAliveInterval = TimeSpan.FromSeconds(15);
+                hubOptions.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+                hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
+            });
+
             // =====================================
-            // 5. APPLICATION SERVICES (PURE HTTP CLIENT DECOUPLED SERVICES)
+            // 5. APPLICATION SERVICES
             // =====================================
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
