@@ -13,35 +13,6 @@
 @inject NavigationManager Navigation
 @inject ILogger<NavMenu> Logger
 
-<script>
-    window.triggerSyncProcess = function(isSuccess = true, queueTimeMs = 10000) {
-        const syncBtn = document.getElementById('syncBtn');
-        const syncIcon = document.getElementById('syncIcon');
-
-        if (!syncBtn || !syncIcon) return;
-
-        syncBtn.classList.remove('text-info', 'text-danger', 'text-success', 'text-secondary');
-        syncBtn.style.color = '#d97706';
-        syncBtn.title = "Syncing: In queue (10 seconds)...";
-        syncIcon.className = "bi bi-arrow-repeat icon-spin"; 
-
-        setTimeout(() => {
-            syncIcon.classList.remove('icon-spin');
-            syncBtn.style.color = '';
-
-            if (isSuccess) {
-                syncBtn.classList.add('text-info');
-                syncBtn.title = "Sync: Saved to Database";
-                syncIcon.className = "bi bi-cloud-check";
-            } else {
-                syncBtn.classList.add('text-danger');
-                syncBtn.title = "Sync: Error saving data!";
-                syncIcon.className = "bi bi-cloud-slash";
-            }
-        }, queueTimeMs);
-    };
-</script>
-
 <!-- TOP NAVBAR -->
 <header class="navbar navbar-expand topbar-solid py-2 sticky-top position-relative" style="min-height: 56px;">
     <div class="container-xxl px-3 d-flex align-items-center justify-content-between h-100 position-relative">
@@ -112,23 +83,6 @@
                         </li>
                     }
                 </ul>
-            </div>
-
-            <span class="text-secondary opacity-25">|</span>
-
-            <div class="d-flex align-items-center gap-2 fs-8 font-monospace">
-                <button class="btn btn-sm btn-link text-success p-0 border-0 shadow-none lh-1 d-flex align-items-center gap-1" type="button" title="Guardian Security: Protected & Active" aria-label="Guardian Status">
-                    <span class="pulse-dot-green me-1"></span>
-                    <i class="bi bi-shield-check" style="font-size: 0.825rem;"></i>
-                    <span class="d-none d-sm-inline text-muted" style="font-size: 0.7rem;">PROTECTED</span>
-                </button>
-
-                <span class="text-secondary opacity-25">/</span>
-
-                <button id="syncBtn" class="btn btn-sm btn-link text-info p-0 border-0 shadow-none lh-1 d-flex align-items-center gap-1" type="button" title="Sync: Up to date" aria-label="Sync Status">
-                    <i id="syncIcon" class="bi bi-cloud-check" style="font-size: 0.825rem;"></i>
-                    <span class="d-none d-sm-inline text-muted" style="font-size: 0.7rem;">SYNCED</span>
-                </button>
             </div>
         </div>
 
@@ -209,12 +163,6 @@
                     <li class="nav-item mb-2">
                         <NavLink href="/documents" class="nav-link icon-btn" title="Economic Documents" @onclick="CloseFlyout">
                             <i class="bi bi-file-earmark-text fs-5"></i>
-                        </NavLink>
-                    </li>
-
-                    <li class="nav-item mb-2">
-                        <NavLink href="/guardian" class="nav-link icon-btn" title="Guardian Security" @onclick="CloseFlyout">
-                            <i class="bi bi-shield-check fs-5"></i>
                         </NavLink>
                     </li>
 
