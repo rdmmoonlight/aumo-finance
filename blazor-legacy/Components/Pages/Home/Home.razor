@@ -1,10 +1,15 @@
 @page "/"
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Web
 @namespace AumoFinance.Components.Pages.Home
 
-@attribute [AllowAnonymous]
+@* Proteksi halaman: Wajib Authenticated User *@
+@attribute [Authorize]
 @rendermode InteractiveServer
+
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
 
 <PageTitle>Aumo Finance</PageTitle>
 
@@ -17,24 +22,39 @@
             <MarketWidget />
         </div>
 
-        <!-- Clean & Minimalist Content (Tanpa Header Besar) -->
+        <!-- Clean & Minimalist Content -->
         <div class="text-center content-body">
             <p class="description-text mb-4">
                 @DescriptionText
             </p>
 
-            <!-- Futuristic Navigation Actions -->
-            <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
-                <NavLink href="/Dashboard" class="btn-nebula btn-nebula-primary">
-                    <i class="bi bi-speedometer2 me-2"></i>
-                    <span>Dashboard</span>
-                </NavLink>
+            <!-- Futuristic Navigation Actions berdasarkan Status Auth -->
+            <AuthorizeView>
+                <Authorized>
+                    <div class="d-flex justify-content-center align-items-center gap-3 flex-wrap">
+                        <NavLink href="/Dashboard" class="btn-nebula btn-nebula-primary">
+                            <i class="bi bi-speedometer2 me-2"></i>
+                            <span>Dashboard</span>
+                        </NavLink>
 
-                <NavLink href="/Journal" class="btn-nebula btn-nebula-secondary">
-                    <i class="bi bi-journal-text me-2"></i>
-                    <span>General Journal</span>
-                </NavLink>
-            </div>
+                        <NavLink href="/Journal" class="btn-nebula btn-nebula-secondary">
+                            <i class="bi bi-journal-text me-2"></i>
+                            <span>General Journal</span>
+                        </NavLink>
+                    </div>
+                </Authorized>
+                <NotAuthorized>
+                    <div class="text-center">
+                        <p class="text-warning mb-3">
+                            <i class="bi bi-shield-lock me-1"></i> Sesi Anda belum terverifikasi.
+                        </p>
+                        <a href="/auth/login" class="btn-nebula btn-nebula-primary">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>
+                            <span>Masuk ke Akun</span>
+                        </a>
+                    </div>
+                </NotAuthorized>
+            </AuthorizeView>
         </div>
 
     </div>
@@ -47,9 +67,16 @@
     protected string DescriptionText { get; set; } =
         "Integrated financial & accounting intelligence core. Manage full-cycle general ledgers, trial balances, and operational analytics with absolute precision.";
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        // Double-check jika user anonim, langsung alihkan ke login
+        if (user.Identity == null || !user.Identity.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/auth/login", forceLoad: true);
+        }
     }
 }
 
