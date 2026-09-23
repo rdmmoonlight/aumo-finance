@@ -3,7 +3,7 @@
 @using Microsoft.AspNetCore.Components.Web
 @namespace AumoFinance.Components.Pages.Home
 
-@attribute [Authorize]
+@attribute [AllowAnonymous]
 @rendermode InteractiveServer
 
 <PageTitle>Aumo Finance</PageTitle>
@@ -39,6 +39,19 @@
 
     </div>
 </div>
+
+@code {
+    /// <summary>
+    /// Deskripsi sistem finansial yang ditampilkan dengan gaya elegan dan presisi.
+    /// </summary>
+    protected string DescriptionText { get; set; } =
+        "Integrated financial & accounting intelligence core. Manage full-cycle general ledgers, trial balances, and operational analytics with absolute precision.";
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+}
 
 <style>
     /* Scope Styling: Deep Nebula Futuristic Theme */
