@@ -3,34 +3,10 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using AumoBackend.Core
 
-<script>
-    window.triggerSyncProcess = function(isSuccess = true, queueTimeMs = 10000) {
-        const syncBtn = document.getElementById('syncBtn');
-        const syncIcon = document.getElementById('syncIcon');
-
-        if (!syncBtn || !syncIcon) return;
-
-        syncBtn.classList.remove('text-info', 'text-danger', 'text-success', 'text-secondary');
-        syncBtn.style.color = '#d97706';
-        syncBtn.title = "Syncing: In queue (10 seconds)...";
-        syncIcon.className = "bi bi-arrow-repeat icon-spin"; 
-
-        setTimeout(() => {
-            syncIcon.classList.remove('icon-spin');
-            syncBtn.style.color = '';
-
-            if (isSuccess) {
-                syncBtn.classList.add('text-info');
-                syncBtn.title = "Sync: Saved to Database";
-                syncIcon.className = "bi bi-cloud-check";
-            } else {
-                syncBtn.classList.add('text-danger');
-                syncBtn.title = "Sync: Error saving data!";
-                syncIcon.className = "bi bi-cloud-slash";
-            }
-        }, queueTimeMs);
-    };
-</script>
+@* Injeksi Service menggunakan atribut Blazor standar *@
+@inject IDbContextFactory<AppDbContext> DbFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject IJSRuntime JSRuntime
 
 <header class="navbar navbar-expand topbar-solid py-2 sticky-top position-relative" style="min-height: 56px;">
     <div class="container-xxl px-3 d-flex align-items-center justify-content-between h-100 position-relative">
@@ -57,8 +33,8 @@
                 </button>
                 <ul class="dropdown-menu dropdown-menu-end shadow-lg border-secondary border-opacity-25" style="font-size: 0.8rem; min-width: 150px;">
                     <li><h6 class="dropdown-header py-1 text-uppercase tracking-wider" style="font-size: 0.65rem;">Theme Interface</h6></li>
-                    <li><button type="button" class="dropdown-item py-1 d-flex align-items-center gap-2" onclick="setAppTheme('dark')"><i class="bi bi-moon-stars-fill text-warning"></i> Dark Nebula</button></li>
-                    <li><button type="button" class="dropdown-item py-1 d-flex align-items-center gap-2" onclick="setAppTheme('light')"><i class="bi bi-sun-fill text-warning"></i> Light Minimal</button></li>
+                    <li><button type="button" class="dropdown-item py-1 d-flex align-items-center gap-2" @onclick='() => SetThemeAsync("dark")'><i class="bi bi-moon-stars-fill text-warning"></i> Dark Nebula</button></li>
+                    <li><button type="button" class="dropdown-item py-1 d-flex align-items-center gap-2" @onclick='() => SetThemeAsync("light")'><i class="bi bi-sun-fill text-warning"></i> Light Minimal</button></li>
                 </ul>
             </div>
         </div>
@@ -139,12 +115,6 @@
 </AuthorizeView>
 
 @code {
-    [Inject]
-    private IDbContextFactory<AppDbContext> DbFactory { get; set; } = default!;
-
-    [Inject]
-    private AuthenticationStateProvider AuthStateProvider { get; set; } = default!;
-
     private string? activePeriodName;
     private bool hasActivePeriod;
     private bool isViewingClosed;
@@ -161,8 +131,10 @@
             var currentUserIdStr = user.FindFirstValue(ClaimTypes.NameIdentifier);
             if (Guid.TryParse(currentUserIdStr, out var currentUserId))
             {
+                // Penggunaan DbContextFactory yang aman
                 await using var context = await DbFactory.CreateDbContextAsync();
                 var activePeriodObj = await context.Periods
+                    .AsNoTracking()
                     .FirstOrDefaultAsync(p => p.UserId == currentUserId && p.IsSelected);
 
                 if (activePeriodObj != null)
@@ -176,6 +148,18 @@
                         : (isViewingClosed ? "bi-lock-fill text-secondary" : "bi-calendar2-check text-success");
                 }
             }
+        }
+    }
+
+    private async Task SetThemeAsync(string theme)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("setAppTheme", theme);
+        }
+        catch (JSException)
+        {
+            // Menangani kegagalan jika JS Interop dipanggil sebelum pragerender selesai
         }
     }
 }
