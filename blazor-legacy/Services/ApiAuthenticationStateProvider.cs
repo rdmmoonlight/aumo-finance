@@ -1,17 +1,23 @@
 using System.Net.Http.Json;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace AumoBlazor.Services;
 
 public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<ApiAuthenticationStateProvider> _logger;
 
-    public ApiAuthenticationStateProvider(HttpClient httpClient, ILogger<ApiAuthenticationStateProvider> logger)
+    public ApiAuthenticationStateProvider(
+        HttpClient httpClient, 
+        IHttpContextAccessor httpContextAccessor,
+        ILogger<ApiAuthenticationStateProvider> logger)
     {
         _httpClient = httpClient;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -19,8 +25,16 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
         try
         {
-            // Memanggil endpoint rujukan backend: /api/v1/auth/me
-            var response = await _httpClient.GetAsync("api/v1/auth/me");
+            var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
+
+            // PERBAIKAN UTAMA: Teruskan Cookie dari HttpContext pengguna ke request HttpClient
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
+            {
+                request.Headers.Add("Cookie", cookieHeader.ToString());
+            }
+
+            var response = await _httpClient.SendAsync(request);
 
             if (response.IsSuccessStatusCode)
             {
@@ -43,7 +57,8 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
                         }
                     }
 
-                    var identity = new ClaimsIdentity(claims, "ApiAuth");
+                    // Menandai klaim terautentikasi dengan jenis autentikasi "CookieAuth"
+                    var identity = new ClaimsIdentity(claims, "CookieAuth");
                     var user = new ClaimsPrincipal(identity);
 
                     return new AuthenticationState(user);
@@ -52,14 +67,17 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Gagal memverifikasi status autentikasi dari backend.");
+            _logger.LogError(ex, "Gagal memverifikasi status autentikasi dari backend API.");
         }
 
-        // Return Anonymous jika gagal
+        // Kembalikan Anonymous User jika gagal terautentikasi
         return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
     }
 
-    public void NotifyAuthenticationStateChanged()
+    /// <summary>
+    /// Dipanggil setelah proses Login / Logout untuk memperbarui UI Blazor secara mendadak.
+    /// </summary>
+    public void NotifyUserAuthenticationStateChanged()
     {
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
     }
