@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using AumoFinance.Components;
@@ -47,10 +48,19 @@ namespace AumoBlazor
                 webApiUrl += "/";
             }
 
-            // Register HttpClient terpusat yang mengarah ke Backend API
-            builder.Services.AddScoped(sp => new HttpClient
+            // Register HttpClient terpusat yang mendukung Cookies & Credentials ke Backend API
+            builder.Services.AddScoped(sp =>
             {
-                BaseAddress = new Uri(webApiUrl)
+                var handler = new HttpClientHandler
+                {
+                    UseCookies = true,
+                    CookieContainer = new CookieContainer()
+                };
+
+                return new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(webApiUrl)
+                };
             });
 
             // =====================================
@@ -79,7 +89,7 @@ namespace AumoBlazor
                     options.SlidingExpiration = true;
                     options.Cookie.Name = $"{appName}.Session";
                     options.Cookie.HttpOnly = true;
-                    // Menggunakan SameAsRequest agar fleksibel di HTTP lokal & HTTPS production
+                    // Flexible Secure Policy untuk Dev (HTTP) & Production (HTTPS)
                     options.Cookie.SecurePolicy = builder.Environment.IsDevelopment() 
                         ? CookieSecurePolicy.SameAsRequest 
                         : CookieSecurePolicy.Always;
@@ -154,7 +164,7 @@ namespace AumoBlazor
             else
             {
                 app.UseHsts();
-                app.UseHttpsRedirection(); // Paksa HTTPS saat deployment di cloud (Render, DLL)
+                app.UseHttpsRedirection(); // Paksa HTTPS di cloud deployment
 
                 app.Use(async (context, next) =>
                 {
