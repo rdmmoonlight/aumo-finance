@@ -8,20 +8,17 @@
 
 <div class="d-flex flex-column min-vh-100 min-vw-0 aumo-main-shell">
 
-    <!-- TOPBAR -->
-    <AuthorizeView>
-        <Authorized>
-            <AumoBlazor.Components.Layout.TopBar />
-        </Authorized>
-    </AuthorizeView>
-
-    <!-- SHELL UTAMA (Hapus overflow-hidden agar sticky sidebar berfungsi sempurna) -->
+    <!-- SHELL UTAMA -->
     <div class="d-flex flex-grow-1 position-relative">
         
-        <!-- SIDEBAR (Sticky di sebelah kiri) -->
-        <AumoBlazor.Components.Layout.Sidebar />
+        <!-- NAVIGATION MENU (Sidebar / Header Nav) -->
+        <AuthorizeView>
+            <Authorized>
+                <AumoBlazor.Components.Layout.NavMenu />
+            </Authorized>
+        </AuthorizeView>
 
-        <!-- MAIN CONTENT AREA (Hapus margin-left: 60px dan overflow-auto) -->
+        <!-- MAIN CONTENT AREA -->
         <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
             @Body
         </main>
