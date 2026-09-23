@@ -60,8 +60,9 @@
                             </div>
                         }
 
-                        <!-- Login Form dengan Antiforgery & SSR Form Handler -->
+                        <!-- Login Form dengan AntiforgeryToken (Mencegah HTTP 400) -->
                         <EditForm Model="Input" OnValidSubmit="HandleLoginAsync" FormName="LoginForm" method="post">
+                            <AntiforgeryToken />
                             <DataAnnotationsValidator />
                             <ValidationSummary class="text-danger small mb-3" />
 
@@ -149,7 +150,7 @@
     [SupplyParameterFromQuery(Name = "infoMessage")]
     private string? QueryInfoMessage { get; set; }
 
-    [SupplyParameterFromForm]
+    [SupplyParameterFromForm(FormName = "LoginForm")]
     private LoginInputModel Input { get; set; } = default!;
 
     private string? successMessage;
@@ -184,7 +185,7 @@
 
             if (response.IsSuccessStatusCode)
             {
-                // Unpack Flat Response dari AuthController
+                // Unpack Flat Response dari AuthController backend
                 var result = await response.Content.ReadFromJsonAsync<BackendLoginResponse>();
 
                 if (result?.Success == true)
@@ -193,7 +194,7 @@
 
                     Guid.TryParse(result.UserId, out var parsedUserId);
 
-                    // Logging ke GuardianService UI (Positional parameters)
+                    // Logging ke GuardianService UI (Menggunakan argumen posisional)
                     await GuardianService.CreateSessionAsync(
                         parsedUserId != Guid.Empty ? parsedUserId : Guid.NewGuid(),
                         "COOKIE_SESSION",
