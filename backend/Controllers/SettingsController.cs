@@ -6,14 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 namespace AumoBackend.Controllers
 {
     [ApiController]
-    [Route("/api/v1/guardian")]
+    [Route("/api/v1/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-    public class GuardianController : ControllerBase
+    public class SettingsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IGuardianService _guardianService;
 
-        public GuardianController(
+        public SettingsController(
             UserManager<ApplicationUser> userManager,
             IGuardianService guardianService)
         {
@@ -21,24 +21,23 @@ namespace AumoBackend.Controllers
             _guardianService = guardianService;
         }
 
-        [HttpGet("dashboard")]
+        [HttpGet("guardian/dashboard")]
         public async Task<IActionResult> GetDashboard()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized(new { success = false, message = "User not authenticated." });
+            if (user == null) return Unauthorized();
 
             var activeSessions = await _guardianService.GetActiveSessionsAsync(user.Id);
             var loginActivities = await _guardianService.GetLoginActivitiesAsync(user.Id);
 
-            var failedAttempts = loginActivities.Count(a => !a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
+            var failedAttempts = loginActivities.Count(a =>!a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
             var lastSuccess = loginActivities.FirstOrDefault(a => a.IsSuccess)?.CreatedAt;
 
             var dashboard = new GuardianDashboardViewModel
             {
                 SecurityStatus = new SecurityStatusViewModel
                 {
-                    StatusLevel = failedAttempts > 3 ? "Warning" : "Good",
+                    StatusLevel = failedAttempts > 3? "Warning" : "Good",
                     ActiveSessionsCount = activeSessions.Count,
                     FailedAttemptsLast24Hours = failedAttempts,
                     LastSuccessfulLogin = lastSuccess
@@ -71,26 +70,24 @@ namespace AumoBackend.Controllers
             return Ok(new { success = true, data = dashboard });
         }
 
-        [HttpPost("revoke-session/{sessionId}")]
+        [HttpPost("guardian/revoke-session/{sessionId}")]
         public async Task<IActionResult> RevokeSession(Guid sessionId)
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized(new { success = false, message = "User not authenticated." });
+            if (user == null) return Unauthorized();
 
             await _guardianService.RevokeSessionAsync(sessionId, user.Id);
-            return Ok(new { success = true, message = "Session revoked successfully." });
+            return Ok(new { success = true, message = "Session revoked." });
         }
 
-        [HttpPost("revoke-all-sessions")]
+        [HttpPost("guardian/revoke-all-sessions")]
         public async Task<IActionResult> RevokeAllSessions()
         {
             var user = await _userManager.GetUserAsync(User);
-            if (user == null)
-                return Unauthorized(new { success = false, message = "User not authenticated." });
+            if (user == null) return Unauthorized();
 
             await _guardianService.RevokeAllSessionsAsync(user.Id);
-            return Ok(new { success = true, message = "All other sessions revoked successfully." });
+            return Ok(new { success = true, message = "All other sessions revoked." });
         }
     }
 }
