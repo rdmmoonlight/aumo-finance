@@ -23,20 +23,17 @@ namespace AumoBackend.Controllers
         private readonly Client _supabaseClient;
         private const string BucketName = "avatars";
 
+        // Inject Supabase.Client langsung dari Dependency Injection Container
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IGuardianService guardianService,
-            IConfiguration configuration)
+            Client supabaseClient)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _guardianService = guardianService;
-
-            // Inisialisasi Supabase Client
-            var supabaseUrl = configuration["Supabase:Url"];
-            var supabaseKey = configuration["Supabase:Key"];
-            _supabaseClient = new Client(supabaseUrl, supabaseKey);
+            _supabaseClient = supabaseClient;
         }
 
         #region Profile Settings
@@ -111,7 +108,7 @@ namespace AumoBackend.Controllers
 
             try
             {
-                // Inisialisasi koneksi ke Supabase
+                // Inisialisasi koneksi ke Supabase jika belum terinisialisasi
                 await _supabaseClient.InitializeAsync();
 
                 var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
