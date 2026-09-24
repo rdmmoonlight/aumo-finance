@@ -1,4 +1,5 @@
 "use client";
+
 import { useState, useEffect, useRef } from "react";
 import { useTheme } from "next-themes";
 import {
@@ -20,12 +21,12 @@ import {
   IconHistory,
   IconLoader2,
   IconPalette,
-  IconLock,
   IconPhone,
   IconUpload,
   IconTrash,
   IconKey,
 } from "@tabler/icons-react";
+
 import {
   useGetApiV1AuthMeQuery,
   useGetApiV1SettingsGuardianDashboardQuery,
@@ -36,6 +37,7 @@ import {
   usePostApiV1SettingsChangePasswordMutation,
   useDeleteApiV1SettingsDeleteAccountMutation,
 } from "@/lib/generatedApi";
+
 import {
   Card,
   CardContent,
@@ -82,20 +84,27 @@ export default function SettingsPage() {
   const [guardianTab, setGuardianTab] = useState("health");
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Form Profile State
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [bio, setBio] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Form Password State
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
+  // RTK Query Hooks
   const {
     data: rawUser,
     isLoading: loadingUser,
     refetch: refetchMe,
   } = useGetApiV1AuthMeQuery();
   const user = rawUser as UserProfile | undefined;
+
   const {
     data: dashboardResponse,
     isLoading: loadingGuardian,
@@ -105,6 +114,7 @@ export default function SettingsPage() {
   } = useGetApiV1SettingsGuardianDashboardQuery(undefined, {
     skip: mainTab !== "security",
   });
+
   const [updateProfile, { isLoading: isUpdatingProfile }] =
     usePutApiV1SettingsProfileMutation();
   const [uploadAvatar, { isLoading: isUploadingAvatar }] =
@@ -113,12 +123,14 @@ export default function SettingsPage() {
     usePostApiV1SettingsChangePasswordMutation();
   const [deleteAccount, { isLoading: isDeletingAccount }] =
     useDeleteApiV1SettingsDeleteAccountMutation();
+
   const [revokeSession, { isLoading: isRevokingSession }] =
     usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation();
   const [revokeAll, { isLoading: isRevokingAll }] =
     usePostApiV1SettingsGuardianRevokeAllSessionsMutation();
 
   useEffect(() => setMounted(true), []);
+
   useEffect(() => {
     if (user) {
       setFullName(user.fullName || "");
@@ -146,6 +158,7 @@ export default function SettingsPage() {
     }
   };
 
+  // Submit Profile Changes
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -165,14 +178,23 @@ export default function SettingsPage() {
     }
   };
 
+  // Upload Avatar File via RTK Query
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
     const formData = new FormData();
     formData.append("file", file);
+
     try {
-      const res: any = await uploadAvatar(formData as any).unwrap();
-      setAvatarPreview(res.avatarUrl);
+      const res: any = await uploadAvatar({
+        body: formData as any,
+      }).unwrap();
+
+      const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl;
+      if (newAvatarUrl) {
+        setAvatarPreview(newAvatarUrl);
+      }
       showNotification("Avatar berhasil diunggah!");
       refetchMe();
     } catch (err: any) {
@@ -180,12 +202,14 @@ export default function SettingsPage() {
     }
   };
 
+  // Submit Password Change
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword || !newPassword) {
       showNotification("Semua field password harus diisi", true);
       return;
     }
+
     try {
       await changePassword({
         changePasswordRequest: { currentPassword, newPassword },
@@ -198,13 +222,15 @@ export default function SettingsPage() {
     }
   };
 
+  // Delete Account
   const handleDeleteAccount = async () => {
     if (
       !confirm(
-        "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan!",
+        "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan!"
       )
     )
       return;
+
     try {
       await deleteAccount().unwrap();
       alert("Akun Anda telah dihapus.");
@@ -244,6 +270,7 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col h-[calc(100vh-72px)]">
+      {/* HEADER + STICKY TABS */}
       <div className="shrink-0 space-y-3 bg-background sticky top-0 z-10 pb-3">
         <div className="flex items-center justify-between">
           <div>
@@ -259,7 +286,7 @@ export default function SettingsPage() {
                 "gap-1.5 h-6 text-xs px-2.5",
                 isHealthy
                   ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-                  : "border-amber-500/20 bg-amber-500/10 text-amber-600",
+                  : "border-amber-500/20 bg-amber-500/10 text-amber-600"
               )}
             >
               <IconHeartbeat size={12} /> {security?.statusLevel || "Loading"}
@@ -281,6 +308,8 @@ export default function SettingsPage() {
         </Tabs>
         <Separator className="mt-3" />
       </div>
+
+      {/* CONTENT SCROLL AREA */}
       <div className="flex-1 overflow-y-auto pr-1 -mr-1 mt-1 space-y-4">
         {successMessage && (
           <Alert className="py-2 bg-emerald-500/10 border-emerald-500/20 text-emerald-600">
@@ -298,6 +327,8 @@ export default function SettingsPage() {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* ACCOUNT TAB */}
         {mainTab === "account" && (
           <div className="space-y-4">
             <Card className="shadow-sm">
@@ -346,15 +377,17 @@ export default function SettingsPage() {
                             <IconLoader2 size={13} className="animate-spin" />
                           ) : (
                             <IconUpload size={13} />
-                          )}{" "}
+                          )}
                           Change Avatar
                         </Button>
-                        <p className="text- text-muted-foreground mt-1">
+                        <p className="text-xs text-muted-foreground mt-1">
                           JPG, PNG, WEBP max 2MB.
                         </p>
                       </div>
                     </div>
+
                     <Separator />
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <div className="space-y-1">
                         <Label className="text-xs flex items-center gap-1">
@@ -400,6 +433,7 @@ export default function SettingsPage() {
                         />
                       </div>
                     </div>
+
                     <div className="space-y-1">
                       <Label className="text-xs">Bio</Label>
                       <Textarea
@@ -410,6 +444,7 @@ export default function SettingsPage() {
                         className="text-xs resize-none"
                       />
                     </div>
+
                     <div className="flex justify-end pt-2">
                       <Button
                         type="submit"
@@ -419,7 +454,7 @@ export default function SettingsPage() {
                       >
                         {isUpdatingProfile && (
                           <IconLoader2 size={13} className="animate-spin" />
-                        )}{" "}
+                        )}
                         Save Profile Changes
                       </Button>
                     </div>
@@ -431,6 +466,8 @@ export default function SettingsPage() {
                 )}
               </CardContent>
             </Card>
+
+            {/* CHANGE PASSWORD */}
             <Card className="shadow-sm">
               <CardHeader className="py-3 px-4">
                 <CardTitle className="text-sm flex items-center gap-2">
@@ -474,12 +511,14 @@ export default function SettingsPage() {
                   >
                     {isChangingPassword && (
                       <IconLoader2 size={13} className="animate-spin" />
-                    )}{" "}
+                    )}
                     Update Password
                   </Button>
                 </form>
               </CardContent>
             </Card>
+
+            {/* DELETE ACCOUNT */}
             <Card className="border-destructive/30 bg-destructive/5 shadow-sm">
               <CardHeader className="py-3 px-4">
                 <CardTitle className="text-sm text-destructive flex items-center gap-2">
@@ -500,13 +539,15 @@ export default function SettingsPage() {
                 >
                   {isDeletingAccount && (
                     <IconLoader2 size={13} className="animate-spin" />
-                  )}{" "}
+                  )}
                   Delete Account Permanently
                 </Button>
               </CardContent>
             </Card>
           </div>
         )}
+
+        {/* APPEARANCE TAB */}
         {mainTab === "appearance" && (
           <Card className="shadow-sm">
             <CardHeader className="py-3 px-4">
@@ -529,7 +570,7 @@ export default function SettingsPage() {
                       htmlFor={opt.id}
                       className={cn(
                         "relative flex flex-col rounded-lg border p-3 cursor-pointer hover:bg-accent/50 transition-all",
-                        active ? "border-primary bg-primary/5" : "border-muted",
+                        active ? "border-primary bg-primary/5" : "border-muted"
                       )}
                     >
                       <RadioGroupItem
@@ -542,7 +583,7 @@ export default function SettingsPage() {
                         className={cn("mb-2", active && "text-primary")}
                       />
                       <span className="text-xs font-medium">{opt.label}</span>
-                      <span className="text- text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {opt.desc}
                       </span>
                       {active && (
@@ -557,6 +598,8 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
         )}
+
+        {/* SECURITY TAB */}
         {mainTab === "security" && (
           <div className="space-y-3">
             {loadingGuardian ? (
@@ -572,7 +615,7 @@ export default function SettingsPage() {
                   </TabsTrigger>
                   <TabsTrigger value="sessions" className="text-xs h-5 gap-1">
                     <IconDeviceLaptop size={12} /> Sessions{" "}
-                    <Badge variant="secondary" className="ml-1 h-4 px-1 text-">
+                    <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
                       {sessions.length}
                     </Badge>
                   </TabsTrigger>
@@ -580,12 +623,13 @@ export default function SettingsPage() {
                     <IconHistory size={12} /> Logs
                   </TabsTrigger>
                 </TabsList>
+
                 <TabsContent value="health" className="mt-3">
                   <div className="grid grid-cols-2 gap-3">
                     <Card className="py-3 px-3 flex items-center justify-between">
                       <div>
                         <p className="text-xs font-medium">Failed 24h</p>
-                        <p className="text- text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           Kegagalan login
                         </p>
                       </div>
@@ -602,14 +646,14 @@ export default function SettingsPage() {
                     <Card className="py-3 px-3 flex items-center justify-between">
                       <div>
                         <p className="text-xs font-medium">Last Login</p>
-                        <p className="text- text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           Waktu login terakhir
                         </p>
                       </div>
                       <span className="text-xs font-mono text-muted-foreground">
                         {security?.lastSuccessfulLogin
                           ? new Date(
-                              security.lastSuccessfulLogin,
+                              security.lastSuccessfulLogin
                             ).toLocaleString("id-ID", {
                               dateStyle: "short",
                               timeStyle: "short",
@@ -619,6 +663,7 @@ export default function SettingsPage() {
                     </Card>
                   </div>
                 </TabsContent>
+
                 <TabsContent value="sessions" className="mt-3">
                   <Card className="overflow-hidden">
                     <div className="flex items-center justify-between py-2 px-3 border-b bg-muted/30">
@@ -656,25 +701,25 @@ export default function SettingsPage() {
                               <TableCell className="py-1.5 text-xs font-medium">
                                 {s.deviceName}
                                 {s.isCurrent && (
-                                  <Badge className="ml-1 h-4 text- bg-emerald-500/15 text-emerald-600">
+                                  <Badge className="ml-1 h-4 text-xs bg-emerald-500/15 text-emerald-600">
                                     Current
                                   </Badge>
                                 )}
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {s.browser}
-                                <div className="text-">{s.operatingSystem}</div>
+                                <div className="text-xs">{s.operatingSystem}</div>
                               </TableCell>
                               <TableCell className="py-1.5 font-mono text-xs">
                                 {s.ipAddress}
-                                <div className="text- text-muted-foreground">
+                                <div className="text-xs text-muted-foreground">
                                   {s.country}
                                 </div>
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {s.lastActivityAt
                                   ? new Date(
-                                      s.lastActivityAt,
+                                      s.lastActivityAt
                                     ).toLocaleTimeString("id-ID")
                                   : "-"}
                               </TableCell>
@@ -704,6 +749,7 @@ export default function SettingsPage() {
                     </ScrollArea>
                   </Card>
                 </TabsContent>
+
                 <TabsContent value="logs" className="mt-3">
                   <Card className="overflow-hidden">
                     <div className="flex items-center justify-between py-2 px-3 border-b bg-muted/30">
@@ -734,7 +780,7 @@ export default function SettingsPage() {
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {a.device}
-                                <div className="text-">{a.operatingSystem}</div>
+                                <div className="text-xs">{a.operatingSystem}</div>
                               </TableCell>
                               <TableCell className="py-1.5 font-mono text-xs">
                                 {a.ipAddress}
@@ -746,19 +792,19 @@ export default function SettingsPage() {
                                       {
                                         dateStyle: "short",
                                         timeStyle: "short",
-                                      },
+                                      }
                                     )
                                   : "-"}
                               </TableCell>
                               <TableCell className="py-1.5 text-right">
                                 {a.isSuccess ? (
-                                  <Badge className="h-4 text- bg-emerald-500/15 text-emerald-600">
+                                  <Badge className="h-4 text-xs bg-emerald-500/15 text-emerald-600">
                                     OK
                                   </Badge>
                                 ) : (
                                   <Badge
                                     variant="destructive"
-                                    className="h-4 text-"
+                                    className="h-4 text-xs"
                                   >
                                     Fail
                                   </Badge>
