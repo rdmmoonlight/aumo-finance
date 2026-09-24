@@ -27,7 +27,7 @@ public record ResendRequest(string Email);
 public class ApplicationUser : IdentityUser<Guid>
 {
     public string? FullName { get; set; }
-    
+
     // Properti tambahan untuk mengatasi error di SettingsController.cs
     public string? Bio { get; set; }
     public string? AvatarUrl { get; set; }
