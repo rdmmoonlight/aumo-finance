@@ -101,46 +101,58 @@ export default function UserSettings() {
       showNotification("Profil berhasil diperbarui!");
       refetchMe();
     } catch (err: any) {
-      showNotification(err?.data?.message || "Gagal memperbarui profil", true);
+      showNotification(err?.data?.message || err?.data?.title || "Gagal memperbarui profil", true);
     }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith("image/")) return showNotification("File harus berupa gambar (JPG, PNG, WEBP)", true);
-    if (file.size > 2 * 1024 * 1024) return showNotification("Ukuran gambar maksimal 2MB", true);
+
+    if (!file.type.startsWith("image/")) {
+      return showNotification("File harus berupa gambar (JPG, PNG, WEBP)", true);
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      return showNotification("Ukuran gambar maksimal 2MB", true);
+    }
 
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview(localPreview);
 
     const formData = new FormData();
+    // Key 'file' disesuaikan dengan parameter IFormFile pada C# Controller
     formData.append("file", file);
 
     try {
-      const res: any = await uploadAvatar(formData as any).unwrap();
+      // RTK Query mutasi file upload
+      const res: any = await uploadAvatar({ body: formData } as any).unwrap();
       const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
+
       if (newAvatarUrl) setAvatarPreview(newAvatarUrl);
       showNotification("Avatar berhasil diunggah!");
       refetchMe();
     } catch (err: any) {
-      showNotification(err?.data?.message || "Gagal mengunggah avatar", true);
+      showNotification(err?.data?.message || err?.data?.title || "Gagal mengunggah avatar", true);
       setAvatarPreview(user?.avatarUrl || null);
     } finally {
-      if (e.target) e.target.value = "";
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     }
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentPassword ||!newPassword) return showNotification("Semua field password harus diisi", true);
+    if (!currentPassword || !newPassword) {
+      return showNotification("Semua field password harus diisi", true);
+    }
     try {
       await changePassword({ changePasswordRequest: { currentPassword, newPassword } }).unwrap();
       showNotification("Password berhasil diubah!");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err: any) {
-      showNotification(err?.data?.message || "Gagal mengubah password", true);
+      showNotification(err?.data?.message || err?.data?.title || "Gagal mengubah password", true);
     }
   };
 
@@ -151,7 +163,7 @@ export default function UserSettings() {
       alert("Akun Anda telah dihapus.");
       window.location.href = "/login";
     } catch (err: any) {
-      showNotification(err?.data?.message || "Gagal menghapus akun", true);
+      showNotification(err?.data?.message || err?.data?.title || "Gagal menghapus akun", true);
     }
   };
 
@@ -172,15 +184,17 @@ export default function UserSettings() {
 
       <Card className="shadow-sm">
         <CardHeader className="py-3 px-4">
-          <CardTitle className="text-sm flex items-center gap-2"><IconUser size={15} /> Edit Profile</CardTitle>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <IconUser size={15} /> Edit Profile
+          </CardTitle>
           <CardDescription className="text-xs">Perbarui informasi profil dan identitas akun Anda.</CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0">
-          {loadingUser? (
+          {loadingUser ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-4">
               <IconLoader2 size={16} className="animate-spin" /> Memuat data profil...
             </div>
-          ) : user? (
+          ) : user ? (
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 border">
@@ -190,9 +204,27 @@ export default function UserSettings() {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" />
-                  <Button type="button" variant="outline" size="sm" className="h-8 text-xs gap-1.5" disabled={isUploadingAvatar} onClick={() => fileInputRef.current?.click()}>
-                    {isUploadingAvatar? <IconLoader2 size={13} className="animate-spin" /> : <IconUpload size={13} />} Change Avatar
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-8 text-xs gap-1.5"
+                    disabled={isUploadingAvatar}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    {isUploadingAvatar ? (
+                      <IconLoader2 size={13} className="animate-spin" />
+                    ) : (
+                      <IconUpload size={13} />
+                    )}{" "}
+                    Change Avatar
                   </Button>
                   <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP max 2MB.</p>
                 </div>
@@ -200,25 +232,54 @@ export default function UserSettings() {
               <Separator />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1"><IconUser size={12} /> Full Name</Label>
-                  <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nama lengkap" className="h-8 text-xs" />
+                  <Label className="text-xs flex items-center gap-1">
+                    <IconUser size={12} /> Full Name
+                  </Label>
+                  <Input
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="Nama lengkap"
+                    className="h-8 text-xs"
+                  />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1"><IconId size={12} /> Username</Label>
-                  <Input value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Username" className="h-8 text-xs" />
+                  <Label className="text-xs flex items-center gap-1">
+                    <IconId size={12} /> Username
+                  </Label>
+                  <Input
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Username"
+                    className="h-8 text-xs"
+                  />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1 text-muted-foreground"><IconMail size={12} /> Email (ReadOnly)</Label>
+                  <Label className="text-xs flex items-center gap-1 text-muted-foreground">
+                    <IconMail size={12} /> Email (ReadOnly)
+                  </Label>
                   <Input value={user.email || ""} disabled className="h-8 text-xs bg-muted/50 cursor-not-allowed" />
                 </div>
                 <div className="space-y-1">
-                  <Label className="text-xs flex items-center gap-1"><IconPhone size={12} /> Phone Number</Label>
-                  <Input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} placeholder="+62812345678" className="h-8 text-xs" />
+                  <Label className="text-xs flex items-center gap-1">
+                    <IconPhone size={12} /> Phone Number
+                  </Label>
+                  <Input
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="+62812345678"
+                    className="h-8 text-xs"
+                  />
                 </div>
               </div>
               <div className="space-y-1">
                 <Label className="text-xs">Bio</Label>
-                <Textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Tuliskan deskripsi singkat profil Anda..." rows={3} className="text-xs resize-none" />
+                <Textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  placeholder="Tuliskan deskripsi singkat profil Anda..."
+                  rows={3}
+                  className="text-xs resize-none"
+                />
               </div>
               <div className="flex justify-end pt-2">
                 <Button type="submit" size="sm" className="h-8 text-xs gap-1.5" disabled={isUpdatingProfile}>
@@ -234,13 +295,35 @@ export default function UserSettings() {
 
       <Card className="shadow-sm">
         <CardHeader className="py-3 px-4">
-          <CardTitle className="text-sm flex items-center gap-2"><IconKey size={15} /> Change Password</CardTitle>
-          <CardDescription className="text-xs">Perbarui kata sandi Anda secara berkala demi keamanan akun.</CardDescription>
+          <CardTitle className="text-sm flex items-center gap-2">
+            <IconKey size={15} /> Change Password
+          </CardTitle>
+          <CardDescription className="text-xs">
+            Perbarui kata sandi Anda secara berkala demi keamanan akun.
+          </CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0">
           <form onSubmit={handlePasswordSubmit} className="space-y-3 max-w-md">
-            <div className="space-y-1"><Label className="text-xs">Current Password</Label><Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} placeholder="••••••••" className="h-8 text-xs" /></div>
-            <div className="space-y-1"><Label className="text-xs">New Password</Label><Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="h-8 text-xs" /></div>
+            <div className="space-y-1">
+              <Label className="text-xs">Current Password</Label>
+              <Input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-8 text-xs"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">New Password</Label>
+              <Input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="••••••••"
+                className="h-8 text-xs"
+              />
+            </div>
             <Button type="submit" size="sm" variant="outline" className="h-8 text-xs gap-1.5" disabled={isChangingPassword}>
               {isChangingPassword && <IconLoader2 size={13} className="animate-spin" />} Update Password
             </Button>
@@ -250,11 +333,21 @@ export default function UserSettings() {
 
       <Card className="border-destructive/30 bg-destructive/5 shadow-sm">
         <CardHeader className="py-3 px-4">
-          <CardTitle className="text-sm text-destructive flex items-center gap-2"><IconTrash size={15} /> Delete Account</CardTitle>
-          <CardDescription className="text-xs text-destructive/80">Menghapus akun Anda secara permanen. Tindakan ini tidak dapat dibatalkan.</CardDescription>
+          <CardTitle className="text-sm text-destructive flex items-center gap-2">
+            <IconTrash size={15} /> Delete Account
+          </CardTitle>
+          <CardDescription className="text-xs text-destructive/80">
+            Menghapus akun Anda secara permanen. Tindakan ini tidak dapat dibatalkan.
+          </CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0 flex justify-end">
-          <Button variant="destructive" size="sm" className="h-8 text-xs gap-1.5" onClick={handleDeleteAccount} disabled={isDeletingAccount}>
+          <Button
+            variant="destructive"
+            size="sm"
+            className="h-8 text-xs gap-1.5"
+            onClick={handleDeleteAccount}
+            disabled={isDeletingAccount}
+          >
             {isDeletingAccount && <IconLoader2 size={13} className="animate-spin" />} Delete Account Permanently
           </Button>
         </CardContent>
