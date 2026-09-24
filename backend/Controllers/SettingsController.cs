@@ -20,7 +20,7 @@ namespace AumoBackend.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IGuardianService _guardianService;
         private readonly Client? _supabaseClient;
-        private const string BucketName = "avatars";
+        private const string BucketName = "aumo-storage";
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
