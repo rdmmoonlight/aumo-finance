@@ -15,14 +15,14 @@
                     </div>
                 </Authorizing>
                 <NotAuthorized Context="authContext">
-                    @if (authContext.User.Identity?.IsAuthenticated != true)
+                    @if (authContext.User.Identity == null || !authContext.User.Identity.IsAuthenticated)
                     {
-                        @* Redirect ke halaman login jika pengguna belum terautentikasi *@
+                        @* Redirect ke halaman login hanya jika pengguna belum terautentikasi *@
                         <RedirectToLogin />
                     }
                     else
                     {
-                        @* Tampilan jika pengguna sudah login tetapi tidak memiliki role/akses *@
+                        @* Tampilan jika pengguna sudah login tetapi tidak memiliki role/claim/akses *@
                         <div class="d-flex align-items-center justify-content-center min-vh-100 w-100 py-5" style="background-color: var(--aumo-bg, #0D1117);">
                             <div class="container">
                                 <div class="card border rounded-4 p-4 p-md-5 shadow-lg mx-auto text-center" 
