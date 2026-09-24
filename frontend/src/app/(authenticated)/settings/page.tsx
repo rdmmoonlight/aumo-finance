@@ -226,7 +226,7 @@ export default function SettingsPage() {
   const handleDeleteAccount = async () => {
     if (
       !confirm(
-        "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan!"
+        "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan!",
       )
     )
       return;
@@ -286,7 +286,7 @@ export default function SettingsPage() {
                 "gap-1.5 h-6 text-xs px-2.5",
                 isHealthy
                   ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-                  : "border-amber-500/20 bg-amber-500/10 text-amber-600"
+                  : "border-amber-500/20 bg-amber-500/10 text-amber-600",
               )}
             >
               <IconHeartbeat size={12} /> {security?.statusLevel || "Loading"}
@@ -570,7 +570,7 @@ export default function SettingsPage() {
                       htmlFor={opt.id}
                       className={cn(
                         "relative flex flex-col rounded-lg border p-3 cursor-pointer hover:bg-accent/50 transition-all",
-                        active ? "border-primary bg-primary/5" : "border-muted"
+                        active ? "border-primary bg-primary/5" : "border-muted",
                       )}
                     >
                       <RadioGroupItem
@@ -615,7 +615,10 @@ export default function SettingsPage() {
                   </TabsTrigger>
                   <TabsTrigger value="sessions" className="text-xs h-5 gap-1">
                     <IconDeviceLaptop size={12} /> Sessions{" "}
-                    <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="ml-1 h-4 px-1 text-xs"
+                    >
                       {sessions.length}
                     </Badge>
                   </TabsTrigger>
@@ -653,7 +656,7 @@ export default function SettingsPage() {
                       <span className="text-xs font-mono text-muted-foreground">
                         {security?.lastSuccessfulLogin
                           ? new Date(
-                              security.lastSuccessfulLogin
+                              security.lastSuccessfulLogin,
                             ).toLocaleString("id-ID", {
                               dateStyle: "short",
                               timeStyle: "short",
@@ -708,7 +711,9 @@ export default function SettingsPage() {
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {s.browser}
-                                <div className="text-xs">{s.operatingSystem}</div>
+                                <div className="text-xs">
+                                  {s.operatingSystem}
+                                </div>
                               </TableCell>
                               <TableCell className="py-1.5 font-mono text-xs">
                                 {s.ipAddress}
@@ -719,7 +724,7 @@ export default function SettingsPage() {
                               <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {s.lastActivityAt
                                   ? new Date(
-                                      s.lastActivityAt
+                                      s.lastActivityAt,
                                     ).toLocaleTimeString("id-ID")
                                   : "-"}
                               </TableCell>
@@ -780,7 +785,9 @@ export default function SettingsPage() {
                               </TableCell>
                               <TableCell className="py-1.5 text-xs text-muted-foreground">
                                 {a.device}
-                                <div className="text-xs">{a.operatingSystem}</div>
+                                <div className="text-xs">
+                                  {a.operatingSystem}
+                                </div>
                               </TableCell>
                               <TableCell className="py-1.5 font-mono text-xs">
                                 {a.ipAddress}
@@ -792,7 +799,7 @@ export default function SettingsPage() {
                                       {
                                         dateStyle: "short",
                                         timeStyle: "short",
-                                      }
+                                      },
                                     )
                                   : "-"}
                               </TableCell>
