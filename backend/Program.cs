@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
@@ -312,6 +313,9 @@ namespace AumoBackend
                     });
                 });
             }
+
+            // PERBAIKAN: Aktifkan Static Files agar avatar di /uploads/avatars/... bisa diakses publik oleh browser
+            app.UseStaticFiles();
 
             // Route Native OpenAPI JSON & UI Scalar
             app.MapOpenApi(); // Dokumentasi skema JSON di "/openapi/v1.json"
