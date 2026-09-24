@@ -265,11 +265,12 @@ namespace AumoBlazor
             app.UseAuthorization();
 
             // =====================================
-            // 8. ENDPOINTS
+            // 8. ENDPOINTS (TIDAK BENTROK RUTE ROOT)
             // =====================================
             app.MapHealthChecks("/health");
             app.MapControllers();
 
+            // Memetakan Blazor Hub & Root Route (/) secara eksklusif ke Blazor Components
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
