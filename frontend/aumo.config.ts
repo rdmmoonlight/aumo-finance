@@ -1,10 +1,11 @@
 import path from "node:path";
 
 export const aumoConfig = {
-  envPrefix: ["WEB_"],
+  envPrefix: ["WEB_", "NEXT_PUBLIC_"],
 
   get backendTarget() {
     let target =
+      process.env.NEXT_PUBLIC_API_URL ||
       process.env.WEB_API_URL ||
       "http://localhost:5000";
 
@@ -28,13 +29,13 @@ export const aumoConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**.supabase.co", // FIX: Menggunakan '**' agar mencakup seluruh subdomain Supabase
+        hostname: "**.supabase.co", // Mencakup seluruh subdomain Supabase
         port: "",
-        pathname: "/**", // FIX: Diperluas agar mencakup /object/public/, /render/image/, dll.
+        pathname: "/**",
       },
       {
         protocol: "https",
-        hostname: "aumonext-api.onrender.com", // Jaga-jaga jika gambar disajikan langsung dari backend
+        hostname: "aumonext-api.onrender.com", // Jika gambar disajikan langsung dari backend
         port: "",
         pathname: "/**",
       },
