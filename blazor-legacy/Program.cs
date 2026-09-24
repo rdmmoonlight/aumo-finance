@@ -56,9 +56,10 @@ namespace AumoBlazor
             // =====================================
             // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR FOR BLAZOR SERVER COOKIES
             // =====================================
+            // AMBIL URL API DARI ENV WEB_API_URL (DILENGKAPI FALLBACK LOKAL TANPA HARDCODE PROD)
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
-                ?? "https://localhost:5001/";
+                ?? "http://localhost:5000/";
 
             if (!webApiUrl.EndsWith("/"))
             {
