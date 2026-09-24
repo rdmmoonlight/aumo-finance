@@ -10,6 +10,7 @@ using AumoFinance.Components;
 using AumoFinance.Models;
 using AumoFinance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -108,7 +109,7 @@ namespace AumoBlazor
             });
 
             // =====================================
-            // 4. COOKIE AUTHENTICATION & BLAZOR AUTH STATE
+            // 4. COOKIE AUTHENTICATION & AUTHORIZATION
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -126,7 +127,7 @@ namespace AumoBlazor
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Lax;
 
-                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket/_blazor dari anonim
+                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket /_blazor dan API dari anonim
                     options.Events.OnRedirectToLogin = context =>
                     {
                         if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/api"))
@@ -154,7 +155,14 @@ namespace AumoBlazor
                     };
                 });
 
-            builder.Services.AddAuthorization();
+            // REVISI: Pastikan tidak ada FallbackPolicy yang memaksa seluruh endpoint /_blazor dikunci secara global.
+            // Proteksi halaman dilakukan secara eksplisit via <AuthorizeRouteView> atau atribut [Authorize] pada komponen.
+            builder.Services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+            });
 
             // Authentication state provider berbasis Cookie / HttpContext User
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
