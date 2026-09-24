@@ -1,11 +1,11 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Threading;
 using System.Threading.Tasks;
 using AumoFinance.Components;
 using AumoFinance.Models;
@@ -67,10 +67,11 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // Register Custom DelegatingHandler
+            // Register Cookie Store Singleton & DelegatingHandler
+            builder.Services.AddSingleton<CircuitCookieStore>();
             builder.Services.AddTransient<CookieHeaderHandler>();
 
-            // Scoped HttpClient untuk Blazor Server Circuit dengan Handler Terintegrasi
+            // Scoped HttpClient untuk Blazor Server Circuit
             builder.Services.AddHttpClient("BackendApi", client =>
             {
                 client.BaseAddress = new Uri(webApiUrl);
@@ -78,11 +79,14 @@ namespace AumoBlazor
             .AddHttpMessageHandler<CookieHeaderHandler>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
-                UseCookies = false // Nonaktifkan penanganan cookie bawaan agar DelegatingHandler yang pegang kendali
+                UseCookies = false // Matikan kontrol cookie internal agar DelegatingHandler memegang kendali
             });
 
-            // Daftarkan HttpClient default dari HttpClientFactory
-            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BackendApi"));
+            builder.Services.AddScoped(sp =>
+            {
+                var factory = sp.GetRequiredService<IHttpClientFactory>();
+                return factory.CreateClient("BackendApi");
+            });
 
             // =====================================
             // 3. DATA PROTECTION & COOKIE POLICY
@@ -97,8 +101,8 @@ namespace AumoBlazor
             builder.Services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => false;
-                options.MinimumSameSitePolicy = SameSiteMode.Unspecified; // Fleksibel untuk komunikasi cross-site
-                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS
+                options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
+                options.Secure = CookieSecurePolicy.Always;
             });
 
             // =====================================
@@ -120,7 +124,6 @@ namespace AumoBlazor
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Lax;
 
-                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket / _blazor dari anonim
                     options.Events.OnRedirectToLogin = context =>
                     {
                         if (IsApiOrBlazorCircuitRequest(context.Request))
@@ -148,10 +151,8 @@ namespace AumoBlazor
                     };
                 });
 
-            // Otorisasi standar (TIDAK Menggunakan FallbackPolicy Global agar /_blazor WebSocket anonim diperbolehkan)
             builder.Services.AddAuthorization();
 
-            // Authentication state provider berbasis Cookie / HttpContext User
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
@@ -167,7 +168,6 @@ namespace AumoBlazor
                     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
                 });
 
-            // Stabilisasi WebSocket di Render (Mencegah Connection Aborted/Dropped)
             builder.Services.AddSignalR(hubOptions =>
             {
                 hubOptions.EnableDetailedErrors = builder.Environment.IsDevelopment();
@@ -265,12 +265,11 @@ namespace AumoBlazor
             app.UseAuthorization();
 
             // =====================================
-            // 8. ENDPOINTS (TIDAK BENTROK RUTE ROOT)
+            // 8. ENDPOINTS
             // =====================================
             app.MapHealthChecks("/health");
             app.MapControllers();
 
-            // Memetakan Blazor Hub & Root Route (/) secara eksklusif ke Blazor Components
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
@@ -323,37 +322,65 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // COOKIE HEADER HANDLER UNTUK HTTPCLIENT (PENYEMPURNAAN PERSISTENSI SIGNALR CIRCUIT)
+    // CIRCUIT COOKIE STORE (UNTUK MEMORY FALLBACK SAAT WEBSOCKET AKTIF)
+    // =====================================
+    public class CircuitCookieStore
+    {
+        private string? _lastKnownCookie;
+
+        public string? LastKnownCookie
+        {
+            get => _lastKnownCookie;
+            set
+            {
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    _lastKnownCookie = value;
+                }
+            }
+        }
+    }
+
+    // =====================================
+    // REVISED COOKIE HEADER HANDLER
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        private string? _cachedCookieHeader;
+        private readonly CircuitCookieStore _cookieStore;
 
-        public CookieHeaderHandler(IHttpContextAccessor httpContextAccessor)
+        public CookieHeaderHandler(IHttpContextAccessor httpContextAccessor, CircuitCookieStore cookieStore)
         {
             _httpContextAccessor = httpContextAccessor;
+            _cookieStore = cookieStore;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
         {
             var httpContext = _httpContextAccessor.HttpContext;
+            string? cookieString = null;
 
-            // 1. Ambil cookie dari HttpContext jika ada (pada HTTP Request pertama/Prerender)
+            // 1. Ambil cookie dari HttpContext (Request HTTP biasa / Prerender)
             if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
             {
-                var cookieString = cookieValues.ToString();
+                cookieString = cookieValues.ToString();
                 if (!string.IsNullOrWhiteSpace(cookieString))
                 {
-                    _cachedCookieHeader = cookieString;
+                    _cookieStore.LastKnownCookie = cookieString; // Simpan ke memory fallback
                 }
             }
 
-            // 2. Gunakan cookie yang tersimpan jika HttpContext sudah null (saat berada di Blazor SignalR Circuit)
-            if (!string.IsNullOrWhiteSpace(_cachedCookieHeader))
+            // 2. Jika HttpContext null (berada di dalam SignalR WebSocket Circuit), gunakan Fallback dari Store
+            if (string.IsNullOrWhiteSpace(cookieString))
+            {
+                cookieString = _cookieStore.LastKnownCookie;
+            }
+
+            // 3. Pasang Cookie ke Header Request
+            if (!string.IsNullOrWhiteSpace(cookieString))
             {
                 request.Headers.Remove("Cookie");
-                request.Headers.TryAddWithoutValidation("Cookie", _cachedCookieHeader);
+                request.Headers.TryAddWithoutValidation("Cookie", cookieString);
             }
 
             return base.SendAsync(request, cancellationToken);
@@ -381,7 +408,7 @@ namespace AumoBlazor
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Saat Prerendering)
+            // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Prerendering)
             var httpContextUser = _httpContextAccessor.HttpContext?.User;
             if (httpContextUser?.Identity?.IsAuthenticated == true)
             {
@@ -397,17 +424,13 @@ namespace AumoBlazor
                 {
                     var userProfile = await response.Content.ReadFromJsonAsync<UserProfileResponse>();
 
-                    if (userProfile != null && (userProfile.Success || !string.IsNullOrEmpty(userProfile.Email)))
+                    if (userProfile?.Success == true && !string.IsNullOrEmpty(userProfile.Email))
                     {
-                        var email = userProfile.Email ?? userProfile.UserName ?? "user@aumo.local";
-                        var userId = userProfile.UserId ?? Guid.NewGuid().ToString();
-                        var name = userProfile.FullName ?? userProfile.UserName ?? email;
-
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier, userId),
-                            new Claim(ClaimTypes.Name, name),
-                            new Claim(ClaimTypes.Email, email)
+                            new Claim(ClaimTypes.NameIdentifier, userProfile.UserId ?? string.Empty),
+                            new Claim(ClaimTypes.Name, userProfile.FullName ?? userProfile.UserName ?? "User"),
+                            new Claim(ClaimTypes.Email, userProfile.Email)
                         };
 
                         if (userProfile.Roles != null)
@@ -433,7 +456,7 @@ namespace AumoBlazor
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        public void NotifyUserAuthenticationStateChanged()
+        public void NotifyAuthenticationStateChanged()
         {
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
