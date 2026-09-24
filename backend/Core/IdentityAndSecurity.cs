@@ -4,11 +4,25 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AumoBackend.Core;
 
-/// <summary>
-/// The application's user record, owned entirely by ASP.NET Core Identity.
-/// Replaces the old hand-rolled User entity, which only ever shadowed
-/// accounts that actually lived in a separate external Aumo.Api service.
-/// </summary>
+public class LoginRequest
+    {
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public bool RememberMe { get; set; } = false;
+        public bool IsMobileClient { get; set; } = false;
+        public string? UserAgent { get; set; }
+        public string? OperatingSystem { get; set; }
+    }
+
+    public class GoogleLoginRequest
+    {
+        public string IdToken { get; set; } = string.Empty;
+        public bool IsMobileClient { get; set; } = false;
+    }
+    
+    // TEST EMAIL DTOs
+    public record ResendRequest(string Email);
+
 public class ApplicationUser : IdentityUser<Guid>
 {
     public string? FullName { get; set; }
