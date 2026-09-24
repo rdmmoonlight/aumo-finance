@@ -41,7 +41,7 @@ interface UserProfile {
   roles?: string[];
 }
 
-export default function UserSettings() {
+export default function AccountSettings() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -63,16 +63,22 @@ export default function UserSettings() {
   const [changePassword, { isLoading: isChangingPassword }] = usePostApiV1SettingsChangePasswordMutation();
   const [deleteAccount, { isLoading: isDeletingAccount }] = useDeleteApiV1SettingsDeleteAccountMutation();
 
+  // Sinkronisasi data user dari API ke form lokal (tanpa menimpa avatar jika avatarPreview lokal lebih baru)
   useEffect(() => {
     if (user) {
-      setFullName(user.fullName || "");
-      setUserName(user.userName || "");
-      setPhoneNumber(user.phoneNumber || "");
-      setBio(user.bio || "");
-      setAvatarPreview(user.avatarUrl || null);
+      setFullName((prev) => prev || user.fullName || "");
+      setUserName((prev) => prev || user.userName || "");
+      setPhoneNumber((prev) => prev || user.phoneNumber || "");
+      setBio((prev) => prev || user.bio || "");
+      
+      // Mengutamakan URL Avatar publik dari backend jika tidak sedang ada blob preview
+      if (!avatarPreview || !avatarPreview.startsWith("blob:")) {
+        setAvatarPreview(user.avatarUrl || null);
+      }
     }
   }, [user]);
 
+  // Cleanup memori untuk object URL blob
   useEffect(() => {
     return () => {
       if (avatarPreview && avatarPreview.startsWith("blob:")) {
@@ -96,10 +102,17 @@ export default function UserSettings() {
     e.preventDefault();
     try {
       await updateProfile({
-        updateProfileRequest: { fullName, userName, phoneNumber, bio, avatarUrl: avatarPreview || undefined },
+        updateProfileRequest: { 
+          fullName, 
+          userName, 
+          phoneNumber, 
+          bio, 
+          avatarUrl: avatarPreview && !avatarPreview.startsWith("blob:") ? avatarPreview : undefined 
+        },
       }).unwrap();
+      
       showNotification("Profil berhasil diperbarui!");
-      refetchMe();
+      await refetchMe();
     } catch (err: any) {
       showNotification(err?.data?.message || err?.data?.title || "Gagal memperbarui profil", true);
     }
@@ -116,23 +129,30 @@ export default function UserSettings() {
       return showNotification("Ukuran gambar maksimal 2MB", true);
     }
 
+    // Tampilkan pratinjau instan dari lokal
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview(localPreview);
 
     const formData = new FormData();
-    // Key 'file' disesuaikan dengan parameter IFormFile pada C# Controller
     formData.append("file", file);
 
     try {
-      // RTK Query mutasi file upload
+      // Kirim mutasi upload
       const res: any = await uploadAvatar({ body: formData } as any).unwrap();
       const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
 
-      if (newAvatarUrl) setAvatarPreview(newAvatarUrl);
+      if (newAvatarUrl) {
+        // Terapkan URL publik baru langsung ke state tampilan
+        setAvatarPreview(newAvatarUrl);
+      }
+
       showNotification("Avatar berhasil diunggah!");
-      refetchMe();
+      
+      // Refresh cache API Me secara eksplisit
+      await refetchMe();
     } catch (err: any) {
       showNotification(err?.data?.message || err?.data?.title || "Gagal mengunggah avatar", true);
+      // Kembalikan ke avatar awal dari database jika upload gagal
       setAvatarPreview(user?.avatarUrl || null);
     } finally {
       if (fileInputRef.current) {
@@ -198,7 +218,8 @@ export default function UserSettings() {
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 border">
-                  <AvatarImage src={avatarPreview || undefined} />
+                  {/* Gunakan key opsional berdasarkan avatarPreview agar komponen Avatar berefek render ulang sempurna */}
+                  <AvatarImage key={avatarPreview} src={avatarPreview || undefined} />
                   <AvatarFallback className="font-bold text-sm">
                     {(fullName || user.userName || "U").substring(0, 2).toUpperCase()}
                   </AvatarFallback>
