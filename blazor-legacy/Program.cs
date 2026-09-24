@@ -45,12 +45,6 @@ namespace AumoBlazor
                 options.KnownProxies.Clear();
             });
 
-            builder.Services.AddHttpsRedirection(options =>
-            {
-                options.RedirectStatusCode = StatusCodes.Status308PermanentRedirect;
-                options.HttpsPort = 443;
-            });
-
             builder.Services.AddHsts(options =>
             {
                 options.Preload = true;
@@ -103,8 +97,8 @@ namespace AumoBlazor
             builder.Services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => false;
-                options.MinimumSameSitePolicy = SameSiteMode.Lax;
-                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS untuk Cross-Site/Proxy
+                options.MinimumSameSitePolicy = SameSiteMode.Unspecified; // Fleksibel untuk komunikasi cross-site
+                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS
             });
 
             // =====================================
@@ -126,7 +120,7 @@ namespace AumoBlazor
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Lax;
 
-                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket/_blazor dari anonim
+                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket / _blazor dari anonim
                     options.Events.OnRedirectToLogin = context =>
                     {
                         if (IsApiOrBlazorCircuitRequest(context.Request))
@@ -154,7 +148,7 @@ namespace AumoBlazor
                     };
                 });
 
-            // Pastikan Otorisasi Tidak Mengunci Fallback Policy Global Secara Tidak Sengaja
+            // Otorisasi standar (TIDAK Menggunakan FallbackPolicy Global agar /_blazor WebSocket anonim diperbolehkan)
             builder.Services.AddAuthorization();
 
             // Authentication state provider berbasis Cookie / HttpContext User
@@ -234,7 +228,6 @@ namespace AumoBlazor
             else
             {
                 app.UseHsts();
-                app.UseHttpsRedirection();
 
                 app.Use(async (context, next) =>
                 {
