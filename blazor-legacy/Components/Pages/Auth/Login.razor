@@ -20,7 +20,7 @@
         <div class="row justify-content-center">
             <div class="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5 text-start">
                 
-                <!-- Card Container dengan Variable CSS Fallback -->
+                <!-- Card Container -->
                 <div class="card border rounded-4 p-4 p-md-5 shadow-lg" 
                      style="background-color: var(--aumo-surface, #161B22); border-color: var(--bs-border-color, #2A313C) !important;">
                     <div class="card-body p-0">
@@ -185,7 +185,6 @@
                 IsMobileClient = false
             });
 
-            // 1. Ambil konten sebagai string mentah untuk menghindari JsonException saat server mengembalikan Plain Text / HTML
             var rawContent = await response.Content.ReadAsStringAsync();
 
             BackendLoginResponse? result = null;
@@ -201,14 +200,13 @@
                 }
             }
 
-            // 2. Evaluasi hasil respon
+            // 1. Evaluasi Berhasil Login
             if (response.IsSuccessStatusCode && result?.Success == true)
             {
                 Logger.LogInformation("User logged in successfully via API.");
 
                 Guid.TryParse(result.UserId, out var parsedUserId);
 
-                // Logging ke GuardianService UI
                 try
                 {
                     await GuardianService.CreateSessionAsync(
@@ -227,24 +225,28 @@
                     Logger.LogWarning(exGuard, "Gagal mencatat sesi di GuardianService.");
                 }
 
-                // Force load WAJIB bernilai true agar browser melakukan hard refresh & Cookie Auth dari backend langsung terikat ke SignalR Circuit Blazor Server
                 Navigation.NavigateTo("/", forceLoad: true);
                 return;
             }
 
-            // 3. Tangani Pesan Gagal
-            if (result != null && !string.IsNullOrWhiteSpace(result.Message))
+            // 2. Evaluasi Pesan Gagal / Lockout
+            if (result != null && result.LockoutEnd.HasValue)
+            {
+                // Format tanggal UTC dari backend ke Waktu Lokal pengguna
+                var localLockout = result.LockoutEnd.Value.ToLocalTime();
+                errorMessage = $"Akun Anda terkunci karena terlalu banyak percobaan login. Silakan coba lagi setelah jam {localLockout:HH:mm:ss} WIB ({localLockout:dd MMM yyyy}).";
+            }
+            else if (result != null && !string.IsNullOrWhiteSpace(result.Message))
             {
                 errorMessage = result.Message;
             }
             else if (!response.IsSuccessStatusCode)
             {
-                // Jika respon bukan JSON, tampilkan pesan ramah berdasarkan HTTP Status Code
                 errorMessage = response.StatusCode switch
                 {
                     System.Net.HttpStatusCode.Unauthorized => "Email atau password yang Anda masukkan salah.",
                     System.Net.HttpStatusCode.BadRequest => "Format data login tidak valid.",
-                    System.Net.HttpStatusCode.TooManyRequests => "Terlalu banyak percobaan login. Silakan tunggu beberapa saat.",
+                    System.Net.HttpStatusCode.TooManyRequests => "Terlalu banyak percobaan login. Akun dikunci sementara.",
                     _ => !string.IsNullOrWhiteSpace(rawContent) && !rawContent.StartsWith("<") 
                         ? rawContent 
                         : $"Gagal melakukan authentication ({response.StatusCode})."
@@ -286,5 +288,6 @@
         public string? UserId { get; set; }
         public string? FullName { get; set; }
         public string? Token { get; set; }
+        public DateTime? LockoutEnd { get; set; }
     }
 }
