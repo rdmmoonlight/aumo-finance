@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using AumoFinance.Components;
 using AumoFinance.Models;
@@ -66,23 +67,22 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // Register Custom DelegatingHandler untuk Meneruskan Cookie Browser ke Backend API
+            // Register Custom DelegatingHandler
             builder.Services.AddTransient<CookieHeaderHandler>();
 
-            // Scoped HttpClient untuk Blazor Server Circuit
-            builder.Services.AddScoped(sp =>
+            // Scoped HttpClient untuk Blazor Server Circuit dengan Handler Terintegrasi
+            builder.Services.AddHttpClient("BackendApi", client =>
             {
-                var cookieHandler = sp.GetRequiredService<CookieHeaderHandler>();
-                cookieHandler.InnerHandler = new HttpClientHandler
-                {
-                    UseCookies = false // Matikan kontrol cookie internal agar DelegatingHandler memegang kendali
-                };
-
-                return new HttpClient(cookieHandler)
-                {
-                    BaseAddress = new Uri(webApiUrl)
-                };
+                client.BaseAddress = new Uri(webApiUrl);
+            })
+            .AddHttpMessageHandler<CookieHeaderHandler>()
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                UseCookies = false // Nonaktifkan penanganan cookie bawaan agar DelegatingHandler yang pegang kendali
             });
+
+            // Daftarkan HttpClient default dari HttpClientFactory
+            builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("BackendApi"));
 
             // =====================================
             // 3. DATA PROTECTION & COOKIE POLICY
@@ -323,29 +323,37 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // COOKIE HEADER HANDLER UNTUK HTTPCLIENT (FIXED & REVISED)
+    // COOKIE HEADER HANDLER UNTUK HTTPCLIENT (PENYEMPURNAAN PERSISTENSI SIGNALR CIRCUIT)
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private string? _cachedCookieHeader;
 
         public CookieHeaderHandler(IHttpContextAccessor httpContextAccessor)
         {
             _httpContextAccessor = httpContextAccessor;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var httpContext = _httpContextAccessor.HttpContext;
+
+            // 1. Ambil cookie dari HttpContext jika ada (pada HTTP Request pertama/Prerender)
             if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
             {
                 var cookieString = cookieValues.ToString();
                 if (!string.IsNullOrWhiteSpace(cookieString))
                 {
-                    request.Headers.Remove("Cookie");
-                    // Menggunakan TryAddWithoutValidation agar header cookie aman dari FormatException
-                    request.Headers.TryAddWithoutValidation("Cookie", cookieString);
+                    _cachedCookieHeader = cookieString;
                 }
+            }
+
+            // 2. Gunakan cookie yang tersimpan jika HttpContext sudah null (saat berada di Blazor SignalR Circuit)
+            if (!string.IsNullOrWhiteSpace(_cachedCookieHeader))
+            {
+                request.Headers.Remove("Cookie");
+                request.Headers.TryAddWithoutValidation("Cookie", _cachedCookieHeader);
             }
 
             return base.SendAsync(request, cancellationToken);
@@ -373,7 +381,7 @@ namespace AumoBlazor
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Prerendering)
+            // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Saat Prerendering)
             var httpContextUser = _httpContextAccessor.HttpContext?.User;
             if (httpContextUser?.Identity?.IsAuthenticated == true)
             {
@@ -389,13 +397,17 @@ namespace AumoBlazor
                 {
                     var userProfile = await response.Content.ReadFromJsonAsync<UserProfileResponse>();
 
-                    if (userProfile?.Success == true && !string.IsNullOrEmpty(userProfile.Email))
+                    if (userProfile != null && (userProfile.Success || !string.IsNullOrEmpty(userProfile.Email)))
                     {
+                        var email = userProfile.Email ?? userProfile.UserName ?? "user@aumo.local";
+                        var userId = userProfile.UserId ?? Guid.NewGuid().ToString();
+                        var name = userProfile.FullName ?? userProfile.UserName ?? email;
+
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier, userProfile.UserId ?? string.Empty),
-                            new Claim(ClaimTypes.Name, userProfile.FullName ?? userProfile.UserName ?? "User"),
-                            new Claim(ClaimTypes.Email, userProfile.Email)
+                            new Claim(ClaimTypes.NameIdentifier, userId),
+                            new Claim(ClaimTypes.Name, name),
+                            new Claim(ClaimTypes.Email, email)
                         };
 
                         if (userProfile.Roles != null)
@@ -421,7 +433,7 @@ namespace AumoBlazor
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
-        public void NotifyAuthenticationStateChanged()
+        public void NotifyUserAuthenticationStateChanged()
         {
             NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
         }
