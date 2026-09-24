@@ -35,12 +35,12 @@ namespace AumoBackend
             // =====================================
             // 1. DATABASE CONFIGURATION (PostgreSQL)
             // =====================================
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
+            var connectionString = builder.Configuration["DATABASE_URL"]
                 ?? Environment.GetEnvironmentVariable("DATABASE_URL");
 
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new InvalidOperationException("Database connection string 'DefaultConnection' or 'DATABASE_URL' is missing.");
+                throw new InvalidOperationException("Database connection string 'DATABASE_URL' is missing.");
             }
 
             builder.Services.AddDbContextFactory<AppDbContext>(options =>
@@ -57,10 +57,10 @@ namespace AumoBackend
             var supabaseUrl = builder.Configuration["SUPABASE_URL"]
                 ?? Environment.GetEnvironmentVariable("SUPABASE_URL");
 
-            var supabaseAnonKey = builder.Configuration["SUPABASE_ANON_KEY"]
-                ?? Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY");
+            var supabaseKey = builder.Configuration["SUPABASE_KEY"]
+                ?? Environment.GetEnvironmentVariable("SUPABASE_KEY");
 
-            if (!string.IsNullOrWhiteSpace(supabaseUrl) && !string.IsNullOrWhiteSpace(supabaseAnonKey))
+            if (!string.IsNullOrWhiteSpace(supabaseUrl) && !string.IsNullOrWhiteSpace(supabaseKey))
             {
                 builder.Services.AddScoped<Supabase.Client>(provider =>
                 {
@@ -69,13 +69,13 @@ namespace AumoBackend
                         AutoRefreshToken = true,
                         AutoConnectRealtime = false
                     };
-                    return new Supabase.Client(supabaseUrl, supabaseAnonKey, options);
+                    return new Supabase.Client(supabaseUrl, supabaseKey, options);
                 });
             }
             else
             {
                 var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
-                logger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_ANON_KEY' belum dikonfigurasi.");
+                logger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_KEY' belum dikonfigurasi.");
             }
 
             // =====================================
