@@ -22,6 +22,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
+using Supabase;
 
 namespace AumoBackend
 {
@@ -51,14 +52,41 @@ namespace AumoBackend
             builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             // =====================================
-            // 2. DATA PROTECTION & PERSISTENCE
+            // 2. SUPABASE CONFIGURATION (Storage / Avatar Bucket)
+            // =====================================
+            var supabaseUrl = builder.Configuration["SUPABASE_URL"]
+                ?? Environment.GetEnvironmentVariable("SUPABASE_URL");
+
+            var supabaseAnonKey = builder.Configuration["SUPABASE_ANON_KEY"]
+                ?? Environment.GetEnvironmentVariable("SUPABASE_ANON_KEY");
+
+            if (!string.IsNullOrWhiteSpace(supabaseUrl) && !string.IsNullOrWhiteSpace(supabaseAnonKey))
+            {
+                builder.Services.AddScoped<Supabase.Client>(provider =>
+                {
+                    var options = new SupabaseOptions
+                    {
+                        AutoRefreshToken = true,
+                        AutoConnectRealtime = false
+                    };
+                    return new Supabase.Client(supabaseUrl, supabaseAnonKey, options);
+                });
+            }
+            else
+            {
+                var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
+                logger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_ANON_KEY' belum dikonfigurasi.");
+            }
+
+            // =====================================
+            // 3. DATA PROTECTION & PERSISTENCE
             // =====================================
             builder.Services.AddDataProtection()
                 .PersistKeysToDbContext<AppDbContext>()
                 .SetApplicationName("AumoFinanceApp");
 
             // =====================================
-            // 3. ASP.NET CORE IDENTITY SETUP
+            // 4. ASP.NET CORE IDENTITY SETUP
             // =====================================
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
@@ -103,7 +131,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 4. AUTHENTICATION & AUTHORIZATION
+            // 5. AUTHENTICATION & AUTHORIZATION
             // =====================================
             var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"]
                 ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
@@ -169,7 +197,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 5. REST API CORE SETUP, OPENAPI & CORS
+            // 6. REST API CORE SETUP, OPENAPI & CORS
             // =====================================
             builder.Services.AddControllers();
 
@@ -197,7 +225,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 6. INFRASTRUCTURE & HEALTH CHECKS
+            // 7. INFRASTRUCTURE & HEALTH CHECKS
             // =====================================
             builder.Services.AddHealthChecks();
             builder.Services.AddMemoryCache();
@@ -209,7 +237,7 @@ namespace AumoBackend
             builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
 
             // =====================================
-            // 7. FORWARDED HEADERS CONFIGURATION
+            // 8. FORWARDED HEADERS CONFIGURATION
             // =====================================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -238,7 +266,7 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 8. AUTOMATIC DATABASE MIGRATION & SEEDING
+            // 9. AUTOMATIC DATABASE MIGRATION & SEEDING
             // =====================================
             using (var scope = app.Services.CreateScope())
             {
@@ -282,7 +310,7 @@ namespace AumoBackend
             }
 
             // =====================================
-            // 9. HTTP PIPELINE MIDDLEWARE ORDER
+            // 10. HTTP PIPELINE MIDDLEWARE ORDER
             // =====================================
             if (app.Environment.IsDevelopment())
             {
@@ -314,12 +342,11 @@ namespace AumoBackend
                 });
             }
 
-            // PERBAIKAN: Aktifkan Static Files agar avatar di /uploads/avatars/... bisa diakses publik oleh browser
             app.UseStaticFiles();
 
             // Route Native OpenAPI JSON & UI Scalar
-            app.MapOpenApi(); // Dokumentasi skema JSON di "/openapi/v1.json"
-            app.MapScalarApiReference(); // Tampilan UI interaktif di "/scalar/v1"
+            app.MapOpenApi();
+            app.MapScalarApiReference();
 
             app.UseRouting();
             app.UseCors("AllowFrontend");
@@ -327,7 +354,7 @@ namespace AumoBackend
             app.UseAuthorization();
 
             // =====================================
-            // 10. ENDPOINTS & MAP CONTROLLERS
+            // 11. ENDPOINTS & MAP CONTROLLERS
             // =====================================
             app.MapMethods("/", new[] { "GET", "HEAD" }, () => Results.Ok(new
             {
@@ -347,14 +374,14 @@ namespace AumoBackend
             app.MapControllers();
 
             // =====================================
-            // 11. RUN APPLICATION
+            // 12. RUN APPLICATION
             // =====================================
             await app.RunAsync();
         }
     }
 
     // =====================================
-    // 12. IDENTITY EMAIL SENDER BRIDGE CLASS
+    // 13. IDENTITY EMAIL SENDER BRIDGE CLASS
     // =====================================
     public class IdentityEmailSenderBridge : IEmailSender<ApplicationUser>
     {
