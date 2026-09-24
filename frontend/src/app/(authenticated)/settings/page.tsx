@@ -41,7 +41,7 @@ export default function SettingsPage() {
 
       {/* CONTENT */}
       <div className="flex-1 overflow-y-auto pr-1 -mr-1 mt-1">
-        {mainTab === "account" && <UserSettings />}
+        {mainTab === "account" && <AccountSettings />}
         {mainTab === "application" && <ApplicationSettings />}
       </div>
     </div>
