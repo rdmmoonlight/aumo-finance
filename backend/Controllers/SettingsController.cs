@@ -29,6 +29,8 @@ namespace AumoBackend.Controllers
             _guardianService = guardianService;
         }
 
+        #region Profile Settings
+
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
@@ -57,7 +59,7 @@ namespace AumoBackend.Controllers
                 }
             }
 
-            // Update Custom Fields pada ApplicationUser (FullName, Bio, AvatarUrl)
+            // Update Custom Fields pada ApplicationUser
             user.FullName = request.FullName;
             user.Bio = request.Bio;
             if (!string.IsNullOrWhiteSpace(request.AvatarUrl))
@@ -76,6 +78,7 @@ namespace AumoBackend.Controllers
         }
 
         [HttpPost("avatar")]
+        [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadAvatar([FromForm] IFormFile file)
         {
             var user = await _userManager.GetUserAsync(User);
@@ -86,10 +89,17 @@ namespace AumoBackend.Controllers
                 return BadRequest(new { success = false, message = "No file uploaded." });
             }
 
-            // Validasi format file
+            // Batasi ukuran file maksimum 2MB
+            if (file.Length > 2 * 1024 * 1024)
+            {
+                return BadRequest(new { success = false, message = "File size exceeds limit (Max 2MB)." });
+            }
+
+            // Validasi format file (Case-Insensitive)
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!allowedExtensions.Contains(extension))
+            var extension = Path.GetExtension(file.FileName);
+
+            if (string.IsNullOrEmpty(extension) || !allowedExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
             {
                 return BadRequest(new { success = false, message = "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed." });
             }
@@ -101,7 +111,7 @@ namespace AumoBackend.Controllers
                 Directory.CreateDirectory(uploadsFolder);
             }
 
-            var fileName = $"{user.Id}_{Guid.NewGuid()}{extension}";
+            var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
             var filePath = Path.Combine(uploadsFolder, fileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -120,6 +130,10 @@ namespace AumoBackend.Controllers
                 avatarUrl = relativeAvatarUrl
             });
         }
+
+        #endregion
+
+        #region Security & Account Settings
 
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
@@ -155,6 +169,10 @@ namespace AumoBackend.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { success = true, message = "Account successfully deleted." });
         }
+
+        #endregion
+
+        #region Guardian Dashboard & Sessions
 
         [HttpGet("guardian/dashboard")]
         public async Task<IActionResult> GetDashboard()
@@ -224,5 +242,7 @@ namespace AumoBackend.Controllers
             await _guardianService.RevokeAllSessionsAsync(user.Id);
             return Ok(new { success = true, message = "All other sessions revoked." });
         }
+
+        #endregion
     }
 }
