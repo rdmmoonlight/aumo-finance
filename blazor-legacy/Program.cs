@@ -69,7 +69,7 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // SANGAT PENTING: CircuitCookieStore WAJIB Scoped (Satu per Circuit / Per User), BUKAN Singleton!
+            // CircuitCookieStore WAJIB Scoped (Satu per Circuit / Per User Browser Tab)
             builder.Services.AddScoped<CircuitCookieStore>();
             builder.Services.AddScoped<CircuitHandler, CookieCircuitHandler>();
             builder.Services.AddTransient<CookieHeaderHandler>();
@@ -168,7 +168,7 @@ namespace AumoBlazor
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents(options =>
                 {
-                    options.DetailedErrors = true; // Diaktifkan agar log mendetail jika ada error lain
+                    options.DetailedErrors = builder.Environment.IsDevelopment();
                     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
                 });
 
@@ -359,7 +359,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // SAFE COOKIE HEADER HANDLER
+    // REVISED COOKIE HEADER HANDLER (READ & WRITE COOKIES)
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
@@ -372,7 +372,7 @@ namespace AumoBlazor
             _cookieStore = cookieStore;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             string? cookieString = null;
 
@@ -386,7 +386,7 @@ namespace AumoBlazor
             }
             catch
             {
-                // Fallback aman jika HttpContext tidak dapat diakses
+                // Fallback aman untuk HttpContext
             }
 
             if (string.IsNullOrWhiteSpace(cookieString))
@@ -400,7 +400,28 @@ namespace AumoBlazor
                 request.Headers.TryAddWithoutValidation("Cookie", cookieString);
             }
 
-            return base.SendAsync(request, cancellationToken);
+            var response = await base.SendAsync(request, cancellationToken);
+
+            // TANGKAP SET-COOKIE DARI RESPON LOGIN/AUTH BACKEND API
+            if (response.Headers.TryGetValues("Set-Cookie", out var setCookieValues))
+            {
+                var newCookies = string.Join("; ", setCookieValues.Select(c => c.Split(';')[0]));
+                if (!string.IsNullOrWhiteSpace(newCookies))
+                {
+                    _cookieStore.LastKnownCookie = newCookies;
+
+                    var httpContext = _httpContextAccessor.HttpContext;
+                    if (httpContext != null && !httpContext.Response.HasStarted)
+                    {
+                        foreach (var cookieHeader in setCookieValues)
+                        {
+                            httpContext.Response.Headers.Append("Set-Cookie", cookieHeader);
+                        }
+                    }
+                }
+            }
+
+            return response;
         }
     }
 
