@@ -7,13 +7,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Supabase;
 
 namespace AumoBackend.Controllers
 {
     [ApiController]
-    [Route("/api/v1/settings")]
+    [Route("api/v1/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
     public class SettingsController : ControllerBase
     {
@@ -23,7 +22,6 @@ namespace AumoBackend.Controllers
         private readonly Client _supabaseClient;
         private const string BucketName = "avatars";
 
-        // Inject Supabase.Client langsung dari Dependency Injection Container
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -108,16 +106,13 @@ namespace AumoBackend.Controllers
 
             try
             {
-                // Inisialisasi koneksi ke Supabase jika belum terinisialisasi
-                await _supabaseClient.InitializeAsync();
-
                 var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
 
                 using var memoryStream = new MemoryStream();
                 await avatar.CopyToAsync(memoryStream);
                 var fileBytes = memoryStream.ToArray();
 
-                // Upload file langsung ke Supabase Storage Bucket
+                // Upload file ke Supabase Storage Bucket
                 await _supabaseClient.Storage
                     .From(BucketName)
                     .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = true });
