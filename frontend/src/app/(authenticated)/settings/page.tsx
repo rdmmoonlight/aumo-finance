@@ -141,7 +141,7 @@ export default function SettingsPage() {
     }
   }, [user]);
 
-  // Cleanup Object URL untuk cegah Memory Leak
+  // Memory leak cleanup untuk Blob Object URL
   useEffect(() => {
     return () => {
       if (avatarPreview && avatarPreview.startsWith("blob:")) {
@@ -167,7 +167,7 @@ export default function SettingsPage() {
     }
   };
 
-  // Submit Profile Changes
+  // Submit Update Profil
   const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -187,7 +187,7 @@ export default function SettingsPage() {
     }
   };
 
-  // Upload Avatar File via RTK Query dengan FormData
+  // Upload Avatar File ke ASP.NET Core API via Multipart Form Data
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -201,17 +201,19 @@ export default function SettingsPage() {
       return;
     }
 
+    // Tampilkan preview lokal sementara
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview(localPreview);
 
-    // Kirim menggunakan multipart/form-data
+    // BUNGKUS DENGAN KEY 'file' SUPAYA COCOK DENGAN `IFormFile file` DI C#
     const formData = new FormData();
     formData.append("file", file);
 
     try {
+      // Kirim FormData langsung ke RTK Query Mutation
       const res: any = await uploadAvatar(formData as any).unwrap();
 
-      const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl;
+      const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
       if (newAvatarUrl) {
         setAvatarPreview(newAvatarUrl);
       }
