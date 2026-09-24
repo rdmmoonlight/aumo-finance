@@ -3,27 +3,7 @@ using System.Collections.Generic;
 
 namespace AumoBackend.Core
 {
-    // AUTH DTOs
-    public class LoginRequest
-    {
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public bool RememberMe { get; set; } = false;
-        public bool IsMobileClient { get; set; } = false;
-        public string? UserAgent { get; set; }
-        public string? OperatingSystem { get; set; }
-    }
-
-    public class GoogleLoginRequest
-    {
-        public string IdToken { get; set; } = string.Empty;
-        public bool IsMobileClient { get; set; } = false;
-    }
-    
-    // TEST EMAIL DTOs
-    public record ResendRequest(string Email);
-
-    // TOOLS / IMPORT DTOs
+        // TOOLS / IMPORT DTOs
     public class JournalImportRequestDto
     {
         public int TargetYear { get; set; }
