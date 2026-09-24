@@ -3,7 +3,7 @@ import path from "node:path";
 export const aumoConfig = {
   envPrefix: ["WEB_"],
 
-  get backendTarget(): string {
+  get backendTarget() {
     let target =
       process.env.WEB_API_URL ||
       process.env.NEXT_PUBLIC_WEB_API_URL ||
@@ -24,6 +24,18 @@ export const aumoConfig = {
     "@": path.resolve(process.cwd(), "./src"),
   },
 
+  // Konfigurasi domain gambar eksternal (Supabase Storage)
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "*.supabase.co", // Wilcard ini mencakup semua subdomain Supabase
+        port: "",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
+  },
+
   getRewrites() {
     return [
       {
@@ -35,6 +47,11 @@ export const aumoConfig = {
         destination: `${this.backendTarget}/api/:path*`,
       },
     ];
+  },
+
+  // Menyambungkan rewrites ke dalam spesifikasi Next.js Config
+  async rewrites() {
+    return this.getRewrites();
   },
 };
 
