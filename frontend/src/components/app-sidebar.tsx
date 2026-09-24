@@ -47,8 +47,19 @@ import {
   useGetApiV1AuthMeQuery,
   usePostApiV1AuthLogoutMutation,
 } from "@/lib/generatedApi";
+import { cn } from "@/lib/utils";
 
-const REPORT_SECTIONS = [
+type ReportItem = {
+  title: string;
+  url: string;
+};
+
+type ReportSection = {
+  title: string;
+  items: readonly ReportItem[];
+};
+
+const REPORT_SECTIONS: readonly ReportSection[] = [
   {
     title: "General Ledger",
     items: [
@@ -108,23 +119,47 @@ const REPORT_SECTIONS = [
   },
 ] as const;
 
-const navigation = [
+type NavItem =
+  | {
+      title: string;
+      url: string;
+      icon: React.ComponentType<{ className?: string }>;
+      isGrouped?: false;
+    }
+  | {
+      title: string;
+      url: string;
+      icon: React.ComponentType<{ className?: string }>;
+      isGrouped: true;
+    };
+
+const navigation: NavItem[] = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Periods", url: "/periods", icon: Calendar },
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
-  { title: "Reports", icon: FileBarChart, url: "/reports", isGrouped: true },
+  { title: "Reports", url: "/reports", icon: FileBarChart, isGrouped: true },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
   { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
+function getUserInitials(name?: string | null) {
+  if (!name?.trim()) return "GU";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+}
+
 export function AppSidebar() {
   const pathname = usePathname();
   const dispatch = useDispatch();
   const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => setIsMounted(true), []);
+
+  React.useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
@@ -148,84 +183,90 @@ export function AppSidebar() {
   };
 
   const userData = user as
-    | { fullName?: string; userName?: string; email?: string; avatarUrl?: string }
+    | {
+        fullName?: string;
+        userName?: string;
+        email?: string;
+        avatarUrl?: string;
+      }
     | undefined;
 
-  const ICON_CLASS = "w-4 h-4 mr-2.5 shrink-0";
-
-  const isReportsActive = REPORT_SECTIONS.some((s) =>
-    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/")),
+  const isReportsActive = REPORT_SECTIONS.some((section) =>
+    section.items.some(
+      (item) =>
+        pathname === item.url || pathname.startsWith(`${item.url}/`),
+    ),
   );
 
-  // Ambil inisialisasi nama untuk AvatarFallback (misal: "John Doe" -> "JD")
-  const getUserInitials = () => {
-    const name = userData?.fullName || userData?.userName || "Guest";
-    return name.substring(0, 2).toUpperCase();
-  };
+  const displayName =
+    userData?.fullName || userData?.userName || "Guest";
+  const displayEmail = userData?.email || "Tidak ada email";
 
   return (
     <Sidebar
       collapsible="none"
-      className="border-r h-screen sticky top-0 flex flex-col justify-between"
-      style={{ "--sidebar-width": "285px" } as React.CSSProperties}
+      className="border-r h-screen sticky top-0 flex flex-col"
+      style={{ "--sidebar-width": "280px" } as React.CSSProperties}
     >
-      <SidebarHeader className="p-3.5 border-b shrink-0">
-        <h2 className="text-lg font-bold tracking-tight">Aumo Finance</h2>
+      {/* Header */}
+      <SidebarHeader className="px-4 py-3.5 border-b shrink-0">
+        <h2 className="text-base font-semibold tracking-tight">
+          Aumo Finance
+        </h2>
+        <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide uppercase">
+          Accounting Suite
+        </p>
       </SidebarHeader>
 
-      <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
-        <SidebarGroup>
-          <SidebarGroupLabel className="uppercase tracking-widest text-muted-foreground mb-2 px-2">
+      {/* Navigation */}
+      <SidebarContent className="px-2.5 py-3 flex-1 overflow-y-auto">
+        <SidebarGroup className="p-0">
+          <SidebarGroupLabel className="px-2 mb-1.5 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             Navigation
           </SidebarGroupLabel>
+
           <SidebarGroupContent>
-            <SidebarMenu className="gap-1">
+            <SidebarMenu className="gap-0.5">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                // @ts-ignore
+
                 if (item.isGrouped) {
                   return (
                     <Collapsible
                       key={item.title}
-                      defaultOpen={
-                        isReportsActive || pathname.startsWith(item.url)
-                      }
+                      defaultOpen={isReportsActive}
                       className="group/collapsible"
                     >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton
                             isActive={isReportsActive}
-                            className="text-[13.5px] h-8 font-normal w-full justify-between px-2 overflow-hidden"
+                            className="h-8 text-[13px] font-normal px-2"
                           >
-                            <div className="flex items-center min-w-0 overflow-hidden">
-                              <Icon className={ICON_CLASS} />
+                            <div className="flex items-center min-w-0 flex-1 overflow-hidden">
+                              <Icon className="size-4 mr-2.5 shrink-0 opacity-80" />
                               <span className="truncate">{item.title}</span>
                             </div>
-                            <ChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 opacity-60 shrink-0" />
+                            <ChevronRight className="size-3.5 shrink-0 opacity-50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
+
                         <CollapsibleContent>
-                          <div className="mt-1 flex flex-col gap-3">
+                          <div className="mt-1 ml-2 pl-3 border-l border-border/60 space-y-3">
                             {REPORT_SECTIONS.map((section) => (
                               <div key={section.title}>
-                                <div className="px-2 py-1 select-none">
-                                  <p className="font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
-                                    {section.title}
-                                  </p>
-                                </div>
-                                <div className="mt-1 flex flex-col gap-1">
+                                <p className="px-2 py-1 text-[10.5px] font-semibold uppercase tracking-wider text-muted-foreground/70 select-none">
+                                  {section.title}
+                                </p>
+                                <div className="mt-0.5 space-y-0.5">
                                   {section.items.map((sub) => {
                                     const isActive = pathname === sub.url;
                                     return (
-                                      <SidebarMenuItem
-                                        key={sub.url}
-                                        className="overflow-hidden"
-                                      >
+                                      <SidebarMenuItem key={sub.url}>
                                         <SidebarMenuButton
                                           asChild
                                           isActive={isActive}
-                                          className="text-[13.5px] h-8 font-normal px-2 overflow-hidden w-full"
+                                          className="h-7 text-[12.5px] font-normal px-2"
                                         >
                                           <Link
                                             href={sub.url}
@@ -248,22 +289,24 @@ export function AppSidebar() {
                   );
                 }
 
-                const isSingleActive =
+                const isActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" &&
+                    pathname.startsWith(`${item.url}/`));
+
                 return (
-                  <SidebarMenuItem key={item.title} className="overflow-hidden">
+                  <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      isActive={isSingleActive}
-                      className="text-[13.5px] h-8 font-normal px-2 overflow-hidden"
+                      isActive={isActive}
+                      className="h-8 text-[13px] font-normal px-2"
                     >
                       <Link
                         href={item.url}
                         title={item.title}
-                        className="flex items-center min-w-0 overflow-hidden w-full"
+                        className="flex items-center min-w-0 w-full overflow-hidden"
                       >
-                        <Icon className={ICON_CLASS} />
+                        <Icon className="size-4 mr-2.5 shrink-0 opacity-80" />
                         <span className="truncate">{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
@@ -275,54 +318,58 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
+      {/* User Footer */}
       <SidebarFooter className="p-2.5 border-t shrink-0">
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full justify-between h-auto py-2.5 overflow-hidden">
-                  <div className="flex items-center gap-2.5 overflow-hidden text-left min-w-0">
-                    {/* Tampilan Avatar Terintegrasi */}
-                    <Avatar className="w-8 h-8 rounded-full border shrink-0">
+                <SidebarMenuButton
+                  className={cn(
+                    "w-full h-auto py-2 px-2 justify-between",
+                    "data-[state=open]:bg-sidebar-accent",
+                  )}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
+                    <Avatar className="size-8 rounded-full border shrink-0">
                       <AvatarImage
                         key={userData?.avatarUrl}
                         src={userData?.avatarUrl || undefined}
-                        alt={userData?.fullName || "User Avatar"}
+                        alt={displayName}
                         className="object-cover"
                       />
-                      <AvatarFallback className="font-semibold text-xs bg-muted text-muted-foreground">
-                        {getUserInitials()}
+                      <AvatarFallback className="text-xs font-semibold bg-muted text-muted-foreground">
+                        {getUserInitials(displayName)}
                       </AvatarFallback>
                     </Avatar>
 
-                    <div className="flex flex-col truncate min-w-0">
-                      <span className="font-medium text-[13.5px] leading-tight truncate">
+                    <div className="flex flex-col min-w-0 truncate text-left">
+                      <span className="text-[13px] font-medium leading-tight truncate">
                         {!isMounted || isUserLoading
                           ? "Memuat..."
-                          : userData?.fullName || userData?.userName || "Guest"}
+                          : displayName}
                       </span>
-                      <span className="text-[11.5px] text-muted-foreground truncate">
-                        {!isMounted || isUserLoading
-                          ? "..."
-                          : userData?.email || "Tidak ada email"}
+                      <span className="text-[11px] text-muted-foreground truncate">
+                        {!isMounted || isUserLoading ? "..." : displayEmail}
                       </span>
                     </div>
                   </div>
-                  <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <ChevronsUpDown className="size-4 text-muted-foreground shrink-0" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem asChild className="text-[13.5px]">
+
+              <DropdownMenuContent align="end" side="top" className="w-56">
+                <DropdownMenuItem asChild className="text-[13px]">
                   <Link href="/settings">
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Settings className="size-4 mr-2" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="text-destructive text-[13.5px]"
+                  className="text-destructive text-[13px] focus:text-destructive"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="size-4 mr-2" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -332,4 +379,4 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-}
+  }
