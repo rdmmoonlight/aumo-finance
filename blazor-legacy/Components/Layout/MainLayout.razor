@@ -1,9 +1,9 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 
-<div class="d-flex flex-column min-vh-100 min-vw-0 aumo-main-shell">
+<div class="d-flex flex-column min-vh-100 w-100 aumo-main-shell">
 
-    <div class="d-flex flex-grow-1 position-relative">
+    <div class="d-flex flex-grow-1 position-relative w-100">
         
         <!-- NAVIGATION MENU -->
         <AuthorizeView>
@@ -11,17 +11,19 @@
                 <AumoBlazor.Components.Layout.NavMenu />
             </Authorized>
             <Authorizing>
-                <!-- Tampilan sementara saat memeriksa cookie auth -->
-                <div class="p-3 text-muted">Memuat navigasi...</div>
+                <!-- Indikator ringan saat Blazor memeriksa sesi cookie -->
+                <aside class="p-3 text-muted small" aria-label="Navigasi Memuat">
+                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                    <span>Memuat...</span>
+                </aside>
             </Authorizing>
             <NotAuthorized>
-                <!-- Tampilan alternatif jika belum login / tamu -->
-                <!-- Biarkan kosong atau tampilkan menu publik -->
+                <!-- Kosongkan agar halaman Login/Public bersih tanpa sidebar/menu internal -->
             </NotAuthorized>
         </AuthorizeView>
 
         <!-- MAIN CONTENT AREA -->
-        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
+        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column w-100" role="main">
             @Body
         </main>
 
@@ -32,10 +34,17 @@
 <style>
     body {
         transition: background-color 0.3s ease, color 0.3s ease;
+        overflow-x: hidden;
+    }
+
+    .aumo-main-shell {
+        background-color: var(--aumo-bg, #0D1117);
+        color: var(--aumo-text, #FFFFFF);
     }
 
     .content { 
         transition: background-color 0.3s ease;
+        min-width: 0; /* Mencegah flex child overflow di layar kecil */
     }
 
     @@media (max-width: 767.98px) {
