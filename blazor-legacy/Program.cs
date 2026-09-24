@@ -81,7 +81,7 @@ namespace AumoBlazor
                 var cookieHandler = sp.GetRequiredService<CookieHeaderHandler>();
                 cookieHandler.InnerHandler = new HttpClientHandler
                 {
-                    UseCookies = false // Matikan otomatisasi internal agar CookieHeaderHandler penuh memegang kontrol
+                    UseCookies = false // Matikan kontrol cookie internal agar DelegatingHandler memegang kendali
                 };
 
                 return new HttpClient(cookieHandler)
@@ -104,7 +104,7 @@ namespace AumoBlazor
             {
                 options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
-                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS untuk Cross-Site Vercel -> Render
+                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS untuk Cross-Site
             });
 
             // =====================================
@@ -125,6 +125,33 @@ namespace AumoBlazor
                     options.Cookie.HttpOnly = true;
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Lax;
+
+                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket/_blazor dari anonim
+                    options.Events.OnRedirectToLogin = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/api"))
+                        {
+                            context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        }
+                        else
+                        {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
+                        return Task.CompletedTask;
+                    };
+
+                    options.Events.OnRedirectToAccessDenied = context =>
+                    {
+                        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/api"))
+                        {
+                            context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        }
+                        else
+                        {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
+                        return Task.CompletedTask;
+                    };
                 });
 
             builder.Services.AddAuthorization();
