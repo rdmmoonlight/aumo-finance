@@ -12,18 +12,18 @@ export default defineNuxtConfig({
 
   css: ['~/assets/css/main.css'],
 
-  routeRules: {
-    '/api/**': {
-      cors: true
-    }
-  },
-
   runtimeConfig: {
     // Server-only: base URL of the AumoBackend ASP.NET Core API.
     // Nuxt's server routes proxy to this so the browser never talks to
     // the backend directly (avoids the cross-site Secure/SameSite=None
     // cookie problem and needs no backend CORS changes for this app).
     backendApiBase: 'https://aumonext-api.onrender.com'
+  },
+
+  routeRules: {
+    '/api/**': {
+      cors: true
+    }
   },
 
   compatibilityDate: '2026-06-30',

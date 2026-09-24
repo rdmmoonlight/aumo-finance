@@ -11,13 +11,15 @@ const appConfig = useAppConfig()
 const colors = ['red', 'orange', 'amber', 'yellow', 'lime', 'green', 'emerald', 'teal', 'cyan', 'sky', 'blue', 'indigo', 'violet', 'purple', 'fuchsia', 'pink', 'rose']
 const neutrals = ['slate', 'gray', 'zinc', 'neutral', 'stone', 'taupe', 'mauve', 'mist', 'olive']
 
-const user = ref({
-  name: 'Benjamin Canac',
+const authUser = useAuthUser()
+
+const user = computed(() => ({
+  name: authUser.value?.fullName || authUser.value?.userName || 'User',
   avatar: {
-    src: 'https://github.com/benjamincanac.png',
-    alt: 'Benjamin Canac'
+    src: undefined,
+    alt: authUser.value?.fullName || authUser.value?.userName || 'User'
   }
-})
+}))
 
 const items = computed<DropdownMenuItem[][]>(() => ([[{
   type: 'label',
@@ -158,7 +160,11 @@ const items = computed<DropdownMenuItem[][]>(() => ([[{
   target: '_blank'
 }], [{
   label: 'Log out',
-  icon: 'i-lucide-log-out'
+  icon: 'i-lucide-log-out',
+  onSelect: async () => {
+    await logout()
+    await navigateTo('/login')
+  }
 }]]))
 </script>
 
