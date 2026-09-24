@@ -20,6 +20,8 @@ namespace AumoBackend.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IGuardianService _guardianService;
         private readonly Client? _supabaseClient;
+        
+        // Pastikan nama bucket persis sesuai di Supabase Dashboard (Lower-case)
         private const string BucketName = "aumo-storage";
 
         public SettingsController(
@@ -114,23 +116,35 @@ namespace AumoBackend.Controllers
 
             try
             {
+                // 1. Ambil / Pastikan Bucket Ada
+                var storage = _supabaseClient.Storage;
+                var targetBucket = storage.From(BucketName);
+
+                // Cek apakah bucket ada, jika belum buat otomatis
+                var bucket = await storage.GetBucket(BucketName);
+                if (bucket == null)
+                {
+                    await storage.CreateBucket(BucketName, new Supabase.Storage.BucketUpsertOptions { Public = true });
+                }
+
+                // 2. Format Nama File Unik
                 var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
 
                 using var memoryStream = new MemoryStream();
                 await uploadFile.CopyToAsync(memoryStream);
                 var fileBytes = memoryStream.ToArray();
 
-                // Upload file ke Supabase Storage Bucket
-                await _supabaseClient.Storage
-                    .From(BucketName)
-                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = true });
+                // 3. Upload File ke Supabase
+                await targetBucket.Upload(fileBytes, fileName, new Supabase.Storage.FileOptions 
+                { 
+                    ContentType = uploadFile.ContentType,
+                    Upsert = true 
+                });
 
-                // Ambil URL Publik hasil upload
-                var publicUrl = _supabaseClient.Storage
-                    .From(BucketName)
-                    .GetPublicUrl(fileName);
+                // 4. Ambil URL Publik
+                var publicUrl = targetBucket.GetPublicUrl(fileName);
 
-                // Update URL avatar pada database user
+                // 5. Update Avatar URL ke User Database
                 user.AvatarUrl = publicUrl;
                 await _userManager.UpdateAsync(user);
 
@@ -143,7 +157,8 @@ namespace AumoBackend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = $"Supabase upload error: {ex.Message}" });
+                // Menangkap pesan detail error dari SDK Supabase
+                return StatusCode(500, new { success = false, message = $"Supabase storage upload error: {ex.Message}" });
             }
         }
 
