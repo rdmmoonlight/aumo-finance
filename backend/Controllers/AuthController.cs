@@ -65,9 +65,47 @@ public class AuthController : ControllerBase
         string ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
         string osValue = !string.IsNullOrWhiteSpace(request.OperatingSystem) ? request.OperatingSystem : deviceCategory;
 
-        // Validasi Password
-        var passwordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-        if (!passwordValid)
+        // 1. CEK UNTUK AKUN YANG SUDAH TERKUNCI SEBELUMNYA
+        if (await _userManager.IsLockedOutAsync(user))
+        {
+            var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                success = false,
+                message = "Account is locked due to multiple failed login attempts.",
+                lockoutEnd = lockoutEndDate?.UtcDateTime
+            });
+        }
+
+        // 2. VALIDASI PASSWORD DENGAN MEMPERHITUNGKAN UNTUK LOCKOUT
+        // Menggunakan CheckPasswordSignInAsync agar AccessFailedCount bertambah & lockout dipicu otomatis oleh ASP.NET Identity
+        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+
+        if (signInResult.IsLockedOut)
+        {
+            var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
+
+            await _guardianService.CreateLoginActivityAsync(
+                user.Id,
+                "Locked Out Login Attempt",
+                deviceCategory,
+                isMobile ? "Mobile App" : "Web Browser",
+                ip,
+                "ID",
+                false,
+                operatingSystem: osValue,
+                userAgent: safeUserAgent
+            );
+
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                success = false,
+                message = "Account is locked due to multiple failed login attempts.",
+                lockoutEnd = lockoutEndDate?.UtcDateTime
+            });
+        }
+
+        if (!signInResult.Succeeded)
         {
             await _guardianService.CreateLoginActivityAsync(
                 user.Id,
@@ -99,6 +137,9 @@ public class AuthController : ControllerBase
             // --- MOBILE FLOW: Hanya buat JWT Token (TIDAK buat Cookie) ---
             jwtToken = await GenerateJwtTokenAsync(user);
         }
+
+        // Reset hitungan percobaan gagal setelah login berhasil
+        await _userManager.ResetAccessFailedCountAsync(user);
 
         // Audit Log & Guardian Session
         await _guardianService.CreateSessionAsync(
