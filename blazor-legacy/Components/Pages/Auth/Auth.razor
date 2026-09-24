@@ -9,6 +9,7 @@
 @using System.Text.Json
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.WebUtilities
 
 @attribute [AllowAnonymous]
@@ -16,6 +17,7 @@
 
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
 @inject ILogger<Auth> Logger
 
 <PageTitle>@GetPageTitle() - Aumo Finance</PageTitle>
@@ -383,6 +385,13 @@
                         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", result.Token);
                 }
 
+                // Beritahu Blazor Authentication Provider jika class tergolong ApiAuthenticationStateProvider
+                if (AuthStateProvider is ApiAuthenticationStateProvider customAuthStateProvider)
+                {
+                    customAuthStateProvider.NotifyAuthenticationStateChanged();
+                }
+
+                // Hard reload langsung ke Root "/" agar browser memuat ulang Circuit dengan Cookie terpasang
                 Navigation.NavigateTo("/", forceLoad: true);
                 return;
             }
