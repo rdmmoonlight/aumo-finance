@@ -12,9 +12,6 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<ApiAuthenticationStateProvider> _logger;
 
-    // Nama cookie auth session aplikasi kamu (sesuaikan jika berbeda di backend)
-    private const string AuthCookieName = "AumoFinance.Session"; 
-
     public ApiAuthenticationStateProvider(
         HttpClient httpClient, 
         IHttpContextAccessor httpContextAccessor,
@@ -33,20 +30,24 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         {
             var httpContext = _httpContextAccessor.HttpContext;
 
-            // 1. CEK COOKIE DULU: Jika HttpContext null atau tidak membawa cookie auth, kembalikan Anonymous.
-            // Ini MENCEGAH spam request ke /api/v1/auth/me yang memicu respon 401 Unauthorized terus-menerus.
+            // 1. Cek ketersediaan HttpContext dan Header Cookie
             if (httpContext == null || !httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
             {
                 return anonymous;
             }
 
             var cookieString = cookieHeader.ToString();
-            if (string.IsNullOrWhiteSpace(cookieString) || !cookieString.Contains(AuthCookieName))
+
+            // 2. Cek apakah ada cookie autentikasi yang tersimpan (AumoFinance, AspNetCore, atau Cookie biasa)
+            if (string.IsNullOrWhiteSpace(cookieString) || 
+               (!cookieString.Contains("AumoFinance") && 
+                !cookieString.Contains(".AspNetCore.") && 
+                !cookieString.Contains("Identity")))
             {
                 return anonymous;
             }
 
-            // 2. Kirim Request GET ke Backend dengan melampirkan Cookie
+            // 3. Teruskan SEMUA Cookie dari HttpContext ke Backend API
             using var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
             request.Headers.TryAddWithoutValidation("Cookie", cookieString);
 
@@ -73,7 +74,6 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
                         }
                     }
 
-                    // Buat ClaimsIdentity dengan AuthType "CookieAuth"
                     var identity = new ClaimsIdentity(claims, "CookieAuth");
                     var user = new ClaimsPrincipal(identity);
 
@@ -89,9 +89,6 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         return anonymous;
     }
 
-    /// <summary>
-    /// Dipanggil untuk memperbarui status autentikasi di seluruh komponen UI Blazor.
-    /// </summary>
     public void NotifyUserAuthenticationStateChanged()
     {
         NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
