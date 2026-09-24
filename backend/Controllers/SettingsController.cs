@@ -29,8 +29,6 @@ namespace AumoBackend.Controllers
             _guardianService = guardianService;
         }
 
-        #region Profile Settings
-
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
@@ -123,10 +121,6 @@ namespace AumoBackend.Controllers
             });
         }
 
-        #endregion
-
-        #region Security & Password Settings
-
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
@@ -161,10 +155,6 @@ namespace AumoBackend.Controllers
             await _signInManager.SignOutAsync();
             return Ok(new { success = true, message = "Account successfully deleted." });
         }
-
-        #endregion
-
-        #region Guardian Dashboard & Sessions
 
         [HttpGet("guardian/dashboard")]
         public async Task<IActionResult> GetDashboard()
