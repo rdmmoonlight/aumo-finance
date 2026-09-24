@@ -10,7 +10,6 @@ using AumoFinance.Components;
 using AumoFinance.Models;
 using AumoFinance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -105,11 +104,11 @@ namespace AumoBlazor
             {
                 options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
-                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS untuk Cross-Site
+                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS untuk Cross-Site/Proxy
             });
 
             // =====================================
-            // 4. COOKIE AUTHENTICATION & AUTHORIZATION
+            // 4. COOKIE AUTHENTICATION & BLAZOR AUTH STATE
             // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
@@ -127,10 +126,10 @@ namespace AumoBlazor
                     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                     options.Cookie.SameSite = SameSiteMode.Lax;
 
-                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket /_blazor dan API dari anonim
+                    // Mencegah redirect HTTP 302 pada request SignalR WebSocket/_blazor dari anonim
                     options.Events.OnRedirectToLogin = context =>
                     {
-                        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/api"))
+                        if (IsApiOrBlazorCircuitRequest(context.Request))
                         {
                             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         }
@@ -143,7 +142,7 @@ namespace AumoBlazor
 
                     options.Events.OnRedirectToAccessDenied = context =>
                     {
-                        if (context.Request.Path.StartsWithSegments("/_blazor") || context.Request.Path.StartsWithSegments("/api"))
+                        if (IsApiOrBlazorCircuitRequest(context.Request))
                         {
                             context.Response.StatusCode = StatusCodes.Status403Forbidden;
                         }
@@ -155,14 +154,8 @@ namespace AumoBlazor
                     };
                 });
 
-            // REVISI: Pastikan tidak ada FallbackPolicy yang memaksa seluruh endpoint /_blazor dikunci secara global.
-            // Proteksi halaman dilakukan secara eksplisit via <AuthorizeRouteView> atau atribut [Authorize] pada komponen.
-            builder.Services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                    .RequireAuthenticatedUser()
-                    .Build();
-            });
+            // Pastikan Otorisasi Tidak Mengunci Fallback Policy Global Secara Tidak Sengaja
+            builder.Services.AddAuthorization();
 
             // Authentication state provider berbasis Cookie / HttpContext User
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
@@ -293,6 +286,13 @@ namespace AumoBlazor
             app.Run();
         }
 
+        private static bool IsApiOrBlazorCircuitRequest(HttpRequest request)
+        {
+            return request.Path.StartsWithSegments("/_blazor") ||
+                   request.Path.StartsWithSegments("/api") ||
+                   request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        }
+
         private static void LoadDotEnv()
         {
             var pathsToTry = new[]
@@ -381,7 +381,7 @@ namespace AumoBlazor
                 return new AuthenticationState(httpContextUser);
             }
 
-            // 2. Jika via WebSocket/Blazor Circuit, lakukan verifikasi sesi Cookie ke API
+            // 2. Jika via WebSocket/Blazor Circuit, lakukan verifikasi sesi Cookie ke API Backend
             try
             {
                 var response = await _httpClient.GetAsync("api/v1/auth/me");
