@@ -189,9 +189,6 @@
                 })
             };
 
-            // Mengizinkan penanganan Cookie Authentication lintas origin
-            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
-
             var response = await Http.SendAsync(request);
             var rawContent = await response.Content.ReadAsStringAsync();
 
