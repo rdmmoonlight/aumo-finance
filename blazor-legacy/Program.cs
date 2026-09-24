@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Security.Claims;
+using System.Threading;
 using System.Threading.Tasks;
 using AumoFinance.Components;
 using AumoFinance.Models;
@@ -56,7 +57,6 @@ namespace AumoBlazor
             // =====================================
             // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR FOR BLAZOR SERVER COOKIES
             // =====================================
-            // AMBIL URL API DARI ENV WEB_API_URL (DILENGKAPI FALLBACK LOKAL TANPA HARDCODE PROD)
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
                 ?? "http://localhost:5000/";
@@ -343,7 +343,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // REVISED COOKIE HEADER HANDLER
+    // REVISED COOKIE HEADER HANDLER (SAFE CIRCUIT)
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
@@ -356,19 +356,27 @@ namespace AumoBlazor
             _cookieStore = cookieStore;
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var httpContext = _httpContextAccessor.HttpContext;
             string? cookieString = null;
 
-            // 1. Ambil cookie dari HttpContext (Request HTTP biasa / Prerender)
-            if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
+            try
             {
-                cookieString = cookieValues.ToString();
-                if (!string.IsNullOrWhiteSpace(cookieString))
+                var httpContext = _httpContextAccessor.HttpContext;
+
+                // 1. Ambil cookie dari HttpContext (Request HTTP biasa / Prerender)
+                if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
                 {
-                    _cookieStore.LastKnownCookie = cookieString; // Simpan ke memory fallback
+                    cookieString = cookieValues.ToString();
+                    if (!string.IsNullOrWhiteSpace(cookieString))
+                    {
+                        _cookieStore.LastKnownCookie = cookieString; // Simpan ke memory fallback
+                    }
                 }
+            }
+            catch
+            {
+                // Safety guard untuk HttpContext
             }
 
             // 2. Jika HttpContext null (berada di dalam SignalR WebSocket Circuit), gunakan Fallback dari Store
@@ -389,41 +397,54 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // AUTHENTICATION STATE PROVIDER UNTUK COOKIES
+    // AUTHENTICATION STATE PROVIDER UNTUK COOKIES (SAFE CIRCUIT)
     // =====================================
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
         private readonly HttpClient _httpClient;
         private readonly ILogger<ApiAuthenticationStateProvider> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CircuitCookieStore _cookieStore;
 
         public ApiAuthenticationStateProvider(
             HttpClient httpClient,
             ILogger<ApiAuthenticationStateProvider> logger,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            CircuitCookieStore cookieStore)
         {
             _httpClient = httpClient;
             _logger = logger;
             _httpContextAccessor = httpContextAccessor;
+            _cookieStore = cookieStore;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Prerendering)
-            var httpContextUser = _httpContextAccessor.HttpContext?.User;
-            if (httpContextUser?.Identity?.IsAuthenticated == true)
-            {
-                return new AuthenticationState(httpContextUser);
-            }
+            var anonymousState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
 
-            // 2. Jika via WebSocket/Blazor Circuit, lakukan verifikasi sesi Cookie ke API Backend
             try
             {
-                var response = await _httpClient.GetAsync("api/v1/auth/me");
+                // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Prerendering)
+                var httpContextUser = _httpContextAccessor.HttpContext?.User;
+                if (httpContextUser?.Identity?.IsAuthenticated == true)
+                {
+                    return new AuthenticationState(httpContextUser);
+                }
+
+                // 2. Cek apakah ada cookie tersimpan. Jika TIDAK ADA cookie, langsung kembalikan anonymous
+                // Mencegah unhandled exception dan request 401 berulang yang memutus SignalR Circuit!
+                if (string.IsNullOrWhiteSpace(_cookieStore.LastKnownCookie))
+                {
+                    return anonymousState;
+                }
+
+                // 3. Jika via WebSocket/Blazor Circuit, lakukan verifikasi sesi Cookie ke API Backend
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var response = await _httpClient.GetAsync("api/v1/auth/me", cts.Token);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var userProfile = await response.Content.ReadFromJsonAsync<UserProfileResponse>();
+                    var userProfile = await response.Content.ReadFromJsonAsync<UserProfileResponse>(cancellationToken: cts.Token);
 
                     if (userProfile?.Success == true && !string.IsNullOrEmpty(userProfile.Email))
                     {
@@ -451,10 +472,10 @@ namespace AumoBlazor
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Gagal memverifikasi sesi cookie autentikasi dari backend API.");
+                _logger.LogWarning("Gagal memverifikasi sesi cookie autentikasi dari backend API: {Message}", ex.Message);
             }
 
-            return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            return anonymousState;
         }
 
         public void NotifyAuthenticationStateChanged()
