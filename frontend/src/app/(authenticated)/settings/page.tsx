@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { IconUser, IconPalette } from "@tabler/icons-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
-import UserSettings from "./usersettings";
-import ApplicationSettings from "./applicationsettings";
+import AccountSettings from "./account-settings";
+import ApplicationSettings from "./application-settings";
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
