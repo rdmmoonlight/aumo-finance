@@ -6,7 +6,6 @@ export const aumoConfig = {
   get backendTarget() {
     let target =
       process.env.WEB_API_URL ||
-      process.env.NEXT_PUBLIC_WEB_API_URL ||
       "http://localhost:5000";
 
     // Hapus trailing slash jika ada
@@ -24,14 +23,20 @@ export const aumoConfig = {
     "@": path.resolve(process.cwd(), "./src"),
   },
 
-  // Konfigurasi domain gambar eksternal (Supabase Storage)
+  // Konfigurasi domain gambar eksternal (Supabase Storage & Backend)
   images: {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "*.supabase.co", // Wilcard ini mencakup semua subdomain Supabase
+        hostname: "**.supabase.co", // FIX: Menggunakan '**' agar mencakup seluruh subdomain Supabase
         port: "",
-        pathname: "/storage/v1/object/public/**",
+        pathname: "/**", // FIX: Diperluas agar mencakup /object/public/, /render/image/, dll.
+      },
+      {
+        protocol: "https",
+        hostname: "aumonext-api.onrender.com", // Jaga-jaga jika gambar disajikan langsung dari backend
+        port: "",
+        pathname: "/**",
       },
     ],
   },
