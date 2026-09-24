@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Supabase;
 
 namespace AumoBackend.Controllers
 {
@@ -18,15 +20,23 @@ namespace AumoBackend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IGuardianService _guardianService;
+        private readonly Client _supabaseClient;
+        private const string BucketName = "avatars";
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IGuardianService guardianService)
+            IGuardianService guardianService,
+            IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _guardianService = guardianService;
+
+            // Inisialisasi Supabase Client
+            var supabaseUrl = configuration["Supabase:Url"];
+            var supabaseKey = configuration["Supabase:Key"];
+            _supabaseClient = new Client(supabaseUrl, supabaseKey);
         }
 
         #region Profile Settings
@@ -37,7 +47,6 @@ namespace AumoBackend.Controllers
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            // Update Username (jika berubah)
             if (!string.IsNullOrWhiteSpace(request.UserName) && request.UserName != user.UserName)
             {
                 var setUserNameResult = await _userManager.SetUserNameAsync(user, request.UserName);
@@ -48,7 +57,6 @@ namespace AumoBackend.Controllers
                 }
             }
 
-            // Update Phone Number (jika berubah)
             if (request.PhoneNumber != user.PhoneNumber)
             {
                 var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
@@ -59,7 +67,6 @@ namespace AumoBackend.Controllers
                 }
             }
 
-            // Update Custom Fields pada ApplicationUser
             user.FullName = request.FullName;
             user.Bio = request.Bio;
             if (!string.IsNullOrWhiteSpace(request.AvatarUrl))
@@ -79,56 +86,65 @@ namespace AumoBackend.Controllers
 
         [HttpPost("avatar")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadAvatar([FromForm] IFormFile file)
+        public async Task<IActionResult> UploadAvatar([FromForm] IFormFile avatar)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            if (file == null || file.Length == 0)
+            if (avatar == null || avatar.Length == 0)
             {
                 return BadRequest(new { success = false, message = "No file uploaded." });
             }
 
-            // Batasi ukuran file maksimum 2MB
-            if (file.Length > 2 * 1024 * 1024)
+            if (avatar.Length > 2 * 1024 * 1024)
             {
                 return BadRequest(new { success = false, message = "File size exceeds limit (Max 2MB)." });
             }
 
-            // Validasi format file (Case-Insensitive)
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var extension = Path.GetExtension(file.FileName);
+            var extension = Path.GetExtension(avatar.FileName);
 
             if (string.IsNullOrEmpty(extension) || !allowedExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
             {
                 return BadRequest(new { success = false, message = "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed." });
             }
 
-            // Simpan file ke direktori wwwroot/uploads/avatars
-            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "avatars");
-            if (!Directory.Exists(uploadsFolder))
+            try
             {
-                Directory.CreateDirectory(uploadsFolder);
+                // Inisialisasi koneksi ke Supabase
+                await _supabaseClient.InitializeAsync();
+
+                var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
+
+                using var memoryStream = new MemoryStream();
+                await avatar.CopyToAsync(memoryStream);
+                var fileBytes = memoryStream.ToArray();
+
+                // Upload file langsung ke Supabase Storage Bucket
+                await _supabaseClient.Storage
+                    .From(BucketName)
+                    .Upload(fileBytes, fileName, new Supabase.Storage.FileOptions { Upsert = true });
+
+                // Ambil URL Publik hasil upload
+                var publicUrl = _supabaseClient.Storage
+                    .From(BucketName)
+                    .GetPublicUrl(fileName);
+
+                // Update URL avatar pada user
+                user.AvatarUrl = publicUrl;
+                await _userManager.UpdateAsync(user);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Avatar uploaded successfully to Supabase.",
+                    avatarUrl = publicUrl
+                });
             }
-
-            var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
-            var filePath = Path.Combine(uploadsFolder, fileName);
-
-            using (var stream = new FileStream(filePath, FileMode.Create))
+            catch (Exception ex)
             {
-                await file.CopyToAsync(stream);
+                return StatusCode(500, new { success = false, message = $"Supabase upload error: {ex.Message}" });
             }
-
-            var relativeAvatarUrl = $"/uploads/avatars/{fileName}";
-            user.AvatarUrl = relativeAvatarUrl;
-            await _userManager.UpdateAsync(user);
-
-            return Ok(new
-            {
-                success = true,
-                message = "Avatar uploaded successfully.",
-                avatarUrl = relativeAvatarUrl
-            });
         }
 
         #endregion
