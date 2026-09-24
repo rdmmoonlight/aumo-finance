@@ -2,6 +2,7 @@ using System.Net.Http.Json;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace AumoBlazor.Services;
 
@@ -10,6 +11,9 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     private readonly HttpClient _httpClient;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<ApiAuthenticationStateProvider> _logger;
+
+    // Nama cookie auth session aplikasi kamu (sesuaikan jika berbeda di backend)
+    private const string AuthCookieName = "AumoFinance.Session"; 
 
     public ApiAuthenticationStateProvider(
         HttpClient httpClient, 
@@ -23,16 +27,28 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
+        var anonymous = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+
         try
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
-
-            // PERBAIKAN UTAMA: Teruskan Cookie dari HttpContext pengguna ke request HttpClient
             var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
+
+            // 1. CEK COOKIE DULU: Jika HttpContext null atau tidak membawa cookie auth, kembalikan Anonymous.
+            // Ini MENCEGAH spam request ke /api/v1/auth/me yang memicu respon 401 Unauthorized terus-menerus.
+            if (httpContext == null || !httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
             {
-                request.Headers.Add("Cookie", cookieHeader.ToString());
+                return anonymous;
             }
+
+            var cookieString = cookieHeader.ToString();
+            if (string.IsNullOrWhiteSpace(cookieString) || !cookieString.Contains(AuthCookieName))
+            {
+                return anonymous;
+            }
+
+            // 2. Kirim Request GET ke Backend dengan melampirkan Cookie
+            using var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
+            request.Headers.TryAddWithoutValidation("Cookie", cookieString);
 
             var response = await _httpClient.SendAsync(request);
 
@@ -57,7 +73,7 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
                         }
                     }
 
-                    // Menandai klaim terautentikasi dengan jenis autentikasi "CookieAuth"
+                    // Buat ClaimsIdentity dengan AuthType "CookieAuth"
                     var identity = new ClaimsIdentity(claims, "CookieAuth");
                     var user = new ClaimsPrincipal(identity);
 
@@ -67,15 +83,14 @@ public class ApiAuthenticationStateProvider : AuthenticationStateProvider
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Gagal memverifikasi status autentikasi dari backend API.");
+            _logger.LogError(ex, "Gagal memverifikasi Cookie Auth dari backend API.");
         }
 
-        // Kembalikan Anonymous User jika gagal terautentikasi
-        return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+        return anonymous;
     }
 
     /// <summary>
-    /// Dipanggil setelah proses Login / Logout untuk memperbarui UI Blazor secara mendadak.
+    /// Dipanggil untuk memperbarui status autentikasi di seluruh komponen UI Blazor.
     /// </summary>
     public void NotifyUserAuthenticationStateChanged()
     {
