@@ -114,38 +114,24 @@ namespace AumoBackend.Controllers
 
             try
             {
-                // Auto-Ensure Bucket Exists
-                var bucket = _supabaseClient.Storage.From(BucketName);
-                try
-                {
-                    await _supabaseClient.Storage.GetBucket(BucketName);
-                }
-                catch
-                {
-                    // Jika bucket belum ada, buat bucket publik otomatis
-                    await _supabaseClient.Storage.CreateBucket(BucketName, new Supabase.Storage.BucketUpsertOptions
-                    {
-                        Public = true
-                    });
-                }
-
                 var fileName = $"avatar_{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
 
                 using var memoryStream = new MemoryStream();
                 await uploadFile.CopyToAsync(memoryStream);
                 var fileBytes = memoryStream.ToArray();
 
-                // Upload file
-                await bucket.Upload(fileBytes, fileName, new Supabase.Storage.FileOptions 
-                { 
+                // Direct Upload ke Supabase Storage Bucket
+                var storage = _supabaseClient.Storage.From(BucketName);
+                await storage.Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
+                {
                     ContentType = uploadFile.ContentType,
-                    Upsert = true 
+                    Upsert = true
                 });
 
-                // Ambil URL Publik hasil upload
-                var publicUrl = bucket.GetPublicUrl(fileName);
+                // Ambil Public URL
+                var publicUrl = storage.GetPublicUrl(fileName);
 
-                // Update URL avatar pada database user
+                // Simpan URL avatar ke database user
                 user.AvatarUrl = publicUrl;
                 await _userManager.UpdateAsync(user);
 
@@ -158,7 +144,8 @@ namespace AumoBackend.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = $"Supabase upload error: {ex.Message}" });
+                // Menampilkan detail exception sesungguhnya jika upload gagal
+                return StatusCode(500, new { success = false, message = $"Supabase upload error: {ex.Message}", details = ex.InnerException?.Message });
             }
         }
 
