@@ -17,8 +17,11 @@
                 <NotAuthorized Context="authContext">
                     @if (authContext.User.Identity == null || !authContext.User.Identity.IsAuthenticated)
                     {
-                        @* Redirect ke halaman login hanya jika pengguna belum terautentikasi *@
-                        <RedirectToLogin />
+                        @* Cek agar TIDAK me-redirect jika user memang sedang berada di area /auth *@
+                        @if (!IsAuthPage(routeData))
+                        {
+                            <RedirectToLogin />
+                        }
                     }
                     else
                     {
@@ -73,3 +76,13 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+@code {
+    private bool IsAuthPage(RouteData routeData)
+    {
+        // Mencegah looping redirect jika halaman yang dituju berada di folder/route '/auth'
+        var pageType = routeData.PageType;
+        return pageType.Namespace?.Contains("Auth", StringComparison.OrdinalIgnoreCase) == true 
+            || pageType.Name.Contains("Login", StringComparison.OrdinalIgnoreCase);
+    }
+}
