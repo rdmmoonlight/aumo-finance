@@ -17,12 +17,10 @@
                 <NotAuthorized Context="authContext">
                     @if (authContext.User.Identity?.IsAuthenticated != true)
                     {
-                        @* Hanya redirect ke login jika user benar-benar belum terautentikasi *@
                         <RedirectToLogin />
                     }
                     else
                     {
-                        @* Tampilkan pesan jika user sudah login tetapi tidak punya role/hak akses *@
                         <div class="container text-center mt-5 py-5">
                             <div class="card shadow-sm border-0 rounded-4 mx-auto p-4" style="max-width: 450px;">
                                 <i class="bi bi-shield-lock-fill text-warning display-4 mb-3"></i>
