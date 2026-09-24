@@ -1,17 +1,8 @@
 @page "/auth/login"
 @using System.ComponentModel.DataAnnotations
-@using System.Net.Http.Json
-@using System.Text.Json
-@using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Authorization
 
 @attribute [AllowAnonymous]
-@rendermode InteractiveServer
-
-@inject HttpClient Http
-@inject IGuardianService GuardianService
-@inject NavigationManager Navigation
-@inject ILogger<Login> Logger
 
 <PageTitle>Sign In - Aumo Finance</PageTitle>
 
@@ -42,7 +33,7 @@
                             </p>
                         </div>
 
-                        <!-- Alert Messages -->
+                        <!-- Alert Messages (via Query Parameters) -->
                         @if (!string.IsNullOrEmpty(successMessage))
                         {
                             <div class="alert alert-success py-2 px-3 small rounded-3 mb-3" role="alert">
@@ -62,11 +53,10 @@
                             </div>
                         }
 
-                        <!-- Interactive EditForm -->
-                        <EditForm Model="Input" OnValidSubmit="HandleLoginAsync">
-                            <DataAnnotationsValidator />
-                            <ValidationSummary class="text-danger small mb-3" />
-
+                        <!-- Native Form POST ke API Backend -->
+                        <form action="https://aumonext-api.onrender.com/api/v1/auth/login" method="post">
+                            <input type="hidden" name="ReturnUrl" value="/" />
+                            
                             <!-- Email Input -->
                             <div class="mb-3">
                                 <label class="form-label small fw-medium" style="color: var(--aumo-text-muted, #FFFFFF);">Email Address</label>
@@ -74,13 +64,14 @@
                                     <span class="input-group-text border-end-0" style="background-color: var(--aumo-bg, #0D1117); border-color: var(--bs-border-color, #2A313C); color: var(--aumo-text-muted, #FFFFFF);">
                                         <i class="bi bi-envelope"></i>
                                     </span>
-                                    <InputText class="form-control border-start-0 ps-0 text-white" 
-                                               style="background-color: var(--aumo-bg, #0D1117); border-color: var(--bs-border-color, #2A313C);" 
-                                               @bind-Value="Input.Email" 
-                                               autocomplete="username"
-                                               placeholder="name@example.com" />
+                                    <input type="email" 
+                                           name="Email" 
+                                           required 
+                                           class="form-control border-start-0 ps-0 text-white" 
+                                           style="background-color: var(--aumo-bg, #0D1117); border-color: var(--bs-border-color, #2A313C);" 
+                                           autocomplete="username"
+                                           placeholder="name@example.com" />
                                 </div>
-                                <ValidationMessage For="() => Input.Email" class="text-danger small mt-1" />
                             </div>
 
                             <!-- Password Input -->
@@ -90,38 +81,30 @@
                                     <span class="input-group-text border-end-0" style="background-color: var(--aumo-bg, #0D1117); border-color: var(--bs-border-color, #2A313C); color: var(--aumo-text-muted, #FFFFFF);">
                                         <i class="bi bi-lock"></i>
                                     </span>
-                                    <InputText type="password" 
-                                               class="form-control border-start-0 ps-0 text-white" 
-                                               style="background-color: var(--aumo-bg, #0D1117); border-color: var(--bs-border-color, #2A313C);" 
-                                               @bind-Value="Input.Password" 
-                                               autocomplete="current-password"
-                                               placeholder="••••••••" />
+                                    <input type="password" 
+                                           name="Password" 
+                                           required 
+                                           class="form-control border-start-0 ps-0 text-white" 
+                                           style="background-color: var(--aumo-bg, #0D1117); border-color: var(--bs-border-color, #2A313C);" 
+                                           autocomplete="current-password"
+                                           placeholder="••••••••" />
                                 </div>
-                                <ValidationMessage For="() => Input.Password" class="text-danger small mt-1" />
                             </div>
 
                             <!-- Remember Me -->
                             <div class="mb-4 form-check">
-                                <InputCheckbox id="rememberMe" class="form-check-input" @bind-Value="Input.RememberMe" />
+                                <input type="checkbox" name="RememberMe" id="rememberMe" value="true" class="form-check-input" />
                                 <label class="form-check-label small" for="rememberMe" style="color: var(--aumo-text-muted, #FFFFFF);">
                                     Remember me
                                 </label>
                             </div>
 
                             <!-- Submit Button -->
-                            <button type="submit" disabled="@isSubmitting" class="btn btn-primary w-100 py-2.5 rounded-pill fw-medium shadow-sm d-flex align-items-center justify-content-center gap-2">
-                                @if (isSubmitting)
-                                {
-                                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span>Signing In...</span>
-                                }
-                                else
-                                {
-                                    <span>Sign In</span>
-                                    <i class="bi bi-arrow-right-short fs-5"></i>
-                                }
+                            <button type="submit" class="btn btn-primary w-100 py-2.5 rounded-pill fw-medium shadow-sm d-flex align-items-center justify-content-center gap-2">
+                                <span>Sign In</span>
+                                <i class="bi bi-arrow-right-short fs-5"></i>
                             </button>
-                        </EditForm>
+                        </form>
 
                         <!-- Links -->
                         <div class="mt-4 pt-3 text-center border-top" style="border-color: var(--bs-border-color, #2A313C) !important;">
@@ -151,143 +134,14 @@
     [SupplyParameterFromQuery(Name = "infoMessage")]
     private string? QueryInfoMessage { get; set; }
 
-    private LoginInputModel Input { get; set; } = new();
-
     private string? successMessage;
     private string? errorMessage;
     private string? infoMessage;
-    private bool isSubmitting = false;
-
-    private static readonly JsonSerializerOptions JsonOptions = new()
-    {
-        PropertyNameCaseInsensitive = true
-    };
 
     protected override void OnInitialized()
     {
         successMessage = QuerySuccessMessage ?? QueryMessage;
         errorMessage = QueryErrorMessage;
         infoMessage = QueryInfoMessage;
-    }
-
-    private async Task HandleLoginAsync()
-    {
-        isSubmitting = true;
-        errorMessage = null;
-
-        try
-        {
-            // Pemanggilan HTTP standar tanpa method extension WebAssembly
-            var response = await Http.PostAsJsonAsync("api/v1/auth/login", new
-            {
-                Email = Input.Email,
-                Password = Input.Password,
-                RememberMe = Input.RememberMe,
-                IsMobileClient = false
-            });
-
-            var rawContent = await response.Content.ReadAsStringAsync();
-
-            BackendLoginResponse? result = null;
-            if (!string.IsNullOrWhiteSpace(rawContent))
-            {
-                try
-                {
-                    result = JsonSerializer.Deserialize<BackendLoginResponse>(rawContent, JsonOptions);
-                }
-                catch (JsonException)
-                {
-                    Logger.LogWarning("Respon dari backend bukan format JSON yang valid. Content: {Content}", rawContent);
-                }
-            }
-
-            // 1. Evaluasi Berhasil Login
-            if (response.IsSuccessStatusCode && result?.Success == true)
-            {
-                Logger.LogInformation("User logged in successfully via Cookie Auth.");
-
-                Guid.TryParse(result.UserId, out var parsedUserId);
-
-                try
-                {
-                    await GuardianService.CreateSessionAsync(
-                        parsedUserId != Guid.Empty ? parsedUserId : Guid.NewGuid(),
-                        "COOKIE_SESSION",
-                        "127.0.0.1",
-                        "Mozilla/5.0 (Blazor Web)",
-                        "Web",
-                        "Unknown",
-                        "Web Browser",
-                        "Web"
-                    );
-                }
-                catch (Exception exGuard)
-                {
-                    Logger.LogWarning(exGuard, "Gagal mencatat sesi di GuardianService.");
-                }
-
-                // Force load WAJIB true agar browser merefresh koneksi SignalR dengan Cookie terikat
-                Navigation.NavigateTo("/", forceLoad: true);
-                return;
-            }
-
-            // 2. Evaluasi Pesan Gagal / Lockout
-            if (result != null && result.LockoutEnd.HasValue)
-            {
-                var localLockout = result.LockoutEnd.Value.ToLocalTime();
-                errorMessage = $"Akun Anda terkunci karena terlalu banyak percobaan login. Silakan tunggu hingga {localLockout:HH:mm:ss} WIB.";
-            }
-            else if (result != null && !string.IsNullOrWhiteSpace(result.Message))
-            {
-                errorMessage = result.Message;
-            }
-            else if (!response.IsSuccessStatusCode)
-            {
-                errorMessage = response.StatusCode switch
-                {
-                    System.Net.HttpStatusCode.Unauthorized => "Email atau password yang Anda masukkan salah.",
-                    System.Net.HttpStatusCode.BadRequest => "Format data login tidak valid.",
-                    System.Net.HttpStatusCode.TooManyRequests => "Terlalu banyak percobaan login. Silakan tunggu beberapa saat.",
-                    _ => !string.IsNullOrWhiteSpace(rawContent) && !rawContent.StartsWith("<") 
-                        ? rawContent 
-                        : $"Gagal melakukan authentication ({response.StatusCode})."
-                };
-            }
-            else
-            {
-                errorMessage = "Invalid email or password.";
-            }
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Error occurred during login attempt: {Message}", ex.Message);
-            errorMessage = "Gagal terhubung ke server backend API.";
-        }
-        finally
-        {
-            isSubmitting = false;
-        }
-    }
-
-    public class LoginInputModel
-    {
-        [Required(ErrorMessage = "Email address is required.")]
-        [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
-        public string Email { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Password is required.")]
-        [DataType(DataType.Password)]
-        public string Password { get; set; } = string.Empty;
-
-        public bool RememberMe { get; set; }
-    }
-
-    public class BackendLoginResponse
-    {
-        public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
-        public string? UserId { get; set; }
-        public string? FullName { get; set; }
-        public DateTime? LockoutEnd { get; set; }
     }
 }
