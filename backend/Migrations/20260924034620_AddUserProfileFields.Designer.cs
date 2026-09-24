@@ -3,6 +3,7 @@ using System;
 using AumoBackend.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AumoBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260924034620_AddUserProfileFields")]
+    partial class AddUserProfileFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,14 +24,6 @@ namespace AumoBackend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            // =========================================================================
-            // PEMANGGILAN METODE PARSIAL BILA ADA LOGIKA TAMBAHAN DI FILE PARSIAL
-            // =========================================================================
-            BuildIdentityEntities(modelBuilder);
-            BuildDomainEntities(modelBuilder);
-            BuildRelationships(modelBuilder);
-            BuildSecurityEntities(modelBuilder);
 
             modelBuilder.Entity("AumoBackend.Core.ApplicationUser", b =>
                 {
@@ -760,13 +755,5 @@ namespace AumoBackend.Migrations
                 });
 #pragma warning restore 612, 618
         }
-
-        // =========================================================================
-        // DEKLARASI DEFINISI METHOD PARSIAL (MENGATASI CS0759)
-        // =========================================================================
-        partial void BuildDomainEntities(ModelBuilder modelBuilder);
-        partial void BuildIdentityEntities(ModelBuilder modelBuilder);
-        partial void BuildRelationships(ModelBuilder modelBuilder);
-        partial void BuildSecurityEntities(ModelBuilder modelBuilder);
     }
 }
