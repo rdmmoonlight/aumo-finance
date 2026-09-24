@@ -177,19 +177,15 @@
 
         try
         {
-            // Konstruksi Request HTTP manual agar bisa menyertakan Credentials (Cookies)
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/auth/login")
+            // Pemanggilan HTTP standar tanpa method extension WebAssembly
+            var response = await Http.PostAsJsonAsync("api/v1/auth/login", new
             {
-                Content = JsonContent.Create(new
-                {
-                    Email = Input.Email,
-                    Password = Input.Password,
-                    RememberMe = Input.RememberMe,
-                    IsMobileClient = false
-                })
-            };
+                Email = Input.Email,
+                Password = Input.Password,
+                RememberMe = Input.RememberMe,
+                IsMobileClient = false
+            });
 
-            var response = await Http.SendAsync(request);
             var rawContent = await response.Content.ReadAsStringAsync();
 
             BackendLoginResponse? result = null;
@@ -230,7 +226,7 @@
                     Logger.LogWarning(exGuard, "Gagal mencatat sesi di GuardianService.");
                 }
 
-                // Hard refresh agar cookie session terikat ke SignalR circuit
+                // Force load WAJIB true agar browser merefresh koneksi SignalR dengan Cookie terikat
                 Navigation.NavigateTo("/", forceLoad: true);
                 return;
             }
@@ -239,7 +235,7 @@
             if (result != null && result.LockoutEnd.HasValue)
             {
                 var localLockout = result.LockoutEnd.Value.ToLocalTime();
-                errorMessage = $"Akun Anda terkunci karena terlalu banyak percobaan login. Silakan coba lagi setelah jam {localLockout:HH:mm:ss} WIB ({localLockout:dd MMM yyyy}).";
+                errorMessage = $"Akun Anda terkunci karena terlalu banyak percobaan login. Silakan tunggu hingga {localLockout:HH:mm:ss} WIB.";
             }
             else if (result != null && !string.IsNullOrWhiteSpace(result.Message))
             {
@@ -251,7 +247,7 @@
                 {
                     System.Net.HttpStatusCode.Unauthorized => "Email atau password yang Anda masukkan salah.",
                     System.Net.HttpStatusCode.BadRequest => "Format data login tidak valid.",
-                    System.Net.HttpStatusCode.TooManyRequests => "Terlalu banyak percobaan login. Akun dikunci sementara.",
+                    System.Net.HttpStatusCode.TooManyRequests => "Terlalu banyak percobaan login. Silakan tunggu beberapa saat.",
                     _ => !string.IsNullOrWhiteSpace(rawContent) && !rawContent.StartsWith("<") 
                         ? rawContent 
                         : $"Gagal melakukan authentication ({response.StatusCode})."
