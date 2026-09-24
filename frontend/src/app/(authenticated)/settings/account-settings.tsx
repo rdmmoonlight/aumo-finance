@@ -63,22 +63,22 @@ export default function AccountSettings() {
   const [changePassword, { isLoading: isChangingPassword }] = usePostApiV1SettingsChangePasswordMutation();
   const [deleteAccount, { isLoading: isDeletingAccount }] = useDeleteApiV1SettingsDeleteAccountMutation();
 
-  // Sinkronisasi data user dari API ke form lokal (tanpa menimpa avatar jika avatarPreview lokal lebih baru)
+  // FIX: Sinkronkan data dari API ke form secara presisi
   useEffect(() => {
     if (user) {
-      setFullName((prev) => prev || user.fullName || "");
-      setUserName((prev) => prev || user.userName || "");
-      setPhoneNumber((prev) => prev || user.phoneNumber || "");
-      setBio((prev) => prev || user.bio || "");
-      
-      // Mengutamakan URL Avatar publik dari backend jika tidak sedang ada blob preview
-      if (!avatarPreview || !avatarPreview.startsWith("blob:")) {
-        setAvatarPreview(user.avatarUrl || null);
+      setFullName(user.fullName || "");
+      setUserName(user.userName || "");
+      setPhoneNumber(user.phoneNumber || "");
+      setBio(user.bio || "");
+
+      // Hanya update avatarPreview dari user API jika kita TIDAK sedang melihat blob lokal baru
+      if (user.avatarUrl && !avatarPreview?.startsWith("blob:")) {
+        setAvatarPreview(user.avatarUrl);
       }
     }
   }, [user]);
 
-  // Cleanup memori untuk object URL blob
+  // Cleanup memori blob URL
   useEffect(() => {
     return () => {
       if (avatarPreview && avatarPreview.startsWith("blob:")) {
@@ -102,15 +102,16 @@ export default function AccountSettings() {
     e.preventDefault();
     try {
       await updateProfile({
-        updateProfileRequest: { 
-          fullName, 
-          userName, 
-          phoneNumber, 
-          bio, 
-          avatarUrl: avatarPreview && !avatarPreview.startsWith("blob:") ? avatarPreview : undefined 
+        updateProfileRequest: {
+          fullName,
+          userName,
+          phoneNumber,
+          bio,
+          // Pastikan URL publik permanen yang dikirim, bukan string blob lokal
+          avatarUrl: avatarPreview && !avatarPreview.startsWith("blob:") ? avatarPreview : user?.avatarUrl,
         },
       }).unwrap();
-      
+
       showNotification("Profil berhasil diperbarui!");
       await refetchMe();
     } catch (err: any) {
@@ -129,7 +130,7 @@ export default function AccountSettings() {
       return showNotification("Ukuran gambar maksimal 2MB", true);
     }
 
-    // Tampilkan pratinjau instan dari lokal
+    // 1. Tampilkan pratinjau lokal secara instan (Blob)
     const localPreview = URL.createObjectURL(file);
     setAvatarPreview(localPreview);
 
@@ -137,22 +138,31 @@ export default function AccountSettings() {
     formData.append("file", file);
 
     try {
-      // Kirim mutasi upload
+      // 2. Upload gambar ke Supabase via backend C#
       const res: any = await uploadAvatar({ body: formData } as any).unwrap();
       const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
 
       if (newAvatarUrl) {
-        // Terapkan URL publik baru langsung ke state tampilan
+        // 3. Pasang URL publik baru Supabase ke state
         setAvatarPreview(newAvatarUrl);
+
+        // 4. OTOMATIS simpan URL ke database user agar tidak hilang saat refresh
+        await updateProfile({
+          updateProfileRequest: {
+            fullName: fullName || user?.fullName,
+            userName: userName || user?.userName,
+            phoneNumber: phoneNumber || user?.phoneNumber,
+            bio: bio || user?.bio,
+            avatarUrl: newAvatarUrl,
+          },
+        }).unwrap();
       }
 
-      showNotification("Avatar berhasil diunggah!");
-      
-      // Refresh cache API Me secara eksplisit
+      showNotification("Avatar berhasil diunggah dan disimpan!");
       await refetchMe();
     } catch (err: any) {
       showNotification(err?.data?.message || err?.data?.title || "Gagal mengunggah avatar", true);
-      // Kembalikan ke avatar awal dari database jika upload gagal
+      // Revert ke avatar lama jika gagal
       setAvatarPreview(user?.avatarUrl || null);
     } finally {
       if (fileInputRef.current) {
@@ -218,8 +228,8 @@ export default function AccountSettings() {
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 border">
-                  {/* Gunakan key opsional berdasarkan avatarPreview agar komponen Avatar berefek render ulang sempurna */}
-                  <AvatarImage key={avatarPreview} src={avatarPreview || undefined} />
+                  {/* Key memaksa elemen <img> di-render ulang sepenuhnya setiap kali URL berganti */}
+                  <AvatarImage key={avatarPreview} src={avatarPreview || undefined} alt="Avatar" />
                   <AvatarFallback className="font-bold text-sm">
                     {(fullName || user.userName || "U").substring(0, 2).toUpperCase()}
                   </AvatarFallback>
