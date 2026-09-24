@@ -14,6 +14,7 @@ using AumoFinance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -68,14 +69,16 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // Register Cookie Store Singleton & DelegatingHandler
-            builder.Services.AddSingleton<CircuitCookieStore>();
+            // SANGAT PENTING: CircuitCookieStore WAJIB Scoped (Satu per Circuit / Per User), BUKAN Singleton!
+            builder.Services.AddScoped<CircuitCookieStore>();
+            builder.Services.AddScoped<CircuitHandler, CookieCircuitHandler>();
             builder.Services.AddTransient<CookieHeaderHandler>();
 
             // Scoped HttpClient untuk Blazor Server Circuit
             builder.Services.AddHttpClient("BackendApi", client =>
             {
                 client.BaseAddress = new Uri(webApiUrl);
+                client.Timeout = TimeSpan.FromSeconds(10);
             })
             .AddHttpMessageHandler<CookieHeaderHandler>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
@@ -165,7 +168,7 @@ namespace AumoBlazor
             builder.Services.AddRazorComponents()
                 .AddInteractiveServerComponents(options =>
                 {
-                    options.DetailedErrors = builder.Environment.IsDevelopment();
+                    options.DetailedErrors = true; // Diaktifkan agar log mendetail jika ada error lain
                     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
                 });
 
@@ -323,27 +326,40 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // CIRCUIT COOKIE STORE (UNTUK MEMORY FALLBACK SAAT WEBSOCKET AKTIF)
+    // SCOPED CIRCUIT COOKIE STORE
     // =====================================
     public class CircuitCookieStore
     {
-        private string? _lastKnownCookie;
+        public string? LastKnownCookie { get; set; }
+    }
 
-        public string? LastKnownCookie
+    // =====================================
+    // CIRCUIT HANDLER TO CAPTURE COOKIE AT CONNECTION TIME
+    // =====================================
+    public class CookieCircuitHandler : CircuitHandler
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CircuitCookieStore _cookieStore;
+
+        public CookieCircuitHandler(IHttpContextAccessor httpContextAccessor, CircuitCookieStore cookieStore)
         {
-            get => _lastKnownCookie;
-            set
+            _httpContextAccessor = httpContextAccessor;
+            _cookieStore = cookieStore;
+        }
+
+        public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
             {
-                if (!string.IsNullOrWhiteSpace(value))
-                {
-                    _lastKnownCookie = value;
-                }
+                _cookieStore.LastKnownCookie = cookieHeader.ToString();
             }
+            return base.OnCircuitOpenedAsync(circuit, cancellationToken);
         }
     }
 
     // =====================================
-    // REVISED COOKIE HEADER HANDLER (SAFE CIRCUIT)
+    // SAFE COOKIE HEADER HANDLER
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
@@ -363,29 +379,21 @@ namespace AumoBlazor
             try
             {
                 var httpContext = _httpContextAccessor.HttpContext;
-
-                // 1. Ambil cookie dari HttpContext (Request HTTP biasa / Prerender)
                 if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
                 {
                     cookieString = cookieValues.ToString();
-                    if (!string.IsNullOrWhiteSpace(cookieString))
-                    {
-                        _cookieStore.LastKnownCookie = cookieString; // Simpan ke memory fallback
-                    }
                 }
             }
             catch
             {
-                // Safety guard untuk HttpContext
+                // Fallback aman jika HttpContext tidak dapat diakses
             }
 
-            // 2. Jika HttpContext null (berada di dalam SignalR WebSocket Circuit), gunakan Fallback dari Store
             if (string.IsNullOrWhiteSpace(cookieString))
             {
                 cookieString = _cookieStore.LastKnownCookie;
             }
 
-            // 3. Pasang Cookie ke Header Request
             if (!string.IsNullOrWhiteSpace(cookieString))
             {
                 request.Headers.Remove("Cookie");
@@ -397,7 +405,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // AUTHENTICATION STATE PROVIDER UNTUK COOKIES (SAFE CIRCUIT)
+    // SAFE AUTHENTICATION STATE PROVIDER
     // =====================================
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
     {
@@ -424,21 +432,27 @@ namespace AumoBlazor
 
             try
             {
-                // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Prerendering)
+                // 1. Cek User HttpContext langsung jika ada (Prerendering)
                 var httpContextUser = _httpContextAccessor.HttpContext?.User;
                 if (httpContextUser?.Identity?.IsAuthenticated == true)
                 {
                     return new AuthenticationState(httpContextUser);
                 }
 
-                // 2. Cek apakah ada cookie tersimpan. Jika TIDAK ADA cookie, langsung kembalikan anonymous
-                // Mencegah unhandled exception dan request 401 berulang yang memutus SignalR Circuit!
-                if (string.IsNullOrWhiteSpace(_cookieStore.LastKnownCookie))
+                // 2. Ambil Cookie yang tersedia
+                var cookieString = _httpContextAccessor.HttpContext?.Request.Headers["Cookie"].ToString();
+                if (string.IsNullOrWhiteSpace(cookieString))
+                {
+                    cookieString = _cookieStore.LastKnownCookie;
+                }
+
+                // Jika TIDAK ADA cookie sama sekali, BATALKAN panggil API (Mencegah loop 401 dan crash circuit)
+                if (string.IsNullOrWhiteSpace(cookieString))
                 {
                     return anonymousState;
                 }
 
-                // 3. Jika via WebSocket/Blazor Circuit, lakukan verifikasi sesi Cookie ke API Backend
+                // 3. Verifikasi sesi Cookie ke API Backend
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 var response = await _httpClient.GetAsync("api/v1/auth/me", cts.Token);
 
@@ -472,7 +486,7 @@ namespace AumoBlazor
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Gagal memverifikasi sesi cookie autentikasi dari backend API: {Message}", ex.Message);
+                _logger.LogWarning("Verifikasi auth di Blazor Circuit mengembalikan anonymous: {Message}", ex.Message);
             }
 
             return anonymousState;
