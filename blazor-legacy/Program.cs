@@ -323,7 +323,7 @@ namespace AumoBlazor
     }
 
     // =====================================
-    // COOKIE HEADER HANDLER UNTUK HTTPCLIENT
+    // COOKIE HEADER HANDLER UNTUK HTTPCLIENT (FIXED & REVISED)
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
@@ -339,8 +339,13 @@ namespace AumoBlazor
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
             {
-                request.Headers.Remove("Cookie");
-                request.Headers.Add("Cookie", cookieValues.ToString());
+                var cookieString = cookieValues.ToString();
+                if (!string.IsNullOrWhiteSpace(cookieString))
+                {
+                    request.Headers.Remove("Cookie");
+                    // Menggunakan TryAddWithoutValidation agar header cookie aman dari FormatException
+                    request.Headers.TryAddWithoutValidation("Cookie", cookieString);
+                }
             }
 
             return base.SendAsync(request, cancellationToken);
