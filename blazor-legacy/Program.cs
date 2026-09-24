@@ -59,7 +59,7 @@ namespace AumoBlazor
             });
 
             // =====================================
-            // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR
+            // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR FOR BLAZOR SERVER COOKIES
             // =====================================
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
@@ -72,27 +72,22 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // Delegating Handler untuk meneruskan Cookie browser ke Backend API
+            // Register Custom DelegatingHandler untuk Meneruskan Cookie Browser ke Backend API
+            builder.Services.AddTransient<CookieHeaderHandler>();
+
+            // Scoped HttpClient untuk Blazor Server Circuit
             builder.Services.AddScoped(sp =>
             {
-                var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
-                var handler = new HttpClientHandler
+                var cookieHandler = sp.GetRequiredService<CookieHeaderHandler>();
+                cookieHandler.InnerHandler = new HttpClientHandler
                 {
-                    UseCookies = false // Mengirimkan header cookie secara terisolasi per HttpContext
+                    UseCookies = false // Matikan otomatisasi internal agar CookieHeaderHandler penuh memegang kontrol
                 };
 
-                var client = new HttpClient(handler)
+                return new HttpClient(cookieHandler)
                 {
                     BaseAddress = new Uri(webApiUrl)
                 };
-
-                var request = httpContextAccessor.HttpContext?.Request;
-                if (request != null && request.Headers.TryGetValue("Cookie", out var cookie))
-                {
-                    client.DefaultRequestHeaders.Add("Cookie", cookie.ToString());
-                }
-
-                return client;
             });
 
             // =====================================
@@ -105,12 +100,11 @@ namespace AumoBlazor
             builder.Services.AddDataProtection()
                 .SetApplicationName(appName);
 
-            // Menegaskan seluruh Cookie di aplikasi WAJIB Secure (HTTPS) & HttpOnly
             builder.Services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => false;
                 options.MinimumSameSitePolicy = SameSiteMode.Lax;
-                options.Secure = CookieSecurePolicy.Always; // Memaksa Cookie hanya berjalan via HTTPS
+                options.Secure = CookieSecurePolicy.Always; // Wajib HTTPS untuk Cross-Site Vercel -> Render
             });
 
             // =====================================
@@ -128,9 +122,9 @@ namespace AumoBlazor
                     options.AccessDeniedPath = accessDeniedPath;
                     options.ExpireTimeSpan = TimeSpan.FromDays(expireDays);
                     options.SlidingExpiration = true;
-                    options.Cookie.HttpOnly = true;                           // Mencegah XSS
-                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // WAJIB HTTPS
-                    options.Cookie.SameSite = SameSiteMode.Lax;              // Proteksi CSRF yang fleksibel untuk Blazor
+                    options.Cookie.HttpOnly = true;
+                    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                    options.Cookie.SameSite = SameSiteMode.Lax;
                 });
 
             builder.Services.AddAuthorization();
@@ -151,7 +145,7 @@ namespace AumoBlazor
                     options.DisconnectedCircuitRetentionPeriod = TimeSpan.FromMinutes(3);
                 });
 
-            // Stabilisasi WebSocket di Render (mencegah Connection Aborted)
+            // Stabilisasi WebSocket di Render (Mencegah Connection Aborted/Dropped)
             builder.Services.AddSignalR(hubOptions =>
             {
                 hubOptions.EnableDetailedErrors = builder.Environment.IsDevelopment();
@@ -192,12 +186,10 @@ namespace AumoBlazor
             var app = builder.Build();
 
             // =====================================
-            // 7. HTTP PIPELINE MIDDLEWARE (URUTAN PENTING)
+            // 7. HTTP PIPELINE MIDDLEWARE ORDER
             // =====================================
-            // 1. Ekstrak Header Reverse Proxy (Render)
             app.UseForwardedHeaders();
 
-            // 2. Tangani skema HTTPS jika ditransfer via SSL Termination
             app.Use(async (context, next) =>
             {
                 if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https")
@@ -214,7 +206,7 @@ namespace AumoBlazor
             else
             {
                 app.UseHsts();
-                app.UseHttpsRedirection(); // Paksa HTTP ke HTTPS
+                app.UseHttpsRedirection();
 
                 app.Use(async (context, next) =>
                 {
@@ -243,12 +235,11 @@ namespace AumoBlazor
             }
 
             app.UseStaticFiles();
-            app.UseCookiePolicy(); // Menerapkan kebijakan Cookie Secure & HttpOnly
+            app.UseCookiePolicy();
 
             app.UseRouting();
             app.UseAntiforgery();
 
-            // Wajib UseAuthentication SEBELUM UseAuthorization
             app.UseAuthentication();
             app.UseAuthorization();
 
@@ -303,6 +294,31 @@ namespace AumoBlazor
     }
 
     // =====================================
+    // COOKIE HEADER HANDLER UNTUK HTTPCLIENT
+    // =====================================
+    public class CookieHeaderHandler : DelegatingHandler
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public CookieHeaderHandler(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
+            {
+                request.Headers.Remove("Cookie");
+                request.Headers.Add("Cookie", cookieValues.ToString());
+            }
+
+            return base.SendAsync(request, cancellationToken);
+        }
+    }
+
+    // =====================================
     // AUTHENTICATION STATE PROVIDER UNTUK COOKIES
     // =====================================
     public class ApiAuthenticationStateProvider : AuthenticationStateProvider
@@ -323,7 +339,7 @@ namespace AumoBlazor
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            // 1. Cek terlebih dahulu apakah user sudah terautentikasi langsung via Cookie di HttpContext
+            // 1. Cek terlebih dahulu apakah user terautentikasi langsung via Cookie di HttpContext (Prerendering)
             var httpContextUser = _httpContextAccessor.HttpContext?.User;
             if (httpContextUser?.Identity?.IsAuthenticated == true)
             {
@@ -356,7 +372,6 @@ namespace AumoBlazor
                             }
                         }
 
-                        // Menggunakan skema Cookie Authentication
                         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                         var user = new ClaimsPrincipal(identity);
 
@@ -369,7 +384,6 @@ namespace AumoBlazor
                 _logger.LogError(ex, "Gagal memverifikasi sesi cookie autentikasi dari backend API.");
             }
 
-            // Return status unauthenticated jika cookie tidak valid
             return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
         }
 
