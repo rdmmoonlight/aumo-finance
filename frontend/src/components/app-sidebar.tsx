@@ -28,6 +28,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
   Home,
@@ -39,7 +40,6 @@ import {
   Wrench,
   Settings,
   ChevronRight,
-  User,
   LogOut,
   ChevronsUpDown,
 } from "lucide-react";
@@ -148,12 +148,20 @@ export function AppSidebar() {
   };
 
   const userData = user as
-    { fullName?: string; userName?: string; email?: string } | undefined;
+    | { fullName?: string; userName?: string; email?: string; avatarUrl?: string }
+    | undefined;
+
   const ICON_CLASS = "w-4 h-4 mr-2.5 shrink-0";
 
   const isReportsActive = REPORT_SECTIONS.some((s) =>
     s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/")),
   );
+
+  // Ambil inisialisasi nama untuk AvatarFallback (misal: "John Doe" -> "JD")
+  const getUserInitials = () => {
+    const name = userData?.fullName || userData?.userName || "Guest";
+    return name.substring(0, 2).toUpperCase();
+  };
 
   return (
     <Sidebar
@@ -167,7 +175,7 @@ export function AppSidebar() {
 
       <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
         <SidebarGroup>
-          <SidebarGroupLabel className="text- uppercase tracking-widest text-muted-foreground mb-2 px-2">
+          <SidebarGroupLabel className="uppercase tracking-widest text-muted-foreground mb-2 px-2">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -202,11 +210,10 @@ export function AppSidebar() {
                             {REPORT_SECTIONS.map((section) => (
                               <div key={section.title}>
                                 <div className="px-2 py-1 select-none">
-                                  <p className="text- font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
+                                  <p className="font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
                                     {section.title}
                                   </p>
                                 </div>
-                                {/* INI YANG BIKIN RATA - SAMA KAYAK COA */}
                                 <div className="mt-1 flex flex-col gap-1">
                                   {section.items.map((sub) => {
                                     const isActive = pathname === sub.url;
@@ -273,11 +280,21 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <SidebarMenuButton className="w-full justify-between h-auto py-3 overflow-hidden">
+                <SidebarMenuButton className="w-full justify-between h-auto py-2.5 overflow-hidden">
                   <div className="flex items-center gap-2.5 overflow-hidden text-left min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4" />
-                    </div>
+                    {/* Tampilan Avatar Terintegrasi */}
+                    <Avatar className="w-8 h-8 rounded-full border shrink-0">
+                      <AvatarImage
+                        key={userData?.avatarUrl}
+                        src={userData?.avatarUrl || undefined}
+                        alt={userData?.fullName || "User Avatar"}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="font-semibold text-xs bg-muted text-muted-foreground">
+                        {getUserInitials()}
+                      </AvatarFallback>
+                    </Avatar>
+
                     <div className="flex flex-col truncate min-w-0">
                       <span className="font-medium text-[13.5px] leading-tight truncate">
                         {!isMounted || isUserLoading
