@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { baseApi } from "@/lib/apiClient";
 import {
   IconUser,
   IconMail,
@@ -16,7 +18,6 @@ import {
 import {
   useGetApiV1AuthMeQuery,
   usePutApiV1SettingsProfileMutation,
-  usePostApiV1SettingsAvatarMutation,
   usePostApiV1SettingsChangePasswordMutation,
   useDeleteApiV1SettingsDeleteAccountMutation,
 } from "@/lib/generatedApi";
@@ -42,6 +43,7 @@ interface UserProfile {
 }
 
 export default function AccountSettings() {
+  const dispatch = useDispatch();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -50,42 +52,30 @@ export default function AccountSettings() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [bio, setBio] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  const { data: rawUser, isLoading: loadingUser, refetch: refetchMe } = useGetApiV1AuthMeQuery();
+  const { data: rawUser, isLoading: loadingUser } = useGetApiV1AuthMeQuery();
   const user = rawUser as UserProfile | undefined;
 
   const [updateProfile, { isLoading: isUpdatingProfile }] = usePutApiV1SettingsProfileMutation();
-  const [uploadAvatar, { isLoading: isUploadingAvatar }] = usePostApiV1SettingsAvatarMutation();
   const [changePassword, { isLoading: isChangingPassword }] = usePostApiV1SettingsChangePasswordMutation();
   const [deleteAccount, { isLoading: isDeletingAccount }] = useDeleteApiV1SettingsDeleteAccountMutation();
 
-  // FIX: Sinkronkan data dari API ke form secara presisi
   useEffect(() => {
     if (user) {
       setFullName(user.fullName || "");
       setUserName(user.userName || "");
       setPhoneNumber(user.phoneNumber || "");
       setBio(user.bio || "");
-
-      // Hanya update avatarPreview dari user API jika kita TIDAK sedang melihat blob lokal baru
-      if (user.avatarUrl && !avatarPreview?.startsWith("blob:")) {
+      if (user.avatarUrl) {
         setAvatarPreview(user.avatarUrl);
       }
     }
   }, [user]);
-
-  // Cleanup memori blob URL
-  useEffect(() => {
-    return () => {
-      if (avatarPreview && avatarPreview.startsWith("blob:")) {
-        URL.revokeObjectURL(avatarPreview);
-      }
-    };
-  }, [avatarPreview]);
 
   const showNotification = (msg: string, isError = false) => {
     if (isError) {
@@ -107,13 +97,13 @@ export default function AccountSettings() {
           userName,
           phoneNumber,
           bio,
-          // Pastikan URL publik permanen yang dikirim, bukan string blob lokal
-          avatarUrl: avatarPreview && !avatarPreview.startsWith("blob:") ? avatarPreview : user?.avatarUrl,
+          avatarUrl: avatarPreview || undefined,
         },
       }).unwrap();
 
       showNotification("Profil berhasil diperbarui!");
-      await refetchMe();
+      // Reset cache RTK Query agar seluruh komponen (Sidebar, dll) ter-refresh data Me-nya
+      dispatch(baseApi.util.invalidateTags(["Auth", "Me"] as any));
     } catch (err: any) {
       showNotification(err?.data?.message || err?.data?.title || "Gagal memperbarui profil", true);
     }
@@ -130,41 +120,48 @@ export default function AccountSettings() {
       return showNotification("Ukuran gambar maksimal 2MB", true);
     }
 
-    // 1. Tampilkan pratinjau lokal secara instan (Blob)
-    const localPreview = URL.createObjectURL(file);
-    setAvatarPreview(localPreview);
-
+    setIsUploading(true);
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      // 2. Upload gambar ke Supabase via backend C#
-      const res: any = await uploadAvatar({ body: formData } as any).unwrap();
-      const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
+      // Gunakan fetch native dengan credentials untuk menghindari masalah header RTK Query pada multipart
+      const response = await fetch("https://aumonext-api.onrender.com/api/v1/settings/avatar", {
+        method: "POST",
+        body: formData,
+        credentials: "include", // Mengirim cookie session (AumoFinance.Session)
+      });
 
-      if (newAvatarUrl) {
-        // 3. Pasang URL publik baru Supabase ke state
-        setAvatarPreview(newAvatarUrl);
+      const res = await response.json();
 
-        // 4. OTOMATIS simpan URL ke database user agar tidak hilang saat refresh
+      if (!response.ok || !res.success) {
+        throw new Error(res.message || "Gagal mengunggah avatar");
+      }
+
+      const uploadedUrl = res.avatarUrl || res.url;
+      if (uploadedUrl) {
+        setAvatarPreview(uploadedUrl);
+
+        // Langsung simpan URL avatar baru ke profil
         await updateProfile({
           updateProfileRequest: {
             fullName: fullName || user?.fullName,
             userName: userName || user?.userName,
             phoneNumber: phoneNumber || user?.phoneNumber,
             bio: bio || user?.bio,
-            avatarUrl: newAvatarUrl,
+            avatarUrl: uploadedUrl,
           },
         }).unwrap();
       }
 
-      showNotification("Avatar berhasil diunggah dan disimpan!");
-      await refetchMe();
+      showNotification("Avatar berhasil diperbarui!");
+      
+      // Memicu pembaruan state global Redux untuk Sidebar & Topbar
+      dispatch(baseApi.util.resetApiState());
     } catch (err: any) {
-      showNotification(err?.data?.message || err?.data?.title || "Gagal mengunggah avatar", true);
-      // Revert ke avatar lama jika gagal
-      setAvatarPreview(user?.avatarUrl || null);
+      showNotification(err.message || "Gagal mengunggah avatar", true);
     } finally {
+      setIsUploading(false);
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -228,8 +225,12 @@ export default function AccountSettings() {
             <form onSubmit={handleProfileSubmit} className="space-y-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16 border">
-                  {/* Key memaksa elemen <img> di-render ulang sepenuhnya setiap kali URL berganti */}
-                  <AvatarImage key={avatarPreview} src={avatarPreview || undefined} alt="Avatar" />
+                  {/* tag img bawaan browser di dalam AvatarImage dipaksa refresh dengan timestamp query */}
+                  <AvatarImage
+                    src={avatarPreview ? `${avatarPreview}?t=${Date.now()}` : undefined}
+                    alt="Avatar"
+                    className="object-cover"
+                  />
                   <AvatarFallback className="font-bold text-sm">
                     {(fullName || user.userName || "U").substring(0, 2).toUpperCase()}
                   </AvatarFallback>
@@ -247,10 +248,10 @@ export default function AccountSettings() {
                     variant="outline"
                     size="sm"
                     className="h-8 text-xs gap-1.5"
-                    disabled={isUploadingAvatar}
+                    disabled={isUploading}
                     onClick={() => fileInputRef.current?.click()}
                   >
-                    {isUploadingAvatar ? (
+                    {isUploading ? (
                       <IconLoader2 size={13} className="animate-spin" />
                     ) : (
                       <IconUpload size={13} />
