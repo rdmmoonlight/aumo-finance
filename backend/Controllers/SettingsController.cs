@@ -19,14 +19,14 @@ namespace AumoBackend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IGuardianService _guardianService;
-        private readonly Client _supabaseClient;
+        private readonly Client? _supabaseClient;
         private const string BucketName = "avatars";
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IGuardianService guardianService,
-            Client supabaseClient)
+            Client? supabaseClient = null)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -81,27 +81,35 @@ namespace AumoBackend.Controllers
 
         [HttpPost("avatar")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadAvatar([FromForm] IFormFile avatar)
+        public async Task<IActionResult> UploadAvatar([FromForm] IFormFile? file, [FromForm] IFormFile? avatar)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 
-            if (avatar == null || avatar.Length == 0)
+            // Flexible Binding: Ambil file dari parameter 'file', 'avatar', atau fallback ke Request.Form.Files
+            var uploadFile = file ?? avatar ?? Request.Form.Files.FirstOrDefault();
+
+            if (uploadFile == null || uploadFile.Length == 0)
             {
-                return BadRequest(new { success = false, message = "No file uploaded." });
+                return BadRequest(new { success = false, message = "No file uploaded. Ensure the form-data key is named 'file' or 'avatar'." });
             }
 
-            if (avatar.Length > 2 * 1024 * 1024)
+            if (uploadFile.Length > 2 * 1024 * 1024)
             {
                 return BadRequest(new { success = false, message = "File size exceeds limit (Max 2MB)." });
             }
 
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
-            var extension = Path.GetExtension(avatar.FileName);
+            var extension = Path.GetExtension(uploadFile.FileName);
 
             if (string.IsNullOrEmpty(extension) || !allowedExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
             {
                 return BadRequest(new { success = false, message = "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed." });
+            }
+
+            if (_supabaseClient == null)
+            {
+                return StatusCode(500, new { success = false, message = "Supabase Client is not configured on the server." });
             }
 
             try
@@ -109,7 +117,7 @@ namespace AumoBackend.Controllers
                 var fileName = $"{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
 
                 using var memoryStream = new MemoryStream();
-                await avatar.CopyToAsync(memoryStream);
+                await uploadFile.CopyToAsync(memoryStream);
                 var fileBytes = memoryStream.ToArray();
 
                 // Upload file ke Supabase Storage Bucket
@@ -122,7 +130,7 @@ namespace AumoBackend.Controllers
                     .From(BucketName)
                     .GetPublicUrl(fileName);
 
-                // Update URL avatar pada user
+                // Update URL avatar pada database user
                 user.AvatarUrl = publicUrl;
                 await _userManager.UpdateAsync(user);
 
