@@ -4,6 +4,7 @@
 @using System.Text.Json
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
 
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
@@ -177,14 +178,22 @@
 
         try
         {
-            var response = await Http.PostAsJsonAsync("api/v1/auth/login", new
+            // Konstruksi Request HTTP manual agar bisa menyertakan Credentials (Cookies)
+            var request = new HttpRequestMessage(HttpMethod.Post, "api/v1/auth/login")
             {
-                Email = Input.Email,
-                Password = Input.Password,
-                RememberMe = Input.RememberMe,
-                IsMobileClient = false
-            });
+                Content = JsonContent.Create(new
+                {
+                    Email = Input.Email,
+                    Password = Input.Password,
+                    RememberMe = Input.RememberMe,
+                    IsMobileClient = false
+                })
+            };
 
+            // Mengizinkan penanganan Cookie Authentication lintas origin
+            request.SetBrowserRequestCredentials(BrowserRequestCredentials.Include);
+
+            var response = await Http.SendAsync(request);
             var rawContent = await response.Content.ReadAsStringAsync();
 
             BackendLoginResponse? result = null;
@@ -203,7 +212,7 @@
             // 1. Evaluasi Berhasil Login
             if (response.IsSuccessStatusCode && result?.Success == true)
             {
-                Logger.LogInformation("User logged in successfully via API.");
+                Logger.LogInformation("User logged in successfully via Cookie Auth.");
 
                 Guid.TryParse(result.UserId, out var parsedUserId);
 
@@ -225,6 +234,7 @@
                     Logger.LogWarning(exGuard, "Gagal mencatat sesi di GuardianService.");
                 }
 
+                // Hard refresh agar cookie session terikat ke SignalR circuit
                 Navigation.NavigateTo("/", forceLoad: true);
                 return;
             }
@@ -232,7 +242,6 @@
             // 2. Evaluasi Pesan Gagal / Lockout
             if (result != null && result.LockoutEnd.HasValue)
             {
-                // Format tanggal UTC dari backend ke Waktu Lokal pengguna
                 var localLockout = result.LockoutEnd.Value.ToLocalTime();
                 errorMessage = $"Akun Anda terkunci karena terlalu banyak percobaan login. Silakan coba lagi setelah jam {localLockout:HH:mm:ss} WIB ({localLockout:dd MMM yyyy}).";
             }
@@ -287,7 +296,6 @@
         public string Message { get; set; } = string.Empty;
         public string? UserId { get; set; }
         public string? FullName { get; set; }
-        public string? Token { get; set; }
         public DateTime? LockoutEnd { get; set; }
     }
 }
