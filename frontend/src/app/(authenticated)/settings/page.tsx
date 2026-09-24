@@ -141,6 +141,15 @@ export default function SettingsPage() {
     }
   }, [user]);
 
+  // Cleanup Object URL untuk cegah Memory Leak
+  useEffect(() => {
+    return () => {
+      if (avatarPreview && avatarPreview.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
+
   const dashboardData = (dashboardResponse as any)?.data || dashboardResponse;
   const security = dashboardData?.securityStatus;
   const activities = (dashboardData?.recentActivities || []).slice(0, 5);
@@ -178,18 +187,29 @@ export default function SettingsPage() {
     }
   };
 
-  // Upload Avatar File via RTK Query
+  // Upload Avatar File via RTK Query dengan FormData
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith("image/")) {
+      showNotification("File harus berupa gambar (JPG, PNG, WEBP)", true);
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      showNotification("Ukuran gambar maksimal 2MB", true);
+      return;
+    }
+
+    const localPreview = URL.createObjectURL(file);
+    setAvatarPreview(localPreview);
+
+    // Kirim menggunakan multipart/form-data
     const formData = new FormData();
     formData.append("file", file);
 
     try {
-      const res: any = await uploadAvatar({
-        body: formData as any,
-      }).unwrap();
+      const res: any = await uploadAvatar(formData as any).unwrap();
 
       const newAvatarUrl = res?.avatarUrl || res?.data?.avatarUrl;
       if (newAvatarUrl) {
@@ -199,6 +219,11 @@ export default function SettingsPage() {
       refetchMe();
     } catch (err: any) {
       showNotification(err?.data?.message || "Gagal mengunggah avatar", true);
+      setAvatarPreview(user?.avatarUrl || null);
+    } finally {
+      if (e.target) {
+        e.target.value = "";
+      }
     }
   };
 
@@ -362,7 +387,7 @@ export default function SettingsPage() {
                           type="file"
                           ref={fileInputRef}
                           onChange={handleFileChange}
-                          accept=".jpg,.jpeg,.png,.gif,.webp"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
                           className="hidden"
                         />
                         <Button
@@ -553,13 +578,13 @@ export default function SettingsPage() {
             <CardHeader className="py-3 px-4">
               <CardTitle className="text-sm">Appearance</CardTitle>
               <CardDescription className="text-xs">
-                Tema disimpan di localStorage
+                Pilih tema antarmuka aplikasi.
               </CardDescription>
             </CardHeader>
             <CardContent className="px-4 pb-4 pt-0">
               <RadioGroup
                 value={mounted ? theme : "system"}
-                onValueChange={(v) => setTheme(v as any)}
+                onValueChange={(v) => setTheme(v)}
                 className="grid grid-cols-3 gap-2.5"
               >
                 {appearanceOptions.map((opt) => {
