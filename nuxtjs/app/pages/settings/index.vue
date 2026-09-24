@@ -1,158 +1,169 @@
 <script setup lang="ts">
-import * as z from 'zod'
-import type { FormSubmitEvent } from '@nuxt/ui'
+import { ref, onMounted } from 'vue'
 
-const fileRef = ref<HTMLInputElement>()
-
-const profileSchema = z.object({
-  name: z.string().min(2, 'Too short'),
-  email: z.string().email('Invalid email'),
-  username: z.string().min(2, 'Too short'),
-  avatar: z.string().optional(),
-  bio: z.string().optional()
-})
-
-type ProfileSchema = z.output<typeof profileSchema>
-
-const profile = reactive<Partial<ProfileSchema>>({
-  name: 'Benjamin Canac',
-  email: 'ben@nuxtlabs.com',
-  username: 'benjamincanac',
-  avatar: undefined,
-  bio: undefined
-})
-const toast = useToast()
-async function onSubmit(event: FormSubmitEvent<ProfileSchema>) {
-  toast.add({
-    title: 'Success',
-    description: 'Your settings have been updated.',
-    icon: 'i-lucide-check',
-    color: 'success'
-  })
-  console.log(event.data)
+interface ActiveSession {
+  id: string
+  deviceName: string
+  operatingSystem: string
+  browser: string
+  ipAddress: string
+  country: string
+  isCurrent: boolean
+  lastActivityAt: string
 }
 
-function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
+interface LoginActivity {
+  id: string
+  activityType: string
+  device: string
+  operatingSystem: string
+  browser: string
+  ipAddress: string
+  country: string
+  isSuccess: boolean
+  createdAt: string
+}
 
-  if (!input.files?.length) {
-    return
+interface GuardianDashboard {
+  securityStatus: {
+    statusLevel: string
+    activeSessionsCount: number
+    failedAttemptsLast24Hours: number
+    lastSuccessfulLogin: string | null
   }
-
-  profile.avatar = URL.createObjectURL(input.files[0]!)
+  recentActivities: LoginActivity[]
+  activeSessions: ActiveSession[]
 }
 
-function onFileClick() {
-  fileRef.value?.click()
+const dashboard = ref<GuardianDashboard | null>(null)
+const loading = ref(false)
+const toast = useToast()
+
+// Fetch data dari Controller
+async function fetchDashboard() {
+  loading.value = true
+  try {
+    const response = await $fetch<{ success: boolean; data: GuardianDashboard }>('/api/v1/settings/guardian/dashboard')
+    if (response.success) {
+      dashboard.value = response.data
+    }
+  } catch (err) {
+    toast.add({ title: 'Error', description: 'Gagal mengambil data keamanan', color: 'error' })
+  } finally {
+    loading.value = false
+  }
 }
+
+// Revoke Single Session
+async function revokeSession(sessionId: string) {
+  try {
+    await $fetch(`/api/v1/settings/guardian/revoke-session/${sessionId}`, { method: 'POST' })
+    toast.add({ title: 'Success', description: 'Sesi berhasil dicabut', color: 'success' })
+    await fetchDashboard()
+  } catch (err) {
+    toast.add({ title: 'Error', description: 'Gagal mencabut sesi', color: 'error' })
+  }
+}
+
+// Revoke All Other Sessions
+async function revokeAllSessions() {
+  try {
+    await $fetch('/api/v1/settings/guardian/revoke-all-sessions', { method: 'POST' })
+    toast.add({ title: 'Success', description: 'Semua sesi lain berhasil dicabut', color: 'success' })
+    await fetchDashboard()
+  } catch (err) {
+    toast.add({ title: 'Error', description: 'Gagal mencabut semua sesi', color: 'error' })
+  }
+}
+
+onMounted(() => {
+  fetchDashboard()
+})
 </script>
 
 <template>
-  <UForm
-    id="settings"
-    :schema="profileSchema"
-    :state="profile"
-    @submit="onSubmit"
-  >
+  <div v-if="loading" class="p-4">Memuat data keamanan...</div>
+
+  <div v-else-if="dashboard" class="space-y-6">
     <UPageCard
-      title="Profile"
-      description="These informations will be displayed publicly."
+      title="Guardian Security"
+      description="Pantau sesi aktif dan riwayat aktivitas login akun Anda."
       variant="naked"
       orientation="horizontal"
-      class="mb-4"
     >
       <UButton
-        form="settings"
-        label="Save changes"
-        color="neutral"
-        type="submit"
+        label="Cabut Semua Sesi Lain"
+        color="error"
         class="w-fit lg:ms-auto"
+        @click="revokeAllSessions"
       />
     </UPageCard>
 
     <UPageCard variant="subtle">
-      <UFormField
-        name="name"
-        label="Name"
-        description="Will appear on receipts, invoices, and other communication."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-      >
-        <UInput
-          v-model="profile.name"
-          autocomplete="off"
-        />
-      </UFormField>
-      <USeparator />
-      <UFormField
-        name="email"
-        label="Email"
-        description="Used to sign in, for email receipts and product updates."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-      >
-        <UInput
-          v-model="profile.email"
-          type="email"
-          autocomplete="off"
-        />
-      </UFormField>
-      <USeparator />
-      <UFormField
-        name="username"
-        label="Username"
-        description="Your unique username for logging in and your profile URL."
-        required
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-      >
-        <UInput
-          v-model="profile.username"
-          type="username"
-          autocomplete="off"
-        />
-      </UFormField>
-      <USeparator />
-      <UFormField
-        name="avatar"
-        label="Avatar"
-        description="JPG, GIF or PNG. 1MB Max."
-        class="flex max-sm:flex-col justify-between sm:items-center gap-4"
-      >
-        <div class="flex flex-wrap items-center gap-3">
-          <UAvatar
-            :src="profile.avatar"
-            :alt="profile.name"
-            size="lg"
-          />
-          <UButton
-            label="Choose"
-            color="neutral"
-            @click="onFileClick"
-          />
-          <input
-            ref="fileRef"
-            type="file"
-            class="hidden"
-            accept=".jpg, .jpeg, .png, .gif"
-            @change="onFileChange"
-          >
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-2">
+        <div>
+          <p class="text-xs text-gray-500">Status Keamanan</p>
+          <p class="font-semibold" :class="dashboard.securityStatus.statusLevel === 'Warning' ? 'text-red-500' : 'text-green-500'">
+            {{ dashboard.securityStatus.statusLevel }}
+          </p>
         </div>
-      </UFormField>
-      <USeparator />
-      <UFormField
-        name="bio"
-        label="Bio"
-        description="Brief description for your profile. URLs are hyperlinked."
-        class="flex max-sm:flex-col justify-between items-start gap-4"
-        :ui="{ container: 'w-full' }"
-      >
-        <UTextarea
-          v-model="profile.bio"
-          :rows="5"
-          autoresize
-          class="w-full"
-        />
-      </UFormField>
+        <div>
+          <p class="text-xs text-gray-500">Percobaan Gagal (24 Jam)</p>
+          <p class="font-semibold">{{ dashboard.securityStatus.failedAttemptsLast24Hours }} kali</p>
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Login Berhasil Terakhir</p>
+          <p class="font-semibold">
+            {{ dashboard.securityStatus.lastSuccessfulLogin ? new Date(dashboard.securityStatus.lastSuccessfulLogin).toLocaleString() : '-' }}
+          </p>
+        </div>
+      </div>
     </UPageCard>
-  </UForm>
+
+    <UPageCard variant="subtle" title="Sesi Aktif">
+      <div class="space-y-4 mt-2">
+        <div 
+          v-for="session in dashboard.activeSessions" 
+          :key="session.id" 
+          class="flex items-center justify-between p-3 border rounded-lg"
+        >
+          <div>
+            <p class="font-medium">
+              {{ session.deviceName }} — {{ session.browser }} ({{ session.operatingSystem }})
+              <span v-if="session.isCurrent" class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded ml-2">Perangkat Ini</span>
+            </p>
+            <p class="text-xs text-gray-500">{{ session.ipAddress }} • {{ session.country }}</p>
+          </div>
+          <UButton
+            v-if="!session.isCurrent"
+            label="Cabut"
+            color="neutral"
+            size="sm"
+            @click="revokeSession(session.id)"
+          />
+        </div>
+      </div>
+    </UPageCard>
+
+    <UPageCard variant="subtle" title="Aktivitas Terakhir">
+      <div class="space-y-3 mt-2">
+        <div 
+          v-for="activity in dashboard.recentActivities" 
+          :key="activity.id" 
+          class="flex items-center justify-between text-sm py-2 border-b last:border-0"
+        >
+          <div>
+            <p class="font-medium">{{ activity.activityType }} ({{ activity.browser }} / {{ activity.operatingSystem }})</p>
+            <p class="text-xs text-gray-400">{{ new Date(activity.createdAt).toLocaleString() }} • {{ activity.ipAddress }}</p>
+          </div>
+          <span 
+            class="text-xs font-semibold px-2 py-1 rounded"
+            :class="activity.isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+          >
+            {{ activity.isSuccess ? 'Sukses' : 'Gagal' }}
+          </span>
+        </div>
+      </div>
+    </UPageCard>
+  </div>
 </template>
