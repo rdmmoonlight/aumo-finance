@@ -41,7 +41,7 @@ export default function AuthenticatedLayout({
     {
       skip: !isAuthenticated,
       refetchOnMountOrArgChange: false,
-    }
+    },
   );
 
   useEffect(() => {
