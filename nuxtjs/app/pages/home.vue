@@ -4,6 +4,7 @@ import type { Period } from '~/types'
 
 // Proteksi Halaman: Hanya user yang sudah login yang bisa akses
 definePageMeta({
+  layout: 'default',
   middleware: ['auth']
 })
 
