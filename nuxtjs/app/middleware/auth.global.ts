@@ -1,22 +1,26 @@
-// Protects every page except /login. Runs once per full app load (both
-// on the server for the first request, and again client-side on full
-// page refresh) and then relies on the cached auth-user/auth-checked
-// state for subsequent client-side navigations.
 export default defineNuxtRouteMiddleware(async (to) => {
   const user = useAuthUser()
   const checked = useAuthChecked()
 
+  // Ambil data user jika belum dicek
   if (!checked.value) {
     await fetchAuthUser()
   }
 
-  const isLoginPage = to.path === '/login'
+  // Definisikan rute mana saja yang bebas diakses tanpa login
+  const publicRoutes = ['/', '/login', '/register']
+  const isPublicRoute = publicRoutes.includes(to.path)
 
-  if (!user.value && !isLoginPage) {
-    return navigateTo({ path: '/login', query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined })
+  // 1. Jika BELUM login dan mencoba buka rute terproteksi (misal /dashboard, /settings)
+  if (!user.value && !isPublicRoute) {
+    return navigateTo({ 
+      path: '/login', 
+      query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined 
+    })
   }
 
-  if (user.value && isLoginPage) {
+  // 2. Jika SUDAH login tetapi malah buka halaman login/register
+  if (user.value && (to.path === '/login' || to.path === '/register')) {
     return navigateTo('/')
   }
 })
