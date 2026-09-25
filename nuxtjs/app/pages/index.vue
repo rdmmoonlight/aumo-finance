@@ -1,5 +1,7 @@
 <script setup lang="ts">
-// Logic halaman landing page jika diperlukan
+definePageMeta({
+  layout: 'landing'
+})
 </script>
 
 <template>
