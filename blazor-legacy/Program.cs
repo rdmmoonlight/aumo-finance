@@ -29,18 +29,13 @@ namespace AumoBlazor
     {
         public static void Main(string[] args)
         {
-            // =====================================
-            // 0. LOAD LOCAL .ENV FILE (IF EXISTS)
-            // =====================================
             LoadDotEnv();
 
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Configuration.AddEnvironmentVariables();
 
-            // =====================================
             // 1. FORWARDED HEADERS & HTTPS REDIRECTION (RENDER PROXY)
-            // =====================================
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -55,9 +50,7 @@ namespace AumoBlazor
                 options.MaxAge = TimeSpan.FromDays(365);
             });
 
-            // =====================================
-            // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR FOR BLAZOR SERVER COOKIES
-            // =====================================
+            // 2. HTTPCLIENT & HTTPCONTEXT ACCESSOR
             var webApiUrl = builder.Configuration["WEB_API_URL"]
                 ?? Environment.GetEnvironmentVariable("WEB_API_URL")
                 ?? "http://localhost:5000/";
@@ -69,7 +62,7 @@ namespace AumoBlazor
 
             builder.Services.AddHttpContextAccessor();
 
-            // CircuitCookieStore WAJIB Scoped (Satu per Circuit / Per User Browser Tab)
+            // CircuitCookieStore (Scoped per User Blazor Circuit)
             builder.Services.AddScoped<CircuitCookieStore>();
             builder.Services.AddScoped<CircuitHandler, CookieCircuitHandler>();
             builder.Services.AddTransient<CookieHeaderHandler>();
@@ -78,12 +71,12 @@ namespace AumoBlazor
             builder.Services.AddHttpClient("BackendApi", client =>
             {
                 client.BaseAddress = new Uri(webApiUrl);
-                client.Timeout = TimeSpan.FromSeconds(10);
+                client.Timeout = TimeSpan.FromSeconds(15);
             })
             .AddHttpMessageHandler<CookieHeaderHandler>()
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
             {
-                UseCookies = false // Matikan kontrol cookie internal agar DelegatingHandler memegang kendali
+                UseCookies = false // Nonaktifkan internal CookieContainer handler agar tidak bentrok dengan CookieHeaderHandler
             });
 
             builder.Services.AddScoped(sp =>
@@ -92,9 +85,7 @@ namespace AumoBlazor
                 return factory.CreateClient("BackendApi");
             });
 
-            // =====================================
             // 3. DATA PROTECTION & COOKIE POLICY
-            // =====================================
             var appName = builder.Configuration["APP_NAME"]
                 ?? Environment.GetEnvironmentVariable("APP_NAME")
                 ?? "AumoFinanceApp";
@@ -109,9 +100,7 @@ namespace AumoBlazor
                 options.Secure = CookieSecurePolicy.Always;
             });
 
-            // =====================================
             // 4. COOKIE AUTHENTICATION & BLAZOR AUTH STATE
-            // =====================================
             var loginPath = builder.Configuration["AUTH_LOGIN_PATH"] ?? "/auth/login";
             var accessDeniedPath = builder.Configuration["AUTH_ACCESS_DENIED_PATH"] ?? "/auth/login";
             var expireDays = int.TryParse(builder.Configuration["AUTH_COOKIE_EXPIRE_DAYS"], out var days) ? days : 30;
@@ -160,9 +149,7 @@ namespace AumoBlazor
             builder.Services.AddScoped<AuthenticationStateProvider, ApiAuthenticationStateProvider>();
             builder.Services.AddCascadingAuthenticationState();
 
-            // =====================================
             // 5. BLAZOR CORE & SIGNALR STABILITY
-            // =====================================
             builder.Services.AddControllers();
 
             builder.Services.AddRazorComponents()
@@ -180,9 +167,7 @@ namespace AumoBlazor
                 hubOptions.HandshakeTimeout = TimeSpan.FromSeconds(15);
             });
 
-            // =====================================
             // 6. APPLICATION SERVICES
-            // =====================================
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
 
@@ -206,14 +191,9 @@ namespace AumoBlazor
 
             builder.Services.AddScoped<IMarketService, MarketService>();
 
-            // =====================================
-            // BUILD APPLICATION
-            // =====================================
             var app = builder.Build();
 
-            // =====================================
             // 7. HTTP PIPELINE MIDDLEWARE ORDER
-            // =====================================
             app.UseForwardedHeaders();
 
             app.Use(async (context, next) =>
@@ -268,18 +248,13 @@ namespace AumoBlazor
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // =====================================
             // 8. ENDPOINTS
-            // =====================================
             app.MapHealthChecks("/health");
             app.MapControllers();
 
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
-            // =====================================
-            // 9. RUN APPLICATION
-            // =====================================
             app.Run();
         }
 
@@ -330,7 +305,53 @@ namespace AumoBlazor
     // =====================================
     public class CircuitCookieStore
     {
-        public string? LastKnownCookie { get; set; }
+        private readonly ConcurrentDictionary<string, string> _cookies = new(StringComparer.OrdinalIgnoreCase);
+
+        public void UpdateFromSetCookieHeader(IEnumerable<string> setCookieHeaders)
+        {
+            foreach (var header in setCookieHeaders)
+            {
+                var cookiePart = header.Split(';')[0].Trim();
+                var eqIdx = cookiePart.IndexOf('=');
+                if (eqIdx > 0)
+                {
+                    var name = cookiePart.Substring(0, eqIdx).Trim();
+                    var val = cookiePart.Substring(eqIdx + 1).Trim();
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        _cookies[name] = val;
+                    }
+                    else
+                    {
+                        _cookies.TryRemove(name, out _);
+                    }
+                }
+            }
+        }
+
+        public void LoadFromCookieHeader(string? cookieHeader)
+        {
+            if (string.IsNullOrWhiteSpace(cookieHeader)) return;
+
+            var pairs = cookieHeader.Split(';');
+            foreach (var pair in pairs)
+            {
+                var cookiePart = pair.Trim();
+                var eqIdx = cookiePart.IndexOf('=');
+                if (eqIdx > 0)
+                {
+                    var name = cookiePart.Substring(0, eqIdx).Trim();
+                    var val = cookiePart.Substring(eqIdx + 1).Trim();
+                    _cookies[name] = val;
+                }
+            }
+        }
+
+        public string? GetCookieHeaderString()
+        {
+            if (_cookies.IsEmpty) return null;
+            return string.Join("; ", _cookies.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+        }
     }
 
     // =====================================
@@ -352,14 +373,14 @@ namespace AumoBlazor
             var httpContext = _httpContextAccessor.HttpContext;
             if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
             {
-                _cookieStore.LastKnownCookie = cookieHeader.ToString();
+                _cookieStore.LoadFromCookieHeader(cookieHeader.ToString());
             }
             return base.OnCircuitOpenedAsync(circuit, cancellationToken);
         }
     }
 
     // =====================================
-    // REVISED COOKIE HEADER HANDLER (READ & WRITE COOKIES)
+    // REVISED COOKIE HEADER HANDLER
     // =====================================
     public class CookieHeaderHandler : DelegatingHandler
     {
@@ -374,49 +395,41 @@ namespace AumoBlazor
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            string? cookieString = null;
-
+            // Update store dari HttpContext jika tersedia
             try
             {
                 var httpContext = _httpContextAccessor.HttpContext;
                 if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
                 {
-                    cookieString = cookieValues.ToString();
+                    _cookieStore.LoadFromCookieHeader(cookieValues.ToString());
                 }
             }
             catch
             {
-                // Fallback aman untuk HttpContext
+                // Ignored
             }
 
-            if (string.IsNullOrWhiteSpace(cookieString))
-            {
-                cookieString = _cookieStore.LastKnownCookie;
-            }
+            var cookieHeaderString = _cookieStore.GetCookieHeaderString();
 
-            if (!string.IsNullOrWhiteSpace(cookieString))
+            if (!string.IsNullOrWhiteSpace(cookieHeaderString))
             {
                 request.Headers.Remove("Cookie");
-                request.Headers.TryAddWithoutValidation("Cookie", cookieString);
+                request.Headers.TryAddWithoutValidation("Cookie", cookieHeaderString);
             }
 
             var response = await base.SendAsync(request, cancellationToken);
 
-            // TANGKAP SET-COOKIE DARI RESPON LOGIN/AUTH BACKEND API
+            // Tangkap Set-Cookie dari API Response (misal dari /login)
             if (response.Headers.TryGetValues("Set-Cookie", out var setCookieValues))
             {
-                var newCookies = string.Join("; ", setCookieValues.Select(c => c.Split(';')[0]));
-                if (!string.IsNullOrWhiteSpace(newCookies))
-                {
-                    _cookieStore.LastKnownCookie = newCookies;
+                _cookieStore.UpdateFromSetCookieHeader(setCookieValues);
 
-                    var httpContext = _httpContextAccessor.HttpContext;
-                    if (httpContext != null && !httpContext.Response.HasStarted)
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext != null && !httpContext.Response.HasStarted)
+                {
+                    foreach (var cookieHeader in setCookieValues)
                     {
-                        foreach (var cookieHeader in setCookieValues)
-                        {
-                            httpContext.Response.Headers.Append("Set-Cookie", cookieHeader);
-                        }
+                        httpContext.Response.Headers.Append("Set-Cookie", cookieHeader);
                     }
                 }
             }
@@ -453,27 +466,26 @@ namespace AumoBlazor
 
             try
             {
-                // 1. Cek User HttpContext langsung jika ada (Prerendering)
-                var httpContextUser = _httpContextAccessor.HttpContext?.User;
-                if (httpContextUser?.Identity?.IsAuthenticated == true)
+                // 1. Ambil Cookie yang tersimpan
+                var cookieHeaderString = _cookieStore.GetCookieHeaderString();
+
+                if (string.IsNullOrWhiteSpace(cookieHeaderString))
                 {
-                    return new AuthenticationState(httpContextUser);
+                    var rawCookie = _httpContextAccessor.HttpContext?.Request.Headers["Cookie"].ToString();
+                    if (!string.IsNullOrWhiteSpace(rawCookie))
+                    {
+                        _cookieStore.LoadFromCookieHeader(rawCookie);
+                        cookieHeaderString = _cookieStore.GetCookieHeaderString();
+                    }
                 }
 
-                // 2. Ambil Cookie yang tersedia
-                var cookieString = _httpContextAccessor.HttpContext?.Request.Headers["Cookie"].ToString();
-                if (string.IsNullOrWhiteSpace(cookieString))
-                {
-                    cookieString = _cookieStore.LastKnownCookie;
-                }
-
-                // Jika TIDAK ADA cookie sama sekali, BATALKAN panggil API (Mencegah loop 401 dan crash circuit)
-                if (string.IsNullOrWhiteSpace(cookieString))
+                // Jika TIDAK ADA cookie sama sekali, kembalikan Anonymous tanpa spam request ke API
+                if (string.IsNullOrWhiteSpace(cookieHeaderString))
                 {
                     return anonymousState;
                 }
 
-                // 3. Verifikasi sesi Cookie ke API Backend
+                // 2. Verifikasi sesi Cookie ke API Backend
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                 var response = await _httpClient.GetAsync("api/v1/auth/me", cts.Token);
 
