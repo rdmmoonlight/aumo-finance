@@ -22,7 +22,10 @@ export const getApiBaseUrl = () => BASE_URL;
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   credentials: "include",
-  prepareHeaders: async (headers, { getState, endpoint, extra, type, forced, arg }) => {
+  prepareHeaders: async (
+    headers,
+    { getState, endpoint, extra, type, forced, arg },
+  ) => {
     // SSR: forward cookies dari server
     if (typeof window === "undefined") {
       try {
@@ -30,12 +33,15 @@ const rawBaseQuery = fetchBaseQuery({
         const cookieStore = await cookies();
         const cookieHeader = cookieStore.toString();
         if (cookieHeader) headers.set("Cookie", cookieHeader);
-      } catch {
-      }
+      } catch {}
     }
 
     const fetchArgs = arg as FetchArgs;
-    if (fetchArgs && typeof fetchArgs!== "string" && fetchArgs.body instanceof FormData) {
+    if (
+      fetchArgs &&
+      typeof fetchArgs !== "string" &&
+      fetchArgs.body instanceof FormData
+    ) {
       headers.delete("Content-Type");
     }
 
@@ -48,7 +54,7 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
-  if (typeof args!== "string" && args.body instanceof FormData) {
+  if (typeof args !== "string" && args.body instanceof FormData) {
     if (args.headers) {
       const h = args.headers as Record<string, string>;
       delete h["Content-Type"];
@@ -61,12 +67,12 @@ const baseQueryWithReauth: BaseQueryFn<
   if (
     result.error &&
     result.error.status === 401 &&
-    typeof window!== "undefined"
+    typeof window !== "undefined"
   ) {
     const currentPath = window.location.pathname;
-    if (!currentPath.startsWith("/auth") && currentPath!== "/") {
+    if (!currentPath.startsWith("/auth") && currentPath !== "/") {
       window.location.replace(
-        `/auth?redirectTo=${encodeURIComponent(currentPath)}`
+        `/auth?redirectTo=${encodeURIComponent(currentPath)}`,
       );
     }
   }
