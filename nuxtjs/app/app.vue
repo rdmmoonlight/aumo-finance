@@ -1,7 +1,25 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
+const route = useRoute()
 
+// Sesuaikan warna theme-color berdasarkan mode
 const color = computed(() => colorMode.value === 'dark' ? '#1b1718' : 'white')
+
+// Rute publik yang dapat diakses tanpa login
+const publicRoutes = ['/', '/login', '/register']
+
+// Contoh simulasi status auth (ganti dengan composable auth Anda, misal: useAuth() atau useUserSession())
+const isAuthenticated = ref(false) 
+
+// Cek akses halaman
+watchEffect(() => {
+  const isPublicRoute = publicRoutes.includes(route.path)
+
+  // Jika user belum login dan mencoba mengakses halaman selain rute publik, redirect ke login
+  if (!isAuthenticated.value && !isPublicRoute) {
+    navigateTo('/login')
+  }
+})
 
 useHead({
   meta: [
@@ -13,12 +31,13 @@ useHead({
     { rel: 'icon', href: '/favicon.ico' }
   ],
   htmlAttrs: {
-    lang: 'en'
+    lang: 'id'
   }
 })
 
-const title = 'Nuxt Dashboard Template'
-const description = 'A professional dashboard template built with Nuxt UI, featuring multiple pages, data visualization, and comprehensive management capabilities for creating powerful admin interfaces.'
+// Metadata SEO disesuaikan untuk Landing Page utama
+const title = 'Selamat Datang - Platform Kelola Bisnis'
+const description = 'Platform terpadu untuk memantau performa, menganalisis data penjualan, dan mengelola bisnis Anda secara efisien.'
 
 useSeoMeta({
   title,
