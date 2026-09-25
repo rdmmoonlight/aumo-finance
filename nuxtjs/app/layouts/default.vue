@@ -3,8 +3,6 @@ const route = useRoute()
 const toast = useToast()
 
 const open = ref(false)
-
-// Ref untuk mengakses data menu dari AppSidebar
 const sidebarRef = ref()
 
 const groups = computed(() => [{
@@ -51,7 +49,7 @@ onMounted(async () => {
 
 <template>
   <UDashboardGroup unit="rem">
-    <!-- Menggunakan Komponent AppSidebar yang terpisah -->
+    <!-- Sidebar Navigasi HANYA muncul di layout ini -->
     <AppSidebar ref="sidebarRef" v-model:open="open" />
 
     <UDashboardSearch :groups="groups" />
