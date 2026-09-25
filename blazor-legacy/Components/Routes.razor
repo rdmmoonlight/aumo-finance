@@ -2,80 +2,79 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using AumoBlazor
 @using AumoBlazor.Components.Layout
+@using AumoBlazor.Components.Pages.Auth
 
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <Authorizing>
-                    <div class="d-flex justify-content-center align-items-center min-vh-100" style="background-color: var(--aumo-bg, #0D1117);">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading authentication state...</span>
+<Router AppAssembly="@typeof(Program).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+            <Authorizing>
+                <div class="d-flex justify-content-center align-items-center min-vh-100" style="background-color: var(--aumo-bg, #0D1117);">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading authentication state...</span>
+                    </div>
+                </div>
+            </Authorizing>
+            <NotAuthorized Context="authContext">
+                @if (authContext.User.Identity == null || !authContext.User.Identity.IsAuthenticated)
+                {
+                    @* Cek agar TIDAK me-redirect jika user memang sedang berada di area /auth *@
+                    @if (!IsAuthPage(routeData))
+                    {
+                        <RedirectToLogin />
+                    }
+                }
+                else
+                {
+                    @* Tampilan jika pengguna sudah login tetapi tidak memiliki role/claim/akses *@
+                    <div class="d-flex align-items-center justify-content-center min-vh-100 w-100 py-5" style="background-color: var(--aumo-bg, #0D1117);">
+                        <div class="container">
+                            <div class="card border rounded-4 p-4 p-md-5 shadow-lg mx-auto text-center" 
+                                 style="max-width: 450px; background-color: var(--aumo-surface, #161B22); border-color: var(--bs-border-color, #2A313C) !important;">
+                                <div class="mb-3">
+                                    <div class="d-inline-block p-3 rounded-circle" style="background-color: rgba(234, 179, 8, 0.15); color: #EAB308;">
+                                        <i class="bi bi-shield-lock-fill display-5 lh-1"></i>
+                                    </div>
+                                </div>
+                                <h3 class="fw-bold mb-2" style="color: var(--aumo-text, #FFFFFF);">Akses Ditolak</h3>
+                                <p class="small mb-4" style="color: var(--aumo-text-muted, #FFFFFF);">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
+                                <div>
+                                    <NavLink class="btn btn-primary px-4 py-2 rounded-pill fw-medium shadow-sm" href="/">
+                                        Kembali ke Dashboard
+                                    </NavLink>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </Authorizing>
-                <NotAuthorized Context="authContext">
-                    @if (authContext.User.Identity == null || !authContext.User.Identity.IsAuthenticated)
-                    {
-                        @* Cek agar TIDAK me-redirect jika user memang sedang berada di area /auth *@
-                        @if (!IsAuthPage(routeData))
-                        {
-                            <RedirectToLogin />
-                        }
-                    }
-                    else
-                    {
-                        @* Tampilan jika pengguna sudah login tetapi tidak memiliki role/claim/akses *@
-                        <div class="d-flex align-items-center justify-content-center min-vh-100 w-100 py-5" style="background-color: var(--aumo-bg, #0D1117);">
-                            <div class="container">
-                                <div class="card border rounded-4 p-4 p-md-5 shadow-lg mx-auto text-center" 
-                                     style="max-width: 450px; background-color: var(--aumo-surface, #161B22); border-color: var(--bs-border-color, #2A313C) !important;">
-                                    <div class="mb-3">
-                                        <div class="d-inline-block p-3 rounded-circle" style="background-color: rgba(234, 179, 8, 0.15); color: #EAB308;">
-                                            <i class="bi bi-shield-lock-fill display-5 lh-1"></i>
-                                        </div>
-                                    </div>
-                                    <h3 class="fw-bold mb-2" style="color: var(--aumo-text, #FFFFFF);">Akses Ditolak</h3>
-                                    <p class="small mb-4" style="color: var(--aumo-text-muted, #FFFFFF);">Anda tidak memiliki izin untuk mengakses halaman ini.</p>
-                                    <div>
-                                        <NavLink class="btn btn-primary px-4 py-2 rounded-pill fw-medium shadow-sm" href="/">
-                                            Kembali ke Dashboard
-                                        </NavLink>
-                                    </div>
-                                </div>
+                }
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not Found - Aumo Finance</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <div class="d-flex align-items-center justify-content-center min-vh-100 w-100 py-5" style="background-color: var(--aumo-bg, #0D1117);">
+                <div class="container">
+                    <div class="card border rounded-4 p-4 p-md-5 shadow-lg mx-auto text-center" 
+                         style="max-width: 450px; background-color: var(--aumo-surface, #161B22); border-color: var(--bs-border-color, #2A313C) !important;">
+                        <div class="mb-3">
+                            <div class="d-inline-block p-3 rounded-circle" style="background-color: rgba(239, 68, 68, 0.15); color: #EF4444;">
+                                <i class="bi bi-exclamation-triangle-fill display-5 lh-1"></i>
                             </div>
                         </div>
-                    }
-                </NotAuthorized>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-        </Found>
-        <NotFound>
-            <PageTitle>Not Found - Aumo Finance</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <div class="d-flex align-items-center justify-content-center min-vh-100 w-100 py-5" style="background-color: var(--aumo-bg, #0D1117);">
-                    <div class="container">
-                        <div class="card border rounded-4 p-4 p-md-5 shadow-lg mx-auto text-center" 
-                             style="max-width: 450px; background-color: var(--aumo-surface, #161B22); border-color: var(--bs-border-color, #2A313C) !important;">
-                            <div class="mb-3">
-                                <div class="d-inline-block p-3 rounded-circle" style="background-color: rgba(239, 68, 68, 0.15); color: #EF4444;">
-                                    <i class="bi bi-exclamation-triangle-fill display-5 lh-1"></i>
-                                </div>
-                            </div>
-                            <h3 class="fw-bold mb-2" style="color: var(--aumo-text, #FFFFFF);">Halaman Tidak Ditemukan</h3>
-                            <p class="small mb-4" style="color: var(--aumo-text-muted, #FFFFFF);">Halaman yang Anda minta tidak dapat ditemukan.</p>
-                            <div>
-                                <NavLink class="btn btn-secondary px-4 py-2 rounded-pill fw-medium shadow-sm" href="/">
-                                    Kembali ke Beranda
-                                </NavLink>
-                            </div>
+                        <h3 class="fw-bold mb-2" style="color: var(--aumo-text, #FFFFFF);">Halaman Tidak Ditemukan</h3>
+                        <p class="small mb-4" style="color: var(--aumo-text-muted, #FFFFFF);">Halaman yang Anda minta tidak dapat ditemukan.</p>
+                        <div>
+                            <NavLink class="btn btn-secondary px-4 py-2 rounded-pill fw-medium shadow-sm" href="/">
+                                Kembali ke Beranda
+                            </NavLink>
                         </div>
                     </div>
                 </div>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
+            </div>
+        </LayoutView>
+    </NotFound>
+</Router>
 
 @code {
     private bool IsAuthPage(RouteData routeData)
