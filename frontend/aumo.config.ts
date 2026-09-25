@@ -1,12 +1,12 @@
 import path from "node:path";
 
 export const aumoConfig = {
-  envPrefix: ["WEB_", "NEXT_PUBLIC_"],
+  envPrefix: ["WEB_"],
 
-  get backendTarget() {
+  get backendTarget(): string {
     let target =
-      process.env.NEXT_PUBLIC_API_URL ||
       process.env.WEB_API_URL ||
+      process.env.NEXT_PUBLIC_WEB_API_URL ||
       "http://localhost:5000";
 
     // Hapus trailing slash jika ada
@@ -24,24 +24,6 @@ export const aumoConfig = {
     "@": path.resolve(process.cwd(), "./src"),
   },
 
-  // Konfigurasi domain gambar eksternal (Supabase Storage & Backend)
-  images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "**.supabase.co", // Mencakup seluruh subdomain Supabase
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "aumonext-api.onrender.com", // Jika gambar disajikan langsung dari backend
-        port: "",
-        pathname: "/**",
-      },
-    ],
-  },
-
   getRewrites() {
     return [
       {
@@ -53,11 +35,6 @@ export const aumoConfig = {
         destination: `${this.backendTarget}/api/:path*`,
       },
     ];
-  },
-
-  // Menyambungkan rewrites ke dalam spesifikasi Next.js Config
-  async rewrites() {
-    return this.getRewrites();
   },
 };
 
