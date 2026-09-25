@@ -1,6 +1,12 @@
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using AumoBlazor.Configurations;
-using AumoFinance.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server.Circuits;
@@ -8,9 +14,281 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace AumoBlazor.Extensions
 {
+    public class CircuitCookieStore
+    {
+        private readonly ConcurrentDictionary<string, string> _cookies = new(StringComparer.OrdinalIgnoreCase);
+
+        public void UpdateFromSetCookieHeader(IEnumerable<string> setCookieHeaders)
+        {
+            foreach (var header in setCookieHeaders)
+            {
+                var cookiePart = header.Split(';')[0].Trim();
+                var eqIdx = cookiePart.IndexOf('=');
+                if (eqIdx > 0)
+                {
+                    var name = cookiePart.Substring(0, eqIdx).Trim();
+                    var val = cookiePart.Substring(eqIdx + 1).Trim();
+                    if (!string.IsNullOrEmpty(val))
+                    {
+                        _cookies[name] = val;
+                    }
+                    else
+                    {
+                        _cookies.TryRemove(name, out _);
+                    }
+                }
+            }
+        }
+
+        public void LoadFromCookieHeader(string? cookieHeader)
+        {
+            if (string.IsNullOrWhiteSpace(cookieHeader)) return;
+
+            var pairs = cookieHeader.Split(';');
+            foreach (var pair in pairs)
+            {
+                var cookiePart = pair.Trim();
+                var eqIdx = cookiePart.IndexOf('=');
+                if (eqIdx > 0)
+                {
+                    var name = cookiePart.Substring(0, eqIdx).Trim();
+                    var val = cookiePart.Substring(eqIdx + 1).Trim();
+                    _cookies[name] = val;
+                }
+            }
+        }
+
+        public string? GetCookieHeaderString()
+        {
+            if (_cookies.IsEmpty) return null;
+            return string.Join("; ", _cookies.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+        }
+    }
+
+    public class CookieCircuitHandler : CircuitHandler
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CircuitCookieStore _cookieStore;
+
+        public CookieCircuitHandler(IHttpContextAccessor httpContextAccessor, CircuitCookieStore cookieStore)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _cookieStore = cookieStore;
+        }
+
+        public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
+        {
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieHeader))
+            {
+                _cookieStore.LoadFromCookieHeader(cookieHeader.ToString());
+            }
+            return base.OnCircuitOpenedAsync(circuit, cancellationToken);
+        }
+    }
+
+    public class CookieHeaderHandler : DelegatingHandler
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CircuitCookieStore _cookieStore;
+
+        public CookieHeaderHandler(IHttpContextAccessor httpContextAccessor, CircuitCookieStore cookieStore)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            _cookieStore = cookieStore;
+        }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext != null && httpContext.Request.Headers.TryGetValue("Cookie", out var cookieValues))
+                {
+                    _cookieStore.LoadFromCookieHeader(cookieValues.ToString());
+                }
+            }
+            catch
+            {
+                // Ignored
+            }
+
+            var cookieHeaderString = _cookieStore.GetCookieHeaderString();
+
+            if (!string.IsNullOrWhiteSpace(cookieHeaderString))
+            {
+                request.Headers.Remove("Cookie");
+                request.Headers.TryAddWithoutValidation("Cookie", cookieHeaderString);
+            }
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            if (response.Headers.TryGetValues("Set-Cookie", out var setCookieValues))
+            {
+                _cookieStore.UpdateFromSetCookieHeader(setCookieValues);
+
+                var httpContext = _httpContextAccessor.HttpContext;
+                if (httpContext != null && !httpContext.Response.HasStarted)
+                {
+                    foreach (var cookieHeader in setCookieValues)
+                    {
+                        httpContext.Response.Headers.Append("Set-Cookie", cookieHeader);
+                    }
+                }
+            }
+
+            return response;
+        }
+    }
+
+    public class ApiAuthenticationStateProvider : AuthenticationStateProvider
+    {
+        private readonly HttpClient _httpClient;
+        private readonly ILogger<ApiAuthenticationStateProvider> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly CircuitCookieStore _cookieStore;
+
+        public ApiAuthenticationStateProvider(
+            HttpClient httpClient,
+            ILogger<ApiAuthenticationStateProvider> logger,
+            IHttpContextAccessor httpContextAccessor,
+            CircuitCookieStore cookieStore)
+        {
+            _httpClient = httpClient;
+            _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
+            _cookieStore = cookieStore;
+        }
+
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            var anonymousState = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+
+            try
+            {
+                var cookieHeaderString = _cookieStore.GetCookieHeaderString();
+
+                if (string.IsNullOrWhiteSpace(cookieHeaderString))
+                {
+                    var rawCookie = _httpContextAccessor.HttpContext?.Request.Headers["Cookie"].ToString();
+                    if (!string.IsNullOrWhiteSpace(rawCookie))
+                    {
+                        _cookieStore.LoadFromCookieHeader(rawCookie);
+                        cookieHeaderString = _cookieStore.GetCookieHeaderString();
+                    }
+                }
+
+                if (string.IsNullOrWhiteSpace(cookieHeaderString))
+                {
+                    return anonymousState;
+                }
+
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                var response = await _httpClient.GetAsync("api/v1/auth/me", cts.Token);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var userProfile = await System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync<UserProfileResponse>(response.Content, cancellationToken: cts.Token);
+
+                    if (userProfile?.Success == true && !string.IsNullOrEmpty(userProfile.Email))
+                    {
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.NameIdentifier, userProfile.UserId ?? string.Empty),
+                            new Claim(ClaimTypes.Name, userProfile.FullName ?? userProfile.UserName ?? "User"),
+                            new Claim(ClaimTypes.Email, userProfile.Email)
+                        };
+
+                        if (userProfile.Roles != null)
+                        {
+                            foreach (var role in userProfile.Roles)
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, role));
+                            }
+                        }
+
+                        var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var user = new ClaimsPrincipal(identity);
+
+                        return new AuthenticationState(user);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning("Verifikasi auth di Blazor Circuit mengembalikan anonymous: {Message}", ex.Message);
+            }
+
+            return anonymousState;
+        }
+
+        public void NotifyAuthenticationStateChanged()
+        {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+        }
+
+        public class UserProfileResponse
+        {
+            public bool Success { get; set; }
+            public string? UserId { get; set; }
+            public string? Email { get; set; }
+            public string? UserName { get; set; }
+            public string? FullName { get; set; }
+            public List<string>? Roles { get; set; }
+        }
+    }
+
+    public class WebApiGuardianService
+    {
+        private readonly HttpClient _httpClient;
+
+        public WebApiGuardianService(HttpClient httpClient)
+        {
+            _httpClient = httpClient;
+        }
+
+        public Task CreateLoginActivityAsync(
+            Guid userId,
+            string ipAddress,
+            string userAgent,
+            string deviceType,
+            string location,
+            string authMethod,
+            bool isSuccess,
+            string? failureReason = null,
+            string? sessionToken = null)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task CreateSessionAsync(
+            Guid userId,
+            string sessionToken,
+            string ipAddress,
+            string userAgent,
+            string deviceType,
+            string location,
+            string deviceName,
+            string operatingSystem)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task RevokeSessionAsync(Guid userId, Guid sessionId)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task RevokeAllSessionsAsync(Guid userId)
+        {
+            return Task.FromResult(true);
+        }
+    }
+
     public static class AppServiceExtensions
     {
         public static AppConfig AddAppConfigurations(this IServiceCollection services, IConfiguration configuration)

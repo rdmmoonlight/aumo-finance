@@ -168,7 +168,7 @@
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private Guid UserId { get; set; }
-    private List<JournalEntry> entries = new();
+    private List<global::AumoBackend.Core.JournalEntry> entries = new();
     private Period? selectedPeriod;
     private bool editMode;
 
@@ -195,7 +195,7 @@
 
         if (selectedPeriod == null)
         {
-            entries = new List<JournalEntry>();
+            entries = new List<global::AumoBackend.Core.JournalEntry>();
             return;
         }
 
@@ -213,7 +213,7 @@
 
     private void ToggleEditMode() => editMode = !editMode;
 
-    private async Task DeleteEntry(JournalEntry entry)
+    private async Task DeleteEntry(AumoBackend.Core.JournalEntry entry)
     {
         var closedPeriods = await DbContext.Periods
             .Where(p => p.UserId == UserId && p.IsClosed)
