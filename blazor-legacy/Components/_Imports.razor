@@ -4,26 +4,16 @@
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @using Microsoft.AspNetCore.Components.Web.Virtualization
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.JSInterop
-@using static Microsoft.AspNetCore.Components.Web.RenderMode
 
-@* Root App & Configurations *@
+@* Gunakan namespace Blazor project utama *@
 @using AumoBlazor
 @using AumoBlazor.Configurations
 @using AumoBlazor.Extensions
-
-@* Core Services & Models *@
-@using AumoFinance.Models
-@using AumoFinance.Services
-
-@* Blazor Components & Layouts *@
 @using AumoBlazor.Components
 @using AumoBlazor.Components.Layout
-@using AumoBlazor.Components.Pages
-@using AumoBlazor.Components.Pages.Auth
 
-@* Backend Entities & Controllers *@
-@using AumoBackend.Core
-@using AumoBackend.Controllers
+@* Gunakan prefix global:: untuk menghindari ambiguitas alias CS0576 *@
+@using global::AumoFinance.Components
+@using global::AumoFinance.Models
+@using global::AumoFinance.Services
