@@ -63,7 +63,7 @@ namespace AumoBlazor
             // 4. APPLICATION SERVICES
             builder.Services.AddHealthChecks();
             builder.Services.AddHostedService<RenderKeepAliveService>();
-            builder.Services.AddScoped<IGuardianService, WebApiGuardianService>();
+            builder.Services.AddScoped<WebApiGuardianService>();
             builder.Services.AddHttpClient<IAiService, AiService>();
             builder.Services.AddScoped<IJournalImportService, JournalImportService>();
             builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();

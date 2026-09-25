@@ -165,7 +165,7 @@
     private Task<AuthenticationState>? AuthStateTask { get; set; }
 
     private Guid UserId { get; set; }
-    private List<JournalEntry> entries = new();
+    private List<AumoBackend.Core.JournalEntry> entries = new();
     private Period? selectedPeriod;
 
     protected override async Task OnInitializedAsync()
@@ -191,7 +191,7 @@
 
         if (selectedPeriod == null)
         {
-            entries = new List<JournalEntry>();
+            entries = new List<AumoBackend.Core.JournalEntry>();
             return;
         }
 
