@@ -10,6 +10,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
 import { AppFooter } from "@/components/app-footer";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function AuthenticatedLayout({
   children,
@@ -40,12 +41,11 @@ export default function AuthenticatedLayout({
     {
       skip: !isAuthenticated,
       refetchOnMountOrArgChange: false,
-    },
+    }
   );
 
   useEffect(() => {
     if (isMounted && isAuthError) {
-      // kasih delay dikit biar user baca pesan
       const t = setTimeout(() => router.replace("/auth"), 800);
       return () => clearTimeout(t);
     }
@@ -70,27 +70,28 @@ export default function AuthenticatedLayout({
   }
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "285px",
-          "--sidebar-width-icon": "3.5rem",
-        } as React.CSSProperties
-      }
-    >
-      <AppSidebar />
-      <SidebarInset className="flex flex-1 flex-col min-w-0">
-        <AppTopBar />
-        {/* optional loader pas periods loading */}
-        {isPeriodsLoading ? (
-          <div className="flex flex-1 items-center justify-center p-6">
-            <p className="text-sm text-muted-foreground">Memuat periode...</p>
-          </div>
-        ) : (
-          <main className="flex-1 p-6">{children}</main>
-        )}
-        <AppFooter />
-      </SidebarInset>
-    </SidebarProvider>
+    <TooltipProvider delayDuration={0}>
+      <SidebarProvider
+        style={
+          {
+            "--sidebar-width": "285px",
+            "--sidebar-width-icon": "3.5rem",
+          } as React.CSSProperties
+        }
+      >
+        <AppSidebar />
+        <SidebarInset className="flex flex-1 flex-col min-w-0">
+          <AppTopBar />
+          {isPeriodsLoading ? (
+            <div className="flex flex-1 items-center justify-center p-6">
+              <p className="text-sm text-muted-foreground">Memuat periode...</p>
+            </div>
+          ) : (
+            <main className="flex-1 p-6">{children}</main>
+          )}
+          <AppFooter />
+        </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }
