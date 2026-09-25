@@ -32,14 +32,15 @@ export default function AuthenticatedLayout({
     refetchOnMountOrArgChange: false,
   });
 
-  const isAuthenticated = isMounted && !isAuthLoading && !isAuthError && !!authData;
+  const isAuthenticated =
+    isMounted && !isAuthLoading && !isAuthError && !!authData;
 
   const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(
     undefined,
     {
       skip: !isAuthenticated,
       refetchOnMountOrArgChange: false,
-    }
+    },
   );
 
   useEffect(() => {
