@@ -74,8 +74,10 @@ namespace AumoBackend
             }
             else
             {
-                var logger = builder.Services.BuildServiceProvider().GetRequiredService<ILogger<Program>>();
-                logger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_KEY' belum dikonfigurasi.");
+                // ✅ REVISI: Gunakan LoggerFactory tanpa BuildServiceProvider()
+                using var loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
+                var startupLogger = loggerFactory.CreateLogger<Program>();
+                startupLogger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_KEY' belum dikonfigurasi.");
             }
 
             // =====================================
@@ -201,7 +203,7 @@ namespace AumoBackend
             // =====================================
             builder.Services.AddControllers();
 
-            // Native Microsoft OpenAPI Support (.NET 10)
+            // Native Microsoft OpenAPI Support (.NET 9/10)
             builder.Services.AddOpenApi();
 
             var originsList = new List<string>
