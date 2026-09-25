@@ -269,19 +269,21 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> GetProfile()
     {
         var user = await _userManager.GetUserAsync(User);
-        if (user == null)
-            return NotFound(new { success = false, message = "User session active, but user not found." });
-
+        if (user == null) return NotFound(new { success = false, message = "User not found." });
+    
         var roles = await _userManager.GetRolesAsync(user);
         var userClaims = await _userManager.GetClaimsAsync(user);
-
+    
         return Ok(new
         {
             success = true,
             userId = user.Id,
             email = user.Email,
             userName = user.UserName,
-            fullName = user.FullName ?? user.UserName,
+            fullName = user.FullName,
+            phoneNumber = user.PhoneNumber,
+            avatarUrl = user.AvatarUrl,
+            bio = user.Bio,
             roles = roles,
             customClaims = userClaims
         });
