@@ -1,25 +1,8 @@
 <script setup lang="ts">
 const colorMode = useColorMode()
-const route = useRoute()
 
 // Sesuaikan warna theme-color berdasarkan mode
 const color = computed(() => colorMode.value === 'dark' ? '#1b1718' : 'white')
-
-// Rute publik yang dapat diakses tanpa login
-const publicRoutes = ['/', '/login', '/register']
-
-// Contoh simulasi status auth (ganti dengan composable auth Anda, misal: useAuth() atau useUserSession())
-const isAuthenticated = ref(false) 
-
-// Cek akses halaman
-watchEffect(() => {
-  const isPublicRoute = publicRoutes.includes(route.path)
-
-  // Jika user belum login dan mencoba mengakses halaman selain rute publik, redirect ke login
-  if (!isAuthenticated.value && !isPublicRoute) {
-    navigateTo('/login')
-  }
-})
 
 useHead({
   meta: [
