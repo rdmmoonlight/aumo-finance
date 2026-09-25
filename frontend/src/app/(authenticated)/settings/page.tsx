@@ -18,9 +18,15 @@ export default function SettingsPage() {
         <h1 className="text-xl font-bold">Settings</h1>
         <Tabs value={mainTab} onValueChange={setMainTab}>
           <TabsList className="h-8 p-1">
-            <TabsTrigger value="account" className="text-xs gap-1.5 h-6"><IconUser size={13}/> Account</TabsTrigger>
-            <TabsTrigger value="appearance" className="text-xs gap-1.5 h-6"><IconPalette size={13}/> Appearance</TabsTrigger>
-            <TabsTrigger value="security" className="text-xs gap-1.5 h-6"><IconShieldCheck size={13}/> Security</TabsTrigger>
+            <TabsTrigger value="account" className="text-xs gap-1.5 h-6">
+              <IconUser size={13} /> Account
+            </TabsTrigger>
+            <TabsTrigger value="appearance" className="text-xs gap-1.5 h-6">
+              <IconPalette size={13} /> Appearance
+            </TabsTrigger>
+            <TabsTrigger value="security" className="text-xs gap-1.5 h-6">
+              <IconShieldCheck size={13} /> Security
+            </TabsTrigger>
           </TabsList>
         </Tabs>
         <Separator />
