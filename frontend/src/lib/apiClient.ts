@@ -16,10 +16,14 @@ function enforceHttps(url: string): string {
 
 const BASE_URL = enforceHttps(aumoConfig.backendTarget);
 
+export const API_BASE_URL = BASE_URL;
+export const getApiBaseUrl = () => BASE_URL;
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   credentials: "include",
-  prepareHeaders: async (headers) => {
+  prepareHeaders: async (headers, { getState, endpoint, extra, type, forced, arg }) => {
+    // SSR: forward cookies dari server
     if (typeof window === "undefined") {
       try {
         const { cookies } = await import("next/headers");
@@ -27,9 +31,14 @@ const rawBaseQuery = fetchBaseQuery({
         const cookieHeader = cookieStore.toString();
         if (cookieHeader) headers.set("Cookie", cookieHeader);
       } catch {
-        // Fallback saat build-time
       }
     }
+
+    const fetchArgs = arg as FetchArgs;
+    if (fetchArgs && typeof fetchArgs!== "string" && fetchArgs.body instanceof FormData) {
+      headers.delete("Content-Type");
+    }
+
     return headers;
   },
 });
@@ -39,21 +48,25 @@ const baseQueryWithReauth: BaseQueryFn<
   unknown,
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
+  if (typeof args!== "string" && args.body instanceof FormData) {
+    if (args.headers) {
+      const h = args.headers as Record<string, string>;
+      delete h["Content-Type"];
+      delete h["content-type"];
+    }
+  }
+
   const result = await rawBaseQuery(args, api, extraOptions);
 
-  // PENTING: Hanya lakukan redirect SEKALI di browser jika 401
   if (
     result.error &&
     result.error.status === 401 &&
-    typeof window !== "undefined"
+    typeof window!== "undefined"
   ) {
     const currentPath = window.location.pathname;
-
-    // Pastikan HANYA redirect jika BELUM di /auth agar tidak loop
-    if (!currentPath.startsWith("/auth") && currentPath !== "/") {
-      // Gunakan window.location.replace agar tidak menyimpan history loop
+    if (!currentPath.startsWith("/auth") && currentPath!== "/") {
       window.location.replace(
-        `/auth?redirectTo=${encodeURIComponent(currentPath)}`,
+        `/auth?redirectTo=${encodeURIComponent(currentPath)}`
       );
     }
   }
@@ -64,7 +77,6 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
-  // Matikan refetch pada fokus jendela untuk mencegah spam saat tab aktif/inaktif
   refetchOnFocus: false,
   refetchOnReconnect: false,
   keepUnusedDataFor: 300,
