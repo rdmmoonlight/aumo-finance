@@ -27,7 +27,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   try {
     await login(event.data)
 
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/home'
     await navigateTo(redirect)
   } catch (err: unknown) {
     const message = (err as { data?: { message?: string } })?.data?.message
