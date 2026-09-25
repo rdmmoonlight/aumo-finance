@@ -2,16 +2,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const user = useAuthUser()
   const checked = useAuthChecked()
 
-  // Ambil data user jika belum dicek
   if (!checked.value) {
     await fetchAuthUser()
   }
 
-  // Definisikan rute mana saja yang bebas diakses tanpa login
   const publicRoutes = ['/', '/login', '/register']
   const isPublicRoute = publicRoutes.includes(to.path)
 
-  // 1. Jika BELUM login dan mencoba buka rute terproteksi (misal /dashboard, /settings)
+  // 1. Jika BELUM login dan mencoba akses rute terproteksi (seperti /home) -> Redirect ke /login
   if (!user.value && !isPublicRoute) {
     return navigateTo({ 
       path: '/login', 
@@ -19,8 +17,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     })
   }
 
-  // 2. Jika SUDAH login tetapi malah buka halaman login/register
-  if (user.value && (to.path === '/login' || to.path === '/register')) {
-    return navigateTo('/')
+  // 2. Jika SUDAH login dan mencoba buka Landing Page Publik (/) atau Login/Register -> Redirect ke Landing Page Member (/home)
+  if (user.value && (to.path === '/' || to.path === '/login' || to.path === '/register')) {
+    return navigateTo('/home')
   }
 })
