@@ -35,7 +35,7 @@
 
     <template #body>
       <div class="flex flex-col items-center justify-center text-center py-16 px-4 space-y-6">
-        <h1 class="text-4xl font-bold tracking-tight sm:text-6xl text-highlighted">
+        <h1 class="max-w-3xl text-lg text-muted">
           Kelola Bisnis Anda Lebih Efisien
         </h1>
         <p class="max-w-2xl text-lg text-muted">
