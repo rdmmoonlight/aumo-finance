@@ -11,6 +11,8 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.WebUtilities
+@using AumoBlazor.Configurations
+@using AumoBlazor.Extensions
 
 @attribute [AllowAnonymous]
 @rendermode InteractiveServer
@@ -360,14 +362,10 @@
                 IsMobileClient = false
             });
 
-            // KUNCI UTAMA: Tangkap Cookie dari respon login & simpan ke Scoped CircuitCookieStore
+            // PERBAIKAN: Tangkap Cookie dari Set-Cookie headers dan update ke CircuitCookieStore secara terstruktur
             if (response.Headers.TryGetValues("Set-Cookie", out var setCookies))
             {
-                var cookieHeaderValue = string.Join("; ", setCookies.Select(c => c.Split(';')[0]));
-                if (!string.IsNullOrWhiteSpace(cookieHeaderValue))
-                {
-                    CookieStore.LastKnownCookie = cookieHeaderValue;
-                }
+                CookieStore.UpdateFromSetCookieHeader(setCookies);
             }
 
             var rawContent = await response.Content.ReadAsStringAsync();
