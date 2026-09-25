@@ -32,8 +32,7 @@ export interface Stat {
   title: string
   icon: string
   value: number | string
-  variation: number
-  formatter?: (value: number) => string
+  description?: string
 }
 
 export interface Sale {
@@ -52,7 +51,10 @@ export interface Notification {
   date: string
 }
 
-export type Period = 'daily' | 'weekly' | 'monthly'
+// Mirrors DashboardController's `period` query param — the backend
+// only understands these two values (monthly = current selected
+// accounting Period, annual = the whole calendar year).
+export type Period = 'monthly' | 'annual'
 
 export interface Range {
   start: Date

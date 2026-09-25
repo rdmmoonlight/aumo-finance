@@ -1,105 +1,49 @@
 <script setup lang="ts">
-import { h, resolveComponent } from 'vue'
+import { h } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import type { Period, Range, Sale } from '~/types'
+import type { DashboardAccountBalance, DashboardData } from '~/composables/useDashboardData'
 
 const props = defineProps<{
-  period: Period
-  range: Range
+  dashboard: DashboardData | null | undefined
+  pending: boolean
 }>()
 
-const UBadge = resolveComponent('UBadge')
+// DashboardController's `recentEntries` field is still an empty
+// placeholder on the backend (not implemented yet), so this table
+// shows the expense breakdown for the selected period instead —
+// real data already returned by the same endpoint.
+const data = computed(() => props.dashboard?.expenseAccountsList ?? [])
 
-const sampleEmails = [
-  'james.anderson@example.com',
-  'mia.white@example.com',
-  'william.brown@example.com',
-  'emma.davis@example.com',
-  'ethan.harris@example.com'
-]
-
-const { data } = await useAsyncData('sales', async () => {
-  const sales: Sale[] = []
-  const currentDate = new Date()
-
-  for (let i = 0; i < 5; i++) {
-    const hoursAgo = randomInt(0, 48)
-    const date = new Date(currentDate.getTime() - hoursAgo * 3600000)
-
-    sales.push({
-      id: (4600 - i).toString(),
-      date: date.toISOString(),
-      status: randomFrom(['paid', 'failed', 'refunded']),
-      email: randomFrom(sampleEmails),
-      amount: randomInt(100, 1000)
-    })
-  }
-
-  return sales.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-}, {
-  watch: [() => props.period, () => props.range],
-  default: () => []
-})
-
-const columns: TableColumn<Sale>[] = [
+const columns: TableColumn<DashboardAccountBalance>[] = [
   {
-    accessorKey: 'id',
-    header: 'ID',
-    cell: ({ row }) => `#${row.getValue('id')}`
+    accessorKey: 'referenceNumber',
+    header: 'No. Akun',
+    cell: ({ row }) => `#${row.getValue('referenceNumber')}`
   },
   {
-    accessorKey: 'date',
-    header: 'Date',
-    cell: ({ row }) => {
-      return new Date(row.getValue('date')).toLocaleString('en-US', {
-        day: 'numeric',
-        month: 'short',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-      })
-    }
+    accessorKey: 'accountName',
+    header: 'Akun'
   },
   {
-    accessorKey: 'status',
-    header: 'Status',
-    cell: ({ row }) => {
-      const color = {
-        paid: 'success' as const,
-        failed: 'error' as const,
-        refunded: 'neutral' as const
-      }[row.getValue('status') as string]
-
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.getValue('status')
-      )
-    }
-  },
-  {
-    accessorKey: 'email',
-    header: 'Email'
-  },
-  {
-    accessorKey: 'amount',
-    header: () => h('div', { class: 'text-right' }, 'Amount'),
-    cell: ({ row }) => {
-      const amount = Number.parseFloat(row.getValue('amount'))
-
-      const formatted = new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'EUR'
-      }).format(amount)
-
-      return h('div', { class: 'text-right font-medium' }, formatted)
-    }
+    accessorKey: 'balance',
+    header: () => h('div', { class: 'text-right' }, 'Saldo'),
+    cell: ({ row }) => h('div', { class: 'text-right font-medium' }, formatCurrencyIDR(row.getValue('balance')))
   }
 ]
 </script>
 
 <template>
+  <UCard v-if="!pending && data.length === 0" class="shrink-0">
+    <p class="text-sm text-muted text-center py-6">
+      Belum ada beban tercatat untuk periode ini.
+    </p>
+  </UCard>
+
   <UTable
+    v-else
     :data="data"
     :columns="columns"
+    :loading="pending"
     class="shrink-0"
     :ui="{
       base: 'table-fixed border-separate border-spacing-0',
