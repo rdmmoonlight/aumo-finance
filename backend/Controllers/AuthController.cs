@@ -270,10 +270,10 @@ public class AuthController : ControllerBase
     {
         var user = await _userManager.GetUserAsync(User);
         if (user == null) return NotFound(new { success = false, message = "User not found." });
-    
+
         var roles = await _userManager.GetRolesAsync(user);
         var userClaims = await _userManager.GetClaimsAsync(user);
-    
+
         return Ok(new
         {
             success = true,
