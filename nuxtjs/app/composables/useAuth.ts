@@ -1,8 +1,4 @@
-// Thin wrapper around AuthController's /api/v1/auth/* routes (proxied
-// by server/api/v1/[...].ts). Shared app-wide via useState so every
-// component (UserMenu, the global auth middleware, the login page)
-// sees the same session.
-
+// Thin wrapper around AuthController's /api/v1/auth/* routes
 interface AuthUser {
   userId: string
   email: string
@@ -26,8 +22,6 @@ export function useAuthUser() {
   return useState<AuthUser | null>('auth-user', () => null)
 }
 
-// Whether we've already asked the backend "who am I" at least once in
-// this app load — avoids re-checking on every single navigation.
 export function useAuthChecked() {
   return useState<boolean>('auth-checked', () => false)
 }
@@ -37,10 +31,17 @@ export async function fetchAuthUser() {
   const checked = useAuthChecked()
 
   try {
-    const response = await $fetch<MeResponse>('/api/v1/auth/me')
-    user.value = response.success ? response : null
+    // Pass headers agar cookie dari SSR/Client ikut terkirim ke proxy Nitro
+    const response = await $fetch<MeResponse>('/api/v1/auth/me', {
+      headers: useRequestHeaders(['cookie']) as Record<string, string>
+    })
+    
+    if (response && response.success) {
+      user.value = response
+    } else {
+      user.value = null
+    }
   } catch {
-    // Not logged in (401) or backend unreachable — either way, no session.
     user.value = null
   } finally {
     checked.value = true
@@ -50,6 +51,9 @@ export async function fetchAuthUser() {
 }
 
 export async function login(payload: { email: string, password: string, rememberMe?: boolean }) {
+  const user = useAuthUser()
+  const checked = useAuthChecked()
+
   const response = await $fetch<LoginResponse>('/api/v1/auth/login', {
     method: 'POST',
     body: {
@@ -60,8 +64,20 @@ export async function login(payload: { email: string, password: string, remember
     }
   })
 
-  // Login only issues the session cookie; fetch /me to populate roles etc.
-  await fetchAuthUser()
+  // 1. Jika login sukses di backend, set state user secara optimis dari respon login
+  if (response && response.success) {
+    user.value = {
+      userId: response.userId,
+      email: payload.email,
+      userName: payload.email,
+      fullName: response.fullName,
+      roles: []
+    }
+    checked.value = true
+
+    // 2. Ambil profil lengkap (roles, dll) di background
+    fetchAuthUser().catch(() => {})
+  }
 
   return response
 }
@@ -72,5 +88,8 @@ export async function logout() {
   } finally {
     useAuthUser().value = null
     useAuthChecked().value = true
+    
+    // Redirect ke landing page publik setelah logout
+    await navigateTo('/')
   }
 }
