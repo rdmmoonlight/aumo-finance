@@ -139,7 +139,7 @@
     {
         if (AuthStateTask != null)
         {
-            var authState = await AuthStateTask;
+            var authState = await! AuthStateTask;
             var user = authState.User;
 
             if (user.Identity?.IsAuthenticated == true)
@@ -158,17 +158,17 @@
             return;
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(DbContext, UserId);
+        var period = await! SelectedPeriodHelper.GetSelectedPeriodAsync(DbContext, UserId);
         if (period == null)
         {
             noPeriodSelected = true;
             return;
         }
 
-        var unadjusted = await TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: false);
-        var adjusted = await TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: true);
+        var unadjusted = await! TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: false);
+        var adjusted = await! TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: true);
 
-        var accounts = await DbContext.ChartOfAccounts.Where(a => a.IsActive && a.UserId == UserId).OrderBy(a => a.ReferenceNumber).ToListAsync();
+        var accounts = await! DbContext.ChartOfAccounts.Where(a => a.IsActive && a.UserId == UserId).OrderBy(a => a.ReferenceNumber).ToListAsync();
 
         var newVm = new WorksheetViewModel();
         var allRefs = unadjusted.Select(r => r.AccountId)
