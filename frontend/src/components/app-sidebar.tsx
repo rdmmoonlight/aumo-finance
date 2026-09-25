@@ -193,13 +193,11 @@ export function AppSidebar() {
 
   const isReportsActive = REPORT_SECTIONS.some((section) =>
     section.items.some(
-      (item) =>
-        pathname === item.url || pathname.startsWith(`${item.url}/`),
+      (item) => pathname === item.url || pathname.startsWith(`${item.url}/`),
     ),
   );
 
-  const displayName =
-    userData?.fullName || userData?.userName || "Guest";
+  const displayName = userData?.fullName || userData?.userName || "Guest";
   const displayEmail = userData?.email || "Tidak ada email";
 
   return (
@@ -210,9 +208,7 @@ export function AppSidebar() {
     >
       {/* Header */}
       <SidebarHeader className="px-4 py-3.5 border-b shrink-0">
-        <h2 className="text-base font-semibold tracking-tight">
-          Aumo Finance
-        </h2>
+        <h2 className="text-base font-semibold tracking-tight">Aumo Finance</h2>
         <p className="text-[11px] text-muted-foreground mt-0.5 tracking-wide uppercase">
           Accounting Suite
         </p>
@@ -291,8 +287,7 @@ export function AppSidebar() {
 
                 const isActive =
                   pathname === item.url ||
-                  (item.url !== "/home" &&
-                    pathname.startsWith(`${item.url}/`));
+                  (item.url !== "/home" && pathname.startsWith(`${item.url}/`));
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -379,4 +374,4 @@ export function AppSidebar() {
       </SidebarFooter>
     </Sidebar>
   );
-  }
+}

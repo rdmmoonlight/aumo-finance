@@ -48,7 +48,7 @@
 }
 
 @layer base {
-    * {
+  * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
@@ -136,8 +136,12 @@
 }
 
 @keyframes quran-marquee {
-  0% { transform: translateX(0%); }
-  100% { transform: translateX(-100%); }
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
 }
 .animate-quran-marquee {
   animation: quran-marquee 20s linear infinite;

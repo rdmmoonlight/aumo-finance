@@ -22,7 +22,13 @@ import {
   useDeleteApiV1SettingsDeleteAccountMutation,
 } from "@/lib/generatedApi";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -61,9 +67,12 @@ export default function AccountSettings() {
   const { data: rawUser, isLoading: loadingUser } = useGetApiV1AuthMeQuery();
   const user = rawUser as UserProfile | undefined;
 
-  const [updateProfile, { isLoading: isUpdatingProfile }] = usePutApiV1SettingsProfileMutation();
-  const [changePassword, { isLoading: isChangingPassword }] = usePostApiV1SettingsChangePasswordMutation();
-  const [deleteAccount, { isLoading: isDeletingAccount }] = useDeleteApiV1SettingsDeleteAccountMutation();
+  const [updateProfile, { isLoading: isUpdatingProfile }] =
+    usePutApiV1SettingsProfileMutation();
+  const [changePassword, { isLoading: isChangingPassword }] =
+    usePostApiV1SettingsChangePasswordMutation();
+  const [deleteAccount, { isLoading: isDeletingAccount }] =
+    useDeleteApiV1SettingsDeleteAccountMutation();
 
   useEffect(() => {
     if (user) {
@@ -105,7 +114,10 @@ export default function AccountSettings() {
       // Reset cache RTK Query agar seluruh komponen (Sidebar, dll) ter-refresh data Me-nya
       dispatch(baseApi.util.invalidateTags(["Auth", "Me"] as any));
     } catch (err: any) {
-      showNotification(err?.data?.message || err?.data?.title || "Gagal memperbarui profil", true);
+      showNotification(
+        err?.data?.message || err?.data?.title || "Gagal memperbarui profil",
+        true,
+      );
     }
   };
 
@@ -114,7 +126,10 @@ export default function AccountSettings() {
     if (!file) return;
 
     if (!file.type.startsWith("image/")) {
-      return showNotification("File harus berupa gambar (JPG, PNG, WEBP)", true);
+      return showNotification(
+        "File harus berupa gambar (JPG, PNG, WEBP)",
+        true,
+      );
     }
     if (file.size > 2 * 1024 * 1024) {
       return showNotification("Ukuran gambar maksimal 2MB", true);
@@ -126,11 +141,14 @@ export default function AccountSettings() {
 
     try {
       // Gunakan fetch native dengan credentials untuk menghindari masalah header RTK Query pada multipart
-      const response = await fetch("https://aumonext-api.onrender.com/api/v1/settings/avatar", {
-        method: "POST",
-        body: formData,
-        credentials: "include", // Mengirim cookie session (AumoFinance.Session)
-      });
+      const response = await fetch(
+        "https://aumonext-api.onrender.com/api/v1/settings/avatar",
+        {
+          method: "POST",
+          body: formData,
+          credentials: "include", // Mengirim cookie session (AumoFinance.Session)
+        },
+      );
 
       const res = await response.json();
 
@@ -155,7 +173,7 @@ export default function AccountSettings() {
       }
 
       showNotification("Avatar berhasil diperbarui!");
-      
+
       // Memicu pembaruan state global Redux untuk Sidebar & Topbar
       dispatch(baseApi.util.resetApiState());
     } catch (err: any) {
@@ -174,23 +192,36 @@ export default function AccountSettings() {
       return showNotification("Semua field password harus diisi", true);
     }
     try {
-      await changePassword({ changePasswordRequest: { currentPassword, newPassword } }).unwrap();
+      await changePassword({
+        changePasswordRequest: { currentPassword, newPassword },
+      }).unwrap();
       showNotification("Password berhasil diubah!");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err: any) {
-      showNotification(err?.data?.message || err?.data?.title || "Gagal mengubah password", true);
+      showNotification(
+        err?.data?.message || err?.data?.title || "Gagal mengubah password",
+        true,
+      );
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (!confirm("Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan!")) return;
+    if (
+      !confirm(
+        "Apakah Anda yakin ingin menghapus akun ini? Tindakan ini tidak dapat dibatalkan!",
+      )
+    )
+      return;
     try {
       await deleteAccount().unwrap();
       alert("Akun Anda telah dihapus.");
       window.location.href = "/login";
     } catch (err: any) {
-      showNotification(err?.data?.message || err?.data?.title || "Gagal menghapus akun", true);
+      showNotification(
+        err?.data?.message || err?.data?.title || "Gagal menghapus akun",
+        true,
+      );
     }
   };
 
@@ -199,13 +230,17 @@ export default function AccountSettings() {
       {successMessage && (
         <Alert className="py-2 bg-emerald-500/10 border-emerald-500/20 text-emerald-600">
           <IconCircleCheck size={14} />
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
         </Alert>
       )}
       {errorMessage && (
         <Alert variant="destructive" className="py-2">
           <IconAlertTriangle size={14} />
-          <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -214,12 +249,15 @@ export default function AccountSettings() {
           <CardTitle className="text-sm flex items-center gap-2">
             <IconUser size={15} /> Edit Profile
           </CardTitle>
-          <CardDescription className="text-xs">Perbarui informasi profil dan identitas akun Anda.</CardDescription>
+          <CardDescription className="text-xs">
+            Perbarui informasi profil dan identitas akun Anda.
+          </CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0">
           {loadingUser ? (
             <div className="flex items-center gap-2 text-xs text-muted-foreground py-4">
-              <IconLoader2 size={16} className="animate-spin" /> Memuat data profil...
+              <IconLoader2 size={16} className="animate-spin" /> Memuat data
+              profil...
             </div>
           ) : user ? (
             <form onSubmit={handleProfileSubmit} className="space-y-4">
@@ -227,12 +265,18 @@ export default function AccountSettings() {
                 <Avatar className="h-16 w-16 border">
                   {/* tag img bawaan browser di dalam AvatarImage dipaksa refresh dengan timestamp query */}
                   <AvatarImage
-                    src={avatarPreview ? `${avatarPreview}?t=${Date.now()}` : undefined}
+                    src={
+                      avatarPreview
+                        ? `${avatarPreview}?t=${Date.now()}`
+                        : undefined
+                    }
                     alt="Avatar"
                     className="object-cover"
                   />
                   <AvatarFallback className="font-bold text-sm">
-                    {(fullName || user.userName || "U").substring(0, 2).toUpperCase()}
+                    {(fullName || user.userName || "U")
+                      .substring(0, 2)
+                      .toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -258,7 +302,9 @@ export default function AccountSettings() {
                     )}{" "}
                     Change Avatar
                   </Button>
-                  <p className="text-xs text-muted-foreground mt-1">JPG, PNG, WEBP max 2MB.</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    JPG, PNG, WEBP max 2MB.
+                  </p>
                 </div>
               </div>
               <Separator />
@@ -289,7 +335,11 @@ export default function AccountSettings() {
                   <Label className="text-xs flex items-center gap-1 text-muted-foreground">
                     <IconMail size={12} /> Email (ReadOnly)
                   </Label>
-                  <Input value={user.email || ""} disabled className="h-8 text-xs bg-muted/50 cursor-not-allowed" />
+                  <Input
+                    value={user.email || ""}
+                    disabled
+                    className="h-8 text-xs bg-muted/50 cursor-not-allowed"
+                  />
                 </div>
                 <div className="space-y-1">
                   <Label className="text-xs flex items-center gap-1">
@@ -314,13 +364,23 @@ export default function AccountSettings() {
                 />
               </div>
               <div className="flex justify-end pt-2">
-                <Button type="submit" size="sm" className="h-8 text-xs gap-1.5" disabled={isUpdatingProfile}>
-                  {isUpdatingProfile && <IconLoader2 size={13} className="animate-spin" />} Save Profile Changes
+                <Button
+                  type="submit"
+                  size="sm"
+                  className="h-8 text-xs gap-1.5"
+                  disabled={isUpdatingProfile}
+                >
+                  {isUpdatingProfile && (
+                    <IconLoader2 size={13} className="animate-spin" />
+                  )}{" "}
+                  Save Profile Changes
                 </Button>
               </div>
             </form>
           ) : (
-            <div className="text-xs text-destructive">Gagal memuat profil / Tidak terautentikasi</div>
+            <div className="text-xs text-destructive">
+              Gagal memuat profil / Tidak terautentikasi
+            </div>
           )}
         </CardContent>
       </Card>
@@ -356,8 +416,17 @@ export default function AccountSettings() {
                 className="h-8 text-xs"
               />
             </div>
-            <Button type="submit" size="sm" variant="outline" className="h-8 text-xs gap-1.5" disabled={isChangingPassword}>
-              {isChangingPassword && <IconLoader2 size={13} className="animate-spin" />} Update Password
+            <Button
+              type="submit"
+              size="sm"
+              variant="outline"
+              className="h-8 text-xs gap-1.5"
+              disabled={isChangingPassword}
+            >
+              {isChangingPassword && (
+                <IconLoader2 size={13} className="animate-spin" />
+              )}{" "}
+              Update Password
             </Button>
           </form>
         </CardContent>
@@ -369,7 +438,8 @@ export default function AccountSettings() {
             <IconTrash size={15} /> Delete Account
           </CardTitle>
           <CardDescription className="text-xs text-destructive/80">
-            Menghapus akun Anda secara permanen. Tindakan ini tidak dapat dibatalkan.
+            Menghapus akun Anda secara permanen. Tindakan ini tidak dapat
+            dibatalkan.
           </CardDescription>
         </CardHeader>
         <CardContent className="px-4 pb-4 pt-0 flex justify-end">
@@ -380,7 +450,10 @@ export default function AccountSettings() {
             onClick={handleDeleteAccount}
             disabled={isDeletingAccount}
           >
-            {isDeletingAccount && <IconLoader2 size={13} className="animate-spin" />} Delete Account Permanently
+            {isDeletingAccount && (
+              <IconLoader2 size={13} className="animate-spin" />
+            )}{" "}
+            Delete Account Permanently
           </Button>
         </CardContent>
       </Card>
