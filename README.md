@@ -2,6 +2,19 @@ Aumo Finance
 
 An integrated, precision-driven financial and accounting information system.
 
+Ukuran font:
+48px  → Display
+32px  → H1 besar
+28px  → H1 / Page title
+24px  → H2
+20px  → H3 / Section
+18px  → H4
+16px  → Body utama
+14px  → UI / navigation / form / table
+13px  → Secondary
+12px  → Caption / metadata / footer
+11px  → Label kecil
+
 /backend
 - ada 2 jenis auth. cookie untuk web dan JWT barier untuk mobile.
 
