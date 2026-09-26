@@ -49,9 +49,8 @@ interface PeriodItem {
 }
 
 // Ambil tipe per-item langsung dari tipe Response API
-type NotificationItem = GetApiV1NotificationsApiResponse extends Array<infer T>
-  ? T
-  : any;
+type NotificationItem =
+  GetApiV1NotificationsApiResponse extends Array<infer T> ? T : any;
 
 export function AppTopBar() {
   const pathname = usePathname();
