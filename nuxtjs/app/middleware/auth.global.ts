@@ -2,11 +2,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const user = useAuthUser()
   const checked = useAuthChecked()
 
-  // 1. Ambil data user dari server jika status otentikasi belum pernah diperiksa
-  if (!checked.value) {
-    await fetchAuthUser()
-  }
-
   // Daftar rute publik (tidak memerlukan login)
   const publicRoutes = ['/', '/login', '/register']
   
@@ -17,7 +12,20 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const isPublicRoute = publicRoutes.includes(normalizedPath)
 
-  // 2. Jika BELUM login & mengakses rute privat -> Redirect ke /login dengan query parameter 'redirect'
+  // 1. Ambil data user dari server HANYA jika status belum diperiksa.
+  // Dibungkus try-catch agar jika server proxy / backend offline, middleware TIDAK membuat Vercel crash 500.
+  if (!checked.value) {
+    try {
+      await fetchAuthUser()
+    } catch (err) {
+      // Jika fetchAuthUser gagal (misal 401 atau backend offline),
+      // tandai checked = true dan anggap user belum login
+      checked.value = true
+      user.value = null
+    }
+  }
+
+  // 2. Jika BELUM login & mengakses rute privat -> Redirect ke /login
   if (!user.value && !isPublicRoute) {
     return navigateTo({
       path: '/login',
