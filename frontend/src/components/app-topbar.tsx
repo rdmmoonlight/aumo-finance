@@ -75,16 +75,14 @@ export function AppTopBar() {
   });
 
   // 3. RTK Query Hooks Notifikasi
-  const {
-    data: notificationsData,
-    isLoading: isNotificationsLoading,
-  } = useGetApiV1NotificationsQuery(
-    { limit: 20 },
-    {
-      skip: !isAuthenticated,
-      pollingInterval: isAuthenticated ? 15000 : 0, // Auto-refetch tiap 15 detik
-    }
-  );
+  const { data: notificationsData, isLoading: isNotificationsLoading } =
+    useGetApiV1NotificationsQuery(
+      { limit: 20 },
+      {
+        skip: !isAuthenticated,
+        pollingInterval: isAuthenticated ? 15000 : 0, // Auto-refetch tiap 15 detik
+      },
+    );
 
   const [markAsRead] = usePutApiV1NotificationsReadByIdMutation();
   const [markAllAsRead, { isLoading: isMarkingAllRead }] =
@@ -197,7 +195,8 @@ export function AppTopBar() {
               <div className="max-h-[300px] overflow-y-auto divide-y">
                 {isNotificationsLoading ? (
                   <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat notifikasi...
+                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat
+                    notifikasi...
                   </div>
                 ) : notifications.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground">
@@ -225,7 +224,12 @@ export function AppTopBar() {
                             {item.title}
                           </p>
                           <span className="text-[10px] text-muted-foreground">
-                            {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                            {item.createdAt
+                              ? new Date(item.createdAt).toLocaleTimeString(
+                                  [],
+                                  { hour: "2-digit", minute: "2-digit" },
+                                )
+                              : ""}
                           </span>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
