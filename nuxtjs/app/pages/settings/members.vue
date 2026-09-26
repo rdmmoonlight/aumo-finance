@@ -38,7 +38,7 @@ async function fetchCurrentMember() {
         }
       ]
     }
-  } catch (err) {
+  } catch {
     toast.add({
       title: 'Error',
       description: 'Gagal mengambil data anggota/profil.',
@@ -57,7 +57,7 @@ const filteredMembers = computed(() => {
     const nameMatch = member.fullName?.toLowerCase().includes(query)
     const usernameMatch = member.userName?.toLowerCase().includes(query)
     const emailMatch = member.email?.toLowerCase().includes(query)
-    
+
     return nameMatch || usernameMatch || emailMatch
   })
 })
@@ -70,21 +70,15 @@ onMounted(() => {
 <template>
   <div>
     <UPageCard
-      title="Members"
-      description="Invite new members by email address."
+      title="Account"
+      description="Menampilkan profil akun yang sedang login. Fitur undang anggota tim belum tersedia di backend."
       variant="naked"
       orientation="horizontal"
       class="mb-4"
-    >
-      <UButton
-        label="Invite people"
-        color="neutral"
-        class="w-fit lg:ms-auto"
-      />
-    </UPageCard>
+    />
 
-    <UPageCard 
-      variant="subtle" 
+    <UPageCard
+      variant="subtle"
       :ui="{ container: 'p-0 sm:p-0 gap-y-0', wrapper: 'items-stretch', header: 'p-4 mb-0 border-b border-default' }"
     >
       <template #header>
