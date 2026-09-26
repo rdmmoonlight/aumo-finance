@@ -124,8 +124,7 @@ export function PeriodList({
                 >
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      | { headerClassName?: string }
-                      | undefined;
+                      { headerClassName?: string } | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -135,7 +134,7 @@ export function PeriodList({
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                       </TableHead>
                     );
@@ -169,13 +168,12 @@ export function PeriodList({
                         isSelected
                           ? "bg-white/[0.06] hover:bg-white/[0.08] border-l-4 border-l-white"
                           : "hover:bg-white/[0.03]",
-                        p.isClosed && !isSelected && "opacity-50"
+                        p.isClosed && !isSelected && "opacity-50",
                       )}
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          | { cellClassName?: string }
-                          | undefined;
+                          { cellClassName?: string } | undefined;
                         return (
                           <TableCell
                             key={cell.id}
@@ -183,7 +181,7 @@ export function PeriodList({
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </TableCell>
                         );
@@ -198,12 +196,8 @@ export function PeriodList({
                     className="text-center py-12 text-zinc-500"
                   >
                     <IconCalendarOff className="mx-auto mb-2" size={28} />
-                    <p className="font-medium text-zinc-300">
-                      No periods yet
-                    </p>
-                    <p className="text-xs">
-                      Click Open New Period to start
-                    </p>
+                    <p className="font-medium text-zinc-300">No periods yet</p>
+                    <p className="text-xs">Click Open New Period to start</p>
                   </TableCell>
                 </TableRow>
               )}
