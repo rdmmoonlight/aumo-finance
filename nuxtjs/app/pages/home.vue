@@ -1,8 +1,7 @@
 <script setup lang="ts">
-// Proteksi Halaman: Hanya user yang sudah login yang bisa akses
+// Proteksi Halaman: Otomatis ditangani oleh global auth middleware
 definePageMeta({
-  layout: 'default',
-  middleware: ['auth']
+  layout: 'default'
 })
 
 // Ambil data user yang sedang login
