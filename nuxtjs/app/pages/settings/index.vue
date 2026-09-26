@@ -1,169 +1,159 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import * as z from 'zod'
+import type { FormSubmitEvent } from '@nuxt/ui'
 
-interface ActiveSession {
-  id: string
-  deviceName: string
-  operatingSystem: string
-  browser: string
-  ipAddress: string
-  country: string
-  isCurrent: boolean
-  lastActivityAt: string
-}
-
-interface LoginActivity {
-  id: string
-  activityType: string
-  device: string
-  operatingSystem: string
-  browser: string
-  ipAddress: string
-  country: string
-  isSuccess: boolean
-  createdAt: string
-}
-
-interface GuardianDashboard {
-  securityStatus: {
-    statusLevel: string
-    activeSessionsCount: number
-    failedAttemptsLast24Hours: number
-    lastSuccessfulLogin: string | null
-  }
-  recentActivities: LoginActivity[]
-  activeSessions: ActiveSession[]
-}
-
-const dashboard = ref<GuardianDashboard | null>(null)
-const loading = ref(false)
 const toast = useToast()
+const loading = ref(false)
+const loadingAvatar = ref(false)
 
-// Fetch data dari Controller
-async function fetchDashboard() {
+const authUser = useAuthUser()
+
+// GET /api/v1/auth/me does not return phoneNumber/bio/avatarUrl, only
+// fullName/userName/email/roles - so only those two fields are safely
+// editable here. Sending phoneNumber/bio blind would risk wiping out
+// values already saved on the account (UpdateProfile compares against
+// the current record and null looks like "clear this field").
+const schema = z.object({
+  fullName: z.string().min(1, 'Full name is required'),
+  userName: z.string().min(3, 'Username must be at least 3 characters')
+})
+
+type Schema = z.output<typeof schema>
+
+const state = reactive<Schema>({
+  fullName: '',
+  userName: ''
+})
+
+watch(authUser, (user) => {
+  if (!user) return
+  state.fullName = user.fullName ?? ''
+  state.userName = user.userName ?? ''
+}, { immediate: true })
+
+async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   try {
-    const response = await $fetch<{ success: boolean; data: GuardianDashboard }>('/api/v1/settings/guardian/dashboard')
-    if (response.success) {
-      dashboard.value = response.data
-    }
-  } catch (err) {
-    toast.add({ title: 'Error', description: 'Gagal mengambil data keamanan', color: 'error' })
+    await $fetch('/api/v1/settings/profile', {
+      method: 'PUT',
+      body: {
+        fullName: event.data.fullName,
+        userName: event.data.userName
+      }
+    })
+
+    await fetchAuthUser()
+
+    toast.add({ title: 'Success', description: 'Profile updated successfully.', color: 'success' })
+  } catch (err: unknown) {
+    const message = (err as { data?: { message?: string } })?.data?.message
+    toast.add({ title: 'Error', description: message || 'Failed to update profile.', color: 'error' })
   } finally {
     loading.value = false
   }
 }
 
-// Revoke Single Session
-async function revokeSession(sessionId: string) {
+// avatarUrl also isn't returned by /me, so the preview only reflects
+// what was just uploaded this session - it won't persist across a
+// page refresh until the backend's /me response includes it.
+const avatarPreview = ref<string | null>(null)
+
+async function onAvatarChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  loadingAvatar.value = true
   try {
-    await $fetch(`/api/v1/settings/guardian/revoke-session/${sessionId}`, { method: 'POST' })
-    toast.add({ title: 'Success', description: 'Sesi berhasil dicabut', color: 'success' })
-    await fetchDashboard()
-  } catch (err) {
-    toast.add({ title: 'Error', description: 'Gagal mencabut sesi', color: 'error' })
+    const form = new FormData()
+    form.append('avatar', file)
+
+    const response = await $fetch<{ success: boolean, avatarUrl: string }>('/api/v1/settings/avatar', {
+      method: 'POST',
+      body: form
+    })
+
+    avatarPreview.value = response.avatarUrl
+    toast.add({ title: 'Success', description: 'Avatar uploaded.', color: 'success' })
+  } catch (err: unknown) {
+    const message = (err as { data?: { message?: string } })?.data?.message
+    toast.add({ title: 'Error', description: message || 'Failed to upload avatar.', color: 'error' })
+  } finally {
+    loadingAvatar.value = false
+    input.value = ''
   }
 }
-
-// Revoke All Other Sessions
-async function revokeAllSessions() {
-  try {
-    await $fetch('/api/v1/settings/guardian/revoke-all-sessions', { method: 'POST' })
-    toast.add({ title: 'Success', description: 'Semua sesi lain berhasil dicabut', color: 'success' })
-    await fetchDashboard()
-  } catch (err) {
-    toast.add({ title: 'Error', description: 'Gagal mencabut semua sesi', color: 'error' })
-  }
-}
-
-onMounted(() => {
-  fetchDashboard()
-})
 </script>
 
 <template>
-  <div v-if="loading" class="p-4">Memuat data keamanan...</div>
-
-  <div v-else-if="dashboard" class="space-y-6">
+  <div class="space-y-6">
     <UPageCard
-      title="Guardian Security"
-      description="Pantau sesi aktif dan riwayat aktivitas login akun Anda."
+      title="Profile"
+      description="Informasi akun Anda."
       variant="naked"
       orientation="horizontal"
     >
-      <UButton
-        label="Cabut Semua Sesi Lain"
-        color="error"
-        class="w-fit lg:ms-auto"
-        @click="revokeAllSessions"
-      />
+      <div class="flex items-center gap-3 lg:ms-auto">
+        <UAvatar :src="avatarPreview ?? undefined" :alt="state.fullName || state.userName" size="lg" />
+
+        <UButton
+          label="Ganti foto"
+          color="neutral"
+          variant="outline"
+          size="sm"
+          :loading="loadingAvatar"
+          @click="($refs.avatarInput as HTMLInputElement)?.click()"
+        />
+        <input
+          ref="avatarInput"
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          class="hidden"
+          @change="onAvatarChange"
+        >
+      </div>
     </UPageCard>
 
     <UPageCard variant="subtle">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 p-2">
-        <div>
-          <p class="text-xs text-gray-500">Status Keamanan</p>
-          <p class="font-semibold" :class="dashboard.securityStatus.statusLevel === 'Warning' ? 'text-red-500' : 'text-green-500'">
-            {{ dashboard.securityStatus.statusLevel }}
-          </p>
-        </div>
-        <div>
-          <p class="text-xs text-gray-500">Percobaan Gagal (24 Jam)</p>
-          <p class="font-semibold">{{ dashboard.securityStatus.failedAttemptsLast24Hours }} kali</p>
-        </div>
-        <div>
-          <p class="text-xs text-gray-500">Login Berhasil Terakhir</p>
-          <p class="font-semibold">
-            {{ dashboard.securityStatus.lastSuccessfulLogin ? new Date(dashboard.securityStatus.lastSuccessfulLogin).toLocaleString() : '-' }}
-          </p>
-        </div>
-      </div>
-    </UPageCard>
+      <UForm
+        :schema="schema"
+        :state="state"
+        class="flex flex-col gap-4 max-w-sm"
+        @submit="onSubmit"
+      >
+        <UFormField label="Full name" name="fullName">
+          <UInput v-model="state.fullName" class="w-full" />
+        </UFormField>
 
-    <UPageCard variant="subtle" title="Sesi Aktif">
-      <div class="space-y-4 mt-2">
-        <div 
-          v-for="session in dashboard.activeSessions" 
-          :key="session.id" 
-          class="flex items-center justify-between p-3 border rounded-lg"
-        >
-          <div>
-            <p class="font-medium">
-              {{ session.deviceName }} — {{ session.browser }} ({{ session.operatingSystem }})
-              <span v-if="session.isCurrent" class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded ml-2">Perangkat Ini</span>
-            </p>
-            <p class="text-xs text-gray-500">{{ session.ipAddress }} • {{ session.country }}</p>
-          </div>
-          <UButton
-            v-if="!session.isCurrent"
-            label="Cabut"
-            color="neutral"
-            size="sm"
-            @click="revokeSession(session.id)"
-          />
-        </div>
-      </div>
-    </UPageCard>
+        <UFormField label="Username" name="userName">
+          <UInput v-model="state.userName" class="w-full" />
+        </UFormField>
 
-    <UPageCard variant="subtle" title="Aktivitas Terakhir">
-      <div class="space-y-3 mt-2">
-        <div 
-          v-for="activity in dashboard.recentActivities" 
-          :key="activity.id" 
-          class="flex items-center justify-between text-sm py-2 border-b last:border-0"
-        >
-          <div>
-            <p class="font-medium">{{ activity.activityType }} ({{ activity.browser }} / {{ activity.operatingSystem }})</p>
-            <p class="text-xs text-gray-400">{{ new Date(activity.createdAt).toLocaleString() }} • {{ activity.ipAddress }}</p>
+        <UFormField label="Email">
+          <UInput :model-value="authUser?.email" disabled class="w-full" />
+        </UFormField>
+
+        <UFormField v-if="authUser?.roles?.length" label="Roles">
+          <div class="flex flex-wrap gap-1">
+            <UBadge
+              v-for="role in authUser.roles"
+              :key="role"
+              color="neutral"
+              variant="subtle"
+              class="capitalize"
+            >
+              {{ role }}
+            </UBadge>
           </div>
-          <span 
-            class="text-xs font-semibold px-2 py-1 rounded"
-            :class="activity.isSuccess ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-          >
-            {{ activity.isSuccess ? 'Sukses' : 'Gagal' }}
-          </span>
-        </div>
-      </div>
+        </UFormField>
+
+        <UButton
+          type="submit"
+          label="Save changes"
+          class="w-fit"
+          :loading="loading"
+        />
+      </UForm>
     </UPageCard>
   </div>
 </template>

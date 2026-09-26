@@ -1,5 +1,3 @@
-import type { H3Event } from 'h3'
-
 /**
  * Proxies the current request to the AumoBackend ASP.NET Core API
  * (folder /backend — the single source of truth for every endpoint
@@ -19,21 +17,28 @@ import type { H3Event } from 'h3'
  *
  * Used by the catch-all route server/api/v1/[...].ts — new backend
  * endpoints therefore need NO new proxy code here, they just work.
+ *
+ * Typed generically (not `H3Event`) because this Nuxt version has two
+ * structurally-identical-but-nominally-different H3Event types in
+ * node_modules (root h3 vs the one nested under @nuxt/nitro-server);
+ * a fixed import of either one conflicts with whichever the calling
+ * route actually received. The h3 utility functions below accept any
+ * H3Event shape at runtime, so this avoids the false type conflict.
  */
-export async function proxyToBackend(event: H3Event, backendPath: string) {
+export async function proxyToBackend<Event extends { method?: string }>(event: Event, backendPath: string) {
   const config = useRuntimeConfig()
   const method = (event.method || 'GET').toUpperCase()
 
-  const cookieHeader = getHeader(event, 'cookie')
-  const contentType = getHeader(event, 'content-type')
-  const query = getQuery(event)
+  const cookieHeader = getHeader(event as never, 'cookie')
+  const contentType = getHeader(event as never, 'content-type')
+  const query = getQuery(event as never)
 
   // Read the raw bytes so JSON bodies, multipart/form-data (e.g. avatar
   // upload) and empty bodies (GET/DELETE) all pass through unchanged —
   // encoding: false keeps binary uploads intact.
   const body = method === 'GET' || method === 'HEAD'
     ? undefined
-    : await readRawBody(event, false)
+    : await readRawBody(event as never, false)
 
   try {
     const response = await $fetch.raw(backendPath, {
@@ -49,10 +54,10 @@ export async function proxyToBackend(event: H3Event, backendPath: string) {
 
     const setCookie = response.headers.getSetCookie?.() ?? []
     for (const cookie of setCookie) {
-      appendHeader(event, 'set-cookie', cookie)
+      appendHeader(event as never, 'set-cookie', cookie)
     }
 
-    setResponseStatus(event, response.status)
+    setResponseStatus(event as never, response.status)
     return response._data
   } catch (error: unknown) {
     // Surface the backend's real status + body (e.g. 401, 429 lockout,
