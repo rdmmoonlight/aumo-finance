@@ -116,7 +116,9 @@ export default function PeriodsPage() {
 
   const periods: PeriodItem[] = useMemo(() => {
     if (Array.isArray(rawPeriodsData)) return rawPeriodsData;
-    return (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
+    return (
+      (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || []
+    );
   }, [rawPeriodsData]);
 
   const selectedPeriod = periods.find((p) => p.isSelected) || null;
@@ -131,7 +133,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting"
+    "LoadExisting",
   );
   const [cashAccountId, setCashAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -157,15 +159,15 @@ export default function PeriodsPage() {
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            ""
+            "",
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
         );
       }
     }
@@ -195,7 +197,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(
-        error?.data?.message || "Gagal menghapus pilihan periode."
+        error?.data?.message || "Gagal menghapus pilihan periode.",
       );
     }
   };
@@ -284,7 +286,7 @@ export default function PeriodsPage() {
                 <span
                   className={cn(
                     "font-bold",
-                    isSelected ? "text-white" : "text-zinc-200"
+                    isSelected ? "text-white" : "text-zinc-200",
                   )}
                 >
                   {p.periodName}
@@ -343,7 +345,10 @@ export default function PeriodsPage() {
       {
         id: "actions",
         header: () => <span className="text-zinc-500 pr-6">Action</span>,
-        meta: { headerClassName: "text-center pr-6", cellClassName: "text-center pr-6" },
+        meta: {
+          headerClassName: "text-center pr-6",
+          cellClassName: "text-center pr-6",
+        },
         cell: ({ row }) => {
           const p = row.original;
           const isSelected = selectedPeriod?.id === p.id;
@@ -359,7 +364,7 @@ export default function PeriodsPage() {
                   "h-7 gap-1.5 font-bold tracking-wide border transition-all",
                   isSelected
                     ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
-                    : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white"
+                    : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white",
                 )}
                 onClick={() => handleSelectPeriod(p)}
                 disabled={isSelectingThis}
@@ -395,7 +400,7 @@ export default function PeriodsPage() {
         },
       },
     ],
-    [selectedPeriod, selectingId, closingId]
+    [selectedPeriod, selectingId, closingId],
   );
 
   const table = useReactTable({
@@ -500,8 +505,7 @@ export default function PeriodsPage() {
                     >
                       {headerGroup.headers.map((header) => {
                         const meta = header.column.columnDef.meta as
-                          | { headerClassName?: string }
-                          | undefined;
+                          { headerClassName?: string } | undefined;
                         return (
                           <TableHead
                             key={header.id}
@@ -511,7 +515,7 @@ export default function PeriodsPage() {
                               ? null
                               : flexRender(
                                   header.column.columnDef.header,
-                                  header.getContext()
+                                  header.getContext(),
                                 )}
                           </TableHead>
                         );
@@ -545,13 +549,12 @@ export default function PeriodsPage() {
                             isSelected
                               ? "bg-white/[0.06] hover:bg-white/[0.08] border-l-4 border-l-white"
                               : "hover:bg-white/[0.03]",
-                            p.isClosed && !isSelected && "opacity-50"
+                            p.isClosed && !isSelected && "opacity-50",
                           )}
                         >
                           {row.getVisibleCells().map((cell) => {
                             const meta = cell.column.columnDef.meta as
-                              | { cellClassName?: string }
-                              | undefined;
+                              { cellClassName?: string } | undefined;
                             return (
                               <TableCell
                                 key={cell.id}
@@ -559,7 +562,7 @@ export default function PeriodsPage() {
                               >
                                 {flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )}
                               </TableCell>
                             );
@@ -721,7 +724,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectContent>
                           </Select>
@@ -745,7 +748,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectContent>
                           </Select>
@@ -771,7 +774,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                )
+                                ),
                               )}
                             </SelectContent>
                           </Select>
@@ -811,7 +814,7 @@ export default function PeriodsPage() {
                                 setCashBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value)
+                                    : Number(e.target.value),
                                 )
                               }
                               className="bg-[#0e0e10] border-white/10 text-white"
@@ -850,7 +853,7 @@ export default function PeriodsPage() {
                                 setBankBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value)
+                                    : Number(e.target.value),
                                 )
                               }
                               className="bg-[#0e0e10] border-white/10 text-white"
