@@ -192,29 +192,45 @@ namespace AumoBlazor.Extensions
 
                 if (response.IsSuccessStatusCode)
                 {
-                    var userProfile = await System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync<UserProfileResponse>(response.Content, cancellationToken: cts.Token);
+                    var jsonString = await response.Content.ReadAsStringAsync(cts.Token);
+                    using var doc = System.Text.Json.JsonDocument.Parse(jsonString);
+                    var root = doc.RootElement;
 
-                    if (userProfile?.Success == true && !string.IsNullOrEmpty(userProfile.Email))
+                    bool isSuccess = true;
+                    if (root.TryGetProperty("success", out var sProp)) isSuccess = sProp.GetBoolean();
+                    else if (root.TryGetProperty("isSuccess", out var isProp)) isSuccess = isProp.GetBoolean();
+
+                    string email = string.Empty;
+                    if (root.TryGetProperty("email", out var eProp)) email = eProp.GetString() ?? string.Empty;
+
+                    if (isSuccess && !string.IsNullOrEmpty(email))
                     {
+                        string userId = string.Empty;
+                        if (root.TryGetProperty("id", out var idProp)) userId = idProp.ToString();
+                        else if (root.TryGetProperty("userId", out var uProp)) userId = uProp.ToString();
+
+                        string fullName = string.Empty;
+                        if (root.TryGetProperty("fullName", out var fnProp)) fullName = fnProp.GetString() ?? string.Empty;
+                        if (string.IsNullOrEmpty(fullName) && root.TryGetProperty("userName", out var unProp)) fullName = unProp.GetString() ?? string.Empty;
+
                         var claims = new List<Claim>
                         {
-                            new Claim(ClaimTypes.NameIdentifier, userProfile.UserId ?? string.Empty),
-                            new Claim(ClaimTypes.Name, userProfile.FullName ?? userProfile.UserName ?? "User"),
-                            new Claim(ClaimTypes.Email, userProfile.Email)
+                            new Claim(ClaimTypes.NameIdentifier, userId),
+                            new Claim(ClaimTypes.Name, string.IsNullOrEmpty(fullName) ? "User" : fullName),
+                            new Claim(ClaimTypes.Email, email)
                         };
 
-                        if (userProfile.Roles != null)
+                        if (root.TryGetProperty("roles", out var rolesProp) && rolesProp.ValueKind == System.Text.Json.JsonValueKind.Array)
                         {
-                            foreach (var role in userProfile.Roles)
+                            foreach (var role in rolesProp.EnumerateArray())
                             {
-                                claims.Add(new Claim(ClaimTypes.Role, role));
+                                if (role.GetString() is string rName)
+                                    claims.Add(new Claim(ClaimTypes.Role, rName));
                             }
                         }
 
                         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                        var user = new ClaimsPrincipal(identity);
-
-                        return new AuthenticationState(user);
+                        return new AuthenticationState(new ClaimsPrincipal(identity));
                     }
                 }
             }
