@@ -4,7 +4,6 @@ export default defineNuxtConfig({
     '@nuxt/eslint',
     '@nuxt/ui',
     '@vueuse/nuxt',
-    '@prisma/nuxt'
   ],
 
   // Konfigurasi Prisma Nuxt Module agar tidak menggantung/prompt saat CI/CD & Vercel
