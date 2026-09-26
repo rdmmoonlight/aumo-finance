@@ -131,12 +131,12 @@ export default function HomePage() {
         <CardContent className="p-6 md:p-8">
           <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h6 className="flex items-center gap-2 text-sm font-bold text-amber-400">
-                <LineChart size={16} /> Market Indicators
-              </h6>
+              <h3 className="flex items-center gap-2 text-xl font-bold text-amber-400">
+                <LineChart size={18} /> Market Indicators
+              </h3>
               <Badge
                 variant="outline"
-                className="border-emerald-500/20 bg-emerald-500/10 text-xs text-emerald-400"
+                className="border-emerald-500/20 bg-emerald-500/10 text-[11px] text-emerald-400"
               >
                 LIVE
               </Badge>
@@ -151,23 +151,23 @@ export default function HomePage() {
                 marketData.map((item) => (
                   <div
                     key={item.symbol}
-                    className="flex min-h- flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
+                    className="flex min-h-[80px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
                   >
                     <div className="flex items-center justify-between">
                       <span className="text-xs font-bold text-white">
                         {item.symbol}
                       </span>
                       <Badge
-                        className={`flex items-center border-0 px-1.5 py-0.5 text- ${
+                        className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${
                           item.isUp
                             ? "bg-emerald-500/15 text-emerald-400"
                             : "bg-red-500/15 text-red-400"
                         }`}
                       >
                         {item.isUp ? (
-                          <TrendingUp size={10} className="mr-0.5" />
+                          <TrendingUp size={12} className="mr-0.5" />
                         ) : (
-                          <TrendingDown size={10} className="mr-0.5" />
+                          <TrendingDown size={12} className="mr-0.5" />
                         )}
                         {item.change}
                       </Badge>
@@ -175,7 +175,7 @@ export default function HomePage() {
                     <div className="mt-1 text-sm font-semibold text-white">
                       {item.price}
                     </div>
-                    <div className="text- text-white/50">{item.name}</div>
+                    <div className="text-xs text-white/50">{item.name}</div>
                   </div>
                 ))
               ) : (
@@ -187,7 +187,7 @@ export default function HomePage() {
           </div>
 
           <div className="mt-6 text-center">
-            <p className="mx-auto max-w-md text-sm leading-relaxed text-white/80">
+            <p className="mx-auto max-w-md text-base leading-relaxed text-white/80">
               Integrated financial & accounting intelligence core. Manage
               full-cycle general ledgers, trial balances, and operational
               analytics with absolute precision.
@@ -195,7 +195,7 @@ export default function HomePage() {
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Button
                 asChild
-                className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
+                className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-sm text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
               >
                 <Link href="/dashboard">
                   <LayoutDashboard size={16} /> Dashboard
@@ -204,7 +204,7 @@ export default function HomePage() {
               <Button
                 asChild
                 variant="secondary"
-                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-white hover:bg-white/15"
+                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-sm text-white hover:bg-white/15"
               >
                 <Link href="/journal-entry">
                   <Notebook size={16} /> Journal Entry
