@@ -1,8 +1,5 @@
 // Thin wrapper around AuthController's /api/v1/auth/* routes
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 export interface AuthUser {
   userId: string
   email: string
@@ -22,12 +19,6 @@ export interface LoginResponse {
   fullName: string
 }
 
-<<<<<<< Updated upstream
-export interface RegisterResponse {
-  success: boolean
-  message: string
-  userId?: string
-=======
 export interface RegisterPayload {
   email: string
   password: string
@@ -39,7 +30,6 @@ export interface RegisterResponse {
   success: boolean
   message: string
   user?: AuthUser
->>>>>>> Stashed changes
 }
 
 export function useAuthUser() {
@@ -55,15 +45,10 @@ export async function fetchAuthUser() {
   const checked = useAuthChecked()
 
   try {
-<<<<<<< Updated upstream
-    // Ambil cookie header jika berjalan di server (SSR), kosongkan jika di browser client
-    const headers = import.meta.server ? useRequestHeaders(['cookie']) as Record<string, string> : undefined
-=======
     // Ambil header cookie hanya saat Server-Side Rendering (SSR)
     const headers: Record<string, string> = import.meta.server 
       ? (useRequestHeaders(['cookie']) as Record<string, string>) 
       : {}
->>>>>>> Stashed changes
 
     const response = await $fetch<MeResponse>('/api/v1/auth/me', { headers })
     
@@ -101,11 +86,7 @@ export async function login(payload: { email: string; password: string; remember
     }
   })
 
-<<<<<<< Updated upstream
-  // Set state optimis dari respon login
-=======
   // Set state user secara optimis dari respon login
->>>>>>> Stashed changes
   if (response && response.success) {
     user.value = {
       userId: response.userId,
@@ -116,41 +97,19 @@ export async function login(payload: { email: string; password: string; remember
     }
     checked.value = true
 
-<<<<<<< Updated upstream
-    // Ambil profil lengkap (roles, dll) di background
-=======
     // Ambil profil lengkap (roles, detail data) di background
->>>>>>> Stashed changes
     fetchAuthUser().catch(() => {})
   }
 
   return response
 }
 
-<<<<<<< Updated upstream
-export async function register(payload: {
-  fullName: string
-  email: string
-  password: string
-  userName?: string
-}) {
-  const response = await $fetch<RegisterResponse>('/api/v1/auth/register', {
-=======
 export async function register(payload: RegisterPayload) {
   const response = await $fetch<RegisterResponse>('/api/auth/register', {
->>>>>>> Stashed changes
     method: 'POST',
     body: payload
   })
 
-<<<<<<< Updated upstream
-  // Opsional: Langsung ambil status user jika pendaftaran otomatis melakukan login / set cookie
-  if (response && response.success) {
-    await fetchAuthUser().catch(() => {})
-  }
-
-=======
->>>>>>> Stashed changes
   return response
 }
 
