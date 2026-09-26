@@ -74,7 +74,6 @@ namespace AumoBackend
             }
             else
             {
-                // ✅ REVISI: Gunakan LoggerFactory tanpa BuildServiceProvider()
                 using var loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
                 var startupLogger = loggerFactory.CreateLogger<Program>();
                 startupLogger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_KEY' belum dikonfigurasi.");
@@ -93,9 +92,11 @@ namespace AumoBackend
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.AllowedForNewUsers = true;
+
+                // -----------------------------------------------------------
+                // ATURAN LOCKOUT DIHAPUS / DIMATIKAN
+                // -----------------------------------------------------------
+                options.Lockout.AllowedForNewUsers = false; // Mematikan fitur lockout untuk user baru
 
                 options.Password.RequiredLength = 6;
                 options.Password.RequireDigit = false;
