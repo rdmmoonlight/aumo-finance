@@ -233,3 +233,36 @@ public class GuardianService : IGuardianService
     }
     public async Task<List<LoginActivity>> GetLoginActivitiesAsync(Guid userId) => await _context.LoginActivities.Where(x => x.UserId == userId).OrderByDescending(x => x.CreatedAt).Take(50).ToListAsync();
 }
+
+// ==========================================
+// FILE 1: Core/Entities/Notification.cs
+// ==========================================
+public class Notification
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    
+    // Foreign key ke ApplicationUser (Guid)
+    public Guid UserId { get; set; } 
+    
+    public string Title { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string Type { get; set; } = "info"; // "info", "warning", "error"
+    public bool IsRead { get; set; } = false;
+    public string? TargetUrl { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+
+// ==========================================
+// FILE 2: DTOs/NotificationDto.cs
+// ==========================================
+public class NotificationDto
+{
+    public Guid Id { get; set; }
+    public string Title { get; set; } = string.Empty;
+    public string Message { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public bool IsRead { get; set; }
+    public string? TargetUrl { get; set; }
+    public string CreatedAt { get; set; } = string.Empty;
+}
