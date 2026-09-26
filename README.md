@@ -45,3 +45,6 @@ Struktur folder (`app/src/main/java/com/aumofinance/app/`), per fungsi:
 - `update/` — `AppUpdateService`, pengecekan & pemasangan APK versi baru otomatis lewat GitHub Releases
 
 Di luar `app/`: `gradle/` (Gradle Wrapper), `build.gradle.kts` & `settings.gradle.kts` (konfigurasi level proyek), `gradlew`/`gradlew.bat` (wrapper script).
+
+About:
+Dibuat tanggal 25 Mei 2026 16:49.
