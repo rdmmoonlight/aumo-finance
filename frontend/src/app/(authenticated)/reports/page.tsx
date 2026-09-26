@@ -3,34 +3,26 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  IconReportAnalytics,
-  IconClipboardList,
-  IconTable,
-  IconNotebook,
-  IconFileInvoice,
-  IconBook,
-  IconBooks,
-  IconChartBar,
-  IconCoins,
-  IconBuildingBank,
-  IconCashBanknote,
-  IconFileSpreadsheet,
-  IconSearch,
-  IconArrowRight,
-  IconFileCheck,
-} from "@tabler/icons-react";
+  BarChart2,
+  ClipboardList,
+  Table,
+  BookOpen,
+  Receipt,
+  Book,
+  Library,
+  BarChart3,
+  Coins,
+  Building2,
+  Banknote,
+  FileSpreadsheet,
+  Search,
+  ArrowRight,
+  FileCheck,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
 
 type ReportItem = {
   slug: string;
@@ -38,7 +30,7 @@ type ReportItem = {
   desc: string;
   category: string;
   step: string;
-  icon: any;
+  icon: React.ElementType;
 };
 
 const REPORTS: ReportItem[] = [
@@ -49,7 +41,7 @@ const REPORTS: ReportItem[] = [
     desc: "Neraca saldo awal sebelum penyesuaian",
     category: "Trial Balance Cycle",
     step: "01",
-    icon: IconClipboardList,
+    icon: ClipboardList,
   },
   {
     slug: "worksheet",
@@ -57,7 +49,7 @@ const REPORTS: ReportItem[] = [
     desc: "10-column worksheet & kertas kerja",
     category: "Trial Balance Cycle",
     step: "02",
-    icon: IconTable,
+    icon: Table,
   },
   {
     slug: "adjusting-journal",
@@ -65,7 +57,7 @@ const REPORTS: ReportItem[] = [
     desc: "Jurnal penyesuaian akhir periode",
     category: "Trial Balance Cycle",
     step: "03",
-    icon: IconNotebook,
+    icon: BookOpen,
   },
   {
     slug: "adjusted-trial-balance",
@@ -73,7 +65,7 @@ const REPORTS: ReportItem[] = [
     desc: "Neraca saldo setelah penyesuaian",
     category: "Trial Balance Cycle",
     step: "04",
-    icon: IconFileCheck,
+    icon: FileCheck,
   },
   // Journals & Ledgers
   {
@@ -82,7 +74,7 @@ const REPORTS: ReportItem[] = [
     desc: "Buku harian semua transaksi",
     category: "Journals & Ledgers",
     step: "05",
-    icon: IconFileInvoice,
+    icon: Receipt,
   },
   {
     slug: "general-ledger-temporary",
@@ -90,7 +82,7 @@ const REPORTS: ReportItem[] = [
     desc: "Buku besar akun nominal",
     category: "Journals & Ledgers",
     step: "06",
-    icon: IconBook,
+    icon: Book,
   },
   {
     slug: "general-ledger-permanent",
@@ -98,7 +90,7 @@ const REPORTS: ReportItem[] = [
     desc: "Buku besar akun riil",
     category: "Journals & Ledgers",
     step: "07",
-    icon: IconBooks,
+    icon: Library,
   },
   // Financial Statements
   {
@@ -107,7 +99,7 @@ const REPORTS: ReportItem[] = [
     desc: "Laporan laba rugi periode berjalan",
     category: "Financial Statements",
     step: "08",
-    icon: IconChartBar,
+    icon: BarChart3,
   },
   {
     slug: "retained-earnings",
@@ -115,7 +107,7 @@ const REPORTS: ReportItem[] = [
     desc: "Laporan perubahan modal & laba ditahan",
     category: "Financial Statements",
     step: "09",
-    icon: IconCoins,
+    icon: Coins,
   },
   {
     slug: "statement-of-financial-position",
@@ -123,7 +115,7 @@ const REPORTS: ReportItem[] = [
     desc: "Neraca / Statement of Financial Position",
     category: "Financial Statements",
     step: "10",
-    icon: IconBuildingBank,
+    icon: Building2,
   },
   {
     slug: "statement-of-cash-flow",
@@ -131,7 +123,7 @@ const REPORTS: ReportItem[] = [
     desc: "Arus kas operasi, investasi, pendanaan",
     category: "Financial Statements",
     step: "11",
-    icon: IconCashBanknote,
+    icon: Banknote,
   },
   // Closing Cycle
   {
@@ -140,7 +132,7 @@ const REPORTS: ReportItem[] = [
     desc: "Jurnal penutup akun nominal",
     category: "Closing Cycle",
     step: "12",
-    icon: IconNotebook,
+    icon: BookOpen,
   },
   {
     slug: "post-closing-trial-balance",
@@ -148,7 +140,7 @@ const REPORTS: ReportItem[] = [
     desc: "Neraca saldo setelah penutupan",
     category: "Closing Cycle",
     step: "13",
-    icon: IconFileSpreadsheet,
+    icon: FileSpreadsheet,
   },
 ];
 
@@ -186,28 +178,11 @@ export default function ReportsPage() {
     <div className="grid w-full place-items-center py-6">
       <Card className="w-full max-w-5xl rounded-2xl border border-white/10 bg-[#0F172A] p-6 text-white shadow-2xl">
         <CardContent className="p-6 md:p-8">
-          {/* Breadcrumb */}
-          <Breadcrumb className="mb-6">
-            <BreadcrumbList className="text-white/50">
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/" className="hover:text-white">
-                    Home
-                  </Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="text-white/20" />
-              <BreadcrumbItem>
-                <BreadcrumbPage className="text-white">Reports</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-
           {/* Header */}
           <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
             <div className="flex gap-4">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 shadow-lg">
-                <IconReportAnalytics size={24} />
+                <BarChart2 className="h-6 w-6" />
               </div>
               <div>
                 <h1 className="text-xl font-bold tracking-tight md:text-2xl">
@@ -238,10 +213,7 @@ export default function ReportsPage() {
 
           {/* Search */}
           <div className="relative mt-6">
-            <IconSearch
-              size={16}
-              className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-white/40"
-            />
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -264,7 +236,7 @@ export default function ReportsPage() {
                     <h2 className="text-sm font-semibold tracking-wide text-white/90">
                       {cat.label}
                     </h2>
-                    <span className="text- text-white/40">{cat.hint}</span>
+                    <span className="text-xs text-white/40">{cat.hint}</span>
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
@@ -277,7 +249,7 @@ export default function ReportsPage() {
                           className="group relative flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]"
                         >
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-slate-900/80 text-white/80 group-hover:border-indigo-400/30 group-hover:text-white">
-                            <Icon size={18} />
+                            <Icon className="h-4 w-4" />
                           </div>
 
                           <div className="min-w-0 flex-1">
@@ -285,19 +257,16 @@ export default function ReportsPage() {
                               <span className="truncate text-sm font-semibold text-white group-hover:text-white">
                                 {report.title}
                               </span>
-                              <span className="rounded bg-white/10 px-1.5 py-0.5 text- font-mono text-white/40">
+                              <span className="rounded bg-white/10 px-1.5 py-0.5 text-xs font-mono text-white/40">
                                 {report.step}
                               </span>
                             </div>
                             <p className="mt-0.5 line-clamp-1 text-xs text-white/50">
                               {report.desc}
                             </p>
-                            <div className="mt-2 flex items-center gap-1 text- text-white/30 group-hover:text-indigo-300">
+                            <div className="mt-2 flex items-center gap-1 text-xs text-white/30 group-hover:text-indigo-300">
                               <span>/reports/{report.slug}</span>
-                              <IconArrowRight
-                                size={12}
-                                className="opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100"
-                              />
+                              <ArrowRight className="h-3 w-3 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
                             </div>
                           </div>
                         </Link>
@@ -319,25 +288,25 @@ export default function ReportsPage() {
 
           {/* Flow Footer */}
           <div className="mt-8 rounded-xl border border-white/10 bg-slate-900/80 p-4">
-            <div className="flex flex-wrap items-center gap-2 text- text-white/40">
+            <div className="flex flex-wrap items-center gap-2 text-xs text-white/40">
               <span className="text-white/60">Flow:</span>
-              <Badge className="border-0 bg-white/10 text- text-white/60">
+              <Badge className="border-0 bg-white/10 text-xs text-white/60">
                 UTB
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-white/10 text- text-white/60">
+              <Badge className="border-0 bg-white/10 text-xs text-white/60">
                 Worksheet
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-amber-500/15 text- text-amber-300">
+              <Badge className="border-0 bg-amber-500/15 text-xs text-amber-300">
                 ATB
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-indigo-500/20 text- text-indigo-300">
+              <Badge className="border-0 bg-indigo-500/20 text-xs text-indigo-300">
                 Financial Statements
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-emerald-500/15 text- text-emerald-300">
+              <Badge className="border-0 bg-emerald-500/15 text-xs text-emerald-300">
                 PCTB
               </Badge>
             </div>
@@ -346,4 +315,5 @@ export default function ReportsPage() {
       </Card>
     </div>
   );
-}
+  }
+    
