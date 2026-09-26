@@ -1,6 +1,3 @@
-import { prisma } from '~~/server/utils/prisma'
-import { getUserId } from '~~/server/utils/auth'
-
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"]
 
 export default defineEventHandler(async (event) => {
