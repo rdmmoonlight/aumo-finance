@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  ColumnDef,
+} from "@tanstack/react-table";
+
 import {
   IconCalendar,
   IconCalendarPlus,
@@ -12,7 +19,6 @@ import {
   IconArrowLeft,
   IconAlertTriangle,
   IconX,
-  IconInfoCircle,
   IconRefresh,
   IconCirclePlus,
   IconCalendarOff,
@@ -108,9 +114,11 @@ export default function PeriodsPage() {
   const [createPeriodMutation, { isLoading: isCreating }] =
     usePostApiV1PeriodsMutation();
 
-  const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
-    ? rawPeriodsData
-    : (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
+  const periods: PeriodItem[] = useMemo(() => {
+    if (Array.isArray(rawPeriodsData)) return rawPeriodsData;
+    return (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
+  }, [rawPeriodsData]);
+
   const selectedPeriod = periods.find((p) => p.isSelected) || null;
   const openInfo = (rawOpenInfoData as any) || null;
 
@@ -123,7 +131,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting",
+    "LoadExisting"
   );
   const [cashAccountId, setCashAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -142,21 +150,22 @@ export default function PeriodsPage() {
     setMonth(d.getMonth() + 1);
     setYear(d.getFullYear());
   }, []);
+
   useEffect(() => {
     if (openInfo) {
       const exists = !!openInfo.hasExistingPermanentAccounts;
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            "",
+            ""
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
         );
       }
     }
@@ -186,7 +195,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(
-        error?.data?.message || "Gagal menghapus pilihan periode.",
+        error?.data?.message || "Gagal menghapus pilihan periode."
       );
     }
   };
@@ -259,6 +268,141 @@ export default function PeriodsPage() {
       setErrorMessage(error?.data?.message || "Failed to create period.");
     }
   };
+
+  // TanStack Table Column Definitions
+  const columns = useMemo<ColumnDef<PeriodItem>[]>(
+    () => [
+      {
+        accessorKey: "periodName",
+        header: () => <span className="pl-6 text-zinc-500">Period Name</span>,
+        cell: ({ row }) => {
+          const p = row.original;
+          const isSelected = selectedPeriod?.id === p.id;
+          return (
+            <div className="pl-6 font-medium">
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    "font-bold",
+                    isSelected ? "text-white" : "text-zinc-200"
+                  )}
+                >
+                  {p.periodName}
+                </span>
+                {isSelected && (
+                  <Badge className="h-5 bg-white text-black border-0 px-1.5 font-bold tracking-wider">
+                    VIEWING
+                  </Badge>
+                )}
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        accessorKey: "startDate",
+        header: () => <span className="text-zinc-500">Start</span>,
+        cell: ({ getValue }) => {
+          const val = getValue<string | undefined>();
+          return (
+            <span className="text-xs text-zinc-400">
+              {val ? new Date(val).toLocaleDateString() : "-"}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "endDate",
+        header: () => <span className="text-zinc-500">End</span>,
+        cell: ({ getValue }) => {
+          const val = getValue<string | undefined>();
+          return (
+            <span className="text-xs text-zinc-400">
+              {val ? new Date(val).toLocaleDateString() : "-"}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "isClosed",
+        header: () => <span className="text-zinc-500">Status</span>,
+        meta: { headerClassName: "text-center", cellClassName: "text-center" },
+        cell: ({ getValue }) => {
+          const isClosed = getValue<boolean>();
+          return isClosed ? (
+            <Badge className="h-6 bg-white/10 text-zinc-400 border-white/10">
+              <IconLock size={10} /> Closed
+            </Badge>
+          ) : (
+            <Badge className="h-6 bg-emerald-500/15 text-emerald-400 border-emerald-500/20">
+              <IconLockOpen size={10} /> Active
+            </Badge>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: () => <span className="text-zinc-500 pr-6">Action</span>,
+        meta: { headerClassName: "text-center pr-6", cellClassName: "text-center pr-6" },
+        cell: ({ row }) => {
+          const p = row.original;
+          const isSelected = selectedPeriod?.id === p.id;
+          const isSelectingThis = selectingId === p.id;
+          const isClosingThis = closingId === p.id;
+
+          return (
+            <div className="flex justify-center gap-1.5">
+              <Button
+                type="button"
+                size="sm"
+                className={cn(
+                  "h-7 gap-1.5 font-bold tracking-wide border transition-all",
+                  isSelected
+                    ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
+                    : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white"
+                )}
+                onClick={() => handleSelectPeriod(p)}
+                disabled={isSelectingThis}
+              >
+                {isSelectingThis ? (
+                  <IconLoader2 size={14} className="animate-spin" />
+                ) : isSelected ? (
+                  <IconEyeOff size={14} />
+                ) : (
+                  <IconEye size={14} />
+                )}
+                {isSelected ? "VIEWING" : "VIEW"}
+              </Button>
+
+              {!p.isClosed && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 w-7 px-0 bg-transparent border border-transparent text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/10"
+                  onClick={() => handleClosePeriod(p)}
+                  disabled={isClosingThis}
+                >
+                  {isClosingThis ? (
+                    <IconLoader2 size={14} className="animate-spin" />
+                  ) : (
+                    <IconLock size={14} />
+                  )}
+                </Button>
+              )}
+            </div>
+          );
+        },
+      },
+    ],
+    [selectedPeriod, selectingId, closingId]
+  );
+
+  const table = useReactTable({
+    data: periods,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -349,25 +493,37 @@ export default function PeriodsPage() {
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-white/[0.06] hover:bg-transparent">
-                    <TableHead className="pl-6 text-zinc-500">
-                      Period Name
-                    </TableHead>
-                    <TableHead className="text-zinc-500">Start</TableHead>
-                    <TableHead className="text-zinc-500">End</TableHead>
-                    <TableHead className="text-center text-zinc-500">
-                      Status
-                    </TableHead>
-                    <TableHead className="text-center pr-6 w- text-zinc-500">
-                      Action
-                    </TableHead>
-                  </TableRow>
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow
+                      key={headerGroup.id}
+                      className="border-white/[0.06] hover:bg-transparent"
+                    >
+                      {headerGroup.headers.map((header) => {
+                        const meta = header.column.columnDef.meta as
+                          | { headerClassName?: string }
+                          | undefined;
+                        return (
+                          <TableHead
+                            key={header.id}
+                            className={meta?.headerClassName}
+                          >
+                            {header.isPlaceholder
+                              ? null
+                              : flexRender(
+                                  header.column.columnDef.header,
+                                  header.getContext()
+                                )}
+                          </TableHead>
+                        );
+                      })}
+                    </TableRow>
+                  ))}
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     <TableRow className="border-white/[0.06]">
                       <TableCell
-                        colSpan={5}
+                        colSpan={columns.length}
                         className="text-center py-8 text-zinc-500"
                       >
                         <IconLoader2
@@ -377,117 +533,44 @@ export default function PeriodsPage() {
                         Loading...
                       </TableCell>
                     </TableRow>
-                  ) : (
-                    periods.map((p) => {
+                  ) : table.getRowModel().rows.length > 0 ? (
+                    table.getRowModel().rows.map((row) => {
+                      const p = row.original;
                       const isSelected = selectedPeriod?.id === p.id;
-                      const isSelectingThis = selectingId === p.id;
-                      const isClosingThis = closingId === p.id;
                       return (
                         <TableRow
-                          key={p.id}
+                          key={row.id}
                           className={cn(
                             "border-white/[0.06] transition-colors",
                             isSelected
                               ? "bg-white/[0.06] hover:bg-white/[0.08] border-l-4 border-l-white"
                               : "hover:bg-white/[0.03]",
-                            p.isClosed && !isSelected && "opacity-50",
+                            p.isClosed && !isSelected && "opacity-50"
                           )}
                         >
-                          <TableCell className="pl-6 font-medium">
-                            <div className="flex items-center gap-2">
-                              <span
-                                className={cn(
-                                  "font-bold",
-                                  isSelected ? "text-white" : "text-zinc-200",
-                                )}
+                          {row.getVisibleCells().map((cell) => {
+                            const meta = cell.column.columnDef.meta as
+                              | { cellClassName?: string }
+                              | undefined;
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={meta?.cellClassName}
                               >
-                                {p.periodName}
-                              </span>
-                              {isSelected && (
-                                <Badge className="h-5 text- bg-white text-black border-0 px-1.5 font-bold tracking-wider">
-                                  VIEWING
-                                </Badge>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-xs text-zinc-400">
-                            {p.startDate
-                              ? new Date(p.startDate).toLocaleDateString()
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-xs text-zinc-400">
-                            {p.endDate
-                              ? new Date(p.endDate).toLocaleDateString()
-                              : "-"}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {p.isClosed ? (
-                              <Badge className="h-6 bg-white/10 text-zinc-400 border-white/10">
-                                <IconLock size={10} /> Closed
-                              </Badge>
-                            ) : (
-                              <Badge className="h-6 bg-emerald-500/15 text-emerald-400 border-emerald-500/20">
-                                <IconLockOpen size={10} /> Active
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-center pr-6">
-                            <div className="flex justify-center gap-1.5">
-                              {/* TOMBOL VIEW - INI KUNCINYA */}
-                              <Button
-                                type="button"
-                                size="sm"
-                                className={cn(
-                                  "h-7 min-w- gap-1.5 font-bold tracking-wide border transition-all",
-                                  isSelected
-                                    ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
-                                    : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white",
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
                                 )}
-                                onClick={() => handleSelectPeriod(p)}
-                                disabled={isSelectingThis}
-                              >
-                                {isSelectingThis ? (
-                                  <IconLoader2
-                                    size={14}
-                                    className="animate-spin"
-                                  />
-                                ) : isSelected ? (
-                                  <IconEyeOff size={14} />
-                                ) : (
-                                  <IconEye size={14} />
-                                )}
-                                {isSelected ? "VIEWING" : "VIEW"}
-                              </Button>
-
-                              {!p.isClosed && (
-                                <Button
-                                  type="button"
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-7 w-7 px-0 bg-transparent border border-transparent text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/10"
-                                  onClick={() => handleClosePeriod(p)}
-                                  disabled={isClosingThis}
-                                >
-                                  {isClosingThis ? (
-                                    <IconLoader2
-                                      size={14}
-                                      className="animate-spin"
-                                    />
-                                  ) : (
-                                    <IconLock size={14} />
-                                  )}
-                                </Button>
-                              )}
-                            </div>
-                          </TableCell>
+                              </TableCell>
+                            );
+                          })}
                         </TableRow>
                       );
                     })
-                  )}
-                  {!isLoading && periods.length === 0 && (
+                  ) : (
                     <TableRow className="border-white/[0.06]">
                       <TableCell
-                        colSpan={5}
+                        colSpan={columns.length}
                         className="text-center py-12 text-zinc-500"
                       >
                         <IconCalendarOff className="mx-auto mb-2" size={28} />
@@ -638,7 +721,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                ),
+                                )
                               )}
                             </SelectContent>
                           </Select>
@@ -662,7 +745,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                ),
+                                )
                               )}
                             </SelectContent>
                           </Select>
@@ -688,7 +771,7 @@ export default function PeriodsPage() {
                                     {a.displayLabel ||
                                       `${a.referenceNumber} - ${a.accountName}`}
                                   </SelectItem>
-                                ),
+                                )
                               )}
                             </SelectContent>
                           </Select>
@@ -728,7 +811,7 @@ export default function PeriodsPage() {
                                 setCashBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value),
+                                    : Number(e.target.value)
                                 )
                               }
                               className="bg-[#0e0e10] border-white/10 text-white"
@@ -767,7 +850,7 @@ export default function PeriodsPage() {
                                 setBankBalance(
                                   e.target.value === ""
                                     ? ""
-                                    : Number(e.target.value),
+                                    : Number(e.target.value)
                                 )
                               }
                               className="bg-[#0e0e10] border-white/10 text-white"
