@@ -6,7 +6,7 @@ const open = defineModel<boolean>('open', { default: false })
 const links = computed(() => [[{
   label: 'Home',
   icon: 'i-lucide-house',
-  to: '/home', // Mengarah ke landing page member
+  to: '/home',
   onSelect: () => {
     open.value = false
   }
@@ -14,6 +14,13 @@ const links = computed(() => [[{
   label: 'Dashboard',
   icon: 'i-lucide-layout-dashboard',
   to: '/dashboard',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  label: 'Periods',
+  icon: 'i-lucide-calendar-range',
+  to: '/periods',
   onSelect: () => {
     open.value = false
   }
@@ -76,7 +83,6 @@ const links = computed(() => [[{
   target: '_blank'
 }]] satisfies NavigationMenuItem[][])
 
-// Expose data links agar bisa dibaca oleh parent jika dibutuhkan
 defineExpose({ links })
 </script>
 
