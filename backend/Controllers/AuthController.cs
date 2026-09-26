@@ -78,7 +78,6 @@ public class AuthController : ControllerBase
         }
 
         // 2. VALIDASI PASSWORD DENGAN MEMPERHITUNGKAN UNTUK LOCKOUT
-        // Menggunakan CheckPasswordSignInAsync agar AccessFailedCount bertambah & lockout dipicu otomatis oleh ASP.NET Identity
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
 
         if (signInResult.IsLockedOut)
@@ -134,7 +133,7 @@ public class AuthController : ControllerBase
         }
         else
         {
-            // --- MOBILE FLOW: Hanya buat JWT Token (TIDAK buat Cookie) ---
+            // --- MOBILE FLOW: Hanya buat JWT Token ---
             jwtToken = await GenerateJwtTokenAsync(user);
         }
 
@@ -165,7 +164,6 @@ public class AuthController : ControllerBase
             userAgent: safeUserAgent
         );
 
-        // Web mendapat JSON tanpa Token (murni Cookie), Mobile mendapat JSON berisi Token JWT
         if (isMobile)
         {
             return Ok(new
@@ -174,6 +172,7 @@ public class AuthController : ControllerBase
                 message = "Mobile login successful.",
                 userId = user.Id.ToString(),
                 fullName = user.FullName ?? user.UserName ?? "User",
+                avatarUrl = user.AvatarUrl,
                 token = jwtToken
             });
         }
@@ -183,7 +182,8 @@ public class AuthController : ControllerBase
             success = true,
             message = "Web login successful.",
             userId = user.Id.ToString(),
-            fullName = user.FullName ?? user.UserName ?? "User"
+            fullName = user.FullName ?? user.UserName ?? "User",
+            avatarUrl = user.AvatarUrl
         });
     }
 
@@ -224,7 +224,8 @@ public class AuthController : ControllerBase
                     UserName = payload.Email,
                     Email = payload.Email,
                     EmailConfirmed = true,
-                    FullName = payload.Name
+                    FullName = payload.Name,
+                    AvatarUrl = payload.Picture
                 };
 
                 var createResult = await _userManager.CreateAsync(user);
@@ -236,24 +237,22 @@ public class AuthController : ControllerBase
                 await _userManager.AddToRoleAsync(user, "User");
             }
 
-            // Simpan relasi Google Login ke tabel AspNetUserLogins
             await _userManager.AddLoginAsync(user, info);
         }
 
         if (!request.IsMobileClient)
         {
-            // Web: Issue Cookie
             await _signInManager.SignInAsync(user, isPersistent: true);
             return Ok(new
             {
                 success = true,
                 message = "Google login successful (Cookie session established).",
                 userId = user.Id.ToString(),
-                fullName = user.FullName ?? user.UserName ?? "User"
+                fullName = user.FullName ?? user.UserName ?? "User",
+                avatarUrl = user.AvatarUrl
             });
         }
 
-        // Mobile: Issue JWT Token
         var token = await GenerateJwtTokenAsync(user);
         return Ok(new
         {
@@ -261,22 +260,60 @@ public class AuthController : ControllerBase
             message = "Google login successful.",
             userId = user.Id.ToString(),
             fullName = user.FullName ?? user.UserName ?? "User",
+            avatarUrl = user.AvatarUrl,
             token = token
         });
     }
 
+    /// <summary>
+    /// Endpoint untuk mendapatkan profil user aktif secara realtime
+    /// </summary>
     [HttpGet("me")]
     public async Task<IActionResult> GetProfile()
     {
+        // 1. Ambil dari Cookie/Claims Principal
         var user = await _userManager.GetUserAsync(User);
-        if (user == null) return NotFound(new { success = false, message = "User not found." });
+
+        // Fallback: Jika null, cari via Claim NameIdentifier / Sub (terutama untuk JWT Bearer)
+        if (user == null)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+                         ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+
+            if (!string.IsNullOrEmpty(userId))
+            {
+                user = await _userManager.FindByIdAsync(userId);
+            }
+        }
+
+        if (user == null)
+        {
+            return Unauthorized(new { success = false, message = "User session expired or user not found." });
+        }
 
         var roles = await _userManager.GetRolesAsync(user);
         var userClaims = await _userManager.GetClaimsAsync(user);
 
+        var profileData = new
+        {
+            id = user.Id,
+            userId = user.Id,
+            email = user.Email,
+            userName = user.UserName,
+            fullName = user.FullName,
+            phoneNumber = user.PhoneNumber,
+            avatarUrl = user.AvatarUrl,
+            bio = user.Bio,
+            roles = roles,
+            customClaims = userClaims
+        };
+
+        // Mereturn ganda (data wrapper & flat) agar kompatibel dengan (me as any)?.data maupun me
         return Ok(new
         {
             success = true,
+            data = profileData,
+            id = user.Id,
             userId = user.Id,
             email = user.Email,
             userName = user.UserName,
@@ -297,7 +334,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Generate JWT Token async yang memuat data User, Roles (AspNetUserRoles), dan Claims (AspNetUserClaims).
+    /// Generate JWT Token async yang memuat data User, Roles, dan Claims.
     /// </summary>
     private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
@@ -318,14 +355,12 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // Memasukkan Roles ke JWT (AspNetUserRoles)
         var roles = await _userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        // Memasukkan Custom User Claims ke JWT (AspNetUserClaims)
         var userClaims = await _userManager.GetClaimsAsync(user);
         claims.AddRange(userClaims);
 
