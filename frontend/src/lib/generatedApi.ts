@@ -1,4 +1,5 @@
 import { baseApi as api } from "./apiClient";
+
 export const addTagTypes = [
   "AumoBackend",
   "Auth",
@@ -6,6 +7,7 @@ export const addTagTypes = [
   "Dashboard",
   "Health",
   "JournalEntry",
+  "Notifications",
   "Periods",
   "Settings",
   "Tools",
@@ -18,13 +20,14 @@ export const addTagTypes = [
   "TrialBalance",
   "Worksheet",
 ] as const;
+
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
   })
   .injectEndpoints({
     endpoints: (build) => ({
-      $get: build.query<$getApiResponse, $getApiArg>({
+      $get: build.query<$getApiResponse,$getApiArg>({
         query: () => ({ url: `/` }),
         providesTags: ["AumoBackend"],
       }),
@@ -203,6 +206,41 @@ const injectedRtkApi = api
         }),
         providesTags: ["JournalEntry"],
       }),
+
+      // --- ENDPOINTS NOTIFICATIONS BARU ---
+      getApiV1Notifications: build.query<
+        GetApiV1NotificationsApiResponse,
+        GetApiV1NotificationsApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/notifications`,
+          params: {
+            limit: queryArg?.limit,
+          },
+        }),
+        providesTags: ["Notifications"],
+      }),
+      putApiV1NotificationsReadById: build.mutation<
+        PutApiV1NotificationsReadByIdApiResponse,
+        PutApiV1NotificationsReadByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/notifications/${queryArg.id}/read`,
+          method: "PUT",
+        }),
+        invalidatesTags: ["Notifications"],
+      }),
+      putApiV1NotificationsReadAll: build.mutation<
+        PutApiV1NotificationsReadAllApiResponse,
+        PutApiV1NotificationsReadAllApiArg
+      >({
+        query: () => ({
+          url: `/api/v1/notifications/read-all`,
+          method: "PUT",
+        }),
+        invalidatesTags: ["Notifications"],
+      }),
+
       getApiV1Periods: build.query<
         GetApiV1PeriodsApiResponse,
         GetApiV1PeriodsApiArg
@@ -478,7 +516,9 @@ const injectedRtkApi = api
     }),
     overrideExisting: false,
   });
+
 export { injectedRtkApi as generatedApi };
+
 export type $getApiResponse = unknown;
 export type $getApiArg = void;
 export type HeadApiResponse = unknown;
@@ -547,6 +587,31 @@ export type GetApiV1JournalEntryNextTransactionNumberApiArg = {
   journalType?: string;
   entryDate?: string;
 };
+
+// --- TYPES NOTIFICATIONS BARU ---
+export type NotificationDto = {
+  id: string;
+  title: string;
+  message: string;
+  type?: string | null;
+  isRead: boolean;
+  targetUrl?: string | null;
+  createdAt: string;
+};
+
+export type GetApiV1NotificationsApiResponse = NotificationDto[];
+export type GetApiV1NotificationsApiArg = {
+  limit?: number;
+} | void;
+
+export type PutApiV1NotificationsReadByIdApiResponse = void;
+export type PutApiV1NotificationsReadByIdApiArg = {
+  id: string;
+};
+
+export type PutApiV1NotificationsReadAllApiResponse = void;
+export type PutApiV1NotificationsReadAllApiArg = void;
+
 export type GetApiV1PeriodsApiResponse = unknown;
 export type GetApiV1PeriodsApiArg = void;
 export type PostApiV1PeriodsApiResponse = unknown;
@@ -759,6 +824,7 @@ export type JournalImportRequestDto = {
   customMappings?: AccountMappingDetailDto[];
   transactions?: JournalTransactionDto[];
 };
+
 export const {
   use$getQuery,
   useHeadMutation,
@@ -779,6 +845,9 @@ export const {
   useDeleteApiV1JournalEntryDeleteByIdMutation,
   useGetApiV1JournalEntrySearchDescriptionsQuery,
   useGetApiV1JournalEntryNextTransactionNumberQuery,
+  useGetApiV1NotificationsQuery,
+  usePutApiV1NotificationsReadByIdMutation,
+  usePutApiV1NotificationsReadAllMutation,
   useGetApiV1PeriodsQuery,
   usePostApiV1PeriodsMutation,
   useGetApiV1PeriodsOpenInfoQuery,
