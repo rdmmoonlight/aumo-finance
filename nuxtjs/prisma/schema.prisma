@@ -1,0 +1,290 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AspNetRoleClaims {
+  Id          Int         @id(map: "PK_AspNetRoleClaims") @default(autoincrement())
+  RoleId      String      @db.Uuid
+  ClaimType   String?
+  ClaimValue  String?
+  AspNetRoles AspNetRoles @relation(fields: [RoleId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_AspNetRoleClaims_AspNetRoles_RoleId")
+
+  @@index([RoleId], map: "IX_AspNetRoleClaims_RoleId")
+}
+
+model AspNetRoles {
+  Id               String             @id(map: "PK_AspNetRoles") @db.Uuid
+  Name             String?            @db.VarChar(256)
+  NormalizedName   String?            @unique(map: "RoleNameIndex") @db.VarChar(256)
+  ConcurrencyStamp String?
+  AspNetRoleClaims AspNetRoleClaims[]
+  AspNetUserRoles  AspNetUserRoles[]
+}
+
+model AspNetUserClaims {
+  Id          Int         @id(map: "PK_AspNetUserClaims") @default(autoincrement())
+  UserId      String      @db.Uuid
+  ClaimType   String?
+  ClaimValue  String?
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_AspNetUserClaims_AspNetUsers_UserId")
+
+  @@index([UserId], map: "IX_AspNetUserClaims_UserId")
+}
+
+model AspNetUserLogins {
+  LoginProvider       String
+  ProviderKey         String
+  ProviderDisplayName String?
+  UserId              String      @db.Uuid
+  AspNetUsers         AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_AspNetUserLogins_AspNetUsers_UserId")
+
+  @@id([LoginProvider, ProviderKey], map: "PK_AspNetUserLogins")
+  @@index([UserId], map: "IX_AspNetUserLogins_UserId")
+}
+
+model AspNetUserRoles {
+  UserId      String      @db.Uuid
+  RoleId      String      @db.Uuid
+  AspNetRoles AspNetRoles @relation(fields: [RoleId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_AspNetUserRoles_AspNetRoles_RoleId")
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_AspNetUserRoles_AspNetUsers_UserId")
+
+  @@id([UserId, RoleId], map: "PK_AspNetUserRoles")
+  @@index([RoleId], map: "IX_AspNetUserRoles_RoleId")
+}
+
+model AspNetUserTokens {
+  UserId        String      @db.Uuid
+  LoginProvider String
+  Name          String
+  Value         String?
+  AspNetUsers   AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_AspNetUserTokens_AspNetUsers_UserId")
+
+  @@id([UserId, LoginProvider, Name], map: "PK_AspNetUserTokens")
+}
+
+model AspNetUsers {
+  Id                   String             @id(map: "PK_AspNetUsers") @db.Uuid
+  FullName             String?
+  UserName             String?            @db.VarChar(256)
+  NormalizedUserName   String?            @unique(map: "UserNameIndex") @db.VarChar(256)
+  Email                String?            @db.VarChar(256)
+  NormalizedEmail      String?            @db.VarChar(256)
+  EmailConfirmed       Boolean
+  PasswordHash         String?
+  SecurityStamp        String?
+  ConcurrencyStamp     String?
+  PhoneNumber          String?
+  PhoneNumberConfirmed Boolean
+  TwoFactorEnabled     Boolean
+  LockoutEnd           DateTime?          @db.Timestamptz(6)
+  LockoutEnabled       Boolean
+  AccessFailedCount    Int
+  AvatarUrl            String?
+  Bio                  String?
+  AspNetUserClaims     AspNetUserClaims[]
+  AspNetUserLogins     AspNetUserLogins[]
+  AspNetUserRoles      AspNetUserRoles[]
+  AspNetUserTokens     AspNetUserTokens[]
+  JournalEntries       JournalEntries[]
+  LoginActivities      LoginActivities[]
+  RecoveryCodes        RecoveryCodes[]
+  SecuritySettings     SecuritySettings?
+  TrustedDevices       TrustedDevices[]
+  UserSessions         UserSessions[]
+
+  @@index([NormalizedEmail], map: "EmailIndex")
+}
+
+model ChartOfAccounts {
+  Id                Int                 @id(map: "PK_ChartOfAccounts") @default(autoincrement())
+  ReferenceNumber   Int
+  AccountName       String              @db.VarChar(100)
+  Type              String
+  Role              String
+  IsActive          Boolean
+  UserId            String              @db.Uuid
+  JournalEntryLines JournalEntryLines[]
+
+  @@unique([UserId, ReferenceNumber], map: "IX_ChartOfAccounts_UserId_ReferenceNumber")
+  @@index([UserId], map: "IX_ChartOfAccounts_UserId")
+}
+
+model DataProtectionKeys {
+  Id           Int     @id(map: "PK_DataProtectionKeys") @default(autoincrement())
+  FriendlyName String?
+  Xml          String?
+}
+
+model EconomicDocuments {
+  Id              Int             @id @default(autoincrement())
+  Title           String          @db.VarChar(200)
+  Category        String          @db.VarChar(50)
+  ReferenceNumber String?         @db.VarChar(100)
+  FileName        String          @db.VarChar(255)
+  FilePath        String          @db.VarChar(500)
+  FileSize        BigInt
+  ContentType     String?         @db.VarChar(100)
+  UploadedBy      String
+  UploadDate      DateTime        @default(now()) @db.Timestamptz(6)
+  Description     String?
+  JournalEntryId  Int?
+  UserId          String          @db.Uuid
+  CloudPublicId   String?         @db.VarChar(150)
+  FolderId        String?         @db.Uuid
+  Folders         Folders?        @relation(fields: [FolderId], references: [Id], onUpdate: NoAction)
+  JournalEntries  JournalEntries? @relation(fields: [JournalEntryId], references: [Id], onUpdate: NoAction, map: "FK_EconomicDocuments_JournalEntries_JournalEntryId")
+
+  @@index([Category], map: "IX_EconomicDocuments_Category")
+  @@index([ReferenceNumber], map: "IX_EconomicDocuments_ReferenceNumber")
+  @@index([UserId], map: "IX_EconomicDocuments_UserId")
+}
+
+model Folders {
+  Id                String              @id @db.Uuid
+  Name              String              @db.VarChar(150)
+  ParentFolderId    String?             @db.Uuid
+  UserId            String              @db.Uuid
+  CreatedAt         DateTime            @default(now()) @db.Timestamptz(6)
+  EconomicDocuments EconomicDocuments[]
+  Folders           Folders?            @relation("FoldersToFolders", fields: [ParentFolderId], references: [Id], onDelete: Cascade, onUpdate: NoAction)
+  other_Folders     Folders[]           @relation("FoldersToFolders")
+}
+
+model JournalEntries {
+  Id                Int                 @id(map: "PK_JournalEntries") @default(autoincrement())
+  JournalType       String
+  EntryDate         DateTime            @db.Timestamptz(6)
+  CreatedAt         DateTime            @default(now()) @db.Timestamptz(6)
+  TransactionNumber String              @db.VarChar(30)
+  UserId            String              @db.Uuid
+  UpdatedAt         DateTime?           @db.Timestamptz(6)
+  EconomicDocuments EconomicDocuments[]
+  AspNetUsers       AspNetUsers         @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_JournalEntries_AspNetUsers_UserId")
+  JournalEntryLines JournalEntryLines[]
+
+  @@unique([UserId, TransactionNumber], map: "IX_JournalEntries_UserId_TransactionNumber")
+  @@index([UserId], map: "IX_JournalEntries_UserId")
+}
+
+model JournalEntryLines {
+  Id              Int             @id(map: "PK_JournalEntryLines") @default(autoincrement())
+  JournalEntryId  Int
+  AccountId       Int
+  LineDescription String?         @db.VarChar(250)
+  Debit           Decimal         @db.Decimal(18, 2)
+  Credit          Decimal         @db.Decimal(18, 2)
+  LineOrder       Int
+  ChartOfAccounts ChartOfAccounts @relation(fields: [AccountId], references: [Id], onUpdate: NoAction, map: "FK_JournalEntryLines_ChartOfAccounts_AccountId")
+  JournalEntries  JournalEntries  @relation(fields: [JournalEntryId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_JournalEntryLines_JournalEntries_JournalEntryId")
+
+  @@index([AccountId], map: "IX_JournalEntryLines_AccountId")
+  @@index([JournalEntryId], map: "IX_JournalEntryLines_JournalEntryId")
+}
+
+model LoginActivities {
+  Id              String      @id(map: "PK_LoginActivities") @db.Uuid
+  UserId          String      @db.Uuid
+  ActivityType    String      @db.VarChar(50)
+  IsSuccess       Boolean
+  Device          String      @db.VarChar(300)
+  Browser         String      @db.VarChar(500)
+  OperatingSystem String      @db.VarChar(200)
+  IpAddress       String      @db.VarChar(45)
+  Country         String      @db.VarChar(100)
+  UserAgent       String      @db.VarChar(500)
+  CreatedAt       DateTime    @db.Timestamptz(6)
+  Description     String?     @db.VarChar(500)
+  AspNetUsers     AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_LoginActivities_AspNetUsers_UserId")
+
+  @@index([UserId, CreatedAt], map: "IX_LoginActivities_UserId_CreatedAt")
+}
+
+model Periods {
+  Id         Int      @id(map: "PK_Periods") @default(autoincrement())
+  PeriodName String   @db.VarChar(50)
+  StartDate  DateTime @db.Timestamptz(6)
+  EndDate    DateTime @db.Timestamptz(6)
+  IsClosed   Boolean  @default(false)
+  IsSelected Boolean  @default(false)
+  UserId     String   @db.Uuid
+
+  @@index([UserId], map: "IX_Periods_UserId")
+}
+
+model RecoveryCodes {
+  Id          String      @id @db.Uuid
+  UserId      String      @db.Uuid
+  CodeHash    String      @db.VarChar(255)
+  Used        Boolean     @default(false)
+  CreatedAt   DateTime    @db.Timestamptz(6)
+  UsedAt      DateTime?   @db.Timestamptz(6)
+  AspNetUsers AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_RecoveryCodes_AspNetUsers")
+
+  @@index([UserId], map: "IX_RecoveryCodes_UserId")
+}
+
+model SecuritySettings {
+  UserId                   String      @id @db.Uuid
+  EmailVerified            Boolean     @default(false)
+  TwoFactorEnabled         Boolean     @default(false)
+  LoginNotificationEnabled Boolean     @default(true)
+  SessionTimeoutMinutes    Int         @default(30)
+  UpdatedAt                DateTime    @db.Timestamptz(6)
+  AspNetUsers              AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_SecuritySettings_AspNetUsers")
+}
+
+model TransactionCounters {
+  Id           Int    @id @default(autoincrement())
+  UserId       String @db.Uuid
+  CounterKey   String @db.VarChar(10)
+  LastSequence Int
+
+  @@unique([UserId, CounterKey], map: "IX_TransactionCounters_UserId_CounterKey")
+}
+
+model TrustedDevices {
+  Id               String      @id @db.Uuid
+  UserId           String      @db.Uuid
+  DeviceName       String      @db.VarChar(100)
+  DeviceIdentifier String      @unique @db.VarChar(255)
+  Browser          String      @db.VarChar(100)
+  OperatingSystem  String      @db.VarChar(100)
+  IsTrusted        Boolean     @default(true)
+  CreatedAt        DateTime    @db.Timestamptz(6)
+  LastUsedAt       DateTime    @db.Timestamptz(6)
+  AspNetUsers      AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_TrustedDevices_AspNetUsers")
+
+  @@index([UserId], map: "IX_TrustedDevices_UserId")
+}
+
+model UserSessions {
+  Id               String      @id(map: "PK_UserSessions") @db.Uuid
+  UserId           String      @db.Uuid
+  DeviceName       String      @db.VarChar(300)
+  Browser          String      @db.VarChar(500)
+  OperatingSystem  String      @db.VarChar(200)
+  IpAddress        String      @db.VarChar(45)
+  Country          String      @db.VarChar(100)
+  UserAgent        String      @db.VarChar(500)
+  RefreshTokenHash String      @db.VarChar(255)
+  IsActive         Boolean
+  IsCurrent        Boolean
+  CreatedAt        DateTime    @db.Timestamptz(6)
+  LastActivityAt   DateTime    @db.Timestamptz(6)
+  RevokedAt        DateTime?   @db.Timestamptz(6)
+  AspNetUsers      AspNetUsers @relation(fields: [UserId], references: [Id], onDelete: Cascade, onUpdate: NoAction, map: "FK_UserSessions_AspNetUsers_UserId")
+
+  @@index([UserId, IsActive], map: "IX_UserSessions_UserId_IsActive")
+}
+
+model EFMigrationsHistory {
+  MigrationId    String @id(map: "PK___EFMigrationsHistory") @db.VarChar(150)
+  ProductVersion String @db.VarChar(32)
+
+  @@map("__EFMigrationsHistory")
+}

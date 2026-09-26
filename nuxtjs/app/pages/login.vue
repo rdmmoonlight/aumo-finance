@@ -4,14 +4,15 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 
 definePageMeta({ layout: 'auth' })
 
+const { login } = useAuth()
 const toast = useToast()
 const route = useRoute()
 const loading = ref(false)
 
 const schema = z.object({
-  email: z.string().min(1, 'Email is required'),
+  email: z.string().min(1, 'Email or username is required'),
   password: z.string().min(1, 'Password is required'),
-  rememberMe: z.boolean()
+  rememberMe: z.boolean().default(false)
 })
 
 type Schema = z.output<typeof schema>
@@ -25,15 +26,24 @@ const state = reactive<Schema>({
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   try {
-    await login(event.data)
+    const res = await login(event.data)
 
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/home'
-    await navigateTo(redirect)
-  } catch (err: unknown) {
-    const message = (err as { data?: { message?: string } })?.data?.message
+    if (res && res.success) {
+      toast.add({
+        title: 'Welcome back!',
+        description: `Logged in as ${res.fullName || 'User'}`,
+        color: 'success'
+      })
+
+      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/home'
+      await navigateTo(redirect, { replace: true })
+    }
+  } catch (err: any) {
+    const message = err.data?.statusMessage || err.data?.message || 'Invalid email/username or password.'
+    
     toast.add({
       title: 'Login failed',
-      description: message || 'Invalid email/username or password.',
+      description: message,
       color: 'error'
     })
   } finally {

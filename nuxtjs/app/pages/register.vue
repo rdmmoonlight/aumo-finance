@@ -4,6 +4,7 @@ import type { FormSubmitEvent } from '@nuxt/ui'
 
 definePageMeta({ layout: 'auth' })
 
+const { register } = useAuth()
 const toast = useToast()
 const route = useRoute()
 const loading = ref(false)
@@ -30,7 +31,11 @@ const state = reactive<Schema>({
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   try {
-    await register(event.data)
+    await register({
+      fullName: event.data.name,
+      email: event.data.email,
+      password: event.data.password
+    })
 
     toast.add({
       title: 'Account created',
@@ -40,8 +45,9 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
     const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await navigateTo(redirect)
-  } catch (err: unknown) {
-    const message = (err as { data?: { message?: string } })?.data?.message
+  } catch (err: any) {
+    const message = err?.data?.statusMessage || err?.data?.message || err?.message
+    
     toast.add({
       title: 'Registration failed',
       description: message || 'Failed to create an account. Please try again.',

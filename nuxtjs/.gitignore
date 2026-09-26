@@ -25,3 +25,5 @@ logs
 
 # VSC
 .history
+node_modules/
+dist/

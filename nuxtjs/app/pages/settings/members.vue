@@ -1,54 +1,35 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import type { AuthUser } from '~/composables/useAuth'
 
-interface UserProfile {
-  userId: string
-  email: string
-  userName: string
-  fullName: string
-  roles: string[]
-}
-
-const members = ref<UserProfile[]>([])
-const loading = ref(false)
+const { user, checked, fetchAuthUser } = useAuth()
 const q = ref('')
+const loading = ref(false)
 const toast = useToast()
 
-// Ambil data profil pengguna yang sedang login dari endpoint AuthController: GET /api/v1/auth/me
-async function fetchCurrentMember() {
-  loading.value = true
-  try {
-    const response = await $fetch<{
-      success: boolean
-      userId: string
-      email: string
-      userName: string
-      fullName: string
-      roles: string[]
-    }>('/api/v1/auth/me')
-
-    if (response.success) {
-      members.value = [
-        {
-          userId: response.userId,
-          email: response.email,
-          userName: response.userName,
-          fullName: response.fullName,
-          roles: response.roles
-        }
-      ]
+// Ambil profil jika belum diambil oleh middleware/SSR
+async function loadData() {
+  if (!checked.value) {
+    loading.value = true
+    try {
+      await fetchAuthUser()
+    } catch {
+      toast.add({
+        title: 'Error',
+        description: 'Gagal mengambil data anggota/profil.',
+        color: 'error'
+      })
+    } finally {
+      loading.value = false
     }
-  } catch {
-    toast.add({
-      title: 'Error',
-      description: 'Gagal mengambil data anggota/profil.',
-      color: 'error'
-    })
-  } finally {
-    loading.value = false
   }
 }
 
+// Map user yang sedang login ke dalam array members
+const members = computed<AuthUser[]>(() => {
+  return user.value ? [user.value] : []
+})
+
+// Filter data berdasarkan kata kunci pencarian
 const filteredMembers = computed(() => {
   if (!q.value) return members.value
 
@@ -63,7 +44,7 @@ const filteredMembers = computed(() => {
 })
 
 onMounted(() => {
-  fetchCurrentMember()
+  loadData()
 })
 </script>
 
@@ -91,11 +72,11 @@ onMounted(() => {
         />
       </template>
 
-      <div v-if="loading" class="p-4 text-sm text-gray-500">
+      <div v-if="loading || !checked" class="p-4 text-sm text-gray-500">
         Memuat data...
       </div>
 
-      <!-- Menampilkan daftar member yang sudah terintegrasi dengan struktur AuthController -->
+      <!-- Menampilkan daftar member yang sudah terintegrasi -->
       <SettingsMembersList v-else :members="filteredMembers" />
     </UPageCard>
   </div>

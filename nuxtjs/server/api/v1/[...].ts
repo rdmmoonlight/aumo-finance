@@ -1,11 +1,15 @@
-// Catch-all proxy: forwards every /api/v1/** call this app makes
-// straight to the matching controller/route in /backend, so pages
-// (e.g. settings/security.vue, settings/members.vue) can call
-// `$fetch('/api/v1/...')` using the exact path the backend controller
-// exposes, with no per-endpoint file needed on this side.
+// server/api/v1/[...].ts
+
 export default defineEventHandler(async (event) => {
+  // 1. Ambil path suffix dari catch-all parameter
   const suffix = event.context.params?._ ?? ''
   const path = Array.isArray(suffix) ? suffix.join('/') : suffix
 
-  return proxyToBackend(event, `/api/v1/${path}`)
+  // 2. Ambil query string (contoh: ?search=abc&page=2) jika ada
+  const query = getRequestURL(event).search
+
+  // 3. Gabungkan path dan query string ke backend target
+  const targetPath = `/api/v1/${path}${query}`
+
+  return proxyToBackend(event, targetPath)
 })

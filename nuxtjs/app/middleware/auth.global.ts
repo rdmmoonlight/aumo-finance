@@ -2,23 +2,31 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const user = useAuthUser()
   const checked = useAuthChecked()
 
+  // 1. Ambil data user dari server jika status otentikasi belum pernah diperiksa
   if (!checked.value) {
     await fetchAuthUser()
   }
 
+  // Daftar rute publik (tidak memerlukan login)
   const publicRoutes = ['/', '/login', '/register']
-  const isPublicRoute = publicRoutes.includes(to.path)
+  
+  // Normalisasi path agar aman dari trailing slash (misal: /login/ -> /login)
+  const normalizedPath = to.path.length > 1 && to.path.endsWith('/') 
+    ? to.path.slice(0, -1) 
+    : to.path
 
-  // 1. Jika BELUM login dan mencoba akses rute terproteksi (seperti /home) -> Redirect ke /login
+  const isPublicRoute = publicRoutes.includes(normalizedPath)
+
+  // 2. Jika BELUM login & mengakses rute privat -> Redirect ke /login dengan query parameter 'redirect'
   if (!user.value && !isPublicRoute) {
-    return navigateTo({ 
-      path: '/login', 
-      query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined 
+    return navigateTo({
+      path: '/login',
+      query: to.fullPath !== '/' ? { redirect: to.fullPath } : undefined
     })
   }
 
-  // 2. Jika SUDAH login dan mencoba buka Landing Page Publik (/) atau Login/Register -> Redirect ke Landing Page Member (/home)
-  if (user.value && (to.path === '/' || to.path === '/login' || to.path === '/register')) {
+  // 3. Jika SUDAH login & mengakses rute publik (/, /login, /register) -> Redirect ke /home
+  if (user.value && isPublicRoute) {
     return navigateTo('/home')
   }
 })

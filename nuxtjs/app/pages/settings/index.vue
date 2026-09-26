@@ -7,24 +7,25 @@ const loading = ref(false)
 const loadingAvatar = ref(false)
 
 const authUser = useAuthUser()
+const avatarInput = ref<HTMLInputElement | null>(null)
 
-// GET /api/v1/auth/me does not return phoneNumber/bio/avatarUrl, only
-// fullName/userName/email/roles - so only those two fields are safely
-// editable here. Sending phoneNumber/bio blind would risk wiping out
-// values already saved on the account (UpdateProfile compares against
-// the current record and null looks like "clear this field").
+// Schema validasi form
 const schema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   userName: z.string().min(3, 'Username must be at least 3 characters')
 })
 
-type Schema = z.output<typeof schema>
+type Schema = z.infer<typeof schema>
 
 const state = reactive<Schema>({
   fullName: '',
   userName: ''
 })
 
+// Avatar preview lokal (untuk gambar baru yang diunggah)
+const avatarPreview = ref<string | null>(null)
+
+// Sinkronkan data dari authUser jika sudah tersedia / diperbarui
 watch(authUser, (user) => {
   if (!user) return
   state.fullName = user.fullName ?? ''
@@ -42,21 +43,29 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       }
     })
 
+    // Refresh state pengguna global
     await fetchAuthUser()
 
-    toast.add({ title: 'Success', description: 'Profile updated successfully.', color: 'success' })
+    toast.add({
+      title: 'Success',
+      description: 'Profile updated successfully.',
+      color: 'success'
+    })
   } catch (err: unknown) {
     const message = (err as { data?: { message?: string } })?.data?.message
-    toast.add({ title: 'Error', description: message || 'Failed to update profile.', color: 'error' })
+    toast.add({
+      title: 'Error',
+      description: message || 'Failed to update profile.',
+      color: 'error'
+    })
   } finally {
     loading.value = false
   }
 }
 
-// avatarUrl also isn't returned by /me, so the preview only reflects
-// what was just uploaded this session - it won't persist across a
-// page refresh until the backend's /me response includes it.
-const avatarPreview = ref<string | null>(null)
+function triggerAvatarSelect() {
+  avatarInput.value?.click()
+}
 
 async function onAvatarChange(event: Event) {
   const input = event.target as HTMLInputElement
@@ -68,16 +77,25 @@ async function onAvatarChange(event: Event) {
     const form = new FormData()
     form.append('avatar', file)
 
-    const response = await $fetch<{ success: boolean, avatarUrl: string }>('/api/v1/settings/avatar', {
+    const response = await $fetch<{ success: boolean; avatarUrl: string }>('/api/v1/settings/avatar', {
       method: 'POST',
       body: form
     })
 
     avatarPreview.value = response.avatarUrl
-    toast.add({ title: 'Success', description: 'Avatar uploaded.', color: 'success' })
+
+    toast.add({
+      title: 'Success',
+      description: 'Avatar uploaded successfully.',
+      color: 'success'
+    })
   } catch (err: unknown) {
     const message = (err as { data?: { message?: string } })?.data?.message
-    toast.add({ title: 'Error', description: message || 'Failed to upload avatar.', color: 'error' })
+    toast.add({
+      title: 'Error',
+      description: message || 'Failed to upload avatar.',
+      color: 'error'
+    })
   } finally {
     loadingAvatar.value = false
     input.value = ''
@@ -94,7 +112,11 @@ async function onAvatarChange(event: Event) {
       orientation="horizontal"
     >
       <div class="flex items-center gap-3 lg:ms-auto">
-        <UAvatar :src="avatarPreview ?? undefined" :alt="state.fullName || state.userName" size="lg" />
+        <UAvatar
+          :src="avatarPreview ?? undefined"
+          :alt="state.fullName || state.userName"
+          size="lg"
+        />
 
         <UButton
           label="Ganti foto"
@@ -102,8 +124,9 @@ async function onAvatarChange(event: Event) {
           variant="outline"
           size="sm"
           :loading="loadingAvatar"
-          @click="($refs.avatarInput as HTMLInputElement)?.click()"
+          @click="triggerAvatarSelect"
         />
+
         <input
           ref="avatarInput"
           type="file"
@@ -130,7 +153,7 @@ async function onAvatarChange(event: Event) {
         </UFormField>
 
         <UFormField label="Email">
-          <UInput :model-value="authUser?.email" disabled class="w-full" />
+          <UInput :model-value="authUser?.email || ''" disabled class="w-full" />
         </UFormField>
 
         <UFormField v-if="authUser?.roles?.length" label="Roles">
