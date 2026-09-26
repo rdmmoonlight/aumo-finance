@@ -1,5 +1,5 @@
 // Thin wrapper around AuthController's /api/v1/auth/* routes
-interface AuthUser {
+export interface AuthUser {
   userId: string
   email: string
   userName: string
@@ -7,15 +7,21 @@ interface AuthUser {
   roles: string[]
 }
 
-interface MeResponse extends AuthUser {
+export interface MeResponse extends AuthUser {
   success: boolean
 }
 
-interface LoginResponse {
+export interface LoginResponse {
   success: boolean
   message: string
   userId: string
   fullName: string
+}
+
+export interface RegisterResponse {
+  success: boolean
+  message: string
+  userId?: string
 }
 
 export function useAuthUser() {
@@ -31,10 +37,10 @@ export async function fetchAuthUser() {
   const checked = useAuthChecked()
 
   try {
-    // Pass headers agar cookie dari SSR/Client ikut terkirim ke proxy Nitro
-    const response = await $fetch<MeResponse>('/api/v1/auth/me', {
-      headers: useRequestHeaders(['cookie']) as Record<string, string>
-    })
+    // Ambil cookie header jika berjalan di server (SSR), kosongkan jika di browser client
+    const headers = import.meta.server ? useRequestHeaders(['cookie']) as Record<string, string> : undefined
+
+    const response = await $fetch<MeResponse>('/api/v1/auth/me', { headers })
     
     if (response && response.success) {
       user.value = response
@@ -50,7 +56,7 @@ export async function fetchAuthUser() {
   return user.value
 }
 
-export async function login(payload: { email: string, password: string, rememberMe?: boolean }) {
+export async function login(payload: { email: string; password: string; rememberMe?: boolean }) {
   const user = useAuthUser()
   const checked = useAuthChecked()
 
@@ -64,7 +70,7 @@ export async function login(payload: { email: string, password: string, remember
     }
   })
 
-  // 1. Jika login sukses di backend, set state user secara optimis dari respon login
+  // Set state optimis dari respon login
   if (response && response.success) {
     user.value = {
       userId: response.userId,
@@ -75,8 +81,27 @@ export async function login(payload: { email: string, password: string, remember
     }
     checked.value = true
 
-    // 2. Ambil profil lengkap (roles, dll) di background
+    // Ambil profil lengkap (roles, dll) di background
     fetchAuthUser().catch(() => {})
+  }
+
+  return response
+}
+
+export async function register(payload: {
+  fullName: string
+  email: string
+  password: string
+  userName?: string
+}) {
+  const response = await $fetch<RegisterResponse>('/api/v1/auth/register', {
+    method: 'POST',
+    body: payload
+  })
+
+  // Opsional: Langsung ambil status user jika pendaftaran otomatis melakukan login / set cookie
+  if (response && response.success) {
+    await fetchAuthUser().catch(() => {})
   }
 
   return response
