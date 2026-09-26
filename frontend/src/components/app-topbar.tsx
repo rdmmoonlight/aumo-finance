@@ -207,7 +207,7 @@ export function AppTopBar() {
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
-                      className={`p-3 text-xs cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
+                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
                         !item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
                       }`}
                     >
@@ -220,10 +220,10 @@ export function AppTopBar() {
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-semibold text-foreground">
+                          <p className="font-semibold text-foreground text-sm">
                             {item.title}
                           </p>
-                          <span className="text-[10px] text-muted-foreground">
+                          <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
                                   [],
@@ -232,7 +232,7 @@ export function AppTopBar() {
                               : ""}
                           </span>
                         </div>
-                        <p className="text-muted-foreground leading-relaxed">
+                        <p className="text-muted-foreground leading-relaxed text-[13px]">
                           {item.message}
                         </p>
                       </div>
@@ -291,7 +291,7 @@ export function AppTopBar() {
           {selectedPeriod ? (
             <Badge
               variant="outline"
-              className={`gap-1.5 font-medium ${
+              className={`gap-1.5 font-medium text-xs ${
                 selectedPeriod.isClosed
                   ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
                   : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
@@ -310,7 +310,7 @@ export function AppTopBar() {
           ) : (
             <Badge
               variant="outline"
-              className="gap-1.5 font-medium text-muted-foreground"
+              className="gap-1.5 font-medium text-xs text-muted-foreground"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
               {isPeriodLoading
@@ -328,7 +328,7 @@ export function AppTopBar() {
             {dbStatus === "online" && (
               <Badge
                 variant="outline"
-                className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-medium"
+                className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-medium text-xs"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 DB: Connected
@@ -338,7 +338,7 @@ export function AppTopBar() {
             {dbStatus === "connecting" && (
               <Badge
                 variant="outline"
-                className="gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-medium"
+                className="gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-medium text-xs"
               >
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-ping" />
                 DB: Connecting...
@@ -347,7 +347,7 @@ export function AppTopBar() {
 
             {dbStatus === "offline" && (
               <div className="flex items-center gap-1.5">
-                <Badge variant="destructive" className="gap-1.5 font-medium">
+                <Badge variant="destructive" className="gap-1.5 font-medium text-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
                   DB: Disconnected
                 </Badge>
