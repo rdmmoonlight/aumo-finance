@@ -347,7 +347,10 @@ export function AppTopBar() {
 
             {dbStatus === "offline" && (
               <div className="flex items-center gap-1.5">
-                <Badge variant="destructive" className="gap-1.5 font-medium text-xs">
+                <Badge
+                  variant="destructive"
+                  className="gap-1.5 font-medium text-xs"
+                >
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
                   DB: Disconnected
                 </Badge>
