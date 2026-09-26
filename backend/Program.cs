@@ -43,13 +43,18 @@ namespace AumoBackend
                 throw new InvalidOperationException("Database connection string 'DATABASE_URL' is missing.");
             }
 
-            builder.Services.AddDbContextFactory<AppDbContext>(options =>
+            // PERBAIKAN: Registrasi DbContext langsung (Scoped) & DbContextFactory agar kompatibel penuh
+            builder.Services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
                 options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
 
-            builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
+            builder.Services.AddDbContextFactory<AppDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString);
+                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            }, ServiceLifetime.Scoped);
 
             // =====================================
             // 2. SUPABASE CONFIGURATION (Storage / Avatar Bucket)
@@ -92,11 +97,7 @@ namespace AumoBackend
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
-
-                // -----------------------------------------------------------
-                // ATURAN LOCKOUT DIHAPUS / DIMATIKAN
-                // -----------------------------------------------------------
-                options.Lockout.AllowedForNewUsers = false; // Mematikan fitur lockout untuk user baru
+                options.Lockout.AllowedForNewUsers = false;
 
                 options.Password.RequiredLength = 6;
                 options.Password.RequireDigit = false;
@@ -269,15 +270,23 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 9. AUTOMATIC DATABASE MIGRATION & SEEDING
+            // 9. AUTOMATIC DATABASE MIGRATION & SEEDING (DEPLOY TO RENDER SAFE)
             // =====================================
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
+                var logger = services.GetRequiredService<ILogger<Program>>();
+
                 try
                 {
+                    logger.LogInformation("Menjalankan migrasi database otomatis...");
+                    
                     var context = services.GetRequiredService<AppDbContext>();
+                    
+                    // Eksekusi auto update schema database (Termasuk tabel Notifications yang baru dibuat)
                     await context.Database.MigrateAsync();
+                    
+                    logger.LogInformation("Migrasi database berhasil dijalankan!");
 
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -307,8 +316,7 @@ namespace AumoBackend
                 }
                 catch (Exception ex)
                 {
-                    var logger = services.GetRequiredService<ILogger<Program>>();
-                    logger.LogError(ex, "Failed to run automatic database migration or seeding.");
+                    logger.LogError(ex, "Gagal menjalankan migrasi database otomatis saat deploy ke Render.");
                 }
             }
 
