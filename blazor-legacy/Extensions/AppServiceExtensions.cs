@@ -188,7 +188,21 @@ namespace AumoBlazor.Extensions
                 }
 
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                var response = await _httpClient.GetAsync("api/v1/auth/me", cts.Token);
+                
+                // Paksa BaseAddress HttpClient wajib HTTPS
+                if (_httpClient.BaseAddress != null && _httpClient.BaseAddress.Scheme == "http")
+                {
+                    _httpClient.BaseAddress = new Uri(_httpClient.BaseAddress.ToString().Replace("http://", "https://"));
+                }
+
+                // Attach CookieHeader ke Request
+                var request = new HttpRequestMessage(HttpMethod.Get, "api/v1/auth/me");
+                if (!string.IsNullOrWhiteSpace(cookieHeaderString))
+                {
+                    request.Headers.TryAddWithoutValidation("Cookie", cookieHeaderString);
+                }
+
+                var response = await _httpClient.SendAsync(request, cts.Token);
 
                 if (response.IsSuccessStatusCode)
                 {
