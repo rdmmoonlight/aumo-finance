@@ -7,6 +7,12 @@ export default defineNuxtConfig({
     '@prisma/nuxt'
   ],
 
+  // Konfigurasi Prisma Nuxt Module agar tidak menggantung di Vercel/CI
+  prisma: {
+    skipPrompts: true,
+    autoSetupPrisma: true
+  },
+
   devtools: {
     enabled: true
   },
