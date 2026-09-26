@@ -24,18 +24,19 @@ import {
   Bell,
   Database,
   RefreshCw,
-  CheckCheck,
   Info,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 
 // RTK Query Hooks & Types
 import {
   useGetApiV1PeriodsQuery,
   useGetApiV1HealthQuery,
-  // Tambahkan hook RTK Query Notifikasi kamu di sini jika sudah ada:
-  // useGetApiV1NotificationsQuery,
-  // useMarkAsReadMutation,
+  useGetApiV1NotificationsQuery,
+  usePutApiV1NotificationsReadByIdMutation,
+  usePutApiV1NotificationsReadAllMutation,
+  NotificationDto,
 } from "@/lib/generatedApi";
 import { useUserProfile } from "@/lib/auth";
 
@@ -45,16 +46,6 @@ interface PeriodItem {
   name?: string;
   isClosed?: boolean;
   isSelected?: boolean;
-}
-
-// Interface dummy untuk Notifikasi
-interface NotificationItem {
-  id: string;
-  title: string;
-  message: string;
-  createdAt: string;
-  isRead: boolean;
-  type?: "info" | "warning";
 }
 
 export function AppTopBar() {
@@ -83,36 +74,43 @@ export function AppTopBar() {
     refetchOnFocus: false,
   });
 
-  // Dummy State Notifikasi (Ganti dengan RTK Query jika endpoint API sudah siap)
-  const [notifications, setNotifications] = React.useState<NotificationItem[]>([
+  // 3. RTK Query Hooks Notifikasi
+  const {
+    data: notificationsData,
+    isLoading: isNotificationsLoading,
+  } = useGetApiV1NotificationsQuery(
+    { limit: 20 },
     {
-      id: "1",
-      title: "Jurnal Penyesuaian",
-      message: "Periode Januari 2026 telah ditutup oleh sistem.",
-      createdAt: "5m yang lalu",
-      isRead: false,
-      type: "info",
-    },
-    {
-      id: "2",
-      title: "Peringatan Saldo Kas",
-      message: "Transaksi Kas Kecil mendekati batas limit harian.",
-      createdAt: "1j yang lalu",
-      isRead: false,
-      type: "warning",
-    },
-  ]);
+      skip: !isAuthenticated,
+      pollingInterval: isAuthenticated ? 15000 : 0, // Auto-refetch tiap 15 detik
+    }
+  );
+
+  const [markAsRead] = usePutApiV1NotificationsReadByIdMutation();
+  const [markAllAsRead, { isLoading: isMarkingAllRead }] =
+    usePutApiV1NotificationsReadAllMutation();
+
+  const notifications: NotificationDto[] = Array.isArray(notificationsData)
+    ? notificationsData
+    : [];
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const handleMarkAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead().unwrap();
+    } catch (error) {
+      console.error("Gagal menandai semua dibaca:", error);
+    }
   };
 
-  const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
-    );
+  const handleMarkAsRead = async (id: string, isRead: boolean) => {
+    if (isRead) return;
+    try {
+      await markAsRead({ id }).unwrap();
+    } catch (error) {
+      console.error("Gagal menandai dibaca:", error);
+    }
   };
 
   // Penentuan status database
@@ -183,16 +181,25 @@ export function AppTopBar() {
                     variant="ghost"
                     size="sm"
                     onClick={handleMarkAllAsRead}
+                    disabled={isMarkingAllRead}
                     className="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
                   >
-                    Tandai dibaca
+                    {isMarkingAllRead ? (
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                    ) : (
+                      "Tandai dibaca"
+                    )}
                   </Button>
                 )}
               </div>
 
               {/* List Notifikasi */}
               <div className="max-h-[300px] overflow-y-auto divide-y">
-                {notifications.length === 0 ? (
+                {isNotificationsLoading ? (
+                  <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat notifikasi...
+                  </div>
+                ) : notifications.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground">
                     Tidak ada notifikasi saat ini.
                   </div>
@@ -200,7 +207,7 @@ export function AppTopBar() {
                   notifications.map((item) => (
                     <div
                       key={item.id}
-                      onClick={() => handleMarkAsRead(item.id)}
+                      onClick={() => handleMarkAsRead(item.id, item.isRead)}
                       className={`p-3 text-xs cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
                         !item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
                       }`}
@@ -218,7 +225,7 @@ export function AppTopBar() {
                             {item.title}
                           </p>
                           <span className="text-[10px] text-muted-foreground">
-                            {item.createdAt}
+                            {item.createdAt ? new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                           </span>
                         </div>
                         <p className="text-muted-foreground leading-relaxed">
