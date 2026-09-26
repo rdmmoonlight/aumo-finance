@@ -4,6 +4,12 @@ import { useState, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  ColumnDef,
+} from "@tanstack/react-table";
+import {
   IconSitemap,
   IconPlus,
   IconPencil,
@@ -146,7 +152,7 @@ function ChartOfAccountsContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
-    null,
+    null
   );
 
   // Client-side fallback filter
@@ -161,6 +167,140 @@ function ChartOfAccountsContent() {
       return matchSearch && matchCat;
     });
   }, [rawAccounts, searchText, categoryFilter]);
+
+  // TanStack Table Column Definitions
+  const columns = useMemo<ColumnDef<AccountItem>[]>(
+    () => [
+      {
+        accessorKey: "referenceNumber",
+        header: () => <span className="pl-6">Ref</span>,
+        meta: { headerClassName: "w-24 pl-6", cellClassName: "pl-6" },
+        cell: ({ getValue }) => (
+          <span className="font-mono text-primary font-medium">
+            {String(getValue() ?? "")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "accountName",
+        header: "Name",
+        cell: ({ getValue }) => (
+          <span className="font-medium">{String(getValue() ?? "")}</span>
+        ),
+      },
+      {
+        accessorKey: "type",
+        header: "Category",
+        cell: ({ getValue }) => (
+          <Badge variant="outline" className="text-xs">
+            {String(getValue() ?? "")}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "role",
+        header: "Role",
+        cell: ({ getValue }) => {
+          const role = getValue<string | undefined>();
+          return role && role !== "Default" ? (
+            <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
+              {role}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">Standard</span>
+          );
+        },
+      },
+      {
+        accessorKey: "balance",
+        header: () => <div className="text-right">Balance</div>,
+        meta: { cellClassName: "text-right" },
+        cell: ({ getValue }) => {
+          const balance = Number(getValue() || 0);
+          return (
+            <span
+              className={cn(
+                "font-medium font-mono",
+                balance >= 0 ? "text-emerald-500" : "text-red-500"
+              )}
+            >
+              Rp {balance.toLocaleString("en-US")}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "isActive",
+        header: () => <div className="text-center">Status</div>,
+        meta: { cellClassName: "text-center" },
+        cell: ({ getValue }) => {
+          const isActive = Boolean(getValue());
+          return (
+            <Badge
+              variant={isActive ? "default" : "secondary"}
+              className={cn(
+                "text-xs",
+                isActive &&
+                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+              )}
+            >
+              {isActive ? "Active" : "Inactive"}
+            </Badge>
+          );
+        },
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-center pr-6">Action</div>,
+        meta: { cellClassName: "pr-6" },
+        cell: ({ row }) => {
+          const acc = row.original;
+          return (
+            <div className="flex justify-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => {
+                  setEditAccount({ ...acc });
+                  setIsEditModalOpen(true);
+                }}
+              >
+                <IconPencil size={14} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                asChild
+              >
+                <Link
+                  href={`/reports/general-ledger/permanent#account-${acc.id}`}
+                >
+                  <IconNotebook size={14} />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-destructive hover:text-destructive"
+                onClick={() => setAccountToDelete(acc)}
+              >
+                <IconTrash size={14} />
+              </Button>
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
+  const table = useReactTable({
+    data: filteredAccounts,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -258,121 +398,72 @@ function ChartOfAccountsContent() {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="pl-6 w-24">Ref</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead className="text-right">Balance</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-center pr-6">Action</TableHead>
-              </TableRow>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const meta = header.column.columnDef.meta as
+                      | { headerClassName?: string }
+                      | undefined;
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className={meta?.headerClassName}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={columns.length}
                     className="text-center py-10 text-muted-foreground"
                   >
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : (
-                filteredAccounts.map((acc: AccountItem) => {
-                  const balance = Number(acc.balance || 0);
+              ) : table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => {
+                  const acc = row.original;
                   return (
                     <TableRow
-                      key={acc.id}
+                      key={row.id}
                       className={cn(
-                        highlightId === String(acc.id) && "bg-primary/10",
+                        highlightId === String(acc.id) && "bg-primary/10"
                       )}
                     >
-                      <TableCell className="pl-6 font-mono text-primary font-medium">
-                        {acc.referenceNumber}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {acc.accountName}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline" className="text-xs">
-                          {acc.type}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {acc.role && acc.role !== "Default" ? (
-                          <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
-                            {acc.role}
-                          </Badge>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">
-                            Standard
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell
-                        className={cn(
-                          "text-right font-medium font-mono",
-                          balance >= 0 ? "text-emerald-500" : "text-red-500",
-                        )}
-                      >
-                        Rp {balance.toLocaleString("en-US")}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge
-                          variant={acc.isActive ? "default" : "secondary"}
-                          className={cn(
-                            "text-xs",
-                            acc.isActive &&
-                              "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
-                          )}
-                        >
-                          {acc.isActive ? "Active" : "Inactive"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="pr-6">
-                        <div className="flex justify-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            onClick={() => {
-                              setEditAccount({ ...acc });
-                              setIsEditModalOpen(true);
-                            }}
+                      {row.getVisibleCells().map((cell) => {
+                        const meta = cell.column.columnDef.meta as
+                          | { cellClassName?: string }
+                          | undefined;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={meta?.cellClassName}
                           >
-                            <IconPencil size={14} />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7"
-                            asChild
-                          >
-                            <Link
-                              href={`/reports/general-ledger/permanent#account-${acc.id}`}
-                            >
-                              <IconNotebook size={14} />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-7 w-7 text-destructive hover:text-destructive"
-                            onClick={() => setAccountToDelete(acc)}
-                          >
-                            <IconTrash size={14} />
-                          </Button>
-                        </div>
-                      </TableCell>
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext()
+                            )}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   );
                 })
-              )}
-              {!isLoading && filteredAccounts.length === 0 && (
+              ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={columns.length}
                     className="text-center py-12 text-muted-foreground"
                   >
                     No accounts found
