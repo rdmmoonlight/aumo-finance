@@ -1,5 +1,11 @@
 import { ColumnDef } from "@tanstack/react-table";
-import { IconLock, IconLockOpen, IconEye, IconEyeOff, IconLoader2 } from "@tabler/icons-react";
+import {
+  IconLock,
+  IconLockOpen,
+  IconEye,
+  IconEyeOff,
+  IconLoader2,
+} from "@tabler/icons-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -32,7 +38,7 @@ export const getPeriodColumns = ({
             <span
               className={cn(
                 "font-bold",
-                isSelected ? "text-white" : "text-zinc-200"
+                isSelected ? "text-white" : "text-zinc-200",
               )}
             >
               {p.periodName}
@@ -110,7 +116,7 @@ export const getPeriodColumns = ({
               "h-7 gap-1.5 font-bold tracking-wide border transition-all",
               isSelected
                 ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
-                : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white"
+                : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white",
             )}
             onClick={() => onSelectPeriod(p)}
             disabled={isSelectingThis}

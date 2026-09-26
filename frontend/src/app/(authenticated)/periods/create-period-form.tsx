@@ -28,8 +28,18 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { AccountItem, OpenInfoData } from "./types";
 
 const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 interface CreatePeriodFormProps {
@@ -108,7 +118,8 @@ export function CreatePeriodForm({
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2 text-white">
-            <IconCalendarPlus className="text-white" size={22} /> Open New Period
+            <IconCalendarPlus className="text-white" size={22} /> Open New
+            Period
           </h1>
           <p className="text-sm text-zinc-400">
             Start monthly cycle. Opening balance posted on day 1.
@@ -235,7 +246,7 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -260,7 +271,7 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -268,10 +279,7 @@ export function CreatePeriodForm({
 
                     <div className="space-y-1.5">
                       <Label className="text-zinc-300">Retained Earnings</Label>
-                      <Select
-                        value={retainedId}
-                        onValueChange={setRetainedId}
-                      >
+                      <Select value={retainedId} onValueChange={setRetainedId}>
                         <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white">
                           <SelectValue />
                         </SelectTrigger>
@@ -285,7 +293,7 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -317,7 +325,9 @@ export function CreatePeriodForm({
                           value={cashBalance}
                           onChange={(e) =>
                             setCashBalance(
-                              e.target.value === "" ? "" : Number(e.target.value)
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value),
                             )
                           }
                           className="bg-[#0e0e10] border-white/10 text-white"
@@ -349,7 +359,9 @@ export function CreatePeriodForm({
                           value={bankBalance}
                           onChange={(e) =>
                             setBankBalance(
-                              e.target.value === "" ? "" : Number(e.target.value)
+                              e.target.value === ""
+                                ? ""
+                                : Number(e.target.value),
                             )
                           }
                           className="bg-[#0e0e10] border-white/10 text-white"
