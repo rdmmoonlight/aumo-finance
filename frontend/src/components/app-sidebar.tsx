@@ -204,7 +204,7 @@ export function AppSidebar() {
             />
           </div>
         ) : (
-          <h2 className="text-lg font-bold tracking-tight truncate">
+          <h2 className="text-xl font-bold tracking-tight truncate">
             Aumo Finance
           </h2>
         )}
@@ -213,7 +213,7 @@ export function AppSidebar() {
 
       <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
         <SidebarGroup>
-          <SidebarGroupLabel className="uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -235,7 +235,7 @@ export function AppSidebar() {
                           <SidebarMenuButton
                             tooltip={item.title}
                             isActive={isReportsActive}
-                            className="text-[13.5px] h-8 font-normal w-full justify-between px-2"
+                            className="text-sm h-8 font-normal w-full justify-between px-2"
                           >
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Icon className={ICON_CLASS} />
@@ -251,7 +251,7 @@ export function AppSidebar() {
                             {REPORT_SECTIONS.map((section) => (
                               <div key={section.title}>
                                 <div className="px-2 py-1 select-none">
-                                  <p className="text- font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
+                                  <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
                                     {section.title}
                                   </p>
                                 </div>
@@ -262,7 +262,7 @@ export function AppSidebar() {
                                         asChild
                                         isActive={pathname === sub.url}
                                         tooltip={sub.title}
-                                        className="text-[13.5px] h-8 font-normal px-2"
+                                        className="text-sm h-8 font-normal px-2"
                                       >
                                         <Link
                                           href={sub.url}
@@ -291,7 +291,7 @@ export function AppSidebar() {
                       asChild
                       isActive={isSingleActive}
                       tooltip={item.title}
-                      className="text-[13.5px] h-8 font-normal px-2"
+                      className="text-sm h-8 font-normal px-2"
                     >
                       <Link
                         href={item.url}
@@ -311,7 +311,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* FOOTER FIX BIAR GAK MIRING KIRI */}
       <SidebarFooter
         className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"}`}
       >
@@ -320,7 +319,6 @@ export function AppSidebar() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 {isCollapsed ? (
-                  // MODE HIDE -> AVATAR DITENGAH, GAK MIRING
                   <SidebarMenuButton
                     tooltip={user?.fullName || user?.userName || "Account"}
                     className="size-9 p-0 flex items-center justify-center mx-auto rounded-full hover:bg-accent"
@@ -340,7 +338,6 @@ export function AppSidebar() {
                     </Avatar>
                   </SidebarMenuButton>
                 ) : (
-                  // MODE EXPAND -> FULL INFO
                   <SidebarMenuButton className="w-full justify-between h-auto py-2.5 px-2">
                     <div className="flex items-center gap-2.5 text-left min-w-0">
                       <Avatar className="w-8 h-8 shrink-0">
@@ -357,12 +354,12 @@ export function AppSidebar() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col truncate min-w-0">
-                        <span className="font-medium text-[13.5px] leading-tight truncate">
+                        <span className="font-medium text-sm leading-tight truncate">
                           {!isMounted || isUserLoading
                             ? "Memuat..."
                             : user?.fullName || user?.userName || "Guest"}
                         </span>
-                        <span className="text-[11.5px] text-muted-foreground truncate">
+                        <span className="text-xs text-muted-foreground truncate">
                           {!isMounted || isUserLoading
                             ? "..."
                             : user?.email || "Tidak ada email"}
@@ -379,7 +376,7 @@ export function AppSidebar() {
                 sideOffset={8}
                 className="w-56"
               >
-                <DropdownMenuItem asChild className="text-[13.5px]">
+                <DropdownMenuItem asChild className="text-sm">
                   <Link href="/settings">
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
@@ -387,7 +384,7 @@ export function AppSidebar() {
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="text-destructive text-[13.5px]"
+                  className="text-destructive text-sm"
                 >
                   <LogOut className="w-4 h-4 mr-2" />
                   Sign Out
