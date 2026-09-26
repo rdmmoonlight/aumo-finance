@@ -1,9 +1,5 @@
 <script setup lang="ts">
-<<<<<<< Updated upstream
-// Proteksi Halaman: Otomatis ditangani oleh global auth middleware
-=======
 // Proteksi Halaman: Diatur secara otomatis oleh middleware global (auth.global.ts)
->>>>>>> Stashed changes
 definePageMeta({
   layout: 'default'
 })
