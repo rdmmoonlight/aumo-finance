@@ -31,6 +31,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   LayoutDashboard,
   Home,
@@ -154,12 +155,16 @@ export function AppSidebar() {
   const [isMounted, setIsMounted] = React.useState(false);
   React.useEffect(() => setIsMounted(true), []);
 
-  const { data: user, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
+  const { data: me, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
     {
       skip: !isMounted,
     },
   );
+
+  // Penyesuaian ekstraksi data sesuai rujukan
+  const user = (me as any)?.data || (me as any);
+
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
 
   const handleSignOut = async () => {
@@ -177,8 +182,6 @@ export function AppSidebar() {
     }
   };
 
-  const userData = user as
-    { fullName?: string; userName?: string; email?: string } | undefined;
   const ICON_CLASS = "w-4 h-4 mr-2.5 shrink-0";
 
   const isReportsActive = REPORT_SECTIONS.some((s) =>
@@ -319,19 +322,28 @@ export function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton className="w-full justify-between h-auto py-3 overflow-hidden">
                   <div className="flex items-center gap-2.5 overflow-hidden text-left min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center shrink-0">
-                      <User className="w-4 h-4" />
-                    </div>
+                    <Avatar className="w-8 h-8 shrink-0">
+                      <AvatarImage
+                        src={user?.avatarUrl || undefined}
+                        alt={user?.fullName || user?.userName || "User"}
+                      />
+                      <AvatarFallback className="bg-muted text-xs">
+                        {user?.fullName
+                          ? user.fullName.slice(0, 2).toUpperCase()
+                          : <User className="w-4 h-4" />}
+                      </AvatarFallback>
+                    </Avatar>
+
                     <div className="flex flex-col truncate min-w-0 group-data-[collapsible=icon]:hidden">
                       <span className="font-medium text-[13.5px] leading-tight truncate">
                         {!isMounted || isUserLoading
                           ? "Memuat..."
-                          : userData?.fullName || userData?.userName || "Guest"}
+                          : user?.fullName || user?.userName || "Guest"}
                       </span>
                       <span className="text-[11.5px] text-muted-foreground truncate">
                         {!isMounted || isUserLoading
                           ? "..."
-                          : userData?.email || "Tidak ada email"}
+                          : user?.email || "Tidak ada email"}
                       </span>
                     </div>
                   </div>
