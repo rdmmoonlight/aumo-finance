@@ -34,7 +34,7 @@ import {
   useGetApiV1PeriodsQuery,
   useGetApiV1HealthQuery,
   useGetApiV1NotificationsQuery,
-  usePutApiV1NotificationsReadByIdMutation,
+  usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
   NotificationDto,
 } from "@/lib/generatedApi";
@@ -84,7 +84,7 @@ export function AppTopBar() {
       },
     );
 
-  const [markAsRead] = usePutApiV1NotificationsReadByIdMutation();
+  const [markAsRead] = usePutApiV1NotificationsByIdReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAllRead }] =
     usePutApiV1NotificationsReadAllMutation();
 
