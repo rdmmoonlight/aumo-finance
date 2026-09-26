@@ -4,8 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "nuxt build",
-    "postinstall": "prisma generate && nuxt prepare",
     "dev": "nuxt dev",
+    "postinstall": "prisma generate && nuxt prepare",
     "preview": "nuxt preview",
     "start": "node --import=data:text/javascript, .output/server/index.mjs",
     "postinstall": "nuxt prepare",
