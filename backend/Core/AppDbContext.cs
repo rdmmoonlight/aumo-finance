@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 
 namespace AumoBackend.Core;
 
@@ -15,6 +16,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
 
     // Data Protection Keys Table
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
+
+    // Notifications
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     // Accounting Core
     public DbSet<ChartOfAccount> ChartOfAccounts => Set<ChartOfAccount>();
@@ -41,6 +45,18 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        // Notifications Configuration
+        builder.Entity<Notification>(entity =>
+        {
+            // Composite Index untuk query cepat per user berdasarkan status baca & urutan waktu
+            entity.HasIndex(x => new { x.UserId, x.IsRead, x.CreatedAt });
+
+            entity.HasOne<ApplicationUser>()
+                .WithMany()
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
         builder.Entity<ChartOfAccount>(entity =>
         {
@@ -128,5 +144,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
+    }
+}
+
+/// <summary>
+/// Factory khusus untuk EF Core Tooling pada Design-Time (CLI Migrations)
+/// </summary>
+public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+{
+    public AppDbContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+
+        // Ambil DATABASE_URL dari environment variable lokal atau gunakan fallback connection string
+        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+            ?? "Host=localhost;Database=aumo_db;Username=postgres;Password=postgres";
+
+        // Ganti UseNpgsql dengan UseSqlServer / provider lain jika kamu tidak pakai PostgreSQL
+        optionsBuilder.UseNpgsql(connectionString);
+
+        return new AppDbContext(optionsBuilder.Options);
     }
 }

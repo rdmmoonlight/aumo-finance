@@ -22,14 +22,6 @@ namespace AumoBackend.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            // =========================================================================
-            // PEMANGGILAN METODE PARSIAL BILA ADA LOGIKA TAMBAHAN DI FILE PARSIAL
-            // =========================================================================
-            BuildIdentityEntities(modelBuilder);
-            BuildDomainEntities(modelBuilder);
-            BuildRelationships(modelBuilder);
-            BuildSecurityEntities(modelBuilder);
-
             modelBuilder.Entity("AumoBackend.Core.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -372,6 +364,43 @@ namespace AumoBackend.Migrations
                     b.ToTable("LoginActivities");
                 });
 
+            modelBuilder.Entity("AumoBackend.Core.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TargetUrl")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId", "IsRead", "CreatedAt");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("AumoBackend.Core.Period", b =>
                 {
                     b.Property<int>("Id")
@@ -694,6 +723,15 @@ namespace AumoBackend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("AumoBackend.Core.Notification", b =>
+                {
+                    b.HasOne("AumoBackend.Core.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("AumoBackend.Core.UserSession", b =>
                 {
                     b.HasOne("AumoBackend.Core.ApplicationUser", null)
@@ -760,13 +798,5 @@ namespace AumoBackend.Migrations
                 });
 #pragma warning restore 612, 618
         }
-
-        // =========================================================================
-        // DEKLARASI DEFINISI METHOD PARSIAL (MENGATASI CS0759)
-        // =========================================================================
-        partial void BuildDomainEntities(ModelBuilder modelBuilder);
-        partial void BuildIdentityEntities(ModelBuilder modelBuilder);
-        partial void BuildRelationships(ModelBuilder modelBuilder);
-        partial void BuildSecurityEntities(ModelBuilder modelBuilder);
     }
 }
