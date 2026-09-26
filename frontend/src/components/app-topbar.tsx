@@ -36,7 +36,7 @@ import {
   useGetApiV1NotificationsQuery,
   usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
-  NotificationDto,
+  GetApiV1NotificationsApiResponse,
 } from "@/lib/generatedApi";
 import { useUserProfile } from "@/lib/auth";
 
@@ -47,6 +47,11 @@ interface PeriodItem {
   isClosed?: boolean;
   isSelected?: boolean;
 }
+
+// Ambil tipe per-item langsung dari tipe Response API
+type NotificationItem = GetApiV1NotificationsApiResponse extends Array<infer T>
+  ? T
+  : any;
 
 export function AppTopBar() {
   const pathname = usePathname();
@@ -88,11 +93,11 @@ export function AppTopBar() {
   const [markAllAsRead, { isLoading: isMarkingAllRead }] =
     usePutApiV1NotificationsReadAllMutation();
 
-  const notifications: NotificationDto[] = Array.isArray(notificationsData)
+  const notifications: NotificationItem[] = Array.isArray(notificationsData)
     ? notificationsData
     : [];
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notifications.filter((n: any) => !n.isRead).length;
 
   const handleMarkAllAsRead = async () => {
     try {
@@ -102,7 +107,7 @@ export function AppTopBar() {
     }
   };
 
-  const handleMarkAsRead = async (id: string, isRead: boolean) => {
+  const handleMarkAsRead = async (id: string, isRead?: boolean) => {
     if (isRead) return;
     try {
       await markAsRead({ id }).unwrap();
@@ -203,7 +208,7 @@ export function AppTopBar() {
                     Tidak ada notifikasi saat ini.
                   </div>
                 ) : (
-                  notifications.map((item) => (
+                  notifications.map((item: any) => (
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
