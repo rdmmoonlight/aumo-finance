@@ -27,7 +27,7 @@ const injectedRtkApi = api
   })
   .injectEndpoints({
     endpoints: (build) => ({
-      $get: build.query<$getApiResponse,$getApiArg>({
+      $get: build.query<$getApiResponse, $getApiArg>({
         query: () => ({ url: `/` }),
         providesTags: ["AumoBackend"],
       }),
