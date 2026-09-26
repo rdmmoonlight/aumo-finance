@@ -43,18 +43,13 @@ namespace AumoBackend
                 throw new InvalidOperationException("Database connection string 'DATABASE_URL' is missing.");
             }
 
-            // PERBAIKAN: Registrasi DbContext langsung (Scoped) & DbContextFactory agar kompatibel penuh
-            builder.Services.AddDbContext<AppDbContext>(options =>
+            builder.Services.AddDbContextFactory<AppDbContext>(options =>
             {
                 options.UseNpgsql(connectionString);
                 options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
             });
 
-            builder.Services.AddDbContextFactory<AppDbContext>(options =>
-            {
-                options.UseNpgsql(connectionString);
-                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-            }, ServiceLifetime.Scoped);
+            builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             // =====================================
             // 2. SUPABASE CONFIGURATION (Storage / Avatar Bucket)
@@ -97,7 +92,11 @@ namespace AumoBackend
             builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
             {
                 options.SignIn.RequireConfirmedAccount = false;
-                options.Lockout.AllowedForNewUsers = false;
+
+                // -----------------------------------------------------------
+                // ATURAN LOCKOUT DIHAPUS / DIMATIKAN
+                // -----------------------------------------------------------
+                options.Lockout.AllowedForNewUsers = false; // Mematikan fitur lockout untuk user baru
 
                 options.Password.RequiredLength = 6;
                 options.Password.RequireDigit = false;
@@ -238,7 +237,6 @@ namespace AumoBackend
             builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
             builder.Services.AddTransient<ResendEmailSender>();
             builder.Services.AddTransient<AumoBackend.Core.IEmailSender, AumoBackend.Core.ResendEmailSender>();
-            builder.Services.AddTransient<Microsoft.AspNetCore.Identity.IEmailSender<ApplicationUser>, IdentityEmailSenderBridge>();
 
             // =====================================
             // 8. FORWARDED HEADERS CONFIGURATION
@@ -270,23 +268,15 @@ namespace AumoBackend
             });
 
             // =====================================
-            // 9. AUTOMATIC DATABASE MIGRATION & SEEDING (DEPLOY TO RENDER SAFE)
+            // 9. AUTOMATIC DATABASE MIGRATION & SEEDING
             // =====================================
             using (var scope = app.Services.CreateScope())
             {
                 var services = scope.ServiceProvider;
-                var logger = services.GetRequiredService<ILogger<Program>>();
-
                 try
                 {
-                    logger.LogInformation("Menjalankan migrasi database otomatis...");
-
                     var context = services.GetRequiredService<AppDbContext>();
-
-                    // Eksekusi auto update schema database (Termasuk tabel Notifications yang baru dibuat)
                     await context.Database.MigrateAsync();
-
-                    logger.LogInformation("Migrasi database berhasil dijalankan!");
 
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
                     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
@@ -316,7 +306,8 @@ namespace AumoBackend
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Gagal menjalankan migrasi database otomatis saat deploy ke Render.");
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Failed to run automatic database migration or seeding.");
                 }
             }
 
@@ -388,62 +379,6 @@ namespace AumoBackend
             // 12. RUN APPLICATION
             // =====================================
             await app.RunAsync();
-        }
-    }
-
-    // =====================================
-    // 13. IDENTITY EMAIL SENDER BRIDGE CLASS
-    // =====================================
-    public class IdentityEmailSenderBridge : IEmailSender<ApplicationUser>
-    {
-        private readonly ResendEmailSender _emailSender;
-
-        public IdentityEmailSenderBridge(ResendEmailSender emailSender)
-        {
-            _emailSender = emailSender;
-        }
-
-        public Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
-        {
-            var message = $"""
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Confirm Your Email</h2>
-                    <p>Hello {user.FullName ?? user.UserName},</p>
-                    <p>Please confirm your account email by clicking the link below:</p>
-                    <p><a href="{confirmationLink}" style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Confirm Email</a></p>
-                    <br/>
-                    <p>If you did not request this, please ignore this email.</p>
-                </div>
-                """;
-
-            return _emailSender.SendEmailAsync(email, "Confirm your email - Aumo Finance", message);
-        }
-
-        public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
-        {
-            var message = $"""
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Reset Your Password</h2>
-                    <p>Hello {user.FullName ?? user.UserName},</p>
-                    <p>You can reset your password by clicking the link below:</p>
-                    <p><a href="{resetLink}" style="background-color: #0d6efd; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">Reset Password</a></p>
-                </div>
-                """;
-
-            return _emailSender.SendEmailAsync(email, "Reset your password - Aumo Finance", message);
-        }
-
-        public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
-        {
-            var message = $"""
-                <div style="font-family: Arial, sans-serif; padding: 20px;">
-                    <h2>Reset Password Code</h2>
-                    <p>Hello {user.FullName ?? user.UserName},</p>
-                    <p>Your password reset code is: <strong>{resetCode}</strong></p>
-                </div>
-                """;
-
-            return _emailSender.SendEmailAsync(email, "Reset password code - Aumo Finance", message);
         }
     }
 }
