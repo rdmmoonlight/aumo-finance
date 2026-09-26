@@ -280,12 +280,12 @@ namespace AumoBackend
                 try
                 {
                     logger.LogInformation("Menjalankan migrasi database otomatis...");
-                    
+
                     var context = services.GetRequiredService<AppDbContext>();
-                    
+
                     // Eksekusi auto update schema database (Termasuk tabel Notifications yang baru dibuat)
                     await context.Database.MigrateAsync();
-                    
+
                     logger.LogInformation("Migrasi database berhasil dijalankan!");
 
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
