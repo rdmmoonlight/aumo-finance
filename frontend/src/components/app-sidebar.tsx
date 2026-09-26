@@ -328,9 +328,11 @@ export function AppSidebar() {
                         alt={user?.fullName || user?.userName || "User"}
                       />
                       <AvatarFallback className="bg-muted text-xs">
-                        {user?.fullName
-                          ? user.fullName.slice(0, 2).toUpperCase()
-                          : <User className="w-4 h-4" />}
+                        {user?.fullName ? (
+                          user.fullName.slice(0, 2).toUpperCase()
+                        ) : (
+                          <User className="w-4 h-4" />
+                        )}
                       </AvatarFallback>
                     </Avatar>
 

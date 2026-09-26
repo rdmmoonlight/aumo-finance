@@ -277,7 +277,7 @@ public class AuthController : ControllerBase
         // Fallback: Jika null, cari via Claim NameIdentifier / Sub (terutama untuk JWT Bearer)
         if (user == null)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
                          ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             if (!string.IsNullOrEmpty(userId))
