@@ -19,7 +19,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Search, Bell, Database, RefreshCw, CheckCheck, Info, AlertTriangle } from "lucide-react";
+import {
+  Search,
+  Bell,
+  Database,
+  RefreshCw,
+  CheckCheck,
+  Info,
+  AlertTriangle,
+} from "lucide-react";
 
 // RTK Query Hooks & Types
 import {
@@ -103,7 +111,7 @@ export function AppTopBar() {
 
   const handleMarkAsRead = (id: string) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+      prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)),
     );
   };
 
@@ -162,7 +170,10 @@ export function AppTopBar() {
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold text-sm">Notifikasi</h4>
                   {unreadCount > 0 && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs px-1.5 py-0.5"
+                    >
                       {unreadCount} baru
                     </Badge>
                   )}
@@ -203,7 +214,9 @@ export function AppTopBar() {
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          <p className="font-semibold text-foreground">{item.title}</p>
+                          <p className="font-semibold text-foreground">
+                            {item.title}
+                          </p>
                           <span className="text-[10px] text-muted-foreground">
                             {item.createdAt}
                           </span>
