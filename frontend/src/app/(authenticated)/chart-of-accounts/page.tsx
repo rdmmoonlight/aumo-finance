@@ -152,7 +152,7 @@ function ChartOfAccountsContent() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
-    null
+    null,
   );
 
   // Client-side fallback filter
@@ -221,7 +221,7 @@ function ChartOfAccountsContent() {
             <span
               className={cn(
                 "font-medium font-mono",
-                balance >= 0 ? "text-emerald-500" : "text-red-500"
+                balance >= 0 ? "text-emerald-500" : "text-red-500",
               )}
             >
               Rp {balance.toLocaleString("en-US")}
@@ -241,7 +241,7 @@ function ChartOfAccountsContent() {
               className={cn(
                 "text-xs",
                 isActive &&
-                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
               )}
             >
               {isActive ? "Active" : "Inactive"}
@@ -268,12 +268,7 @@ function ChartOfAccountsContent() {
               >
                 <IconPencil size={14} />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                asChild
-              >
+              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
                 <Link
                   href={`/reports/general-ledger/permanent#account-${acc.id}`}
                 >
@@ -293,7 +288,7 @@ function ChartOfAccountsContent() {
         },
       },
     ],
-    []
+    [],
   );
 
   const table = useReactTable({
@@ -402,8 +397,7 @@ function ChartOfAccountsContent() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      | { headerClassName?: string }
-                      | undefined;
+                      { headerClassName?: string } | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -413,7 +407,7 @@ function ChartOfAccountsContent() {
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                       </TableHead>
                     );
@@ -438,13 +432,12 @@ function ChartOfAccountsContent() {
                     <TableRow
                       key={row.id}
                       className={cn(
-                        highlightId === String(acc.id) && "bg-primary/10"
+                        highlightId === String(acc.id) && "bg-primary/10",
                       )}
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          | { cellClassName?: string }
-                          | undefined;
+                          { cellClassName?: string } | undefined;
                         return (
                           <TableCell
                             key={cell.id}
@@ -452,7 +445,7 @@ function ChartOfAccountsContent() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </TableCell>
                         );

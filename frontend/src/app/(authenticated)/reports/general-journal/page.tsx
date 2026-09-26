@@ -163,7 +163,7 @@ export default function GeneralJournalClient() {
   const handlePromptDelete = (entry: JournalEntry) => {
     if (isPeriodClosed) {
       setErrorMessage(
-        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`
+        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`,
       );
       return;
     }
@@ -177,7 +177,7 @@ export default function GeneralJournalClient() {
       refetch();
     } catch (err: any) {
       setErrorMessage(
-        err?.data?.message || err?.message || "Gagal menghapus entri jurnal."
+        err?.data?.message || err?.message || "Gagal menghapus entri jurnal.",
       );
     } finally {
       setEntryToDelete(null);
@@ -192,7 +192,7 @@ export default function GeneralJournalClient() {
 
     entries.forEach((entry) => {
       const sorted = [...(entry.lines || [])].sort(
-        (a, b) => a.lineOrder - b.lineOrder
+        (a, b) => a.lineOrder - b.lineOrder,
       );
       const curDate = formatDateDisplay(entry.entryDate);
       const showHeader = curDate !== currentDateTracker;
@@ -235,7 +235,10 @@ export default function GeneralJournalClient() {
       {
         id: "dateAndRef",
         header: () => <span className="pl-6">Date & Ref</span>,
-        meta: { headerClassName: "w-[16%] pl-6", cellClassName: "align-top py-2 text-xs pl-6" },
+        meta: {
+          headerClassName: "w-[16%] pl-6",
+          cellClassName: "align-top py-2 text-xs pl-6",
+        },
         cell: ({ row }) => {
           const item = row.original;
           return (
@@ -312,13 +315,19 @@ export default function GeneralJournalClient() {
       {
         accessorKey: "lineDescription",
         header: "Description",
-        meta: { headerClassName: "w-[26%]", cellClassName: "align-top py-2 text-xs text-muted-foreground" },
+        meta: {
+          headerClassName: "w-[26%]",
+          cellClassName: "align-top py-2 text-xs text-muted-foreground",
+        },
         cell: ({ getValue }) => String(getValue() || "-"),
       },
       {
         accessorKey: "referenceNumber",
         header: () => <div className="text-center">Ref #</div>,
-        meta: { headerClassName: "w-[10%] text-center", cellClassName: "align-top py-2 text-xs text-center" },
+        meta: {
+          headerClassName: "w-[10%] text-center",
+          cellClassName: "align-top py-2 text-xs text-center",
+        },
         cell: ({ getValue }) => (
           <Badge variant="outline" className="font-mono text-amber-500">
             {String(getValue())}
@@ -330,7 +339,8 @@ export default function GeneralJournalClient() {
         header: () => <div className="text-right">Debit (Rp)</div>,
         meta: {
           headerClassName: "w-[11%] text-right",
-          cellClassName: "align-top py-2 text-right font-mono text-xs font-medium text-emerald-500",
+          cellClassName:
+            "align-top py-2 text-right font-mono text-xs font-medium text-emerald-500",
         },
         cell: ({ getValue }) => {
           const val = Number(getValue() || 0);
@@ -342,7 +352,8 @@ export default function GeneralJournalClient() {
         header: () => <div className="text-right pr-6">Credit (Rp)</div>,
         meta: {
           headerClassName: "w-[11%] pr-6 text-right",
-          cellClassName: "align-top py-2 pr-6 text-right font-mono text-xs font-medium text-red-500",
+          cellClassName:
+            "align-top py-2 pr-6 text-right font-mono text-xs font-medium text-red-500",
         },
         cell: ({ getValue }) => {
           const val = Number(getValue() || 0);
@@ -350,7 +361,7 @@ export default function GeneralJournalClient() {
         },
       },
     ],
-    [editMode, isDeleting]
+    [editMode, isDeleting],
   );
 
   const table = useReactTable({
@@ -419,8 +430,7 @@ export default function GeneralJournalClient() {
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       const meta = header.column.columnDef.meta as
-                        | { headerClassName?: string }
-                        | undefined;
+                        { headerClassName?: string } | undefined;
                       return (
                         <TableHead
                           key={header.id}
@@ -430,7 +440,7 @@ export default function GeneralJournalClient() {
                             ? null
                             : flexRender(
                                 header.column.columnDef.header,
-                                header.getContext()
+                                header.getContext(),
                               )}
                         </TableHead>
                       );
@@ -459,8 +469,7 @@ export default function GeneralJournalClient() {
                       <TableRow key={row.id} className={shade}>
                         {row.getVisibleCells().map((cell) => {
                           const meta = cell.column.columnDef.meta as
-                            | { cellClassName?: string }
-                            | undefined;
+                            { cellClassName?: string } | undefined;
                           return (
                             <TableCell
                               key={cell.id}
@@ -468,7 +477,7 @@ export default function GeneralJournalClient() {
                             >
                               {flexRender(
                                 cell.column.columnDef.cell,
-                                cell.getContext()
+                                cell.getContext(),
                               )}
                             </TableCell>
                           );
@@ -546,5 +555,4 @@ export default function GeneralJournalClient() {
       </AlertDialog>
     </div>
   );
-  }
-  
+}
