@@ -1,7 +1,3 @@
 export default defineEventHandler(() => {
-  return {
-    hasExistingPermanentAccounts: false,
-    availableCashAndBankAccounts: [],
-    availableRetainedEarningsAccounts: []
-  }
+  return { hasExistingPermanentAccounts: false, availableCashAndBankAccounts: [], availableRetainedEarningsAccounts: [] }
 })
