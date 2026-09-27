@@ -6,7 +6,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { AlertTriangle, X, Calendar, Plus, EyeOff, Loader2 } from "lucide-react";
+import {
+  AlertTriangle,
+  X,
+  Calendar,
+  Plus,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
@@ -103,7 +110,7 @@ function PeriodList({
         onSelectPeriod,
         onClosePeriod,
       }),
-    [selectedPeriod, selectingId, closingId, onSelectPeriod, onClosePeriod]
+    [selectedPeriod, selectingId, closingId, onSelectPeriod, onClosePeriod],
   );
 
   const table = useReactTable({
@@ -164,7 +171,7 @@ function PeriodList({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -192,7 +199,7 @@ function PeriodList({
                       <TableCell key={cell.id} className="py-3 text-xs">
                         {flexRender(
                           cell.column.columnDef.cell,
-                          cell.getContext()
+                          cell.getContext(),
                         )}
                       </TableCell>
                     ))}
@@ -255,7 +262,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting"
+    "LoadExisting",
   );
   const [cashAccountId, setCashAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -281,15 +288,15 @@ export default function PeriodsPage() {
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            ""
+            "",
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
         );
       }
     }
@@ -319,7 +326,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(
-        error?.data?.message || "Gagal menghapus pilihan periode."
+        error?.data?.message || "Gagal menghapus pilihan periode.",
       );
     }
   };
