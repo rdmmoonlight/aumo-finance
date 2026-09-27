@@ -76,7 +76,7 @@ fun LoginScreen(
                 text = "Kelola pembukuan keuangan Anda",
                 color = AumoColors.TextMuted,
                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                modifier = Modifier.padding(top = 4.dp),
+                modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
             )
 
             Column(
@@ -94,7 +94,7 @@ fun LoginScreen(
                     placeholder = { Text("admin@email.com") },
                     singleLine = true,
                     colors = loginFieldColors(),
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall),
                 )
 
                 Text(
@@ -110,7 +110,7 @@ fun LoginScreen(
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
                     colors = loginFieldColors(),
-                    modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall),
                 )
 
                 LoginCheckboxRow(
@@ -125,7 +125,7 @@ fun LoginScreen(
                         label = "Masuk dengan biometrik lain kali",
                         checked = biometricSetupChecked,
                         onCheckedChange = onBiometricSetupChange,
-                        modifier = Modifier.padding(top = 4.dp),
+                        modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
                     )
                 }
 
@@ -134,7 +134,7 @@ fun LoginScreen(
                         text = errorMessage,
                         color = AumoColors.Bad,
                         fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall),
                     )
                 }
 
@@ -151,7 +151,7 @@ fun LoginScreen(
                     Button(
                         onClick = onBiometricLoginClick,
                         colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Background),
-                        modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall),
                     ) {
                         Text(
                             "\uD83D\uDD12  Masuk dengan biometrik",
@@ -174,7 +174,7 @@ private fun LoginCheckboxRow(
 ) {
     androidx.compose.foundation.layout.Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall),
         modifier = modifier,
     ) {
         Checkbox(

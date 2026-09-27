@@ -14,6 +14,7 @@ import com.aumofinance.app.reports.financials.ReportDivider
 import com.aumofinance.app.reports.financials.ReportRow
 import com.aumofinance.app.reports.financials.ReportSectionTitle
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 /**
  * Read-only: entri Closing bersifat system-generated (dihitung on-the-fly
@@ -33,7 +34,7 @@ fun ClosingJournalScreen(report: ClosingJournalReport?) {
             color = AumoColors.TextPrimary,
             fontWeight = FontWeight.Bold,
             fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-            modifier = Modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
         )
 
         data?.groups?.forEach { group ->

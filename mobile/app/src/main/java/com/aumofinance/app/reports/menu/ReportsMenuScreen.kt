@@ -65,7 +65,7 @@ fun ReportsMenuScreen(
                     Modifier
                         .fillMaxWidth()
                         .background(AumoColors.Background)
-                        .padding(horizontal = AumoDimens.SpacingSmall, vertical = 10.dp),
+                        .padding(horizontal = AumoDimens.SpacingSmall, vertical = AumoDimens.SpacingSmall),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(onClick = onBackClick) {
@@ -132,14 +132,14 @@ private fun ReportRow(item: ReportMenuItem) {
             Modifier
                 .fillMaxWidth()
                 .clickable(onClick = item.onClick)
-                .padding(horizontal = 14.dp, vertical = 14.dp),
+                .padding(horizontal = AumoDimens.SpacingLarge, vertical = AumoDimens.SpacingLarge),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
             imageVector = item.icon,
             contentDescription = null,
             tint = AumoColors.Primary,
-            modifier = Modifier.padding(end = 14.dp),
+            modifier = Modifier.padding(end = AumoDimens.SpacingLarge),
         )
         Text(
             text = item.title,

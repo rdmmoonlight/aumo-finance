@@ -12,6 +12,7 @@ import com.aumofinance.app.reports.financials.ReportDivider
 import com.aumofinance.app.reports.financials.ReportRow
 import com.aumofinance.app.reports.financials.ReportSectionTitle
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 /** Statement of Financial Position (Neraca): Aset = Liabilitas + Ekuitas. Padanan Compose dari activity_financial_position.xml. */
 @Composable
@@ -39,7 +40,7 @@ fun FinancialPositionScreen(report: FinancialPositionReport?) {
             text = if (report.isBalanced) "Neraca Balance" else "Neraca TIDAK Balance",
             color = if (report.isBalanced) AumoColors.Good else AumoColors.Bad,
             fontSize = MaterialTheme.typography.labelMedium.fontSize,
-            modifier = Modifier.padding(top = 12.dp),
+            modifier = Modifier.padding(top = AumoDimens.SpacingLarge),
         )
     }
 }

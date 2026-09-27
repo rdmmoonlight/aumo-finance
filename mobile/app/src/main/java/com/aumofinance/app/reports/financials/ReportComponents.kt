@@ -58,7 +58,7 @@ fun ReportRow(
     bold: Boolean = false,
     indent: Boolean = false,
 ) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = AumoDimens.SpacingSmall)) {
         Text(
             text = if (indent) "    $label" else label,
             color = if (bold) AumoColors.TextPrimary else AumoColors.TextMuted,
@@ -82,7 +82,7 @@ fun ReportSectionTitle(text: String) {
         color = AumoColors.TextPrimary,
         fontWeight = FontWeight.Bold,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-        modifier = Modifier.padding(top = AumoDimens.SpacingLarge, bottom = 4.dp),
+        modifier = Modifier.padding(top = AumoDimens.SpacingLarge, bottom = AumoDimens.SpacingSmall),
     )
 }
 
@@ -92,7 +92,7 @@ fun ReportDivider() {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 6.dp)
+                .padding(top = AumoDimens.SpacingSmall)
                 .height(1.dp)
                 .background(AumoColors.Border),
     )

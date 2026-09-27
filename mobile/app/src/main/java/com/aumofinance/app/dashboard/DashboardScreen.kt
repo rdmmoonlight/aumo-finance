@@ -51,7 +51,7 @@ fun DashboardScreen(summary: DashboardSummary?) {
                     text = "Periode Ditutup",
                     color = AumoColors.Bad,
                     fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
                 )
             }
 
@@ -89,7 +89,7 @@ fun DashboardScreen(summary: DashboardSummary?) {
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 12.dp)
+                        .padding(top = AumoDimens.SpacingLarge)
                         .background(AumoColors.SurfaceElevated)
                         .padding(AumoDimens.SpacingLarge),
             ) {
@@ -106,7 +106,7 @@ fun DashboardScreen(summary: DashboardSummary?) {
                     )}  \u2022  Beban ${CurrencyFormatter.format(summary.totalExpenses)}",
                     color = AumoColors.TextMuted,
                     fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                    modifier = Modifier.padding(top = 6.dp),
+                    modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
                 )
             }
 
@@ -155,7 +155,7 @@ private fun CashBankSection(
     ) {
         entries.forEach { entry ->
             Row(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = AumoDimens.SpacingSmall),
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Text(
@@ -176,6 +176,6 @@ private fun CashBankSection(
         text = "$totalLabel: ${CurrencyFormatter.format(total)}",
         color = AumoColors.TextMuted,
         fontSize = MaterialTheme.typography.labelSmall.fontSize,
-        modifier = Modifier.padding(top = 6.dp),
+        modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
     )
 }

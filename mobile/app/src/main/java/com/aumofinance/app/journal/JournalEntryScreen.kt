@@ -94,7 +94,7 @@ fun JournalEntryScreen(
                 color = AumoColors.TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                modifier = Modifier.padding(16.dp, 14.dp, 16.dp, 0.dp),
+                modifier = Modifier.padding(AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, 0.dp),
             )
 
             LazyColumn(
@@ -136,7 +136,7 @@ fun JournalEntryScreen(
                                 shape = RoundedCornerShape(8.dp),
                             ) {
                                 TablerIcon(TablerIcons.Plus, tint = Color.White, size = 14.dp)
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))
                                 Text("Add Line", color = Color.White, fontSize = MaterialTheme.typography.labelMedium.fontSize)
                             }
                         }
@@ -175,11 +175,11 @@ private fun LockedPeriodWarning() {
                 .fillMaxWidth()
                 .border(1.dp, AumoColors.Bad, RoundedCornerShape(10.dp))
                 .background(AumoColors.Surface, RoundedCornerShape(10.dp))
-                .padding(12.dp, 10.dp),
+                .padding(AumoDimens.SpacingLarge, AumoDimens.SpacingSmall),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TablerIcon(TablerIcons.AlertTriangle, tint = AumoColors.Bad, size = 16.dp)
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))
         Text(
             text = "This entry falls in a closed accounting period and cannot be modified.",
             color = AumoColors.Bad,
@@ -211,7 +211,7 @@ private fun JournalDetailsCard(
         border = BorderStroke(1.dp, AumoColors.SurfaceElevated),
         shape = RoundedCornerShape(12.dp),
     ) {
-        Column(modifier = Modifier.padding(AumoDimens.SpacingLarge), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.padding(AumoDimens.SpacingLarge), verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge)) {
             // --- Journal Type: dropdown, item sekarang selalu terlihat
             // (warna teks & background popup diset eksplisit) ---
             FieldLabel("Journal Type")
@@ -333,7 +333,7 @@ private fun JournalLineCard(
         border = BorderStroke(1.dp, AumoColors.SurfaceElevated),
         shape = RoundedCornerShape(12.dp),
     ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
+        Column(modifier = Modifier.padding(AumoDimens.SpacingLarge), verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
             // Row 1: Account dropdown & Delete button
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
                 var expanded by remember { mutableStateOf(false) }
@@ -388,7 +388,7 @@ private fun JournalLineCard(
                             Modifier
                                 .background(AumoColors.Bad.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                                 .clickable(onClick = onRemove)
-                                .padding(10.dp),
+                                .padding(AumoDimens.SpacingSmall),
                         contentAlignment = Alignment.Center,
                     ) {
                         TablerIcon(TablerIcons.Trash, tint = AumoColors.Bad, size = 16.dp)
@@ -480,7 +480,7 @@ private fun BottomActionBar(
                 .background(AumoColors.Surface, RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
                 .border(1.dp, AumoColors.SurfaceElevated, RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
                 .padding(AumoDimens.SpacingLarge),
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.weight(1f)) {
@@ -505,7 +505,7 @@ private fun BottomActionBar(
                 modifier =
                     Modifier
                         .background(if (isBalanced) AumoColors.Good else AumoColors.Bad, RoundedCornerShape(6.dp))
-                        .padding(8.dp, 4.dp),
+                        .padding(AumoDimens.SpacingSmall, AumoDimens.SpacingSmall),
             ) {
                 Text(
                     text = if (isBalanced) "Balanced" else "Unbalanced",
@@ -516,7 +516,7 @@ private fun BottomActionBar(
             }
         }
 
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
             if (isEditingMode) {
                 TextButton(
                     onClick = onCancel,
