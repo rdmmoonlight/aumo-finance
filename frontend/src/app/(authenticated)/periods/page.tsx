@@ -39,7 +39,11 @@ import {
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
 } from "@/lib/generatedApi";
-import components from "./components";
+import components, {
+  type PeriodItem,
+  type PeriodListProps,
+  type ApiError,
+} from "./components";
 
 /* -------------------------------------------------------------------------- */
 /*                               PERIOD LIST UI                               */
@@ -200,9 +204,11 @@ export default function PeriodsPage() {
     usePostApiV1PeriodsMutation();
 
   const periods: PeriodItem[] = useMemo(() => {
-    if (Array.isArray(rawPeriodsData)) return rawPeriodsData;
+    if (Array.isArray(rawPeriodsData)) return rawPeriodsData as PeriodItem[];
     return (
-      (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || []
+      ((rawPeriodsData as any)?.items ||
+        (rawPeriodsData as any)?.periods ||
+        []) as PeriodItem[]
     );
   }, [rawPeriodsData]);
 
