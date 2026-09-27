@@ -198,6 +198,7 @@ export default function PeriodsPage() {
           variant="destructive"
           className="flex justify-between items-center py-2 bg-red-950/50 border-red-900/50 text-red-200"
         >
+          {/* Caption (12px) */}
           <AlertDescription className="flex items-center gap-2 text-xs">
             <AlertTriangle size={16} />
             {errorMessage}
@@ -215,6 +216,7 @@ export default function PeriodsPage() {
 
       {successMessage && (
         <Alert className="bg-white/[0.06] border-white/10 text-white flex justify-between items-center py-2">
+          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             {successMessage}
           </AlertDescription>
@@ -281,5 +283,4 @@ export default function PeriodsPage() {
       )}
     </div>
   );
-    }
-         
+}
