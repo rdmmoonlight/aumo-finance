@@ -204,7 +204,9 @@ export default function AiAssistantPage() {
               >
                 <IconComponent size={15} />
               </div>
-              <span className="font-semibold text-caption">{row.original.title}</span>
+              <span className="font-semibold text-caption">
+                {row.original.title}
+              </span>
             </div>
           );
         },
