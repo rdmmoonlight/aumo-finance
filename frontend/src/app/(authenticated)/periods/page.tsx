@@ -42,50 +42,6 @@ import {
 import components from "./components";
 
 /* -------------------------------------------------------------------------- */
-/*                                   TYPES                                    */
-/* -------------------------------------------------------------------------- */
-
-export interface ApiError {
-  data?: { message?: string };
-  message?: string;
-}
-
-export interface AccountItem {
-  id?: number | string;
-  displayLabel?: string;
-  referenceNumber?: string;
-  accountName?: string;
-}
-
-export interface PeriodItem {
-  id: number;
-  periodName?: string;
-  startDate?: string;
-  endDate?: string;
-  isClosed?: boolean;
-  isSelected?: boolean;
-}
-
-export interface OpenInfoData {
-  hasExistingPermanentAccounts?: boolean;
-  availableCashAndBankAccounts?: AccountItem[];
-  availableRetainedEarningsAccounts?: AccountItem[];
-}
-
-interface PeriodListProps {
-  periods: PeriodItem[];
-  selectedPeriod: PeriodItem | null;
-  isLoading: boolean;
-  isClearing: boolean;
-  selectingId: number | null;
-  closingId: number | null;
-  onClearSelection: () => void;
-  onSelectPeriod: (p: PeriodItem) => void;
-  onClosePeriod: (p: PeriodItem) => void;
-  onOpenCreateView: () => void;
-}
-
-/* -------------------------------------------------------------------------- */
 /*                               PERIOD LIST UI                               */
 /* -------------------------------------------------------------------------- */
 
