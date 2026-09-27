@@ -1,9 +1,29 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { AlertTriangle, X } from "lucide-react";
+import React, { useState, useEffect, useMemo } from "react";
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import { AlertTriangle, X, Calendar, Plus, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   useGetApiV1PeriodsQuery,
   useGetApiV1PeriodsOpenInfoQuery,
@@ -12,7 +32,7 @@ import {
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
 } from "@/lib/generatedApi";
-import { Components } from "./components";
+import components from "./components";
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPES                                    */
@@ -45,8 +65,159 @@ export interface OpenInfoData {
   availableRetainedEarningsAccounts?: AccountItem[];
 }
 
+interface PeriodListProps {
+  periods: PeriodItem[];
+  selectedPeriod: PeriodItem | null;
+  isLoading: boolean;
+  isClearing: boolean;
+  selectingId: number | null;
+  closingId: number | null;
+  onClearSelection: () => void;
+  onSelectPeriod: (p: PeriodItem) => void;
+  onClosePeriod: (p: PeriodItem) => void;
+  onOpenCreateView: () => void;
+}
+
 /* -------------------------------------------------------------------------- */
-/*                                 COMPONENT                                  */
+/*                               PERIOD LIST UI                               */
+/* -------------------------------------------------------------------------- */
+
+function PeriodList({
+  periods,
+  selectedPeriod,
+  isLoading,
+  isClearing,
+  selectingId,
+  closingId,
+  onClearSelection,
+  onSelectPeriod,
+  onClosePeriod,
+  onOpenCreateView,
+}: PeriodListProps) {
+  const columns = useMemo(
+    () =>
+      components.getPeriodColumns({
+        selectedPeriod,
+        selectingId,
+        closingId,
+        onSelectPeriod,
+        onClosePeriod,
+      }),
+    [selectedPeriod, selectingId, closingId, onSelectPeriod, onClosePeriod]
+  );
+
+  const table = useReactTable({
+    data: periods,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <Card className="bg-[#151519] border-white/[0.07]">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+        <div>
+          <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
+            <Calendar className="text-white" size={20} /> Financial Periods
+          </CardTitle>
+          <CardDescription className="text-xs text-zinc-400 mt-1">
+            Manage accounting cycles and period statuses
+          </CardDescription>
+        </div>
+        <div className="flex items-center gap-2">
+          {selectedPeriod && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClearSelection}
+              disabled={isClearing}
+              className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10 hover:text-white"
+            >
+              {isClearing ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : (
+                <EyeOff size={14} />
+              )}
+              Clear Selection
+            </Button>
+          )}
+          <Button
+            size="sm"
+            onClick={onOpenCreateView}
+            className="gap-1.5 bg-white text-black text-xs font-semibold hover:bg-zinc-200"
+          >
+            <Plus size={14} /> Open Period
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="border-t border-white/[0.07]">
+          <Table>
+            <TableHeader className="bg-[#0e0e10]">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow
+                  key={headerGroup.id}
+                  className="border-b border-white/[0.07] hover:bg-transparent"
+                >
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id} className="h-10 text-xs">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs text-zinc-500"
+                  >
+                    <Loader2 className="animate-spin inline mr-1" size={16} />
+                    Loading periods...
+                  </TableCell>
+                </TableRow>
+              ) : table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    className="border-b border-white/[0.05] hover:bg-white/[0.02]"
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id} className="py-3 text-xs">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center text-xs text-zinc-500"
+                  >
+                    No financial periods found.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                MAIN COMPONENT                              */
 /* -------------------------------------------------------------------------- */
 
 export default function PeriodsPage() {
@@ -84,7 +255,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting",
+    "LoadExisting"
   );
   const [cashAccountId, setCashAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -110,15 +281,15 @@ export default function PeriodsPage() {
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            "",
+            ""
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
         );
       }
     }
@@ -148,7 +319,7 @@ export default function PeriodsPage() {
     } catch (err) {
       const error = err as ApiError;
       setErrorMessage(
-        error?.data?.message || "Gagal menghapus pilihan periode.",
+        error?.data?.message || "Gagal menghapus pilihan periode."
       );
     }
   };
@@ -274,7 +445,7 @@ export default function PeriodsPage() {
           onOpenCreateView={() => setViewMode("create")}
         />
       ) : (
-        <CreatePeriodForm
+        <components.CreatePeriodForm
           month={month}
           year={year}
           setupMode={setupMode}
