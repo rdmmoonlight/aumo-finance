@@ -416,7 +416,9 @@ export default function GeneralJournalClient() {
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
             {/* Caption (12px) */}
-            <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+            <AlertDescription className="text-xs">
+              {errorMessage}
+            </AlertDescription>
           </div>
           <Button
             variant="ghost"

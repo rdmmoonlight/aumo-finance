@@ -21,7 +21,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { BookOpen, Calendar, EyeOff, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  BookOpen,
+  Calendar,
+  EyeOff,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
 export interface LedgerLineViewModel {
   journalEntryId: number;
@@ -133,7 +139,7 @@ function LedgerTable({ lines }: { lines: LedgerLineViewModel[] }) {
         ),
       }),
     ],
-    []
+    [],
   );
 
   const table = useReactTable({
@@ -187,7 +193,7 @@ function LedgerTable({ lines }: { lines: LedgerLineViewModel[] }) {
                     ? null
                     : flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                 </TableHead>
               );
@@ -275,7 +281,9 @@ export default function GeneralLedgerPermanentPage() {
         <Alert variant="destructive">
           <AlertTriangle size={16} />
           {/* Caption (12px) */}
-          <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -330,5 +338,4 @@ export default function GeneralLedgerPermanentPage() {
       </div>
     </div>
   );
-  }
-  
+}

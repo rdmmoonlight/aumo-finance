@@ -38,7 +38,18 @@ import {
   usePostApiV1JournalEntryCreateMutation,
   usePutApiV1JournalEntryEditByIdMutation,
 } from "@/lib/generatedApi";
-import { Edit, BookOpen, ArrowLeft, CheckCircle2, AlertTriangle, Lock, Plus, Trash2, Save, Loader2 } from "lucide-react";
+import {
+  Edit,
+  BookOpen,
+  ArrowLeft,
+  CheckCircle2,
+  AlertTriangle,
+  Lock,
+  Plus,
+  Trash2,
+  Save,
+  Loader2,
+} from "lucide-react";
 
 export interface LineItem {
   id: string;
@@ -516,7 +527,9 @@ function JournalEntryContent() {
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300">
           <CheckCircle2 size={16} />
           {/* Caption (12px) */}
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -550,7 +563,9 @@ function JournalEntryContent() {
           <Card>
             <CardHeader className="pb-3">
               {/* UI (14px) */}
-              <CardTitle className="text-sm font-semibold">Transaction Info</CardTitle>
+              <CardTitle className="text-sm font-semibold">
+                Transaction Info
+              </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
@@ -608,7 +623,9 @@ function JournalEntryContent() {
           <Card className="overflow-hidden">
             <CardHeader className="py-3 flex-row items-center justify-between space-y-0">
               {/* UI (14px) */}
-              <CardTitle className="text-sm font-semibold">Journal Lines</CardTitle>
+              <CardTitle className="text-sm font-semibold">
+                Journal Lines
+              </CardTitle>
               {/* Caption (12px) */}
               <Button
                 type="button"
@@ -630,12 +647,12 @@ function JournalEntryContent() {
                           header.id === "referenceNumber"
                             ? "w-[10%]"
                             : header.id === "accountId"
-                            ? "w-[28%]"
-                            : header.id === "debit" || header.id === "credit"
-                            ? "text-right w-[15%]"
-                            : header.id === "actions"
-                            ? "w-[5%]"
-                            : "";
+                              ? "w-[28%]"
+                              : header.id === "debit" || header.id === "credit"
+                                ? "text-right w-[15%]"
+                                : header.id === "actions"
+                                  ? "w-[5%]"
+                                  : "";
 
                         return (
                           <TableHead key={header.id} className={styleClass}>
@@ -668,7 +685,10 @@ function JournalEntryContent() {
                 <TableFooter>
                   <TableRow>
                     {/* Caption (12px) */}
-                    <TableCell colSpan={3} className="text-right text-xs font-medium">
+                    <TableCell
+                      colSpan={3}
+                      className="text-right text-xs font-medium"
+                    >
                       Total:
                     </TableCell>
                     {/* Caption (12px) */}
@@ -712,7 +732,12 @@ function JournalEntryContent() {
 
           <div className="flex justify-end gap-2">
             {/* UI (14px) */}
-            <Button type="button" variant="outline" onClick={resetForm} className="text-sm">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={resetForm}
+              className="text-sm"
+            >
               Reset
             </Button>
             {/* UI (14px) */}
