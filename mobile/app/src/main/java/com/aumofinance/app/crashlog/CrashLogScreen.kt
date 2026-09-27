@@ -8,6 +8,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,7 +39,7 @@ fun CrashLogScreen(
                 text = content,
                 color = AumoColors.TextPrimary,
                 fontFamily = FontFamily.Monospace,
-                fontSize = 12.sp,
+                fontSize = MaterialTheme.typography.labelMedium.fontSize,
                 modifier =
                     Modifier
                         .fillMaxSize()

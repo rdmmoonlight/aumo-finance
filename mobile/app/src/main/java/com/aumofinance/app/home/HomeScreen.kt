@@ -52,7 +52,13 @@ fun HomeScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = AumoDimens.SpacingSmall, bottom = 32.dp),
+            contentPadding =
+                PaddingValues(
+                    start = AumoDimens.ScreenPadding,
+                    end = AumoDimens.ScreenPadding,
+                    top = AumoDimens.SpacingSmall,
+                    bottom = 32.dp,
+                ),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {

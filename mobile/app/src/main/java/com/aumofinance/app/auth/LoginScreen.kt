@@ -56,7 +56,7 @@ fun LoginScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 28.dp)
+                    .padding(horizontal = AumoDimens.ScreenPadding)
                     .padding(top = 72.dp, bottom = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

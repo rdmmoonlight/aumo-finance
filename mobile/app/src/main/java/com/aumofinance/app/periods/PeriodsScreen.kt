@@ -71,7 +71,12 @@ fun PeriodsScreen(
                 color = AumoColors.TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                modifier = Modifier.padding(16.dp, 14.dp, 16.dp, 0.dp),
+                modifier =
+                    Modifier.padding(
+                        start = AumoDimens.ScreenPadding,
+                        top = AumoDimens.ScreenPadding,
+                        end = AumoDimens.ScreenPadding,
+                    ),
             )
 
             Button(
