@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.BuildConfig
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 /**
  * Padanan Compose dari activity_settings.xml. State dua switch (Notifikasi,
@@ -44,7 +45,7 @@ fun SettingsScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(AumoDimens.SpacingLarge),
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 SettingsSwitchRow(
@@ -107,7 +108,7 @@ private fun SettingsSwitchRow(
 @Composable
 private fun SettingsFooter() {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
@@ -127,7 +128,7 @@ private fun SettingsFooter() {
             text = "\u00A9 2026 rdmmoonlight",
             color = AumoColors.TextMuted,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier.padding(bottom = AumoDimens.SpacingSmall),
         )
     }
 }

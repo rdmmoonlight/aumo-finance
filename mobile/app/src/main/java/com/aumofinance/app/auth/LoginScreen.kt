@@ -29,6 +29,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.R
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 /** Padanan Compose dari activity_login.xml. */
 @Composable
@@ -69,7 +70,7 @@ fun LoginScreen(
                 color = AumoColors.TextPrimary,
                 fontWeight = FontWeight.Bold,
                 fontSize = MaterialTheme.typography.headlineSmall.fontSize,
-                modifier = Modifier.padding(top = 16.dp),
+                modifier = Modifier.padding(top = AumoDimens.SpacingLarge),
             )
             Text(
                 text = "Kelola pembukuan keuangan Anda",
@@ -100,7 +101,7 @@ fun LoginScreen(
                     "Password",
                     color = AumoColors.TextMuted,
                     fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                    modifier = Modifier.padding(top = 16.dp),
+                    modifier = Modifier.padding(top = AumoDimens.SpacingLarge),
                 )
                 OutlinedTextField(
                     value = password,

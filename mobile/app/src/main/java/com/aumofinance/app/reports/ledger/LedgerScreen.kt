@@ -20,19 +20,20 @@ import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.aumofinance.app.ui.theme.AumoDimens
 
 // Padanan Compose dari activity_general_ledger.xml + LedgerAdapter/item_ledger_account/item_ledger_line.
 // Dipakai bareng oleh halaman Permanent & Temporary (satu-satunya beda: parameter isTemporary saat load()).
 @Composable
 fun LedgerScreen(report: LedgerResponse?) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AumoDimens.SpacingLarge)) {
             Text(
                 text = report?.selectedPeriodName ?: "Belum ada periode dipilih",
                 color = AumoColors.TextMuted,
                 fontSize = MaterialTheme.typography.labelMedium.fontSize,
             )
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 8.dp)) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = AumoDimens.SpacingSmall)) {
                 items(report?.ledgers ?: emptyList()) { account -> LedgerAccountCard(account) }
             }
         }
@@ -83,7 +84,7 @@ private fun LedgerLineRow(line: LedgerLine) {
             text = formatDate(line.entryDate),
             color = AumoColors.TextMuted,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            modifier = Modifier.padding(end = 8.dp),
+            modifier = Modifier.padding(end = AumoDimens.SpacingSmall),
         )
         Text(
             text = line.description ?: "",
@@ -96,7 +97,7 @@ private fun LedgerLineRow(line: LedgerLine) {
             text = CurrencyFormatter.format(amount),
             color = AumoColors.TextPrimary,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            modifier = Modifier.padding(end = 8.dp),
+            modifier = Modifier.padding(end = AumoDimens.SpacingSmall),
         )
         Text(
             text = CurrencyFormatter.format(line.runningBalance),

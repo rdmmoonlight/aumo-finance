@@ -31,6 +31,7 @@ import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.aumofinance.app.ui.theme.AumoDimens
 
 // Lebar indentasi/tab nomor referensi baris kredit — dipakai juga untuk
 // menggeser mundur (backspace) nominal debit sejauh jarak yang sama, supaya
@@ -69,7 +70,7 @@ fun JournalReportScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(16.dp),
+                    .padding(AumoDimens.SpacingLarge),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -111,7 +112,7 @@ fun JournalReportScreen(
 
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentPadding = PaddingValues(top = 8.dp, bottom = 16.dp),
+                contentPadding = PaddingValues(top = AumoDimens.SpacingSmall, bottom = AumoDimens.SpacingLarge),
             ) {
                 grouped.forEach { (dateKey, entriesForDate) ->
                     item(key = "header-$dateKey") {
@@ -148,7 +149,7 @@ private fun EntryCard(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp)
+                .padding(bottom = AumoDimens.SpacingSmall)
                 .background(AumoColors.Surface, RoundedCornerShape(8.dp))
                 .padding(12.dp),
     ) {

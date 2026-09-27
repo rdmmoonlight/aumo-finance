@@ -23,6 +23,7 @@ import com.aumofinance.app.ui.icons.TablerIcon
 import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
 import java.util.Calendar as JavaCalendar
+import com.aumofinance.app.ui.theme.AumoDimens
 
 data class HomeMenuItem(
     val title: String,
@@ -51,7 +52,7 @@ fun HomeScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 8.dp, bottom = 32.dp),
+            contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = AumoDimens.SpacingSmall, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             item {
@@ -148,7 +149,7 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
                 .clickable(onClick = onSettingsClick),
             contentAlignment = Alignment.Center
         ) {
-            TablerIcon(TablerIcons.Settings, tint = AumoColors.TextPrimary, size = 20.dp)
+            TablerIcon(TablerIcons.Settings, tint = AumoColors.TextPrimary, size = AumoDimens.IconSmall)
         }
     }
 }
@@ -218,13 +219,13 @@ private fun BentoCard(item: HomeMenuItem, modifier: Modifier = Modifier) {
         modifier = modifier.height(142.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(Modifier.fillMaxSize().padding(AumoDimens.SpacingLarge), verticalArrangement = Arrangement.SpaceBetween) {
             Box(
                 Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
                     .background(AumoColors.Primary.copy(0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                TablerIcon(item.icon, tint = AumoColors.Primary, size = 20.dp)
+                TablerIcon(item.icon, tint = AumoColors.Primary, size = AumoDimens.IconSmall)
             }
             Column {
                 Text(item.title, color = AumoColors.TextPrimary, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall)

@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 data class ReportMenuItem(
     val title: String,
@@ -64,7 +65,7 @@ fun ReportsMenuScreen(
                     Modifier
                         .fillMaxWidth()
                         .background(AumoColors.Background)
-                        .padding(horizontal = 8.dp, vertical = 10.dp),
+                        .padding(horizontal = AumoDimens.SpacingSmall, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 IconButton(onClick = onBackClick) {
@@ -88,7 +89,7 @@ fun ReportsMenuScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            contentPadding = PaddingValues(horizontal = AumoDimens.SpacingLarge, vertical = AumoDimens.SpacingSmall),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
             items(sections) { section ->
@@ -99,7 +100,7 @@ fun ReportsMenuScreen(
                         fontWeight = FontWeight.Bold,
                         fontSize = MaterialTheme.typography.labelMedium.fontSize,
                     )
-                    Spacer(modifier = Modifier.padding(top = 8.dp))
+                    Spacer(modifier = Modifier.padding(top = AumoDimens.SpacingSmall))
                     Column(
                         modifier =
                             Modifier
