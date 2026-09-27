@@ -293,8 +293,7 @@ export function AppSidebar() {
                 }
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url !== "/home" &&
-                    pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
                 return (
                   <SidebarMenuItem key={item.title}>
                     {/* UI (14px) */}
@@ -417,5 +416,4 @@ export function AppSidebar() {
       <SidebarRail />
     </Sidebar>
   );
-  }
-  
+}

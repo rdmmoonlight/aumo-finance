@@ -397,5 +397,4 @@ export function AppTopBar() {
       </div>
     </header>
   );
-  }
-  
+}
