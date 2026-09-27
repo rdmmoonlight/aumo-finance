@@ -191,7 +191,11 @@ export function AppSidebar() {
       }
     >
       <SidebarHeader
-        className={`border-b shrink-0 flex items-center gap-2 ${isCollapsed ? "flex-col justify-center p-2.5 gap-3" : "flex-row justify-between p-3.5"}`}
+        className={`border-b shrink-0 flex items-center gap-2 ${
+          isCollapsed
+            ? "flex-col justify-center p-2.5 gap-3"
+            : "flex-row justify-between p-3.5"
+        }`}
       >
         {isCollapsed ? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
@@ -204,6 +208,7 @@ export function AppSidebar() {
             />
           </div>
         ) : (
+          /* H3 (20px) */
           <h2 className="text-xl font-bold tracking-tight truncate">
             Aumo Finance
           </h2>
@@ -213,6 +218,7 @@ export function AppSidebar() {
 
       <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
         <SidebarGroup>
+          {/* Label kecil (11px) */}
           <SidebarGroupLabel className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
             Navigation
           </SidebarGroupLabel>
@@ -232,6 +238,7 @@ export function AppSidebar() {
                     >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
+                          {/* UI (14px) */}
                           <SidebarMenuButton
                             tooltip={item.title}
                             isActive={isReportsActive}
@@ -251,6 +258,7 @@ export function AppSidebar() {
                             {REPORT_SECTIONS.map((section) => (
                               <div key={section.title}>
                                 <div className="px-2 py-1 select-none">
+                                  {/* Label kecil (11px) */}
                                   <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
                                     {section.title}
                                   </p>
@@ -258,6 +266,7 @@ export function AppSidebar() {
                                 <div className="mt-1 flex flex-col gap-0.5">
                                   {section.items.map((sub) => (
                                     <SidebarMenuItem key={sub.url}>
+                                      {/* UI (14px) */}
                                       <SidebarMenuButton
                                         asChild
                                         isActive={pathname === sub.url}
@@ -284,9 +293,11 @@ export function AppSidebar() {
                 }
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" &&
+                    pathname.startsWith(item.url + "/"));
                 return (
                   <SidebarMenuItem key={item.title}>
+                    {/* UI (14px) */}
                     <SidebarMenuButton
                       asChild
                       isActive={isSingleActive}
@@ -312,7 +323,9 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter
-        className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"}`}
+        className={`border-t shrink-0 ${
+          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+        }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
@@ -328,6 +341,7 @@ export function AppSidebar() {
                         src={user?.avatarUrl || undefined}
                         alt={user?.fullName || "User"}
                       />
+                      {/* Caption (12px) */}
                       <AvatarFallback className="bg-muted text-xs">
                         {user?.fullName ? (
                           user.fullName.slice(0, 2).toUpperCase()
@@ -345,6 +359,7 @@ export function AppSidebar() {
                           src={user?.avatarUrl || undefined}
                           alt={user?.fullName || "User"}
                         />
+                        {/* Caption (12px) */}
                         <AvatarFallback className="bg-muted text-xs">
                           {user?.fullName ? (
                             user.fullName.slice(0, 2).toUpperCase()
@@ -354,11 +369,13 @@ export function AppSidebar() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex flex-col truncate min-w-0">
+                        {/* UI (14px) */}
                         <span className="font-medium text-sm leading-tight truncate">
                           {!isMounted || isUserLoading
                             ? "Memuat..."
                             : user?.fullName || user?.userName || "Guest"}
                         </span>
+                        {/* Caption (12px) */}
                         <span className="text-xs text-muted-foreground truncate">
                           {!isMounted || isUserLoading
                             ? "..."
@@ -376,12 +393,14 @@ export function AppSidebar() {
                 sideOffset={8}
                 className="w-56"
               >
+                {/* UI (14px) */}
                 <DropdownMenuItem asChild className="text-sm">
                   <Link href="/settings">
                     <Settings className="w-4 h-4 mr-2" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
+                {/* UI (14px) */}
                 <DropdownMenuItem
                   onClick={handleSignOut}
                   className="text-destructive text-sm"
@@ -398,4 +417,5 @@ export function AppSidebar() {
       <SidebarRail />
     </Sidebar>
   );
-}
+  }
+  
