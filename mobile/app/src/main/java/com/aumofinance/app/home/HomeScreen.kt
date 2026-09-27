@@ -68,7 +68,7 @@ fun HomeScreen(
                         color = AumoColors.TextMuted,
                         style = MaterialTheme.typography.labelLarge,
                     )
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(AumoDimens.SpacingSmall))
                     Text(
                         text = greeting,
                         color = AumoColors.TextPrimary,
@@ -88,12 +88,12 @@ fun HomeScreen(
             }
 
             item {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.animateItemPlacement()) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                Column(verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge), modifier = Modifier.animateItemPlacement()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge), modifier = Modifier.fillMaxWidth()) {
                         BentoCard(item = journalEntry, modifier = Modifier.weight(1f))
                         BentoCard(item = generalJournal, modifier = Modifier.weight(1f))
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge), modifier = Modifier.fillMaxWidth()) {
                         BentoCard(item = periods, modifier = Modifier.weight(1f))
                         BentoCard(item = coa, modifier = Modifier.weight(1f))
                     }
@@ -116,7 +116,7 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = 14.dp),
+            .padding(horizontal = 20.dp, vertical = AumoDimens.SpacingLarge),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -125,21 +125,21 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
                 color = AumoColors.TextPrimary
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(AumoDimens.SpacingSmall))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
                     .background(if (isDbConnected) Color(0xFFDCFCE7) else Color(0xFFFFF8E1))
                     .border(1.dp, if (isDbConnected) Color(0xFF86EFAC).copy(0.5f) else Color(0xFFFFE082), RoundedCornerShape(100.dp))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
+                    .padding(horizontal = AumoDimens.SpacingSmall, vertical = AumoDimens.SpacingSmall)
             ) {
                 Box(
                     Modifier.size(6.dp).alpha(if (isDbConnected) 1f else blinkAlpha)
                         .clip(CircleShape)
                         .background(if (isDbConnected) Color(0xFF16A34A) else Color(0xFFFFC107))
                 )
-                Spacer(Modifier.width(6.dp))
+                Spacer(Modifier.width(AumoDimens.SpacingSmall))
                 Text(
                     text = if (isDbConnected) "Live • Connected" else "Waking up server...",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -162,14 +162,14 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
 
 @Composable
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.padding(top = 4.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.padding(top = AumoDimens.SpacingSmall)) {
         Text(
             text, color = AumoColors.TextMuted,
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold, letterSpacing = androidx.compose.ui.unit.TextUnit(1.2f, androidx.compose.ui.unit.TextUnitType.Sp)
             )
         )
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(AumoDimens.SpacingSmall))
         Box(Modifier.height(1.dp).width(24.dp).background(AumoColors.TextMuted.copy(0.15f)))
     }
 }
@@ -201,10 +201,10 @@ private fun HeroDashboardCard(item: HomeMenuItem, modifier: Modifier = Modifier)
                 ) {
                     TablerIcon(item.icon, tint = Color.White, size = 28.dp)
                 }
-                Spacer(Modifier.width(16.dp))
+                Spacer(Modifier.width(AumoDimens.SpacingLarge))
                 Column(Modifier.weight(1f)) {
                     Text(item.title, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(AumoDimens.SpacingSmall))
                     Text(item.subtitle, color = Color.White.copy(0.75f), style = MaterialTheme.typography.bodySmall, lineHeight = MaterialTheme.typography.bodySmall.lineHeight)
                 }
                 Box(Modifier.size(32.dp).clip(CircleShape).background(Color.White.copy(0.12f)), contentAlignment = Alignment.Center) {

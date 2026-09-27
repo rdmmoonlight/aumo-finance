@@ -60,7 +60,7 @@ fun TrialBalanceScreen(
                     color = if (report.isBalanced) AumoColors.Good else AumoColors.Bad,
                     fontWeight = FontWeight.Bold,
                     fontSize = MaterialTheme.typography.labelMedium.fontSize,
-                    modifier = Modifier.padding(top = 4.dp),
+                    modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
                 )
             }
         }
@@ -69,7 +69,7 @@ fun TrialBalanceScreen(
 
 @Composable
 private fun TrialBalanceRowItem(row: TrialBalanceRow) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = AumoDimens.SpacingSmall)) {
         Text(
             text = "${row.referenceNumber} - ${row.accountName}",
             color = AumoColors.TextPrimary,
@@ -80,7 +80,7 @@ private fun TrialBalanceRowItem(row: TrialBalanceRow) {
             text = if (row.debit > 0) CurrencyFormatter.format(row.debit) else "",
             color = AumoColors.TextPrimary,
             fontSize = MaterialTheme.typography.bodySmall.fontSize,
-            modifier = Modifier.padding(end = 12.dp),
+            modifier = Modifier.padding(end = AumoDimens.SpacingLarge),
         )
         Text(
             text = if (row.credit > 0) CurrencyFormatter.format(row.credit) else "",

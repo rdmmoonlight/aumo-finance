@@ -46,9 +46,9 @@ private fun LedgerAccountCard(account: LedgerAccount) {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(bottom = 12.dp)
+                .padding(bottom = AumoDimens.SpacingLarge)
                 .background(AumoColors.Surface, RoundedCornerShape(8.dp))
-                .padding(14.dp),
+                .padding(AumoDimens.SpacingLarge),
     ) {
         Text(
             text = "${account.referenceNumber} - ${account.accountName}",
@@ -62,7 +62,7 @@ private fun LedgerAccountCard(account: LedgerAccount) {
             color = AumoColors.TextPrimary,
             fontWeight = FontWeight.Bold,
             fontSize = MaterialTheme.typography.bodySmall.fontSize,
-            modifier = Modifier.padding(top = 6.dp),
+            modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
         )
     }
 }
@@ -79,7 +79,7 @@ private fun formatDate(iso: String): String =
 
 @Composable
 private fun LedgerLineRow(line: LedgerLine) {
-    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = AumoDimens.SpacingSmall)) {
         Text(
             text = formatDate(line.entryDate),
             color = AumoColors.TextMuted,

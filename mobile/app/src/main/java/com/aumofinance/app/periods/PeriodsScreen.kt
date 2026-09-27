@@ -83,10 +83,10 @@ fun PeriodsScreen(
                 onClick = onOpenNewPeriodClick,
                 colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.padding(16.dp, 12.dp, 16.dp, 4.dp).fillMaxWidth(),
+                modifier = Modifier.padding(AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingSmall).fillMaxWidth(),
             ) {
                 TablerIcon(TablerIcons.CirclePlus, tint = Color.White, size = 16.dp)
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))
                 Text("Open New Period", color = Color.White, fontWeight = FontWeight.Bold)
             }
 
@@ -94,15 +94,15 @@ fun PeriodsScreen(
                 Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         TablerIcon(TablerIcons.CalendarOff, tint = AumoColors.TextMuted, size = 40.dp)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(AumoDimens.SpacingSmall))
                         Text("No periods yet", color = AumoColors.TextMuted)
                     }
                 }
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentPadding = PaddingValues(16.dp, 12.dp, 16.dp, 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    contentPadding = PaddingValues(AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge),
+                    verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge),
                 ) {
                     items(periods) { period ->
                         PeriodCard(
@@ -131,7 +131,7 @@ private fun PeriodCard(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
+        Column(modifier = Modifier.padding(AumoDimens.SpacingLarge)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -147,7 +147,7 @@ private fun PeriodCard(
                     modifier =
                         Modifier
                             .background(if (period.isClosed) AumoColors.Bad else AumoColors.Good, RoundedCornerShape(6.dp))
-                            .padding(8.dp, 4.dp),
+                            .padding(AumoDimens.SpacingSmall, AumoDimens.SpacingSmall),
                 ) {
                     Text(
                         text = if (period.isClosed) "Closed" else "Open",
@@ -158,15 +158,15 @@ private fun PeriodCard(
                 }
             }
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(AumoDimens.SpacingSmall))
             Text(
                 text = "${period.startDate.take(10)} \u2013 ${period.endDate.take(10)}",
                 color = AumoColors.TextSecondary,
                 fontSize = MaterialTheme.typography.bodySmall.fontSize,
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Spacer(modifier = Modifier.height(AumoDimens.SpacingSmall))
+            Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
                 ActionChip(
                     icon = TablerIcons.Eye,
                     label = if (isSelected) "Viewing" else "View",
@@ -194,10 +194,10 @@ private fun ActionChip(
             Modifier
                 .background(tint.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
                 .clickable(onClick = onClick)
-                .padding(10.dp, 6.dp),
+                .padding(AumoDimens.SpacingSmall, AumoDimens.SpacingSmall),
     ) {
         TablerIcon(icon, tint = tint, size = 14.dp)
-        Spacer(modifier = Modifier.width(6.dp))
+        Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))
         Text(label, color = tint, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelSmall.fontSize)
     }
 }
@@ -250,7 +250,7 @@ fun OpenPeriodDialog(
                         .fillMaxWidth()
                         .heightIn(max = 460.dp)
                         .verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall),
             ) {
                 Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
                     OutlinedTextField(
@@ -397,7 +397,7 @@ private fun AccountPickerField(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
         Text(label, color = AumoColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelSmall.fontSize)
         Box {
             Row(
@@ -408,7 +408,7 @@ private fun AccountPickerField(
                         .fillMaxWidth()
                         .background(AumoColors.Background, RoundedCornerShape(8.dp))
                         .clickable { expanded = true }
-                        .padding(12.dp, 12.dp),
+                        .padding(AumoDimens.SpacingLarge, AumoDimens.SpacingLarge),
             ) {
                 Text(
                     text = selected?.displayLabel ?: "Select an account",
@@ -451,7 +451,7 @@ private fun NewAccountFields(
     balance: String?,
     onBalanceChange: ((String) -> Unit)?,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
         Text(title, color = AumoColors.TextSecondary, fontWeight = FontWeight.Bold, fontSize = MaterialTheme.typography.labelSmall.fontSize)
         OutlinedTextField(
             value = code,

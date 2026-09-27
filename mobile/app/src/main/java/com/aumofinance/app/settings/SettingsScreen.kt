@@ -62,7 +62,7 @@ fun SettingsScreen(
                 Button(
                     onClick = onCrashLogClick,
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Surface),
-                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingLarge),
                 ) {
                     Text("Lihat Crash Log", color = AumoColors.TextPrimary)
                 }
@@ -88,7 +88,7 @@ private fun SettingsSwitchRow(
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 14.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = AumoDimens.SpacingLarge),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
@@ -110,7 +110,7 @@ private fun SettingsFooter() {
     Column(
         modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingLarge),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall),
     ) {
         androidx.compose.foundation.layout.Box(
             modifier =

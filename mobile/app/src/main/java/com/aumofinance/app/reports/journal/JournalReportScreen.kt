@@ -93,7 +93,7 @@ fun JournalReportScreen(
                                     RoundedCornerShape(8.dp),
                                 )
                                 .clickable { onToggleShowActions(!showActions) }
-                                .padding(12.dp, 6.dp),
+                                .padding(AumoDimens.SpacingLarge, AumoDimens.SpacingSmall),
                     ) {
                         Text(
                             text = if (showActions) "Selesai" else "Edit",
@@ -121,7 +121,7 @@ fun JournalReportScreen(
                             color = AumoColors.TextMuted,
                             fontWeight = FontWeight.Bold,
                             fontSize = MaterialTheme.typography.titleMedium.fontSize,
-                            modifier = Modifier.padding(top = 12.dp, bottom = 4.dp),
+                            modifier = Modifier.padding(top = AumoDimens.SpacingLarge, bottom = AumoDimens.SpacingSmall),
                         )
                     }
                     items(entriesForDate, key = { it.id }) { entry ->
@@ -151,7 +151,7 @@ private fun EntryCard(
                 .fillMaxWidth()
                 .padding(bottom = AumoDimens.SpacingSmall)
                 .background(AumoColors.Surface, RoundedCornerShape(8.dp))
-                .padding(12.dp),
+                .padding(AumoDimens.SpacingLarge),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             Text(
@@ -164,7 +164,7 @@ private fun EntryCard(
                 text = formatTimestampLabel(entry),
                 color = AumoColors.TextMuted,
                 fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                modifier = Modifier.padding(end = 6.dp),
+                modifier = Modifier.padding(end = AumoDimens.SpacingSmall),
             )
             if (showActions) {
                 // Ikon pensil/trash sengaja pakai clickable polos (bukan
@@ -178,7 +178,7 @@ private fun EntryCard(
                     size = 16.dp,
                     modifier = Modifier.clickable(onClick = onEdit),
                 )
-                Spacer(modifier = Modifier.width(10.dp))
+                Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))
                 TablerIcon(
                     TablerIcons.Trash,
                     tint = AumoColors.Bad,
@@ -188,7 +188,7 @@ private fun EntryCard(
             }
         }
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(AumoDimens.SpacingSmall))
 
         entry.lines.sortedBy { it.lineOrder }.forEach { line ->
             JournalLineRow(line)

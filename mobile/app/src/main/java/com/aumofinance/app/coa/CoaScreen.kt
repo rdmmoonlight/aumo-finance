@@ -80,7 +80,7 @@ fun CoaScreen(
                 }
             }
 
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = 12.dp)) {
+            LazyColumn(modifier = Modifier.fillMaxSize().padding(top = AumoDimens.SpacingLarge)) {
                 items(accounts) { account ->
                     AccountRow(account = account, onClick = { onAccountClick(account) })
                 }
@@ -101,7 +101,7 @@ private fun AccountRow(
                 .padding(bottom = AumoDimens.SpacingSmall)
                 .background(AumoColors.Surface, RoundedCornerShape(8.dp))
                 .clickable(onClick = onClick)
-                .padding(14.dp),
+                .padding(AumoDimens.SpacingLarge),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -199,7 +199,7 @@ private fun AccountFormDialog(
         text = {
             Column(
                 modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall),
             ) {
                 OutlinedTextField(
                     value = refNumber,
@@ -269,7 +269,7 @@ private fun AccountTypeDropdown(
                     .fillMaxWidth()
                     .background(AumoColors.Background, RoundedCornerShape(8.dp))
                     .clickable { expanded = true }
-                    .padding(12.dp),
+                    .padding(AumoDimens.SpacingLarge),
         ) {
             Text(selected, color = AumoColors.TextPrimary)
         }

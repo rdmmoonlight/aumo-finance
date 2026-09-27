@@ -126,7 +126,7 @@ private fun WorksheetRowView(
                 modifier =
                     Modifier
                         .width(if (index == 0) 140.dp else 110.dp)
-                        .padding(horizontal = 12.dp, vertical = AumoDimens.SpacingSmall),
+                        .padding(horizontal = AumoDimens.SpacingLarge, vertical = AumoDimens.SpacingSmall),
             )
         }
     }
