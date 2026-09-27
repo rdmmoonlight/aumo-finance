@@ -54,6 +54,7 @@ export default function AuthenticatedLayout({
   if (!isMounted || isAuthLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
+        {/* UI (14px) */}
         <p className="text-sm text-muted-foreground">Memverifikasi sesi...</p>
       </div>
     );
@@ -62,6 +63,7 @@ export default function AuthenticatedLayout({
   if (isAuthError) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
+        {/* UI (14px) */}
         <p className="text-sm text-muted-foreground">
           Sesi berakhir, mengalihkan ke halaman login...
         </p>
@@ -84,6 +86,7 @@ export default function AuthenticatedLayout({
           <AppTopBar />
           {isPeriodsLoading ? (
             <div className="flex flex-1 items-center justify-center p-6">
+              {/* UI (14px) */}
               <p className="text-sm text-muted-foreground">Memuat periode...</p>
             </div>
           ) : (
@@ -94,4 +97,5 @@ export default function AuthenticatedLayout({
       </SidebarProvider>
     </TooltipProvider>
   );
-}
+  }
+                                            
