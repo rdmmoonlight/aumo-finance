@@ -128,7 +128,10 @@ function MappingStatusTable({
         header: "Excel Input",
         cell: ({ row }) => (
           <div className="text-caption">
-            <Badge variant="outline" className="font-mono text-label-small mr-1">
+            <Badge
+              variant="outline"
+              className="font-mono text-label-small mr-1"
+            >
               {row.original.excelRef}
             </Badge>
             {row.original.excelAccountName}
@@ -306,8 +309,7 @@ function PreviewTransactionLinesTable({
         {table.getHeaderGroups().map((headerGroup) => (
           <TableRow key={headerGroup.id} className="text-caption">
             {headerGroup.headers.map((header) => {
-              const isRight =
-                header.id === "debit" || header.id === "credit";
+              const isRight = header.id === "debit" || header.id === "credit";
               const isRowIdx = header.id === "rowIndex";
               const isRef = header.id === "refNumber";
 
@@ -358,7 +360,10 @@ function PreviewTransactionLinesTable({
       </TableBody>
       <TableFooter>
         <TableRow>
-          <TableCell colSpan={3} className="text-right font-medium text-caption">
+          <TableCell
+            colSpan={3}
+            className="text-right font-medium text-caption"
+          >
             Total
           </TableCell>
           <TableCell className="text-right font-mono text-caption font-bold">
@@ -593,10 +598,12 @@ export default function ToolsPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-ui">
-                <FileSpreadsheet size={16} className="text-primary" />{" "}
-                Import Journal Entries
+                <FileSpreadsheet size={16} className="text-primary" /> Import
+                Journal Entries
               </CardTitle>
-              <CardDescription className="text-caption">Upload Excel GJ/AJ sheets</CardDescription>
+              <CardDescription className="text-caption">
+                Upload Excel GJ/AJ sheets
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
@@ -613,7 +620,11 @@ export default function ToolsPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {MONTHS.map((m, i) => (
-                        <SelectItem key={i + 1} value={String(i + 1)} className="text-caption">
+                        <SelectItem
+                          key={i + 1}
+                          value={String(i + 1)}
+                          className="text-caption"
+                        >
                           {m}
                         </SelectItem>
                       ))}
@@ -628,7 +639,11 @@ export default function ToolsPage() {
                     </SelectTrigger>
                     <SelectContent>
                       {[2024, 2025, 2026, 2027, 2028].map((y) => (
-                        <SelectItem key={y} value={String(y)} className="text-caption">
+                        <SelectItem
+                          key={y}
+                          value={String(y)}
+                          className="text-caption"
+                        >
                           {y}
                         </SelectItem>
                       ))}
@@ -718,14 +733,21 @@ export default function ToolsPage() {
                 <h3 className="text-ui font-semibold flex items-center gap-2">
                   <Upload size={14} /> Preview Transactions
                 </h3>
-                <Badge className="text-label-small">{parseResult.transactions.length} loaded</Badge>
+                <Badge className="text-label-small">
+                  {parseResult.transactions.length} loaded
+                </Badge>
               </div>
               {parseResult.transactions.map((tx, txIdx) => (
                 <Card key={txIdx} className="overflow-hidden">
                   <CardHeader className="py-2 px-3 flex-row items-center justify-between space-y-0 bg-muted/30">
                     <div className="flex items-center gap-2">
-                      <Badge className="text-label-small">{tx.journalType}</Badge>
-                      <Badge variant="outline" className="font-mono text-label-small">
+                      <Badge className="text-label-small">
+                        {tx.journalType}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="font-mono text-label-small"
+                      >
                         {tx.date}
                       </Badge>
                     </div>
