@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import {
   useGetApiV1PeriodsQuery,
   useGetApiV1PeriodsOpenInfoQuery,
@@ -13,10 +12,42 @@ import {
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
 } from "@/lib/generatedApi";
+import { Components } from "./components";
 
-import { ApiError, PeriodItem } from "./types";
-import { PeriodList } from "./period-list";
-import { CreatePeriodForm } from "./create-period-form";
+/* -------------------------------------------------------------------------- */
+/*                                   TYPES                                    */
+/* -------------------------------------------------------------------------- */
+
+export interface ApiError {
+  data?: { message?: string };
+  message?: string;
+}
+
+export interface AccountItem {
+  id?: number | string;
+  displayLabel?: string;
+  referenceNumber?: string;
+  accountName?: string;
+}
+
+export interface PeriodItem {
+  id: number;
+  periodName?: string;
+  startDate?: string;
+  endDate?: string;
+  isClosed?: boolean;
+  isSelected?: boolean;
+}
+
+export interface OpenInfoData {
+  hasExistingPermanentAccounts?: boolean;
+  availableCashAndBankAccounts?: AccountItem[];
+  availableRetainedEarningsAccounts?: AccountItem[];
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 COMPONENT                                  */
+/* -------------------------------------------------------------------------- */
 
 export default function PeriodsPage() {
   const {
@@ -198,7 +229,6 @@ export default function PeriodsPage() {
           variant="destructive"
           className="flex justify-between items-center py-2 bg-red-950/50 border-red-900/50 text-red-200"
         >
-          {/* Caption (12px) */}
           <AlertDescription className="flex items-center gap-2 text-xs">
             <AlertTriangle size={16} />
             {errorMessage}
@@ -216,7 +246,6 @@ export default function PeriodsPage() {
 
       {successMessage && (
         <Alert className="bg-white/[0.06] border-white/10 text-white flex justify-between items-center py-2">
-          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             {successMessage}
           </AlertDescription>
