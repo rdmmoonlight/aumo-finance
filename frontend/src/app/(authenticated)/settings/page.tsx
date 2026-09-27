@@ -1,23 +1,26 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import { IconUser, IconPalette, IconShieldCheck } from "@tabler/icons-react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import AccountSettings from "./account";
-import AppearanceSettings from "./appearance";
-import SecuritySettings from "./security";
+import AppearanceAndSecuritySettings from "./appearance-and-security";
 
 export default function SettingsPage() {
   const [mounted, setMounted] = useState(false);
   const [mainTab, setMainTab] = useState("account");
+
   useEffect(() => setMounted(true), []);
+
   if (!mounted) return null;
+
   return (
     <div className="max-w-4xl mx-auto flex flex-col h-[calc(100vh-72px)]">
-      <div className="shrink-0 space-y-3 bg-background sticky top-0 z-10 pb-3">
-        <h1 className="text-xl font-bold">Settings</h1>
-        <Tabs value={mainTab} onValueChange={setMainTab}>
-          <TabsList className="h-8 p-1">
+      <Tabs value={mainTab} onValueChange={setMainTab} className="flex-1 flex flex-col min-h-0">
+        <div className="shrink-0 space-y-3 bg-background sticky top-0 z-10 pb-3">
+          <h1 className="text-xl font-bold">Settings</h1>
+          <TabsList className="h-8 p-1 w-fit">
             <TabsTrigger value="account" className="text-xs gap-1.5 h-6">
               <IconUser size={13} /> Account
             </TabsTrigger>
@@ -28,14 +31,21 @@ export default function SettingsPage() {
               <IconShieldCheck size={13} /> Security
             </TabsTrigger>
           </TabsList>
-        </Tabs>
-        <Separator />
-      </div>
-      <div className="flex-1 overflow-y-auto mt-1">
-        {mainTab === "account" && <AccountSettings />}
-        {mainTab === "appearance" && <AppearanceSettings />}
-        {mainTab === "security" && <SecuritySettings />}
-      </div>
+          <Separator />
+        </div>
+
+        <div className="flex-1 overflow-y-auto mt-1">
+          <TabsContent value="account" className="m-0 focus-visible:outline-none">
+            <AccountSettings />
+          </TabsContent>
+          <TabsContent value="appearance" className="m-0 focus-visible:outline-none">
+            <AppearanceAndSecuritySettings defaultTab="appearance" />
+          </TabsContent>
+          <TabsContent value="security" className="m-0 focus-visible:outline-none">
+            <AppearanceAndSecuritySettings defaultTab="security" />
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }
