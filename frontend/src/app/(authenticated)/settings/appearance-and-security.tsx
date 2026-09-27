@@ -22,11 +22,24 @@ import {
   usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation,
   usePostApiV1SettingsGuardianRevokeAllSessionsMutation,
 } from "@/lib/generatedApi";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Label } from "@/components/ui/label";
@@ -42,7 +55,10 @@ const THEME_OPTIONS = [
 
 const formatDate = (dateStr?: string) =>
   dateStr
-    ? new Date(dateStr).toLocaleString("id-ID", { dateStyle: "short", timeStyle: "short" })
+    ? new Date(dateStr).toLocaleString("id-ID", {
+        dateStyle: "short",
+        timeStyle: "short",
+      })
     : "-";
 
 // --- SUB-COMPONENTS ---
@@ -56,7 +72,9 @@ function AppearanceSection() {
     <Card className="shadow-sm">
       <CardHeader className="py-3 px-4">
         <CardTitle className="text-sm">Appearance</CardTitle>
-        <CardDescription className="text-xs">Pilih tema antarmuka.</CardDescription>
+        <CardDescription className="text-xs">
+          Pilih tema antarmuka.
+        </CardDescription>
       </CardHeader>
       <CardContent className="px-4 pb-4 pt-0">
         <RadioGroup
@@ -72,11 +90,14 @@ function AppearanceSection() {
                 htmlFor={id}
                 className={cn(
                   "relative flex flex-col rounded-lg border p-3 cursor-pointer hover:bg-accent/50",
-                  active ? "border-primary bg-primary/5" : "border-muted"
+                  active ? "border-primary bg-primary/5" : "border-muted",
                 )}
               >
                 <RadioGroupItem value={id} id={id} className="sr-only" />
-                <Icon size={16} className={cn("mb-2", active && "text-primary")} />
+                <Icon
+                  size={16}
+                  className={cn("mb-2", active && "text-primary")}
+                />
                 <span className="text-xs font-medium">{label}</span>
                 <span className="text-xs text-muted-foreground">{desc}</span>
                 {active && (
@@ -98,8 +119,13 @@ function SecuritySection() {
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { data: resp, isLoading, isError, error: fetchError, refetch } =
-    useGetApiV1SettingsGuardianDashboardQuery();
+  const {
+    data: resp,
+    isLoading,
+    isError,
+    error: fetchError,
+    refetch,
+  } = useGetApiV1SettingsGuardianDashboardQuery();
   const [revokeSession, { isLoading: isRevoking }] =
     usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation();
   const [revokeAll, { isLoading: isRevokingAll }] =
@@ -169,7 +195,7 @@ function SecuritySection() {
             "gap-1.5 h-6 text-xs",
             isHealthy
               ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-              : "border-amber-500/20 bg-amber-500/10 text-amber-600"
+              : "border-amber-500/20 bg-amber-500/10 text-amber-600",
           )}
         >
           <IconHeartbeat size={12} /> {security?.statusLevel || "Loading"}
@@ -203,10 +229,14 @@ function SecuritySection() {
               <Card className="py-3 px-3 flex items-center justify-between">
                 <div>
                   <p className="text-xs font-medium">Failed 24h</p>
-                  <p className="text-xs text-muted-foreground">Kegagalan login</p>
+                  <p className="text-xs text-muted-foreground">
+                    Kegagalan login
+                  </p>
                 </div>
                 {security?.failedAttemptsLast24Hours === 0 ? (
-                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs h-5">0</Badge>
+                  <Badge className="bg-emerald-500/15 text-emerald-600 text-xs h-5">
+                    0
+                  </Badge>
                 ) : (
                   <Badge variant="destructive" className="text-xs h-5">
                     {security?.failedAttemptsLast24Hours}
@@ -267,11 +297,15 @@ function SecuritySection() {
                         </TableCell>
                         <TableCell className="py-1.5 font-mono text-xs">
                           {s.ipAddress}
-                          <div className="text-xs text-muted-foreground">{s.country}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {s.country}
+                          </div>
                         </TableCell>
                         <TableCell className="py-1.5 text-xs">
                           {s.lastActivityAt
-                            ? new Date(s.lastActivityAt).toLocaleTimeString("id-ID")
+                            ? new Date(s.lastActivityAt).toLocaleTimeString(
+                                "id-ID",
+                              )
                             : "-"}
                         </TableCell>
                         <TableCell className="py-1.5 text-right">
@@ -286,7 +320,9 @@ function SecuritySection() {
                               <IconLogout size={11} />
                             </Button>
                           ) : (
-                            <span className="text-xs text-emerald-600">Active</span>
+                            <span className="text-xs text-emerald-600">
+                              Active
+                            </span>
                           )}
                         </TableCell>
                       </TableRow>
@@ -310,26 +346,37 @@ function SecuritySection() {
                       <TableHead className="text-xs h-7">Device</TableHead>
                       <TableHead className="text-xs h-7">IP</TableHead>
                       <TableHead className="text-xs h-7">Date</TableHead>
-                      <TableHead className="text-right text-xs h-7">Status</TableHead>
+                      <TableHead className="text-right text-xs h-7">
+                        Status
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {activities.map((a: any, i: number) => (
                       <TableRow key={a.id || i} className="h-9">
-                        <TableCell className="py-1.5 text-xs">{a.activityType}</TableCell>
+                        <TableCell className="py-1.5 text-xs">
+                          {a.activityType}
+                        </TableCell>
                         <TableCell className="py-1.5 text-xs text-muted-foreground">
                           {a.device}
                           <div className="text-xs">{a.operatingSystem}</div>
                         </TableCell>
-                        <TableCell className="py-1.5 font-mono text-xs">{a.ipAddress}</TableCell>
-                        <TableCell className="py-1.5 text-xs">{formatDate(a.createdAt)}</TableCell>
+                        <TableCell className="py-1.5 font-mono text-xs">
+                          {a.ipAddress}
+                        </TableCell>
+                        <TableCell className="py-1.5 text-xs">
+                          {formatDate(a.createdAt)}
+                        </TableCell>
                         <TableCell className="py-1.5 text-right">
                           {a.isSuccess ? (
                             <Badge className="h-4 text-xs bg-emerald-500/15 text-emerald-600">
                               OK
                             </Badge>
                           ) : (
-                            <Badge variant="destructive" className="h-4 text-xs">
+                            <Badge
+                              variant="destructive"
+                              className="h-4 text-xs"
+                            >
                               Fail
                             </Badge>
                           )}
