@@ -205,5 +205,4 @@ export default function LoginPage() {
       </Suspense>
     </main>
   );
-    }
-    
+}

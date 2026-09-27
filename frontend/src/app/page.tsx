@@ -43,7 +43,9 @@ export default function LandingPage() {
             A
           </div>
           {/* UI (14px) */}
-          <span className="text-sm font-semibold tracking-tight">AUMO FINANCE</span>
+          <span className="text-sm font-semibold tracking-tight">
+            AUMO FINANCE
+          </span>
         </div>
 
         <div className="mt-12 lg:mt-0">
@@ -139,5 +141,4 @@ export default function LandingPage() {
       </div>
     </div>
   );
-    }
-        
+}

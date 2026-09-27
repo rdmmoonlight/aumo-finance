@@ -227,5 +227,4 @@ export default function HomePage() {
       </Card>
     </div>
   );
-          }
-        
+}
