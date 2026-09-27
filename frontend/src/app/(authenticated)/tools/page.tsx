@@ -1,6 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import {
   Card,
   CardContent,
@@ -30,21 +36,19 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  IconUpload,
-  IconEye,
-  IconDownload,
-  IconCheck,
-  IconAlertTriangle,
-  IconFileSpreadsheet,
-  IconCalendar,
-} from "@tabler/icons-react";
-
-// Import RTK Query Hooks dari file hasil auto-generate
-import {
   useGetApiV1ChartOfAccountsQuery,
   usePostApiV1ToolsImportJournalEntriesMutation,
   AccountMappingDetailDto,
 } from "@/lib/generatedApi";
+import {
+  Upload,
+  Eye,
+  Download,
+  Check,
+  AlertTriangle,
+  FileSpreadsheet,
+  Calendar,
+} from "lucide-react";
 
 interface JournalLineImport {
   rowIndex: number;
@@ -92,6 +96,283 @@ const MONTHS = [
   "December",
 ];
 
+const formatIDR = (n: number) =>
+  new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(n);
+
+// --- TANSTACK TABLE HELPERS & SUB-COMPONENTS ---
+const mappingColumnHelper = createColumnHelper<AccountMappingDetail>();
+const previewLineColumnHelper = createColumnHelper<JournalLineImport>();
+
+function MappingStatusTable({
+  mappings,
+  dbAccounts,
+  isLoadingCoa,
+  onMappingChange,
+}: {
+  mappings: AccountMappingDetail[];
+  dbAccounts: any[];
+  isLoadingCoa: boolean;
+  onMappingChange: (
+    excelRef: number,
+    excelName: string,
+    targetRef: number,
+  ) => void;
+}) {
+  const columns = useMemo(
+    () => [
+      mappingColumnHelper.accessor("excelAccountName", {
+        header: "Excel Input",
+        cell: ({ row }) => (
+          <div className="text-caption">
+            <Badge variant="outline" className="font-mono text-label-small mr-1">
+              {row.original.excelRef}
+            </Badge>
+            {row.original.excelAccountName}
+          </div>
+        ),
+      }),
+      mappingColumnHelper.accessor("mappedRef", {
+        header: "Target COA",
+        cell: ({ row }) => (
+          <Select
+            value={String(row.original.mappedRef || 0)}
+            onValueChange={(v) =>
+              onMappingChange(
+                row.original.excelRef,
+                row.original.excelAccountName,
+                Number(v),
+              )
+            }
+            disabled={isLoadingCoa}
+          >
+            <SelectTrigger className="h-7 text-caption">
+              <SelectValue placeholder="Pilih COA" />
+            </SelectTrigger>
+            <SelectContent>
+              {dbAccounts.map((o: any) => {
+                const refNum = o.referenceNumber || o.code;
+                const accName = o.accountName || o.name;
+                return (
+                  <SelectItem
+                    key={o.id || refNum}
+                    value={String(refNum)}
+                    className="text-caption"
+                  >
+                    [{refNum}] {accName}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+        ),
+      }),
+    ],
+    [dbAccounts, isLoadingCoa, onMappingChange],
+  );
+
+  const table = useReactTable({
+    data: mappings,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <Table>
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id} className="text-caption">
+            {headerGroup.headers.map((header) => (
+              <TableHead key={header.id}>
+                {header.isPlaceholder
+                  ? null
+                  : flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow
+            key={row.id}
+            className={row.original.mappedRef ? "bg-amber-500/10" : ""}
+          >
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id}>
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  );
+}
+
+function PreviewTransactionLinesTable({
+  lines,
+  accountMappings,
+}: {
+  lines: JournalLineImport[];
+  accountMappings: AccountMappingDetail[];
+}) {
+  const columns = useMemo(
+    () => [
+      previewLineColumnHelper.accessor("rowIndex", {
+        header: "#",
+        cell: (info) => <span className="text-caption">{info.getValue()}</span>,
+      }),
+      previewLineColumnHelper.accessor("refNumber", {
+        header: "Ref",
+        cell: (info) => (
+          <Badge variant="secondary" className="font-mono text-label-small">
+            {info.getValue()}
+          </Badge>
+        ),
+      }),
+      previewLineColumnHelper.accessor("accountName", {
+        header: "Account",
+        cell: ({ row }) => {
+          const line = row.original;
+          const mapping = accountMappings.find(
+            (m) =>
+              m.excelRef === line.refNumber &&
+              m.excelAccountName === line.accountName,
+          );
+          return (
+            <div className="text-caption">
+              <div className="font-medium">{line.accountName}</div>
+              <div className="text-caption text-muted-foreground truncate">
+                {line.description}
+              </div>
+              {mapping?.mappedRef ? (
+                <Badge className="mt-1 bg-amber-500/15 text-amber-600 border-amber-500/20 text-label-small">
+                  → [{mapping.mappedRef}] {mapping.mappedAccountName}
+                </Badge>
+              ) : (
+                <Badge variant="destructive" className="mt-1 text-label-small">
+                  Unmapped
+                </Badge>
+              )}
+            </div>
+          );
+        },
+      }),
+      previewLineColumnHelper.accessor("debit", {
+        header: () => <div className="text-right">Debit</div>,
+        cell: (info) => (
+          <div className="text-right font-mono text-caption">
+            {info.getValue() !== null ? formatIDR(info.getValue()!) : "-"}
+          </div>
+        ),
+      }),
+      previewLineColumnHelper.accessor("credit", {
+        header: () => <div className="text-right">Credit</div>,
+        cell: (info) => (
+          <div className="text-right font-mono text-caption">
+            {info.getValue() !== null ? formatIDR(info.getValue()!) : "-"}
+          </div>
+        ),
+      }),
+    ],
+    [accountMappings],
+  );
+
+  const table = useReactTable({
+    data: lines,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const totalDebit = useMemo(
+    () => lines.reduce((a, b) => a + (b.debit || 0), 0),
+    [lines],
+  );
+  const totalCredit = useMemo(
+    () => lines.reduce((a, b) => a + (b.credit || 0), 0),
+    [lines],
+  );
+
+  return (
+    <Table>
+      <TableHeader>
+        {table.getHeaderGroups().map((headerGroup) => (
+          <TableRow key={headerGroup.id} className="text-caption">
+            {headerGroup.headers.map((header) => {
+              const isRight =
+                header.id === "debit" || header.id === "credit";
+              const isRowIdx = header.id === "rowIndex";
+              const isRef = header.id === "refNumber";
+
+              return (
+                <TableHead
+                  key={header.id}
+                  className={`
+                    ${isRight ? "text-right" : ""}
+                    ${isRowIdx ? "w-10" : ""}
+                    ${isRef ? "w-20" : ""}
+                  `}
+                >
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
+                </TableHead>
+              );
+            })}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => {
+          const line = row.original;
+          const mapping = accountMappings.find(
+            (m) =>
+              m.excelRef === line.refNumber &&
+              m.excelAccountName === line.accountName,
+          );
+          const isUnmapped = !mapping?.mappedRef;
+
+          return (
+            <TableRow
+              key={row.id}
+              className={isUnmapped ? "bg-destructive/10" : ""}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <TableCell key={cell.id}>
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </TableCell>
+              ))}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell colSpan={3} className="text-right font-medium text-caption">
+            Total
+          </TableCell>
+          <TableCell className="text-right font-mono text-caption font-bold">
+            {formatIDR(totalDebit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-caption font-bold">
+            {formatIDR(totalCredit)}
+          </TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  );
+}
+
 export default function ToolsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -120,13 +401,6 @@ export default function ToolsPage() {
     usePostApiV1ToolsImportJournalEntriesMutation();
 
   const isBusy = isParsing || isImporting;
-
-  const formatIDR = (n: number) =>
-    new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      minimumFractionDigits: 0,
-    }).format(n);
 
   const handlePreview = async () => {
     if (!selectedFile) {
@@ -254,7 +528,6 @@ export default function ToolsPage() {
     setSuccessMessage(null);
 
     try {
-      // Format DTO customMappings agar sesuai dengan kontrak RTK Query
       const customMappingsDto: AccountMappingDetailDto[] = accountMappings.map(
         (m) => ({
           excelRef: m.excelRef,
@@ -265,7 +538,6 @@ export default function ToolsPage() {
         }),
       );
 
-      // Eksekusi API via RTK Query Mutation
       await importJournalEntries({
         journalImportRequestDto: {
           targetMonth,
@@ -303,14 +575,14 @@ export default function ToolsPage() {
   return (
     <div className="space-y-6">
       {successMessage && (
-        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300">
-          <IconCheck size={16} />
+        <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300 text-ui">
+          <Check size={16} />
           <AlertDescription>{successMessage}</AlertDescription>
         </Alert>
       )}
       {errorMessage && (
-        <Alert variant="destructive">
-          <IconAlertTriangle size={16} />
+        <Alert variant="destructive" className="text-ui">
+          <AlertTriangle size={16} />
           <AlertDescription>{errorMessage}</AlertDescription>
         </Alert>
       )}
@@ -320,28 +592,28 @@ export default function ToolsPage() {
         <div className="lg:col-span-4 space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-sm">
-                <IconFileSpreadsheet size={16} className="text-primary" />{" "}
+              <CardTitle className="flex items-center gap-2 text-ui">
+                <FileSpreadsheet size={16} className="text-primary" />{" "}
                 Import Journal Entries
               </CardTitle>
-              <CardDescription>Upload Excel GJ/AJ sheets</CardDescription>
+              <CardDescription className="text-caption">Upload Excel GJ/AJ sheets</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="rounded-lg border bg-muted/50 p-3 space-y-2">
-                <Label className="flex items-center gap-1">
-                  <IconCalendar size={12} /> Target Period
+                <Label className="flex items-center gap-1 text-ui">
+                  <Calendar size={12} /> Target Period
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Select
                     value={String(targetMonth)}
                     onValueChange={(v) => setTargetMonth(Number(v))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-caption">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {MONTHS.map((m, i) => (
-                        <SelectItem key={i + 1} value={String(i + 1)}>
+                        <SelectItem key={i + 1} value={String(i + 1)} className="text-caption">
                           {m}
                         </SelectItem>
                       ))}
@@ -351,12 +623,12 @@ export default function ToolsPage() {
                     value={String(targetYear)}
                     onValueChange={(v) => setTargetYear(Number(v))}
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="text-caption">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {[2024, 2025, 2026, 2027, 2028].map((y) => (
-                        <SelectItem key={y} value={String(y)}>
+                        <SelectItem key={y} value={String(y)} className="text-caption">
                           {y}
                         </SelectItem>
                       ))}
@@ -365,10 +637,11 @@ export default function ToolsPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Excel File (.xlsx)</Label>
+                <Label className="text-ui">Excel File (.xlsx)</Label>
                 <Input
                   type="file"
                   accept=".xlsx"
+                  className="text-caption"
                   onChange={(e) => {
                     setSelectedFile(e.target.files?.[0] || null);
                     setParseResult(null);
@@ -378,7 +651,7 @@ export default function ToolsPage() {
                 <Button
                   variant="link"
                   size="sm"
-                  className="h-auto p-0 text-xs gap-1"
+                  className="h-auto p-0 text-caption gap-1"
                   onClick={() => {
                     window.open(
                       "/api/v1/tools/download-journal-template",
@@ -386,30 +659,30 @@ export default function ToolsPage() {
                     );
                   }}
                 >
-                  <IconDownload size={12} /> Download Template
+                  <Download size={12} /> Download Template
                 </Button>
               </div>
               <div className="grid gap-2">
                 <Button
                   disabled={!selectedFile || isBusy}
                   onClick={handlePreview}
-                  className="gap-2"
+                  className="gap-2 text-caption"
                 >
-                  <IconEye size={14} />{" "}
+                  <Eye size={14} />{" "}
                   {isBusy ? "Processing..." : "Preview Entries"}
                 </Button>
                 {parseResult && (
                   <Button
                     disabled={isBusy || unmappedCount > 0}
                     onClick={handleConfirmImport}
-                    className="gap-2 bg-emerald-600 hover:bg-emerald-500"
+                    className="gap-2 bg-emerald-600 hover:bg-emerald-500 text-caption"
                   >
-                    <IconCheck size={14} /> Submit & Import (
+                    <Check size={14} /> Submit & Import (
                     {parseResult.totalTransactionsRead})
                   </Button>
                 )}
                 {unmappedCount > 0 && (
-                  <p className="text-xs text-destructive text-center font-medium">
+                  <p className="text-caption text-destructive text-center font-medium">
                     {unmappedCount} akun belum dipetakan
                   </p>
                 )}
@@ -420,70 +693,18 @@ export default function ToolsPage() {
           {accountMappings.length > 0 && (
             <Card>
               <CardHeader className="py-3 flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-xs">Mapping Status</CardTitle>
-                <Badge variant="secondary" className="text-xs">
+                <CardTitle className="text-caption">Mapping Status</CardTitle>
+                <Badge variant="secondary" className="text-label-small">
                   {accountMappings.length} akun
                 </Badge>
               </CardHeader>
               <CardContent className="p-0 max-h-60 overflow-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="text-xs">
-                      <TableHead>Excel Input</TableHead>
-                      <TableHead>Target COA</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {accountMappings.map((m, i) => (
-                      <TableRow
-                        key={i}
-                        className={m.mappedRef ? "bg-amber-500/10" : ""}
-                      >
-                        <TableCell className="text-xs">
-                          <Badge
-                            variant="outline"
-                            className="font-mono text-xs mr-1"
-                          >
-                            {m.excelRef}
-                          </Badge>
-                          {m.excelAccountName}
-                        </TableCell>
-                        <TableCell>
-                          <Select
-                            value={String(m.mappedRef || 0)}
-                            onValueChange={(v) =>
-                              handleMappingChange(
-                                m.excelRef,
-                                m.excelAccountName,
-                                Number(v),
-                              )
-                            }
-                            disabled={isLoadingCoa}
-                          >
-                            <SelectTrigger className="h-7 text-xs">
-                              <SelectValue placeholder="Pilih COA" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {dbAccounts.map((o: any) => {
-                                const refNum = o.referenceNumber || o.code;
-                                const accName = o.accountName || o.name;
-                                return (
-                                  <SelectItem
-                                    key={o.id || refNum}
-                                    value={String(refNum)}
-                                    className="text-xs"
-                                  >
-                                    [{refNum}] {accName}
-                                  </SelectItem>
-                                );
-                              })}
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <MappingStatusTable
+                  mappings={accountMappings}
+                  dbAccounts={dbAccounts}
+                  isLoadingCoa={isLoadingCoa}
+                  onMappingChange={handleMappingChange}
+                />
               </CardContent>
             </Card>
           )}
@@ -494,111 +715,29 @@ export default function ToolsPage() {
           {parseResult ? (
             <div className="space-y-4 max-h-[calc(100vh-120px)] overflow-auto pr-1">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold flex items-center gap-2">
-                  <IconUpload size={14} /> Preview Transactions
+                <h3 className="text-ui font-semibold flex items-center gap-2">
+                  <Upload size={14} /> Preview Transactions
                 </h3>
-                <Badge>{parseResult.transactions.length} loaded</Badge>
+                <Badge className="text-label-small">{parseResult.transactions.length} loaded</Badge>
               </div>
               {parseResult.transactions.map((tx, txIdx) => (
                 <Card key={txIdx} className="overflow-hidden">
                   <CardHeader className="py-2 px-3 flex-row items-center justify-between space-y-0 bg-muted/30">
                     <div className="flex items-center gap-2">
-                      <Badge className="text-xs">{tx.journalType}</Badge>
-                      <Badge variant="outline" className="font-mono text-xs">
+                      <Badge className="text-label-small">{tx.journalType}</Badge>
+                      <Badge variant="outline" className="font-mono text-label-small">
                         {tx.date}
                       </Badge>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-caption text-muted-foreground">
                       {tx.lines.length} lines
                     </span>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <Table>
-                      <TableHeader>
-                        <TableRow className="text-xs">
-                          <TableHead className="w-10">#</TableHead>
-                          <TableHead className="w-20">Ref</TableHead>
-                          <TableHead>Account</TableHead>
-                          <TableHead className="text-right">Debit</TableHead>
-                          <TableHead className="text-right">Credit</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {tx.lines.map((l, i) => {
-                          const mapping = accountMappings.find(
-                            (m) =>
-                              m.excelRef === l.refNumber &&
-                              m.excelAccountName === l.accountName,
-                          );
-                          const isUnmapped = !mapping?.mappedRef;
-                          return (
-                            <TableRow
-                              key={i}
-                              className={isUnmapped ? "bg-destructive/10" : ""}
-                            >
-                              <TableCell className="text-xs">
-                                {l.rowIndex}
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant="secondary"
-                                  className="font-mono text-xs"
-                                >
-                                  {l.refNumber}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-xs">
-                                <div className="font-medium">
-                                  {l.accountName}
-                                </div>
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {l.description}
-                                </div>
-                                {mapping?.mappedRef ? (
-                                  <Badge className="mt-1 bg-amber-500/15 text-amber-600 border-amber-500/20 text-xs">
-                                    → [{mapping.mappedRef}]{" "}
-                                    {mapping.mappedAccountName}
-                                  </Badge>
-                                ) : (
-                                  <Badge
-                                    variant="destructive"
-                                    className="mt-1 text-xs"
-                                  >
-                                    Unmapped
-                                  </Badge>
-                                )}
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-xs">
-                                {l.debit !== null ? formatIDR(l.debit) : "-"}
-                              </TableCell>
-                              <TableCell className="text-right font-mono text-xs">
-                                {l.credit !== null ? formatIDR(l.credit) : "-"}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                      <TableFooter>
-                        <TableRow>
-                          <TableCell
-                            colSpan={3}
-                            className="text-right font-medium text-xs"
-                          >
-                            Total
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-xs font-bold">
-                            {formatIDR(
-                              tx.lines.reduce((a, b) => a + (b.debit || 0), 0),
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-xs font-bold">
-                            {formatIDR(
-                              tx.lines.reduce((a, b) => a + (b.credit || 0), 0),
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      </TableFooter>
-                    </Table>
+                    <PreviewTransactionLinesTable
+                      lines={tx.lines}
+                      accountMappings={accountMappings}
+                    />
                   </CardContent>
                 </Card>
               ))}
@@ -606,9 +745,9 @@ export default function ToolsPage() {
           ) : (
             <Card className="h-64 grid place-items-center border-dashed">
               <CardContent className="text-center text-muted-foreground">
-                <IconUpload size={32} className="mx-auto mb-2 opacity-50" />
-                <p className="text-sm font-medium">No Preview Yet</p>
-                <p className="text-xs">
+                <Upload size={32} className="mx-auto mb-2 opacity-50" />
+                <p className="text-ui font-medium">No Preview Yet</p>
+                <p className="text-caption">
                   Select Excel on left and click Preview
                 </p>
               </CardContent>
