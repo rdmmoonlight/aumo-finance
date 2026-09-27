@@ -131,9 +131,11 @@ export default function HomePage() {
         <CardContent className="p-6 md:p-8">
           <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
             <div className="mb-3 flex items-center justify-between">
+              {/* H3 (20px) */}
               <h3 className="flex items-center gap-2 text-xl font-bold text-amber-400">
                 <LineChart size={18} /> Market Indicators
               </h3>
+              {/* Label kecil (11px) */}
               <Badge
                 variant="outline"
                 className="border-emerald-500/20 bg-emerald-500/10 text-[11px] text-emerald-400"
@@ -144,6 +146,7 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {isLoading ? (
+                /* Caption (12px) */
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
                 </div>
@@ -154,9 +157,11 @@ export default function HomePage() {
                     className="flex min-h-[80px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
                   >
                     <div className="flex items-center justify-between">
+                      {/* Caption (12px) */}
                       <span className="text-xs font-bold text-white">
                         {item.symbol}
                       </span>
+                      {/* Label kecil (11px) */}
                       <Badge
                         className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${
                           item.isUp
@@ -172,13 +177,16 @@ export default function HomePage() {
                         {item.change}
                       </Badge>
                     </div>
+                    {/* UI (14px) */}
                     <div className="mt-1 text-sm font-semibold text-white">
                       {item.price}
                     </div>
+                    {/* Caption (12px) */}
                     <div className="text-xs text-white/50">{item.name}</div>
                   </div>
                 ))
               ) : (
+                /* Caption (12px) */
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Gagal memuat indikator pasar.
                 </div>
@@ -187,12 +195,14 @@ export default function HomePage() {
           </div>
 
           <div className="mt-6 text-center">
+            {/* Body (16px) */}
             <p className="mx-auto max-w-md text-base leading-relaxed text-white/80">
               Integrated financial & accounting intelligence core. Manage
               full-cycle general ledgers, trial balances, and operational
               analytics with absolute precision.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {/* UI (14px) */}
               <Button
                 asChild
                 className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-sm text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
@@ -201,6 +211,7 @@ export default function HomePage() {
                   <LayoutDashboard size={16} /> Dashboard
                 </Link>
               </Button>
+              {/* UI (14px) */}
               <Button
                 asChild
                 variant="secondary"
@@ -216,4 +227,5 @@ export default function HomePage() {
       </Card>
     </div>
   );
-}
+          }
+        
