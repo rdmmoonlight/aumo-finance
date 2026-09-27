@@ -570,7 +570,12 @@ function DashboardContent() {
               <Plus size={14} /> New Entry
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="h-8 gap-1 text-caption">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1 text-caption"
+          >
             <Link href="/reports/income-statement">
               <FileText size={14} /> Report
             </Link>
@@ -581,7 +586,9 @@ function DashboardContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-caption">Financial Health Index</CardDescription>
+            <CardDescription className="text-caption">
+              Financial Health Index
+            </CardDescription>
             <Activity size={18} className="text-primary" />
           </CardHeader>
           <CardContent className="flex items-center gap-4">
@@ -643,7 +650,9 @@ function DashboardContent() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-caption">Revenue ({periodLabel})</CardDescription>
+            <CardDescription className="text-caption">
+              Revenue ({periodLabel})
+            </CardDescription>
             <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 grid place-items-center">
               <TrendingUp size={16} />
             </div>
@@ -657,7 +666,9 @@ function DashboardContent() {
         </Card>
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-caption">Expenses ({periodLabel})</CardDescription>
+            <CardDescription className="text-caption">
+              Expenses ({periodLabel})
+            </CardDescription>
             <div className="w-7 h-7 rounded-full bg-red-500/10 text-red-500 grid place-items-center">
               <TrendingDown size={16} />
             </div>
@@ -666,7 +677,9 @@ function DashboardContent() {
             <div className="text-h3 font-bold font-mono">
               {formatNumber(totalExpenses)}
             </div>
-            <p className="text-caption text-muted-foreground">Period Expenses</p>
+            <p className="text-caption text-muted-foreground">
+              Period Expenses
+            </p>
           </CardContent>
         </Card>
         <Card className="bg-primary text-primary-foreground">
@@ -687,7 +700,9 @@ function DashboardContent() {
         </Card>
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-caption">Liabilities ({periodLabel})</CardDescription>
+            <CardDescription className="text-caption">
+              Liabilities ({periodLabel})
+            </CardDescription>
             <div className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-500 grid place-items-center">
               <CreditCard size={16} />
             </div>
@@ -724,7 +739,9 @@ function DashboardContent() {
           <CardHeader className="flex-row items-center justify-between">
             <div>
               <CardTitle className="text-ui">Net Income Trend</CardTitle>
-              <CardDescription className="text-caption">Profitability over time</CardDescription>
+              <CardDescription className="text-caption">
+                Profitability over time
+              </CardDescription>
             </div>
             <TrendingUp size={18} className="text-muted-foreground" />
           </CardHeader>
@@ -740,7 +757,8 @@ function DashboardContent() {
           <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
             <div>
               <CardTitle className="text-ui flex items-center gap-2">
-                <TableIcon size={16} className="text-primary" /> Expense Account Breakdown
+                <TableIcon size={16} className="text-primary" /> Expense Account
+                Breakdown
               </CardTitle>
               <CardDescription className="text-caption mt-0.5">
                 Itemized operating costs ({periodLabel})
@@ -756,7 +774,8 @@ function DashboardContent() {
           <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
             <div>
               <CardTitle className="text-ui flex items-center gap-2">
-                <TableIcon size={16} className="text-primary" /> Trend Financial Log
+                <TableIcon size={16} className="text-primary" /> Trend Financial
+                Log
               </CardTitle>
               <CardDescription className="text-caption mt-0.5">
                 Tabular overview of revenue & expenses
