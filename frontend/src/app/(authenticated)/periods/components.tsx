@@ -31,7 +31,50 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { AccountItem, OpenInfoData, PeriodItem } from "./types";
+
+/* -------------------------------------------------------------------------- */
+/*                            TYPES & INTERFACES                              */
+/* -------------------------------------------------------------------------- */
+
+export interface ApiError {
+  data?: { message?: string };
+  message?: string;
+}
+
+export interface AccountItem {
+  id?: number | string;
+  displayLabel?: string;
+  referenceNumber?: string;
+  accountName?: string;
+}
+
+export interface PeriodItem {
+  id: number;
+  periodName?: string;
+  startDate?: string;
+  endDate?: string;
+  isClosed?: boolean;
+  isSelected?: boolean;
+}
+
+export interface OpenInfoData {
+  hasExistingPermanentAccounts?: boolean;
+  availableCashAndBankAccounts?: AccountItem[];
+  availableRetainedEarningsAccounts?: AccountItem[];
+}
+
+interface PeriodListProps {
+  periods: PeriodItem[];
+  selectedPeriod: PeriodItem | null;
+  isLoading: boolean;
+  isClearing: boolean;
+  selectingId: number | null;
+  closingId: number | null;
+  onClearSelection: () => void;
+  onSelectPeriod: (p: PeriodItem) => void;
+  onClosePeriod: (p: PeriodItem) => void;
+  onOpenCreateView: () => void;
+}
 
 const MONTH_NAMES = [
   "January",
