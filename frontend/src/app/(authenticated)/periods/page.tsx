@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { IconAlertTriangle, IconX } from "@tabler/icons-react";
+import { AlertTriangle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
@@ -199,7 +199,7 @@ export default function PeriodsPage() {
           className="flex justify-between items-center py-2 bg-red-950/50 border-red-900/50 text-red-200"
         >
           <AlertDescription className="flex items-center gap-2 text-xs">
-            <IconAlertTriangle size={16} />
+            <AlertTriangle size={16} />
             {errorMessage}
           </AlertDescription>
           <Button
@@ -208,7 +208,7 @@ export default function PeriodsPage() {
             className="h-6 w-6 text-red-200 hover:bg-red-900/30"
             onClick={() => setErrorMessage(null)}
           >
-            <IconX size={14} />
+            <X size={14} />
           </Button>
         </Alert>
       )}
@@ -224,7 +224,7 @@ export default function PeriodsPage() {
             className="h-6 w-6 hover:bg-white/10 text-white"
             onClick={() => setSuccessMessage(null)}
           >
-            <IconX size={14} />
+            <X size={14} />
           </Button>
         </Alert>
       )}
@@ -281,4 +281,5 @@ export default function PeriodsPage() {
       )}
     </div>
   );
-}
+    }
+         
