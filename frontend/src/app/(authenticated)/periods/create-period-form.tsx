@@ -1,12 +1,4 @@
 import {
-  IconCalendarPlus,
-  IconArrowLeft,
-  IconRefresh,
-  IconCirclePlus,
-  IconLoader2,
-} from "@tabler/icons-react";
-
-import {
   Card,
   CardContent,
   CardHeader,
@@ -24,8 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 import { AccountItem, OpenInfoData } from "./types";
+import {
+  CalendarPlus,
+  ArrowLeft,
+  RefreshCw,
+  PlusCircle,
+  Loader2,
+} from "lucide-react";
 
 const MONTH_NAMES = [
   "January",
@@ -117,40 +115,49 @@ export function CreatePeriodForm({
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
+          {/* H3 (20px) */}
           <h1 className="text-xl font-bold flex items-center gap-2 text-white">
-            <IconCalendarPlus className="text-white" size={22} /> Open New
+            <CalendarPlus className="text-white" size={22} /> Open New
             Period
           </h1>
-          <p className="text-sm text-zinc-400">
+          {/* Caption (12px) */}
+          <p className="text-xs text-zinc-400 mt-1">
             Start monthly cycle. Opening balance posted on day 1.
           </p>
         </div>
+        {/* Caption (12px) */}
         <Button
           variant="outline"
           size="sm"
-          className="gap-1.5 bg-transparent border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white"
+          className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10 hover:text-white"
           onClick={onCancel}
         >
-          <IconArrowLeft size={14} /> Back
+          <ArrowLeft size={14} /> Back
         </Button>
       </div>
 
       <form onSubmit={onSubmit} className="space-y-6">
         <Card className="bg-[#151519] border-white/[0.07]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-white">Period</CardTitle>
+            {/* UI (14px) */}
+            <CardTitle className="text-sm font-semibold text-white">
+              Period
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-zinc-300">Month</Label>
+              {/* UI (14px) */}
+              <Label className="text-sm text-zinc-300">Month</Label>
               <Select
                 value={String(month)}
                 onValueChange={(v) => setMonth(Number(v))}
               >
-                <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white">
+                {/* UI (14px) */}
+                <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-[#1e1e22] border-white/10 text-white">
+                {/* UI (14px) */}
+                <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                   {MONTH_NAMES.map((n, i) => (
                     <SelectItem key={i + 1} value={String(i + 1)}>
                       {n}
@@ -160,13 +167,15 @@ export function CreatePeriodForm({
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-zinc-300">Year</Label>
+              {/* UI (14px) */}
+              <Label className="text-sm text-zinc-300">Year</Label>
+              {/* UI (14px) */}
               <Input
                 type="number"
                 value={year}
                 onChange={(e) => setYear(Number(e.target.value))}
                 required
-                className="bg-[#0e0e10] border-white/10 text-white"
+                className="bg-[#0e0e10] border-white/10 text-white text-sm"
               />
             </div>
           </CardContent>
@@ -174,17 +183,20 @@ export function CreatePeriodForm({
 
         <Card className="bg-[#151519] border-white/[0.07]">
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm text-white">
+            {/* UI (14px) */}
+            <CardTitle className="text-sm font-semibold text-white">
               Permanent Accounts Setup
             </CardTitle>
-            <CardDescription className="text-zinc-500">
+            {/* Caption (12px) */}
+            <CardDescription className="text-xs text-zinc-500">
               Choose existing or create new
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {isLoadingOpenInfo ? (
+              /* Caption (12px) */
               <div className="text-center py-4 text-xs text-zinc-500">
-                <IconLoader2 className="animate-spin inline mr-1" size={14} />
+                <Loader2 className="animate-spin inline mr-1" size={14} />
                 Memuat informasi akun...
               </div>
             ) : (
@@ -203,11 +215,12 @@ export function CreatePeriodForm({
                       disabled={!openInfo?.hasExistingPermanentAccounts}
                       className="border-white/20 text-white"
                     />
+                    {/* Caption (12px) */}
                     <Label
                       htmlFor="load"
                       className="flex items-center gap-1 text-xs cursor-pointer text-zinc-300"
                     >
-                      <IconRefresh size={12} /> Use Existing
+                      <RefreshCw size={12} /> Use Existing
                     </Label>
                   </div>
                   <div className="flex items-center gap-2">
@@ -216,11 +229,12 @@ export function CreatePeriodForm({
                       id="create"
                       className="border-white/20 text-white"
                     />
+                    {/* Caption (12px) */}
                     <Label
                       htmlFor="create"
                       className="flex items-center gap-1 text-xs cursor-pointer text-zinc-300"
                     >
-                      <IconCirclePlus size={12} /> Register New
+                      <PlusCircle size={12} /> Register New
                     </Label>
                   </div>
                 </RadioGroup>
@@ -228,15 +242,18 @@ export function CreatePeriodForm({
                 {setupMode === "LoadExisting" ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
-                      <Label className="text-zinc-300">Cash Account</Label>
+                      {/* UI (14px) */}
+                      <Label className="text-sm text-zinc-300">Cash Account</Label>
                       <Select
                         value={cashAccountId}
                         onValueChange={setCashAccountId}
                       >
-                        <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white">
+                        {/* UI (14px) */}
+                        <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1e1e22] border-white/10">
+                        {/* UI (14px) */}
+                        <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                           {openInfo?.availableCashAndBankAccounts?.map(
                             (a: AccountItem) => (
                               <SelectItem
@@ -253,15 +270,18 @@ export function CreatePeriodForm({
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-zinc-300">Bank Account</Label>
+                      {/* UI (14px) */}
+                      <Label className="text-sm text-zinc-300">Bank Account</Label>
                       <Select
                         value={bankAccountId}
                         onValueChange={setBankAccountId}
                       >
-                        <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white">
+                        {/* UI (14px) */}
+                        <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1e1e22] border-white/10">
+                        {/* UI (14px) */}
+                        <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                           {openInfo?.availableCashAndBankAccounts?.map(
                             (a: AccountItem) => (
                               <SelectItem
@@ -278,12 +298,15 @@ export function CreatePeriodForm({
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label className="text-zinc-300">Retained Earnings</Label>
+                      {/* UI (14px) */}
+                      <Label className="text-sm text-zinc-300">Retained Earnings</Label>
                       <Select value={retainedId} onValueChange={setRetainedId}>
-                        <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white">
+                        {/* UI (14px) */}
+                        <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#1e1e22] border-white/10">
+                        {/* UI (14px) */}
+                        <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                           {openInfo?.availableRetainedEarningsAccounts?.map(
                             (a: AccountItem) => (
                               <SelectItem
@@ -303,23 +326,26 @@ export function CreatePeriodForm({
                   <div className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Cash Code</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Cash Code</Label>
                         <Input
                           value={cashAccountCode}
                           onChange={(e) => setCashAccountCode(e.target.value)}
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Cash Name</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Cash Name</Label>
                         <Input
                           value={cashAccountName}
                           onChange={(e) => setCashAccountName(e.target.value)}
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Cash Balance</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Cash Balance</Label>
                         <Input
                           type="number"
                           value={cashBalance}
@@ -330,30 +356,33 @@ export function CreatePeriodForm({
                                 : Number(e.target.value),
                             )
                           }
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Bank Code</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Bank Code</Label>
                         <Input
                           value={bankAccountCode}
                           onChange={(e) => setBankAccountCode(e.target.value)}
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Bank Name</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Bank Name</Label>
                         <Input
                           value={bankAccountName}
                           onChange={(e) => setBankAccountName(e.target.value)}
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Bank Balance</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Bank Balance</Label>
                         <Input
                           type="number"
                           value={bankBalance}
@@ -364,26 +393,28 @@ export function CreatePeriodForm({
                                 : Number(e.target.value),
                             )
                           }
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Retained Code</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Retained Code</Label>
                         <Input
                           value={retainedCode}
                           onChange={(e) => setRetainedCode(e.target.value)}
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-zinc-300">Retained Name</Label>
+                        {/* UI (14px) */}
+                        <Label className="text-sm text-zinc-300">Retained Name</Label>
                         <Input
                           value={retainedName}
                           onChange={(e) => setRetainedName(e.target.value)}
-                          className="bg-[#0e0e10] border-white/10 text-white"
+                          className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                     </div>
@@ -395,18 +426,20 @@ export function CreatePeriodForm({
         </Card>
 
         <div className="flex justify-end gap-2">
+          {/* UI (14px) */}
           <Button
             type="button"
             variant="outline"
             onClick={onCancel}
-            className="bg-transparent border-white/10 text-zinc-300 hover:bg-white/10 hover:text-white"
+            className="bg-transparent border-white/10 text-sm text-zinc-300 hover:bg-white/10 hover:text-white"
           >
             Cancel
           </Button>
+          {/* UI (14px) */}
           <Button
             type="submit"
             disabled={isCreating}
-            className="bg-white text-black hover:bg-zinc-200"
+            className="bg-white text-black text-sm font-medium hover:bg-zinc-200"
           >
             {isCreating ? "Creating..." : "Submit Period"}
           </Button>
@@ -414,4 +447,5 @@ export function CreatePeriodForm({
       </form>
     </div>
   );
-}
+  }
+  
