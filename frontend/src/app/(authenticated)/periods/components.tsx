@@ -88,7 +88,7 @@ interface CreatePeriodFormProps {
   onCancel: () => void;
 }
 
-export function CreatePeriodForm({
+function CreatePeriodForm({
   month,
   year,
   setupMode,
@@ -461,7 +461,7 @@ interface GetPeriodColumnsProps {
   onClosePeriod: (p: PeriodItem) => void;
 }
 
-export const getPeriodColumns = ({
+const getPeriodColumns = ({
   selectedPeriod,
   selectingId,
   closingId,
@@ -614,3 +614,14 @@ export const getPeriodColumns = ({
     },
   },
 ];
+
+/* -------------------------------------------------------------------------- */
+/*                            EXPORTS                                         */
+/* -------------------------------------------------------------------------- */
+
+export const components = {
+  CreatePeriodForm,
+  getPeriodColumns,
+};
+
+export default components;
