@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,12 +29,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-// Import RTK Query auto-generated hooks
 import {
   usePostApiV1ChartOfAccountsMutation,
   usePutApiV1ChartOfAccountsByIdMutation,
   useDeleteApiV1ChartOfAccountsByIdMutation,
 } from "@/lib/generatedApi";
+import { Plus } from "lucide-react";
 
 // Tipe DTO lokal untuk UI dialog (sepadan dengan respons API)
 export interface ChartOfAccount {
@@ -149,18 +148,21 @@ export function AddAccountDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <IconPlus size={18} className="text-primary" /> Add New Account
+          {/* H3 (20px) */}
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <Plus size={18} className="text-primary" /> Add New Account
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
+            /* Caption (12px) */
             <Alert variant="destructive" className="text-xs">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           <div className="space-y-2">
-            <Label>Category</Label>
+            {/* UI (14px) */}
+            <Label className="text-sm">Category</Label>
             <Select
               value={newAccount.type}
               onValueChange={(v) =>
@@ -172,10 +174,12 @@ export function AddAccountDialog({
               }
               required
             >
-              <SelectTrigger>
+              {/* UI (14px) */}
+              <SelectTrigger className="text-sm">
                 <SelectValue placeholder="Select Category" />
               </SelectTrigger>
-              <SelectContent>
+              {/* UI (14px) */}
+              <SelectContent className="text-sm">
                 {ACCOUNT_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
                     {ACCOUNT_RANGES[t].label}
@@ -185,7 +189,9 @@ export function AddAccountDialog({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>Reference Number</Label>
+            {/* UI (14px) */}
+            <Label className="text-sm">Reference Number</Label>
+            {/* UI (14px) */}
             <Input
               type="number"
               value={newAccount.referenceNumber || ""}
@@ -196,8 +202,10 @@ export function AddAccountDialog({
                 })
               }
               disabled={!newAccount.type}
+              className="text-sm"
               required
             />
+            {/* Caption (12px) */}
             <p className="text-xs text-muted-foreground">
               {newAccount.type
                 ? `Valid: ${ACCOUNT_RANGES[newAccount.type].start}-${ACCOUNT_RANGES[newAccount.type].end}`
@@ -205,24 +213,30 @@ export function AddAccountDialog({
             </p>
           </div>
           <div className="space-y-2">
-            <Label>Account Name</Label>
+            {/* UI (14px) */}
+            <Label className="text-sm">Account Name</Label>
+            {/* UI (14px) */}
             <Input
               value={newAccount.accountName}
               onChange={(e) =>
                 setNewAccount({ ...newAccount, accountName: e.target.value })
               }
+              className="text-sm"
               required
             />
           </div>
           <DialogFooter>
+            {/* UI (14px) */}
             <Button
               type="button"
               variant="ghost"
+              className="text-sm"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isCreating}>
+            {/* UI (14px) */}
+            <Button type="submit" disabled={isCreating} className="text-sm font-medium">
               {isCreating ? "Saving..." : "Save Account"}
             </Button>
           </DialogFooter>
@@ -284,26 +298,33 @@ export function EditAccountDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Account</DialogTitle>
+          {/* H3 (20px) */}
+          <DialogTitle className="text-xl font-bold">Edit Account</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
+            /* Caption (12px) */
             <Alert variant="destructive" className="text-xs">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
           <div className="space-y-2">
-            <Label>Name</Label>
+            {/* UI (14px) */}
+            <Label className="text-sm">Name</Label>
+            {/* UI (14px) */}
             <Input
               value={editData.accountName}
               onChange={(e) =>
                 setEditData({ ...editData, accountName: e.target.value })
               }
+              className="text-sm"
               required
             />
           </div>
           <div className="space-y-2">
-            <Label>Ref Number</Label>
+            {/* UI (14px) */}
+            <Label className="text-sm">Ref Number</Label>
+            {/* UI (14px) */}
             <Input
               type="number"
               value={editData.referenceNumber}
@@ -313,18 +334,22 @@ export function EditAccountDialog({
                   referenceNumber: Number(e.target.value),
                 })
               }
+              className="text-sm"
               required
             />
           </div>
           <DialogFooter>
+            {/* UI (14px) */}
             <Button
               type="button"
               variant="ghost"
+              className="text-sm"
               onClick={() => onOpenChange(false)}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isUpdating}>
+            {/* UI (14px) */}
+            <Button type="submit" disabled={isUpdating} className="text-sm font-medium">
               {isUpdating ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>
@@ -366,18 +391,26 @@ export function DeleteAccountAlertDialog({
     <AlertDialog open={!!account} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete Account</AlertDialogTitle>
-          <AlertDialogDescription>
+          {/* H3 (20px) */}
+          <AlertDialogTitle className="text-xl font-bold">
+            Delete Account
+          </AlertDialogTitle>
+          {/* Caption (12px) */}
+          <AlertDialogDescription className="text-xs text-muted-foreground">
             Are you sure you want to delete &quot;{account?.accountName}&quot;?
             This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          {/* UI (14px) */}
+          <AlertDialogCancel disabled={isDeleting} className="text-sm">
+            Cancel
+          </AlertDialogCancel>
+          {/* UI (14px) */}
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}
-            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm font-medium"
           >
             {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
