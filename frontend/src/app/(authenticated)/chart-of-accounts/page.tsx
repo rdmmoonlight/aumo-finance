@@ -36,7 +36,15 @@ import {
   EditAccountDialog,
   DeleteAccountAlertDialog,
 } from "./_components/coa-dialogs";
-import { Network, Plus, Pencil, BookOpen, Trash2, X, Search } from "lucide-react";
+import {
+  Network,
+  Plus,
+  Pencil,
+  BookOpen,
+  Trash2,
+  X,
+  Search,
+} from "lucide-react";
 
 // Tipe presisi yang cocok dengan ekspektasi ChartOfAccount pada coa-dialogs.tsx
 type AccountItem = {
@@ -185,7 +193,9 @@ function ChartOfAccountsContent() {
         ),
         cell: ({ getValue }) => (
           /* UI (14px) */
-          <span className="text-sm font-medium">{String(getValue() ?? "")}</span>
+          <span className="text-sm font-medium">
+            {String(getValue() ?? "")}
+          </span>
         ),
       },
       {
@@ -342,7 +352,10 @@ function ChartOfAccountsContent() {
           </p>
         </div>
         {/* UI (14px) */}
-        <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 text-sm font-medium">
+        <Button
+          onClick={() => setIsAddModalOpen(true)}
+          className="gap-2 text-sm font-medium"
+        >
           <Plus size={16} /> New Account
         </Button>
       </div>
@@ -371,7 +384,9 @@ function ChartOfAccountsContent() {
       {successMessage && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex justify-between items-center py-2">
           {/* Caption (12px) */}
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
           <Button
             variant="ghost"
             size="icon"

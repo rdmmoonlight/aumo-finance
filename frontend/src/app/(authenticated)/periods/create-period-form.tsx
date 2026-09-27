@@ -117,8 +117,7 @@ export function CreatePeriodForm({
         <div>
           {/* H3 (20px) */}
           <h1 className="text-xl font-bold flex items-center gap-2 text-white">
-            <CalendarPlus className="text-white" size={22} /> Open New
-            Period
+            <CalendarPlus className="text-white" size={22} /> Open New Period
           </h1>
           {/* Caption (12px) */}
           <p className="text-xs text-zinc-400 mt-1">
@@ -243,7 +242,9 @@ export function CreatePeriodForm({
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-1.5">
                       {/* UI (14px) */}
-                      <Label className="text-sm text-zinc-300">Cash Account</Label>
+                      <Label className="text-sm text-zinc-300">
+                        Cash Account
+                      </Label>
                       <Select
                         value={cashAccountId}
                         onValueChange={setCashAccountId}
@@ -271,7 +272,9 @@ export function CreatePeriodForm({
 
                     <div className="space-y-1.5">
                       {/* UI (14px) */}
-                      <Label className="text-sm text-zinc-300">Bank Account</Label>
+                      <Label className="text-sm text-zinc-300">
+                        Bank Account
+                      </Label>
                       <Select
                         value={bankAccountId}
                         onValueChange={setBankAccountId}
@@ -299,7 +302,9 @@ export function CreatePeriodForm({
 
                     <div className="space-y-1.5">
                       {/* UI (14px) */}
-                      <Label className="text-sm text-zinc-300">Retained Earnings</Label>
+                      <Label className="text-sm text-zinc-300">
+                        Retained Earnings
+                      </Label>
                       <Select value={retainedId} onValueChange={setRetainedId}>
                         {/* UI (14px) */}
                         <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
@@ -327,7 +332,9 @@ export function CreatePeriodForm({
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Cash Code</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Cash Code
+                        </Label>
                         <Input
                           value={cashAccountCode}
                           onChange={(e) => setCashAccountCode(e.target.value)}
@@ -336,7 +343,9 @@ export function CreatePeriodForm({
                       </div>
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Cash Name</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Cash Name
+                        </Label>
                         <Input
                           value={cashAccountName}
                           onChange={(e) => setCashAccountName(e.target.value)}
@@ -345,7 +354,9 @@ export function CreatePeriodForm({
                       </div>
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Cash Balance</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Cash Balance
+                        </Label>
                         <Input
                           type="number"
                           value={cashBalance}
@@ -364,7 +375,9 @@ export function CreatePeriodForm({
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Bank Code</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Bank Code
+                        </Label>
                         <Input
                           value={bankAccountCode}
                           onChange={(e) => setBankAccountCode(e.target.value)}
@@ -373,7 +386,9 @@ export function CreatePeriodForm({
                       </div>
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Bank Name</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Bank Name
+                        </Label>
                         <Input
                           value={bankAccountName}
                           onChange={(e) => setBankAccountName(e.target.value)}
@@ -382,7 +397,9 @@ export function CreatePeriodForm({
                       </div>
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Bank Balance</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Bank Balance
+                        </Label>
                         <Input
                           type="number"
                           value={bankBalance}
@@ -401,7 +418,9 @@ export function CreatePeriodForm({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Retained Code</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Retained Code
+                        </Label>
                         <Input
                           value={retainedCode}
                           onChange={(e) => setRetainedCode(e.target.value)}
@@ -410,7 +429,9 @@ export function CreatePeriodForm({
                       </div>
                       <div className="space-y-1.5">
                         {/* UI (14px) */}
-                        <Label className="text-sm text-zinc-300">Retained Name</Label>
+                        <Label className="text-sm text-zinc-300">
+                          Retained Name
+                        </Label>
                         <Input
                           value={retainedName}
                           onChange={(e) => setRetainedName(e.target.value)}
@@ -447,5 +468,4 @@ export function CreatePeriodForm({
       </form>
     </div>
   );
-  }
-  
+}
