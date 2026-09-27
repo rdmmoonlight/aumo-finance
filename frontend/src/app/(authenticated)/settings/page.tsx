@@ -49,13 +49,13 @@ export default function SettingsPage() {
             value="appearance"
             className="m-0 focus-visible:outline-none"
           >
-            <AppearanceAndSecuritySettings defaultTab="appearance" />
+            <AppearanceAndSecuritySettings />
           </TabsContent>
           <TabsContent
             value="security"
             className="m-0 focus-visible:outline-none"
           >
-            <AppearanceAndSecuritySettings defaultTab="security" />
+            <AppearanceAndSecuritySettings />
           </TabsContent>
         </div>
       </Tabs>
