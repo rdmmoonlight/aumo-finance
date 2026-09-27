@@ -41,7 +41,8 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <div className="min-h-screen bg-background text-foreground antialiased selection:bg-primary selection:text-primary-foreground">
+            {/* UI (14px) set sebagai basis teks default aplikasi */}
+            <div className="min-h-screen bg-background text-foreground text-sm antialiased selection:bg-primary selection:text-primary-foreground">
               {children}
             </div>
           </ThemeProvider>
@@ -49,4 +50,5 @@ export default function RootLayout({
       </body>
     </html>
   );
-}
+  }
+    
