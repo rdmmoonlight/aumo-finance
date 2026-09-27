@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 /** Padanan Compose dari activity_dashboard.xml. */
 @Composable
@@ -59,9 +60,9 @@ fun DashboardScreen(summary: DashboardSummary?) {
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .padding(top = 16.dp)
+                        .padding(top = AumoDimens.SpacingLarge)
                         .background(AumoColors.Surface)
-                        .padding(16.dp),
+                        .padding(AumoDimens.SpacingLarge),
             ) {
                 BalanceLine(
                     label = "Total Aset",
@@ -90,7 +91,7 @@ fun DashboardScreen(summary: DashboardSummary?) {
                         .fillMaxWidth()
                         .padding(top = 12.dp)
                         .background(AumoColors.SurfaceElevated)
-                        .padding(16.dp),
+                        .padding(AumoDimens.SpacingLarge),
             ) {
                 Text("Laba Bersih Periode Ini", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize)
                 Text(
@@ -149,7 +150,7 @@ private fun CashBankSection(
         modifier = Modifier.padding(top = 20.dp),
     )
     Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall),
         verticalArrangement = Arrangement.spacedBy(0.dp),
     ) {
         entries.forEach { entry ->

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 // According to the reference number ranges in AccountClassification.cs in aumo-finance-web.
 val CoaAccountTypes =
@@ -60,7 +61,7 @@ fun CoaScreen(
     onAccountClick: (Account) -> Unit,
 ) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AumoDimens.SpacingLarge)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 OutlinedTextField(
                     value = searchQuery,
@@ -73,7 +74,7 @@ fun CoaScreen(
                 Button(
                     onClick = onAddClick,
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
-                    modifier = Modifier.padding(start = 8.dp),
+                    modifier = Modifier.padding(start = AumoDimens.SpacingSmall),
                 ) {
                     Text("Tambah")
                 }
@@ -97,7 +98,7 @@ private fun AccountRow(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp)
+                .padding(bottom = AumoDimens.SpacingSmall)
                 .background(AumoColors.Surface, RoundedCornerShape(8.dp))
                 .clickable(onClick = onClick)
                 .padding(14.dp),

@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 // Dipakai bersama oleh Income Statement, Retained Earnings, Financial
 // Position, Cash Flow, Closing Journal — padanan Compose dari ReportRowBuilder
@@ -38,7 +39,7 @@ fun FinancialReportScaffold(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(16.dp),
+                    .padding(AumoDimens.SpacingLarge),
         ) {
             Text(
                 text = periodName ?: "Belum ada periode dipilih",
@@ -81,7 +82,7 @@ fun ReportSectionTitle(text: String) {
         color = AumoColors.TextPrimary,
         fontWeight = FontWeight.Bold,
         fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+        modifier = Modifier.padding(top = AumoDimens.SpacingLarge, bottom = 4.dp),
     )
 }
 

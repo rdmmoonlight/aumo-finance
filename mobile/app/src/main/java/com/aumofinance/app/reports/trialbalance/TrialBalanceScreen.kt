@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 // Padanan Compose dari activity_trial_balance.xml + TrialBalanceAdapter/item_trial_balance_row.
 // Dipakai bareng oleh 3 varian: Unadjusted, Adjusted, Post-Closing (beda cuma
@@ -26,7 +27,7 @@ fun TrialBalanceScreen(
     fallbackTitle: String,
 ) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AumoDimens.SpacingLarge)) {
             Text(
                 text = report?.reportTitle ?: fallbackTitle,
                 color = AumoColors.TextPrimary,
@@ -40,7 +41,7 @@ fun TrialBalanceScreen(
                 modifier = Modifier.padding(top = 2.dp),
             )
 
-            LazyColumn(modifier = Modifier.weight(1f).padding(top = 8.dp)) {
+            LazyColumn(modifier = Modifier.weight(1f).padding(top = AumoDimens.SpacingSmall)) {
                 items(report?.rows ?: emptyList()) { row -> TrialBalanceRowItem(row) }
             }
 
@@ -52,7 +53,7 @@ fun TrialBalanceScreen(
                     color = AumoColors.TextPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                    modifier = Modifier.padding(top = 8.dp),
+                    modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
                 )
                 Text(
                     text = if (report.isBalanced) "Balanced" else "Unbalanced",

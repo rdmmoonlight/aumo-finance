@@ -48,6 +48,7 @@ import com.aumofinance.app.ui.icons.TablerIcon
 import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
 import java.util.Calendar
+import com.aumofinance.app.ui.theme.AumoDimens
 
 /**
  * Halaman Periods, ditulis ulang dengan Jetpack Compose (sebelumnya
@@ -246,7 +247,7 @@ fun OpenPeriodDialog(
                         .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
                     OutlinedTextField(
                         value = month,
                         onValueChange = { month = it.filter(Char::isDigit) },

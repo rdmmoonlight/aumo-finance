@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 
 private val columnHeaders =
     listOf(
@@ -37,7 +38,7 @@ private fun fmt(value: Double): String = if (value == 0.0) "" else CurrencyForma
 @Composable
 fun WorksheetScreen(report: WorksheetReport?) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->
-        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(16.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AumoDimens.SpacingLarge)) {
             Text(
                 text = report?.selectedPeriodName ?: "Belum ada periode dipilih",
                 color = AumoColors.TextMuted,
@@ -47,7 +48,7 @@ fun WorksheetScreen(report: WorksheetReport?) {
             Column(
                 modifier =
                     Modifier
-                        .padding(top = 8.dp)
+                        .padding(top = AumoDimens.SpacingSmall)
                         .horizontalScroll(rememberScrollState())
                         .verticalScroll(rememberScrollState()),
             ) {
@@ -125,7 +126,7 @@ private fun WorksheetRowView(
                 modifier =
                     Modifier
                         .width(if (index == 0) 140.dp else 110.dp)
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                        .padding(horizontal = 12.dp, vertical = AumoDimens.SpacingSmall),
             )
         }
     }

@@ -54,6 +54,7 @@ import com.aumofinance.app.ui.theme.AumoColors
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.aumofinance.app.ui.theme.AumoDimens
 
 private val DATE_DISPLAY = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
 
@@ -98,8 +99,8 @@ fun JournalEntryScreen(
 
             LazyColumn(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(AumoDimens.SpacingLarge),
+                verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge),
             ) {
                 if (isLocked) {
                     item { LockedPeriodWarning() }
@@ -210,7 +211,7 @@ private fun JournalDetailsCard(
         border = BorderStroke(1.dp, AumoColors.SurfaceElevated),
         shape = RoundedCornerShape(12.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(modifier = Modifier.padding(AumoDimens.SpacingLarge), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             // --- Journal Type: dropdown, item sekarang selalu terlihat
             // (warna teks & background popup diset eksplisit) ---
             FieldLabel("Journal Type")
@@ -332,9 +333,9 @@ private fun JournalLineCard(
         border = BorderStroke(1.dp, AumoColors.SurfaceElevated),
         shape = RoundedCornerShape(12.dp),
     ) {
-        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
             // Row 1: Account dropdown & Delete button
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
                 var expanded by remember { mutableStateOf(false) }
                 val selectedLabel =
                     accounts.firstOrNull { it.id == line.accountId }
@@ -408,7 +409,7 @@ private fun JournalLineCard(
             )
 
             // Debit & Credit — dengan pemisah ribuan otomatis
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
                 ThousandsAmountField(
                     label = "Debit",
                     rawDigits = line.debit,
@@ -478,7 +479,7 @@ private fun BottomActionBar(
                 .fillMaxWidth()
                 .background(AumoColors.Surface, RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
                 .border(1.dp, AumoColors.SurfaceElevated, RoundedCornerShape(16.dp, 16.dp, 0.dp, 0.dp))
-                .padding(16.dp),
+                .padding(AumoDimens.SpacingLarge),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
