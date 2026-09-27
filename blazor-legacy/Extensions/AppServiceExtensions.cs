@@ -325,7 +325,13 @@ namespace AumoBlazor.Extensions
         {
             var config = new AppConfig();
 
-            var webApi = configuration["WEB_API_URL"] ?? Environment.GetEnvironmentVariable("WEB_API_URL");
+            // PERBAIKAN: WEB_API_URL (top-level env var) diprioritaskan untuk deployment,
+            // tapi fallback ke AppSettings:WebApiUrl (key nested di appsettings.json) yang
+            // sebelumnya tidak pernah terbaca sehingga koneksi ke backend diam-diam jatuh
+            // ke default "http://localhost:5000/" di AppConfig.cs.
+            var webApi = configuration["WEB_API_URL"]
+                ?? Environment.GetEnvironmentVariable("WEB_API_URL")
+                ?? configuration["AppSettings:WebApiUrl"];
             if (!string.IsNullOrWhiteSpace(webApi))
             {
                 config.WebApiUrl = webApi.EndsWith("/") ? webApi : webApi + "/";
@@ -333,6 +339,7 @@ namespace AumoBlazor.Extensions
 
             config.AppName = configuration["APP_NAME"]
                 ?? Environment.GetEnvironmentVariable("APP_NAME")
+                ?? configuration["AppSettings:AppName"]
                 ?? config.AppName;
 
             config.AuthLoginPath = configuration["AUTH_LOGIN_PATH"] ?? config.AuthLoginPath;
