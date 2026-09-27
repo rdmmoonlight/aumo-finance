@@ -30,7 +30,7 @@ fun DashboardScreen(summary: DashboardSummary?) {
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(20.dp),
+                    .padding(AumoDimens.ScreenPadding),
         ) {
             if (summary == null || !summary.hasPeriodSelected) {
                 Text(

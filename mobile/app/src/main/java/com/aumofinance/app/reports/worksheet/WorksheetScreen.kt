@@ -122,7 +122,7 @@ private fun WorksheetRowView(
                 text = text,
                 color = if (isHeader) AumoColors.Primary else AumoColors.TextPrimary,
                 fontWeight = if (isHeader) FontWeight.Bold else FontWeight.Normal,
-                fontSize = 12.sp,
+                fontSize = MaterialTheme.typography.labelMedium.fontSize,
                 modifier =
                     Modifier
                         .width(if (index == 0) 140.dp else 110.dp)
