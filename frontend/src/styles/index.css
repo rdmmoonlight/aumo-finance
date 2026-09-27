@@ -150,21 +150,6 @@
   }
 }
 
-@keyframes quran-marquee {
-  0% {
-    transform: translateX(0%);
-  }
-  100% {
-    transform: translateX(-100%);
-  }
-}
-
-.animate-quran-marquee {
-  animation: quran-marquee 20s linear infinite;
-}
-
-/* KITA HAPUS BLOK :ROOT DAN .DARK MANUAL DI SINI AGAR TIDAK MENIMPA THEME.CSS */
-
 :root {
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
@@ -185,4 +170,19 @@
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+@layer utilities {
+  .text-label-small { font-size: 11px; }
+  .text-caption     { font-size: 12px; }
+  .text-secondary   { font-size: 13px; }
+  .text-ui          { font-size: 14px; }
+  .text-body        { font-size: 16px; }
+  .text-h4          { font-size: 18px; }
+  .text-h3          { font-size: 20px; }
+  .text-h2          { font-size: 24px; }
+  .text-h1          { font-size: 28px; }
+  .text-h1-large    { font-size: 30px; }
+  .text-h1-xlarge   { font-size: 32px; }
+  .text-display     { font-size: 48px; }
 }
