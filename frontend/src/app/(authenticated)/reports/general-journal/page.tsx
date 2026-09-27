@@ -234,7 +234,12 @@ export default function GeneralJournalClient() {
     () => [
       {
         id: "dateAndRef",
-        header: () => <span className="pl-6">Date & Ref</span>,
+        header: () => (
+          /* Label kecil (11px) */
+          <span className="pl-6 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Date & Ref
+          </span>
+        ),
         meta: {
           headerClassName: "w-[16%] pl-6",
           cellClassName: "align-top py-2 text-xs pl-6",
@@ -244,21 +249,25 @@ export default function GeneralJournalClient() {
           return (
             <>
               {item.showHeader && (
-                <Badge variant="secondary" className="mb-1 font-mono">
+                /* Caption (12px) */
+                <Badge variant="secondary" className="mb-1 font-mono text-xs">
                   {item.formattedDate}
                 </Badge>
               )}
               {item.isFirstLine && (
                 <div className="flex flex-col gap-0.5">
-                  <span className="font-mono font-bold text-amber-500">
+                  {/* Caption (12px) */}
+                  <span className="font-mono font-bold text-xs text-amber-500">
                     {item.transactionNumber}
                   </span>
                   {item.createdAt && (
+                    /* Caption (12px) */
                     <span className="text-xs text-muted-foreground">
                       {formatDateTimeDisplay(item.createdAt)}
                     </span>
                   )}
                   {item.updatedAt && (
+                    /* Caption (12px) */
                     <span className="flex items-center gap-0.5 text-xs text-sky-500">
                       <Pencil className="h-2.5 w-2.5" />{" "}
                       {formatDateTimeDisplay(item.updatedAt)}
@@ -295,15 +304,21 @@ export default function GeneralJournalClient() {
       },
       {
         accessorKey: "accountName",
-        header: "Account",
+        header: () => (
+          /* Label kecil (11px) */
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Account
+          </span>
+        ),
         meta: { headerClassName: "w-[26%]" },
         cell: ({ row, getValue }) => {
           const isDebit = row.original.debit > 0;
           return (
+            /* Caption (12px) */
             <div
               className={
                 isDebit
-                  ? "align-top py-2 text-xs font-semibold"
+                  ? "align-top py-2 text-xs font-semibold text-foreground"
                   : "align-top py-2 pl-6 text-xs text-muted-foreground"
               }
             >
@@ -314,7 +329,12 @@ export default function GeneralJournalClient() {
       },
       {
         accessorKey: "lineDescription",
-        header: "Description",
+        header: () => (
+          /* Label kecil (11px) */
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Description
+          </span>
+        ),
         meta: {
           headerClassName: "w-[26%]",
           cellClassName: "align-top py-2 text-xs text-muted-foreground",
@@ -323,20 +343,31 @@ export default function GeneralJournalClient() {
       },
       {
         accessorKey: "referenceNumber",
-        header: () => <div className="text-center">Ref #</div>,
+        header: () => (
+          /* Label kecil (11px) */
+          <div className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Ref #
+          </div>
+        ),
         meta: {
           headerClassName: "w-[10%] text-center",
           cellClassName: "align-top py-2 text-xs text-center",
         },
         cell: ({ getValue }) => (
-          <Badge variant="outline" className="font-mono text-amber-500">
+          /* Caption (12px) */
+          <Badge variant="outline" className="font-mono text-xs text-amber-500">
             {String(getValue())}
           </Badge>
         ),
       },
       {
         accessorKey: "debit",
-        header: () => <div className="text-right">Debit (Rp)</div>,
+        header: () => (
+          /* Label kecil (11px) */
+          <div className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Debit (Rp)
+          </div>
+        ),
         meta: {
           headerClassName: "w-[11%] text-right",
           cellClassName:
@@ -349,7 +380,12 @@ export default function GeneralJournalClient() {
       },
       {
         accessorKey: "credit",
-        header: () => <div className="text-right pr-6">Credit (Rp)</div>,
+        header: () => (
+          /* Label kecil (11px) */
+          <div className="text-right pr-6 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            Credit (Rp)
+          </div>
+        ),
         meta: {
           headerClassName: "w-[11%] pr-6 text-right",
           cellClassName:
@@ -379,7 +415,8 @@ export default function GeneralJournalClient() {
         >
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>{errorMessage}</AlertDescription>
+            {/* Caption (12px) */}
+            <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
           </div>
           <Button
             variant="ghost"
@@ -394,9 +431,11 @@ export default function GeneralJournalClient() {
 
       <div className="flex flex-wrap sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div>
+          {/* H3 (20px) */}
           <h1 className="flex items-center gap-2 text-xl font-bold">
             <Book className="h-5.5 w-5.5 text-amber-500" /> General Journal
           </h1>
+          {/* UI (14px) */}
           <p className="mt-1 text-sm text-muted-foreground">
             Chronological record{" "}
             {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ""} • All
@@ -404,15 +443,17 @@ export default function GeneralJournalClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button asChild size="sm" className="gap-1.5">
+          {/* UI (14px) */}
+          <Button asChild size="sm" className="gap-1.5 text-sm font-medium">
             <Link href="/journal-entry">
               <Plus className="h-3.5 w-3.5" /> Add Entry
             </Link>
           </Button>
+          {/* UI (14px) */}
           <Button
             variant={editMode ? "secondary" : "outline"}
             size="sm"
-            className="gap-1.5"
+            className="gap-1.5 text-sm"
             onClick={() => setEditMode((p) => !p)}
             disabled={!entries.length}
           >
@@ -451,9 +492,10 @@ export default function GeneralJournalClient() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
+                    {/* Caption (12px) */}
                     <TableCell
                       colSpan={6}
-                      className="py-10 text-center text-muted-foreground"
+                      className="py-10 text-center text-xs text-muted-foreground"
                     >
                       <Loader2 className="animate-spin inline mr-2 h-4 w-4" />{" "}
                       Loading general journal...
@@ -492,9 +534,11 @@ export default function GeneralJournalClient() {
                         {selectedPeriodName === null ? (
                           <>
                             <EyeOff className="h-7 w-7" />
+                            {/* UI (14px) */}
                             <p className="text-sm font-medium">
                               No Period Selected
                             </p>
+                            {/* Caption (12px) */}
                             <p className="text-xs">
                               Go to{" "}
                               <Link
@@ -508,9 +552,11 @@ export default function GeneralJournalClient() {
                         ) : (
                           <>
                             <BookX className="h-7 w-7" />
+                            {/* UI (14px) */}
                             <p className="text-sm font-medium">
                               No Entries Found
                             </p>
+                            {/* Caption (12px) */}
                             <p className="text-xs">
                               No entries in{" "}
                               <strong>{selectedPeriodName}</strong>
@@ -534,19 +580,27 @@ export default function GeneralJournalClient() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Journal Entry</AlertDialogTitle>
-            <AlertDialogDescription>
+            {/* H3 (20px) */}
+            <AlertDialogTitle className="text-xl font-bold">
+              Delete Journal Entry
+            </AlertDialogTitle>
+            {/* Caption (12px) */}
+            <AlertDialogDescription className="text-xs text-muted-foreground">
               Are you sure you want to delete entry &quot;
               {entryToDelete?.transactionNumber}&quot;? This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            {/* UI (14px) */}
+            <AlertDialogCancel disabled={isDeleting} className="text-sm">
+              Cancel
+            </AlertDialogCancel>
+            {/* UI (14px) */}
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm font-medium"
             >
               {isDeleting ? "Deleting..." : "Delete"}
             </AlertDialogAction>
