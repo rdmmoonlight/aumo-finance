@@ -46,6 +46,38 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { cn } from "@/lib/utils";
 
+// --- TYPES ---
+export interface AppearanceAndSecuritySettingsProps {
+  defaultTab?: "appearance" | "security" | string;
+}
+
+interface SessionItem {
+  id?: string;
+  deviceName?: string;
+  isCurrent?: boolean;
+  browser?: string;
+  operatingSystem?: string;
+  ipAddress?: string;
+  country?: string;
+  lastActivityAt?: string;
+}
+
+interface ActivityItem {
+  id?: string;
+  activityType?: string;
+  device?: string;
+  operatingSystem?: string;
+  ipAddress?: string;
+  createdAt?: string;
+  isSuccess?: boolean;
+}
+
+interface ApiCustomError {
+  data?: {
+    message?: string;
+  };
+}
+
 // --- HELPERS (DRY & KISS) ---
 const THEME_OPTIONS = [
   { id: "light", label: "Light", desc: "Terang", icon: IconSun },
@@ -90,7 +122,7 @@ function AppearanceSection() {
                 htmlFor={id}
                 className={cn(
                   "relative flex flex-col rounded-lg border p-3 cursor-pointer hover:bg-accent/50",
-                  active ? "border-primary bg-primary/5" : "border-muted",
+                  active ? "border-primary bg-primary/5" : "border-muted"
                 )}
               >
                 <RadioGroupItem value={id} id={id} className="sr-only" />
@@ -131,10 +163,15 @@ function SecuritySection() {
   const [revokeAll, { isLoading: isRevokingAll }] =
     usePostApiV1SettingsGuardianRevokeAllSessionsMutation();
 
-  const dashboardData = (resp as any)?.data || resp;
+  const dashboardData = (resp as Record<string, any>)?.data || resp;
   const security = dashboardData?.securityStatus;
-  const activities = (dashboardData?.recentActivities || []).slice(0, 5);
-  const sessions = (dashboardData?.activeSessions || []).slice(0, 5);
+  const activities: ActivityItem[] = (
+    dashboardData?.recentActivities || []
+  ).slice(0, 5);
+  const sessions: SessionItem[] = (dashboardData?.activeSessions || []).slice(
+    0,
+    5
+  );
   const isHealthy = security?.statusLevel === "Good";
 
   const notify = (msg: string, isErr = false) => {
@@ -154,8 +191,9 @@ function SecuritySection() {
       await revokeSession({ sessionId: id }).unwrap();
       notify("Sesi diakhiri");
       refetch();
-    } catch (e: any) {
-      notify(e?.data?.message || "Gagal", true);
+    } catch (e) {
+      const err = e as ApiCustomError;
+      notify(err?.data?.message || "Gagal", true);
     }
   };
 
@@ -165,8 +203,9 @@ function SecuritySection() {
       await revokeAll().unwrap();
       notify("Semua sesi lain diakhiri");
       refetch();
-    } catch (e: any) {
-      notify(e?.data?.message || "Gagal", true);
+    } catch (e) {
+      const err = e as ApiCustomError;
+      notify(err?.data?.message || "Gagal", true);
     }
   };
 
@@ -182,7 +221,7 @@ function SecuritySection() {
         <Alert variant="destructive" className="py-2">
           <IconAlertTriangle size={14} />
           <AlertDescription className="text-xs">
-            {error || (fetchError as any)?.data?.message}
+            {error || (fetchError as ApiCustomError)?.data?.message}
           </AlertDescription>
         </Alert>
       )}
@@ -195,7 +234,7 @@ function SecuritySection() {
             "gap-1.5 h-6 text-xs",
             isHealthy
               ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-              : "border-amber-500/20 bg-amber-500/10 text-amber-600",
+              : "border-amber-500/20 bg-amber-500/10 text-amber-600"
           )}
         >
           <IconHeartbeat size={12} /> {security?.statusLevel || "Loading"}
@@ -281,7 +320,7 @@ function SecuritySection() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {sessions.map((s: any, i: number) => (
+                    {sessions.map((s, i) => (
                       <TableRow key={s.id || i} className="h-9">
                         <TableCell className="py-1.5 text-xs font-medium">
                           {s.deviceName}
@@ -304,7 +343,7 @@ function SecuritySection() {
                         <TableCell className="py-1.5 text-xs">
                           {s.lastActivityAt
                             ? new Date(s.lastActivityAt).toLocaleTimeString(
-                                "id-ID",
+                                "id-ID"
                               )
                             : "-"}
                         </TableCell>
@@ -352,7 +391,7 @@ function SecuritySection() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {activities.map((a: any, i: number) => (
+                    {activities.map((a, i) => (
                       <TableRow key={a.id || i} className="h-9">
                         <TableCell className="py-1.5 text-xs">
                           {a.activityType}
@@ -395,9 +434,11 @@ function SecuritySection() {
 }
 
 // --- MAIN COMBINED COMPONENT ---
-export default function AppearanceAndSecuritySettings() {
+export default function AppearanceAndSecuritySettings({
+  defaultTab = "appearance",
+}: AppearanceAndSecuritySettingsProps) {
   return (
-    <Tabs defaultValue="appearance" className="w-full space-y-4">
+    <Tabs defaultValue={defaultTab} className="w-full space-y-4">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="appearance">Appearance</TabsTrigger>
         <TabsTrigger value="security">Security</TabsTrigger>
