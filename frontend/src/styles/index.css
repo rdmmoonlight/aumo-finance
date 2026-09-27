@@ -173,16 +173,40 @@
 }
 
 @layer utilities {
-  .text-label-small { font-size: 11px; }
-  .text-caption     { font-size: 12px; }
-  .text-secondary   { font-size: 13px; }
-  .text-ui          { font-size: 14px; }
-  .text-body        { font-size: 16px; }
-  .text-h4          { font-size: 18px; }
-  .text-h3          { font-size: 20px; }
-  .text-h2          { font-size: 24px; }
-  .text-h1          { font-size: 28px; }
-  .text-h1-large    { font-size: 30px; }
-  .text-h1-xlarge   { font-size: 32px; }
-  .text-display     { font-size: 48px; }
+  .text-label-small {
+    font-size: 11px;
+  }
+  .text-caption {
+    font-size: 12px;
+  }
+  .text-secondary {
+    font-size: 13px;
+  }
+  .text-ui {
+    font-size: 14px;
+  }
+  .text-body {
+    font-size: 16px;
+  }
+  .text-h4 {
+    font-size: 18px;
+  }
+  .text-h3 {
+    font-size: 20px;
+  }
+  .text-h2 {
+    font-size: 24px;
+  }
+  .text-h1 {
+    font-size: 28px;
+  }
+  .text-h1-large {
+    font-size: 30px;
+  }
+  .text-h1-xlarge {
+    font-size: 32px;
+  }
+  .text-display {
+    font-size: 48px;
+  }
 }
