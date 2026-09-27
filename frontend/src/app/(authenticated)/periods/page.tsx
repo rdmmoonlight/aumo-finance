@@ -205,11 +205,9 @@ export default function PeriodsPage() {
 
   const periods: PeriodItem[] = useMemo(() => {
     if (Array.isArray(rawPeriodsData)) return rawPeriodsData as PeriodItem[];
-    return (
-      ((rawPeriodsData as any)?.items ||
-        (rawPeriodsData as any)?.periods ||
-        []) as PeriodItem[]
-    );
+    return ((rawPeriodsData as any)?.items ||
+      (rawPeriodsData as any)?.periods ||
+      []) as PeriodItem[];
   }, [rawPeriodsData]);
 
   const selectedPeriod = periods.find((p) => p.isSelected) || null;
