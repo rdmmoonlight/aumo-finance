@@ -17,13 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { PeriodItem } from "./types";
 import { getPeriodColumns } from "./period-columns";
-import {
-  Calendar,
-  EyeOff,
-  Plus,
-  CalendarOff,
-  Loader2,
-} from "lucide-react";
+import { Calendar, EyeOff, Plus, CalendarOff, Loader2 } from "lucide-react";
 
 interface PeriodListProps {
   periods: PeriodItem[];
@@ -156,10 +150,7 @@ export function PeriodList({
                     colSpan={columns.length}
                     className="text-center py-8 text-xs text-zinc-500"
                   >
-                    <Loader2
-                      className="animate-spin inline mr-2"
-                      size={16}
-                    />{" "}
+                    <Loader2 className="animate-spin inline mr-2" size={16} />{" "}
                     Loading...
                   </TableCell>
                 </TableRow>

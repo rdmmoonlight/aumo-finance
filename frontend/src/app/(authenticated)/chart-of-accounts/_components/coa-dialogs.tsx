@@ -236,7 +236,11 @@ export function AddAccountDialog({
               Cancel
             </Button>
             {/* UI (14px) */}
-            <Button type="submit" disabled={isCreating} className="text-sm font-medium">
+            <Button
+              type="submit"
+              disabled={isCreating}
+              className="text-sm font-medium"
+            >
               {isCreating ? "Saving..." : "Save Account"}
             </Button>
           </DialogFooter>
@@ -349,7 +353,11 @@ export function EditAccountDialog({
               Cancel
             </Button>
             {/* UI (14px) */}
-            <Button type="submit" disabled={isUpdating} className="text-sm font-medium">
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              className="text-sm font-medium"
+            >
               {isUpdating ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>

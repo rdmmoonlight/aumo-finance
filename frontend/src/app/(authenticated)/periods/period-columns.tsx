@@ -1,11 +1,5 @@
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  Lock,
-  LockOpen,
-  Eye,
-  EyeOff,
-  Loader2,
-} from "lucide-react";
+import { Lock, LockOpen, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -184,4 +178,3 @@ export const getPeriodColumns = ({
     },
   },
 ];
-  
