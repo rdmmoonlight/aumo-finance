@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.sp
 import com.aumofinance.app.R
 
 val AptosFontFamily =
@@ -16,24 +17,25 @@ val AptosFontFamily =
         Font(R.font.aptos_bold, FontWeight.Bold),
     )
 
+// Skala ukuran font kustom Aumo. Rujukan lengkap: /docs/typography-scale.md
 private val AumoTypography: Typography =
     Typography().run {
         copy(
-            displayLarge = displayLarge.copy(fontFamily = AptosFontFamily),
+            displayLarge = displayLarge.copy(fontFamily = AptosFontFamily, fontSize = 32.sp),
             displayMedium = displayMedium.copy(fontFamily = AptosFontFamily),
             displaySmall = displaySmall.copy(fontFamily = AptosFontFamily),
-            headlineLarge = headlineLarge.copy(fontFamily = AptosFontFamily),
-            headlineMedium = headlineMedium.copy(fontFamily = AptosFontFamily),
-            headlineSmall = headlineSmall.copy(fontFamily = AptosFontFamily),
-            titleLarge = titleLarge.copy(fontFamily = AptosFontFamily),
-            titleMedium = titleMedium.copy(fontFamily = AptosFontFamily),
+            headlineLarge = headlineLarge.copy(fontFamily = AptosFontFamily, fontSize = 28.sp),
+            headlineMedium = headlineMedium.copy(fontFamily = AptosFontFamily, fontSize = 24.sp),
+            headlineSmall = headlineSmall.copy(fontFamily = AptosFontFamily, fontSize = 20.sp),
+            titleLarge = titleLarge.copy(fontFamily = AptosFontFamily, fontSize = 18.sp),
+            titleMedium = titleMedium.copy(fontFamily = AptosFontFamily, fontSize = 16.sp),
             titleSmall = titleSmall.copy(fontFamily = AptosFontFamily),
-            bodyLarge = bodyLarge.copy(fontFamily = AptosFontFamily),
-            bodyMedium = bodyMedium.copy(fontFamily = AptosFontFamily),
-            bodySmall = bodySmall.copy(fontFamily = AptosFontFamily),
+            bodyLarge = bodyLarge.copy(fontFamily = AptosFontFamily, fontSize = 16.sp),
+            bodyMedium = bodyMedium.copy(fontFamily = AptosFontFamily, fontSize = 14.sp),
+            bodySmall = bodySmall.copy(fontFamily = AptosFontFamily, fontSize = 13.sp),
             labelLarge = labelLarge.copy(fontFamily = AptosFontFamily),
-            labelMedium = labelMedium.copy(fontFamily = AptosFontFamily),
-            labelSmall = labelSmall.copy(fontFamily = AptosFontFamily),
+            labelMedium = labelMedium.copy(fontFamily = AptosFontFamily, fontSize = 12.sp),
+            labelSmall = labelSmall.copy(fontFamily = AptosFontFamily, fontSize = 11.sp),
         )
     }
 
