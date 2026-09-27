@@ -185,9 +185,11 @@ export default function ReportsPage() {
                 <BarChart2 className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-xl font-bold tracking-tight md:text-2xl">
+                {/* H2 (24px) */}
+                <h1 className="text-2xl font-bold tracking-tight">
                   Reports Center
                 </h1>
+                {/* UI (14px) */}
                 <p className="mt-1 max-w-xl text-sm leading-relaxed text-white/60">
                   Akses 13 laporan siklus akuntansi lengkap. Dari unadjusted
                   trial balance sampai post-closing. Pilih laporan untuk melihat
@@ -196,15 +198,17 @@ export default function ReportsPage() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {/* Label kecil (11px) */}
               <Badge
                 variant="outline"
-                className="border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                className="border-emerald-500/20 bg-emerald-500/10 text-[11px] text-emerald-400"
               >
                 {REPORTS.length} REPORTS
               </Badge>
+              {/* Label kecil (11px) */}
               <Badge
                 variant="outline"
-                className="border-white/10 bg-white/5 text-white/60"
+                className="border-white/10 bg-white/5 text-[11px] text-white/60"
               >
                 ACCOUNTING CYCLE
               </Badge>
@@ -214,11 +218,12 @@ export default function ReportsPage() {
           {/* Search */}
           <div className="relative mt-6">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
+            {/* UI (14px) */}
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="Cari laporan: journal, ledger, cash flow..."
-              className="h-11 rounded-xl border-white/10 bg-black/40 pl-10 text-white placeholder:text-white/30 focus-visible:ring-indigo-500/50"
+              className="h-11 rounded-xl border-white/10 bg-black/40 pl-10 text-sm text-white placeholder:text-white/30 focus-visible:ring-indigo-500/50"
             />
           </div>
 
@@ -233,9 +238,11 @@ export default function ReportsPage() {
               return (
                 <div key={cat.id}>
                   <div className="mb-3 flex items-baseline justify-between">
+                    {/* UI (14px) */}
                     <h2 className="text-sm font-semibold tracking-wide text-white/90">
                       {cat.label}
                     </h2>
+                    {/* Caption (12px) */}
                     <span className="text-xs text-white/40">{cat.hint}</span>
                   </div>
 
@@ -254,16 +261,20 @@ export default function ReportsPage() {
 
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
+                              {/* UI (14px) */}
                               <span className="truncate text-sm font-semibold text-white group-hover:text-white">
                                 {report.title}
                               </span>
-                              <span className="rounded bg-white/10 px-1.5 py-0.5 text-xs font-mono text-white/40">
+                              {/* Label kecil (11px) */}
+                              <span className="rounded bg-white/10 px-1.5 py-0.5 text-[11px] font-mono text-white/40">
                                 {report.step}
                               </span>
                             </div>
+                            {/* Caption (12px) */}
                             <p className="mt-0.5 line-clamp-1 text-xs text-white/50">
                               {report.desc}
                             </p>
+                            {/* Caption (12px) */}
                             <div className="mt-2 flex items-center gap-1 text-xs text-white/30 group-hover:text-indigo-300">
                               <span>/reports/{report.slug}</span>
                               <ArrowRight className="h-3 w-3 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
@@ -280,7 +291,8 @@ export default function ReportsPage() {
 
           {filtered.length === 0 && (
             <div className="mt-10 rounded-xl border border-white/10 bg-black/40 py-10 text-center">
-              <p className="text-sm text-white/50">
+              {/* Caption (12px) */}
+              <p className="text-xs text-white/50">
                 Tidak ada laporan untuk &quot;{q}&quot;
               </p>
             </div>
@@ -288,25 +300,31 @@ export default function ReportsPage() {
 
           {/* Flow Footer */}
           <div className="mt-8 rounded-xl border border-white/10 bg-slate-900/80 p-4">
+            {/* Caption (12px) */}
             <div className="flex flex-wrap items-center gap-2 text-xs text-white/40">
               <span className="text-white/60">Flow:</span>
-              <Badge className="border-0 bg-white/10 text-xs text-white/60">
+              {/* Label kecil (11px) */}
+              <Badge className="border-0 bg-white/10 text-[11px] text-white/60">
                 UTB
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-white/10 text-xs text-white/60">
+              {/* Label kecil (11px) */}
+              <Badge className="border-0 bg-white/10 text-[11px] text-white/60">
                 Worksheet
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-amber-500/15 text-xs text-amber-300">
+              {/* Label kecil (11px) */}
+              <Badge className="border-0 bg-amber-500/15 text-[11px] text-amber-300">
                 ATB
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-indigo-500/20 text-xs text-indigo-300">
+              {/* Label kecil (11px) */}
+              <Badge className="border-0 bg-indigo-500/20 text-[11px] text-indigo-300">
                 Financial Statements
               </Badge>
               <span>→</span>
-              <Badge className="border-0 bg-emerald-500/15 text-xs text-emerald-300">
+              {/* Label kecil (11px) */}
+              <Badge className="border-0 bg-emerald-500/15 text-[11px] text-emerald-300">
                 PCTB
               </Badge>
             </div>
