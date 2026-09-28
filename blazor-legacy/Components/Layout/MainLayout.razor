@@ -8,20 +8,29 @@
 
 <div class="d-flex flex-column min-vh-100 min-vw-0 aumo-main-shell">
 
-    <!-- TOPBAR -->
+    <!-- TOPBAR (Di Atas Penuh) -->
     <AuthorizeView>
         <Authorized>
             <AumoBlazor.Components.Layout.TopBar />
         </Authorized>
     </AuthorizeView>
 
-    <!-- SHELL UTAMA (Hapus overflow-hidden agar sticky sidebar berfungsi sempurna) -->
-    <div class="d-flex flex-grow-1 position-relative">
+    <!-- SHELL UTAMA: Mengatur Sidebar & Content Secara Horizontal (Menyamping) -->
+    <div class="d-flex flex-row flex-grow-1 w-100 position-relative align-items-stretch">
         
-        <!-- SIDEBAR (Sticky di sebelah kiri) -->
-        <AumoBlazor.Components.Layout.Sidebar />
+        <!-- SIDEBAR (Menempel di Sisi Kiri) -->
+        <AuthorizeView>
+            <Authorized>
+                <AumoBlazor.Components.Layout.Sidebar />
+            </Authorized>
+            <Authorizing>
+                <aside class="p-3 text-muted small flex-shrink-0" style="width: 60px;">
+                    <span class="spinner-border spinner-border-sm" role="status"></span>
+                </aside>
+            </Authorizing>
+        </AuthorizeView>
 
-        <!-- MAIN CONTENT AREA (Hapus margin-left: 60px dan overflow-auto) -->
+        <!-- MAIN CONTENT AREA (Di Sebelah Kanan Sidebar) -->
         <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
             @Body
         </main>
@@ -33,10 +42,18 @@
 <style>
     body {
         transition: background-color 0.3s ease, color 0.3s ease;
+        overflow-x: hidden;
+    }
+
+    .aumo-main-shell {
+        background-color: var(--aumo-bg, #0D1117);
+        color: var(--aumo-text, #FFFFFF);
     }
 
     .content { 
         transition: background-color 0.3s ease;
+        /* min-width: 0 PENTING agar Flex Child tidak meluap/terdorong ke bawah */
+        min-width: 0; 
     }
 
     @@media (max-width: 767.98px) {
