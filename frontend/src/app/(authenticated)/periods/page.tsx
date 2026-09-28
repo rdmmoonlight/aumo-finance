@@ -347,7 +347,10 @@ export default function PeriodsPage() {
                         colSpan={columns.length}
                         className="h-24 text-center text-xs text-zinc-500"
                       >
-                        <Loader2 className="animate-spin inline mr-1" size={16} />
+                        <Loader2
+                          className="animate-spin inline mr-1"
+                          size={16}
+                        />
                         Loading periods...
                       </TableCell>
                     </TableRow>
