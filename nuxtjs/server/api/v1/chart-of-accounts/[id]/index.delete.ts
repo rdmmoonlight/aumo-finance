@@ -1,5 +1,11 @@
+import prisma from '~/server/utils/prisma'
+
 export default defineEventHandler(async (event) => {
-  // Mengambil param 'id' dari folder [id]
+  const userId = event.context.user?.id
+  if (!userId) {
+    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
+  }
+
   const idParam = getRouterParam(event, 'id')
   const id = Number(idParam)
 
@@ -7,28 +13,35 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Invalid account ID.' })
   }
 
-  // 1. Cek keberadaan entitas
-  // const entity = await db.chartOfAccounts.findFirst({ where: { id, userId } })
-  // if (!entity) {
-  //   throw createError({ statusCode: 404, statusMessage: 'Account not found.' })
-  // }
+  // 1. Cek keberadaan Akun
+  const entity = await prisma.chartOfAccounts.findFirst({
+    where: { Id: id, UserId: userId }
+  })
 
-  // 2. Integritas data: Cek apakah akun memiliki transaksi jurnal
-  // const hasJournalLines = await db.journalEntryLines.exists({ accountId: id })
-  // if (hasJournalLines) {
-  //   throw createError({
-  //     statusCode: 400,
-  //     statusMessage: `Account '${entity.accountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead.`
-  //   })
-  // }
+  if (!entity) {
+    throw createError({ statusCode: 404, statusMessage: 'Account not found.' })
+  }
+
+  // 2. Integritas Data: Cek apakah akun memiliki transaksi jurnal
+  const hasJournalLines = await prisma.journalEntryLines.findFirst({
+    where: { AccountId: id }
+  })
+
+  if (hasJournalLines) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Account '${entity.AccountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead.`
+    })
+  }
 
   try {
-    // Hapus dari DB
-    // await db.chartOfAccounts.delete({ where: { id } })
+    await prisma.chartOfAccounts.delete({
+      where: { Id: id }
+    })
 
     return {
       success: true,
-      message: `Account successfully deleted.`
+      message: `Account '${entity.AccountName}' successfully deleted.`
     }
   } catch (error: any) {
     throw createError({
