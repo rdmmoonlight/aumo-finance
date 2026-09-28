@@ -1,5 +1,6 @@
 <!-- pages/coa.vue -->
 <script setup lang="ts">
+  
 definePageMeta({
   layout: 'default'
 })
@@ -11,6 +12,7 @@ export interface ChartOfAccount {
   type: string
   role?: string
   isActive?: boolean
+  balance?: number
 }
 
 const ACCOUNT_TYPES = [
@@ -87,9 +89,20 @@ const categoryOptions = ACCOUNT_TYPES.map(t => ({
 // --- API ACTIONS ---
 const fetchAccounts = async () => {
   isLoading.value = true
+  errorMessage.value = null
   try {
-    const data: any = await $fetch(ENDPOINTS.LIST)
-    accounts.value = Array.isArray(data) ? data : data?.items || []
+    const res: any = await $fetch(ENDPOINTS.LIST)
+
+    // Handled support: { accounts: [...] }, { items: [...] }, or raw Array
+    if (res?.accounts && Array.isArray(res.accounts)) {
+      accounts.value = res.accounts
+    } else if (Array.isArray(res)) {
+      accounts.value = res
+    } else if (res?.items && Array.isArray(res.items)) {
+      accounts.value = res.items
+    } else {
+      accounts.value = []
+    }
   } catch (err: any) {
     errorMessage.value = err?.data?.message || err?.message || 'Failed to load accounts'
   } finally {
@@ -345,7 +358,6 @@ onMounted(fetchAccounts)
       <template #footer>
         <div class="flex justify-end gap-2">
           <UButton variant="outline" @click="isAddOpen = false">Cancel</UButton>
-
           <UButton type="submit" form="add-form" :loading="isCreating">Save Account</UButton>
         </div>
       </template>
@@ -376,7 +388,6 @@ onMounted(fetchAccounts)
       <template #footer>
         <div class="flex justify-end gap-2">
           <UButton variant="outline" @click="isEditOpen = false">Cancel</UButton>
-
           <UButton type="submit" form="edit-form" :loading="isUpdating">Update</UButton>
         </div>
       </template>
@@ -394,7 +405,6 @@ onMounted(fetchAccounts)
       <template #footer>
         <div class="flex justify-end gap-2">
           <UButton variant="outline" :disabled="isDeleting" @click="isDeleteOpen = false">Cancel</UButton>
-
           <UButton color="error" :loading="isDeleting" @click="handleDelete">Delete</UButton>
         </div>
       </template>
