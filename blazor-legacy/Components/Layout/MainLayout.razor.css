@@ -1,0 +1,52 @@
+/* Variable Tema Global Scope MainLayout */
+:root,
+[data-bs-theme="dark"] {
+    --aumo-bg: #0D1117;
+    --aumo-surface: #161B22;
+    --aumo-text: #FFFFFF;
+    --aumo-text-muted: #94A3B8;
+    --aumo-border: #2A313C;
+    --font-heading: "Space Grotesk", sans-serif;
+    --font-body: "Inter", sans-serif;
+}
+
+[data-bs-theme="light"] {
+    --aumo-bg: #FFFFFF;
+    --aumo-surface: #FFFFFF;
+    --aumo-text: #0F172A;
+    --aumo-text-muted: #64748B;
+    --aumo-border: #E2E8F0;
+}
+
+.aumo-main-shell {
+    background-color: var(--aumo-bg);
+    color: var(--aumo-text);
+    font-family: var(--font-body);
+}
+
+/* KUNCI FLEXBOX LAYOUT (Side-by-Side Protection) */
+.aumo-body-shell {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    width: 100% !important;
+}
+
+.sidebar-container {
+    display: flex !important;
+    flex-shrink: 0 !important;
+    z-index: 100;
+}
+
+/* Memaksa Main Content Tetap Sejajar di Kanan Sidebar */
+#mainContent {
+    background-color: var(--aumo-bg);
+    color: var(--aumo-text);
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+}
+
+::deep h1, ::deep h2, ::deep h3, ::deep h4, ::deep h5, ::deep h6 {
+    font-family: var(--font-heading);
+}
