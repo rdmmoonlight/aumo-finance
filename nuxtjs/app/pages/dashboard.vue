@@ -3,7 +3,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Period } from '~/types'
 
 definePageMeta({
-  // middleware: ['auth'] dihapus karena middleware bertipe global (auth.global.ts)
+  layout: 'default'
 })
 
 const { isNotificationsSlideoverOpen } = useDashboard()
