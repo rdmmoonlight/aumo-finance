@@ -1,7 +1,3 @@
-// server/api/v1/reports/summary.get.ts
-import { prisma } from '~/server/utils/prisma'
-import { getUserId } from '~/server/utils/auth' // Sesuaikan dengan helper auth kamu
-
 export default defineEventHandler(async (event) => {
   const userId = await getUserId(event)
 
