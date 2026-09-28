@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 
 // --- TYPES ---
 export interface AppearanceAndSecuritySettingsProps {
+  mode?: "appearance" | "security" | "all";
   defaultTab?: "appearance" | "security" | string;
 }
 
@@ -78,7 +79,7 @@ interface ApiCustomError {
   };
 }
 
-// --- HELPERS (DRY & KISS) ---
+// --- HELPERS ---
 const THEME_OPTIONS = [
   { id: "light", label: "Light", desc: "Terang", icon: IconSun },
   { id: "dark", label: "Dark", desc: "Gelap", icon: IconMoon },
@@ -94,7 +95,7 @@ const formatDate = (dateStr?: string) =>
     : "-";
 
 // --- SUB-COMPONENTS ---
-function AppearanceSection() {
+export function AppearanceSection() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -122,7 +123,7 @@ function AppearanceSection() {
                 htmlFor={id}
                 className={cn(
                   "relative flex flex-col rounded-lg border p-3 cursor-pointer hover:bg-accent/50",
-                  active ? "border-primary bg-primary/5" : "border-muted",
+                  active ? "border-primary bg-primary/5" : "border-muted"
                 )}
               >
                 <RadioGroupItem value={id} id={id} className="sr-only" />
@@ -146,7 +147,7 @@ function AppearanceSection() {
   );
 }
 
-function SecuritySection() {
+export function SecuritySection() {
   const [guardianTab, setGuardianTab] = useState("health");
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -170,7 +171,7 @@ function SecuritySection() {
   ).slice(0, 5);
   const sessions: SessionItem[] = (dashboardData?.activeSessions || []).slice(
     0,
-    5,
+    5
   );
   const isHealthy = security?.statusLevel === "Good";
 
@@ -234,7 +235,7 @@ function SecuritySection() {
             "gap-1.5 h-6 text-xs",
             isHealthy
               ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-              : "border-amber-500/20 bg-amber-500/10 text-amber-600",
+              : "border-amber-500/20 bg-amber-500/10 text-amber-600"
           )}
         >
           <IconHeartbeat size={12} /> {security?.statusLevel || "Loading"}
@@ -343,7 +344,7 @@ function SecuritySection() {
                         <TableCell className="py-1.5 text-xs">
                           {s.lastActivityAt
                             ? new Date(s.lastActivityAt).toLocaleTimeString(
-                                "id-ID",
+                                "id-ID"
                               )
                             : "-"}
                         </TableCell>
@@ -435,8 +436,14 @@ function SecuritySection() {
 
 // --- MAIN COMBINED COMPONENT ---
 export default function AppearanceAndSecuritySettings({
+  mode,
   defaultTab = "appearance",
 }: AppearanceAndSecuritySettingsProps) {
+  // Jika dipanggil dengan prop mode spesifik dari main page
+  if (mode === "appearance") return <AppearanceSection />;
+  if (mode === "security") return <SecuritySection />;
+
+  // Jika dipanggil berdiri sendiri tanpa mode
   return (
     <Tabs defaultValue={defaultTab} className="w-full space-y-4">
       <TabsList className="grid w-full grid-cols-2">
