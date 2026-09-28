@@ -3,28 +3,23 @@
 
 <div class="d-flex flex-column min-vh-100 w-100 aumo-main-shell">
 
-    <!-- Container Utama: Mengatur Sidebar & Konten secara Horizontal -->
+    <!-- NAVMENU (Akan merender TopBar di sini terlebih dahulu secara penuh) -->
+    <AuthorizeView>
+        <Authorized>
+            <AumoBlazor.Components.Layout.NavMenu />
+        </Authorized>
+        <Authorizing>
+            <aside class="p-3 text-muted small" aria-label="Navigasi Memuat">
+                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                <span>Memuat...</span>
+            </aside>
+        </Authorizing>
+    </AuthorizeView>
+
+    <!-- AREA BAWAH: Menggabungkan Sidebar (dari NavMenu) dan Content secara horizontal -->
     <div class="d-flex flex-grow-1 w-100 position-relative align-items-stretch">
         
-        <!-- NAVIGATION MENU -->
-        <AuthorizeView>
-            <Authorized>
-                <AumoBlazor.Components.Layout.NavMenu />
-            </Authorized>
-            <Authorizing>
-                <!-- Diberi style flex-shrink agar tidak memakan space berlebih -->
-                <aside class="p-3 text-muted small flex-shrink-0" style="min-width: 200px;" aria-label="Navigasi Memuat">
-                    <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                    <span>Memuat...</span>
-                </aside>
-            </Authorizing>
-            <NotAuthorized>
-                <!-- Kosong tanpa render elemen samping -->
-            </NotAuthorized>
-        </AuthorizeView>
-
         <!-- MAIN CONTENT AREA -->
-        <!-- Catatan: Hapus 'w-100' agar flex-grow-1 bekerja proporsional bersama sidebar -->
         <main id="mainContent" class="content flex-grow-1 p-3 p-md-4 d-flex flex-column" role="main">
             @Body
         </main>
@@ -46,7 +41,7 @@
 
     .content { 
         transition: background-color 0.3s ease;
-        min-width: 0; /* Mencegah overflow flex child pada layar kecil/tabel */
+        min-width: 0;
     }
 
     @@media (max-width: 767.98px) {
