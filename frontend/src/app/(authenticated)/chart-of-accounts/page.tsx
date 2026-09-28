@@ -35,7 +35,7 @@ import {
   AddAccountDialog,
   EditAccountDialog,
   DeleteAccountAlertDialog,
-} from "./_components/coa-dialogs";
+} from "./coa-dialogs";
 import {
   Network,
   Plus,
