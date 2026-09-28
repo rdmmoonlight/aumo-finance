@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const userId = await getAuthUserId(event)
+  const userId = await getUserId(event)
   const id = Number(getRouterParam(event, 'id'))
 
   if (!id || isNaN(id)) {
