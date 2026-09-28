@@ -1,25 +1,9 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Period } from '~/types'
 
 definePageMeta({
   layout: 'default'
 })
-
-const { isNotificationsSlideoverOpen } = useDashboard()
-
-const items = [[
-  {
-    label: 'New mail',
-    icon: 'i-lucide-send',
-    to: '/inbox'
-  },
-  {
-    label: 'New customer',
-    icon: 'i-lucide-user-plus',
-    to: '/customers'
-  }
-]] satisfies DropdownMenuItem[][]
 
 const period = ref<Period>('monthly')
 
@@ -27,49 +11,21 @@ const { data: dashboard, pending } = useDashboardData(period)
 </script>
 
 <template>
-  <UDashboardPanel id="home">
-    <template #header>
-      <UDashboardNavbar title="Home" :ui="{ right: 'gap-3' }">
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
+  <div class="space-y-6">
+    <!-- Toolbar Kontrol Halaman Home -->
+    <div class="flex items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-gray-800">
+      <div class="flex items-center gap-3">
+        <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+          {{ dashboard?.selectedPeriodName ?? 'Current Period' }}
+        </span>
 
-        <template #right>
-          <UTooltip title="Notifications" :shortcuts="['N']">
-            <UButton
-              color="neutral"
-              variant="ghost"
-              square
-              aria-label="Notifications"
-              @click="isNotificationsSlideoverOpen = true"
-            >
-              <UChip color="error" inset>
-                <UIcon name="i-lucide-bell" class="size-5 shrink-0" />
-              </UChip>
-            </UButton>
-          </UTooltip>
+        <HomePeriodSelect v-model="period" />
+      </div>
+    </div>
 
-          <UDropdownMenu :items="items">
-            <UButton icon="i-lucide-plus" size="md" class="rounded-full" aria-label="Add new" />
-          </UDropdownMenu>
-        </template>
-      </UDashboardNavbar>
-
-      <UDashboardToolbar>
-        <template #left>
-          <span class="-ms-1 px-2 flex items-center text-sm text-gray-500 dark:text-gray-400">
-            {{ dashboard?.selectedPeriodName ?? 'Current Period' }}
-          </span>
-
-          <HomePeriodSelect v-model="period" />
-        </template>
-      </UDashboardToolbar>
-    </template>
-
-    <template #body>
-      <HomeStats :dashboard="dashboard" :pending="pending" />
-      <HomeChart :dashboard="dashboard" />
-      <HomeSales :dashboard="dashboard" :pending="pending" />
-    </template>
-  </UDashboardPanel>
+    <!-- Konten Utama Home -->
+    <HomeStats :dashboard="dashboard" :pending="pending" />
+    <HomeChart :dashboard="dashboard" />
+    <HomeSales :dashboard="dashboard" :pending="pending" />
+  </div>
 </template>
