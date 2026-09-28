@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -142,7 +143,7 @@ fun LoginScreen(
                     onClick = onLoginClick,
                     enabled = !isLoading,
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
-                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 20.dp).heightIn(min = AumoDimens.ButtonHeight),
                 ) {
                     Text(if (isLoading) "Memproses..." else "Masuk", fontSize = MaterialTheme.typography.bodyMedium.fontSize)
                 }
@@ -151,7 +152,7 @@ fun LoginScreen(
                     Button(
                         onClick = onBiometricLoginClick,
                         colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Background),
-                        modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall),
+                        modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall).heightIn(min = AumoDimens.ButtonHeight),
                     ) {
                         Text(
                             "\uD83D\uDD12  Masuk dengan biometrik",

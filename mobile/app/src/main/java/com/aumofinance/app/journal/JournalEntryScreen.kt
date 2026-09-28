@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -134,6 +135,7 @@ fun JournalEntryScreen(
                                 onClick = onAddLine,
                                 colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
                                 shape = RoundedCornerShape(8.dp),
+                                modifier = Modifier.heightIn(min = AumoDimens.ButtonHeight),
                             ) {
                                 TablerIcon(TablerIcons.Plus, tint = Color.White, size = 14.dp)
                                 Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))
@@ -226,7 +228,7 @@ private fun JournalDetailsCard(
                     onValueChange = {},
                     readOnly = true,
                     enabled = isEditable,
-                    trailingIcon = { TablerIcon(TablerIcons.Selector, tint = AumoColors.TextSecondary) },
+                    trailingIcon = { TablerIcon(TablerIcons.Selector, tint = AumoColors.TextSecondary, size = AumoDimens.IconSmall) },
                     colors = journalFieldColors(),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth().menuAnchor(),
@@ -264,7 +266,7 @@ private fun JournalDetailsCard(
                     onValueChange = {},
                     readOnly = true,
                     enabled = isEditable,
-                    trailingIcon = { TablerIcon(TablerIcons.Calendar, tint = AumoColors.TextSecondary) },
+                    trailingIcon = { TablerIcon(TablerIcons.Calendar, tint = AumoColors.TextSecondary, size = AumoDimens.IconSmall) },
                     colors = journalFieldColors(),
                     shape = RoundedCornerShape(8.dp),
                     modifier = Modifier.fillMaxWidth(),
@@ -352,7 +354,7 @@ private fun JournalLineCard(
                         readOnly = true,
                         enabled = isEditable,
                         placeholder = { Text("Select Account", color = AumoColors.TextSecondary) },
-                        trailingIcon = { TablerIcon(TablerIcons.Selector, tint = AumoColors.TextSecondary) },
+                        trailingIcon = { TablerIcon(TablerIcons.Selector, tint = AumoColors.TextSecondary, size = AumoDimens.IconSmall) },
                         colors = journalFieldColors(),
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.fillMaxWidth().menuAnchor(),
@@ -526,6 +528,7 @@ private fun BottomActionBar(
                             contentColor = AumoColors.TextSecondary,
                         ),
                     shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.heightIn(min = AumoDimens.ButtonHeight),
                 ) {
                     Text("Cancel", fontWeight = FontWeight.Bold)
                 }
@@ -534,7 +537,7 @@ private fun BottomActionBar(
                 onClick = onSubmit,
                 colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Good),
                 shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).heightIn(min = AumoDimens.ButtonHeight),
             ) {
                 Text(submitButtonText, color = Color.White, fontWeight = FontWeight.Bold)
             }
