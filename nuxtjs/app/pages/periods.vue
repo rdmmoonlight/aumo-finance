@@ -1,5 +1,9 @@
 <script setup lang="ts">
-// pages/periods/index.vue - REVISI ENDPOINT TERBARU PRISMA
+
+definePageMeta({
+  // middleware: ['auth'] dihapus karena middleware bertipe global (auth.global.ts)
+})
+  
 interface PeriodRaw {
   Id: number
   PeriodName: string
