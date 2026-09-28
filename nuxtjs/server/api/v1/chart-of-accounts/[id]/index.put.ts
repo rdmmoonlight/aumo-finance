@@ -1,11 +1,6 @@
 export default defineEventHandler(async (event) => {
-  const userId = event.context.user?.id
-  if (!userId) {
-    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
-  }
-
-  const idParam = getRouterParam(event, 'id')
-  const id = Number(idParam)
+  const userId = await getAuthUserId(event)
+  const id = Number(getRouterParam(event, 'id'))
 
   if (!id || isNaN(id)) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid account ID.' })
@@ -13,7 +8,6 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  // 1. Cek keberadaan Akun
   const account = await prisma.chartOfAccounts.findFirst({
     where: { Id: id, UserId: userId }
   })
@@ -28,7 +22,6 @@ export default defineEventHandler(async (event) => {
 
   const refNumber = Number(body.referenceNumber)
 
-  // 2. Cek Duplikasi Kode Akun pada ID Lain
   const isCodeTaken = await prisma.chartOfAccounts.findFirst({
     where: {
       UserId: userId,
@@ -63,7 +56,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: 500,
-      statusMessage: `A fatal error occurred while updating the account: ${error.message}`
+      statusMessage: `Fatal error updating account: ${error.message}`
     })
   }
 })
