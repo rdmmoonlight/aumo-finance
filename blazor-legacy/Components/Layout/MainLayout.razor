@@ -1,43 +1,25 @@
 @inherits LayoutComponentBase
-@using Microsoft.AspNetCore.Components.Authorization
-@inject NavigationManager Navigation
 
-<AuthorizeView>
-    <Authorized>
-        <div class="aumo-main-shell min-vh-100 min-vw-0 d-flex flex-column">
+<div class="aumo-main-shell min-vh-100 min-vw-0 d-flex flex-column">
 
-            <!-- 1. TOPBAR (Membentang Penuh 100% di Atas) -->
-            <div class="topbar-container flex-shrink-0 w-100">
-                <AumoBlazor.Components.Layout.AppTopBar />
-            </div>
+    <!-- 1. TOPBAR (Membentang Penuh 100% di Atas) -->
+    <div class="topbar-container flex-shrink-0 w-100">
+        <AumoBlazor.Components.Layout.AppTopBar />
+    </div>
 
-            <!-- 2. SHELL UTAMA (Sidebar & Main Content Menyamping) -->
-            <div class="aumo-body-shell flex-grow-1 d-flex flex-row flex-nowrap w-100 align-items-stretch position-relative">
-                
-                <!-- SIDEBAR / NAVMENU (Kiri) -->
-                <aside class="sidebar-container flex-shrink-0">
-                    <AumoBlazor.Components.Layout.NavMenu />
-                </aside>
+    <!-- 2. SHELL UTAMA (Sidebar & Main Content Menyamping) -->
+    <div class="aumo-body-shell flex-grow-1 d-flex flex-row flex-nowrap w-100 align-items-stretch position-relative">
+        
+        <!-- SIDEBAR / NAVMENU (Kiri) -->
+        <aside class="sidebar-container flex-shrink-0">
+            <AumoBlazor.Components.Layout.NavMenu />
+        </aside>
 
-                <!-- MAIN CONTENT AREA (Kanan - Mengisi Sisa Ruang) -->
-                <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
-                    @Body
-                </main>
+        <!-- MAIN CONTENT AREA (Kanan - Mengisi Sisa Ruang) -->
+        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
+            @Body
+        </main>
 
-            </div>
+    </div>
 
-        </div>
-    </Authorized>
-    <NotAuthorized>
-        @{
-            RedirectToLanding();
-        }
-    </NotAuthorized>
-</AuthorizeView>
-
-@code {
-    private void RedirectToLanding()
-    {
-        Navigation.NavigateTo("/", replace: true);
-    }
-}
+</div>
