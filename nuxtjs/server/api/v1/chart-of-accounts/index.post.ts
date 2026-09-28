@@ -1,31 +1,45 @@
 export default defineEventHandler(async (event) => {
-  // Ambil data JSON body yang dikirim dari frontend
   const body = await readBody(event)
 
-  // Validasi payload dasar
-  if (!body.accountName || !body.referenceNumber || !body.type) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'Field referenceNumber, accountName, dan type wajib diisi.'
-    })
+  // Validasi Input
+  if (!body?.accountName || !String(body.accountName).trim()) {
+    throw createError({ statusCode: 400, statusMessage: 'Account name is required.' })
   }
 
-  try {
-    // Simpan ke database / kirim ke backend utama
-    // const newAccount = await prisma.chartOfAccount.create({ data: body })
+  if (!body?.type || !String(body.type).trim()) {
+    throw createError({ statusCode: 400, statusMessage: 'Account category type is required.' })
+  }
 
-    // Response dummy jika berhasil
+  // Validasi Rentang Kode Akun (Sesuai helper C#)
+  // if (!AccountClassification.validateReferenceNumber(body.type, body.referenceNumber)) {
+  //   throw createError({
+  //     statusCode: 400,
+  //     statusMessage: `Invalid reference number ${body.referenceNumber} for category ${body.type}.`
+  //   })
+  // }
+
+  // Cek duplikasi nomor referensi
+  // const isCodeTaken = await db.chartOfAccounts.exists({ referenceNumber: body.referenceNumber, userId })
+  // if (isCodeTaken) {
+  //   throw createError({
+  //     statusCode: 400,
+  //     statusMessage: `Account code ${body.referenceNumber} is already in use.`
+  //   })
+  // }
+
+  try {
+    // Simpan ke DB
+    // const newAccount = await db.chartOfAccounts.create({ ... })
+
     return {
-      message: 'Account created successfully',
-      data: {
-        id: Date.now(),
-        ...body
-      }
+      success: true,
+      message: `Account '${body.accountName.trim()}' successfully created.`,
+      accountId: Date.now()
     }
   } catch (error: any) {
     throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: error.message || 'Gagal menambah account baru'
+      statusCode: 500,
+      statusMessage: `A fatal error occurred while saving the account: ${error.message}`
     })
   }
 })
