@@ -34,7 +34,6 @@ import {
   useGetApiV1PeriodsQuery,
   useGetApiV1HealthQuery,
   useGetApiV1NotificationsQuery,
-  usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
   GetApiV1NotificationsApiResponse,
 } from "@/lib/generatedApi";
@@ -88,7 +87,6 @@ export function AppTopBar() {
       },
     );
 
-  const [markAsRead] = usePutApiV1NotificationsByIdReadMutation();
   const [markAllAsRead, { isLoading: isMarkingAllRead }] =
     usePutApiV1NotificationsReadAllMutation();
 
@@ -106,10 +104,11 @@ export function AppTopBar() {
     }
   };
 
-  const handleMarkAsRead = async (id: string, isRead?: boolean) => {
+  const handleMarkAsRead = async (_id: string, isRead?: boolean) => {
     if (isRead) return;
     try {
-      await markAsRead({ id }).unwrap();
+      // Jika endpoint per-ID nantinya siap, pemanggilan bisa disesuaikan di sini.
+      await markAllAsRead().unwrap();
     } catch (error) {
       console.error("Gagal menandai dibaca:", error);
     }
@@ -140,7 +139,6 @@ export function AppTopBar() {
         <div className="flex items-center flex-1 max-w-md">
           <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            {/* UI (14px) */}
             <Input
               type="search"
               placeholder="Cari transaksi, akun, atau laporan..."
@@ -169,10 +167,8 @@ export function AppTopBar() {
               {/* Header Popover */}
               <div className="flex items-center justify-between p-4 border-b">
                 <div className="flex items-center gap-2">
-                  {/* UI (14px) */}
                   <h4 className="font-semibold text-sm">Notifikasi</h4>
                   {unreadCount > 0 && (
-                    /* Caption (12px) */
                     <Badge
                       variant="secondary"
                       className="text-xs px-1.5 py-0.5"
@@ -182,7 +178,6 @@ export function AppTopBar() {
                   )}
                 </div>
                 {unreadCount > 0 && (
-                  /* Caption (12px) */
                   <Button
                     variant="ghost"
                     size="sm"
@@ -202,13 +197,11 @@ export function AppTopBar() {
               {/* List Notifikasi */}
               <div className="max-h-[300px] overflow-y-auto divide-y">
                 {isNotificationsLoading ? (
-                  /* Caption (12px) */
                   <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" /> Memuat
                     notifikasi...
                   </div>
                 ) : notifications.length === 0 ? (
-                  /* Caption (12px) */
                   <div className="p-4 text-center text-xs text-muted-foreground">
                     Tidak ada notifikasi saat ini.
                   </div>
@@ -217,7 +210,6 @@ export function AppTopBar() {
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
-                      /* Secondary (13px) */
                       className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
                         !item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
                       }`}
@@ -231,11 +223,9 @@ export function AppTopBar() {
                       </div>
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center justify-between">
-                          {/* UI (14px) */}
                           <p className="font-semibold text-foreground text-sm">
                             {item.title}
                           </p>
-                          {/* Label kecil (11px) */}
                           <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
@@ -245,7 +235,6 @@ export function AppTopBar() {
                               : ""}
                           </span>
                         </div>
-                        {/* Secondary (13px) */}
                         <p className="text-muted-foreground leading-relaxed text-[13px]">
                           {item.message}
                         </p>
@@ -262,13 +251,11 @@ export function AppTopBar() {
       <Separator />
 
       {/* KELOMPOK 2: Bar Sekunder */}
-      {/* Caption (12px) */}
       <div className="flex h-10 items-center justify-between px-6 bg-muted/20 text-xs">
         {/* Dynamic Breadcrumbs */}
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              {/* Caption (12px) */}
               <BreadcrumbLink href="/home" className="text-xs">
                 Home
               </BreadcrumbLink>
@@ -287,12 +274,10 @@ export function AppTopBar() {
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     {isLast ? (
-                      /* Caption (12px) */
                       <BreadcrumbPage className="text-xs font-semibold">
                         {formattedName}
                       </BreadcrumbPage>
                     ) : (
-                      /* Caption (12px) */
                       <BreadcrumbLink href={url} className="text-xs">
                         {formattedName}
                       </BreadcrumbLink>
@@ -307,7 +292,6 @@ export function AppTopBar() {
         {/* Status Periode & Indikator DB */}
         <div className="flex items-center gap-4 text-muted-foreground">
           {selectedPeriod ? (
-            /* Caption (12px) */
             <Badge
               variant="outline"
               className={`gap-1.5 font-medium text-xs ${
@@ -327,7 +311,6 @@ export function AppTopBar() {
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
             </Badge>
           ) : (
-            /* Caption (12px) */
             <Badge
               variant="outline"
               className="gap-1.5 font-medium text-xs text-muted-foreground"
@@ -342,12 +325,10 @@ export function AppTopBar() {
           <Separator orientation="vertical" className="h-3" />
 
           {/* Indikator Database */}
-          {/* Caption (12px) */}
           <div className="flex items-center gap-2 text-xs">
             <Database className="h-3.5 w-3.5 text-muted-foreground" />
 
             {dbStatus === "online" && (
-              /* Caption (12px) */
               <Badge
                 variant="outline"
                 className="gap-1.5 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-medium text-xs"
@@ -358,7 +339,6 @@ export function AppTopBar() {
             )}
 
             {dbStatus === "connecting" && (
-              /* Caption (12px) */
               <Badge
                 variant="outline"
                 className="gap-1.5 border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10 font-medium text-xs"
@@ -370,7 +350,6 @@ export function AppTopBar() {
 
             {dbStatus === "offline" && (
               <div className="flex items-center gap-1.5">
-                {/* Caption (12px) */}
                 <Badge
                   variant="destructive"
                   className="gap-1.5 font-medium text-xs"

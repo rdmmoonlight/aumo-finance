@@ -39,152 +39,17 @@ import {
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
 } from "@/lib/generatedApi";
-import components, {
-  type PeriodItem,
+import {
+  PeriodList,
+  CreatePeriodForm,
+  getPeriodColumns,
   type PeriodListProps,
+  type PeriodItem,
   type ApiError,
 } from "./components";
 
 /* -------------------------------------------------------------------------- */
-/*                               PERIOD LIST UI                               */
-/* -------------------------------------------------------------------------- */
-
-function PeriodList({
-  periods,
-  selectedPeriod,
-  isLoading,
-  isClearing,
-  selectingId,
-  closingId,
-  onClearSelection,
-  onSelectPeriod,
-  onClosePeriod,
-  onOpenCreateView,
-}: PeriodListProps) {
-  const columns = useMemo(
-    () =>
-      components.getPeriodColumns({
-        selectedPeriod,
-        selectingId,
-        closingId,
-        onSelectPeriod,
-        onClosePeriod,
-      }),
-    [selectedPeriod, selectingId, closingId, onSelectPeriod, onClosePeriod],
-  );
-
-  const table = useReactTable({
-    data: periods,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
-  return (
-    <Card className="bg-[#151519] border-white/[0.07]">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-        <div>
-          <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
-            <Calendar className="text-white" size={20} /> Financial Periods
-          </CardTitle>
-          <CardDescription className="text-xs text-zinc-400 mt-1">
-            Manage accounting cycles and period statuses
-          </CardDescription>
-        </div>
-        <div className="flex items-center gap-2">
-          {selectedPeriod && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onClearSelection}
-              disabled={isClearing}
-              className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10 hover:text-white"
-            >
-              {isClearing ? (
-                <Loader2 size={14} className="animate-spin" />
-              ) : (
-                <EyeOff size={14} />
-              )}
-              Clear Selection
-            </Button>
-          )}
-          <Button
-            size="sm"
-            onClick={onOpenCreateView}
-            className="gap-1.5 bg-white text-black text-xs font-semibold hover:bg-zinc-200"
-          >
-            <Plus size={14} /> Open Period
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="border-t border-white/[0.07]">
-          <Table>
-            <TableHeader className="bg-[#0e0e10]">
-              {table.getHeaderGroups().map((headerGroup) => (
-                <TableRow
-                  key={headerGroup.id}
-                  className="border-b border-white/[0.07] hover:bg-transparent"
-                >
-                  {headerGroup.headers.map((header) => (
-                    <TableHead key={header.id} className="h-10 text-xs">
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
-                    </TableHead>
-                  ))}
-                </TableRow>
-              ))}
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-xs text-zinc-500"
-                  >
-                    <Loader2 className="animate-spin inline mr-1" size={16} />
-                    Loading periods...
-                  </TableCell>
-                </TableRow>
-              ) : table.getRowModel().rows.length > 0 ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    className="border-b border-white/[0.05] hover:bg-white/[0.02]"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-3 text-xs">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center text-xs text-zinc-500"
-                  >
-                    No financial periods found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                MAIN COMPONENT                              */
+/*                                MAIN PAGE                                   */
 /* -------------------------------------------------------------------------- */
 
 export default function PeriodsPage() {
@@ -360,6 +225,24 @@ export default function PeriodsPage() {
     }
   };
 
+  const columns = useMemo(
+    () =>
+      getPeriodColumns({
+        selectedPeriod,
+        selectingId,
+        closingId,
+        onSelectPeriod: handleSelectPeriod,
+        onClosePeriod: handleClosePeriod,
+      }),
+    [selectedPeriod, selectingId, closingId],
+  );
+
+  const table = useReactTable({
+    data: periods,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   return (
     <div className="space-y-6 max-w-5xl">
       {errorMessage && (
@@ -399,20 +282,108 @@ export default function PeriodsPage() {
       )}
 
       {viewMode === "list" ? (
-        <PeriodList
-          periods={periods}
-          selectedPeriod={selectedPeriod}
-          isLoading={isLoading}
-          isClearing={isClearing}
-          selectingId={selectingId}
-          closingId={closingId}
-          onClearSelection={handleClearSelection}
-          onSelectPeriod={handleSelectPeriod}
-          onClosePeriod={handleClosePeriod}
-          onOpenCreateView={() => setViewMode("create")}
-        />
+        <Card className="bg-[#151519] border-white/[0.07]">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+            <div>
+              <CardTitle className="text-lg font-bold text-white flex items-center gap-2">
+                <Calendar className="text-white" size={20} /> Financial Periods
+              </CardTitle>
+              <CardDescription className="text-xs text-zinc-400 mt-1">
+                Manage accounting cycles and period statuses
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-2">
+              {selectedPeriod && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearSelection}
+                  disabled={isClearing}
+                  className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10 hover:text-white"
+                >
+                  {isClearing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <EyeOff size={14} />
+                  )}
+                  Clear Selection
+                </Button>
+              )}
+              <Button
+                size="sm"
+                onClick={() => setViewMode("create")}
+                className="gap-1.5 bg-white text-black text-xs font-semibold hover:bg-zinc-200"
+              >
+                <Plus size={14} /> Open Period
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="border-t border-white/[0.07]">
+              <Table>
+                <TableHeader className="bg-[#0e0e10]">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    <TableRow
+                      key={headerGroup.id}
+                      className="border-b border-white/[0.07] hover:bg-transparent"
+                    >
+                      {headerGroup.headers.map((header) => (
+                        <TableHead key={header.id} className="h-10 text-xs">
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </TableHead>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center text-xs text-zinc-500"
+                      >
+                        <Loader2 className="animate-spin inline mr-1" size={16} />
+                        Loading periods...
+                      </TableCell>
+                    </TableRow>
+                  ) : table.getRowModel().rows.length > 0 ? (
+                    table.getRowModel().rows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        className="border-b border-white/[0.05] hover:bg-white/[0.02]"
+                      >
+                        {row.getVisibleCells().map((cell) => (
+                          <TableCell key={cell.id} className="py-3 text-xs">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        ))}
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center text-xs text-zinc-500"
+                      >
+                        No financial periods found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <components.CreatePeriodForm
+        <CreatePeriodForm
           month={month}
           year={year}
           setupMode={setupMode}
