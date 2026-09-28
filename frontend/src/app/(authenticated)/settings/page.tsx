@@ -212,25 +212,42 @@ export default function SettingsPage() {
           </div>
 
           <TabsList className="h-8 p-1 w-fit bg-zinc-100 dark:bg-muted text-muted-foreground border border-border">
-            <TabsTrigger
-              value="account"
-              className="text-caption gap-1.5 h-6 px-3 rounded-sm transition-all text-muted-foreground data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
-            >
-              <User size={13} /> Account
-            </TabsTrigger>
-            <TabsTrigger
-              value="appearance"
-              className="text-caption gap-1.5 h-6 px-3 rounded-sm transition-all text-muted-foreground data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
-            >
-              <Palette size={13} /> Appearance
-            </TabsTrigger>
-            <TabsTrigger
-              value="security"
-              className="text-caption gap-1.5 h-6 px-3 rounded-sm transition-all text-muted-foreground data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm"
-            >
-              <ShieldCheck size={13} /> Security
-            </TabsTrigger>
-          </TabsList>
+          <TabsTrigger
+            value="account"
+            className="text-caption gap-1.5 h-6 px-3 rounded-sm transition-all
+                       text-zinc-500 dark:text-zinc-400
+                       data-[state=active]:bg-white 
+                       data-[state=active]:!text-black 
+                       data-[state=active]:[&_svg]:!text-black
+                       data-[state=active]:shadow-sm data-[state=active]:font-semibold"
+          >
+            <User size={13} className="text-current" /> Account
+          </TabsTrigger>
+        
+          <TabsTrigger
+            value="appearance"
+            className="text-caption gap-1.5 h-6 px-3 rounded-sm transition-all
+                       text-zinc-500 dark:text-zinc-400
+                       data-[state=active]:bg-white 
+                       data-[state=active]:!text-black 
+                       data-[state=active]:[&_svg]:!text-black
+                       data-[state=active]:shadow-sm data-[state=active]:font-semibold"
+          >
+            <Palette size={13} className="text-current" /> Appearance
+          </TabsTrigger>
+        
+          <TabsTrigger
+            value="security"
+            className="text-caption gap-1.5 h-6 px-3 rounded-sm transition-all
+                       text-zinc-500 dark:text-zinc-400
+                       data-[state=active]:bg-white 
+                       data-[state=active]:!text-black 
+                       data-[state=active]:[&_svg]:!text-black
+                       data-[state=active]:shadow-sm data-[state=active]:font-semibold"
+          >
+            <ShieldCheck size={13} className="text-current" /> Security
+          </TabsTrigger>
+        </TabsList>
 
           <Separator className="bg-border" />
         </div>
