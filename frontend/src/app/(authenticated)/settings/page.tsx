@@ -24,7 +24,7 @@ export default function SettingsPage() {
       >
         <div className="shrink-0 space-y-3 bg-background relative z-20 pb-3">
           <h1 className="text-xl font-bold">Settings</h1>
-          
+
           <TabsList className="h-8 p-1 w-fit bg-muted text-muted-foreground">
             <TabsTrigger
               value="account"
@@ -32,14 +32,14 @@ export default function SettingsPage() {
             >
               <IconUser size={13} /> Account
             </TabsTrigger>
-            
+
             <TabsTrigger
               value="appearance"
               className="text-xs gap-1.5 h-6 px-3 rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
             >
               <IconPalette size={13} /> Appearance
             </TabsTrigger>
-            
+
             <TabsTrigger
               value="security"
               className="text-xs gap-1.5 h-6 px-3 rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
@@ -47,7 +47,7 @@ export default function SettingsPage() {
               <IconShieldCheck size={13} /> Security
             </TabsTrigger>
           </TabsList>
-          
+
           <Separator />
         </div>
 
