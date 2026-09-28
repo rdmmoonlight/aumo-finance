@@ -1,5 +1,3 @@
-import prisma from '~/server/utils/prisma'
-
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   const search = query.search ? String(query.search).trim().toLowerCase() : null
