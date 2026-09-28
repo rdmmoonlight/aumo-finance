@@ -1,36 +1,26 @@
 @inherits LayoutComponentBase
 @using Microsoft.AspNetCore.Components.Authorization
 
-<!-- ==========================================
-     Aumo Finance - Main Layout
-     Cosmic / Nebula Theme
-     ========================================== -->
-
 <div class="d-flex flex-column min-vh-100 min-vw-0 aumo-main-shell">
 
-    <!-- TOPBAR (Di Atas Penuh) -->
+    <!-- TOPBAR (Di Paling Atas) -->
     <AuthorizeView>
         <Authorized>
             <AumoBlazor.Components.Layout.TopBar />
         </Authorized>
     </AuthorizeView>
 
-    <!-- SHELL UTAMA: Mengatur Sidebar & Content Secara Horizontal (Menyamping) -->
-    <div class="d-flex flex-row flex-grow-1 w-100 position-relative align-items-stretch">
+    <!-- CONTAINER UTAMA (flex-nowrap mencegah main terdorong ke bawah) -->
+    <div class="d-flex flex-row flex-nowrap flex-grow-1 w-100 position-relative align-items-stretch">
         
-        <!-- SIDEBAR (Menempel di Sisi Kiri) -->
+        <!-- SIDEBAR (Kiri) -->
         <AuthorizeView>
             <Authorized>
                 <AumoBlazor.Components.Layout.Sidebar />
             </Authorized>
-            <Authorizing>
-                <aside class="p-3 text-muted small flex-shrink-0" style="width: 60px;">
-                    <span class="spinner-border spinner-border-sm" role="status"></span>
-                </aside>
-            </Authorizing>
         </AuthorizeView>
 
-        <!-- MAIN CONTENT AREA (Di Sebelah Kanan Sidebar) -->
+        <!-- MAIN CONTENT (Kanan) -->
         <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
             @Body
         </main>
@@ -50,10 +40,11 @@
         color: var(--aumo-text, #FFFFFF);
     }
 
+    /* PENTING: Mencegah konten meluap dan memaksa tetap di samping Sidebar */
     .content { 
         transition: background-color 0.3s ease;
-        /* min-width: 0 PENTING agar Flex Child tidak meluap/terdorong ke bawah */
         min-width: 0; 
+        width: 100%;
     }
 
     @@media (max-width: 767.98px) {
