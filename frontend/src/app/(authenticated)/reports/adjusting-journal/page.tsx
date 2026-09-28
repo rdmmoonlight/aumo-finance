@@ -15,23 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  IconAdjustments,
-  IconPlus,
-  IconPencil,
-  IconTrash,
-  IconEyeOff,
-  IconFileX,
-  IconLoader2,
-  IconAlertTriangle,
-} from "@tabler/icons-react";
-
-// Import Hooks & Types dari auto-generated RTK Query
-import {
   useGetApiV1ReportsJournalsAdjustingQuery,
   useDeleteApiV1ReportsJournalsAdjustingByIdMutation,
 } from "@/lib/generatedApi";
+import { SlidersHorizontal, Plus, Pencil, Trash2, EyeOff, FileX, Loader2, AlertTriangle } from "lucide-react";
 
-// Format Helpers
 const formatNumber = (n: number) =>
   new Intl.NumberFormat("id-ID").format(Math.abs(n));
 
@@ -103,9 +91,9 @@ export default function AdjustingJournalPage() {
     <div className="max-w-5xl space-y-6 w-full">
       {/* Alert Error dari Fetching atau Deleting */}
       {(errorMessage || isError) && (
-        <Alert variant="destructive">
-          <IconAlertTriangle size={16} />
-          <AlertDescription>
+        <Alert variant="destructive" className="text-ui">
+          <AlertTriangle size={16} />
+          <AlertDescription className="text-caption">
             {errorMessage ||
               (error as any)?.data?.message ||
               "Gagal memuat laporan Jurnal Penyesuaian."}
@@ -116,11 +104,11 @@ export default function AdjustingJournalPage() {
       {/* Header Bar */}
       <div className="flex flex-wrap sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="flex items-center gap-2 text-xl font-bold">
-            <IconAdjustments className="text-amber-500" size={22} /> Adjusting
+          <h1 className="flex items-center gap-2 text-h3 font-bold">
+            <SlidersHorizontal className="text-amber-500" size={22} /> Adjusting
             Journal
           </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-ui text-muted-foreground">
             Menyelaraskan pendapatan & beban{" "}
             {selectedPeriodName
               ? `(Melihat Periode: ${selectedPeriodName})`
@@ -129,19 +117,19 @@ export default function AdjustingJournalPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button asChild size="sm" className="gap-1.5">
+          <Button asChild size="sm" className="gap-1.5 text-caption">
             <Link href="/adjusting-journal-entry">
-              <IconPlus size={14} /> Add Entry
+              <Plus size={14} /> Add Entry
             </Link>
           </Button>
           <Button
             variant={editMode ? "secondary" : "outline"}
             size="sm"
-            className="gap-1.5"
+            className="gap-1.5 text-caption"
             onClick={() => setEditMode((p) => !p)}
             disabled={!entries.length}
           >
-            <IconPencil size={14} /> Edit
+            <Pencil size={14} /> Edit
           </Button>
         </div>
       </div>
@@ -153,12 +141,12 @@ export default function AdjustingJournalPage() {
             <Table className="min-w-[650px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[16%] pl-6">Tanggal & Ref</TableHead>
-                  <TableHead className="w-[26%]">Akun</TableHead>
-                  <TableHead className="w-[26%]">Keterangan</TableHead>
-                  <TableHead className="w-[10%] text-center">Ref #</TableHead>
-                  <TableHead className="w-[11%] text-right">Debit</TableHead>
-                  <TableHead className="w-[11%] pr-6 text-right">
+                  <TableHead className="w-[16%] pl-6 text-caption">Tanggal & Ref</TableHead>
+                  <TableHead className="w-[26%] text-caption">Akun</TableHead>
+                  <TableHead className="w-[26%] text-caption">Keterangan</TableHead>
+                  <TableHead className="w-[10%] text-center text-caption">Ref #</TableHead>
+                  <TableHead className="w-[11%] text-right text-caption">Debit</TableHead>
+                  <TableHead className="w-[11%] pr-6 text-right text-caption">
                     Kredit
                   </TableHead>
                 </TableRow>
@@ -169,9 +157,9 @@ export default function AdjustingJournalPage() {
                   <TableRow>
                     <TableCell
                       colSpan={6}
-                      className="py-10 text-center text-muted-foreground"
+                      className="py-10 text-center text-caption text-muted-foreground"
                     >
-                      <IconLoader2
+                      <Loader2
                         className="mr-2 inline animate-spin"
                         size={16}
                       />{" "}
@@ -215,28 +203,28 @@ export default function AdjustingJournalPage() {
                           key={`${entry.id}-${line.id || i}`}
                           className={shade}
                         >
-                          <TableCell className="align-top py-2 pl-6 text-xs">
+                          <TableCell className="align-top py-2 pl-6 text-caption">
                             {isFirst && showHeader && (
                               <Badge
                                 variant="secondary"
-                                className="mb-1 font-mono"
+                                className="mb-1 font-mono text-label-small"
                               >
                                 {curDate}
                               </Badge>
                             )}
                             {isFirst && (
                               <div className="flex flex-col gap-0.5">
-                                <span className="font-mono font-bold text-amber-500">
+                                <span className="font-mono font-bold text-amber-500 text-caption">
                                   {entry.transactionNumber}
                                 </span>
                                 {entry.createdAt && (
-                                  <span className="text-xs text-muted-foreground">
+                                  <span className="text-label-small text-muted-foreground">
                                     {formatDateTimeDisplay(entry.createdAt)}
                                   </span>
                                 )}
                                 {entry.updatedAt && (
-                                  <span className="flex items-center gap-0.5 text-xs text-sky-500">
-                                    <IconPencil size={10} />{" "}
+                                  <span className="flex items-center gap-0.5 text-label-small text-sky-500">
+                                    <Pencil size={10} />{" "}
                                     {formatDateTimeDisplay(entry.updatedAt)}
                                   </span>
                                 )}
@@ -252,7 +240,7 @@ export default function AdjustingJournalPage() {
                                       <Link
                                         href={`/adjusting-journal-entry?id=${entry.id}`}
                                       >
-                                        <IconPencil size={12} />
+                                        <Pencil size={12} />
                                       </Link>
                                     </Button>
                                     <Button
@@ -262,7 +250,7 @@ export default function AdjustingJournalPage() {
                                       onClick={() => handleDeleteEntry(entry)}
                                       disabled={isDeleting}
                                     >
-                                      <IconTrash size={12} />
+                                      <Trash2 size={12} />
                                     </Button>
                                   </div>
                                 )}
@@ -271,7 +259,7 @@ export default function AdjustingJournalPage() {
                           </TableCell>
 
                           <TableCell
-                            className={`align-top py-2 text-xs ${
+                            className={`align-top py-2 text-caption ${
                               isDebit
                                 ? "font-semibold"
                                 : "pl-6 text-muted-foreground"
@@ -280,24 +268,24 @@ export default function AdjustingJournalPage() {
                             {accName}
                           </TableCell>
 
-                          <TableCell className="align-top py-2 text-xs text-muted-foreground">
+                          <TableCell className="align-top py-2 text-caption text-muted-foreground">
                             {line.lineDescription || "-"}
                           </TableCell>
 
                           <TableCell className="align-top py-2 text-center">
                             <Badge
                               variant="outline"
-                              className="font-mono text-amber-500"
+                              className="font-mono text-amber-500 text-label-small"
                             >
                               {refNumber}
                             </Badge>
                           </TableCell>
 
-                          <TableCell className="align-top py-2 text-right font-mono text-xs font-medium text-emerald-500">
+                          <TableCell className="align-top py-2 text-right font-mono text-caption font-medium text-emerald-500">
                             {debitNum > 0 ? formatNumber(debitNum) : "-"}
                           </TableCell>
 
-                          <TableCell className="align-top py-2 pr-6 text-right font-mono text-xs font-medium text-red-500">
+                          <TableCell className="align-top py-2 pr-6 text-right font-mono text-caption font-medium text-red-500">
                             {creditNum > 0 ? formatNumber(creditNum) : "-"}
                           </TableCell>
                         </TableRow>
@@ -310,11 +298,11 @@ export default function AdjustingJournalPage() {
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
                         {selectedPeriodName === null ? (
                           <>
-                            <IconEyeOff size={28} />
-                            <p className="text-sm font-medium">
+                            <EyeOff size={28} />
+                            <p className="text-ui font-medium">
                               Belum Ada Periode Dipilih
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-caption text-muted-foreground">
                               Buka halaman{" "}
                               <Link
                                 href="/periods"
@@ -327,11 +315,11 @@ export default function AdjustingJournalPage() {
                           </>
                         ) : (
                           <>
-                            <IconFileX size={28} />
-                            <p className="text-sm font-medium">
+                            <FileX size={28} />
+                            <p className="text-ui font-medium">
                               Belum Ada Jurnal Penyesuaian
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-caption text-muted-foreground">
                               Tidak ada entri jurnal pada periode{" "}
                               <strong>{selectedPeriodName}</strong>.
                             </p>
