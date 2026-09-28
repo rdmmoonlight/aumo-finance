@@ -66,7 +66,9 @@ function CashFlowSectionTable({
         ),
       }),
       columnHelper.accessor("amount", {
-        header: () => <div className="text-right pr-4 text-caption">Jumlah</div>,
+        header: () => (
+          <div className="text-right pr-4 text-caption">Jumlah</div>
+        ),
         cell: (info) => {
           const val = info.getValue() || 0;
           return (
@@ -227,7 +229,9 @@ export default function StatementOfCashFlowPage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -255,7 +259,12 @@ export default function StatementOfCashFlowPage() {
                 Indirect method (IAS 7) • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-caption"
+            >
               <Link href="/reports/income-statement">
                 <ArrowRight size={14} /> Income Statement
               </Link>
