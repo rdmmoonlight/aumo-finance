@@ -1,24 +1,39 @@
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
+  // Mengambil param 'id' dari folder [id]
+  const idParam = getRouterParam(event, 'id')
+  const id = Number(idParam)
 
-  if (!id) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: 'ID account tidak valid'
-    })
+  if (!id || isNaN(id)) {
+    throw createError({ statusCode: 400, statusMessage: 'Invalid account ID.' })
   }
 
+  // 1. Cek keberadaan entitas
+  // const entity = await db.chartOfAccounts.findFirst({ where: { id, userId } })
+  // if (!entity) {
+  //   throw createError({ statusCode: 404, statusMessage: 'Account not found.' })
+  // }
+
+  // 2. Integritas data: Cek apakah akun memiliki transaksi jurnal
+  // const hasJournalLines = await db.journalEntryLines.exists({ accountId: id })
+  // if (hasJournalLines) {
+  //   throw createError({
+  //     statusCode: 400,
+  //     statusMessage: `Account '${entity.accountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead.`
+  //   })
+  // }
+
   try {
-    // Hapus dari database
-    // await prisma.chartOfAccount.delete({ where: { id: Number(id) } })
+    // Hapus dari DB
+    // await db.chartOfAccounts.delete({ where: { id } })
 
     return {
-      message: `Account #${id} deleted successfully`
+      success: true,
+      message: `Account successfully deleted.`
     }
   } catch (error: any) {
     throw createError({
-      statusCode: error.statusCode || 500,
-      statusMessage: error.message || 'Gagal menghapus account'
+      statusCode: 500,
+      statusMessage: `A fatal error occurred while deleting the account: ${error.message}`
     })
   }
 })
