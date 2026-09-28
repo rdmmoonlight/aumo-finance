@@ -22,7 +22,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useGetApiV1ReportsWorksheetQuery } from "@/lib/generatedApi";
-import { Grid, Calendar, EyeOff, TrendingUp, AlertTriangle, Loader2, Info } from "lucide-react";
+import {
+  Grid,
+  Calendar,
+  EyeOff,
+  TrendingUp,
+  AlertTriangle,
+  Loader2,
+  Info,
+} from "lucide-react";
 
 export interface WorksheetRow {
   accountId: number;
@@ -231,9 +239,14 @@ function WorksheetTable({
               {row.getVisibleCells().map((cell) => {
                 const id = cell.column.id;
                 const isAccountName = id === "accountName";
-                const isAmber = id === "adjustmentDebit" || id === "adjustmentCredit";
-                const isEmerald = id === "incomeStatementDebit" || id === "incomeStatementCredit";
-                const isSky = id === "financialPositionDebit" || id === "financialPositionCredit";
+                const isAmber =
+                  id === "adjustmentDebit" || id === "adjustmentCredit";
+                const isEmerald =
+                  id === "incomeStatementDebit" ||
+                  id === "incomeStatementCredit";
+                const isSky =
+                  id === "financialPositionDebit" ||
+                  id === "financialPositionCredit";
                 const isBorderLeft =
                   id === "adjustmentDebit" ||
                   id === "adjustedDebit" ||
@@ -246,7 +259,10 @@ function WorksheetTable({
                       key={cell.id}
                       className="sticky left-0 bg-background font-medium flex items-center gap-2 text-caption"
                     >
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
                     </TableCell>
                   );
                 }
@@ -346,9 +362,7 @@ function WorksheetTable({
             Total (after plug)
           </TableCell>
           <TableCell className="text-right font-mono text-emerald-500 border-l text-caption">
-            {formatNumber(
-              totals.isDebit + (netIncome >= 0 ? netIncome : 0),
-            )}
+            {formatNumber(totals.isDebit + (netIncome >= 0 ? netIncome : 0))}
           </TableCell>
           <TableCell className="text-right font-mono text-emerald-500 text-caption">
             {formatNumber(
@@ -361,9 +375,7 @@ function WorksheetTable({
             )}
           </TableCell>
           <TableCell className="text-right font-mono text-sky-500 text-caption">
-            {formatNumber(
-              totals.bsCredit + (netIncome >= 0 ? netIncome : 0),
-            )}
+            {formatNumber(totals.bsCredit + (netIncome >= 0 ? netIncome : 0))}
           </TableCell>
         </TableRow>
       </TableFooter>
@@ -464,7 +476,9 @@ export default function WorksheetPage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -485,15 +499,19 @@ export default function WorksheetPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-h3 font-bold flex items-center gap-2">
-                <Grid className="text-sky-500" size={22} /> 10-Column
-                Worksheet
+                <Grid className="text-sky-500" size={22} /> 10-Column Worksheet
               </h1>
               <p className="text-ui text-muted-foreground mt-1">
                 Trial Balance → Adjustments → Adjusted TB → Income Statement →
                 Balance Sheet • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-caption"
+            >
               <Link href="/reports/income-statement">
                 <TrendingUp size={14} /> Income Statement
               </Link>

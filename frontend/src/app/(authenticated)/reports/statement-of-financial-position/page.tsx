@@ -251,8 +251,7 @@ export default function StatementOfFinancialPositionPage() {
   if (isLoading) {
     return (
       <div className="py-16 text-center text-caption text-muted-foreground flex items-center justify-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Loading Balance
-        Sheet...
+        <Loader2 className="animate-spin" size={16} /> Loading Balance Sheet...
       </div>
     );
   }
@@ -266,7 +265,9 @@ export default function StatementOfFinancialPositionPage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -287,8 +288,8 @@ export default function StatementOfFinancialPositionPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-h3 font-bold flex items-center gap-2">
-                <Landmark className="text-sky-500" size={22} />{" "}
-                Statement of Financial Position
+                <Landmark className="text-sky-500" size={22} /> Statement of
+                Financial Position
               </h1>
               <p className="text-ui text-muted-foreground mt-1">
                 As of {formatDateDisplay(asOfDate) || "current period"} • IAS 1
@@ -304,7 +305,12 @@ export default function StatementOfFinancialPositionPage() {
               >
                 Refresh Data
               </Button>
-              <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
+              <Button
+                asChild
+                variant="outline"
+                size="sm"
+                className="gap-1.5 text-caption"
+              >
                 <Link href="/reports/closing-journal">
                   <ArrowRight size={14} /> Closing Journal
                 </Link>
