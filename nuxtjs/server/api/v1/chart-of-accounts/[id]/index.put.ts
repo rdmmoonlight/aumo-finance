@@ -1,5 +1,11 @@
+import prisma from '~/server/utils/prisma'
+
 export default defineEventHandler(async (event) => {
-  // Mengambil param 'id' dari folder [id]
+  const userId = event.context.user?.id
+  if (!userId) {
+    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
+  }
+
   const idParam = getRouterParam(event, 'id')
   const id = Number(idParam)
 
@@ -9,33 +15,52 @@ export default defineEventHandler(async (event) => {
 
   const body = await readBody(event)
 
-  // 1. Cek apakah entitas ada
-  // const account = await db.chartOfAccounts.findFirst({ where: { id, userId } })
-  // if (!account) {
-  //   throw createError({ statusCode: 404, statusMessage: 'Account not found.' })
-  // }
+  // 1. Cek keberadaan Akun
+  const account = await prisma.chartOfAccounts.findFirst({
+    where: { Id: id, UserId: userId }
+  })
 
-  // 2. Validasi Input
+  if (!account) {
+    throw createError({ statusCode: 404, statusMessage: 'Account not found.' })
+  }
+
   if (!body?.accountName || !String(body.accountName).trim()) {
     throw createError({ statusCode: 400, statusMessage: 'Account name is required.' })
   }
 
-  // 3. Cek Duplikasi Kode Akun pada ID Lain
-  // const isCodeTaken = await db.chartOfAccounts.exists({ referenceNumber: body.referenceNumber, userId, idNotEqual: id })
-  // if (isCodeTaken) {
-  //   throw createError({
-  //     statusCode: 400,
-  //     statusMessage: `Account code ${body.referenceNumber} is already in use.`
-  //   })
-  // }
+  const refNumber = Number(body.referenceNumber)
+
+  // 2. Cek Duplikasi Kode Akun pada ID Lain
+  const isCodeTaken = await prisma.chartOfAccounts.findFirst({
+    where: {
+      UserId: userId,
+      ReferenceNumber: refNumber,
+      NOT: { Id: id }
+    }
+  })
+
+  if (isCodeTaken) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Account code ${refNumber} is already in use.`
+    })
+  }
 
   try {
-    // Update data di DB
-    // await db.chartOfAccounts.update({ where: { id }, data: { ... } })
+    const updated = await prisma.chartOfAccounts.update({
+      where: { Id: id },
+      data: {
+        ReferenceNumber: refNumber,
+        AccountName: String(body.accountName).trim(),
+        Type: String(body.type),
+        Role: body.role ? String(body.role).trim() : 'Default',
+        IsActive: typeof body.isActive === 'boolean' ? body.isActive : true
+      }
+    })
 
     return {
       success: true,
-      message: `Account '${body.accountName.trim()}' successfully updated.`
+      message: `Account '${updated.AccountName}' successfully updated.`
     }
   } catch (error: any) {
     throw createError({
