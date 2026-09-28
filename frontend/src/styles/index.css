@@ -1,15 +1,22 @@
 @import "tailwindcss";
 @import "./theme.css";
 
+/* =========================================
+      1. VARIANTS & SETUP
+   ========================================= */
 @custom-variant dark (&:is(.dark *));
 
+/* =========================================
+      2. DESIGN TOKENS - AUMO MATTE
+   ========================================= */
 @theme inline {
+  /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* PANGGUL MURNI VAR() KARENA DI THEME.CSS SUDAH DIBUNGKUS HSL() */
+  /* Core Colors - ngambil dari theme.css */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -29,7 +36,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* AUMO MATTE - premium */
+  /* Matte System - Premium Dark */
   --color-matte: #0e0e10;
   --color-matte-soft: #151519;
   --color-matte-hover: #1e1e22;
@@ -38,12 +45,13 @@
   --color-matte-active: #ffffff;
   --color-matte-active-fg: #0e0e10;
 
+  /* Shadows */
   --shadow-soft:
     0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
   --shadow-glow:
     0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.5);
 
-  /* SIDEBAR SAMAKAN PENGGUNAAN VAR()-NYA */
+  /* Sidebar */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -53,6 +61,7 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
 
+  /* Typography Scale */
   --text-label-small: 11px;
   --text-caption: 12px;
   --text-secondary: 13px;
@@ -67,8 +76,11 @@
   --text-display: 48px;
 }
 
+/* =========================================
+      3. BASE RESET & GLOBAL
+   ========================================= */
 @layer base {
-  * {
+    * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
@@ -79,9 +91,12 @@
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
     scrollbar-gutter: stable;
-    /* Mencegah layar flash putih saat halaman awal direload */
     background-color: #0e0e10;
     color-scheme: dark;
+
+    /* DEFAULT: dark = tulisan putih, blok putih */
+    --selection-bg: #ffffff;
+    --selection-fg: #000000;
   }
 
   body {
@@ -90,37 +105,69 @@
     letter-spacing: -0.011em;
   }
 
-  /* SELECTION - selalu kebalik */
+  /* =========================================
+          4. SELECTION SYSTEM - ANTI PUTIH-PUTIH
+     ========================================= */
+  
+  /* 4a. Global - selalu konsisten */
   ::selection {
-    background-color: white;
-    color: black;
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
   }
   ::-moz-selection {
-    background-color: white;
-    color: black;
+    background-color: var(--selection-bg);
+    color: var(--selection-fg);
   }
 
-  /* Area terang (card login bg-white) -> dibalik lagi jadi hitam */
-  .bg-white::selection,
-  .bg-white ::selection,
-  .bg-zinc-50::selection,
-  .bg-zinc-50 ::selection,
-  input::selection,
-  textarea::selection {
-    background-color: black;
-    color: white;
-  }
-  .bg-white::-moz-selection,
-  .bg-white ::-moz-selection,
-  .bg-zinc-50::-moz-selection,
-  .bg-zinc-50 ::-moz-selection,
-  input::-moz-selection,
-  textarea::-moz-selection {
-    background-color: black;
-    color: white;
+  /* 4b. Light Islands - semua area terang */
+  :is(
+    .bg-white,
+    .bg-zinc-50,
+    .bg-zinc-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-50,
+    .bg-card,
+    .bg-popover
+  ) {
+    --selection-bg: #000000;
+    --selection-fg: #ffffff;
+    color: #000000; /* paksa biar gak ada tulisan putih di bg putih */
   }
 
-  /* Scrollbar Webkit */
+  :is(input, textarea, select) {
+    --selection-bg: #000000;
+    --selection-fg: #ffffff;
+  }
+
+  /* 4c. Selection di dalam light islands */
+  :is(
+    .bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100,
+    .bg-slate-50, .bg-card, .bg-popover, input, textarea, select
+  )::selection,
+  :is(
+    .bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100,
+    .bg-slate-50, .bg-card, .bg-popover, input, textarea, select
+  ) *::selection {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  :is(
+    .bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100,
+    .bg-slate-50, .bg-card, .bg-popover, input, textarea, select
+  )::-moz-selection,
+  :is(
+    .bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100,
+    .bg-slate-50, .bg-card, .bg-popover, input, textarea, select
+  ) *::-moz-selection {
+    background-color: #000000;
+    color: #ffffff;
+  }
+
+  /* =========================================
+          5. SCROLLBAR SYSTEM
+     ========================================= */
   ::-webkit-scrollbar {
     width: 5px;
     height: 5px;
@@ -142,6 +189,9 @@
   }
 }
 
+/* =========================================
+      6. CUSTOM UTILITIES
+   ========================================= */
 @layer utilities {
   .matte-card {
     background: var(--color-matte-soft);
@@ -163,6 +213,9 @@
   }
 }
 
+/* =========================================
+      7. SIDEBAR TOKENS
+   ========================================= */
 :root {
   --sidebar: hsl(0 0% 98%);
   --sidebar-foreground: hsl(240 5.3% 26.1%);
