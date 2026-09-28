@@ -2,6 +2,12 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -15,15 +21,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  IconListCheck,
-  IconCalendar,
-  IconEyeOff,
-  IconAlertTriangle,
-  IconLoader2,
-  IconCircleCheck,
-} from "@tabler/icons-react";
 import { useGetApiV1ReportsTrialBalanceAdjustedQuery } from "@/lib/generatedApi";
+import {
+  ListChecks,
+  Calendar,
+  EyeOff,
+  AlertTriangle,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 
 export interface TrialRow {
   accountId: number;
@@ -45,6 +51,8 @@ const formatNumber = (n: number) =>
         maximumFractionDigits: 0,
       }).format(Math.abs(n));
 
+const columnHelper = createColumnHelper<TrialRow>();
+
 function TrialTable({
   rows,
   totalDebit,
@@ -54,50 +62,135 @@ function TrialTable({
   totalDebit: number;
   totalCredit: number;
 }) {
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("referenceNumber", {
+        header: () => <div className="text-center text-caption">Ref.</div>,
+        cell: (info) => (
+          <div className="text-center">
+            <Badge
+              variant="outline"
+              className="font-mono text-amber-500 text-label-small"
+            >
+              {info.getValue() || "-"}
+            </Badge>
+          </div>
+        ),
+      }),
+      columnHelper.accessor("accountName", {
+        header: "Account",
+        cell: (info) => (
+          <span className="text-caption font-medium">{info.getValue()}</span>
+        ),
+      }),
+      columnHelper.accessor("type", {
+        header: "Type",
+        cell: (info) => (
+          <Badge variant="secondary" className="text-label-small">
+            {info.getValue()}
+          </Badge>
+        ),
+      }),
+      columnHelper.accessor("debit", {
+        header: () => <div className="text-right text-caption">Debit</div>,
+        cell: (info) => {
+          const val = info.getValue() || 0;
+          return (
+            <div className="font-mono text-caption text-emerald-500 text-right">
+              {val > 0 ? formatNumber(val) : "-"}
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("credit", {
+        header: () => <div className="text-right text-caption">Credit</div>,
+        cell: (info) => {
+          const val = info.getValue() || 0;
+          return (
+            <div className="font-mono text-caption text-red-500 text-right">
+              {val > 0 ? formatNumber(val) : "-"}
+            </div>
+          );
+        },
+      }),
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => String(row.accountId),
+  });
+
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-0">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="w-[10%] pl-6 text-center">Ref.</TableHead>
-              <TableHead className="w-[50%]">Account</TableHead>
-              <TableHead className="w-[15%]">Type</TableHead>
-              <TableHead className="w-[12%] text-right">Debit</TableHead>
-              <TableHead className="w-[13%] pr-6 text-right">Credit</TableHead>
-            </TableRow>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => {
+                  const isRef = header.id === "referenceNumber";
+                  const isAccount = header.id === "accountName";
+                  const isType = header.id === "type";
+                  const isDebit = header.id === "debit";
+                  const isCredit = header.id === "credit";
+
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={`text-caption
+                        ${isRef ? "w-[10%] pl-6" : ""}
+                        ${isAccount ? "w-[50%]" : ""}
+                        ${isType ? "w-[15%]" : ""}
+                        ${isDebit ? "w-[12%]" : ""}
+                        ${isCredit ? "w-[13%] pr-6" : ""}
+                      `}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                    </TableHead>
+                  );
+                })}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
-            {rows.length ? (
-              rows.map((r) => (
-                <TableRow key={r.accountId}>
-                  <TableCell className="pl-6 text-center">
-                    <Badge
-                      variant="outline"
-                      className="font-mono text-amber-500"
-                    >
-                      {r.referenceNumber || "-"}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-xs font-medium">
-                    {r.accountName}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{r.type}</Badge>
-                  </TableCell>
-                  <TableCell className="font-mono text-xs text-emerald-500 text-right">
-                    {(r.debit || 0) > 0 ? formatNumber(r.debit!) : "-"}
-                  </TableCell>
-                  <TableCell className="pr-6 font-mono text-xs text-red-500 text-right">
-                    {(r.credit || 0) > 0 ? formatNumber(r.credit!) : "-"}
-                  </TableCell>
+            {table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => {
+                    const isRef = cell.column.id === "referenceNumber";
+                    const isCredit = cell.column.id === "credit";
+
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className={`
+                          ${isRef ? "pl-6" : ""}
+                          ${isCredit ? "pr-6" : ""}
+                        `}
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell
                   colSpan={5}
-                  className="py-8 text-center text-xs text-muted-foreground"
+                  className="py-8 text-center text-caption text-muted-foreground"
                 >
                   No accounts found.
                 </TableCell>
@@ -105,7 +198,7 @@ function TrialTable({
             )}
           </TableBody>
           <TableFooter>
-            <TableRow className="font-bold">
+            <TableRow className="font-bold text-caption">
               <TableCell colSpan={3} className="pl-6 text-right">
                 Total
               </TableCell>
@@ -124,16 +217,13 @@ function TrialTable({
 }
 
 export default function AdjustedTrialBalancePage() {
-  // Menggunakan Hook Auto-Generated RTK Query
   const { data, isLoading, isError, error } =
     useGetApiV1ReportsTrialBalanceAdjustedQuery();
 
-  // Evaluasi jika belum ada periode aktif yang dipilih
   const noPeriod =
     (data as any)?.hasPeriodSelected === false ||
     (error as any)?.status === 404;
 
-  // Transformasi data untuk menghitung saldo Debit/Kredit
   const rows = useMemo(() => {
     if (!data || noPeriod) return [];
 
@@ -180,8 +270,8 @@ export default function AdjustedTrialBalancePage() {
 
   if (isLoading)
     return (
-      <div className="flex items-center justify-center gap-2 py-16 text-center text-muted-foreground">
-        <IconLoader2 className="animate-spin" size={16} /> Loading adjusted
+      <div className="flex items-center justify-center gap-2 py-16 text-center text-caption text-muted-foreground">
+        <Loader2 className="animate-spin" size={16} /> Loading adjusted
         trial balance...
       </div>
     );
@@ -189,33 +279,33 @@ export default function AdjustedTrialBalancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="flex items-center gap-2 text-xl font-bold">
-          <IconListCheck className="text-amber-500" size={22} /> Adjusted Trial
+        <h1 className="flex items-center gap-2 text-h3 font-bold">
+          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial
           Balance
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="mt-1 text-ui text-muted-foreground">
           After adjusting entries • IDR
         </p>
       </div>
 
       {isError && !noPeriod && (
-        <Alert variant="destructive">
-          <IconAlertTriangle size={16} />
-          <AlertDescription>{errorMessage}</AlertDescription>
+        <Alert variant="destructive" className="text-ui">
+          <AlertTriangle size={16} />
+          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
         </Alert>
       )}
 
       {noPeriod ? (
         <Card className="border-dashed py-16 text-center">
           <CardContent className="space-y-3">
-            <IconEyeOff size={36} className="mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">No Period Selected</h3>
-            <p className="text-sm text-muted-foreground">
+            <EyeOff size={36} className="mx-auto text-muted-foreground" />
+            <h3 className="font-semibold text-ui">No Period Selected</h3>
+            <p className="text-ui text-muted-foreground">
               Select a period to view trial balance.
             </p>
             <Button asChild size="sm">
-              <Link href="/periods" className="gap-1.5">
-                <IconCalendar size={14} /> Go to Periods
+              <Link href="/periods" className="gap-1.5 text-caption">
+                <Calendar size={14} /> Go to Periods
               </Link>
             </Button>
           </CardContent>
@@ -230,12 +320,12 @@ export default function AdjustedTrialBalancePage() {
           <Alert
             className={
               isBalanced
-                ? "border-emerald-500/20 bg-emerald-500/10"
-                : "border-red-500/20 bg-red-500/10"
+                ? "border-emerald-500/20 bg-emerald-500/10 text-ui"
+                : "border-red-500/20 bg-red-500/10 text-ui"
             }
           >
-            <IconCircleCheck size={16} />
-            <AlertDescription className="text-xs">
+            <CheckCircle2 size={16} />
+            <AlertDescription className="text-caption">
               {isBalanced
                 ? "Adjusted TB is balanced"
                 : "Unbalanced - check adjusting entries"}
