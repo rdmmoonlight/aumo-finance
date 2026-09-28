@@ -18,7 +18,16 @@ import {
   useGetApiV1ReportsJournalsAdjustingQuery,
   useDeleteApiV1ReportsJournalsAdjustingByIdMutation,
 } from "@/lib/generatedApi";
-import { SlidersHorizontal, Plus, Pencil, Trash2, EyeOff, FileX, Loader2, AlertTriangle } from "lucide-react";
+import {
+  SlidersHorizontal,
+  Plus,
+  Pencil,
+  Trash2,
+  EyeOff,
+  FileX,
+  Loader2,
+  AlertTriangle,
+} from "lucide-react";
 
 const formatNumber = (n: number) =>
   new Intl.NumberFormat("id-ID").format(Math.abs(n));
@@ -141,11 +150,19 @@ export default function AdjustingJournalPage() {
             <Table className="min-w-[650px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[16%] pl-6 text-caption">Tanggal & Ref</TableHead>
+                  <TableHead className="w-[16%] pl-6 text-caption">
+                    Tanggal & Ref
+                  </TableHead>
                   <TableHead className="w-[26%] text-caption">Akun</TableHead>
-                  <TableHead className="w-[26%] text-caption">Keterangan</TableHead>
-                  <TableHead className="w-[10%] text-center text-caption">Ref #</TableHead>
-                  <TableHead className="w-[11%] text-right text-caption">Debit</TableHead>
+                  <TableHead className="w-[26%] text-caption">
+                    Keterangan
+                  </TableHead>
+                  <TableHead className="w-[10%] text-center text-caption">
+                    Ref #
+                  </TableHead>
+                  <TableHead className="w-[11%] text-right text-caption">
+                    Debit
+                  </TableHead>
                   <TableHead className="w-[11%] pr-6 text-right text-caption">
                     Kredit
                   </TableHead>
@@ -159,10 +176,7 @@ export default function AdjustingJournalPage() {
                       colSpan={6}
                       className="py-10 text-center text-caption text-muted-foreground"
                     >
-                      <Loader2
-                        className="mr-2 inline animate-spin"
-                        size={16}
-                      />{" "}
+                      <Loader2 className="mr-2 inline animate-spin" size={16} />{" "}
                       Memuat data Jurnal Penyesuaian...
                     </TableCell>
                   </TableRow>
