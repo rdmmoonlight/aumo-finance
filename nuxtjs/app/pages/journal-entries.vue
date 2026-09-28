@@ -40,7 +40,7 @@ const fetchData = async () => {
   isLoading.value = true
   try {
     const [entriesRes, accountsRes]: [any, any] = await Promise.all([
-      $fetch('/api/v1/journal-entries'),$fetch('/api/v1/chart-of-accounts'), // Sesuaikan endpoint COA kamu
+      $fetch('/api/v1/journal-entries'),$fetch('/api/v1/chart-of-accounts'),
     ])
     entries.value = entriesRes || []
     accounts.value = accountsRes || []
@@ -112,128 +112,170 @@ const handleDelete = async (id: number) => {
   }
 }
 
+const formatNumber = (num: number) => {
+  return new Intl.NumberFormat('id-ID', { minimumFractionDigits: 2 }).format(num || 0)
+}
+
 onMounted(fetchData)
 </script>
 
 <template>
-  <div class="max-w-6xl mx-auto p-6 space-y-6">
-    <div class="flex justify-between items-center">
-      <div>
-        <h1 class="text-2xl font-bold text-gray-800">General Journal</h1>
-        <p class="text-sm text-gray-500">Pencatatan transaksi jurnal umum keuangan</p>
-      </div>
-      <button 
-        @click="openCreateModal" 
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2"
-      >
-        + Buat Jurnal Baru
-      </button>
-    </div>
+  <UDashboardPage>
+    <UDashboardPanel grow>
+      <!-- Navbar / Header Konsisten -->
+      <UDashboardNavbar title="General Journal" badge="Pencatatan">
+        <template #right>
+          <UButton
+            icon="i-lucide-plus"
+            color="primary"
+            label="Buat Jurnal Baru"
+            @click="openCreateModal"
+          />
+        </template>
+      </UDashboardNavbar>
 
-    <!-- Table Jurnal -->
-    <div class="bg-white rounded-lg shadow overflow-hidden border">
-      <table class="w-full text-left border-collapse">
-        <thead class="bg-gray-50 text-xs font-semibold text-gray-600 uppercase">
-          <tr>
-            <th class="p-4 border-b">Tanggal</th>
-            <th class="p-4 border-b">No. Transaksi</th>
-            <th class="p-4 border-b">Rincian Akun & Keterangan</th>
-            <th class="p-4 border-b text-right">Debit</th>
-            <th class="p-4 border-b text-right">Kredit</th>
-            <th class="p-4 border-b text-center">Aksi</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y text-sm">
-          <template v-for="entry in entries" :key="entry.Id">
-            <tr class="bg-gray-50 font-medium">
-              <td class="p-4">{{ new Date(entry.EntryDate).toLocaleDateString('id-ID') }}</td>
-              <td class="p-4 text-blue-600">{{ entry.TransactionNumber }}</td>
-              <td class="p-4" colspan="3"><span class="text-xs bg-gray-200 px-2 py-1 rounded">{{ entry.JournalType }}</span></td>
-              <td class="p-4 text-center">
-                <button @click="handleDelete(entry.Id)" class="text-red-600 hover:underline text-xs">Hapus</button>
-              </td>
-            </tr>
-            <!-- Baris Detail Akun -->
-            <tr v-for="line in entry.JournalEntryLines" :key="line.Id" class="hover:bg-gray-50/50">
-              <td colspan="2"></td>
-              <td class="p-3 pl-8">
-                <div :class="{ 'pl-6': Number(line.Credit) > 0 }">
-                  <span class="font-mono text-xs text-gray-500 mr-2">{{ line.ChartOfAccounts?.ReferenceNumber }}</span>
-                  <span>{{ line.ChartOfAccounts?.AccountName }}</span>
-                  <p v-if="line.LineDescription" class="text-xs text-gray-400 italic">{{ line.LineDescription }}</p>
-                </div>
-              </td>
-              <td class="p-3 text-right font-mono">{{ Number(line.Debit) > 0 ? Number(line.Debit).toLocaleString('id-ID') : '-' }}</td>
-              <td class="p-3 text-right font-mono">{{ Number(line.Credit) > 0 ? Number(line.Credit).toLocaleString('id-ID') : '-' }}</td>
-              <td></td>
-            </tr>
+      <UDashboardPanelContent class="p-6 space-y-6">
+        <!-- Container Card Tabel -->
+        <UCard>
+          <template #header>
+            <div class="flex justify-between items-center">
+              <div>
+                <h3 class="font-bold text-base">Daftar Transaksi Jurnal Umum</h3>
+                <p class="text-xs text-neutral-500">Kelola dan catat ringkasan transaksi debit/kredit keuangan.</p>
+              </div>
+              <UButton
+                icon="i-lucide-refresh-cw"
+                color="neutral"
+                variant="ghost"
+                size="xs"
+                :loading="isLoading"
+                @click="fetchData"
+              />
+            </div>
           </template>
-        </tbody>
-      </table>
-    </div>
 
-    <!-- Modal Form Input/Edit Jurnal -->
-    <div v-if="isModalOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg max-w-4xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-        <h2 class="text-xl font-bold">Input Transaksi Jurnal Umum</h2>
-        
-        <div class="grid grid-cols-3 gap-4">
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Tipe Jurnal</label>
-            <input v-model="form.journalType" type="text" class="w-full border rounded p-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">Tanggal</label>
-            <input v-model="form.entryDate" type="date" class="w-full border rounded p-2 text-sm" />
-          </div>
-          <div>
-            <label class="block text-xs font-medium text-gray-700 mb-1">No. Transaksi</label>
-            <input v-model="form.transactionNumber" type="text" class="w-full border rounded p-2 text-sm" />
-          </div>
-        </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead class="bg-neutral-50 dark:bg-neutral-800/50 uppercase font-semibold text-neutral-600 dark:text-neutral-300">
+                <tr>
+                  <th class="p-3 border-b">Tanggal</th>
+                  <th class="p-3 border-b">No. Transaksi</th>
+                  <th class="p-3 border-b">Rincian Akun & Keterangan</th>
+                  <th class="p-3 border-b text-right">Debit</th>
+                  <th class="p-3 border-b text-right">Kredit</th>
+                  <th class="p-3 border-b text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800">
+                <template v-for="entry in entries" :key="entry.Id">
+                  <!-- Entry Header Row -->
+                  <tr class="bg-neutral-100/50 dark:bg-neutral-800/30 font-semibold">
+                    <td class="p-3">{{ new Date(entry.EntryDate).toLocaleDateString('id-ID') }}</td>
+                    <td class="p-3 text-blue-600 dark:text-blue-400">{{ entry.TransactionNumber }}</td>
+                    <td class="p-3" colspan="3">
+                      <UBadge size="xs" color="neutral" variant="subtle">{{ entry.JournalType }}</UBadge>
+                    </td>
+                    <td class="p-3 text-center">
+                      <UButton
+                        color="error"
+                        variant="ghost"
+                        size="xs"
+                        label="Hapus"
+                        @click="handleDelete(entry.Id)"
+                      />
+                    </td>
+                  </tr>
+                  <!-- Detail Account Lines -->
+                  <tr v-for="line in entry.JournalEntryLines" :key="line.Id" class="hover:bg-neutral-50 dark:hover:bg-neutral-800/20">
+                    <td colspan="2"></td>
+                    <td class="p-2.5 pl-6">
+                      <div :class="{ 'pl-6': Number(line.Credit) > 0 }">
+                        <span class="font-mono text-neutral-400 mr-2">[{{ line.ChartOfAccounts?.ReferenceNumber }}]</span>
+                        <span>{{ line.ChartOfAccounts?.AccountName }}</span>
+                        <p v-if="line.LineDescription" class="text-[11px] text-neutral-400 italic mt-0.5">{{ line.LineDescription }}</p>
+                      </div>
+                    </td>
+                    <td class="p-2.5 text-right font-mono">{{ Number(line.Debit) > 0 ? formatNumber(Number(line.Debit)) : '-' }}</td>
+                    <td class="p-2.5 text-right font-mono">{{ Number(line.Credit) > 0 ? formatNumber(Number(line.Credit)) : '-' }}</td>
+                    <td></td>
+                  </tr>
+                </template>
 
-        <!-- Dynamic Entry Lines -->
-        <div class="space-y-2">
-          <label class="block text-sm font-semibold">Detail Akun (Debit / Kredit)</label>
-          <div v-for="(line, idx) in form.lines" :key="idx" class="flex gap-2 items-center bg-gray-50 p-2 rounded border">
-            <select v-model="line.accountId" class="border rounded p-2 text-sm flex-1">
-              <option :value="null">-- Pilih Akun --</option>
-              <option v-for="acc in accounts" :key="acc.Id" :value="acc.Id">
-                {{ acc.ReferenceNumber }} - {{ acc.AccountName }}
-              </option>
-            </select>
-            <input v-model="line.lineDescription" placeholder="Catatan/Memori" type="text" class="border rounded p-2 text-sm flex-1" />
-            <input v-model.number="line.debit" placeholder="Debit" type="number" class="border rounded p-2 text-sm w-32 text-right" />
-            <input v-model.number="line.credit" placeholder="Kredit" type="number" class="border rounded p-2 text-sm w-32 text-right" />
-            <button @click="removeLine(idx)" class="text-red-500 font-bold px-2" :disabled="form.lines.length <= 2">✕</button>
+                <tr v-if="entries.length === 0 && !isLoading">
+                  <td colspan="6" class="text-center p-8 text-neutral-400">Belum ada transaksi jurnal.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
-          <button @click="addLine" class="text-sm text-blue-600 font-medium hover:underline">+ Tambah Baris</button>
-        </div>
+        </UCard>
 
-        <!-- Total & Balance Status Indicator -->
-        <div class="flex justify-between items-center p-3 rounded border bg-gray-100 font-mono text-sm">
-          <div>
-            Status: 
-            <span v-if="isBalanced" class="text-green-600 font-bold">SEIMBANG (Balanced)</span>
-            <span v-else class="text-red-600 font-bold">BELUM SEIMBANG</span>
-          </div>
-          <div class="space-x-4">
-            <span>Total Debit: <strong>{{ totalDebit.toLocaleString('id-ID') }}</strong></span>
-            <span>Total Kredit: <strong>{{ totalCredit.toLocaleString('id-ID') }}</strong></span>
-          </div>
-        </div>
+        <!-- Modal Form Input Jurnal -->
+        <UModal v-model:open="isModalOpen" title="Input Transaksi Jurnal Umum">
+          <template #body>
+            <div class="space-y-4">
+              <div class="grid grid-cols-3 gap-3">
+                <div>
+                  <label class="block text-xs font-medium text-neutral-500 mb-1">Tipe Jurnal</label>
+                  <UInput v-model="form.journalType" size="sm" class="w-full" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-neutral-500 mb-1">Tanggal</label>
+                  <UInput v-model="form.entryDate" type="date" size="sm" class="w-full" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-neutral-500 mb-1">No. Transaksi</label>
+                  <UInput v-model="form.transactionNumber" size="sm" class="w-full" />
+                </div>
+              </div>
 
-        <div class="flex justify-end gap-2 pt-4">
-          <button @click="isModalOpen = false" class="px-4 py-2 text-sm border rounded">Batal</button>
-          <button 
-            @click="handleSave" 
-            :disabled="!isBalanced" 
-            class="px-4 py-2 text-sm bg-blue-600 text-white rounded disabled:opacity-50"
-          >
-            Simpan Jurnal
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+              <!-- Lines Detail -->
+              <div class="space-y-2">
+                <label class="block text-xs font-semibold">Rincian Akun (Debit / Kredit)</label>
+                <div v-for="(line, idx) in form.lines" :key="idx" class="flex gap-2 items-center bg-neutral-50 dark:bg-neutral-800/50 p-2 rounded border border-neutral-200 dark:border-neutral-800">
+                  <select v-model="line.accountId" class="border dark:border-neutral-700 bg-white dark:bg-neutral-900 rounded p-1.5 text-xs flex-1">
+                    <option :value="null">-- Pilih Akun --</option>
+                    <option v-for="acc in accounts" :key="acc.Id" :value="acc.Id">
+                      {{ acc.ReferenceNumber }} - {{ acc.AccountName }}
+                    </option>
+                  </select>
+                  <UInput v-model="line.lineDescription" placeholder="Keterangan" size="sm" class="flex-1" />
+                  <UInput v-model.number="line.debit" placeholder="Debit" type="number" size="sm" class="w-28 text-right" />
+                  <UInput v-model.number="line.credit" placeholder="Kredit" type="number" size="sm" class="w-28 text-right" />
+                  <UButton
+                    color="error"
+                    variant="ghost"
+                    icon="i-lucide-x"
+                    size="xs"
+                    :disabled="form.lines.length <= 2"
+                    @click="removeLine(idx)"
+                  />
+                </div>
+                <UButton icon="i-lucide-plus" size="xs" variant="ghost" color="primary" label="Tambah Baris" @click="addLine" />
+              </div>
+
+              <!-- Balance Indicator -->
+              <div class="flex justify-between items-center p-3 rounded border border-neutral-200 dark:border-neutral-800 bg-neutral-100 dark:bg-neutral-800 font-mono text-xs">
+                <div>
+                  Status: 
+                  <span v-if="isBalanced" class="text-emerald-600 font-bold">SEIMBANG (Balanced)</span>
+                  <span v-else class="text-rose-600 font-bold">BELUM SEIMBANG</span>
+                </div>
+                <div class="space-x-3">
+                  <span>D: <strong>{{ formatNumber(totalDebit) }}</strong></span>
+                  <span>K: <strong>{{ formatNumber(totalCredit) }}</strong></span>
+                </div>
+              </div>
+            </div>
+          </template>
+
+          <template #footer>
+            <div class="flex justify-end gap-2">
+              <UButton color="neutral" variant="outline" label="Batal" @click="isModalOpen = false" />
+              <UButton color="primary" label="Simpan Jurnal" :disabled="!isBalanced" @click="handleSave" />
+            </div>
+          </template>
+        </UModal>
+      </UDashboardPanelContent>
+    </UDashboardPanel>
+  </UDashboardPage>
 </template>
