@@ -16,7 +16,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* Core Colors - ngambil dari theme.css */
+  /* Core Colors */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -36,7 +36,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
-  /* Matte System - Premium Dark */
+  /* Matte System */
   --color-matte: #0e0e10;
   --color-matte-soft: #151519;
   --color-matte-hover: #1e1e22;
@@ -61,7 +61,7 @@
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar: var(--sidebar);
 
-  /* Typography Scale */
+  /* Typography */
   --text-label-small: 11px;
   --text-caption: 12px;
   --text-secondary: 13px;
@@ -80,7 +80,7 @@
       3. BASE RESET & GLOBAL
    ========================================= */
 @layer base {
-  * {
+    * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
@@ -94,9 +94,9 @@
     background-color: #0e0e10;
     color-scheme: dark;
 
-    /* DEFAULT: dark = tulisan putih, blok putih */
-    --selection-bg: #ffffff;
-    --selection-fg: #000000;
+    /* REQUEST LU: tulisan putih = blok hitam */
+    --selection-bg: #000000;
+    --selection-fg: #ffffff;
   }
 
   body {
@@ -108,8 +108,7 @@
   /* =========================================
           4. SELECTION SYSTEM - ANTI PUTIH-PUTIH
      ========================================= */
-
-  /* 4a. Global - selalu konsisten */
+  /* 4a. Global - dark default */
   ::selection {
     background-color: var(--selection-bg);
     color: var(--selection-fg);
@@ -119,88 +118,36 @@
     color: var(--selection-fg);
   }
 
-  /* 4b. Light Islands - semua area terang */
-  :is(
-    .bg-white,
-    .bg-zinc-50,
-    .bg-zinc-100,
-    .bg-gray-50,
-    .bg-gray-100,
-    .bg-slate-50,
-    .bg-card,
-    .bg-popover
-  ) {
-    --selection-bg: #000000;
-    --selection-fg: #ffffff;
-    color: #000000; /* paksa biar gak ada tulisan putih di bg putih */
+  /* 4b. True white islands - yang emang putih di dark mode juga */
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) {
+    --selection-bg: #ffffff;
+    --selection-fg: #000000;
+    color: #000000; /* paksa tulisan hitam kalo bg nya putih */
   }
 
-  :is(input, textarea, select) {
-    --selection-bg: #000000;
-    --selection-fg: #ffffff;
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50)::selection,
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) *::selection {
+    background-color: #ffffff;
+    color: #000000;
   }
 
-  /* 4c. Selection di dalam light islands */
-  :is(
-    .bg-white,
-    .bg-zinc-50,
-    .bg-zinc-100,
-    .bg-gray-50,
-    .bg-gray-100,
-    .bg-slate-50,
-    .bg-card,
-    .bg-popover,
-    input,
-    textarea,
-    select
-  )::selection,
-  :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50,
-      .bg-card,
-      .bg-popover,
-      input,
-      textarea,
-      select
-    )
-    *::selection {
-    background-color: #000000;
-    color: #ffffff;
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50)::-moz-selection,
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) *::-moz-selection {
+    background-color: #ffffff;
+    color: #000000;
   }
 
-  :is(
-    .bg-white,
-    .bg-zinc-50,
-    .bg-zinc-100,
-    .bg-gray-50,
-    .bg-gray-100,
-    .bg-slate-50,
-    .bg-card,
-    .bg-popover,
-    input,
-    textarea,
-    select
-  )::-moz-selection,
-  :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50,
-      .bg-card,
-      .bg-popover,
-      input,
-      textarea,
-      select
-    )
-    *::-moz-selection {
-    background-color: #000000;
-    color: #ffffff;
+  /* 4c. Light mode islands - baru jadi putih pas .light aktif */
+  .light,
+  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select) {
+    --selection-bg: #ffffff;
+    --selection-fg: #000000;
+  }
+
+  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select)::selection,
+  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select) *::selection {
+    background-color: #ffffff;
+    color: #000000;
   }
 
   /* =========================================
