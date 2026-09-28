@@ -1,5 +1,4 @@
 import { baseApi as api } from "./apiClient";
-
 export const addTagTypes = [
   "AumoBackend",
   "Auth",
@@ -20,7 +19,6 @@ export const addTagTypes = [
   "TrialBalance",
   "Worksheet",
 ] as const;
-
 const injectedRtkApi = api
   .enhanceEndpoints({
     addTagTypes,
@@ -206,8 +204,6 @@ const injectedRtkApi = api
         }),
         providesTags: ["JournalEntry"],
       }),
-
-      // --- ENDPOINTS NOTIFICATIONS BARU ---
       getApiV1Notifications: build.query<
         GetApiV1NotificationsApiResponse,
         GetApiV1NotificationsApiArg
@@ -215,14 +211,14 @@ const injectedRtkApi = api
         query: (queryArg) => ({
           url: `/api/v1/notifications`,
           params: {
-            limit: queryArg?.limit,
+            limit: queryArg.limit,
           },
         }),
         providesTags: ["Notifications"],
       }),
-      putApiV1NotificationsReadById: build.mutation<
-        PutApiV1NotificationsReadByIdApiResponse,
-        PutApiV1NotificationsReadByIdApiArg
+      putApiV1NotificationsByIdRead: build.mutation<
+        PutApiV1NotificationsByIdReadApiResponse,
+        PutApiV1NotificationsByIdReadApiArg
       >({
         query: (queryArg) => ({
           url: `/api/v1/notifications/${queryArg.id}/read`,
@@ -234,13 +230,9 @@ const injectedRtkApi = api
         PutApiV1NotificationsReadAllApiResponse,
         PutApiV1NotificationsReadAllApiArg
       >({
-        query: () => ({
-          url: `/api/v1/notifications/read-all`,
-          method: "PUT",
-        }),
+        query: () => ({ url: `/api/v1/notifications/read-all`, method: "PUT" }),
         invalidatesTags: ["Notifications"],
       }),
-
       getApiV1Periods: build.query<
         GetApiV1PeriodsApiResponse,
         GetApiV1PeriodsApiArg
@@ -516,9 +508,7 @@ const injectedRtkApi = api
     }),
     overrideExisting: false,
   });
-
 export { injectedRtkApi as generatedApi };
-
 export type $getApiResponse = unknown;
 export type $getApiArg = void;
 export type HeadApiResponse = unknown;
@@ -587,31 +577,16 @@ export type GetApiV1JournalEntryNextTransactionNumberApiArg = {
   journalType?: string;
   entryDate?: string;
 };
-
-// --- TYPES NOTIFICATIONS BARU ---
-export type NotificationDto = {
-  id: string;
-  title: string;
-  message: string;
-  type?: string | null;
-  isRead: boolean;
-  targetUrl?: string | null;
-  createdAt: string;
-};
-
-export type GetApiV1NotificationsApiResponse = NotificationDto[];
+export type GetApiV1NotificationsApiResponse = unknown;
 export type GetApiV1NotificationsApiArg = {
-  limit?: number;
-} | void;
-
-export type PutApiV1NotificationsReadByIdApiResponse = void;
-export type PutApiV1NotificationsReadByIdApiArg = {
+  limit?: number | string;
+};
+export type PutApiV1NotificationsByIdReadApiResponse = unknown;
+export type PutApiV1NotificationsByIdReadApiArg = {
   id: string;
 };
-
-export type PutApiV1NotificationsReadAllApiResponse = void;
+export type PutApiV1NotificationsReadAllApiResponse = unknown;
 export type PutApiV1NotificationsReadAllApiArg = void;
-
 export type GetApiV1PeriodsApiResponse = unknown;
 export type GetApiV1PeriodsApiArg = void;
 export type PostApiV1PeriodsApiResponse = unknown;
@@ -637,6 +612,15 @@ export type PutApiV1SettingsProfileApiArg = {
 export type PostApiV1SettingsAvatarApiResponse = unknown;
 export type PostApiV1SettingsAvatarApiArg = {
   body: {
+    ContentType?: string;
+    ContentDisposition?: string;
+    Headers?: {
+      [key: string]: string[];
+    };
+    Length?: number | string;
+    Name?: string;
+    FileName?: string;
+  } & {
     ContentType?: string;
     ContentDisposition?: string;
     Headers?: {
@@ -824,7 +808,6 @@ export type JournalImportRequestDto = {
   customMappings?: AccountMappingDetailDto[];
   transactions?: JournalTransactionDto[];
 };
-
 export const {
   use$getQuery,
   useHeadMutation,
@@ -846,7 +829,7 @@ export const {
   useGetApiV1JournalEntrySearchDescriptionsQuery,
   useGetApiV1JournalEntryNextTransactionNumberQuery,
   useGetApiV1NotificationsQuery,
-  usePutApiV1NotificationsReadByIdMutation,
+  usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
   useGetApiV1PeriodsQuery,
   usePostApiV1PeriodsMutation,

@@ -63,7 +63,7 @@ export interface OpenInfoData {
   availableRetainedEarningsAccounts?: AccountItem[];
 }
 
-interface PeriodListProps {
+export interface PeriodListProps {
   periods: PeriodItem[];
   selectedPeriod: PeriodItem | null;
   isLoading: boolean;
@@ -76,7 +76,7 @@ interface PeriodListProps {
   onOpenCreateView: () => void;
 }
 
-const MONTH_NAMES = [
+export const MONTH_NAMES = [
   "January",
   "February",
   "March",
@@ -92,10 +92,51 @@ const MONTH_NAMES = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*                            CREATE PERIOD FORM                              */
+/*                                 PERIOD LIST                                */
 /* -------------------------------------------------------------------------- */
 
-interface CreatePeriodFormProps {
+export function PeriodList({
+  periods,
+  selectedPeriod,
+  isLoading,
+  isClearing,
+  selectingId,
+  closingId,
+  onClearSelection,
+  onSelectPeriod,
+  onClosePeriod,
+  onOpenCreateView,
+}: PeriodListProps) {
+  return (
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-bold text-white">Periods</h2>
+        <div className="flex gap-2">
+          {selectedPeriod && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onClearSelection}
+              disabled={isClearing}
+            >
+              Clear Selection
+            </Button>
+          )}
+          <Button size="sm" onClick={onOpenCreateView}>
+            <PlusCircle size={16} className="mr-1.5" />
+            New Period
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                             CREATE PERIOD FORM                             */
+/* -------------------------------------------------------------------------- */
+
+export interface CreatePeriodFormProps {
   month: number;
   year: number;
   setupMode: "LoadExisting" | "CreateNew";
@@ -131,7 +172,7 @@ interface CreatePeriodFormProps {
   onCancel: () => void;
 }
 
-function CreatePeriodForm({
+export function CreatePeriodForm({
   month,
   year,
   setupMode,
@@ -493,10 +534,10 @@ function CreatePeriodForm({
 }
 
 /* -------------------------------------------------------------------------- */
-/*                            GET PERIOD COLUMNS                              */
+/*                             GET PERIOD COLUMNS                             */
 /* -------------------------------------------------------------------------- */
 
-interface GetPeriodColumnsProps {
+export interface GetPeriodColumnsProps {
   selectedPeriod: PeriodItem | null;
   selectingId: number | null;
   closingId: number | null;
@@ -504,7 +545,7 @@ interface GetPeriodColumnsProps {
   onClosePeriod: (p: PeriodItem) => void;
 }
 
-const getPeriodColumns = ({
+export const getPeriodColumns = ({
   selectedPeriod,
   selectingId,
   closingId,
@@ -657,14 +698,3 @@ const getPeriodColumns = ({
     },
   },
 ];
-
-/* -------------------------------------------------------------------------- */
-/*                            EXPORTS                                         */
-/* -------------------------------------------------------------------------- */
-
-export const components = {
-  CreatePeriodForm,
-  getPeriodColumns,
-};
-
-export default components;
