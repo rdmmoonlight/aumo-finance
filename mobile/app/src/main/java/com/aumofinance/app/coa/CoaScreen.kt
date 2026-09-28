@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -74,7 +75,7 @@ fun CoaScreen(
                 Button(
                     onClick = onAddClick,
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
-                    modifier = Modifier.padding(start = AumoDimens.SpacingSmall),
+                    modifier = Modifier.padding(start = AumoDimens.SpacingSmall).heightIn(min = AumoDimens.ButtonHeight),
                 ) {
                     Text("Tambah")
                 }

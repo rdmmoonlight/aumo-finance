@@ -83,7 +83,13 @@ fun PeriodsScreen(
                 onClick = onOpenNewPeriodClick,
                 colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
                 shape = RoundedCornerShape(8.dp),
-                modifier = Modifier.padding(AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingSmall).fillMaxWidth(),
+                modifier =
+                    Modifier.padding(
+                        AumoDimens.SpacingLarge,
+                        AumoDimens.SpacingLarge,
+                        AumoDimens.SpacingLarge,
+                        AumoDimens.SpacingSmall,
+                    ).fillMaxWidth().heightIn(min = AumoDimens.ButtonHeight),
             ) {
                 TablerIcon(TablerIcons.CirclePlus, tint = Color.White, size = 16.dp)
                 Spacer(modifier = Modifier.width(AumoDimens.SpacingSmall))

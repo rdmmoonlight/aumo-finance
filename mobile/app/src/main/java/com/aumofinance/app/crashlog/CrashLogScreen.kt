@@ -2,6 +2,7 @@ package com.aumofinance.app.crashlog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -30,7 +31,7 @@ fun CrashLogScreen(
             Button(
                 onClick = onCopyClick,
                 colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Primary),
-                modifier = Modifier.fillMaxWidth().padding(AumoDimens.SpacingLarge),
+                modifier = Modifier.fillMaxWidth().padding(AumoDimens.SpacingLarge).heightIn(min = AumoDimens.ButtonHeight),
             ) {
                 Text("Copy Crash Log", color = AumoColors.TextPrimary)
             }

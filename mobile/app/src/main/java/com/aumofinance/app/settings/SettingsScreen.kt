@@ -3,6 +3,7 @@ package com.aumofinance.app.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -62,7 +63,7 @@ fun SettingsScreen(
                 Button(
                     onClick = onCrashLogClick,
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Surface),
-                    modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingLarge),
+                    modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingLarge).heightIn(min = AumoDimens.ButtonHeight),
                 ) {
                     Text("Lihat Crash Log", color = AumoColors.TextPrimary)
                 }
@@ -70,7 +71,7 @@ fun SettingsScreen(
                 Button(
                     onClick = onLogoutClick,
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Bad),
-                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp).heightIn(min = AumoDimens.ButtonHeight),
                 ) {
                     Text("Logout", color = AumoColors.TextPrimary)
                 }
