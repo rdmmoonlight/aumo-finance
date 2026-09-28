@@ -25,7 +25,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 // Import Auto-Generated Hook dari RTK Query
 import { useGetApiV1ReportsJournalsClosingQuery } from "@/lib/generatedApi";
 
-import { Lock, ArrowRight, EyeOff, Info, AlertTriangle, Loader2 } from "lucide-react";
+import {
+  Lock,
+  ArrowRight,
+  EyeOff,
+  Info,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
 export interface ClosingJournalLine {
   referenceNumber?: number;
@@ -107,7 +114,9 @@ function ClosingGroupTable({
         },
       }),
       columnHelper.accessor("credit", {
-        header: () => <div className="text-right pr-6 text-caption">Credit</div>,
+        header: () => (
+          <div className="text-right pr-6 text-caption">Credit</div>
+        ),
         cell: (info) => {
           const val = info.getValue();
           return (
@@ -182,10 +191,7 @@ function ClosingGroupTable({
             </TableBody>
             <TableFooter>
               <TableRow className="font-bold text-caption">
-                <TableCell
-                  colSpan={2}
-                  className="text-right pl-6"
-                >
+                <TableCell colSpan={2} className="text-right pl-6">
                   Total
                 </TableCell>
                 <TableCell className="text-right font-mono text-emerald-500">
@@ -287,7 +293,9 @@ export default function ClosingJournalReportPage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -311,8 +319,7 @@ export default function ClosingJournalReportPage() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h1 className="text-h3 font-bold flex items-center gap-2">
-                <Lock className="text-amber-500" size={22} /> Closing
-                Journal
+                <Lock className="text-amber-500" size={22} /> Closing Journal
               </h1>
               <p className="text-ui text-muted-foreground mt-1 max-w-3xl">
                 Closing entries are calculated automatically based on current
@@ -320,7 +327,12 @@ export default function ClosingJournalReportPage() {
                 IDR).
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-caption"
+            >
               <Link href="/reports/post-closing-trial-balance">
                 <ArrowRight size={14} /> Post-Closing Trial Balance
               </Link>
