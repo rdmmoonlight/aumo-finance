@@ -117,9 +117,15 @@ function SettingsOverviewTable({
     <Table>
       <TableHeader>
         {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="text-caption h-8 border-border hover:bg-transparent">
+          <TableRow
+            key={headerGroup.id}
+            className="text-caption h-8 border-border hover:bg-transparent"
+          >
             {headerGroup.headers.map((header) => (
-              <TableHead key={header.id} className="h-8 text-caption text-muted-foreground">
+              <TableHead
+                key={header.id}
+                className="h-8 text-caption text-muted-foreground"
+              >
                 {header.isPlaceholder
                   ? null
                   : flexRender(
@@ -230,13 +236,22 @@ export default function SettingsPage() {
         </div>
 
         <div className="flex-1 overflow-y-auto mt-1 relative z-10">
-          <TabsContent value="account" className="m-0 focus-visible:outline-none text-foreground">
+          <TabsContent
+            value="account"
+            className="m-0 focus-visible:outline-none text-foreground"
+          >
             <AccountSettings />
           </TabsContent>
-          <TabsContent value="appearance" className="m-0 focus-visible:outline-none text-foreground">
+          <TabsContent
+            value="appearance"
+            className="m-0 focus-visible:outline-none text-foreground"
+          >
             <AppearanceAndSecuritySettings mode="appearance" />
           </TabsContent>
-          <TabsContent value="security" className="m-0 focus-visible:outline-none text-foreground">
+          <TabsContent
+            value="security"
+            className="m-0 focus-visible:outline-none text-foreground"
+          >
             <AppearanceAndSecuritySettings mode="security" />
           </TabsContent>
         </div>
