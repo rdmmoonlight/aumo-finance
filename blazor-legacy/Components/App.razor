@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <base href="/" />
 
-    <!-- CSS Dependencies -->
+    <!-- CSS External CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" />
 
@@ -15,10 +15,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Aumo Theme Styles -->
-    <link rel="stylesheet" href="css/theme/theme.css" />
+    <!-- CSS ISOLATION BUNDLE (Semua .razor.css otomatis dikompilasi ke sini) -->
+    <link rel="stylesheet" href="AumoBlazor.styles.css" />
 
-    <!-- Instant Theme Loader -->
+    <!-- Instant Theme Loader Script -->
     <script>
         (function() {
             try {
@@ -30,26 +30,22 @@
         })();
     </script>
 
-    <!-- HeadOutlet untuk Meta Data Dinamis -->
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
 <body>
-    <!-- Main Routing Component -->
     <Routes @rendermode="InteractiveServer" />
 
-    <!-- UI Penanganan Error Blazor -->
     <div id="blazor-error-ui" class="alert alert-danger fixed-bottom m-3 d-none" role="alert">
         An unhandled error has occurred.
         <a href="" class="reload link-primary text-decoration-underline ms-2">Reload</a>
         <a class="dismiss link-secondary ms-2" style="cursor: pointer;">🗙</a>
     </div>
 
-    <!-- JS Dependencies (Eksternal) -->
+    <!-- JS Dependencies -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Global Theme Controller Function -->
     <script>
         window.setAppTheme = function(themeName) {
             document.documentElement.setAttribute('data-bs-theme', themeName);
@@ -57,10 +53,7 @@
         };
     </script>
 
-    <!-- Custom Scripts Aplikasi -->
     <script src="js/site.js"></script>
-
-    <!-- Framework Blazor Core dengan Konfigurasi Auto-Reconnect -->
     <script src="_framework/blazor.web.js" autostart="false"></script>
     <script>
         Blazor.start({
@@ -68,9 +61,7 @@
                 reconnectionOptions: {
                     maxRetries: 10,
                     retryIntervalMilliseconds: 2000,
-                    dialogOptions: {
-                        showModal: false
-                    }
+                    dialogOptions: { showModal: false }
                 }
             }
         });
