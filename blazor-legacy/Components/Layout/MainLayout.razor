@@ -3,8 +3,8 @@
 
 <div class="aumo-main-shell min-vh-100 min-vw-0 d-flex flex-column">
 
-    <!-- TOPBAR (Atas Penuh) -->
-    <div class="topbar-container flex-shrink-0">
+    <!-- 1. TOPBAR (Membentang Penuh 100% di Atas) -->
+    <div class="topbar-container flex-shrink-0 w-100">
         <AuthorizeView>
             <Authorized>
                 <AumoBlazor.Components.Layout.TopBar />
@@ -12,63 +12,23 @@
         </AuthorizeView>
     </div>
 
-    <!-- BODY SHELL (Sidebar + Content Menyamping) -->
-    <div class="aumo-body-shell flex-grow-1 d-flex flex-row w-100">
+    <!-- 2. SHELL UTAMA (Mengunci NavMenu & Main Content Agar Sejajar Menyamping) -->
+    <div class="aumo-body-shell flex-grow-1 d-flex flex-row flex-nowrap w-100 align-items-stretch position-relative">
         
-        <!-- SIDEBAR (Dikunci di Kiri) -->
+        <!-- SIDEBAR / NAVMENU (Kiri) -->
         <div class="sidebar-container flex-shrink-0">
             <AuthorizeView>
                 <Authorized>
-                    <AumoBlazor.Components.Layout.Sidebar />
+                    <AumoBlazor.Components.Layout.NavMenu />
                 </Authorized>
             </AuthorizeView>
         </div>
 
-        <!-- MAIN CONTENT (Kanan Isi Sisa Layar) -->
-        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4" role="main">
+        <!-- MAIN CONTENT AREA (Kanan - Mengisi Sisa Ruang) -->
+        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
             @Body
         </main>
 
     </div>
 
 </div>
-
-<style>
-    body {
-        transition: background-color 0.3s ease, color 0.3s ease;
-        overflow-x: hidden;
-    }
-
-    .aumo-main-shell {
-        background-color: var(--aumo-bg, #0D1117);
-        color: var(--aumo-text, #FFFFFF);
-    }
-
-    /* PENTING: Mengunci Container Agar Selalu Menyamping (Side-by-Side) */
-    .aumo-body-shell {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: stretch !important;
-        width: 100% !important;
-    }
-
-    /* Memastikan pembungkus Sidebar tidak megar / makan tempat */
-    .sidebar-container {
-        display: flex !important;
-        flex-shrink: 0 !important;
-        z-index: 100;
-    }
-
-    /* PENTING: Memaksa Main Content Mengisi Sisa Ruang Tanpa Pindah Baris */
-    #mainContent {
-        flex: 1 1 auto !important;
-        min-width: 0 !important; /* Kunci CSS agar Flexbox tidak meluap ke bawah */
-        width: auto !important;
-    }
-
-    @@media (max-width: 767.98px) {
-        #mainContent {
-            padding: 0.75rem 0.5rem !important;
-        }
-    }
-</style>
