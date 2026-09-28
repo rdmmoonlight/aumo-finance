@@ -41,9 +41,9 @@ const links = computed(() => [[{
     open.value = false
   }
 }, {
-  // --- GRUP REPORTS DENGAN SUB-MENU GENERAL JOURNAL ---
-  label: 'Reports',
+label: 'Reports',
   icon: 'i-lucide-file-text',
+  to: '/reports',
   type: 'trigger',
   defaultOpen: true,
   children: [{
