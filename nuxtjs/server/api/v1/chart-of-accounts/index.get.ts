@@ -3,8 +3,8 @@ export default defineEventHandler(async (event) => {
   const search = query.search ? String(query.search).trim().toLowerCase() : null
   const category = query.category ? String(query.category).trim() : null
 
-  // Dapatkan UserId yang valid
-  const userId = await getAuthUserId(event)
+  // Gunakan getUserId(event) persis seperti di periods
+  const userId = await getUserId(event)
 
   try {
     const whereCondition: any = { UserId: userId }
@@ -55,8 +55,8 @@ export default defineEventHandler(async (event) => {
         if (!balancesMap[line.AccountId]) {
           balancesMap[line.AccountId] = { debit: 0, credit: 0 }
         }
-        balancesMap[line.AccountId].debit += Number(line.Debit)
-        balancesMap[line.AccountId].credit += Number(line.Credit)
+        balancesMap[line.AccountId].debit += line.Debit ? Number(line.Debit) : 0
+        balancesMap[line.AccountId].credit += line.Credit ? Number(line.Credit) : 0
       }
     }
 
