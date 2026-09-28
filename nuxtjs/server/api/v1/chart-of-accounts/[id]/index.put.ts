@@ -1,5 +1,3 @@
-import prisma from '~/server/utils/prisma'
-
 export default defineEventHandler(async (event) => {
   const userId = event.context.user?.id
   if (!userId) {
