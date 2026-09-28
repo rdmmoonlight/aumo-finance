@@ -3,7 +3,8 @@
 
 <div class="d-flex flex-column min-vh-100 w-100 aumo-main-shell">
 
-    <div class="d-flex flex-grow-1 position-relative w-100">
+    <!-- Container Utama: Mengatur Sidebar & Konten secara Horizontal -->
+    <div class="d-flex flex-grow-1 w-100 position-relative align-items-stretch">
         
         <!-- NAVIGATION MENU -->
         <AuthorizeView>
@@ -11,19 +12,20 @@
                 <AumoBlazor.Components.Layout.NavMenu />
             </Authorized>
             <Authorizing>
-                <!-- Indikator ringan saat Blazor memeriksa sesi cookie -->
-                <aside class="p-3 text-muted small" aria-label="Navigasi Memuat">
+                <!-- Diberi style flex-shrink agar tidak memakan space berlebih -->
+                <aside class="p-3 text-muted small flex-shrink-0" style="min-width: 200px;" aria-label="Navigasi Memuat">
                     <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
                     <span>Memuat...</span>
                 </aside>
             </Authorizing>
             <NotAuthorized>
-                <!-- Kosongkan agar halaman Login/Public bersih tanpa sidebar/menu internal -->
+                <!-- Kosong tanpa render elemen samping -->
             </NotAuthorized>
         </AuthorizeView>
 
         <!-- MAIN CONTENT AREA -->
-        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column w-100" role="main">
+        <!-- Catatan: Hapus 'w-100' agar flex-grow-1 bekerja proporsional bersama sidebar -->
+        <main id="mainContent" class="content flex-grow-1 p-3 p-md-4 d-flex flex-column" role="main">
             @Body
         </main>
 
@@ -44,7 +46,7 @@
 
     .content { 
         transition: background-color 0.3s ease;
-        min-width: 0; /* Mencegah flex child overflow di layar kecil */
+        min-width: 0; /* Mencegah overflow flex child pada layar kecil/tabel */
     }
 
     @@media (max-width: 767.98px) {
