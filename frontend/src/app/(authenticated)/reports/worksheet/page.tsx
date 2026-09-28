@@ -2,6 +2,12 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -15,17 +21,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  IconGridDots,
-  IconCalendar,
-  IconEyeOff,
-  IconTrendingUp,
-  IconAlertTriangle,
-  IconLoader2,
-  IconInfoCircle,
-} from "@tabler/icons-react";
-// Import hook RTK Query dari generatedApi
 import { useGetApiV1ReportsWorksheetQuery } from "@/lib/generatedApi";
+import { Grid, Calendar, EyeOff, TrendingUp, AlertTriangle, Loader2, Info } from "lucide-react";
 
 export interface WorksheetRow {
   accountId: number;
@@ -51,6 +48,19 @@ export interface WorksheetViewModel {
   hasPeriodSelected: boolean;
 }
 
+export interface WorksheetTotals {
+  unadjustedDebit: number;
+  unadjustedCredit: number;
+  adjustmentDebit: number;
+  adjustmentCredit: number;
+  adjustedDebit: number;
+  adjustedCredit: number;
+  isDebit: number;
+  isCredit: number;
+  bsDebit: number;
+  bsCredit: number;
+}
+
 const formatNumber = (n: number) =>
   n === 0
     ? "-"
@@ -58,6 +68,308 @@ const formatNumber = (n: number) =>
         style: "decimal",
         maximumFractionDigits: 0,
       }).format(Math.abs(n));
+
+const columnHelper = createColumnHelper<WorksheetRow>();
+
+function WorksheetTable({
+  rows,
+  totals,
+  netIncome,
+}: {
+  rows: WorksheetRow[];
+  totals: WorksheetTotals;
+  netIncome: number;
+}) {
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("accountName", {
+        id: "accountName",
+        header: "Account",
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2 text-caption">
+            <Badge variant="outline" className="font-mono text-label-small">
+              {row.original.referenceNumber}
+            </Badge>
+            <span className="text-caption">{row.original.accountName}</span>
+          </div>
+        ),
+      }),
+      columnHelper.accessor("unadjustedDebit", {
+        id: "unadjustedDebit",
+        header: "Dr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("unadjustedCredit", {
+        id: "unadjustedCredit",
+        header: "Cr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("adjustmentDebit", {
+        id: "adjustmentDebit",
+        header: "Dr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("adjustmentCredit", {
+        id: "adjustmentCredit",
+        header: "Cr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("adjustedDebit", {
+        id: "adjustedDebit",
+        header: "Dr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("adjustedCredit", {
+        id: "adjustedCredit",
+        header: "Cr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("incomeStatementDebit", {
+        id: "incomeStatementDebit",
+        header: "Dr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("incomeStatementCredit", {
+        id: "incomeStatementCredit",
+        header: "Cr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("financialPositionDebit", {
+        id: "financialPositionDebit",
+        header: "Dr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+      columnHelper.accessor("financialPositionCredit", {
+        id: "financialPositionCredit",
+        header: "Cr",
+        cell: (info) => {
+          const val = info.getValue();
+          return val ? formatNumber(val) : "-";
+        },
+      }),
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+    getRowId: (row) => String(row.accountId),
+  });
+
+  return (
+    <Table className="text-caption">
+      <TableHeader>
+        <TableRow className="bg-muted/50 text-caption">
+          <TableHead
+            rowSpan={2}
+            className="sticky left-0 bg-muted/50 z-10 min-w-[200px] text-caption"
+          >
+            Account
+          </TableHead>
+          <TableHead colSpan={2} className="text-center border-l text-caption">
+            Trial Balance
+          </TableHead>
+          <TableHead colSpan={2} className="text-center border-l text-caption">
+            Adjustments
+          </TableHead>
+          <TableHead colSpan={2} className="text-center border-l text-caption">
+            Adjusted TB
+          </TableHead>
+          <TableHead colSpan={2} className="text-center border-l text-caption">
+            Income Statement
+          </TableHead>
+          <TableHead colSpan={2} className="text-center border-l text-caption">
+            Balance Sheet
+          </TableHead>
+        </TableRow>
+        <TableRow className="bg-muted/50 text-caption">
+          <TableHead className="text-right text-caption">Dr</TableHead>
+          <TableHead className="text-right text-caption">Cr</TableHead>
+          <TableHead className="text-right border-l text-caption">Dr</TableHead>
+          <TableHead className="text-right text-caption">Cr</TableHead>
+          <TableHead className="text-right border-l text-caption">Dr</TableHead>
+          <TableHead className="text-right text-caption">Cr</TableHead>
+          <TableHead className="text-right border-l text-caption">Dr</TableHead>
+          <TableHead className="text-right text-caption">Cr</TableHead>
+          <TableHead className="text-right border-l text-caption">Dr</TableHead>
+          <TableHead className="text-right text-caption">Cr</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.length ? (
+          table.getRowModel().rows.map((row) => (
+            <TableRow key={row.id}>
+              {row.getVisibleCells().map((cell) => {
+                const id = cell.column.id;
+                const isAccountName = id === "accountName";
+                const isAmber = id === "adjustmentDebit" || id === "adjustmentCredit";
+                const isEmerald = id === "incomeStatementDebit" || id === "incomeStatementCredit";
+                const isSky = id === "financialPositionDebit" || id === "financialPositionCredit";
+                const isBorderLeft =
+                  id === "adjustmentDebit" ||
+                  id === "adjustedDebit" ||
+                  id === "incomeStatementDebit" ||
+                  id === "financialPositionDebit";
+
+                if (isAccountName) {
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className="sticky left-0 bg-background font-medium flex items-center gap-2 text-caption"
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  );
+                }
+
+                return (
+                  <TableCell
+                    key={cell.id}
+                    className={`text-right font-mono text-caption ${isBorderLeft ? "border-l" : ""} ${
+                      isAmber ? "text-amber-500" : ""
+                    } ${isEmerald ? "text-emerald-500" : ""} ${
+                      isSky ? "text-sky-500" : ""
+                    }`}
+                  >
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          ))
+        ) : (
+          <TableRow>
+            <TableCell
+              colSpan={11}
+              className="text-center py-6 text-muted-foreground text-caption"
+            >
+              No worksheet rows.
+            </TableCell>
+          </TableRow>
+        )}
+      </TableBody>
+      <TableFooter className="font-bold text-caption">
+        {/* Row Total */}
+        <TableRow>
+          <TableCell className="sticky left-0 bg-muted text-right text-caption">
+            Total
+          </TableCell>
+          <TableCell className="text-right font-mono text-caption">
+            {formatNumber(totals.unadjustedDebit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-caption">
+            {formatNumber(totals.unadjustedCredit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-amber-500 border-l text-caption">
+            {formatNumber(totals.adjustmentDebit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-amber-500 text-caption">
+            {formatNumber(totals.adjustmentCredit)}
+          </TableCell>
+          <TableCell className="text-right font-mono border-l text-caption">
+            {formatNumber(totals.adjustedDebit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-caption">
+            {formatNumber(totals.adjustedCredit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-emerald-500 border-l text-caption">
+            {formatNumber(totals.isDebit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-emerald-500 text-caption">
+            {formatNumber(totals.isCredit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-sky-500 border-l text-caption">
+            {formatNumber(totals.bsDebit)}
+          </TableCell>
+          <TableCell className="text-right font-mono text-sky-500 text-caption">
+            {formatNumber(totals.bsCredit)}
+          </TableCell>
+        </TableRow>
+
+        {/* Row Net Income Plug */}
+        <TableRow>
+          <TableCell
+            colSpan={7}
+            className="sticky left-0 bg-muted text-right text-caption"
+          >
+            Net Income (plug)
+          </TableCell>
+          <TableCell className="text-right font-mono text-emerald-500 border-l text-caption">
+            {netIncome >= 0 ? formatNumber(netIncome) : "-"}
+          </TableCell>
+          <TableCell className="text-right font-mono text-emerald-500 text-caption">
+            {netIncome < 0 ? formatNumber(Math.abs(netIncome)) : "-"}
+          </TableCell>
+          <TableCell className="text-right font-mono text-sky-500 border-l text-caption">
+            {netIncome < 0 ? formatNumber(Math.abs(netIncome)) : "-"}
+          </TableCell>
+          <TableCell className="text-right font-mono text-sky-500 text-caption">
+            {netIncome >= 0 ? formatNumber(netIncome) : "-"}
+          </TableCell>
+        </TableRow>
+
+        {/* Row Total After Plug */}
+        <TableRow className="bg-primary/5">
+          <TableCell
+            colSpan={7}
+            className="sticky left-0 bg-primary/5 text-right text-caption"
+          >
+            Total (after plug)
+          </TableCell>
+          <TableCell className="text-right font-mono text-emerald-500 border-l text-caption">
+            {formatNumber(
+              totals.isDebit + (netIncome >= 0 ? netIncome : 0),
+            )}
+          </TableCell>
+          <TableCell className="text-right font-mono text-emerald-500 text-caption">
+            {formatNumber(
+              totals.isCredit + (netIncome < 0 ? Math.abs(netIncome) : 0),
+            )}
+          </TableCell>
+          <TableCell className="text-right font-mono text-sky-500 border-l text-caption">
+            {formatNumber(
+              totals.bsDebit + (netIncome < 0 ? Math.abs(netIncome) : 0),
+            )}
+          </TableCell>
+          <TableCell className="text-right font-mono text-sky-500 text-caption">
+            {formatNumber(
+              totals.bsCredit + (netIncome >= 0 ? netIncome : 0),
+            )}
+          </TableCell>
+        </TableRow>
+      </TableFooter>
+    </Table>
+  );
+}
 
 export default function WorksheetPage() {
   // Panggil hook RTK Query
@@ -98,7 +410,7 @@ export default function WorksheetPage() {
   }, [data]);
 
   // Hitung total tiap kolom
-  const totals = useMemo(
+  const totals: WorksheetTotals = useMemo(
     () =>
       vm.rows.reduce(
         (acc, r) => {
@@ -141,8 +453,8 @@ export default function WorksheetPage() {
 
   if (isLoading) {
     return (
-      <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
-        <IconLoader2 className="animate-spin" size={16} /> Loading Worksheet...
+      <div className="py-16 text-center text-caption text-muted-foreground flex items-center justify-center gap-2">
+        <Loader2 className="animate-spin" size={16} /> Loading Worksheet...
       </div>
     );
   }
@@ -150,20 +462,20 @@ export default function WorksheetPage() {
   return (
     <div className="space-y-6">
       {errorMessage && (
-        <Alert variant="destructive">
-          <IconAlertTriangle size={16} />
-          <AlertDescription>{errorMessage}</AlertDescription>
+        <Alert variant="destructive" className="text-ui">
+          <AlertTriangle size={16} />
+          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
         </Alert>
       )}
 
       {!vm.hasPeriodSelected ? (
         <Card className="py-16 text-center border-dashed">
           <CardContent className="space-y-3">
-            <IconEyeOff size={36} className="mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">No Period Selected</h3>
+            <EyeOff size={36} className="mx-auto text-muted-foreground" />
+            <h3 className="font-semibold text-ui">No Period Selected</h3>
             <Button asChild size="sm">
-              <Link href="/periods" className="gap-1.5">
-                <IconCalendar size={14} /> Go to Periods
+              <Link href="/periods" className="gap-1.5 text-caption">
+                <Calendar size={14} /> Go to Periods
               </Link>
             </Button>
           </CardContent>
@@ -172,234 +484,35 @@ export default function WorksheetPage() {
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <IconGridDots className="text-sky-500" size={22} /> 10-Column
+              <h1 className="text-h3 font-bold flex items-center gap-2">
+                <Grid className="text-sky-500" size={22} /> 10-Column
                 Worksheet
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-ui text-muted-foreground mt-1">
                 Trial Balance → Adjustments → Adjusted TB → Income Statement →
                 Balance Sheet • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
               <Link href="/reports/income-statement">
-                <IconTrendingUp size={14} /> Income Statement
+                <TrendingUp size={14} /> Income Statement
               </Link>
             </Button>
           </div>
 
           <Card className="overflow-hidden">
             <CardContent className="p-0 overflow-auto">
-              <Table className="text-xs">
-                <TableHeader>
-                  <TableRow className="bg-muted/50">
-                    <TableHead
-                      rowSpan={2}
-                      className="sticky left-0 bg-muted/50 z-10 min-w-[200px]"
-                    >
-                      Account
-                    </TableHead>
-                    <TableHead colSpan={2} className="text-center border-l">
-                      Trial Balance
-                    </TableHead>
-                    <TableHead colSpan={2} className="text-center border-l">
-                      Adjustments
-                    </TableHead>
-                    <TableHead colSpan={2} className="text-center border-l">
-                      Adjusted TB
-                    </TableHead>
-                    <TableHead colSpan={2} className="text-center border-l">
-                      Income Statement
-                    </TableHead>
-                    <TableHead colSpan={2} className="text-center border-l">
-                      Balance Sheet
-                    </TableHead>
-                  </TableRow>
-                  <TableRow className="bg-muted/50">
-                    <TableHead className="text-right">Dr</TableHead>
-                    <TableHead className="text-right">Cr</TableHead>
-                    <TableHead className="text-right border-l">Dr</TableHead>
-                    <TableHead className="text-right">Cr</TableHead>
-                    <TableHead className="text-right border-l">Dr</TableHead>
-                    <TableHead className="text-right">Cr</TableHead>
-                    <TableHead className="text-right border-l">Dr</TableHead>
-                    <TableHead className="text-right">Cr</TableHead>
-                    <TableHead className="text-right border-l">Dr</TableHead>
-                    <TableHead className="text-right">Cr</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {vm.rows.length ? (
-                    vm.rows.map((row) => (
-                      <TableRow key={row.accountId}>
-                        <TableCell className="sticky left-0 bg-background font-medium flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono">
-                            {row.referenceNumber}
-                          </Badge>
-                          {row.accountName}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {row.unadjustedDebit
-                            ? formatNumber(row.unadjustedDebit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {row.unadjustedCredit
-                            ? formatNumber(row.unadjustedCredit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-amber-500 border-l">
-                          {row.adjustmentDebit
-                            ? formatNumber(row.adjustmentDebit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-amber-500">
-                          {row.adjustmentCredit
-                            ? formatNumber(row.adjustmentCredit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono border-l">
-                          {row.adjustedDebit
-                            ? formatNumber(row.adjustedDebit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono">
-                          {row.adjustedCredit
-                            ? formatNumber(row.adjustedCredit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-emerald-500 border-l">
-                          {row.incomeStatementDebit
-                            ? formatNumber(row.incomeStatementDebit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-emerald-500">
-                          {row.incomeStatementCredit
-                            ? formatNumber(row.incomeStatementCredit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-sky-500 border-l">
-                          {row.financialPositionDebit
-                            ? formatNumber(row.financialPositionDebit)
-                            : "-"}
-                        </TableCell>
-                        <TableCell className="text-right font-mono text-sky-500">
-                          {row.financialPositionCredit
-                            ? formatNumber(row.financialPositionCredit)
-                            : "-"}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell
-                        colSpan={11}
-                        className="text-center py-6 text-muted-foreground"
-                      >
-                        No worksheet rows.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-                <TableFooter className="font-bold">
-                  <TableRow>
-                    <TableCell className="sticky left-0 bg-muted text-right">
-                      Total
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatNumber(totals.unadjustedDebit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatNumber(totals.unadjustedCredit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-amber-500 border-l">
-                      {formatNumber(totals.adjustmentDebit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-amber-500">
-                      {formatNumber(totals.adjustmentCredit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono border-l">
-                      {formatNumber(totals.adjustedDebit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono">
-                      {formatNumber(totals.adjustedCredit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-emerald-500 border-l">
-                      {formatNumber(totals.isDebit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-emerald-500">
-                      {formatNumber(totals.isCredit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sky-500 border-l">
-                      {formatNumber(totals.bsDebit)}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sky-500">
-                      {formatNumber(totals.bsCredit)}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell
-                      colSpan={7}
-                      className="sticky left-0 bg-muted text-right"
-                    >
-                      Net Income (plug)
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-emerald-500 border-l">
-                      {vm.netIncome >= 0 ? formatNumber(vm.netIncome) : "-"}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-emerald-500">
-                      {vm.netIncome < 0
-                        ? formatNumber(Math.abs(vm.netIncome))
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sky-500 border-l">
-                      {vm.netIncome < 0
-                        ? formatNumber(Math.abs(vm.netIncome))
-                        : "-"}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sky-500">
-                      {vm.netIncome >= 0 ? formatNumber(vm.netIncome) : "-"}
-                    </TableCell>
-                  </TableRow>
-                  <TableRow className="bg-primary/5">
-                    <TableCell
-                      colSpan={7}
-                      className="sticky left-0 bg-primary/5 text-right"
-                    >
-                      Total (after plug)
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-emerald-500 border-l">
-                      {formatNumber(
-                        totals.isDebit + (vm.netIncome >= 0 ? vm.netIncome : 0),
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-emerald-500">
-                      {formatNumber(
-                        totals.isCredit +
-                          (vm.netIncome < 0 ? Math.abs(vm.netIncome) : 0),
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sky-500 border-l">
-                      {formatNumber(
-                        totals.bsDebit +
-                          (vm.netIncome < 0 ? Math.abs(vm.netIncome) : 0),
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right font-mono text-sky-500">
-                      {formatNumber(
-                        totals.bsCredit +
-                          (vm.netIncome >= 0 ? vm.netIncome : 0),
-                      )}
-                    </TableCell>
-                  </TableRow>
-                </TableFooter>
-              </Table>
+              <WorksheetTable
+                rows={vm.rows}
+                totals={totals}
+                netIncome={vm.netIncome}
+              />
             </CardContent>
           </Card>
 
-          <Alert className="bg-sky-500/10 border-sky-500/20">
-            <IconInfoCircle size={16} />
-            <AlertDescription className="text-xs">
+          <Alert className="bg-sky-500/10 border-sky-500/20 text-ui">
+            <Info size={16} />
+            <AlertDescription className="text-caption">
               Net Income: <strong>{formatNumber(vm.netIncome)}</strong> —
               plugged from Income Statement to Balance Sheet.
             </AlertDescription>
