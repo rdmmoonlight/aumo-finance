@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using AumoBackend.Core;
 using AumoBlazor.Configurations;
 using AumoBlazor.Extensions;
 using AumoFinance.Components;
@@ -8,6 +9,7 @@ using AumoFinance.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,6 +44,29 @@ namespace AumoBlazor
             var appConfig = builder.Services.AddAppConfigurations(builder.Configuration);
             builder.Services.AddHttpAndCircuitServices(appConfig);
             builder.Services.AddCustomAuthentication(appConfig, IsApiOrBlazorCircuitRequest);
+
+            // PERBAIKAN: banyak halaman blazor-legacy (NavMenu, Reports, Periods,
+            // Documents, dll) query database LANGSUNG lewat IDbContextFactory<AppDbContext>
+            // / AppDbContext, bukan lewat REST API /backend. Sebelum ini blazor-legacy
+            // tidak pernah mendaftarkan koneksi DB-nya sendiri, jadi crash begitu login
+            // berhasil dan halaman ber-auth (mis. NavMenu) coba dirender.
+            // Pola & connection string sama persis dengan backend/Program.cs, karena
+            // keduanya memang berbagi satu database Postgres yang sama.
+            var connectionString = builder.Configuration["DATABASE_URL"]
+                ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
+            if (string.IsNullOrWhiteSpace(connectionString))
+            {
+                throw new InvalidOperationException("Database connection string 'DATABASE_URL' is missing.");
+            }
+
+            builder.Services.AddDbContextFactory<AppDbContext>(options =>
+            {
+                options.UseNpgsql(connectionString);
+                options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+            });
+
+            builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
             // 3. BLAZOR CORE & SIGNALR
             builder.Services.AddControllers();
