@@ -1,0 +1,121 @@
+/* ==========================================================================
+   TOPBAR & STATUS STRIP STYLES
+   ========================================================================== */
+
+/* Variables / Fallbacks */
+:root {
+    --aumo-bg: #0D1117;
+    --aumo-surface: #161B22;
+    --aumo-border: #2A313C;
+    --aumo-text: #FFFFFF;
+    --aumo-text-muted: #94A3B8;
+    --aumo-accent-cyan: #00C2FF;
+    --aumo-accent-amber: #D97706;
+}
+
+/* 1. Header & Navbar Utama */
+.topbar-solid {
+    background-color: var(--aumo-surface, #161B22);
+    border-bottom: 1px solid var(--aumo-border, #2A313C);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    z-index: 1030;
+}
+
+/* 2. Topbar Buttons & Controls */
+.topbar-btn {
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--aumo-border, #2A313C) !important;
+    border-radius: 6px;
+    color: var(--aumo-text-muted, #94A3B8) !important;
+    transition: all 0.2s ease-in-out;
+}
+
+.topbar-btn:hover,
+.topbar-btn:focus {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--aumo-accent-cyan, #00C2FF) !important;
+    border-color: rgba(0, 194, 255, 0.3) !important;
+}
+
+/* 3. Status Strip (Baris Status Bawah Topbar) */
+.status-strip {
+    background-color: var(--aumo-bg, #0D1117);
+    border-bottom: 1px solid var(--aumo-border, #2A313C);
+    color: var(--aumo-text-muted, #94A3B8);
+}
+
+.status-badge {
+    transition: opacity 0.2s ease;
+}
+
+.status-badge:hover {
+    opacity: 0.85;
+}
+
+/* 4. Custom Animations (Sync & Guardian Indicator) */
+.icon-spin {
+    animation: spin 1.2s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.pulse-dot-green {
+    width: 6px;
+    height: 6px;
+    background-color: #10B981;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 8px #10B981;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(16, 185, 129, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+
+/* 5. Dropdown Styling */
+.topbar-solid .dropdown-menu,
+.status-strip .dropdown-menu {
+    background-color: var(--aumo-surface, #161B22);
+    border: 1px solid var(--aumo-border, #2A313C);
+    border-radius: 8px;
+}
+
+.topbar-solid .dropdown-item,
+.status-strip .dropdown-item {
+    color: var(--aumo-text, #FFFFFF);
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.topbar-solid .dropdown-item:hover,
+.status-strip .dropdown-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--aumo-accent-cyan, #00C2FF);
+}
+
+.dropdown-header {
+    color: var(--aumo-text-muted, #94A3B8);
+}
+
+/* 6. Modals (Search Modal) */
+.modal-dialog-top {
+    margin-top: 4rem;
+}
+
+.modal-content.topbar-solid {
+    background-color: var(--aumo-surface, #161B22);
+    border-radius: 10px;
+}
