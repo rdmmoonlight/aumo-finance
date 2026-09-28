@@ -140,7 +140,7 @@
     {
         if (AuthStateTask != null)
         {
-            var authState = (await AuthStateTask)!;
+            var authState = await AuthStateTask;
             var user = authState.User;
 
             if (user.Identity?.IsAuthenticated == true)
@@ -159,17 +159,24 @@
             return;
         }
 
-        var period = (await SelectedPeriodHelper.GetSelectedPeriodAsync(DbContext, UserId))!;
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(DbContext, UserId);
         if (period == null)
         {
             noPeriodSelected = true;
             return;
         }
 
-        var unadjusted = (await TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: false))!;
-        var adjusted = (await TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: true))!;
+        var unadjusted = await TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: false) 
+            ?? new List<TrialBalanceRow>();
+        var adjusted = await TrialBalancePage.BuildTrialBalanceRowsAsync(DbContext, UserId, period, includeAdjusting: true) 
+            ?? new List<TrialBalanceRow>();
 
-        var accounts = (await DbContext.ChartOfAccounts.Where(a => a.IsActive && a.UserId == UserId).OrderBy(a => a.ReferenceNumber).ToListAsync())!;
+        var accounts = await DbContext.ChartOfAccounts
+            .Where(a => a.IsActive && a.UserId == UserId)
+            .OrderBy(a => a.ReferenceNumber)
+            .ToListAsync();
+
+        var accountsDict = accounts.ToDictionary(a => a.Id);
 
         var newVm = new WorksheetViewModel();
         var allRefs = unadjusted.Select(r => r.AccountId)
@@ -178,7 +185,11 @@
 
         foreach (var accountId in allRefs)
         {
-            var account = accounts.First(a => a.Id == accountId);
+            if (!accountsDict.TryGetValue(accountId, out var account))
+            {
+                continue;
+            }
+
             var u = unadjusted.FirstOrDefault(r => r.AccountId == accountId);
             var a = adjusted.FirstOrDefault(r => r.AccountId == accountId);
             var normalDebit = AccountClassification.NormalBalanceIsDebit(account.Type ?? string.Empty);
@@ -193,8 +204,8 @@
             var row = new WorksheetRow
             {
                 AccountId = accountId,
-                ReferenceNumber = account.ReferenceNumber.ToString(), // Konversi int ke string di sini
-                AccountName = account.AccountName,
+                ReferenceNumber = account.ReferenceNumber.ToString(),
+                AccountName = account.AccountName ?? string.Empty,
                 Type = account.Type,
                 NormalBalanceIsDebit = normalDebit,
                 UnadjustedDebit = uDebit,
