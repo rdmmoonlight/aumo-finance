@@ -3,15 +3,11 @@ export default defineEventHandler(async (event) => {
   const search = query.search ? String(query.search).trim().toLowerCase() : null
   const category = query.category ? String(query.category).trim() : null
 
-  // 1. Ambil UserId (Contoh dari session / auth middleware)
-  const userId = event.context.user?.id
-  if (!userId) {
-    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
-  }
+  // Dapatkan UserId yang valid
+  const userId = await getAuthUserId(event)
 
   try {
-    // 2. Query dasar ChartOfAccounts berdasarkan UserId
-    const whereCondition: any = { userId }
+    const whereCondition: any = { UserId: userId }
 
     if (search) {
       whereCondition.OR = [
@@ -31,15 +27,13 @@ export default defineEventHandler(async (event) => {
 
     const accountIds = loadedAccounts.map(a => a.Id)
 
-    // 3. Cek Periode Aktif (IsSelected = true)
     const currentPeriod = await prisma.periods.findFirst({
-      where: { userId, IsSelected: true }
+      where: { UserId: userId, IsSelected: true }
     })
 
     let balancesMap: Record<number, { debit: number; credit: number }> = {}
 
     if (currentPeriod && accountIds.length > 0) {
-      // Aggregate Mutasi Jurnal di Periode Terpilih
       const journalLines = await prisma.journalEntryLines.findMany({
         where: {
           AccountId: { in: accountIds },
@@ -57,7 +51,6 @@ export default defineEventHandler(async (event) => {
         }
       })
 
-      // Hitung Total Debit & Credit per Account
       for (const line of journalLines) {
         if (!balancesMap[line.AccountId]) {
           balancesMap[line.AccountId] = { debit: 0, credit: 0 }
@@ -67,7 +60,6 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // 4. Map Akun dengan Perhitungan Saldo Normal (Debit vs Credit)
     const normalDebitTypes = ['Assets', 'OperatingExpenses', 'OtherExpenses']
 
     const accountsResult = loadedAccounts.map(a => {
@@ -97,7 +89,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: error.statusCode || 500,
-      statusMessage: error.message || 'A fatal error occurred while loading accounts.'
+      statusMessage: error.message || 'Fatal error loading accounts'
     })
   }
 })
