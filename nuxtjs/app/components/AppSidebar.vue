@@ -26,13 +26,34 @@ const links = computed(() => [[{
     open.value = false
   }
 }, {
-  // --- DITAMBAHKAN TEPAT DI BAWAH PERIODS ---
   label: 'Chart of Accounts',
   icon: 'i-lucide-book-open',
   to: '/coa',
   onSelect: () => {
     open.value = false
   }
+}, {
+  // --- DITAMBAHKAN TEPAT DI BAWAH CHART OF ACCOUNTS ---
+  label: 'General Journal',
+  icon: 'i-lucide-notebook-pen',
+  to: '/journal-entries',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  // --- GRUP REPORTS DENGAN SUB-MENU GENERAL JOURNAL ---
+  label: 'Reports',
+  icon: 'i-lucide-file-text',
+  type: 'trigger',
+  defaultOpen: true,
+  children: [{
+    label: 'General Journal',
+    icon: 'i-lucide-notebook-tabs',
+    to: '/reports/general-journal',
+    onSelect: () => {
+      open.value = false
+    }
+  }]
 }, {
   label: 'Inbox',
   icon: 'i-lucide-inbox',
