@@ -1,5 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const userId = await getAuthUserId(event)
+  const userId = await getUserId(event)
   const body = await readBody(event)
 
   if (!body?.accountName || !String(body.accountName).trim()) {
