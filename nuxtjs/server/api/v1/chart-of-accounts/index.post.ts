@@ -1,9 +1,5 @@
 export default defineEventHandler(async (event) => {
-  const userId = event.context.user?.id
-  if (!userId) {
-    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
-  }
-
+  const userId = await getAuthUserId(event)
   const body = await readBody(event)
 
   if (!body?.accountName || !String(body.accountName).trim()) {
@@ -16,7 +12,6 @@ export default defineEventHandler(async (event) => {
 
   const refNumber = Number(body.referenceNumber)
 
-  // Cek Duplikasi Kode Akun
   const isCodeTaken = await prisma.chartOfAccounts.findUnique({
     where: {
       UserId_ReferenceNumber: {
@@ -53,7 +48,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: 500,
-      statusMessage: `A fatal error occurred while saving the account: ${error.message}`
+      statusMessage: `Fatal error saving account: ${error.message}`
     })
   }
 })
