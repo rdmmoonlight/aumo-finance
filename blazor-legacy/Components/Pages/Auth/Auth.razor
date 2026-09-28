@@ -20,6 +20,7 @@
 @inject NavigationManager Navigation
 @inject AuthenticationStateProvider AuthStateProvider
 @inject CircuitCookieStore CookieStore
+@inject LoginCookieBridge CookieBridge
 @inject ILogger<Auth> Logger
 
 <PageTitle>@GetPageTitle() - Aumo Finance</PageTitle>
@@ -362,9 +363,11 @@
             });
 
             // PERBAIKAN: Tangkap Cookie dari Set-Cookie headers dan update ke CircuitCookieStore secara terstruktur
+            List<string>? pendingSetCookieHeaders = null;
             if (response.Headers.TryGetValues("Set-Cookie", out var setCookies))
             {
-                CookieStore.UpdateFromSetCookieHeader(setCookies);
+                pendingSetCookieHeaders = setCookies.ToList();
+                CookieStore.UpdateFromSetCookieHeader(pendingSetCookieHeaders);
             }
 
             var rawContent = await response.Content.ReadAsStringAsync();
@@ -399,8 +402,22 @@
                     customAuthStateProvider.NotifyAuthenticationStateChanged();
                 }
 
-                // Hard reload ke halaman utama agar browser menginisialisasi ulang circuit dengan cookie baru
-                Navigation.NavigateTo("/", forceLoad: true);
+                // PERBAIKAN: jangan langsung forceLoad ke "/" - Set-Cookie yang ditangkap
+                // di atas TIDAK PERNAH sampai ke browser kalau di-append ke httpContext.Response
+                // di sini, karena event OnValidSubmit ini berjalan lewat circuit SignalR
+                // (response HTTP asli halaman ini sudah lama HasStarted). Titipkan dulu
+                // Set-Cookie mentah ke LoginCookieBridge (token sekali-pakai, umur pendek),
+                // lalu forceLoad ke endpoint /account/login-bridge - itu request HTTP baru
+                // yang genuine, sehingga Set-Cookie di situ benar-benar nempel ke browser.
+                if (pendingSetCookieHeaders is { Count: > 0 })
+                {
+                    var bridgeToken = CookieBridge.Stash(pendingSetCookieHeaders);
+                    Navigation.NavigateTo($"/account/login-bridge?token={Uri.EscapeDataString(bridgeToken)}", forceLoad: true);
+                }
+                else
+                {
+                    Navigation.NavigateTo("/", forceLoad: true);
+                }
                 return;
             }
 
