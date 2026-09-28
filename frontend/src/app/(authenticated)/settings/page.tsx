@@ -22,7 +22,8 @@ export default function SettingsPage() {
         onValueChange={setMainTab}
         className="flex-1 flex flex-col min-h-0"
       >
-        <div className="shrink-0 space-y-3 bg-background sticky top-0 z-10 pb-3">
+        {/* Tambahkan relative dan atur z-index agar tab selamanya berada di atas konten */}
+        <div className="shrink-0 space-y-3 bg-background relative z-20 pb-3">
           <h1 className="text-xl font-bold">Settings</h1>
           <TabsList className="h-8 p-1 w-fit">
             <TabsTrigger value="account" className="text-xs gap-1.5 h-6">
@@ -38,7 +39,7 @@ export default function SettingsPage() {
           <Separator />
         </div>
 
-        <div className="flex-1 overflow-y-auto mt-1">
+        <div className="flex-1 overflow-y-auto mt-1 relative z-10">
           <TabsContent
             value="account"
             className="m-0 focus-visible:outline-none"
