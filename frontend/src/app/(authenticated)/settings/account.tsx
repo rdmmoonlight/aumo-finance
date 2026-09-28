@@ -278,7 +278,9 @@ export default function AccountSettings() {
       {success && (
         <Alert className="py-2 bg-emerald-500/10 text-emerald-600 text-ui">
           <CheckCircle2 size={14} />
-          <AlertDescription className="text-caption">{success}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {success}
+          </AlertDescription>
         </Alert>
       )}
       {error && (
@@ -293,7 +295,8 @@ export default function AccountSettings() {
         <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
           <div>
             <CardTitle className="text-ui flex items-center gap-2">
-              <ShieldCheck size={16} className="text-primary" /> Ringkasan Status Akun
+              <ShieldCheck size={16} className="text-primary" /> Ringkasan
+              Status Akun
             </CardTitle>
             <CardDescription className="text-caption">
               Status kredensial pengguna aktif dari `/api/v1/auth/me`
