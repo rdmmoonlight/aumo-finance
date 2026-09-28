@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  // middleware: ['auth'] dihapus karena middleware bertipe global (auth.global.ts)
+  layout: 'default'
 })
   
 interface PeriodRaw {
