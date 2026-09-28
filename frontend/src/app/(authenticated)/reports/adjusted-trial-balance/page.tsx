@@ -271,8 +271,8 @@ export default function AdjustedTrialBalancePage() {
   if (isLoading)
     return (
       <div className="flex items-center justify-center gap-2 py-16 text-center text-caption text-muted-foreground">
-        <Loader2 className="animate-spin" size={16} /> Loading adjusted
-        trial balance...
+        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial
+        balance...
       </div>
     );
 
@@ -291,7 +291,9 @@ export default function AdjustedTrialBalancePage() {
       {isError && !noPeriod && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
