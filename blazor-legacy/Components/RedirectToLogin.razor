@@ -1,0 +1,9 @@
+@inject NavigationManager Navigation
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Mengarahkan ke halaman login publik
+        Navigation.NavigateTo("/auth/login", forceLoad: false);
+    }
+}
