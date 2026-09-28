@@ -44,7 +44,6 @@ const flattenedRows = computed(() => {
   const rows: any[] = []
 
   filteredData.value.forEach((entry) => {
-    // Row Header Jurnal
     rows.push({
       isHeader: true,
       id: `header-${entry.Id}`,
@@ -53,7 +52,6 @@ const flattenedRows = computed(() => {
       journalType: entry.JournalType
     })
 
-    // Baris Lines (Detail Akun)
     entry.JournalEntryLines?.forEach((line: any) => {
       rows.push({
         isHeader: false,
@@ -70,7 +68,7 @@ const flattenedRows = computed(() => {
   return rows
 })
 
-// Konfigurasi Kolom UTable (TanStack Table Schema)
+// Konfigurasi Kolom UTable
 const columns = ref<TableColumn<any>[]>([
   { accessorKey: 'entryDate', header: 'Tanggal / Kode Akun' },
   { accessorKey: 'transactionNumber', header: 'No. Transaksi / Nama Akun' },
@@ -79,7 +77,6 @@ const columns = ref<TableColumn<any>[]>([
   { accessorKey: 'credit', header: 'Kredit', class: 'text-right' }
 ])
 
-// Total Debit & Kredit
 const totalDebit = computed(() => {
   return journalData.value.reduce((acc, entry) => {
     const sum = entry.JournalEntryLines?.reduce((s: number, l: any) => s + (Number(l.Debit) || 0), 0) || 0
@@ -102,11 +99,10 @@ onMounted(fetchReport)
 </script>
 
 <template>
-  <!-- KONTAINER UTAMA: Memunci Tinggi Tepat 100vh tanpa Scroll Global Utama -->
-  <UDashboardPage class="h-screen overflow-hidden">
-    <UDashboardPanel grow class="h-full flex flex-col overflow-hidden">
+  <UDashboardPage class="h-full min-h-0 overflow-hidden">
+    <UDashboardPanel grow class="h-full min-h-0 flex flex-col overflow-hidden">
       
-      <!-- Top Navbar (Tetap Diam di Atas) -->
+      <!-- Top Navbar (Tetap Diam) -->
       <UDashboardNavbar title="Laporan Jurnal Umum" badge="Report">
         <template #right>
           <UButton icon="i-lucide-printer" color="neutral" variant="outline" label="Cetak" @click="() => window.print()" />
@@ -114,10 +110,9 @@ onMounted(fetchReport)
         </template>
       </UDashboardNavbar>
 
-      <!-- SCROLL CONTAINER 1: Scroll Halaman/Panel (Filter & Header) -->
-      <UDashboardPanelContent class="flex-1 flex flex-col p-6 space-y-4 overflow-y-auto min-h-0">
+      <UDashboardPanelContent class="flex-1 flex flex-col p-6 space-y-4 overflow-hidden min-h-0">
         
-        <!-- Toolbar & Filter Atas -->
+        <!-- Toolbar Atas (Kembali & Search) -->
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
           <UButton to="/reports" icon="i-lucide-arrow-left" variant="ghost" color="neutral" size="xs" label="Kembali ke Pusat Laporan" />
 
@@ -130,26 +125,32 @@ onMounted(fetchReport)
           />
         </div>
 
-        <!-- Card Wrapper Laporan -->
-        <UCard class="flex-1 flex flex-col min-h-0 overflow-hidden" :ui="{ body: 'flex-1 flex flex-col p-0 sm:p-0 min-h-0 overflow-hidden' }">
-          
+        <!-- Card Pembungkus Utama -->
+        <UCard 
+          class="flex-1 flex flex-col min-h-0 overflow-hidden" 
+          :ui="{ body: 'flex-1 flex flex-col p-0 sm:p-0 min-h-0 overflow-hidden' }"
+        >
           <template #header>
             <div class="flex justify-between items-center p-4 shrink-0">
               <div>
                 <h3 class="font-bold text-base">Rincian Transaksi Jurnal Umum</h3>
-                <p class="text-xs text-neutral-500">Dual Independent Scroll Active.</p>
+                <p class="text-xs text-neutral-500">Scrollable Table Container.</p>
               </div>
               <UButton icon="i-lucide-refresh-cw" color="neutral" variant="ghost" size="xs" :loading="isLoading" @click="fetchReport" />
             </div>
           </template>
 
-          <!-- SCROLL CONTAINER 2: Scroll Khusus Tabel (Independent Table Scroll) -->
-          <div class="flex-1 overflow-auto min-h-0">
+          <!-- CONTAINER SCROLL TABEL (Menggunakan style inline kalkulasi tinggi dinamis) -->
+          <div class="flex-1 w-full overflow-auto min-h-0 h-full max-h-[calc(100vh-280px)]">
             <UTable
               :data="flattenedRows"
               :columns="columns"
               :loading="isLoading"
-              class="w-full"
+              class="w-full relative border-collapse"
+              :ui="{
+                thead: 'sticky top-0 z-20 bg-neutral-100 dark:bg-neutral-800 shadow-sm',
+                th: 'bg-neutral-100 dark:bg-neutral-800'
+              }"
             >
               <!-- Cell Custom Render -->
               <template #entryDate-cell="{ row }">
@@ -195,7 +196,7 @@ onMounted(fetchReport)
             </UTable>
           </div>
 
-          <!-- Footer Total (Pinned/Fixed di Bawah Card Tabel) -->
+          <!-- Footer Total (Pinned/Fixed di Bawah Card) -->
           <div class="shrink-0 flex justify-between items-center p-4 bg-neutral-50 dark:bg-neutral-800/80 border-t font-bold text-xs z-10">
             <span>TOTAL GENERAL JOURNAL</span>
             <div class="space-x-8 font-mono text-blue-600 dark:text-blue-400">
