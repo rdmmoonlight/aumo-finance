@@ -420,23 +420,36 @@ namespace AumoBlazor.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<CircuitCookieStore>();
             services.AddScoped<CircuitHandler, CookieCircuitHandler>();
-            services.AddTransient<CookieHeaderHandler>();
 
-            services.AddHttpClient("BackendApi", client =>
-            {
-                client.BaseAddress = new Uri(config.WebApiUrl);
-                client.Timeout = TimeSpan.FromSeconds(15);
-            })
-            .AddHttpMessageHandler<CookieHeaderHandler>()
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
-            {
-                UseCookies = false
-            });
-
+            // PERBAIKAN: HttpClient "BackendApi" sebelumnya dibangun lewat
+            // AddHttpClient(...).AddHttpMessageHandler<CookieHeaderHandler>() lalu
+            // factory.CreateClient("BackendApi"). IHttpClientFactory meng-cache/pool
+            // handler chain (termasuk CookieHeaderHandler) di DI scope internal
+            // miliknya sendiri (default lifetime 2 menit) - BUKAN di scope circuit
+            // Blazor yang sedang aktif. Akibatnya CircuitCookieStore (Scoped) yang
+            // ke-resolve di dalam CookieHeaderHandler bisa jadi instance basi, atau
+            // bahkan ketuker dengan circuit/user lain selama handler tsb masih dipakai
+            // ulang dari pool - login sukses & cookie tersimpan, tapi ApiAuthenticationStateProvider
+            // (yang resolve CircuitCookieStore lewat scope circuit yang benar) tetap
+            // melihat cookie kosong -> /me langsung 401 lagi.
+            //
+            // Fix: bangun HttpClient ini manual per-scope (bypass pooling factory utk
+            // client ini saja), supaya CookieHeaderHandler dijamin pakai
+            // CircuitCookieStore milik circuit yang sama persis dengan yang dipakai
+            // ApiAuthenticationStateProvider dan komponen lain di circuit tsb.
             services.AddScoped(sp =>
             {
-                var factory = sp.GetRequiredService<IHttpClientFactory>();
-                return factory.CreateClient("BackendApi");
+                var httpContextAccessor = sp.GetRequiredService<IHttpContextAccessor>();
+                var cookieStore = sp.GetRequiredService<CircuitCookieStore>();
+                var handler = new CookieHeaderHandler(httpContextAccessor, cookieStore)
+                {
+                    InnerHandler = new HttpClientHandler { UseCookies = false }
+                };
+                return new HttpClient(handler)
+                {
+                    BaseAddress = new Uri(config.WebApiUrl),
+                    Timeout = TimeSpan.FromSeconds(15)
+                };
             });
 
             services.AddHttpClient("MarketApiClient", client =>
