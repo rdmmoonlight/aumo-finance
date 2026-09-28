@@ -102,7 +102,9 @@ function TemporaryLedgerTable({ lines }: { lines: TemporaryLedgerLine[] }) {
         },
       }),
       columnHelper.accessor("runningBalance", {
-        header: () => <div className="text-right pr-6 text-caption">Balance</div>,
+        header: () => (
+          <div className="text-right pr-6 text-caption">Balance</div>
+        ),
         cell: (info) => (
           <div className="text-right pr-6 font-mono text-caption font-medium">
             {formatNumber(info.getValue() || 0)}
@@ -225,7 +227,9 @@ export default function GeneralLedgerTemporaryPage() {
       {isError && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
