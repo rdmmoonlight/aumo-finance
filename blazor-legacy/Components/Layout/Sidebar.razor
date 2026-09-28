@@ -1,11 +1,12 @@
 @rendermode InteractiveServer
+
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.Routing
 @using System.Net.Http.Json
 
 @inject HttpClient Http
 @inject NavigationManager Navigation
-@inject ILogger<NavMenu> Logger
+@inject ILogger<Sidebar> Logger
 
 <AuthorizeView>
     <Authorized>
@@ -231,18 +232,18 @@
     .sidebar-sticky-neon {
         position: -webkit-sticky;
         position: sticky;
-        top: 0;
-        height: 100vh;
-        max-height: 100vh;
+        top: 86px; /* Menyesuaikan tinggi TopBar + Status Strip agar pas di bawahnya */
+        height: calc(100vh - 86px);
+        max-height: calc(100vh - 86px);
         align-self: flex-start;
-        z-index: 1030;
+        z-index: 1020;
         flex-shrink: 0;
     }
 
     /* KOTAK DOCK UNGU DENGAN FULL WHITE NEON BORDER (360 DERAJAT) */
     .sidebar-icons {
         width: 65px;
-        height: 100vh;
+        height: 100%;
         background-color: #1a1625;
         border: 2px solid #ffffff;
         border-radius: 8px;
@@ -255,7 +256,7 @@
     /* HOLOGRAM FLYOUT PANEL WITH MATCHING NEON BORDER */
     .sidebar-flyout {
         width: 230px;
-        height: 100vh;
+        height: 100%;
         overflow-y: auto;
         background-color: rgba(26, 22, 37, 0.95);
         backdrop-filter: blur(8px);
