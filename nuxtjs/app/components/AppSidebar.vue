@@ -1,3 +1,4 @@
+<!-- components/AppSidebar.vue -->
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
 
@@ -21,6 +22,14 @@ const links = computed(() => [[{
   label: 'Periods',
   icon: 'i-lucide-calendar-range',
   to: '/periods',
+  onSelect: () => {
+    open.value = false
+  }
+}, {
+  // --- DITAMBAHKAN TEPAT DI BAWAH PERIODS ---
+  label: 'Chart of Accounts',
+  icon: 'i-lucide-book-open',
+  to: '/coa',
   onSelect: () => {
     open.value = false
   }
