@@ -67,7 +67,10 @@ function IncomeStatementSectionTable({
         header: () => <div className="text-left pl-4 text-caption">Ref #</div>,
         cell: (info) => (
           <div className="pl-4">
-            <Badge variant="outline" className="font-mono text-amber-500 text-label-small">
+            <Badge
+              variant="outline"
+              className="font-mono text-amber-500 text-label-small"
+            >
               {info.getValue() || "-"}
             </Badge>
           </div>
@@ -80,7 +83,9 @@ function IncomeStatementSectionTable({
         ),
       }),
       columnHelper.accessor("amount", {
-        header: () => <div className="text-right pr-4 text-caption">Amount</div>,
+        header: () => (
+          <div className="text-right pr-4 text-caption">Amount</div>
+        ),
         cell: ({ row }) => {
           const val = row.original.amount;
           const formatted = formatNumber(val);
@@ -129,7 +134,10 @@ function IncomeStatementSectionTable({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id} className="border-none hover:bg-transparent">
+              <TableRow
+                key={row.id}
+                className="border-none hover:bg-transparent"
+              >
                 {row.getVisibleCells().map((cell) => {
                   const isRef = cell.column.id === "referenceNumber";
                   const isAmount = cell.column.id === "amount";
@@ -179,15 +187,19 @@ export default function IncomeStatementPage() {
       revenues: (rawData?.revenueAccounts ||
         rawData?.revenues ||
         []) as IncomeStatementLine[],
-      operatingExpenses: ((rawData?.expenseAccounts ||
-        rawData?.operatingExpenses ||
-        []) as IncomeStatementLine[]).map((e) => ({ ...e, isExpense: true })),
+      operatingExpenses: (
+        (rawData?.expenseAccounts ||
+          rawData?.operatingExpenses ||
+          []) as IncomeStatementLine[]
+      ).map((e) => ({ ...e, isExpense: true })),
       otherIncome: (rawData?.otherIncomeAccounts ||
         rawData?.otherIncome ||
         []) as IncomeStatementLine[],
-      otherExpenses: ((rawData?.otherExpenseAccounts ||
-        rawData?.otherExpenses ||
-        []) as IncomeStatementLine[]).map((e) => ({ ...e, isExpense: true })),
+      otherExpenses: (
+        (rawData?.otherExpenseAccounts ||
+          rawData?.otherExpenses ||
+          []) as IncomeStatementLine[]
+      ).map((e) => ({ ...e, isExpense: true })),
     };
   }, [rawData]);
 
@@ -196,8 +208,7 @@ export default function IncomeStatementPage() {
     [vm.revenues],
   );
   const totalOpex = useMemo(
-    () =>
-      vm.operatingExpenses.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    () => vm.operatingExpenses.reduce((s, i) => s + (Number(i.amount) || 0), 0),
     [vm.operatingExpenses],
   );
   const operatingIncome = totalRevenue - totalOpex;
@@ -231,7 +242,9 @@ export default function IncomeStatementPage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -270,7 +283,12 @@ export default function IncomeStatementPage() {
                 • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-caption"
+            >
               <Link href="/reports/retained-earnings">
                 <ArrowRight size={14} /> Retained Earnings
               </Link>
