@@ -123,7 +123,7 @@ export function AppearanceSection() {
                 htmlFor={id}
                 className={cn(
                   "relative flex flex-col rounded-lg border p-3 cursor-pointer hover:bg-accent/50",
-                  active ? "border-primary bg-primary/5" : "border-muted"
+                  active ? "border-primary bg-primary/5" : "border-muted",
                 )}
               >
                 <RadioGroupItem value={id} id={id} className="sr-only" />
@@ -171,7 +171,7 @@ export function SecuritySection() {
   ).slice(0, 5);
   const sessions: SessionItem[] = (dashboardData?.activeSessions || []).slice(
     0,
-    5
+    5,
   );
   const isHealthy = security?.statusLevel === "Good";
 
@@ -235,7 +235,7 @@ export function SecuritySection() {
             "gap-1.5 h-6 text-xs",
             isHealthy
               ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-              : "border-amber-500/20 bg-amber-500/10 text-amber-600"
+              : "border-amber-500/20 bg-amber-500/10 text-amber-600",
           )}
         >
           <IconHeartbeat size={12} /> {security?.statusLevel || "Loading"}
@@ -344,7 +344,7 @@ export function SecuritySection() {
                         <TableCell className="py-1.5 text-xs">
                           {s.lastActivityAt
                             ? new Date(s.lastActivityAt).toLocaleTimeString(
-                                "id-ID"
+                                "id-ID",
                               )
                             : "-"}
                         </TableCell>
