@@ -33,20 +33,27 @@ const links = computed(() => [[{
     open.value = false
   }
 }, {
-  // --- DITAMBAHKAN TEPAT DI BAWAH CHART OF ACCOUNTS ---
-  label: 'General Journal',
+  label: 'Journal Entry',
   icon: 'i-lucide-notebook-pen',
   to: '/journal-entries',
   onSelect: () => {
     open.value = false
   }
 }, {
-label: 'Reports',
+  label: 'Reports',
   icon: 'i-lucide-file-text',
   to: '/reports',
   type: 'trigger',
   defaultOpen: true,
   children: [{
+    label: 'Overview',
+    icon: 'i-lucide-layout-grid',
+    to: '/reports',
+    exact: true,
+    onSelect: () => {
+      open.value = false
+    }
+  }, {
     label: 'General Journal',
     icon: 'i-lucide-notebook-tabs',
     to: '/reports/general-journal',
