@@ -22,7 +22,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { List, Calendar, EyeOff, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  List,
+  Calendar,
+  EyeOff,
+  AlertTriangle,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 
 export interface TrialRow {
   accountId: number;
@@ -96,7 +103,9 @@ function TrialTable({
         },
       }),
       columnHelper.accessor("credit", {
-        header: () => <div className="text-right pr-6 text-caption">Credit</div>,
+        header: () => (
+          <div className="text-right pr-6 text-caption">Credit</div>
+        ),
         cell: (info) => {
           const val = info.getValue() || 0;
           return (
@@ -264,8 +273,8 @@ export default function UnadjustedTrialBalancePage() {
   if (isLoading) {
     return (
       <div className="py-16 text-center text-caption text-muted-foreground flex items-center justify-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Loading unadjusted
-        trial balance...
+        <Loader2 className="animate-spin" size={16} /> Loading unadjusted trial
+        balance...
       </div>
     );
   }
@@ -281,8 +290,7 @@ export default function UnadjustedTrialBalancePage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-h3 font-bold flex items-center gap-2">
-            <List className="text-sky-500" size={22} /> Unadjusted Trial
-            Balance
+            <List className="text-sky-500" size={22} /> Unadjusted Trial Balance
           </h1>
           <p className="text-ui text-muted-foreground mt-1">
             Before adjustments • IDR
@@ -293,7 +301,9 @@ export default function UnadjustedTrialBalancePage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 

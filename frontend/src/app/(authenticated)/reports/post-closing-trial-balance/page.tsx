@@ -22,7 +22,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShieldCheck, Calendar, EyeOff, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
+import {
+  ShieldCheck,
+  Calendar,
+  EyeOff,
+  AlertTriangle,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
 
 export interface TrialRow {
   accountId: number;
@@ -94,7 +101,9 @@ function TrialTable({
         },
       }),
       columnHelper.accessor("credit", {
-        header: () => <div className="text-right pr-6 text-caption">Credit</div>,
+        header: () => (
+          <div className="text-right pr-6 text-caption">Credit</div>
+        ),
         cell: (info) => {
           const val = info.getValue() || 0;
           return (
@@ -317,8 +326,8 @@ export default function PostClosingTrialBalancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-h3 font-bold flex items-center gap-2">
-          <ShieldCheck className="text-emerald-500" size={22} />{" "}
-          Post-Closing Trial Balance
+          <ShieldCheck className="text-emerald-500" size={22} /> Post-Closing
+          Trial Balance
         </h1>
         <p className="text-ui text-muted-foreground mt-1">
           After closing entries • Only permanent accounts • IDR
@@ -328,7 +337,9 @@ export default function PostClosingTrialBalancePage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
