@@ -18,6 +18,51 @@ using Microsoft.Extensions.Logging;
 
 namespace AumoBlazor.Extensions
 {
+    // PERBAIKAN (bug: cookie login tidak pernah sampai ke browser):
+    // Set-Cookie dari backend hanya bisa "nempel" ke response browser lewat
+    // httpContext.Response kalau response HTTP itu belum HasStarted. Di Blazor
+    // Interactive Server, submit form (OnValidSubmit) berjalan lewat koneksi
+    // SignalR yang persisten - HTTP response asli untuk halaman itu sudah lama
+    // selesai/terkirim sebelum event ini terjadi, jadi Set-Cookie yang dicoba
+    // di-append di titik ini SELALU gagal nyampe ke browser (silently no-op).
+    // Solusinya: simpan Set-Cookie mentah sementara di sini dengan token
+    // sekali-pakai berumur pendek, lalu redirect (forceLoad -> full HTTP GET
+    // baru, request/response asli, bukan lewat SignalR) ke endpoint kecil yang
+    // benar-benar men-set cookie itu di response-nya sendiri.
+    public class LoginCookieBridge
+    {
+        private readonly ConcurrentDictionary<string, (IReadOnlyList<string> Cookies, DateTime Expiry)> _store = new();
+
+        public string Stash(IReadOnlyList<string> setCookieHeaders)
+        {
+            var token = Guid.NewGuid().ToString("N");
+            _store[token] = (setCookieHeaders, DateTime.UtcNow.AddSeconds(30));
+            CleanupExpired();
+            return token;
+        }
+
+        public IReadOnlyList<string>? Consume(string token)
+        {
+            if (_store.TryRemove(token, out var entry) && entry.Expiry > DateTime.UtcNow)
+            {
+                return entry.Cookies;
+            }
+            return null;
+        }
+
+        private void CleanupExpired()
+        {
+            var now = DateTime.UtcNow;
+            foreach (var kvp in _store)
+            {
+                if (kvp.Value.Expiry <= now)
+                {
+                    _store.TryRemove(kvp.Key, out _);
+                }
+            }
+        }
+    }
+
     public class CircuitCookieStore
     {
         private readonly ConcurrentDictionary<string, string> _cookies = new(StringComparer.OrdinalIgnoreCase);
@@ -420,6 +465,7 @@ namespace AumoBlazor.Extensions
             services.AddHttpContextAccessor();
             services.AddScoped<CircuitCookieStore>();
             services.AddScoped<CircuitHandler, CookieCircuitHandler>();
+            services.AddSingleton<LoginCookieBridge>();
 
             // PERBAIKAN: HttpClient "BackendApi" sebelumnya dibangun lewat
             // AddHttpClient(...).AddHttpMessageHandler<CookieHeaderHandler>() lalu

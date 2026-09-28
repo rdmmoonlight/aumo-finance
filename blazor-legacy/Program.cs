@@ -129,6 +129,24 @@ namespace AumoBlazor
             // 6. ENDPOINTS
             app.MapHealthChecks("/health");
             app.MapControllers();
+
+            // PERBAIKAN: endpoint kecil non-Blazor (HTTP request/response asli,
+            // bukan event circuit SignalR) yang benar-benar men-set cookie sesi
+            // ke browser setelah login. Lihat komentar LoginCookieBridge di
+            // Extensions/AppServiceExtensions.cs untuk alasannya.
+            app.MapGet("/account/login-bridge", (string token, HttpContext ctx, LoginCookieBridge bridge) =>
+            {
+                var cookies = bridge.Consume(token);
+                if (cookies != null)
+                {
+                    foreach (var cookieHeader in cookies)
+                    {
+                        ctx.Response.Headers.Append("Set-Cookie", cookieHeader);
+                    }
+                }
+                return Results.Redirect("/");
+            }).AllowAnonymous();
+
             app.MapRazorComponents<App>()
                 .AddInteractiveServerRenderMode();
 
