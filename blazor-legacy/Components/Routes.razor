@@ -15,18 +15,6 @@
                     </div>
                 </div>
             </Authorizing>
-            <Authorized Context="authContext">
-                @* Jika user SUDAH login dan berada di landing page (/), redirect otomatis ke /home *@
-                @if (IsLandingPage(routeData))
-                {
-                    <RedirectToHome />
-                }
-                else
-                {
-                    @* Render halaman normal sesuai rute *@
-                    <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                }
-            </Authorized>
             <NotAuthorized Context="authContext">
                 @if (authContext.User.Identity == null || !authContext.User.Identity.IsAuthenticated)
                 {
@@ -100,14 +88,14 @@
         var pageType = routeData.PageType;
         
         // Cek apakah halaman adalah Landing Page (/)
-        if (IsLandingPage(routeData)) return true;
+        if (IsLandingPage()) return true;
 
         // Cek apakah halaman berada di namespace Auth (misal: /auth/login, /auth/register)
         return pageType.Namespace?.Contains("Auth", StringComparison.OrdinalIgnoreCase) == true 
             || pageType.Name.Contains("Login", StringComparison.OrdinalIgnoreCase);
     }
 
-    private bool IsLandingPage(RouteData routeData)
+    private bool IsLandingPage()
     {
         var relativeUri = Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
         return string.IsNullOrEmpty(relativeUri);
