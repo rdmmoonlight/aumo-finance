@@ -1,9 +1,8 @@
 <script setup lang="ts">
-
 definePageMeta({
   layout: 'default'
 })
-  
+
 interface PeriodRaw {
   Id: number
   PeriodName: string
@@ -12,6 +11,7 @@ interface PeriodRaw {
   IsClosed: boolean
   IsSelected: boolean
 }
+
 interface PeriodItem {
   id: number
   periodName: string
@@ -22,8 +22,8 @@ interface PeriodItem {
 }
 
 const MONTH_NAMES = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December"
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
 ]
 
 const ENDPOINTS = {
@@ -65,8 +65,7 @@ const fetchPeriods = async () => {
   isLoading.value = true
   try {
     const raw: any = await $fetch(ENDPOINTS.LIST)
-    // support array langsung atau { items: [] }
-    const arr = Array.isArray(raw)? raw : raw?.items || []
+    const arr = Array.isArray(raw) ? raw : raw?.items || []
     periods.value = mapRaw(arr as PeriodRaw[])
   } catch (e: any) {
     errorMessage.value = e?.data?.message || e?.message || 'Gagal load periods'
@@ -136,7 +135,7 @@ const handleCreateSubmit = async () => {
   }
 }
 
-const formatDate = (d?: string) => d? new Date(d).toLocaleDateString('id-ID') : '-'
+const formatDate = (d?: string) => d ? new Date(d).toLocaleDateString('id-ID') : '-'
 
 onMounted(fetchPeriods)
 </script>
@@ -146,8 +145,8 @@ onMounted(fetchPeriods)
     <UAlert v-if="errorMessage" color="error" variant="subtle" :title="errorMessage" icon="i-lucide-triangle-alert" :close-button="{ icon: 'i-lucide-x' }" @close="errorMessage = null" />
     <UAlert v-if="successMessage" color="success" variant="subtle" :title="successMessage" icon="i-lucide-check-circle" :close-button="{ icon: 'i-lucide-x' }" @close="successMessage = null" />
 
-    <template v-if="viewMode === 'list'">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div v-if="viewMode === 'list'">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-xl font-bold flex items-center gap-2"><UIcon name="i-lucide-calendar" class="size-5" /> Accounting Periods</h1>
           <p class="text-sm text-muted mt-1">Period yang aktif akan dipakai di semua halaman</p>
@@ -178,10 +177,10 @@ onMounted(fetchPeriods)
             </thead>
             <tbody>
               <tr v-if="isLoading"><td colspan="5" class="text-center py-8 text-zinc-500"><UIcon name="i-lucide-loader-2" class="animate-spin inline mr-2" /> Loading...</td></tr>
-              <tr v-for="p in periods" :key="p.id" class="border-b border-white/[0.06]" :class="[selectedPeriod?.id === p.id? 'bg-white/[0.06] border-l-4 border-l-white' : 'hover:bg-white/[0.03]', p.isClosed && selectedPeriod?.id!== p.id? 'opacity-50' : '']">
+              <tr v-for="p in periods" :key="p.id" class="border-b border-white/[0.06]" :class="[selectedPeriod?.id === p.id ? 'bg-white/[0.06] border-l-4 border-l-white' : 'hover:bg-white/[0.03]', p.isClosed && selectedPeriod?.id !== p.id ? 'opacity-50' : '']">
                 <td class="pl-6 py-3 flex items-center gap-2">
-                  <span :class="selectedPeriod?.id === p.id? 'text-white font-bold' : 'text-zinc-200'">{{ p.periodName }}</span>
-                  <UBadge v-if="selectedPeriod?.id === p.id" class="bg-white text-black font-bold text-">VIEWING</UBadge>
+                  <span :class="selectedPeriod?.id === p.id ? 'text-white font-bold' : 'text-zinc-200'">{{ p.periodName }}</span>
+                  <UBadge v-if="selectedPeriod?.id === p.id" class="bg-white text-black font-bold">VIEWING</UBadge>
                 </td>
                 <td class="text-xs text-zinc-400">{{ formatDate(p.startDate) }}</td>
                 <td class="text-xs text-zinc-400">{{ formatDate(p.endDate) }}</td>
@@ -191,7 +190,7 @@ onMounted(fetchPeriods)
                 </td>
                 <td class="pr-6 py-3">
                   <div class="flex justify-center gap-1.5">
-                    <UButton size="xs" :loading="selectingId === p.id" :icon="selectedPeriod?.id === p.id? 'i-lucide-eye-off' : 'i-lucide-eye'" :variant="selectedPeriod?.id === p.id? 'solid' : 'outline'" @click="handleSelectPeriod(p)">{{ selectedPeriod?.id === p.id? 'VIEWING' : 'VIEW' }}</UButton>
+                    <UButton size="xs" :loading="selectingId === p.id" :icon="selectedPeriod?.id === p.id ? 'i-lucide-eye-off' : 'i-lucide-eye'" :variant="selectedPeriod?.id === p.id ? 'solid' : 'outline'" @click="handleSelectPeriod(p)">{{ selectedPeriod?.id === p.id ? 'VIEWING' : 'VIEW' }}</UButton>
                     <UButton v-if="!p.isClosed" size="xs" variant="ghost" icon="i-lucide-lock" :loading="closingId === p.id" @click="handleClosePeriod(p)" />
                   </div>
                 </td>
@@ -201,27 +200,25 @@ onMounted(fetchPeriods)
           </table>
         </div>
       </UCard>
-    </template>
+    </div>
 
-    <template v-else>
-      <div class="max-w-xl mx-auto space-y-6">
-        <div class="flex items-center justify-between">
-          <h1 class="text-xl font-bold flex items-center gap-2"><UIcon name="i-lucide-calendar-plus" class="size-5" /> Open New Period</h1>
-          <UButton variant="outline" size="sm" icon="i-lucide-arrow-left" @click="viewMode = 'list'">Back</UButton>
-        </div>
-        <form @submit.prevent="handleCreateSubmit" class="space-y-6">
-          <UCard class="bg-[#151519] border border-white/[0.07]">
-            <div class="grid grid-cols-2 gap-4">
-              <UFormField label="Month"><USelect v-model="month" :items="monthOptions" class="w-full" /></UFormField>
-              <UFormField label="Year"><UInput v-model.number="year" type="number" required /></UFormField>
-            </div>
-          </UCard>
-          <div class="flex justify-end gap-2">
-            <UButton variant="outline" @click="viewMode = 'list'">Cancel</UButton>
-            <UButton type="submit" :loading="isCreating">Submit Period</UButton>
-          </div>
-        </form>
+    <div v-else class="max-w-xl mx-auto space-y-6">
+      <div class="flex items-center justify-between">
+        <h1 class="text-xl font-bold flex items-center gap-2"><UIcon name="i-lucide-calendar-plus" class="size-5" /> Open New Period</h1>
+        <UButton variant="outline" size="sm" icon="i-lucide-arrow-left" @click="viewMode = 'list'">Back</UButton>
       </div>
-    </template>
+      <form @submit.prevent="handleCreateSubmit" class="space-y-6">
+        <UCard class="bg-[#151519] border border-white/[0.07]">
+          <div class="grid grid-cols-2 gap-4">
+            <UFormField label="Month"><USelect v-model="month" :items="monthOptions" class="w-full" /></UFormField>
+            <UFormField label="Year"><UInput v-model.number="year" type="number" required /></UFormField>
+          </div>
+        </UCard>
+        <div class="flex justify-end gap-2">
+          <UButton variant="outline" @click="viewMode = 'list'">Cancel</UButton>
+          <UButton type="submit" :loading="isCreating">Submit Period</UButton>
+        </div>
+      </form>
+    </div>
   </div>
 </template>
