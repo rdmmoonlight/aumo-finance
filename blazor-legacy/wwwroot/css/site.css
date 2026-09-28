@@ -5,7 +5,7 @@
 
 
 /* ==========================================
-   HTML & BODY FIX
+   HTML & BODY
    ========================================== */
 
 html {
@@ -22,7 +22,8 @@ html {
 
 body {
     margin: 0;
-    /* Dihapus margin-bottom: 60px agar tidak memutus kalkulasi Flexbox */
+    margin-bottom: 60px;
+
     background-color: var(--aumo-bg) !important;
     color: var(--aumo-text) !important;
 }
@@ -34,6 +35,7 @@ body {
 
 #app {
     min-height: 100vh;
+
     background-color: var(--aumo-bg) !important;
     color: var(--aumo-text) !important;
 }
@@ -74,11 +76,13 @@ body {
    AUMO FINANCE CUSTOM FONT & COLOR THEME
    ========================================== */
 
+
 /* ---------- Glass Card Text ---------- */
 
 .card.glass-card {
     color: var(--aumo-text) !important;
 }
+
 
 /* ---------- Glass Card Headings ---------- */
 
@@ -88,12 +92,14 @@ body {
     color: var(--aumo-text) !important;
 }
 
+
 /* ---------- Glass Card Secondary Text ---------- */
 
 .card.glass-card .text-secondary,
 .card.glass-card .fs-8 {
     color: var(--aumo-text-muted) !important;
 }
+
 
 /* ---------- Glass Card Tables ---------- */
 
@@ -104,6 +110,7 @@ body {
 .card.glass-card table tbody td {
     color: var(--aumo-text) !important;
 }
+
 
 /* ---------- Health Circle Score ---------- */
 
@@ -119,23 +126,27 @@ body {
 .pulse-dot {
     width: 8px;
     height: 8px;
+
     background-color: var(--aumo-success);
+
     border-radius: 50%;
+
     display: inline-block;
-    box-shadow: 0 0 8px var(--aumo-success);
+
+    box-shadow:
+        0 0 8px var(--aumo-success);
 }
 
 
 /* ==========================================
-   SIDEBAR & FLYOUT NAVIGATION (LAYOUT FIX)
+   SIDEBAR & FLYOUT NAVIGATION
    ========================================== */
 
 .sidebar-wrapper {
     position: relative;
-    /* Diubah dari 100vh ke 100% agar fleksibel mengikuti tinggi container */
-    height: 100%;
-    min-height: 100%;
-    flex-shrink: 0 !important;
+
+    height: 100vh;
+
     z-index: 1040;
 }
 
@@ -147,33 +158,43 @@ body {
 .sidebar-icons {
     width: 60px;
     min-width: 60px;
+
     height: 100%;
-    flex-shrink: 0 !important;
+
     background-color: var(--aumo-bg) !important;
+
     border-right: 1px solid var(--aumo-border);
+
     z-index: 1045;
 }
+
 
 /* ---------- Sidebar Icon Button ---------- */
 
 .sidebar-icons .icon-btn {
     width: 44px;
     height: 44px;
+
     display: flex;
+
     align-items: center;
     justify-content: center;
+
     border-radius: 10px;
+
     transition:
         background-color 0.2s ease-in-out,
         color 0.2s ease-in-out,
         transform 0.2s ease-in-out;
 }
 
+
 /* ---------- Sidebar Icon Hover / Active ---------- */
 
 .sidebar-icons .icon-btn:hover,
 .sidebar-icons .icon-btn.active {
     background-color: rgba(255, 255, 255, 0.10);
+
     color: var(--aumo-accent) !important;
 }
 
@@ -184,18 +205,27 @@ body {
 
 .sidebar-flyout {
     position: absolute;
+
     top: 0;
     left: 60px;
-    /* Mengikuti tinggi container agar tidak memutus layout */
-    height: 100%;
+
+    height: 100vh;
     width: 280px;
+
     z-index: 1040;
+
     background-color: var(--aumo-surface) !important;
+
     border-left: 1px solid var(--aumo-border);
     border-right: 1px solid var(--aumo-border);
+
     color: var(--aumo-text) !important;
-    box-shadow: 4px 0 15px rgba(0, 0, 0, 0.40);
+
+    box-shadow:
+        4px 0 15px rgba(0, 0, 0, 0.40);
+
     overflow-y: auto;
+
     transition:
         opacity 0.2s ease-in-out,
         transform 0.2s ease-in-out;
@@ -208,30 +238,24 @@ body {
 
 .sidebar-flyout .list-group-item {
     background-color: transparent !important;
+
     border-color: var(--aumo-border) !important;
+
     color: var(--aumo-text) !important;
+
     transition:
         background-color 0.15s ease-in-out,
         color 0.15s ease-in-out;
 }
+
 
 /* ---------- Flyout Hover / Active ---------- */
 
 .sidebar-flyout .list-group-item:hover,
 .sidebar-flyout .list-group-item.active {
     background-color: rgba(255, 255, 255, 0.10) !important;
+
     color: var(--aumo-accent) !important;
-}
-
-
-/* ==========================================
-   MAIN CONTENT FLEXBOX ISOLATION FIX
-   ========================================== */
-
-#mainContent {
-    min-width: 0 !important;
-    flex: 1 1 auto !important;
-    width: auto !important;
 }
 
 
@@ -284,11 +308,13 @@ body {
 [data-bs-theme="light"] .sidebar-icons .icon-btn:hover,
 [data-bs-theme="light"] .sidebar-icons .icon-btn.active {
     background-color: rgba(15, 23, 42, 0.08);
+
     color: var(--aumo-primary) !important;
 }
 
 [data-bs-theme="light"] .sidebar-flyout .list-group-item:hover,
 [data-bs-theme="light"] .sidebar-flyout .list-group-item.active {
     background-color: rgba(15, 23, 42, 0.08) !important;
+
     color: var(--aumo-primary) !important;
 }
