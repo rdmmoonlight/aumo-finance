@@ -1,7 +1,13 @@
+import prisma from '~/server/utils/prisma'
+
 export default defineEventHandler(async (event) => {
+  const userId = event.context.user?.id
+  if (!userId) {
+    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
+  }
+
   const body = await readBody(event)
 
-  // Validasi Input
   if (!body?.accountName || !String(body.accountName).trim()) {
     throw createError({ statusCode: 400, statusMessage: 'Account name is required.' })
   }
@@ -10,31 +16,41 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'Account category type is required.' })
   }
 
-  // Validasi Rentang Kode Akun (Sesuai helper C#)
-  // if (!AccountClassification.validateReferenceNumber(body.type, body.referenceNumber)) {
-  //   throw createError({
-  //     statusCode: 400,
-  //     statusMessage: `Invalid reference number ${body.referenceNumber} for category ${body.type}.`
-  //   })
-  // }
+  const refNumber = Number(body.referenceNumber)
 
-  // Cek duplikasi nomor referensi
-  // const isCodeTaken = await db.chartOfAccounts.exists({ referenceNumber: body.referenceNumber, userId })
-  // if (isCodeTaken) {
-  //   throw createError({
-  //     statusCode: 400,
-  //     statusMessage: `Account code ${body.referenceNumber} is already in use.`
-  //   })
-  // }
+  // Cek Duplikasi Kode Akun
+  const isCodeTaken = await prisma.chartOfAccounts.findUnique({
+    where: {
+      UserId_ReferenceNumber: {
+        UserId: userId,
+        ReferenceNumber: refNumber
+      }
+    }
+  })
+
+  if (isCodeTaken) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: `Account code ${refNumber} is already in use.`
+    })
+  }
 
   try {
-    // Simpan ke DB
-    // const newAccount = await db.chartOfAccounts.create({ ... })
+    const newAccount = await prisma.chartOfAccounts.create({
+      data: {
+        UserId: userId,
+        ReferenceNumber: refNumber,
+        AccountName: String(body.accountName).trim(),
+        Type: String(body.type),
+        Role: body.role ? String(body.role).trim() : 'Default',
+        IsActive: true
+      }
+    })
 
     return {
       success: true,
-      message: `Account '${body.accountName.trim()}' successfully created.`,
-      accountId: Date.now()
+      message: `Account '${newAccount.AccountName}' successfully created.`,
+      accountId: newAccount.Id
     }
   } catch (error: any) {
     throw createError({
