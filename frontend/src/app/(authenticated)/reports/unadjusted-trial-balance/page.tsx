@@ -22,7 +22,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
 import { List, Calendar, EyeOff, AlertTriangle, Loader2, CheckCircle2 } from "lucide-react";
 
 export interface TrialRow {
