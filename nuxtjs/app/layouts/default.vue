@@ -49,12 +49,24 @@ onMounted(async () => {
 
 <template>
   <UDashboardGroup unit="rem">
-    <!-- Sidebar Navigasi HANYA muncul di layout ini -->
+    <!-- Sidebar Navigasi -->
     <AppSidebar ref="sidebarRef" v-model:open="open" />
 
     <UDashboardSearch :groups="groups" />
 
-    <slot />
+    <!-- Panel Utama & Topbar Global -->
+    <UDashboardPanel grow>
+      <UDashboardNavbar>
+        <template #leading>
+          <UDashboardSidebarCollapse />
+        </template>
+      </UDashboardNavbar>
+
+      <!-- Konten Halaman -->
+      <UDashboardPanelContent>
+        <slot />
+      </UDashboardPanelContent>
+    </UDashboardPanel>
 
     <NotificationsSlideover />
   </UDashboardGroup>
