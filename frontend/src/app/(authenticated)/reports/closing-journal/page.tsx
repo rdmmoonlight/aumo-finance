@@ -2,6 +2,12 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -15,17 +21,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  IconLock,
-  IconArrowRight,
-  IconEyeOff,
-  IconInfoCircle,
-  IconAlertTriangle,
-  IconLoader2,
-} from "@tabler/icons-react";
 
 // Import Auto-Generated Hook dari RTK Query
 import { useGetApiV1ReportsJournalsClosingQuery } from "@/lib/generatedApi";
+
+import { Lock, ArrowRight, EyeOff, Info, AlertTriangle, Loader2 } from "lucide-react";
 
 export interface ClosingJournalLine {
   referenceNumber?: number;
@@ -53,6 +53,156 @@ const formatNumber = (amount: number) => {
   return amount < 0 ? `(${formatted})` : formatted;
 };
 
+const columnHelper = createColumnHelper<ClosingJournalLine>();
+
+function ClosingGroupTable({
+  group,
+  totals,
+}: {
+  group: ClosingJournalEntryGroup;
+  totals: { totalDebit: number; totalCredit: number };
+}) {
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("referenceNumber", {
+        header: () => <div className="text-center text-caption">Ref.</div>,
+        cell: (info) => {
+          const val = info.getValue();
+          return (
+            <div className="text-center pl-6">
+              <Badge
+                variant="outline"
+                className="font-mono text-amber-500 text-label-small"
+              >
+                {val && val > 0 ? val : "-"}
+              </Badge>
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("accountName", {
+        header: "Account",
+        cell: ({ row }) => {
+          const isCredit = row.original.credit > 0;
+          return (
+            <div
+              className={`text-caption ${
+                isCredit ? "pl-6 text-muted-foreground" : "font-medium"
+              }`}
+            >
+              {row.original.accountName}
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("debit", {
+        header: () => <div className="text-right text-caption">Debit</div>,
+        cell: (info) => {
+          const val = info.getValue();
+          return (
+            <div className="text-right font-mono text-caption text-emerald-500">
+              {val > 0 ? formatNumber(val) : "-"}
+            </div>
+          );
+        },
+      }),
+      columnHelper.accessor("credit", {
+        header: () => <div className="text-right pr-6 text-caption">Credit</div>,
+        cell: (info) => {
+          const val = info.getValue();
+          return (
+            <div className="text-right pr-6 font-mono text-caption text-red-500">
+              {val > 0 ? formatNumber(val) : "-"}
+            </div>
+          );
+        },
+      }),
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: group.lines || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <Card className="w-full overflow-hidden">
+      <CardHeader className="py-3 bg-muted/30 border-b">
+        <CardTitle className="text-ui">{group.description}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto w-full">
+          <Table className="min-w-[600px]">
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const isRef = header.id === "referenceNumber";
+                    const isAcc = header.id === "accountName";
+                    const isDebit = header.id === "debit";
+                    const isCredit = header.id === "credit";
+
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className={`text-caption
+                          ${isRef ? "text-center pl-6 w-[15%]" : ""}
+                          ${isAcc ? "w-[45%]" : ""}
+                          ${isDebit ? "text-right w-[20%]" : ""}
+                          ${isCredit ? "text-right pr-6 w-[20%]" : ""}
+                        `}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows.map((row) => (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+            <TableFooter>
+              <TableRow className="font-bold text-caption">
+                <TableCell
+                  colSpan={2}
+                  className="text-right pl-6"
+                >
+                  Total
+                </TableCell>
+                <TableCell className="text-right font-mono text-emerald-500">
+                  {formatNumber(totals?.totalDebit || 0)}
+                </TableCell>
+                <TableCell className="text-right pr-6 font-mono text-red-500">
+                  {formatNumber(totals?.totalCredit || 0)}
+                </TableCell>
+              </TableRow>
+            </TableFooter>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function ClosingJournalReportPage() {
   // 1. Konsumsi RTK Query Hook
   const {
@@ -62,7 +212,7 @@ export default function ClosingJournalReportPage() {
     error,
   } = useGetApiV1ReportsJournalsClosingQuery();
 
-  // 2. Extrak & Normalisasi Response Data
+  // 2. Ekstrak & Normalisasi Response Data
   const { noPeriodSelected, vm } = useMemo(() => {
     const data = rawResponse as any;
 
@@ -125,8 +275,8 @@ export default function ClosingJournalReportPage() {
 
   if (isLoading) {
     return (
-      <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
-        <IconLoader2 className="animate-spin" size={16} /> Loading closing
+      <div className="py-16 text-center text-caption text-muted-foreground flex items-center justify-center gap-2">
+        <Loader2 className="animate-spin" size={16} /> Loading closing
         entries...
       </div>
     );
@@ -135,23 +285,23 @@ export default function ClosingJournalReportPage() {
   return (
     <div className="space-y-6 w-full">
       {errorMessage && (
-        <Alert variant="destructive">
-          <IconAlertTriangle size={16} />
-          <AlertDescription>{errorMessage}</AlertDescription>
+        <Alert variant="destructive" className="text-ui">
+          <AlertTriangle size={16} />
+          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
         </Alert>
       )}
 
       {noPeriodSelected ? (
         <Card className="py-16 text-center border-dashed">
           <CardContent className="space-y-3">
-            <IconEyeOff size={36} className="mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">No Period Selected</h3>
-            <p className="text-sm text-muted-foreground">
+            <EyeOff size={36} className="mx-auto text-muted-foreground" />
+            <h3 className="font-semibold text-ui">No Period Selected</h3>
+            <p className="text-ui text-muted-foreground">
               This report follows whichever period you're viewing.
             </p>
             <Button asChild size="sm">
-              <Link href="/periods" className="gap-1.5">
-                <IconEyeOff size={14} /> Go to Periods
+              <Link href="/periods" className="gap-1.5 text-caption">
+                <EyeOff size={14} /> Go to Periods
               </Link>
             </Button>
           </CardContent>
@@ -160,117 +310,44 @@ export default function ClosingJournalReportPage() {
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <IconLock className="text-amber-500" size={22} /> Closing
+              <h1 className="text-h3 font-bold flex items-center gap-2">
+                <Lock className="text-amber-500" size={22} /> Closing
                 Journal
               </h1>
-              <p className="text-sm text-muted-foreground mt-1 max-w-3xl">
+              <p className="text-ui text-muted-foreground mt-1 max-w-3xl">
                 Closing entries are calculated automatically based on current
                 nominal account balances — not yet posted to General Journal (In
                 IDR).
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
               <Link href="/reports/post-closing-trial-balance">
-                <IconArrowRight size={14} /> Post-Closing Trial Balance
+                <ArrowRight size={14} /> Post-Closing Trial Balance
               </Link>
             </Button>
           </div>
 
           {vm.groups.length === 0 && (
-            <Alert>
-              <IconInfoCircle size={16} />
-              <AlertDescription>
+            <Alert className="text-ui">
+              <Info size={16} />
+              <AlertDescription className="text-caption">
                 There are no nominal accounts with balances to close.
               </AlertDescription>
             </Alert>
           )}
 
-          {vm.groups.map((group, gIdx) => {
-            const totals = groupTotals[gIdx];
-            return (
-              <Card key={gIdx} className="w-full">
-                <CardHeader className="py-3 bg-muted/30 border-b">
-                  <CardTitle className="text-sm">{group.description}</CardTitle>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto w-full">
-                    <Table className="min-w-[600px]">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="text-center pl-6 w-[15%]">
-                            Ref.
-                          </TableHead>
-                          <TableHead className="w-[45%]">Account</TableHead>
-                          <TableHead className="text-right w-[20%]">
-                            Debit
-                          </TableHead>
-                          <TableHead className="text-right pr-6 w-[20%]">
-                            Credit
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {group.lines.map((line, lIdx) => (
-                          <TableRow key={lIdx}>
-                            <TableCell className="text-center pl-6">
-                              <Badge
-                                variant="outline"
-                                className="font-mono text-amber-500"
-                              >
-                                {line.referenceNumber &&
-                                line.referenceNumber > 0
-                                  ? line.referenceNumber
-                                  : "-"}
-                              </Badge>
-                            </TableCell>
-                            <TableCell
-                              className={`text-xs ${
-                                line.credit > 0
-                                  ? "pl-6 text-muted-foreground"
-                                  : "font-medium"
-                              }`}
-                            >
-                              {line.accountName}
-                            </TableCell>
-                            <TableCell className="text-right font-mono text-xs text-emerald-500">
-                              {line.debit > 0 ? formatNumber(line.debit) : "-"}
-                            </TableCell>
-                            <TableCell className="text-right pr-6 font-mono text-xs text-red-500">
-                              {line.credit > 0
-                                ? formatNumber(line.credit)
-                                : "-"}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                      <TableFooter>
-                        <TableRow className="font-bold">
-                          <TableCell
-                            colSpan={2}
-                            className="text-right pl-6 text-xs"
-                          >
-                            Total
-                          </TableCell>
-                          <TableCell className="text-right font-mono text-xs text-emerald-500">
-                            {formatNumber(totals?.totalDebit || 0)}
-                          </TableCell>
-                          <TableCell className="text-right pr-6 font-mono text-xs text-red-500">
-                            {formatNumber(totals?.totalCredit || 0)}
-                          </TableCell>
-                        </TableRow>
-                      </TableFooter>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {vm.groups.map((group, gIdx) => (
+            <ClosingGroupTable
+              key={gIdx}
+              group={group}
+              totals={groupTotals[gIdx]}
+            />
+          ))}
 
           {vm.groups.length > 0 && (
-            <Alert className="bg-sky-500/10 border-sky-500/20 text-sky-700 dark:text-sky-300">
-              <IconInfoCircle size={16} />
-              <AlertDescription className="text-xs">
+            <Alert className="bg-sky-500/10 border-sky-500/20 text-sky-700 dark:text-sky-300 text-ui">
+              <Info size={16} />
+              <AlertDescription className="text-caption">
                 After closing, all nominal accounts will have zero balance and
                 Net Income of <strong>{formatNumber(vm.netIncome)}</strong> will
                 transfer to <strong>{vm.retainedEarningsAccountName}</strong>.
