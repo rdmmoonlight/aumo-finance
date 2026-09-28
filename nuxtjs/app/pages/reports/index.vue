@@ -4,32 +4,40 @@ definePageMeta({
   layout: 'default'
 })
 
-// Quick stats / Summary ringkasan keuangan
-const summaryStats = ref([
+// Fetch Real Data dari API Summary
+const { data: summary, pending: isLoadingSummary, refresh } = await useFetch('/api/v1/reports/summary')
+
+// Format angka ribuan (e.g. 1.284)
+const formatInt = (num?: number) => {
+  return new Intl.NumberFormat('id-ID').format(num || 0)
+}
+
+// Compute Quick Stats secara DYNAMIC dari API Response
+const summaryStats = computed(() => [
   {
     title: 'Total Transaksi Jurnal',
-    value: '1,284',
-    change: '+12%',
+    value: formatInt(summary.value?.totalJournal),
+    subtext: 'Transaksi Terdaftar',
     icon: 'i-lucide-notebook-tabs',
     color: 'text-blue-500'
   },
   {
     title: 'Total Akun Aktif',
-    value: '48',
-    change: 'COA Aktif',
+    value: formatInt(summary.value?.activeCoa),
+    subtext: 'Akun COA Aktif',
     icon: 'i-lucide-book-open',
     color: 'text-emerald-500'
   },
   {
     title: 'Periode Berjalan',
-    value: 'Q3 2026',
-    change: 'Status: Terbuka',
+    value: summary.value?.activePeriodName || '-',
+    subtext: summary.value?.isPeriodOpen ? 'Status: Terbuka' : 'Status: Ditutup / Belum Set',
     icon: 'i-lucide-calendar-range',
     color: 'text-amber-500'
   }
 ])
 
-// Daftar Kategori & Menu Laporan Keuangan
+// Navigation items untuk laporan
 const reportCategories = ref([
   {
     category: 'Laporan Akuntansi Utama',
@@ -88,11 +96,15 @@ const reportCategories = ref([
       <UDashboardNavbar title="Financial Reports" badge="Pusat Laporan">
         <template #right>
           <UButton
-            icon="i-lucide-calendar"
+            icon="i-lucide-refresh-cw"
             color="neutral"
             variant="outline"
-            label="Filter Periode"
-          />
+            size="xs"
+            :loading="isLoadingSummary"
+            @click="() => refresh()"
+          >
+            Refresh Data
+          </UButton>
         </template>
       </UDashboardNavbar>
 
@@ -110,14 +122,18 @@ const reportCategories = ref([
           </div>
         </div>
 
-        <!-- Quick Summary Cards -->
+        <!-- Quick Summary Cards (Real Data) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <UCard v-for="(stat, idx) in summaryStats" :key="idx" class="relative overflow-hidden">
             <div class="flex items-center justify-between">
-              <div>
+              <div class="space-y-1">
                 <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">{{ stat.title }}</p>
-                <p class="text-2xl font-bold mt-1">{{ stat.value }}</p>
-                <span class="text-xs text-emerald-600 font-medium mt-1 inline-block">{{ stat.change }}</span>
+                
+                <!-- Skeleton Loader saat pending -->
+                <USkeleton v-if="isLoadingSummary" class="h-8 w-24 my-1" />
+                <p v-else class="text-2xl font-bold tracking-tight">{{ stat.value }}</p>
+                
+                <span class="text-xs text-neutral-500 font-medium block">{{ stat.subtext }}</span>
               </div>
               <div class="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
                 <UIcon :name="stat.icon" class="w-6 h-6" :class="stat.color" />
