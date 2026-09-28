@@ -80,7 +80,7 @@
       3. BASE RESET & GLOBAL
    ========================================= */
 @layer base {
-    * {
+  * {
     @apply border-border outline-ring/50;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
@@ -119,33 +119,98 @@
   }
 
   /* 4b. True white islands - yang emang putih di dark mode juga */
-  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) {
+  :is(
+    .bg-white,
+    .bg-zinc-50,
+    .bg-zinc-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-50
+  ) {
     --selection-bg: #ffffff;
     --selection-fg: #000000;
     color: #000000; /* paksa tulisan hitam kalo bg nya putih */
   }
 
-  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50)::selection,
-  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) *::selection {
+  :is(
+    .bg-white,
+    .bg-zinc-50,
+    .bg-zinc-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-50
+  )::selection,
+  :is(
+      .bg-white,
+      .bg-zinc-50,
+      .bg-zinc-100,
+      .bg-gray-50,
+      .bg-gray-100,
+      .bg-slate-50
+    )
+    *::selection {
     background-color: #ffffff;
     color: #000000;
   }
 
-  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50)::-moz-selection,
-  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) *::-moz-selection {
+  :is(
+    .bg-white,
+    .bg-zinc-50,
+    .bg-zinc-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-50
+  )::-moz-selection,
+  :is(
+      .bg-white,
+      .bg-zinc-50,
+      .bg-zinc-100,
+      .bg-gray-50,
+      .bg-gray-100,
+      .bg-slate-50
+    )
+    *::-moz-selection {
     background-color: #ffffff;
     color: #000000;
   }
 
   /* 4c. Light mode islands - baru jadi putih pas .light aktif */
   .light,
-  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select) {
+  .light
+    :is(
+      .bg-card,
+      .bg-popover,
+      .bg-background,
+      .bg-muted,
+      input,
+      textarea,
+      select
+    ) {
     --selection-bg: #ffffff;
     --selection-fg: #000000;
   }
 
-  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select)::selection,
-  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select) *::selection {
+  .light
+    :is(
+      .bg-card,
+      .bg-popover,
+      .bg-background,
+      .bg-muted,
+      input,
+      textarea,
+      select
+    )::selection,
+  .light
+    :is(
+      .bg-card,
+      .bg-popover,
+      .bg-background,
+      .bg-muted,
+      input,
+      textarea,
+      select
+    )
+    *::selection {
     background-color: #ffffff;
     color: #000000;
   }
