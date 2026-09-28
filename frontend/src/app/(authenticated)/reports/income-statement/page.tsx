@@ -2,25 +2,40 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import {
+  useReactTable,
+  getCoreRowModel,
+  flexRender,
+  createColumnHelper,
+} from "@tanstack/react-table";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+  TableFooter,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  IconTrendingUp,
-  IconCalendar,
-  IconEyeOff,
-  IconArrowRight,
-  IconAlertTriangle,
-  IconLoader2,
-} from "@tabler/icons-react";
-// Import hook RTK Query dari generatedApi
 import { useGetApiV1ReportsIncomeStatementQuery } from "@/lib/generatedApi";
+import {
+  TrendingUp,
+  Calendar,
+  EyeOff,
+  ArrowRight,
+  AlertTriangle,
+  Loader2,
+} from "lucide-react";
 
 export interface IncomeStatementLine {
   referenceNumber: number;
   accountName: string;
   amount: number;
+  isExpense?: boolean;
 }
 
 const formatNumber = (n: number) => {
@@ -31,12 +46,130 @@ const formatNumber = (n: number) => {
   return n < 0 ? `(${f})` : f;
 };
 
+const columnHelper = createColumnHelper<IncomeStatementLine>();
+
+function IncomeStatementSectionTable({
+  title,
+  lines,
+  totalAmount,
+  totalLabel,
+  emptyMessage,
+}: {
+  title: string;
+  lines: IncomeStatementLine[];
+  totalAmount: number;
+  totalLabel: string;
+  emptyMessage: string;
+}) {
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("referenceNumber", {
+        header: () => <div className="text-left pl-4 text-caption">Ref #</div>,
+        cell: (info) => (
+          <div className="pl-4">
+            <Badge variant="outline" className="font-mono text-amber-500 text-label-small">
+              {info.getValue() || "-"}
+            </Badge>
+          </div>
+        ),
+      }),
+      columnHelper.accessor("accountName", {
+        header: "Account",
+        cell: (info) => (
+          <span className="text-ui font-medium">{info.getValue()}</span>
+        ),
+      }),
+      columnHelper.accessor("amount", {
+        header: () => <div className="text-right pr-4 text-caption">Amount</div>,
+        cell: ({ row }) => {
+          const val = row.original.amount;
+          const formatted = formatNumber(val);
+          return (
+            <div className="text-right pr-4 font-mono text-caption">
+              {row.original.isExpense ? `(${formatted})` : formatted}
+            </div>
+          );
+        },
+      }),
+    ],
+    [],
+  );
+
+  const table = useReactTable({
+    data: lines,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <div className="p-4 space-y-2">
+      <div className="font-bold tracking-widest text-amber-500 uppercase text-caption">
+        {title}
+      </div>
+
+      {lines.length === 0 ? (
+        <div className="text-caption text-muted-foreground italic pl-4 py-2">
+          {emptyMessage}
+        </div>
+      ) : (
+        <Table>
+          <TableHeader className="sr-only">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id}>
+                    {flexRender(
+                      header.column.columnDef.header,
+                      header.getContext(),
+                    )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
+          </TableHeader>
+          <TableBody>
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} className="border-none hover:bg-transparent">
+                {row.getVisibleCells().map((cell) => {
+                  const isRef = cell.column.id === "referenceNumber";
+                  const isAmount = cell.column.id === "amount";
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className={`py-1 ${isRef ? "w-[15%]" : ""} ${
+                        isAmount ? "w-[25%]" : ""
+                      }`}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+          <TableFooter className="bg-transparent border-t">
+            <TableRow className="font-semibold text-ui hover:bg-transparent">
+              <TableCell colSpan={2} className="pl-4 py-2">
+                {totalLabel}
+              </TableCell>
+              <TableCell className="text-right pr-4 py-2 font-mono text-ui">
+                {formatNumber(totalAmount)}
+              </TableCell>
+            </TableRow>
+          </TableFooter>
+        </Table>
+      )}
+    </div>
+  );
+}
+
 export default function IncomeStatementPage() {
-  // Panggil Hook RTK Query
   const { data, isLoading, isError, error } =
     useGetApiV1ReportsIncomeStatementQuery();
 
-  // Parsing data dari response API backend .NET
   const rawData = data as any;
   const noPeriod = rawData?.hasPeriodSelected === false;
 
@@ -46,15 +179,15 @@ export default function IncomeStatementPage() {
       revenues: (rawData?.revenueAccounts ||
         rawData?.revenues ||
         []) as IncomeStatementLine[],
-      operatingExpenses: (rawData?.expenseAccounts ||
+      operatingExpenses: ((rawData?.expenseAccounts ||
         rawData?.operatingExpenses ||
-        []) as IncomeStatementLine[],
+        []) as IncomeStatementLine[]).map((e) => ({ ...e, isExpense: true })),
       otherIncome: (rawData?.otherIncomeAccounts ||
         rawData?.otherIncome ||
         []) as IncomeStatementLine[],
-      otherExpenses: (rawData?.otherExpenseAccounts ||
+      otherExpenses: ((rawData?.otherExpenseAccounts ||
         rawData?.otherExpenses ||
-        []) as IncomeStatementLine[],
+        []) as IncomeStatementLine[]).map((e) => ({ ...e, isExpense: true })),
     };
   }, [rawData]);
 
@@ -63,7 +196,8 @@ export default function IncomeStatementPage() {
     [vm.revenues],
   );
   const totalOpex = useMemo(
-    () => vm.operatingExpenses.reduce((s, i) => s + (Number(i.amount) || 0), 0),
+    () =>
+      vm.operatingExpenses.reduce((s, i) => s + (Number(i.amount) || 0), 0),
     [vm.operatingExpenses],
   );
   const operatingIncome = totalRevenue - totalOpex;
@@ -77,17 +211,15 @@ export default function IncomeStatementPage() {
   );
   const netIncome = operatingIncome + totalOtherIncome - totalOtherExpenses;
 
-  // Render State Loading
   if (isLoading) {
     return (
-      <div className="py-16 text-center text-muted-foreground flex items-center justify-center gap-2">
-        <IconLoader2 className="animate-spin" size={16} /> Loading Income
+      <div className="py-16 text-center text-caption text-muted-foreground flex items-center justify-center gap-2">
+        <Loader2 className="animate-spin" size={16} /> Loading Income
         Statement...
       </div>
     );
   }
 
-  // Format error message dari RTK Query
   const errorMessage = isError
     ? (error as any)?.data?.message ||
       (error as any)?.message ||
@@ -97,23 +229,23 @@ export default function IncomeStatementPage() {
   return (
     <div className="space-y-6">
       {errorMessage && (
-        <Alert variant="destructive">
-          <IconAlertTriangle size={16} />
-          <AlertDescription>{errorMessage}</AlertDescription>
+        <Alert variant="destructive" className="text-ui">
+          <AlertTriangle size={16} />
+          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
         </Alert>
       )}
 
       {noPeriod ? (
         <Card className="py-16 text-center border-dashed">
           <CardContent className="space-y-3">
-            <IconEyeOff size={36} className="mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">No Period Selected</h3>
-            <p className="text-sm text-muted-foreground">
+            <EyeOff size={36} className="mx-auto text-muted-foreground" />
+            <h3 className="font-semibold text-ui">No Period Selected</h3>
+            <p className="text-ui text-muted-foreground">
               This report follows whichever period you're viewing.
             </p>
             <Button asChild size="sm">
-              <Link href="/periods" className="gap-1.5">
-                <IconCalendar size={14} /> Go to Periods
+              <Link href="/periods" className="gap-1.5 text-caption">
+                <Calendar size={14} /> Go to Periods
               </Link>
             </Button>
           </CardContent>
@@ -122,11 +254,11 @@ export default function IncomeStatementPage() {
         <>
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <IconTrendingUp className="text-emerald-500" size={22} /> Income
+              <h1 className="text-h3 font-bold flex items-center gap-2">
+                <TrendingUp className="text-emerald-500" size={22} /> Income
                 Statement
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-ui text-muted-foreground mt-1">
                 Profit or Loss (IAS 1) for{" "}
                 {vm.asOfDate
                   ? new Date(vm.asOfDate).toLocaleDateString("id-ID", {
@@ -138,9 +270,9 @@ export default function IncomeStatementPage() {
                 • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5">
+            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
               <Link href="/reports/retained-earnings">
-                <IconArrowRight size={14} /> Retained Earnings
+                <ArrowRight size={14} /> Retained Earnings
               </Link>
             </Button>
           </div>
@@ -148,132 +280,54 @@ export default function IncomeStatementPage() {
           <Card className="overflow-hidden">
             <CardContent className="p-0">
               <div className="divide-y">
-                {/* Revenue */}
-                <div className="p-4 space-y-2">
-                  <div className="font-bold tracking-widest text-amber-500 uppercase text-xs">
-                    Revenue
-                  </div>
-                  {vm.revenues.length === 0 ? (
-                    <div className="text-xs text-muted-foreground italic pl-4">
-                      No revenue accounts recorded.
-                    </div>
-                  ) : (
-                    vm.revenues.map((l, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between text-sm pl-4"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono">
-                            {l.referenceNumber}
-                          </Badge>
-                          {l.accountName}
-                        </span>
-                        <span className="font-mono text-xs">
-                          {formatNumber(l.amount)}
-                        </span>
-                      </div>
-                    ))
-                  )}
-                  <div className="flex items-center justify-between font-semibold text-sm border-t pt-2 mt-2">
-                    <span className="pl-4">Total Revenue</span>
-                    <span className="font-mono">
-                      {formatNumber(totalRevenue)}
-                    </span>
-                  </div>
-                </div>
+                {/* Revenue Section Table */}
+                <IncomeStatementSectionTable
+                  title="Revenue"
+                  lines={vm.revenues}
+                  totalAmount={totalRevenue}
+                  totalLabel="Total Revenue"
+                  emptyMessage="No revenue accounts recorded."
+                />
 
-                {/* Operating Expenses */}
-                <div className="p-4 space-y-2">
-                  <div className="font-bold tracking-widest text-amber-500 uppercase text-xs">
-                    Operating Expenses
-                  </div>
-                  {vm.operatingExpenses.length === 0 ? (
-                    <div className="text-xs text-muted-foreground italic pl-4">
-                      No operating expenses.
-                    </div>
-                  ) : (
-                    vm.operatingExpenses.map((l, i) => (
-                      <div
-                        key={i}
-                        className="flex items-center justify-between text-sm pl-4"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono">
-                            {l.referenceNumber}
-                          </Badge>
-                          {l.accountName}
-                        </span>
-                        <span className="font-mono text-xs">
-                          ({formatNumber(l.amount)})
-                        </span>
-                      </div>
-                    ))
-                  )}
-                  <div className="flex items-center justify-between font-semibold text-sm border-t pt-2 mt-2">
-                    <span className="pl-4">Total Operating Expenses</span>
-                    <span className="font-mono">
-                      ({formatNumber(totalOpex)})
-                    </span>
-                  </div>
-                </div>
+                {/* Operating Expenses Section Table */}
+                <IncomeStatementSectionTable
+                  title="Operating Expenses"
+                  lines={vm.operatingExpenses}
+                  totalAmount={totalOpex}
+                  totalLabel="Total Operating Expenses"
+                  emptyMessage="No operating expenses."
+                />
 
-                {/* Operating Income */}
-                <div className="flex items-center justify-between p-4 bg-muted/30 font-bold">
+                {/* Operating Income Summary */}
+                <div className="flex items-center justify-between p-4 bg-muted/30 font-bold text-ui">
                   <span>Operating Income</span>
                   <span
-                    className={`font-mono text-base ${operatingIncome >= 0 ? "text-emerald-500" : "text-red-500"}`}
+                    className={`font-mono text-body ${
+                      operatingIncome >= 0 ? "text-emerald-500" : "text-red-500"
+                    }`}
                   >
                     {formatNumber(operatingIncome)}
                   </span>
                 </div>
 
-                {/* Other Income/Expenses */}
+                {/* Other Income / Expenses Section Table */}
                 {(vm.otherIncome.length > 0 || vm.otherExpenses.length > 0) && (
-                  <div className="p-4 space-y-2">
-                    <div className="font-bold tracking-widest text-amber-500 uppercase text-xs">
-                      Other Income & Expenses
-                    </div>
-                    {vm.otherIncome.map((l, i) => (
-                      <div
-                        key={`oi-${i}`}
-                        className="flex items-center justify-between text-sm pl-4"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono">
-                            {l.referenceNumber}
-                          </Badge>
-                          {l.accountName}
-                        </span>
-                        <span className="font-mono text-xs">
-                          {formatNumber(l.amount)}
-                        </span>
-                      </div>
-                    ))}
-                    {vm.otherExpenses.map((l, i) => (
-                      <div
-                        key={`oe-${i}`}
-                        className="flex items-center justify-between text-sm pl-4"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono">
-                            {l.referenceNumber}
-                          </Badge>
-                          {l.accountName}
-                        </span>
-                        <span className="font-mono text-xs">
-                          ({formatNumber(l.amount)})
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  <IncomeStatementSectionTable
+                    title="Other Income & Expenses"
+                    lines={[...vm.otherIncome, ...vm.otherExpenses]}
+                    totalAmount={totalOtherIncome - totalOtherExpenses}
+                    totalLabel="Total Other Income / (Expenses)"
+                    emptyMessage="No other income or expenses recorded."
+                  />
                 )}
 
-                {/* Net Income */}
+                {/* Net Income Final Summary */}
                 <div className="flex items-center justify-between p-4 bg-primary/5 border-t-2 border-primary/20">
-                  <span className="font-bold text-base">Net Income</span>
+                  <span className="font-bold text-body">Net Income</span>
                   <span
-                    className={`font-mono font-bold text-lg ${netIncome >= 0 ? "text-emerald-500" : "text-red-500"}`}
+                    className={`font-mono font-bold text-h4 ${
+                      netIncome >= 0 ? "text-emerald-500" : "text-red-500"
+                    }`}
                   >
                     {formatNumber(netIncome)}
                   </span>
