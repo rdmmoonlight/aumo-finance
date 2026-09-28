@@ -1,3 +1,4 @@
+<!-- layouts/default.vue -->
 <script setup lang="ts">
 const route = useRoute()
 const toast = useToast()
@@ -20,49 +21,18 @@ const groups = computed(() => [{
     target: '_blank'
   }]
 }])
-
-onMounted(async () => {
-  const cookie = useCookie('cookie-consent')
-  if (cookie.value === 'accepted') {
-    return
-  }
-
-  toast.add({
-    title: 'We use first-party cookies to enhance your experience on our website.',
-    duration: 0,
-    close: false,
-    actions: [{
-      label: 'Accept',
-      color: 'neutral',
-      variant: 'outline',
-      onClick: () => {
-        cookie.value = 'accepted'
-      }
-    }, {
-      label: 'Opt out',
-      color: 'neutral',
-      variant: 'ghost'
-    }]
-  })
-})
 </script>
 
 <template>
   <UDashboardGroup unit="rem">
-    <!-- Sidebar Navigasi -->
     <AppSidebar ref="sidebarRef" v-model:open="open" />
 
     <UDashboardSearch :groups="groups" />
 
-    <!-- Panel Utama & Topbar Global -->
     <UDashboardPanel grow>
-      <UDashboardNavbar>
-        <template #leading>
-          <UDashboardSidebarCollapse />
-        </template>
-      </UDashboardNavbar>
+      <!-- PANGGIL FILE TOPBAR DI SINI -->
+      <AppTopbar />
 
-      <!-- Konten Halaman -->
       <UDashboardPanelContent>
         <slot />
       </UDashboardPanelContent>
