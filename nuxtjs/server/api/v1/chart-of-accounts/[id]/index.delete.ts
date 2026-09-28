@@ -1,17 +1,11 @@
 export default defineEventHandler(async (event) => {
-  const userId = event.context.user?.id
-  if (!userId) {
-    throw createError({ statusCode: 401, statusMessage: 'User identity is invalid or expired.' })
-  }
-
-  const idParam = getRouterParam(event, 'id')
-  const id = Number(idParam)
+  const userId = await getAuthUserId(event)
+  const id = Number(getRouterParam(event, 'id'))
 
   if (!id || isNaN(id)) {
     throw createError({ statusCode: 400, statusMessage: 'Invalid account ID.' })
   }
 
-  // 1. Cek keberadaan Akun
   const entity = await prisma.chartOfAccounts.findFirst({
     where: { Id: id, UserId: userId }
   })
@@ -20,7 +14,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Account not found.' })
   }
 
-  // 2. Integritas Data: Cek apakah akun memiliki transaksi jurnal
   const hasJournalLines = await prisma.journalEntryLines.findFirst({
     where: { AccountId: id }
   })
@@ -44,7 +37,7 @@ export default defineEventHandler(async (event) => {
   } catch (error: any) {
     throw createError({
       statusCode: 500,
-      statusMessage: `A fatal error occurred while deleting the account: ${error.message}`
+      statusMessage: `Fatal error deleting account: ${error.message}`
     })
   }
 })
