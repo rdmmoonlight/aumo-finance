@@ -24,17 +24,30 @@ export default function SettingsPage() {
       >
         <div className="shrink-0 space-y-3 bg-background relative z-20 pb-3">
           <h1 className="text-xl font-bold">Settings</h1>
-          <TabsList className="h-8 p-1 w-fit">
-            <TabsTrigger value="account" className="text-xs gap-1.5 h-6">
+          
+          <TabsList className="h-8 p-1 w-fit bg-muted text-muted-foreground">
+            <TabsTrigger
+              value="account"
+              className="text-xs gap-1.5 h-6 px-3 rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               <IconUser size={13} /> Account
             </TabsTrigger>
-            <TabsTrigger value="appearance" className="text-xs gap-1.5 h-6">
+            
+            <TabsTrigger
+              value="appearance"
+              className="text-xs gap-1.5 h-6 px-3 rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               <IconPalette size={13} /> Appearance
             </TabsTrigger>
-            <TabsTrigger value="security" className="text-xs gap-1.5 h-6">
+            
+            <TabsTrigger
+              value="security"
+              className="text-xs gap-1.5 h-6 px-3 rounded-sm transition-all data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm"
+            >
               <IconShieldCheck size={13} /> Security
             </TabsTrigger>
           </TabsList>
+          
           <Separator />
         </div>
 
@@ -45,14 +58,12 @@ export default function SettingsPage() {
           >
             <AccountSettings />
           </TabsContent>
-
           <TabsContent
             value="appearance"
             className="m-0 focus-visible:outline-none"
           >
             <AppearanceAndSecuritySettings mode="appearance" />
           </TabsContent>
-
           <TabsContent
             value="security"
             className="m-0 focus-visible:outline-none"
