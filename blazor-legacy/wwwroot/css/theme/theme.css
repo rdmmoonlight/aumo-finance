@@ -93,13 +93,16 @@
 
     --aumo-text: #FFFFFF;
     --aumo-text-strong: #FFFFFF;
-    --aumo-text-muted: #94A3B8;
+    --aumo-text-muted: #FFFFFF;
 
     --aumo-border: #2A313C;
     --aumo-border-subtle: rgba(148, 163, 184, 0.14);
 
-    --aumo-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    --aumo-shadow-lg: 0 20px 50px rgba(0, 0, 0, 0.35);
+    --aumo-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.25);
+
+    --aumo-shadow-lg:
+        0 20px 50px rgba(0, 0, 0, 0.35);
 
 
     /* ---------- Typography ---------- */
@@ -194,8 +197,11 @@
     --aumo-border: #E2E8F0;
     --aumo-border-subtle: rgba(15, 23, 42, 0.08);
 
-    --aumo-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-    --aumo-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+    --aumo-shadow:
+        0 8px 24px rgba(15, 23, 42, 0.08);
+
+    --aumo-shadow-lg:
+        0 16px 40px rgba(15, 23, 42, 0.12);
 
 
     /* ---------- Typography ---------- */
@@ -217,10 +223,15 @@ html {
 body {
     min-height: 100vh;
     margin: 0;
+
     font-family: var(--font-body);
+
     background-color: var(--aumo-bg);
     color: var(--aumo-text);
-    transition: background-color 0.2s ease, color 0.2s ease;
+
+    transition:
+        background-color 0.2s ease,
+        color 0.2s ease;
 }
 
 
@@ -228,16 +239,38 @@ body {
    4. TYPOGRAPHY
    ========================================================= */
 
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6,
-.navbar-brand, .card-title, .dashboard-title, .security-score {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.h1,
+.h2,
+.h3,
+.h4,
+.h5,
+.h6,
+.navbar-brand,
+.card-title,
+.dashboard-title,
+.security-score {
     font-family: var(--font-heading);
     color: var(--aumo-text-strong);
 }
 
-body, table, th, td,
-.form-control, .form-select, .form-label, .form-check-label,
-.list-group-item, .nav-link, .btn, .dropdown-item {
+body,
+table,
+th,
+td,
+.form-control,
+.form-select,
+.form-label,
+.form-check-label,
+.list-group-item,
+.nav-link,
+.btn,
+.dropdown-item {
     font-family: var(--font-body);
 }
 
@@ -247,7 +280,7 @@ body, table, th, td,
 
 
 /* =========================================================
-   5. MAIN APPLICATION SURFACES & LAYOUT ISOLATION FIX
+   5. MAIN APPLICATION SURFACES
    ========================================================= */
 
 .aumo-page {
@@ -256,13 +289,9 @@ body, table, th, td,
     color: var(--aumo-text);
 }
 
-/* PERBAIKAN UTAMA: Kunci #mainContent agar tidak pernah terdorong turun */
 #mainContent {
     background-color: var(--aumo-bg);
     color: var(--aumo-text);
-    min-width: 0 !important;
-    flex: 1 1 auto !important;
-    width: auto !important;
 }
 
 
@@ -297,8 +326,12 @@ body, table, th, td,
     box-shadow: var(--aumo-shadow);
 }
 
-.glass-card h1, .glass-card h2, .glass-card h3, 
-.glass-card h4, .glass-card h5, .glass-card h6 {
+.glass-card h1,
+.glass-card h2,
+.glass-card h3,
+.glass-card h4,
+.glass-card h5,
+.glass-card h6 {
     color: var(--aumo-text-strong);
 }
 
@@ -315,6 +348,7 @@ body, table, th, td,
     --bs-table-bg: var(--aumo-surface);
     --bs-table-color: var(--aumo-text);
     --bs-table-border-color: var(--aumo-border);
+
     color: var(--aumo-text);
 }
 
@@ -360,8 +394,11 @@ body, table, th, td,
 .form-select:focus {
     background-color: var(--aumo-surface);
     color: var(--aumo-text);
+
     border-color: var(--aumo-primary);
-    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.20);
+
+    box-shadow:
+        0 0 0 0.25rem rgba(59, 130, 246, 0.20);
 }
 
 .form-label {
@@ -390,9 +427,14 @@ input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
+
     -webkit-text-fill-color: var(--aumo-text);
-    transition: background-color 5000s ease-in-out 0s;
-    box-shadow: inset 0 0 0 1000px var(--aumo-surface);
+
+    transition:
+        background-color 5000s ease-in-out 0s;
+
+    box-shadow:
+        inset 0 0 0 1000px var(--aumo-surface);
 }
 
 
@@ -554,20 +596,12 @@ a:hover {
 
 
 /* =========================================================
-   16. SIDEBAR FIX
+   16. SIDEBAR
    ========================================================= */
-
-.sidebar-wrapper {
-    flex-shrink: 0 !important;
-    z-index: 100;
-}
 
 .sidebar-icons {
     background-color: var(--aumo-bg);
     border-right: 1px solid var(--aumo-border);
-    width: 60px;
-    min-width: 60px;
-    flex-shrink: 0 !important;
 }
 
 .sidebar-flyout {
@@ -580,12 +614,18 @@ a:hover {
 .sidebar-icons .icon-btn {
     width: 44px;
     height: 44px;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
     border-radius: 10px;
+
     color: var(--aumo-text-muted);
-    transition: background-color 0.15s ease, color 0.15s ease;
+
+    transition:
+        background-color 0.15s ease,
+        color 0.15s ease;
 }
 
 .sidebar-icons .icon-btn:hover,
@@ -617,10 +657,15 @@ a:hover {
 .pulse-dot {
     width: 8px;
     height: 8px;
+
     display: inline-block;
+
     background-color: var(--aumo-success);
+
     border-radius: 50%;
-    box-shadow: 0 0 8px var(--aumo-success);
+
+    box-shadow:
+        0 0 8px var(--aumo-success);
 }
 
 
@@ -634,8 +679,9 @@ a:hover {
 .form-control:focus,
 .form-select:focus,
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.2rem var(--bs-body-bg),
-                0 0 0 0.35rem rgba(59, 130, 246, 0.55);
+    box-shadow:
+        0 0 0 0.2rem var(--bs-body-bg),
+        0 0 0 0.35rem rgba(59, 130, 246, 0.55);
 }
 
 
@@ -702,7 +748,9 @@ a:hover {
 
 * {
     scrollbar-width: thin;
-    scrollbar-color: var(--aumo-border) var(--aumo-bg);
+    scrollbar-color:
+        var(--aumo-border)
+        var(--aumo-bg);
 }
 
 ::-webkit-scrollbar {
