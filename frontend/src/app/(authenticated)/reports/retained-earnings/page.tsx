@@ -92,7 +92,9 @@ function RetainedEarningsTable({ data }: { data: StatementRow[] }) {
         },
       }),
       columnHelper.accessor("amount", {
-        header: () => <div className="text-right pr-4 text-caption">Jumlah (IDR)</div>,
+        header: () => (
+          <div className="text-right pr-4 text-caption">Jumlah (IDR)</div>
+        ),
         cell: ({ row }) => {
           const item = row.original;
           const formatted = formatNumber(item.amount);
@@ -253,7 +255,9 @@ export default function RetainedEarningsPage() {
       {errorMessage && (
         <Alert variant="destructive" className="text-ui">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-caption">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 
@@ -284,7 +288,12 @@ export default function RetainedEarningsPage() {
                 Bridges Income Statement to Equity on Balance Sheet • IDR
               </p>
             </div>
-            <Button asChild variant="outline" size="sm" className="gap-1.5 text-caption">
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-caption"
+            >
               <Link href="/reports/statement-of-financial-position">
                 <ArrowRight size={14} /> Balance Sheet
               </Link>
