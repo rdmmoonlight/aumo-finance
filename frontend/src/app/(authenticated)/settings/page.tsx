@@ -22,7 +22,13 @@ import {
 } from "@/components/ui/table";
 import AccountSettings from "./account";
 import AppearanceAndSecuritySettings from "./appearance-and-security";
-import { User, Palette, ShieldCheck, LucideIcon, ArrowRight } from "lucide-react";
+import {
+  User,
+  Palette,
+  ShieldCheck,
+  LucideIcon,
+  ArrowRight,
+} from "lucide-react";
 
 interface SettingModuleItem {
   id: string;
@@ -52,7 +58,9 @@ function SettingsOverviewTable({
           return (
             <div className="flex items-center gap-2">
               <IconComponent size={15} className="text-primary" />
-              <span className="font-semibold text-caption">{row.original.name}</span>
+              <span className="font-semibold text-caption">
+                {row.original.name}
+              </span>
             </div>
           );
         },

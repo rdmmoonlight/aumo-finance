@@ -252,7 +252,9 @@ function ActivityLogsTable({ activities }: { activities: ActivityItem[] }) {
       activityColumnHelper.accessor("createdAt", {
         header: "Date",
         cell: (info) => (
-          <div className="py-1.5 text-caption">{formatDate(info.getValue())}</div>
+          <div className="py-1.5 text-caption">
+            {formatDate(info.getValue())}
+          </div>
         ),
       }),
       activityColumnHelper.accessor("isSuccess", {
@@ -352,7 +354,9 @@ export function AppearanceSection() {
                   className={cn("mb-2", active && "text-primary")}
                 />
                 <span className="text-caption font-medium">{label}</span>
-                <span className="text-caption text-muted-foreground">{desc}</span>
+                <span className="text-caption text-muted-foreground">
+                  {desc}
+                </span>
                 {active && (
                   <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-primary text-primary-foreground grid place-items-center">
                     <Check size={10} />
@@ -435,7 +439,9 @@ export function SecuritySection() {
       {success && (
         <Alert className="py-2 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 text-ui">
           <CheckCircle2 size={14} />
-          <AlertDescription className="text-caption">{success}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {success}
+          </AlertDescription>
         </Alert>
       )}
       {(error || isError) && (
@@ -475,7 +481,10 @@ export function SecuritySection() {
             </TabsTrigger>
             <TabsTrigger value="sessions" className="text-caption h-5 gap-1">
               <Laptop size={12} /> Sessions{" "}
-              <Badge variant="secondary" className="ml-1 h-4 px-1 text-label-small">
+              <Badge
+                variant="secondary"
+                className="ml-1 h-4 px-1 text-label-small"
+              >
                 {sessions.length}
               </Badge>
             </TabsTrigger>
@@ -518,7 +527,9 @@ export function SecuritySection() {
           <TabsContent value="sessions" className="mt-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between py-2 px-3 border-b bg-muted/30">
-                <span className="text-caption font-semibold">Active Sessions</span>
+                <span className="text-caption font-semibold">
+                  Active Sessions
+                </span>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -542,7 +553,9 @@ export function SecuritySection() {
           <TabsContent value="logs" className="mt-3">
             <Card className="overflow-hidden">
               <div className="py-2 px-3 border-b bg-muted/30">
-                <span className="text-caption font-semibold">Login History</span>
+                <span className="text-caption font-semibold">
+                  Login History
+                </span>
               </div>
               <ScrollArea className="h-64">
                 <ActivityLogsTable activities={activities} />
@@ -566,8 +579,12 @@ export default function AppearanceAndSecuritySettings({
   return (
     <Tabs defaultValue={defaultTab} className="w-full space-y-4">
       <TabsList className="grid w-full grid-cols-2 text-ui">
-        <TabsTrigger value="appearance" className="text-caption">Appearance</TabsTrigger>
-        <TabsTrigger value="security" className="text-caption">Security</TabsTrigger>
+        <TabsTrigger value="appearance" className="text-caption">
+          Appearance
+        </TabsTrigger>
+        <TabsTrigger value="security" className="text-caption">
+          Security
+        </TabsTrigger>
       </TabsList>
 
       <TabsContent value="appearance">
