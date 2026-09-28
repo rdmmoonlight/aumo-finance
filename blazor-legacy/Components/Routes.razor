@@ -3,8 +3,6 @@
 @using AumoBlazor
 @using AumoBlazor.Components.Layout
 
-@inject NavigationManager Navigation
-
 <Router AppAssembly="@typeof(Program).Assembly">
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
@@ -18,20 +16,12 @@
             <NotAuthorized Context="authContext">
                 @if (authContext.User.Identity == null || !authContext.User.Identity.IsAuthenticated)
                 {
-                    @* Jika BELUM login, izinkan HANYA akses Landing Page (/) dan area /auth *@
-                    @if (IsPublicPage(routeData))
-                    {
-                        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                    }
-                    else
-                    {
-                        @* Jika mencoba akses halaman lain, arahkan ke login *@
-                        <RedirectToLogin />
-                    }
+                    @* Pengguna belum login dan mencoba mengakses halaman ber-attribute [Authorize] *@
+                    <RedirectToLogin />
                 }
                 else
                 {
-                    @* Tampilan jika pengguna sudah login tetapi tidak memiliki role/permission untuk halaman tersebut *@
+                    @* Pengguna sudah login tapi tidak punya peran/izin (Akses Ditolak) *@
                     <div class="d-flex align-items-center justify-content-center min-vh-100 w-100 py-5" style="background-color: var(--aumo-bg, #0D1117);">
                         <div class="container">
                             <div class="card border rounded-4 p-4 p-md-5 shadow-lg mx-auto text-center" 
@@ -81,23 +71,3 @@
         </LayoutView>
     </NotFound>
 </Router>
-
-@code {
-    private bool IsPublicPage(RouteData routeData)
-    {
-        var pageType = routeData.PageType;
-        
-        // Cek apakah halaman adalah Landing Page (/)
-        if (IsLandingPage()) return true;
-
-        // Cek apakah halaman berada di namespace Auth (misal: /auth/login, /auth/register)
-        return pageType.Namespace?.Contains("Auth", StringComparison.OrdinalIgnoreCase) == true 
-            || pageType.Name.Contains("Login", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private bool IsLandingPage()
-    {
-        var relativeUri = Navigation.ToBaseRelativePath(Navigation.Uri).Trim('/');
-        return string.IsNullOrEmpty(relativeUri);
-    }
-}
