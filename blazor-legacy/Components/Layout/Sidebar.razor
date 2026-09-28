@@ -10,10 +10,11 @@
 
 <AuthorizeView>
     <Authorized>
-        <div class="sidebar-wrapper d-flex sidebar-sticky-neon">
+        <!-- PENTING: flex-shrink-0 ditambahkan langsung di sini agar Flexbox tidak menggelembungkannya -->
+        <div class="sidebar-wrapper d-flex sidebar-sticky-neon flex-shrink-0">
             
             <!-- MAIN ICON DOCK -->
-            <nav id="sidebar-icons" class="sidebar-icons text-white d-flex flex-column align-items-center py-3">
+            <nav id="sidebar-icons" class="sidebar-icons text-white d-flex flex-column align-items-center py-3 flex-shrink-0">
 
                 <!-- BRAND / HOME ICON -->
                 <NavLink href="/" Match="NavLinkMatch.All" class="brand-container text-center text-warning text-decoration-none mb-2" title="Aumo Finance Home" @onclick="CloseFlyout">
@@ -126,7 +127,7 @@
             <!-- HOLOGRAM FLYOUT PANEL (REPORTS) -->
             @if (showReportsFlyout)
             {
-                <div id="reports-flyout" class="sidebar-flyout">
+                <div id="reports-flyout" class="sidebar-flyout flex-shrink-0">
 
                     <div class="p-3 border-bottom border-secondary border-opacity-25 d-flex justify-content-end align-items-center">
                         <button type="button" @onclick="CloseFlyout" class="btn-close btn-close-white btn-sm" aria-label="Close"></button>
@@ -212,7 +213,6 @@
         CloseFlyout();
         try
         {
-            // Panggil API Backend Sign Out
             await Http.PostAsync("api/v1/auth/logout", null);
         }
         catch (Exception ex)
@@ -221,7 +221,6 @@
         }
         finally
         {
-            // Direct redirect ke login page
             Navigation.NavigateTo("/auth/login", forceLoad: true);
         }
     }
@@ -232,12 +231,12 @@
     .sidebar-sticky-neon {
         position: -webkit-sticky;
         position: sticky;
-        top: 86px; /* Menyesuaikan tinggi TopBar + Status Strip agar pas di bawahnya */
+        top: 86px;
         height: calc(100vh - 86px);
         max-height: calc(100vh - 86px);
         align-self: flex-start;
         z-index: 1020;
-        flex-shrink: 0;
+        flex-shrink: 0 !important; /* Ditegaskan agar tidak menggelembung */
     }
 
     /* KOTAK DOCK UNGU DENGAN FULL WHITE NEON BORDER (360 DERAJAT) */
