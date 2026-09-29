@@ -9,6 +9,7 @@ export const addTagTypes = [
   "Notifications",
   "Periods",
   "Settings",
+  "Summary",
   "Tools",
   "GeneralLedger",
   "IncomeStatement",
@@ -358,6 +359,13 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Settings"],
       }),
+      getApiV1Summary: build.query<
+        GetApiV1SummaryApiResponse,
+        GetApiV1SummaryApiArg
+      >({
+        query: () => ({ url: `/api/v1/Summary` }),
+        providesTags: ["Summary"],
+      }),
       getApiV1ToolsDownloadJournalTemplate: build.query<
         GetApiV1ToolsDownloadJournalTemplateApiResponse,
         GetApiV1ToolsDownloadJournalTemplateApiArg
@@ -646,6 +654,8 @@ export type PostApiV1SettingsGuardianRevokeSessionBySessionIdApiArg = {
 };
 export type PostApiV1SettingsGuardianRevokeAllSessionsApiResponse = unknown;
 export type PostApiV1SettingsGuardianRevokeAllSessionsApiArg = void;
+export type GetApiV1SummaryApiResponse = unknown;
+export type GetApiV1SummaryApiArg = void;
 export type GetApiV1ToolsDownloadJournalTemplateApiResponse = unknown;
 export type GetApiV1ToolsDownloadJournalTemplateApiArg = void;
 export type PostApiV1ToolsPreviewJournalImportApiResponse = unknown;
@@ -844,6 +854,7 @@ export const {
   useGetApiV1SettingsGuardianDashboardQuery,
   usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation,
   usePostApiV1SettingsGuardianRevokeAllSessionsMutation,
+  useGetApiV1SummaryQuery,
   useGetApiV1ToolsDownloadJournalTemplateQuery,
   usePostApiV1ToolsPreviewJournalImportMutation,
   usePostApiV1ToolsImportJournalEntriesMutation,
