@@ -451,8 +451,7 @@ function ChartOfAccountsContent() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      | { headerClassName?: string }
-                      | undefined;
+                      { headerClassName?: string } | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -493,8 +492,7 @@ function ChartOfAccountsContent() {
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          | { cellClassName?: string }
-                          | undefined;
+                          { cellClassName?: string } | undefined;
                         return (
                           <TableCell
                             key={cell.id}
