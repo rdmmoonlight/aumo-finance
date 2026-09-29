@@ -355,7 +355,7 @@ export default function ReportsPage() {
                         >
                           {summary?.isPeriodOpen
                             ? "Open"
-                            : "Closed / Pasif"}
+                            : "Closed"}
                         </span>
                       </>
                     )}
