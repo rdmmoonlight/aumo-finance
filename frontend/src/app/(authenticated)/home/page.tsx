@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -8,6 +9,7 @@ import {
   TrendingUp,
   TrendingDown,
   RotateCw,
+  Clock,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,8 +30,24 @@ export default function HomePage() {
     isLoading,
     isFetching,
     isError,
+    fulfilledTimeStamp,
     refetch,
   } = useGetApiV1MarketQuery();
+
+  const [lastUpdated, setLastUpdated] = useState<string>("");
+
+  // Update timestamp saat data berhasil dimuat/di-refresh
+  useEffect(() => {
+    if (fulfilledTimeStamp) {
+      setLastUpdated(
+        new Date(fulfilledTimeStamp).toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        })
+      );
+    }
+  }, [fulfilledTimeStamp]);
 
   // Ekstraksi data secara fleksibel (menangani array langsung maupun wrapped object like { data: [...] })
   const extractRawItems = (res: unknown): Record<string, unknown>[] => {
@@ -108,6 +126,14 @@ export default function HomePage() {
                 </Button>
               </div>
             </div>
+
+            {/* Timestamp */}
+            {lastUpdated && (
+              <div className="mb-3 flex items-center justify-end gap-1.5 text-[11px] text-white/50">
+                <Clock size={12} />
+                <span>Diperbarui: {lastUpdated} WIB</span>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {isLoading ? (
