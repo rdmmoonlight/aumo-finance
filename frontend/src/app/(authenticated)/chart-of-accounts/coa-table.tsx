@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -284,27 +284,76 @@ export function ChartOfAccountsTable() {
 
   return (
     <div className="space-y-6 max-w-7xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header Utama */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Network className="text-primary" size={24} /> Chart of Accounts
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Master list of financial accounts • {filteredAccounts.length}{" "}
-            accounts
+          <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
+            <span>Master list of financial accounts</span>
+            <span>•</span>
+            <Badge variant="secondary" className="font-mono text-xs font-normal">
+              {filteredAccounts.length} accounts
+            </Badge>
+            <span>•</span>
+            <span className="text-xs text-muted-foreground font-medium">
+              in IDR (Rp)
+            </span>
           </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Search, Category Filter, and Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search
+              size={14}
+              className="absolute left-3 top-3 text-muted-foreground"
+            />
+            <Input
+              className="pl-8 h-9 w-52 text-sm"
+              placeholder="Search..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
+          </div>
+
+          <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+            <SelectTrigger className="h-9 w-40 text-sm">
+              <SelectValue placeholder="All Categories" />
+            </SelectTrigger>
+            <SelectContent className="text-sm">
+              {ACCOUNT_TYPES.map((t) => (
+                <SelectItem key={t} value={t}>
+                  {ACCOUNT_RANGES[t]?.label ?? t}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {categoryFilter && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setCategoryFilter("")}
+              className="h-9 px-2"
+            >
+              <X size={14} />
+            </Button>
+          )}
+
+          <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
+
           <Button
             onClick={() => setIsAddModalOpen(true)}
-            className="gap-2 text-sm font-medium"
+            className="gap-2 text-sm font-medium h-9"
           >
             <Plus size={16} /> New Account
           </Button>
           <Button
             variant={isEditMode ? "default" : "outline"}
             onClick={() => setIsEditMode((prev) => !prev)}
-            className="gap-2 text-sm font-medium"
+            className="gap-2 text-sm font-medium h-9"
           >
             {isEditMode ? <Check size={16} /> : <Pencil size={16} />}
             {isEditMode ? "Done Editing" : "Edit"}
@@ -349,52 +398,6 @@ export function ChartOfAccountsTable() {
       )}
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0 py-4">
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <Search
-                size={14}
-                className="absolute left-3 top-3 text-muted-foreground"
-              />
-              <Input
-                className="pl-8 h-9 w-60 text-sm"
-                placeholder="Search..."
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-              />
-            </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="h-9 w-44 text-sm">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent className="text-sm">
-                {ACCOUNT_TYPES.map((t) => (
-                  <SelectItem key={t} value={t}>
-                    {ACCOUNT_RANGES[t]?.label ?? t}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {categoryFilter && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setCategoryFilter("")}
-                className="h-9 px-2"
-              >
-                <X size={14} />
-              </Button>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="font-mono text-xs">
-              {filteredAccounts.length} total
-            </Badge>
-            <span className="text-xs text-muted-foreground font-medium">
-              All amounts in IDR (Rp)
-            </span>
-          </div>
-        </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
