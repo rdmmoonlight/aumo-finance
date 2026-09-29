@@ -26,7 +26,48 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    // Fetch USD/IDR dengan nilai perubahan real
     async function fetchUsdRate(): Promise<MarketItem | null> {
+      const endpoints = [
+        "https://query1.finance.yahoo.com/v8/finance/chart/IDR=X",
+        "https://query2.finance.yahoo.com/v8/finance/chart/IDR=X",
+      ];
+
+      const proxies = [
+        (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+        (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
+        (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+      ];
+
+      // Coba lewat Yahoo Finance terlebih dahulu agar mendapatkan persentase/nilai perubahan real
+      for (const ep of endpoints) {
+        for (const proxyFn of proxies) {
+          try {
+            const res = await fetch(proxyFn(ep), { cache: "no-store" });
+            if (!res.ok) continue;
+            const data = await res.json();
+            const meta = data?.chart?.result?.[0]?.meta;
+
+            if (meta?.regularMarketPrice) {
+              const price = meta.regularMarketPrice;
+              const prevClose = meta.chartPreviousClose || meta.previousClose || price;
+              const changeAmount = price - prevClose;
+              const changePercent = prevClose ? (changeAmount / prevClose) * 100 : 0;
+              const isUp = changeAmount >= 0;
+
+              return {
+                symbol: "USD/IDR",
+                name: "Rupiah",
+                price: `Rp ${Math.round(price).toLocaleString("id-ID")}`,
+                change: `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`,
+                isUp,
+              };
+            }
+          } catch {}
+        }
+      }
+
+      // Fallback ke Open ER API jika proxy Yahoo terhambat
       try {
         const res = await fetch("https://open.er-api.com/v6/latest/USD", {
           cache: "no-store",
@@ -39,27 +80,28 @@ export default function HomePage() {
               symbol: "USD/IDR",
               name: "Rupiah",
               price: `Rp ${Math.round(rate).toLocaleString("id-ID")}`,
-              change: "Live",
+              change: "0.00%",
               isUp: true,
             };
           }
         }
       } catch {}
+
       return null;
     }
 
+    // Fetch IHSG dengan perbaikan koneksi & fallback yang lebih baik
     async function fetchIhsg(): Promise<MarketItem | null> {
       const yahooEndpoints = [
         "https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE",
+        "https://query2.finance.yahoo.com/v8/finance/chart/%5EJKSE",
         "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EJKSE",
       ];
 
       const proxies = [
-        (url: string) =>
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
         (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        (url: string) =>
-          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
+        (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
       ];
 
       for (const yahooUrl of yahooEndpoints) {
@@ -69,7 +111,7 @@ export default function HomePage() {
             if (!res.ok) continue;
             const data = await res.json();
 
-            // v8 chart
+            // Format v8 chart
             const meta = data?.chart?.result?.[0]?.meta;
             if (meta?.regularMarketPrice) {
               const price = meta.regularMarketPrice;
@@ -78,6 +120,7 @@ export default function HomePage() {
                 ? ((price - prevClose) / prevClose) * 100
                 : 0;
               const isUp = changePercent >= 0;
+
               return {
                 symbol: "IHSG",
                 name: "Indeks Saham",
@@ -90,25 +133,27 @@ export default function HomePage() {
               };
             }
 
-            // v7 quote
+            // Format v7 quote
             const quote = data?.quoteResponse?.result?.[0];
             if (quote?.regularMarketPrice) {
-              const isUp = (quote.regularMarketChangePercent ?? 0) >= 0;
+              const changePercent = quote.regularMarketChangePercent ?? 0;
+              const isUp = changePercent >= 0;
+
               return {
                 symbol: "IHSG",
                 name: "Indeks Saham",
                 price: quote.regularMarketPrice.toLocaleString("id-ID", {
                   minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
                 }),
-                change: quote.regularMarketChangePercent
-                  ? `${isUp ? "+" : ""}${quote.regularMarketChangePercent.toFixed(2)}%`
-                  : "0.00%",
+                change: `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`,
                 isUp,
               };
             }
           } catch {}
         }
       }
+
       return null;
     }
 
@@ -131,11 +176,9 @@ export default function HomePage() {
         <CardContent className="p-6 md:p-8">
           <div className="rounded-xl border border-white/10 bg-slate-900/80 p-4">
             <div className="mb-3 flex items-center justify-between">
-              {/* H3 (20px) */}
               <h3 className="flex items-center gap-2 text-xl font-bold text-amber-400">
                 <LineChart size={18} /> Market Indicators
               </h3>
-              {/* Label kecil (11px) */}
               <Badge
                 variant="outline"
                 className="border-emerald-500/20 bg-emerald-500/10 text-[11px] text-emerald-400"
@@ -146,7 +189,6 @@ export default function HomePage() {
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {isLoading ? (
-                /* Caption (12px) */
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
                 </div>
@@ -157,11 +199,9 @@ export default function HomePage() {
                     className="flex min-h-[80px] flex-col justify-between rounded-lg border border-white/10 bg-black/40 p-2.5"
                   >
                     <div className="flex items-center justify-between">
-                      {/* Caption (12px) */}
                       <span className="text-xs font-bold text-white">
                         {item.symbol}
                       </span>
-                      {/* Label kecil (11px) */}
                       <Badge
                         className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${
                           item.isUp
@@ -177,16 +217,13 @@ export default function HomePage() {
                         {item.change}
                       </Badge>
                     </div>
-                    {/* UI (14px) */}
                     <div className="mt-1 text-sm font-semibold text-white">
                       {item.price}
                     </div>
-                    {/* Caption (12px) */}
                     <div className="text-xs text-white/50">{item.name}</div>
                   </div>
                 ))
               ) : (
-                /* Caption (12px) */
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Gagal memuat indikator pasar.
                 </div>
@@ -195,14 +232,12 @@ export default function HomePage() {
           </div>
 
           <div className="mt-6 text-center">
-            {/* Body (16px) */}
             <p className="mx-auto max-w-md text-base leading-relaxed text-white/80">
               Integrated financial & accounting intelligence core. Manage
               full-cycle general ledgers, trial balances, and operational
               analytics with absolute precision.
             </p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              {/* UI (14px) */}
               <Button
                 asChild
                 className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-sm text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
@@ -211,7 +246,6 @@ export default function HomePage() {
                   <LayoutDashboard size={16} /> Dashboard
                 </Link>
               </Button>
-              {/* UI (14px) */}
               <Button
                 asChild
                 variant="secondary"
