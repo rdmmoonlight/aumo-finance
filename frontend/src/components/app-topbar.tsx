@@ -28,16 +28,15 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
-
-// RTK Query Hooks & Types
 import {
+  useGetApiV1AuthMeQuery,
   useGetApiV1PeriodsQuery,
   useGetApiV1HealthQuery,
   useGetApiV1NotificationsQuery,
+  usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
   GetApiV1NotificationsApiResponse,
 } from "@/lib/generatedApi";
-import { useUserProfile } from "@/lib/auth";
 
 interface PeriodItem {
   id: number;
@@ -54,17 +53,18 @@ type NotificationItem =
 export function AppTopBar() {
   const pathname = usePathname();
 
-  // Cek profil user
-  const { profile, isLoading: isProfileLoading } = useUserProfile();
-  const isAuthenticated = !isProfileLoading && !!profile;
+  // 1. Cek status autentikasi user via RTK Query (/api/v1/auth/me)
+  const { data: userProfile, isLoading: isProfileLoading } =
+    useGetApiV1AuthMeQuery();
+  const isAuthenticated = !isProfileLoading && !!userProfile;
 
-  // 1. Fetch seluruh periode
+  // 2. Fetch seluruh periode
   const { data: rawPeriodsData, isLoading: isPeriodLoading } =
     useGetApiV1PeriodsQuery(undefined, {
       skip: !isAuthenticated,
     });
 
-  // 2. Hook Database Health Check
+  // 3. Hook Database Health Check
   const {
     data: healthData,
     isLoading: isHealthLoading,
@@ -77,18 +77,19 @@ export function AppTopBar() {
     refetchOnFocus: false,
   });
 
-  // 3. RTK Query Hooks Notifikasi
+  // 4. RTK Query Hooks Notifikasi
   const { data: notificationsData, isLoading: isNotificationsLoading } =
     useGetApiV1NotificationsQuery(
       { limit: 20 },
       {
         skip: !isAuthenticated,
         pollingInterval: isAuthenticated ? 15000 : 0, // Auto-refetch tiap 15 detik
-      },
+      }
     );
 
   const [markAllAsRead, { isLoading: isMarkingAllRead }] =
     usePutApiV1NotificationsReadAllMutation();
+  const [markByIdRead] = usePutApiV1NotificationsByIdReadMutation();
 
   const notifications: NotificationItem[] = Array.isArray(notificationsData)
     ? notificationsData
@@ -104,11 +105,10 @@ export function AppTopBar() {
     }
   };
 
-  const handleMarkAsRead = async (_id: string, isRead?: boolean) => {
-    if (isRead) return;
+  const handleMarkAsRead = async (id: string, isRead?: boolean) => {
+    if (isRead || !id) return;
     try {
-      // Jika endpoint per-ID nantinya siap, pemanggilan bisa disesuaikan di sini.
-      await markAllAsRead().unwrap();
+      await markByIdRead({ id }).unwrap();
     } catch (error) {
       console.error("Gagal menandai dibaca:", error);
     }
@@ -118,10 +118,10 @@ export function AppTopBar() {
   const dbStatus = isHealthError
     ? "offline"
     : isHealthLoading
-      ? "connecting"
-      : healthData
-        ? "online"
-        : "offline";
+    ? "connecting"
+    : healthData
+    ? "online"
+    : "offline";
 
   // Parsing array periods
   const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
@@ -230,7 +230,7 @@ export function AppTopBar() {
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
                                   [],
-                                  { hour: "2-digit", minute: "2-digit" },
+                                  { hour: "2-digit", minute: "2-digit" }
                                 )
                               : ""}
                           </span>
