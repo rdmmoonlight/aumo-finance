@@ -353,9 +353,7 @@ export default function ReportsPage() {
                               : "text-amber-300/80"
                           }`}
                         >
-                          {summary?.isPeriodOpen
-                            ? "Open"
-                            : "Closed"}
+                          {summary?.isPeriodOpen ? "Open" : "Closed"}
                         </span>
                       </>
                     )}
