@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -8,10 +7,12 @@ import {
   LineChart,
   TrendingUp,
   TrendingDown,
+  RotateCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useGetApiV1MarketQuery } from "./lib/generatedApi";
 
 interface MarketItem {
   symbol: string;
@@ -22,160 +23,18 @@ interface MarketItem {
 }
 
 export default function HomePage() {
-  const [marketData, setMarketData] = useState<MarketItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Menggunakan RTK Query Hook yang berasal dari file rujukan
+  const {
+    data: apiMarketData,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useGetApiV1MarketQuery();
 
-  useEffect(() => {
-    // Fetch USD/IDR dengan nilai perubahan real
-    async function fetchUsdRate(): Promise<MarketItem | null> {
-      const endpoints = [
-        "https://query1.finance.yahoo.com/v8/finance/chart/IDR=X",
-        "https://query2.finance.yahoo.com/v8/finance/chart/IDR=X",
-      ];
-
-      const proxies = [
-        (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        (url: string) =>
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
-        (url: string) =>
-          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-      ];
-
-      // Coba lewat Yahoo Finance terlebih dahulu agar mendapatkan persentase/nilai perubahan real
-      for (const ep of endpoints) {
-        for (const proxyFn of proxies) {
-          try {
-            const res = await fetch(proxyFn(ep), { cache: "no-store" });
-            if (!res.ok) continue;
-            const data = await res.json();
-            const meta = data?.chart?.result?.[0]?.meta;
-
-            if (meta?.regularMarketPrice) {
-              const price = meta.regularMarketPrice;
-              const prevClose =
-                meta.chartPreviousClose || meta.previousClose || price;
-              const changeAmount = price - prevClose;
-              const changePercent = prevClose
-                ? (changeAmount / prevClose) * 100
-                : 0;
-              const isUp = changeAmount >= 0;
-
-              return {
-                symbol: "USD/IDR",
-                name: "Rupiah",
-                price: `Rp ${Math.round(price).toLocaleString("id-ID")}`,
-                change: `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`,
-                isUp,
-              };
-            }
-          } catch {}
-        }
-      }
-
-      // Fallback ke Open ER API jika proxy Yahoo terhambat
-      try {
-        const res = await fetch("https://open.er-api.com/v6/latest/USD", {
-          cache: "no-store",
-        });
-        if (res.ok) {
-          const data = await res.json();
-          const rate = data?.rates?.IDR;
-          if (rate) {
-            return {
-              symbol: "USD/IDR",
-              name: "Rupiah",
-              price: `Rp ${Math.round(rate).toLocaleString("id-ID")}`,
-              change: "0.00%",
-              isUp: true,
-            };
-          }
-        }
-      } catch {}
-
-      return null;
-    }
-
-    // Fetch IHSG dengan perbaikan koneksi & fallback yang lebih baik
-    async function fetchIhsg(): Promise<MarketItem | null> {
-      const yahooEndpoints = [
-        "https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE",
-        "https://query2.finance.yahoo.com/v8/finance/chart/%5EJKSE",
-        "https://query1.finance.yahoo.com/v7/finance/quote?symbols=%5EJKSE",
-      ];
-
-      const proxies = [
-        (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        (url: string) =>
-          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
-        (url: string) =>
-          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
-      ];
-
-      for (const yahooUrl of yahooEndpoints) {
-        for (const proxyFn of proxies) {
-          try {
-            const res = await fetch(proxyFn(yahooUrl), { cache: "no-store" });
-            if (!res.ok) continue;
-            const data = await res.json();
-
-            // Format v8 chart
-            const meta = data?.chart?.result?.[0]?.meta;
-            if (meta?.regularMarketPrice) {
-              const price = meta.regularMarketPrice;
-              const prevClose = meta.chartPreviousClose || meta.previousClose;
-              const changePercent = prevClose
-                ? ((price - prevClose) / prevClose) * 100
-                : 0;
-              const isUp = changePercent >= 0;
-
-              return {
-                symbol: "IHSG",
-                name: "Indeks Saham",
-                price: price.toLocaleString("id-ID", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }),
-                change: `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`,
-                isUp,
-              };
-            }
-
-            // Format v7 quote
-            const quote = data?.quoteResponse?.result?.[0];
-            if (quote?.regularMarketPrice) {
-              const changePercent = quote.regularMarketChangePercent ?? 0;
-              const isUp = changePercent >= 0;
-
-              return {
-                symbol: "IHSG",
-                name: "Indeks Saham",
-                price: quote.regularMarketPrice.toLocaleString("id-ID", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }),
-                change: `${isUp ? "+" : ""}${changePercent.toFixed(2)}%`,
-                isUp,
-              };
-            }
-          } catch {}
-        }
-      }
-
-      return null;
-    }
-
-    async function fetchAll() {
-      const results = await Promise.allSettled([fetchUsdRate(), fetchIhsg()]);
-      const items: MarketItem[] = [];
-      results.forEach((r) => {
-        if (r.status === "fulfilled" && r.value) items.push(r.value);
-      });
-      setMarketData(items);
-      setIsLoading(false);
-    }
-
-    fetchAll();
-  }, []);
+  // Parsing data dari RTK Query API atau penyesuaian tipe jika format backend mengembalikannya
+  const marketData: MarketItem[] = Array.isArray(apiMarketData)
+    ? (apiMarketData as unknown as MarketItem[])
+    : [];
 
   return (
     <div className="grid w-full place-items-center py-6">
@@ -186,16 +45,33 @@ export default function HomePage() {
               <h3 className="flex items-center gap-2 text-xl font-bold text-amber-400">
                 <LineChart size={18} /> Market Indicators
               </h3>
-              <Badge
-                variant="outline"
-                className="border-emerald-500/20 bg-emerald-500/10 text-[11px] text-emerald-400"
-              >
-                LIVE
-              </Badge>
+              
+              <div className="flex items-center gap-2">
+                <Badge
+                  variant="outline"
+                  className="border-emerald-500/20 bg-emerald-500/10 text-[11px] text-emerald-400"
+                >
+                  LIVE
+                </Badge>
+                {/* Tombol Refresh di pojok kanan atas widget Market */}
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => refetch()}
+                  disabled={isFetching}
+                  className="h-7 w-7 rounded-lg text-white/70 hover:bg-white/10 hover:text-white"
+                  title="Refresh Indikator Pasar"
+                >
+                  <RotateCw
+                    size={14}
+                    className={isFetching ? "animate-spin text-amber-400" : ""}
+                  />
+                </Button>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {isLoading ? (
+              {isLoading || isFetching ? (
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
                 </div>
