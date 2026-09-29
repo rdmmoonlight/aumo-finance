@@ -1,16 +1,13 @@
 import type { NextConfig } from "next";
 
-// Helper untuk mendapatkan URL backend yang bersih dan terformat
 const getBackendTarget = (): string => {
   let target =
     process.env.WEB_API_URL ||
     process.env.NEXT_PUBLIC_WEB_API_URL ||
     "http://localhost:5000";
 
-  // Hapus trailing slash jika ada
   target = target.replace(/\/+$/, "");
 
-  // Paksa HTTPS jika menembak server remote (Production / Render)
   if (!target.includes("localhost") && target.startsWith("http://")) {
     target = target.replace("http://", "https://");
   }
@@ -21,6 +18,9 @@ const getBackendTarget = (): string => {
 const backendTarget = getBackendTarget();
 
 const nextConfig: NextConfig = {
+  // Pindahkan cacheComponents ke top-level (bukan di dalam experimental)
+  cacheComponents: true,
+
   typescript: {
     ignoreBuildErrors: false,
   },
@@ -45,9 +45,6 @@ const nextConfig: NextConfig = {
         destination: `${backendTarget}/api/:path*`,
       },
     ];
-  },
-  experimental: {
-    cacheComponents: true,
   },
 };
 
