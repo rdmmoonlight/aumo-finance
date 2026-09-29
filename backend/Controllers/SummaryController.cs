@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Core; // <--- DITAMBAHKAN (Namespace tempat AppDbContext & ApplicationUser berada)
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -62,14 +63,14 @@ public class SummaryController : ControllerBase
             })
             .FirstOrDefaultAsync();
 
-        // Tunggu semua query selesai dieksekusi secara bersamaan
+        // Tunggu semua query selesai dieksekusi bersamaan
         await Task.WhenAll(journalCountTask, activeCoaCountTask, activePeriodTask);
 
         var journalCount = await journalCountTask;
         var activeCoaCount = await activeCoaCountTask;
         var activePeriod = await activePeriodTask;
 
-        // 3. Construct Output Response
+        // 3. Output Response
         var summaryData = new
         {
             totalJournal = journalCount,
