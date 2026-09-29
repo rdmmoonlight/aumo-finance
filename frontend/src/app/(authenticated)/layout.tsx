@@ -36,7 +36,7 @@ export default function AuthenticatedLayout({
     {
       skip: !isAuthenticated,
       refetchOnMountOrArgChange: false,
-    }
+    },
   );
 
   useEffect(() => {
@@ -86,7 +86,9 @@ export default function AuthenticatedLayout({
           <main className="flex-1 p-6 relative">
             {isPeriodsLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
-                <p className="text-sm text-muted-foreground">Memuat periode...</p>
+                <p className="text-sm text-muted-foreground">
+                  Memuat periode...
+                </p>
               </div>
             )}
             {children}
