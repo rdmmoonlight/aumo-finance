@@ -5,16 +5,25 @@ import type {
   FetchArgs,
   FetchBaseQueryError,
 } from "@reduxjs/toolkit/query";
-import { aumoConfig } from "../../aumo.config";
 
-function enforceHttps(url: string): string {
-  if (!url) return url;
-  if (url.includes("localhost") || url.includes("127.0.0.1")) return url;
-  if (url.startsWith("http://")) return url.replace("http://", "https://");
-  return url;
+function getBackendTarget(): string {
+  let target =
+    process.env.NEXT_PUBLIC_WEB_API_URL ||
+    process.env.WEB_API_URL ||
+    "http://localhost:5000";
+
+  // Hapus trailing slash jika ada
+  target = target.replace(/\/+$/, "");
+
+  // Paksa HTTPS jika menembak server remote (Production / Render)
+  if (!target.includes("localhost") && !target.includes("127.0.0.1") && target.startsWith("http://")) {
+    target = target.replace("http://", "https://");
+  }
+
+  return target;
 }
 
-const BASE_URL = enforceHttps(aumoConfig.backendTarget);
+const BASE_URL = getBackendTarget();
 
 export const API_BASE_URL = BASE_URL;
 export const getApiBaseUrl = () => BASE_URL;
@@ -24,16 +33,18 @@ const rawBaseQuery = fetchBaseQuery({
   credentials: "include",
   prepareHeaders: async (
     headers,
-    { getState, endpoint, extra, type, forced, arg },
+    { arg },
   ) => {
-    // SSR: forward cookies dari server
+    // SSR: forward cookies dari server secara dinamis
     if (typeof window === "undefined") {
       try {
         const { cookies } = await import("next/headers");
         const cookieStore = await cookies();
         const cookieHeader = cookieStore.toString();
         if (cookieHeader) headers.set("Cookie", cookieHeader);
-      } catch {}
+      } catch {
+        // Mengabaikan error jika dipanggil di luar konteks request server Next.js
+      }
     }
 
     const fetchArgs = arg as FetchArgs;
