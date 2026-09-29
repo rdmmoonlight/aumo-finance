@@ -65,7 +65,7 @@ export function DashboardSidebarCollapse() {
       className="h-7 w-7 shrink-0"
       onClick={toggleSidebar}
     >
-      {isCollapsed ? (
+      {isCollapsed? (
         <PanelLeft className="h-4 w-4" />
       ) : (
         <PanelLeftClose className="h-4 w-4" />
@@ -156,7 +156,7 @@ export function AppSidebar() {
 
   const { data: me, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip: !isMounted },
+    { skip:!isMounted },
   );
   const user = (me as any)?.data || (me as any);
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
@@ -193,11 +193,11 @@ export function AppSidebar() {
       <SidebarHeader
         className={`border-b shrink-0 flex items-center gap-2 ${
           isCollapsed
-            ? "flex-col justify-center p-2.5 gap-3"
+           ? "flex-col justify-center p-2.5 gap-3"
             : "flex-row justify-between p-3.5"
         }`}
       >
-        {isCollapsed ? (
+        {isCollapsed? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
             <Image
               src="/favicon.ico"
@@ -208,7 +208,6 @@ export function AppSidebar() {
             />
           </div>
         ) : (
-          /* H3 (20px) */
           <h2 className="text-xl font-bold tracking-tight truncate">
             Aumo Finance
           </h2>
@@ -218,8 +217,7 @@ export function AppSidebar() {
 
       <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
         <SidebarGroup>
-          {/* Label kecil (11px) */}
-          <SidebarGroupLabel className="text-[11px] uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="text- uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>
@@ -238,7 +236,6 @@ export function AppSidebar() {
                     >
                       <SidebarMenuItem>
                         <CollapsibleTrigger asChild>
-                          {/* UI (14px) */}
                           <SidebarMenuButton
                             tooltip={item.title}
                             isActive={isReportsActive}
@@ -253,35 +250,47 @@ export function AppSidebar() {
                             <ChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 opacity-60 shrink-0 group-data-[collapsible=icon]:hidden" />
                           </SidebarMenuButton>
                         </CollapsibleTrigger>
+
+                        {/* --- REFINED REPORTS SUBMENU --- */}
                         <CollapsibleContent>
-                          <div className="mt-1 flex flex-col gap-3 group-data-[collapsible=icon]:hidden">
+                          <div className="mt-2.5 flex flex-col gap-4 group-data-[collapsible=icon]:hidden">
                             {REPORT_SECTIONS.map((section) => (
-                              <div key={section.title}>
-                                <div className="px-2 py-1 select-none">
-                                  {/* Label kecil (11px) */}
-                                  <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground/60 leading-none truncate">
+                              <div key={section.title} className="flex flex-col">
+                                <div className="px-3 py-1 select-none">
+                                  <p className="text- font-semibold uppercase tracking-[0.12em] text-muted-foreground/50 leading-none truncate">
                                     {section.title}
                                   </p>
                                 </div>
-                                <div className="mt-1 flex flex-col gap-0.5">
-                                  {section.items.map((sub) => (
-                                    <SidebarMenuItem key={sub.url}>
-                                      {/* UI (14px) */}
-                                      <SidebarMenuButton
-                                        asChild
-                                        isActive={pathname === sub.url}
-                                        tooltip={sub.title}
-                                        className="text-sm h-8 font-normal px-2"
-                                      >
-                                        <Link
-                                          href={sub.url}
-                                          className="truncate"
+                                <div className="relative ml- flex flex-col gap-0.5 border-l border-border/40 pl-2.5">
+                                  {section.items.map((sub) => {
+                                    const active = pathname === sub.url;
+                                    return (
+                                      <SidebarMenuItem key={sub.url}>
+                                        <SidebarMenuButton
+                                          asChild
+                                          isActive={active}
+                                          tooltip={sub.title}
+                                          className="h-7 rounded-md px-2 text- font-normal tracking-tight text-muted-foreground hover:bg-accent/50 hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground transition-colors"
                                         >
-                                          {sub.title}
-                                        </Link>
-                                      </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                  ))}
+                                          <Link
+                                            href={sub.url}
+                                            className="flex items-center gap-2 truncate"
+                                          >
+                                            <span
+                                              className={`h- w- shrink-0 rounded-full transition-colors ${
+                                                active
+                                                 ? "bg-foreground"
+                                                  : "bg-muted-foreground/40"
+                                              }`}
+                                            />
+                                            <span className="truncate leading-none">
+                                              {sub.title}
+                                            </span>
+                                          </Link>
+                                        </SidebarMenuButton>
+                                      </SidebarMenuItem>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             ))}
@@ -293,10 +302,9 @@ export function AppSidebar() {
                 }
                 const isSingleActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url!== "/home" && pathname.startsWith(item.url + "/"));
                 return (
                   <SidebarMenuItem key={item.title}>
-                    {/* UI (14px) */}
                     <SidebarMenuButton
                       asChild
                       isActive={isSingleActive}
@@ -323,88 +331,82 @@ export function AppSidebar() {
 
       <SidebarFooter
         className={`border-t shrink-0 ${
-          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+          isCollapsed? "p-2 flex justify-center" : "p-2.5"
         }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                {isCollapsed ? (
+                {isCollapsed? (
                   <SidebarMenuButton
                     tooltip={user?.fullName || user?.userName || "Account"}
-                    className="size-9 p-0 flex items-center justify-center mx-auto rounded-full hover:bg-accent"
+                    className="mx-auto flex size-9 items-center justify-center rounded-full p-0 hover:bg-accent"
                   >
-                    <Avatar className="w-8 h-8">
+                    <Avatar className="h-8 w-8">
                       <AvatarImage
                         src={user?.avatarUrl || undefined}
                         alt={user?.fullName || "User"}
                       />
-                      {/* Caption (12px) */}
                       <AvatarFallback className="bg-muted text-xs">
-                        {user?.fullName ? (
+                        {user?.fullName? (
                           user.fullName.slice(0, 2).toUpperCase()
                         ) : (
-                          <User className="w-4 h-4" />
+                          <User className="h-4 w-4" />
                         )}
                       </AvatarFallback>
                     </Avatar>
                   </SidebarMenuButton>
                 ) : (
-                  <SidebarMenuButton className="w-full justify-between h-auto py-2.5 px-2">
-                    <div className="flex items-center gap-2.5 text-left min-w-0">
-                      <Avatar className="w-8 h-8 shrink-0">
+                  <SidebarMenuButton className="h-auto w-full justify-between px-2 py-2.5">
+                    <div className="flex min-w-0 items-center gap-2.5 text-left">
+                      <Avatar className="h-8 w-8 shrink-0">
                         <AvatarImage
                           src={user?.avatarUrl || undefined}
                           alt={user?.fullName || "User"}
                         />
-                        {/* Caption (12px) */}
                         <AvatarFallback className="bg-muted text-xs">
-                          {user?.fullName ? (
+                          {user?.fullName? (
                             user.fullName.slice(0, 2).toUpperCase()
                           ) : (
-                            <User className="w-4 h-4" />
+                            <User className="h-4 w-4" />
                           )}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="flex flex-col truncate min-w-0">
-                        {/* UI (14px) */}
-                        <span className="font-medium text-sm leading-tight truncate">
+                      <div className="flex min-w-0 flex-col truncate">
+                        <span className="truncate text-sm font-medium leading-tight">
                           {!isMounted || isUserLoading
-                            ? "Memuat..."
+                           ? "Memuat..."
                             : user?.fullName || user?.userName || "Guest"}
                         </span>
-                        {/* Caption (12px) */}
-                        <span className="text-xs text-muted-foreground truncate">
+                        <span className="truncate text-xs text-muted-foreground">
                           {!isMounted || isUserLoading
-                            ? "..."
+                           ? "..."
                             : user?.email || "Tidak ada email"}
                         </span>
                       </div>
                     </div>
-                    <ChevronsUpDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <ChevronsUpDown className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </SidebarMenuButton>
                 )}
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                side={isCollapsed ? "right" : "top"}
+                side={isCollapsed? "right" : "top"}
                 sideOffset={8}
                 className="w-56"
               >
-                {/* UI (14px) */}
                 <DropdownMenuItem asChild className="text-sm">
                   <Link href="/settings">
-                    <Settings className="w-4 h-4 mr-2" />
+                    <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>
                 </DropdownMenuItem>
-                {/* UI (14px) */}
                 <DropdownMenuItem
                   onClick={handleSignOut}
-                  className="text-destructive text-sm"
+                  className="text-sm text-destructive"
                 >
-                  <LogOut className="w-4 h-4 mr-2" />
+                  <LogOut className="mr-2 h-4 w-4" />
                   Sign Out
                 </DropdownMenuItem>
               </DropdownMenuContent>
