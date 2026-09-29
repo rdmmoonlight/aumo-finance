@@ -84,7 +84,7 @@ export function AppTopBar() {
       {
         skip: !isAuthenticated,
         pollingInterval: isAuthenticated ? 15000 : 0, // Auto-refetch tiap 15 detik
-      }
+      },
     );
 
   const [markAllAsRead, { isLoading: isMarkingAllRead }] =
@@ -118,10 +118,10 @@ export function AppTopBar() {
   const dbStatus = isHealthError
     ? "offline"
     : isHealthLoading
-    ? "connecting"
-    : healthData
-    ? "online"
-    : "offline";
+      ? "connecting"
+      : healthData
+        ? "online"
+        : "offline";
 
   // Parsing array periods
   const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
@@ -230,7 +230,7 @@ export function AppTopBar() {
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
                                   [],
-                                  { hour: "2-digit", minute: "2-digit" }
+                                  { hour: "2-digit", minute: "2-digit" },
                                 )
                               : ""}
                           </span>
