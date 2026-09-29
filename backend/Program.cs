@@ -33,6 +33,12 @@ namespace AumoBackend
             var builder = WebApplication.CreateBuilder(args);
 
             // =====================================
+            // 0. HTTP CLIENT REGISTRATION
+            // =====================================
+            // Mendaftarkan IHttpClientFactory ke DI Container
+            builder.Services.AddHttpClient();
+
+            // =====================================
             // 1. DATABASE CONFIGURATION (PostgreSQL)
             // =====================================
             var connectionString = builder.Configuration["DATABASE_URL"]
@@ -155,7 +161,7 @@ namespace AumoBackend
             })
             .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
             {
-                options.RequireHttpsMetadata = false;
+                options.RequireHttpsMetadata = true; // Wajib HTTPS untuk JWT metadata
                 options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
@@ -254,13 +260,18 @@ namespace AumoBackend
             var app = builder.Build();
 
             // =====================================
-            // MIDDLEWARE FORWARDED HEADERS & HTTPS
+            // MIDDLEWARE FORWARDED HEADERS & HTTPS ENFORCEMENT
             // =====================================
             app.UseForwardedHeaders();
 
+            // Paksa scheme menjadi HTTPS di balik reverse proxy (misal: Render.com)
             app.Use(async (context, next) =>
             {
                 if (context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) && proto == "https")
+                {
+                    context.Request.Scheme = "https";
+                }
+                else
                 {
                     context.Request.Scheme = "https";
                 }
