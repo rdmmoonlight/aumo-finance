@@ -30,7 +30,7 @@ public class SummaryController : ControllerBase
     {
         // 1. Ambil User ID aktif (Mendukung Cookie & JWT Bearer)
         var user = await _userManager.GetUserAsync(User);
-        
+
         Guid userId;
         if (user != null)
         {
@@ -38,7 +38,7 @@ public class SummaryController : ControllerBase
         }
         else
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier) 
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                               ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userId))
@@ -56,10 +56,10 @@ public class SummaryController : ControllerBase
 
         var activePeriodTask = _context.Periods
             .Where(p => p.UserId == userId && !p.IsClosed && p.IsSelected)
-            .Select(p => new 
-            { 
-                p.PeriodName, 
-                p.IsClosed 
+            .Select(p => new
+            {
+                p.PeriodName,
+                p.IsClosed
             })
             .FirstOrDefaultAsync();
 
