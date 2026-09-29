@@ -16,7 +16,11 @@ function getBackendTarget(): string {
   target = target.replace(/\/+$/, "");
 
   // Paksa HTTPS jika menembak server remote (Production / Render)
-  if (!target.includes("localhost") && !target.includes("127.0.0.1") && target.startsWith("http://")) {
+  if (
+    !target.includes("localhost") &&
+    !target.includes("127.0.0.1") &&
+    target.startsWith("http://")
+  ) {
     target = target.replace("http://", "https://");
   }
 
@@ -31,10 +35,7 @@ export const getApiBaseUrl = () => BASE_URL;
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   credentials: "include",
-  prepareHeaders: async (
-    headers,
-    { arg },
-  ) => {
+  prepareHeaders: async (headers, { arg }) => {
     // SSR: forward cookies dari server secara dinamis
     if (typeof window === "undefined") {
       try {
