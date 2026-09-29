@@ -46,31 +46,47 @@ public class SummaryController : ControllerBase
             }
         }
 
-        // FIX: Jangan pakai Task.WhenAll di 1 DbContext. Sequential aja, ini udah cepet.
-        var journalCount = await _context.JournalEntries
+        // 1. Cari periode yang sedang dipilih oleh user (IsSelected == true)
+        var selectedPeriod = await _context.Periods
            .AsNoTracking()
-           .CountAsync(j => j.UserId == userId);
-
-        var activeCoaCount = await _context.ChartOfAccounts
-           .AsNoTracking()
-           .CountAsync(c => c.UserId == userId && c.IsActive);
-
-        var activePeriod = await _context.Periods
-           .AsNoTracking()
-           .Where(p => p.UserId == userId && !p.IsClosed && p.IsSelected)
+           .Where(p => p.UserId == userId && p.IsSelected)
            .Select(p => new
            {
+               p.Id,
                p.PeriodName,
+               p.StartDate,
+               p.EndDate,
                p.IsClosed
            })
            .FirstOrDefaultAsync();
 
+        // 2. Query JournalEntries filtered berdasarkan rentang tanggal periode yang dipilih (jika ada)
+        var journalQuery = _context.JournalEntries
+           .AsNoTracking()
+           .Where(j => j.UserId == userId);
+
+        if (selectedPeriod != null)
+        {
+            journalQuery = journalQuery.Where(j => j.EntryDate >= selectedPeriod.StartDate && j.EntryDate <= selectedPeriod.EndDate);
+        }
+
+        var journalCount = await journalQuery.CountAsync();
+
+        // 3. Hitung Active COA
+        var activeCoaCount = await _context.ChartOfAccounts
+           .AsNoTracking()
+           .CountAsync(c => c.UserId == userId && c.IsActive);
+
+        var activePeriodName = selectedPeriod?.PeriodName ?? "Tidak Ada Periode Aktif";
+        var isPeriodOpen = selectedPeriod != null && !selectedPeriod.IsClosed;
+
         var summaryData = new
         {
+            selectedPeriodId = selectedPeriod?.Id,
             totalJournal = journalCount,
             activeCoa = activeCoaCount,
-            activePeriodName = activePeriod?.PeriodName ?? "Tidak Ada Periode Aktif",
-            isPeriodOpen = activePeriod != null && !activePeriod.IsClosed
+            activePeriodName = activePeriodName,
+            isPeriodOpen = isPeriodOpen
         };
 
         return Ok(new
