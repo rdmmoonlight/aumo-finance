@@ -1,13 +1,13 @@
 "use client";
 
 import React, { Suspense, useState, useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import {
   usePostApiV1AuthLoginMutation,
   useGetApiV1AuthMeQuery,
   generatedApi,
 } from "@/lib/generatedApi";
-import { useAppDispatch } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
