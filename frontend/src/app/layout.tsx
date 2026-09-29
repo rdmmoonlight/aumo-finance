@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { cacheLife } from 'next/cache'
 import { ThemeProvider } from "@/components/theme-provider";
 import { ReduxProvider } from "@/components/redux-provider";
 import { Inter } from "next/font/google";
@@ -26,7 +27,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({
+export default function RootLayout(
+   'use cache'
+  cacheLife('hours')
+{
   children,
 }: Readonly<{
   children: React.ReactNode;
