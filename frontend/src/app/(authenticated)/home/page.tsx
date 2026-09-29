@@ -23,18 +23,56 @@ interface MarketItem {
 }
 
 export default function HomePage() {
-  // Menggunakan RTK Query Hook yang berasal dari file rujukan
   const {
-    data: apiMarketData,
+    data: rawResponse,
     isLoading,
     isFetching,
+    isError,
     refetch,
   } = useGetApiV1MarketQuery();
 
-  // Parsing data dari RTK Query API atau penyesuaian tipe jika format backend mengembalikannya
-  const marketData: MarketItem[] = Array.isArray(apiMarketData)
-    ? (apiMarketData as unknown as MarketItem[])
-    : [];
+  // Ekstraksi data secara fleksibel (menangani array langsung maupun wrapped object like { data: [...] })
+  const extractRawItems = (res: unknown): Record<string, unknown>[] => {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (typeof res === "object") {
+      const obj = res as Record<string, unknown>;
+      if (Array.isArray(obj.data)) return obj.data;
+      if (Array.isArray(obj.items)) return obj.items;
+      if (Array.isArray(obj.result)) return obj.result;
+    }
+    return [];
+  };
+
+  // Normalisasi field dari Backend (mendukung PascalCase & camelCase)
+  const rawList = extractRawItems(rawResponse);
+  const marketData: MarketItem[] = rawList.map((item) => {
+    const symbol = String(item.symbol ?? item.Symbol ?? item.code ?? "N/A");
+    const name = String(item.name ?? item.Name ?? item.description ?? "");
+    const rawPrice = item.price ?? item.Price ?? item.value ?? 0;
+    const rawChange = item.change ?? item.Change ?? item.changePercent ?? 0;
+    const isUp = Boolean(item.isUp ?? item.IsUp ?? Number(rawChange) >= 0);
+
+    // Format harga jika berupa angka
+    const formattedPrice =
+      typeof rawPrice === "number"
+        ? `Rp ${Math.round(rawPrice).toLocaleString("id-ID")}`
+        : String(rawPrice);
+
+    // Format persen perubahan
+    const formattedChange =
+      typeof rawChange === "number"
+        ? `${rawChange >= 0 ? "+" : ""}${rawChange.toFixed(2)}%`
+        : String(rawChange);
+
+    return {
+      symbol,
+      name,
+      price: formattedPrice,
+      change: formattedChange,
+      isUp,
+    };
+  });
 
   return (
     <div className="grid w-full place-items-center py-6">
@@ -53,7 +91,8 @@ export default function HomePage() {
                 >
                   LIVE
                 </Badge>
-                {/* Tombol Refresh di pojok kanan atas widget Market */}
+
+                {/* Tombol Refresh */}
                 <Button
                   variant="ghost"
                   size="icon"
@@ -71,9 +110,13 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {isLoading || isFetching ? (
+              {isLoading ? (
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
                   Memuat indikator pasar...
+                </div>
+              ) : isError ? (
+                <div className="col-span-2 py-4 text-center text-xs text-rose-400">
+                  Gagal memuat indikator pasar dari server.
                 </div>
               ) : marketData.length > 0 ? (
                 marketData.map((item) => (
@@ -108,7 +151,7 @@ export default function HomePage() {
                 ))
               ) : (
                 <div className="col-span-2 py-4 text-center text-xs text-white/40">
-                  Gagal memuat indikator pasar.
+                  Tidak ada data pasar tersedia.
                 </div>
               )}
             </div>
