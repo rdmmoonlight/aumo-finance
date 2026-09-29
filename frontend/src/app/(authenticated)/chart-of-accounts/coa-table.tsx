@@ -293,7 +293,10 @@ export function ChartOfAccountsTable() {
           <p className="text-sm text-muted-foreground mt-1 flex items-center gap-2">
             <span>Master list of financial accounts</span>
             <span>•</span>
-            <Badge variant="secondary" className="font-mono text-xs font-normal">
+            <Badge
+              variant="secondary"
+              className="font-mono text-xs font-normal"
+            >
               {filteredAccounts.length} accounts
             </Badge>
             <span>•</span>
@@ -405,8 +408,7 @@ export function ChartOfAccountsTable() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      | { headerClassName?: string }
-                      | undefined;
+                      { headerClassName?: string } | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -446,8 +448,7 @@ export function ChartOfAccountsTable() {
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          | { cellClassName?: string }
-                          | undefined;
+                          { cellClassName?: string } | undefined;
                         return (
                           <TableCell
                             key={cell.id}
