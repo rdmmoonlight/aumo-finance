@@ -28,7 +28,7 @@ public class MarketController : ControllerBase
         try
         {
             var client = _httpClientFactory.CreateClient();
-            
+
             // Tambahkan User-Agent standar agar permintaan ke Yahoo Finance tidak diblokir
             client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64)");
 
@@ -60,10 +60,10 @@ public class MarketController : ControllerBase
     }
 
     private static async Task<object?> FetchSymbolDataAsync(
-        HttpClient client, 
-        string url, 
-        string symbol, 
-        string name, 
+        HttpClient client,
+        string url,
+        string symbol,
+        string name,
         bool isCurrency)
     {
         try
