@@ -94,7 +94,7 @@
     background-color: #0e0e10;
     color-scheme: dark;
 
-    /* REQUEST LU: tulisan putih = blok hitam */
+    /* Selection Default */
     --selection-bg: #000000;
     --selection-fg: #ffffff;
   }
@@ -105,10 +105,25 @@
     letter-spacing: -0.011em;
   }
 
+  /* Force font & icon color di dark mode / auth */
+  .dark,
+  .dark body,
+  .dark input,
+  .dark textarea,
+  .dark select,
+  .dark button {
+    color: #ffffff;
+  }
+
+  /* Placeholder input di dark mode */
+  .dark ::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
   /* =========================================
-          4. SELECTION SYSTEM - ANTI PUTIH-PUTIH
+        4. SELECTION SYSTEM
      ========================================= */
-  /* 4a. Global - dark default */
+  /* 4a. Global selection */
   ::selection {
     background-color: var(--selection-bg);
     color: var(--selection-fg);
@@ -118,8 +133,9 @@
     color: var(--selection-fg);
   }
 
-  /* 4b. True white islands - yang emang putih di dark mode juga */
-  :is(
+  /* 4b. Explicit light islands inside dark mode */
+  /* Hanya ubah warna teks hitam jika elemen tersebut berada dalam konteks light mode aktif */
+  .light :is(
     .bg-white,
     .bg-zinc-50,
     .bg-zinc-100,
@@ -127,9 +143,7 @@
     .bg-gray-100,
     .bg-slate-50
   ) {
-    --selection-bg: #ffffff;
-    --selection-fg: #000000;
-    color: #000000; /* paksa tulisan hitam kalo bg nya putih */
+    color: #000000;
   }
 
   :is(
@@ -141,14 +155,13 @@
     .bg-slate-50
   )::selection,
   :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50
-    )
-    *::selection {
+    .bg-white,
+    .bg-zinc-50,
+    .bg-zinc-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-50
+  ) *::selection {
     background-color: #ffffff;
     color: #000000;
   }
@@ -162,61 +175,56 @@
     .bg-slate-50
   )::-moz-selection,
   :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50
-    )
-    *::-moz-selection {
+    .bg-white,
+    .bg-zinc-50,
+    .bg-zinc-100,
+    .bg-gray-50,
+    .bg-gray-100,
+    .bg-slate-50
+  ) *::-moz-selection {
     background-color: #ffffff;
     color: #000000;
   }
 
-  /* 4c. Light mode islands - baru jadi putih pas .light aktif */
+  /* 4c. Light mode selection override */
   .light,
-  .light
-    :is(
-      .bg-card,
-      .bg-popover,
-      .bg-background,
-      .bg-muted,
-      input,
-      textarea,
-      select
-    ) {
+  .light :is(
+    .bg-card,
+    .bg-popover,
+    .bg-background,
+    .bg-muted,
+    input,
+    textarea,
+    select
+  ) {
     --selection-bg: #ffffff;
     --selection-fg: #000000;
   }
 
-  .light
-    :is(
-      .bg-card,
-      .bg-popover,
-      .bg-background,
-      .bg-muted,
-      input,
-      textarea,
-      select
-    )::selection,
-  .light
-    :is(
-      .bg-card,
-      .bg-popover,
-      .bg-background,
-      .bg-muted,
-      input,
-      textarea,
-      select
-    )
-    *::selection {
+  .light :is(
+    .bg-card,
+    .bg-popover,
+    .bg-background,
+    .bg-muted,
+    input,
+    textarea,
+    select
+  )::selection,
+  .light :is(
+    .bg-card,
+    .bg-popover,
+    .bg-background,
+    .bg-muted,
+    input,
+    textarea,
+    select
+  ) *::selection {
     background-color: #ffffff;
     color: #000000;
   }
 
   /* =========================================
-          5. SCROLLBAR SYSTEM
+        5. SCROLLBAR SYSTEM
      ========================================= */
   ::-webkit-scrollbar {
     width: 5px;
