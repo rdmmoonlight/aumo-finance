@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -29,13 +30,30 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { cn } from "@/lib/utils";
-import { useGetApiV1ChartOfAccountsQuery } from "@/lib/generatedApi";
 import {
-  AddAccountDialog,
-  EditAccountDialog,
-  DeleteAccountAlertDialog,
-} from "./coa-dialogs";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
+import {
+  useGetApiV1ChartOfAccountsQuery,
+  usePostApiV1ChartOfAccountsMutation,
+  usePutApiV1ChartOfAccountsByIdMutation,
+  useDeleteApiV1ChartOfAccountsByIdMutation,
+} from "@/lib/generatedApi";
 import {
   Network,
   Plus,
@@ -46,8 +64,348 @@ import {
   Search,
   Check,
 } from "lucide-react";
-import { ACCOUNT_TYPES, ACCOUNT_RANGES, AccountItem } from "./coa-types";
+import {
+  ACCOUNT_TYPES,
+  ACCOUNT_RANGES,
+  ChartOfAccount,
+  AccountItem,
+} from "./coa-types";
 
+// ==========================================
+// 1. ADD ACCOUNT DIALOG
+// ==========================================
+export function AddAccountDialog({
+  open,
+  onOpenChange,
+  accounts,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  accounts: ChartOfAccount[];
+  onSuccess: (msg: string) => void;
+}) {
+  const [createAccount, { isLoading: isCreating }] =
+    usePostApiV1ChartOfAccountsMutation();
+
+  const [error, setError] = useState<string | null>(null);
+  const [newAccount, setNewAccount] = useState({
+    type: "",
+    referenceNumber: 0,
+    accountName: "",
+    role: "Default",
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const refNum = Number(newAccount.referenceNumber);
+    const range = ACCOUNT_RANGES[newAccount.type];
+
+    if (range && (refNum < range.start || refNum > range.end)) {
+      setError(
+        `Ref ${refNum} not valid for ${newAccount.type} (${range.start}-${range.end})`
+      );
+      return;
+    }
+
+    if (accounts.some((a) => Number(a.referenceNumber) === refNum)) {
+      setError(`Code ${refNum} already used`);
+      return;
+    }
+
+    try {
+      await createAccount({
+        createAccountRequest: {
+          referenceNumber: refNum,
+          accountName: newAccount.accountName,
+          type: newAccount.type,
+          role: newAccount.role,
+        },
+      }).unwrap();
+
+      onSuccess(`Account '${newAccount.accountName}' created`);
+      onOpenChange(false);
+      setNewAccount({
+        type: "",
+        referenceNumber: 0,
+        accountName: "",
+        role: "Default",
+      });
+    } catch (err: any) {
+      setError(
+        err?.data?.message || err?.message || "Failed to create account"
+      );
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <Plus size={18} className="text-primary" /> Add New Account
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="text-xs">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <div className="space-y-2">
+            <Label className="text-sm">Category</Label>
+            <Select
+              value={newAccount.type}
+              onValueChange={(v) =>
+                setNewAccount({
+                  ...newAccount,
+                  type: v,
+                  referenceNumber: ACCOUNT_RANGES[v]?.start || 0,
+                })
+              }
+              required
+            >
+              <SelectTrigger className="text-sm">
+                <SelectValue placeholder="Select Category" />
+              </SelectTrigger>
+              <SelectContent className="text-sm">
+                {ACCOUNT_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {ACCOUNT_RANGES[t]?.label ?? t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Reference Number</Label>
+            <Input
+              type="number"
+              value={newAccount.referenceNumber || ""}
+              onChange={(e) =>
+                setNewAccount({
+                  ...newAccount,
+                  referenceNumber: Number(e.target.value),
+                })
+              }
+              disabled={!newAccount.type}
+              className="text-sm"
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              {newAccount.type
+                ? `Valid: ${ACCOUNT_RANGES[newAccount.type].start}-${ACCOUNT_RANGES[newAccount.type].end}`
+                : "Select category first"}
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Account Name</Label>
+            <Input
+              value={newAccount.accountName}
+              onChange={(e) =>
+                setNewAccount({ ...newAccount, accountName: e.target.value })
+              }
+              className="text-sm"
+              required
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isCreating}
+              className="text-sm font-medium"
+            >
+              {isCreating ? "Saving..." : "Save Account"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ==========================================
+// 2. EDIT ACCOUNT DIALOG
+// ==========================================
+export function EditAccountDialog({
+  open,
+  onOpenChange,
+  account,
+  onSuccess,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  account: ChartOfAccount;
+  onSuccess: (msg: string) => void;
+}) {
+  const [updateAccount, { isLoading: isUpdating }] =
+    usePutApiV1ChartOfAccountsByIdMutation();
+
+  const [error, setError] = useState<string | null>(null);
+  const [editData, setEditData] = useState<ChartOfAccount>(account);
+
+  useEffect(() => {
+    setEditData(account);
+  }, [account]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    try {
+      await updateAccount({
+        id: editData.id,
+        updateAccountRequest: {
+          referenceNumber: Number(editData.referenceNumber),
+          accountName: editData.accountName,
+          type: editData.type,
+          role: editData.role,
+          isActive: editData.isActive,
+        },
+      }).unwrap();
+
+      onSuccess(`Account '${editData.accountName}' updated`);
+      onOpenChange(false);
+    } catch (err: any) {
+      setError(
+        err?.data?.message || err?.message || "Failed to update account"
+      );
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">Edit Account</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <Alert variant="destructive" className="text-xs">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          <div className="space-y-2">
+            <Label className="text-sm">Name</Label>
+            <Input
+              value={editData.accountName}
+              onChange={(e) =>
+                setEditData({ ...editData, accountName: e.target.value })
+              }
+              className="text-sm"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label className="text-sm">Ref Number</Label>
+            <Input
+              type="number"
+              value={editData.referenceNumber}
+              onChange={(e) =>
+                setEditData({
+                  ...editData,
+                  referenceNumber: Number(e.target.value),
+                })
+              }
+              className="text-sm"
+              required
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              className="text-sm font-medium"
+            >
+              {isUpdating ? "Updating..." : "Update"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ==========================================
+// 3. DELETE ACCOUNT ALERT DIALOG
+// ==========================================
+export function DeleteAccountAlertDialog({
+  account,
+  onOpenChange,
+  onSuccess,
+  onError,
+}: {
+  account: ChartOfAccount | null;
+  onOpenChange: (open: boolean) => void;
+  onSuccess: (msg: string) => void;
+  onError: (msg: string) => void;
+}) {
+  const [deleteAccount, { isLoading: isDeleting }] =
+    useDeleteApiV1ChartOfAccountsByIdMutation();
+
+  const handleDelete = async () => {
+    if (!account) return;
+
+    try {
+      await deleteAccount({ id: account.id }).unwrap();
+      onSuccess(`Deleted '${account.accountName}'`);
+      onOpenChange(false);
+    } catch (err: any) {
+      onError(err?.data?.message || err?.message || "Failed to delete account");
+      onOpenChange(false);
+    }
+  };
+
+  return (
+    <AlertDialog open={!!account} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className="text-xl font-bold">
+            Delete Account
+          </AlertDialogTitle>
+          <AlertDialogDescription className="text-xs text-muted-foreground">
+            Are you sure you want to delete &quot;{account?.accountName}&quot;?
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isDeleting} className="text-sm">
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm font-medium"
+          >
+            {isDeleting ? "Deleting..." : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
+// ==========================================
+// 4. MAIN TABLE COMPONENT
+// ==========================================
 export function ChartOfAccountsTable() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
@@ -103,7 +461,7 @@ export function ChartOfAccountsTable() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
-    null,
+    null
   );
 
   // Client-side fallback filter
@@ -194,7 +552,7 @@ export function ChartOfAccountsTable() {
             <span
               className={cn(
                 "font-medium font-mono text-sm",
-                balance >= 0 ? "text-emerald-500" : "text-red-500",
+                balance >= 0 ? "text-emerald-500" : "text-red-500"
               )}
             >
               {balance.toLocaleString("id-ID")}
@@ -218,7 +576,7 @@ export function ChartOfAccountsTable() {
               className={cn(
                 "text-xs",
                 isActive &&
-                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
+                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
               )}
             >
               {isActive ? "Active" : "Inactive"}
@@ -408,7 +766,8 @@ export function ChartOfAccountsTable() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      { headerClassName?: string } | undefined;
+                      | { headerClassName?: string }
+                      | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -418,7 +777,7 @@ export function ChartOfAccountsTable() {
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext(),
+                              header.getContext()
                             )}
                       </TableHead>
                     );
@@ -443,12 +802,13 @@ export function ChartOfAccountsTable() {
                     <TableRow
                       key={row.id}
                       className={cn(
-                        highlightId === String(acc.id) && "bg-primary/10",
+                        highlightId === String(acc.id) && "bg-primary/10"
                       )}
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          { cellClassName?: string } | undefined;
+                          | { cellClassName?: string }
+                          | undefined;
                         return (
                           <TableCell
                             key={cell.id}
@@ -456,7 +816,7 @@ export function ChartOfAccountsTable() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext(),
+                              cell.getContext()
                             )}
                           </TableCell>
                         );
