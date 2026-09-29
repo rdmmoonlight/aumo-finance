@@ -1,5 +1,3 @@
-
-
 namespace AumoBackend.Core;
 
 public class MobileLoginRequest
@@ -94,4 +92,12 @@ public class AccountMappingDetailDto
     public string MappedAccountName { get; set; } = string.Empty;
     public string Status { get; set; } = string.Empty;
     public string Reason { get; set; } = string.Empty;
+}
+
+public class DashboardSummaryDto
+{
+    public int TotalJournal { get; set; }
+    public int ActiveCoa { get; set; }
+    public string ActivePeriodName { get; set; } = string.Empty;
+    public bool IsPeriodOpen { get; set; }
 }
