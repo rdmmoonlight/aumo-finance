@@ -35,8 +35,10 @@ export default function HomePage() {
 
       const proxies = [
         (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
-        (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        (url: string) =>
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
+        (url: string) =>
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
       ];
 
       // Coba lewat Yahoo Finance terlebih dahulu agar mendapatkan persentase/nilai perubahan real
@@ -50,9 +52,12 @@ export default function HomePage() {
 
             if (meta?.regularMarketPrice) {
               const price = meta.regularMarketPrice;
-              const prevClose = meta.chartPreviousClose || meta.previousClose || price;
+              const prevClose =
+                meta.chartPreviousClose || meta.previousClose || price;
               const changeAmount = price - prevClose;
-              const changePercent = prevClose ? (changeAmount / prevClose) * 100 : 0;
+              const changePercent = prevClose
+                ? (changeAmount / prevClose) * 100
+                : 0;
               const isUp = changeAmount >= 0;
 
               return {
@@ -100,8 +105,10 @@ export default function HomePage() {
 
       const proxies = [
         (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
-        (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
-        (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+        (url: string) =>
+          `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}&t=${Date.now()}`,
+        (url: string) =>
+          `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
       ];
 
       for (const yahooUrl of yahooEndpoints) {
