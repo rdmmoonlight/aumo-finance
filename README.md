@@ -47,6 +47,9 @@ text-5xl
 /backend
 - ada 2 jenis auth. cookie untuk web dan JWT barier untuk mobile.
 
+/frontend
+- deploy pertama di Vercel tanggal 9 September 2026.
+
 /mobile
 - Android native (Kotlin), bukan React Native/Flutter/MAUI. Konsumen REST API `/backend` di repo yang sama, auth pakai JWT Bearer.
 
