@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   useGetApiV1AuthMeQuery,
@@ -18,43 +18,38 @@ export default function AuthenticatedLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const [isMounted, setIsMounted] = useState(false);
 
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
-
+  // RTK Query sudah otomatis menangani caching & SSR/hydration di client side.
+  // Tidak perlu lagi menunggu state 'isMounted'.
   const {
     data: authData,
     isLoading: isAuthLoading,
     isError: isAuthError,
   } = useGetApiV1AuthMeQuery(undefined, {
-    skip: !isMounted,
     refetchOnMountOrArgChange: false,
   });
 
-  const isAuthenticated =
-    isMounted && !isAuthLoading && !isAuthError && !!authData;
+  const isAuthenticated = !isAuthLoading && !isAuthError && !!authData;
 
   const { isLoading: isPeriodsLoading } = useGetApiV1PeriodsOpenInfoQuery(
     undefined,
     {
       skip: !isAuthenticated,
       refetchOnMountOrArgChange: false,
-    },
+    }
   );
 
   useEffect(() => {
-    if (isMounted && isAuthError) {
+    if (isAuthError) {
       const t = setTimeout(() => router.replace("/auth"), 800);
       return () => clearTimeout(t);
     }
-  }, [isMounted, isAuthError, router]);
+  }, [isAuthError, router]);
 
-  if (!isMounted || isAuthLoading) {
+  // Render kondisi loading HANYA saat verifikasi awal (saat cache benar-benar kosong)
+  if (isAuthLoading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        {/* UI (14px) */}
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">Memverifikasi sesi...</p>
       </div>
     );
@@ -62,8 +57,7 @@ export default function AuthenticatedLayout({
 
   if (isAuthError) {
     return (
-      <div className="flex h-screen w-full items-center justify-center">
-        {/* UI (14px) */}
+      <div className="flex h-screen w-full items-center justify-center bg-background">
         <p className="text-sm text-muted-foreground">
           Sesi berakhir, mengalihkan ke halaman login...
         </p>
@@ -84,14 +78,19 @@ export default function AuthenticatedLayout({
         <AppSidebar />
         <SidebarInset className="flex flex-1 flex-col min-w-0">
           <AppTopBar />
-          {isPeriodsLoading ? (
-            <div className="flex flex-1 items-center justify-center p-6">
-              {/* UI (14px) */}
-              <p className="text-sm text-muted-foreground">Memuat periode...</p>
-            </div>
-          ) : (
-            <main className="flex-1 p-6">{children}</main>
-          )}
+          {/* 
+            JANGAN unmount {children} saat loading periode!
+            Biarkan UI tetap tampil dan gunakan overlay/skeleton jika perlu, 
+            agar layout tidak berkedip hilang-tampil.
+          */}
+          <main className="flex-1 p-6 relative">
+            {isPeriodsLoading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
+                <p className="text-sm text-muted-foreground">Memuat periode...</p>
+              </div>
+            )}
+            {children}
+          </main>
           <AppFooter />
         </SidebarInset>
       </SidebarProvider>
