@@ -51,26 +51,133 @@ type ReportItem = {
 };
 
 const REPORTS: ReportItem[] = [
-  { slug: "unadjusted-trial-balance", title: "Unadjusted Trial Balance", desc: "Neraca saldo awal sebelum penyesuaian", category: "Trial Balance Cycle", step: "01", icon: ClipboardList },
-  { slug: "worksheet", title: "Worksheet", desc: "10-column worksheet & kertas kerja", category: "Trial Balance Cycle", step: "02", icon: TableIcon },
-  { slug: "adjusting-journal", title: "Adjusting Journal", desc: "Jurnal penyesuaian akhir periode", category: "Trial Balance Cycle", step: "03", icon: BookOpen },
-  { slug: "adjusted-trial-balance", title: "Adjusted Trial Balance", desc: "Neraca saldo setelah penyesuaian", category: "Trial Balance Cycle", step: "04", icon: FileCheck },
-  { slug: "general-journal", title: "General Journal", desc: "Buku harian semua transaksi", category: "Journals & Ledgers", step: "05", icon: Receipt },
-  { slug: "general-ledger-temporary", title: "General Ledger - Temporary", desc: "Buku besar akun nominal", category: "Journals & Ledgers", step: "06", icon: Book },
-  { slug: "general-ledger-permanent", title: "General Ledger - Permanent", desc: "Buku besar akun riil", category: "Journals & Ledgers", step: "07", icon: Library },
-  { slug: "income-statement", title: "Income Statement", desc: "Laporan laba rugi periode berjalan", category: "Financial Statements", step: "08", icon: BarChart3 },
-  { slug: "retained-earnings", title: "Retained Earnings", desc: "Laporan perubahan modal & laba ditahan", category: "Financial Statements", step: "09", icon: Coins },
-  { slug: "statement-of-financial-position", title: "Financial Position", desc: "Neraca / Statement of Financial Position", category: "Financial Statements", step: "10", icon: Building2 },
-  { slug: "statement-of-cash-flow", title: "Cash Flow Statement", desc: "Arus kas operasi, investasi, pendanaan", category: "Financial Statements", step: "11", icon: Banknote },
-  { slug: "closing-journal", title: "Closing Journal", desc: "Jurnal penutup akun nominal", category: "Closing Cycle", step: "12", icon: BookOpen },
-  { slug: "post-closing-trial-balance", title: "Post-Closing Trial Balance", desc: "Neraca saldo setelah penutupan", category: "Closing Cycle", step: "13", icon: FileSpreadsheet },
+  {
+    slug: "unadjusted-trial-balance",
+    title: "Unadjusted Trial Balance",
+    desc: "Neraca saldo awal sebelum penyesuaian",
+    category: "Trial Balance Cycle",
+    step: "01",
+    icon: ClipboardList,
+  },
+  {
+    slug: "worksheet",
+    title: "Worksheet",
+    desc: "10-column worksheet & kertas kerja",
+    category: "Trial Balance Cycle",
+    step: "02",
+    icon: TableIcon,
+  },
+  {
+    slug: "adjusting-journal",
+    title: "Adjusting Journal",
+    desc: "Jurnal penyesuaian akhir periode",
+    category: "Trial Balance Cycle",
+    step: "03",
+    icon: BookOpen,
+  },
+  {
+    slug: "adjusted-trial-balance",
+    title: "Adjusted Trial Balance",
+    desc: "Neraca saldo setelah penyesuaian",
+    category: "Trial Balance Cycle",
+    step: "04",
+    icon: FileCheck,
+  },
+  {
+    slug: "general-journal",
+    title: "General Journal",
+    desc: "Buku harian semua transaksi",
+    category: "Journals & Ledgers",
+    step: "05",
+    icon: Receipt,
+  },
+  {
+    slug: "general-ledger-temporary",
+    title: "General Ledger - Temporary",
+    desc: "Buku besar akun nominal",
+    category: "Journals & Ledgers",
+    step: "06",
+    icon: Book,
+  },
+  {
+    slug: "general-ledger-permanent",
+    title: "General Ledger - Permanent",
+    desc: "Buku besar akun riil",
+    category: "Journals & Ledgers",
+    step: "07",
+    icon: Library,
+  },
+  {
+    slug: "income-statement",
+    title: "Income Statement",
+    desc: "Laporan laba rugi periode berjalan",
+    category: "Financial Statements",
+    step: "08",
+    icon: BarChart3,
+  },
+  {
+    slug: "retained-earnings",
+    title: "Retained Earnings",
+    desc: "Laporan perubahan modal & laba ditahan",
+    category: "Financial Statements",
+    step: "09",
+    icon: Coins,
+  },
+  {
+    slug: "statement-of-financial-position",
+    title: "Financial Position",
+    desc: "Neraca / Statement of Financial Position",
+    category: "Financial Statements",
+    step: "10",
+    icon: Building2,
+  },
+  {
+    slug: "statement-of-cash-flow",
+    title: "Cash Flow Statement",
+    desc: "Arus kas operasi, investasi, pendanaan",
+    category: "Financial Statements",
+    step: "11",
+    icon: Banknote,
+  },
+  {
+    slug: "closing-journal",
+    title: "Closing Journal",
+    desc: "Jurnal penutup akun nominal",
+    category: "Closing Cycle",
+    step: "12",
+    icon: BookOpen,
+  },
+  {
+    slug: "post-closing-trial-balance",
+    title: "Post-Closing Trial Balance",
+    desc: "Neraca saldo setelah penutupan",
+    category: "Closing Cycle",
+    step: "13",
+    icon: FileSpreadsheet,
+  },
 ];
 
 const CATEGORIES = [
-  { id: "Trial Balance Cycle", label: "Trial Balance & Worksheet", hint: "Tahap awal hingga penyesuaian" },
-  { id: "Journals & Ledgers", label: "Journals & Ledgers", hint: "Pencatatan harian & buku besar" },
-  { id: "Financial Statements", label: "Financial Statements", hint: "Output utama laporan keuangan" },
-  { id: "Closing Cycle", label: "Closing Cycle", hint: "Penutupan & saldo awal periode baru" },
+  {
+    id: "Trial Balance Cycle",
+    label: "Trial Balance & Worksheet",
+    hint: "Tahap awal hingga penyesuaian",
+  },
+  {
+    id: "Journals & Ledgers",
+    label: "Journals & Ledgers",
+    hint: "Pencatatan harian & buku besar",
+  },
+  {
+    id: "Financial Statements",
+    label: "Financial Statements",
+    hint: "Output utama laporan keuangan",
+  },
+  {
+    id: "Closing Cycle",
+    label: "Closing Cycle",
+    hint: "Penutupan & saldo awal periode baru",
+  },
 ];
 
 const columnHelper = createColumnHelper<ReportItem>();
@@ -94,12 +201,12 @@ export default function ReportsPage() {
         });
         const json = await res.json();
         // Controller kamu return data dobel di root & di data
-        const data = json.data?? json;
+        const data = json.data ?? json;
         setSummary({
-          totalJournal: data.totalJournal?? 0,
-          activeCoa: data.activeCoa?? 0,
-          activePeriodName: data.activePeriodName?? "Tidak Ada Periode Aktif",
-          isPeriodOpen: data.isPeriodOpen?? false,
+          totalJournal: data.totalJournal ?? 0,
+          activeCoa: data.activeCoa ?? 0,
+          activePeriodName: data.activePeriodName ?? "Tidak Ada Periode Aktif",
+          isPeriodOpen: data.isPeriodOpen ?? false,
         });
       } catch (e) {
         console.error(e);
@@ -110,33 +217,45 @@ export default function ReportsPage() {
     fetchSummary();
   }, []);
 
-  const columns = useMemo(() => [
-    columnHelper.accessor("title", {
-      header: "Report Card",
-      cell: (info) => {
-        const report = info.row.original;
-        const Icon = report.icon;
-        return (
-          <Link href={`/reports/${report.slug}`} className="group relative flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-slate-900/80 text-white/80 group-hover:border-indigo-400/30 group-hover:text-white">
-              <Icon className="h-4 w-4" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="truncate text-sm font-semibold text-white">{report.title}</span>
-                <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-white/40">{report.step}</span>
+  const columns = useMemo(
+    () => [
+      columnHelper.accessor("title", {
+        header: "Report Card",
+        cell: (info) => {
+          const report = info.row.original;
+          const Icon = report.icon;
+          return (
+            <Link
+              href={`/reports/${report.slug}`}
+              className="group relative flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]"
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-slate-900/80 text-white/80 group-hover:border-indigo-400/30 group-hover:text-white">
+                <Icon className="h-4 w-4" />
               </div>
-              <p className="mt-0.5 line-clamp-1 text-xs text-white/50">{report.desc}</p>
-              <div className="mt-2 flex items-center gap-1 text-xs text-white/30 group-hover:text-indigo-300">
-                <span>/reports/{report.slug}</span>
-                <ArrowRight className="h-3 w-3 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <span className="truncate text-sm font-semibold text-white">
+                    {report.title}
+                  </span>
+                  <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-white/40">
+                    {report.step}
+                  </span>
+                </div>
+                <p className="mt-0.5 line-clamp-1 text-xs text-white/50">
+                  {report.desc}
+                </p>
+                <div className="mt-2 flex items-center gap-1 text-xs text-white/30 group-hover:text-indigo-300">
+                  <span>/reports/{report.slug}</span>
+                  <ArrowRight className="h-3 w-3 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
+                </div>
               </div>
-            </div>
-          </Link>
-        );
-      },
-    }),
-  ], []);
+            </Link>
+          );
+        },
+      }),
+    ],
+    [],
+  );
 
   const table = useReactTable({
     data: REPORTS,
@@ -165,15 +284,28 @@ export default function ReportsPage() {
                 <BarChart2 className="h-6 w-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight">Reports Center</h1>
+                <h1 className="text-2xl font-bold tracking-tight">
+                  Reports Center
+                </h1>
                 <p className="mt-1 max-w-xl text-sm leading-relaxed text-white/60">
-                  Akses 13 laporan siklus akuntansi lengkap. Dari unadjusted trial balance sampai post-closing.
+                  Akses 13 laporan siklus akuntansi lengkap. Dari unadjusted
+                  trial balance sampai post-closing.
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Badge variant="outline" className="border-emerald-500/20 bg-emerald-500/10 text-emerald-400">{REPORTS.length} REPORTS</Badge>
-              <Badge variant="outline" className="border-white/10 bg-white/5 text-white/60">ACCOUNTING CYCLE</Badge>
+              <Badge
+                variant="outline"
+                className="border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+              >
+                {REPORTS.length} REPORTS
+              </Badge>
+              <Badge
+                variant="outline"
+                className="border-white/10 bg-white/5 text-white/60"
+              >
+                ACCOUNTING CYCLE
+              </Badge>
             </div>
           </div>
 
@@ -181,7 +313,6 @@ export default function ReportsPage() {
           <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/10 p-">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-transparent to-violet-500/20 opacity-60" />
             <div className="relative grid grid-cols-1 divide-y divide-white/10 rounded- bg-[#0B1226]/90 backdrop-blur md:grid-cols-3 md:divide-x md:divide-y-0">
-
               {/* 1. Total Journal */}
               <div className="group relative flex items-center gap-4 p-5">
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
@@ -189,11 +320,15 @@ export default function ReportsPage() {
                   <Receipt className="h-5 w-5" />
                 </div>
                 <div className="relative">
-                  <p className="text- uppercase tracking-widest text-white/40">Total Journal</p>
-                  {loadingSummary? (
+                  <p className="text- uppercase tracking-widest text-white/40">
+                    Total Journal
+                  </p>
+                  {loadingSummary ? (
                     <div className="mt-1 h-6 w-16 animate-pulse rounded bg-white/10" />
                   ) : (
-                    <p className="mt-0.5 text-2xl font-bold tabular-nums text-white">{summary?.totalJournal?? 0}</p>
+                    <p className="mt-0.5 text-2xl font-bold tabular-nums text-white">
+                      {summary?.totalJournal ?? 0}
+                    </p>
                   )}
                   <p className="mt-0.5 flex items-center gap-1 text-xs text-white/40">
                     <Activity className="h-3 w-3" /> entri tercatat
@@ -208,11 +343,15 @@ export default function ReportsPage() {
                   <Layers className="h-5 w-5" />
                 </div>
                 <div className="relative">
-                  <p className="text- uppercase tracking-widest text-white/40">Active COA</p>
-                  {loadingSummary? (
+                  <p className="text- uppercase tracking-widest text-white/40">
+                    Active COA
+                  </p>
+                  {loadingSummary ? (
                     <div className="mt-1 h-6 w-16 animate-pulse rounded bg-white/10" />
                   ) : (
-                    <p className="mt-0.5 text-2xl font-bold tabular-nums text-white">{summary?.activeCoa?? 0}</p>
+                    <p className="mt-0.5 text-2xl font-bold tabular-nums text-white">
+                      {summary?.activeCoa ?? 0}
+                    </p>
                   )}
                   <p className="mt-0.5 text-xs text-white/40">akun aktif</p>
                 </div>
@@ -225,8 +364,10 @@ export default function ReportsPage() {
                   <CalendarCheck2 className="h-5 w-5" />
                 </div>
                 <div className="relative min-w-0 flex-1">
-                  <p className="text- uppercase tracking-widest text-white/40">Active Period</p>
-                  {loadingSummary? (
+                  <p className="text- uppercase tracking-widest text-white/40">
+                    Active Period
+                  </p>
+                  {loadingSummary ? (
                     <div className="mt-1 h-6 w-32 animate-pulse rounded bg-white/10" />
                   ) : (
                     <p className="mt-0.5 truncate text- font-semibold leading-tight text-white">
@@ -234,38 +375,57 @@ export default function ReportsPage() {
                     </p>
                   )}
                   <div className="mt-1.5 flex items-center gap-2">
-                    <span className={`h-2 w-2 rounded-full ${summary?.isPeriodOpen? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" : "bg-amber-400"}`} />
-                    <span className={`text-xs ${summary?.isPeriodOpen? "text-emerald-300" : "text-amber-300/80"}`}>
-                      {summary?.isPeriodOpen? "Open • transaksi boleh masuk" : "Closed / Tidak ada"}
+                    <span
+                      className={`h-2 w-2 rounded-full ${summary?.isPeriodOpen ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" : "bg-amber-400"}`}
+                    />
+                    <span
+                      className={`text-xs ${summary?.isPeriodOpen ? "text-emerald-300" : "text-amber-300/80"}`}
+                    >
+                      {summary?.isPeriodOpen
+                        ? "Open • transaksi boleh masuk"
+                        : "Closed / Tidak ada"}
                     </span>
                   </div>
                 </div>
               </div>
-
             </div>
           </div>
 
           {/* Search */}
           <div className="relative mt-6">
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/40" />
-            <Input value={globalFilter?? ""} onChange={(e) => setGlobalFilter(e.target.value)} placeholder="Cari laporan: journal, ledger, cash flow..." className="h-11 rounded-xl border-white/10 bg-black/40 pl-10 text-sm text-white placeholder:text-white/30 focus-visible:ring-indigo-500/50" />
+            <Input
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              placeholder="Cari laporan: journal, ledger, cash flow..."
+              className="h-11 rounded-xl border-white/10 bg-black/40 pl-10 text-sm text-white placeholder:text-white/30 focus-visible:ring-indigo-500/50"
+            />
           </div>
 
           <Separator className="my-6 bg-white/10" />
 
           <div className="space-y-8">
             {CATEGORIES.map((cat) => {
-              const categoryRows = filteredRows.filter((row) => row.original.category === cat.id);
+              const categoryRows = filteredRows.filter(
+                (row) => row.original.category === cat.id,
+              );
               if (categoryRows.length === 0) return null;
               return (
                 <div key={cat.id}>
                   <div className="mb-3 flex items-baseline justify-between">
-                    <h2 className="text-sm font-semibold tracking-wide text-white/90">{cat.label}</h2>
+                    <h2 className="text-sm font-semibold tracking-wide text-white/90">
+                      {cat.label}
+                    </h2>
                     <span className="text-xs text-white/40">{cat.hint}</span>
                   </div>
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     {categoryRows.map((row) => (
-                      <div key={row.id}>{flexRender(row.getVisibleCells()[0].column.columnDef.cell, row.getVisibleCells()[0].getContext())}</div>
+                      <div key={row.id}>
+                        {flexRender(
+                          row.getVisibleCells()[0].column.columnDef.cell,
+                          row.getVisibleCells()[0].getContext(),
+                        )}
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -275,7 +435,9 @@ export default function ReportsPage() {
 
           {filteredRows.length === 0 && (
             <div className="mt-10 rounded-xl border border-white/10 bg-black/40 py-10 text-center">
-              <p className="text-xs text-white/50">Tidak ada laporan untuk &quot;{globalFilter}&quot;</p>
+              <p className="text-xs text-white/50">
+                Tidak ada laporan untuk &quot;{globalFilter}&quot;
+              </p>
             </div>
           )}
         </CardContent>
