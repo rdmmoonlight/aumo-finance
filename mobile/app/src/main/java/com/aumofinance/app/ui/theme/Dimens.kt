@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
  *
  * Sumber nilai: spesifikasi desain internal Aumo (lihat rujukan lengkap
  * di /docs/spacing-scale.md). Rentang (mis. 8–16dp, 48–56dp, 64–80dp)
- * diwakili oleh dua konstanta *Min/*Max atau *Small/*Large agar tetap
+ * diwakili oleh dua konstanta Min/Max atau Small/Large agar tetap
  * type-safe, bukan angka ambang bebas.
  */
 object AumoDimens {
