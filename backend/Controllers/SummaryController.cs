@@ -31,7 +31,7 @@ public class SummaryController : ControllerBase
         var user = await _userManager.GetUserAsync(User);
 
         Guid userId;
-        if (user!= null)
+        if (user != null)
         {
             userId = user.Id;
         }
@@ -40,7 +40,7 @@ public class SummaryController : ControllerBase
             var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
                              ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
-            if (string.IsNullOrEmpty(userIdClaim) ||!Guid.TryParse(userIdClaim, out userId))
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userId))
             {
                 return Unauthorized(new { success = false, message = "User session expired or invalid." });
             }
@@ -57,20 +57,20 @@ public class SummaryController : ControllerBase
 
         var activePeriod = await _context.Periods
            .AsNoTracking()
-           .Where(p => p.UserId == userId &&!p.IsClosed && p.IsSelected)
+           .Where(p => p.UserId == userId && !p.IsClosed && p.IsSelected)
            .Select(p => new
-            {
-                p.PeriodName,
-                p.IsClosed
-            })
+           {
+               p.PeriodName,
+               p.IsClosed
+           })
            .FirstOrDefaultAsync();
 
         var summaryData = new
         {
             totalJournal = journalCount,
             activeCoa = activeCoaCount,
-            activePeriodName = activePeriod?.PeriodName?? "Tidak Ada Periode Aktif",
-            isPeriodOpen = activePeriod!= null &&!activePeriod.IsClosed
+            activePeriodName = activePeriod?.PeriodName ?? "Tidak Ada Periode Aktif",
+            isPeriodOpen = activePeriod != null && !activePeriod.IsClosed
         };
 
         return Ok(new
