@@ -21,11 +21,6 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -43,7 +38,6 @@ import {
   FileSpreadsheet,
   Wrench,
   Settings,
-  ChevronRight,
   User,
   LogOut,
   ChevronsUpDown,
@@ -65,7 +59,7 @@ export function DashboardSidebarCollapse() {
       className="h-7 w-7 shrink-0"
       onClick={toggleSidebar}
     >
-      {isCollapsed ? (
+      {isCollapsed? (
         <PanelLeft className="h-4 w-4" />
       ) : (
         <PanelLeftClose className="h-4 w-4" />
@@ -74,72 +68,12 @@ export function DashboardSidebarCollapse() {
   );
 }
 
-const REPORT_SECTIONS = [
-  {
-    title: "General Ledger",
-    items: [
-      {
-        title: "General Ledger — Permanent",
-        url: "/reports/general-ledger-permanent",
-      },
-      {
-        title: "General Ledger — Temporary",
-        url: "/reports/general-ledger-temporary",
-      },
-    ],
-  },
-  {
-    title: "Trial Balance & Adjustments",
-    items: [
-      { title: "General Journal", url: "/reports/general-journal" },
-      { title: "Trial Balance", url: "/reports/unadjusted-trial-balance" },
-      { title: "Adjusting Journal", url: "/reports/adjusting-journal" },
-      {
-        title: "Adjusted Trial Balance",
-        url: "/reports/adjusted-trial-balance",
-      },
-    ],
-  },
-  {
-    title: "Worksheet",
-    items: [{ title: "Worksheet", url: "/reports/worksheet" }],
-  },
-  {
-    title: "Financial Statements",
-    items: [
-      { title: "Income Statement", url: "/reports/income-statement" },
-      {
-        title: "Retained Earnings Statement",
-        url: "/reports/retained-earnings",
-      },
-      {
-        title: "Statement of Financial Position",
-        url: "/reports/statement-of-financial-position",
-      },
-      {
-        title: "Statement of Cash Flows",
-        url: "/reports/statement-of-cash-flow",
-      },
-    ],
-  },
-  {
-    title: "Closing",
-    items: [
-      { title: "Closing Journal", url: "/reports/closing-journal" },
-      {
-        title: "Post-Closing Trial Balance",
-        url: "/reports/post-closing-trial-balance",
-      },
-    ],
-  },
-] as const;
-
 const navigation = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Periods", url: "/periods", icon: Calendar },
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
-  { title: "Reports", icon: FileBarChart, url: "/reports", isGrouped: true },
+  { title: "Reports", url: "/reports", icon: FileBarChart },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
   { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
   { title: "Tools", url: "/tools", icon: Wrench },
@@ -156,7 +90,7 @@ export function AppSidebar() {
 
   const { data: me, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
     undefined,
-    { skip: !isMounted },
+    { skip:!isMounted },
   );
   const user = (me as any)?.data || (me as any);
   const [logoutApi] = usePostApiV1AuthLogoutMutation();
@@ -175,9 +109,6 @@ export function AppSidebar() {
   };
 
   const ICON_CLASS = "h-4 w-4 shrink-0";
-  const isReportsActive = REPORT_SECTIONS.some((s) =>
-    s.items.some((i) => pathname === i.url || pathname.startsWith(i.url + "/")),
-  );
 
   return (
     <Sidebar
@@ -185,7 +116,7 @@ export function AppSidebar() {
       className="border-r h-screen sticky top-0 flex flex-col justify-between"
       style={
         {
-          "--sidebar-width": "310px",
+          "--sidebar-width": "285px",
           "--sidebar-width-icon": "4rem",
         } as React.CSSProperties
       }
@@ -193,11 +124,11 @@ export function AppSidebar() {
       <SidebarHeader
         className={`border-b shrink-0 flex items-center gap-2 ${
           isCollapsed
-            ? "flex-col justify-center p-2.5 gap-3"
+           ? "flex-col justify-center p-2.5 gap-3"
             : "flex-row justify-between p-3.5"
         }`}
       >
-        {isCollapsed ? (
+        {isCollapsed? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
             <Image
               src="/favicon.ico"
@@ -224,87 +155,15 @@ export function AppSidebar() {
             <SidebarMenu className="gap-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                // @ts-ignore
-                if (item.isGrouped) {
-                  return (
-                    <Collapsible
-                      key={item.title}
-                      defaultOpen={
-                        isReportsActive || pathname.startsWith(item.url)
-                      }
-                      className="group/collapsible"
-                    >
-                      <SidebarMenuItem>
-                        <CollapsibleTrigger asChild>
-                          <SidebarMenuButton
-                            tooltip={item.title}
-                            isActive={isReportsActive}
-                            className="text-sm h-8 font-normal w-full justify-between px-2"
-                          >
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <Icon className={ICON_CLASS} />
-                              <span className="truncate group-data-[collapsible=icon]:hidden">
-                                {item.title}
-                              </span>
-                            </div>
-                            <ChevronRight className="w-3.5 h-3.5 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 opacity-60 shrink-0 group-data-[collapsible=icon]:hidden" />
-                          </SidebarMenuButton>
-                        </CollapsibleTrigger>
-
-                        <CollapsibleContent>
-                          <div className="mt-2 flex flex-col pl-2 group-data-[collapsible=icon]:hidden">
-                            {REPORT_SECTIONS.map((section, idx) => (
-                              <React.Fragment key={section.title}>
-                                {idx !== 0 && (
-                                  <div className="my-2 ml-3 mr-3 h-px bg-border/40" />
-                                )}
-                                <div className="flex flex-col gap-1">
-                                  {section.items.map((sub) => {
-                                    const active = pathname === sub.url;
-                                    return (
-                                      <SidebarMenuItem key={sub.url}>
-                                        <SidebarMenuButton
-                                          asChild
-                                          isActive={active}
-                                          tooltip={sub.title}
-                                          className="h-auto min-h-9 rounded-md px-3 py-2 text-[12.5px] font-normal leading-[1.35] tracking-tight text-muted-foreground hover:bg-accent/50 hover:text-foreground data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-foreground transition-colors"
-                                        >
-                                          <Link
-                                            href={sub.url}
-                                            className="flex w-full items-center gap-2.5"
-                                          >
-                                            <span
-                                              className={`h-1 w-1 shrink-0 rounded-full transition-colors ${
-                                                active
-                                                  ? "bg-foreground"
-                                                  : "bg-muted-foreground/50"
-                                              }`}
-                                            />
-                                            <span className="flex-1 whitespace-normal break-words">
-                                              {sub.title}
-                                            </span>
-                                          </Link>
-                                        </SidebarMenuButton>
-                                      </SidebarMenuItem>
-                                    );
-                                  })}
-                                </div>
-                              </React.Fragment>
-                            ))}
-                          </div>
-                        </CollapsibleContent>
-                      </SidebarMenuItem>
-                    </Collapsible>
-                  );
-                }
-                const isSingleActive =
+                const isActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url!== "/home" && pathname.startsWith(item.url + "/"));
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton
                       asChild
-                      isActive={isSingleActive}
+                      isActive={isActive}
                       tooltip={item.title}
                       className="text-sm h-8 font-normal px-2"
                     >
@@ -328,14 +187,14 @@ export function AppSidebar() {
 
       <SidebarFooter
         className={`border-t shrink-0 ${
-          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+          isCollapsed? "p-2 flex justify-center" : "p-2.5"
         }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                {isCollapsed ? (
+                {isCollapsed? (
                   <SidebarMenuButton
                     tooltip={user?.fullName || user?.userName || "Account"}
                     className="mx-auto flex size-9 items-center justify-center rounded-full p-0 hover:bg-accent"
@@ -346,7 +205,7 @@ export function AppSidebar() {
                         alt={user?.fullName || "User"}
                       />
                       <AvatarFallback className="bg-muted text-xs">
-                        {user?.fullName ? (
+                        {user?.fullName? (
                           user.fullName.slice(0, 2).toUpperCase()
                         ) : (
                           <User className="h-4 w-4" />
@@ -363,7 +222,7 @@ export function AppSidebar() {
                           alt={user?.fullName || "User"}
                         />
                         <AvatarFallback className="bg-muted text-xs">
-                          {user?.fullName ? (
+                          {user?.fullName? (
                             user.fullName.slice(0, 2).toUpperCase()
                           ) : (
                             <User className="h-4 w-4" />
@@ -373,12 +232,12 @@ export function AppSidebar() {
                       <div className="flex min-w-0 flex-col truncate">
                         <span className="truncate text-sm font-medium leading-tight">
                           {!isMounted || isUserLoading
-                            ? "Memuat..."
+                           ? "Memuat..."
                             : user?.fullName || user?.userName || "Guest"}
                         </span>
                         <span className="truncate text-xs text-muted-foreground">
                           {!isMounted || isUserLoading
-                            ? "..."
+                           ? "..."
                             : user?.email || "Tidak ada email"}
                         </span>
                       </div>
@@ -389,7 +248,7 @@ export function AppSidebar() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                side={isCollapsed ? "right" : "top"}
+                side={isCollapsed? "right" : "top"}
                 sideOffset={8}
                 className="w-56"
               >
