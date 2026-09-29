@@ -1,19 +1,14 @@
-export type AccountItem = {
+export interface ChartOfAccount {
   id: number;
   referenceNumber: number | string;
   accountName: string;
   type: string;
   role?: string;
-  balance?: number | string;
-  isActive: boolean;
-  [key: string]: any;
-};
-
-export interface AccountRangeInfo {
-  start: number;
-  end: number;
-  label: string;
+  balance?: number;
+  isActive?: boolean;
 }
+
+export type AccountItem = ChartOfAccount;
 
 export const ACCOUNT_TYPES = [
   "Assets",
@@ -23,11 +18,12 @@ export const ACCOUNT_TYPES = [
   "OperatingExpenses",
   "OtherIncome",
   "OtherExpenses",
-] as const;
+];
 
-export type AccountType = (typeof ACCOUNT_TYPES)[number];
-
-export const ACCOUNT_RANGES: Record<AccountType, AccountRangeInfo> = {
+export const ACCOUNT_RANGES: Record<
+  string,
+  { start: number; end: number; label: string }
+> = {
   Assets: { start: 100, end: 199, label: "Assets (100-199)" },
   Liabilities: { start: 200, end: 299, label: "Liabilities (200-299)" },
   Equity: { start: 300, end: 399, label: "Equity (300-399)" },
