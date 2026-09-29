@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Fragment } from "react";
 import { useRouter } from "next/navigation";
 import {
   useReactTable,
@@ -35,6 +35,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 import {
   Book,
@@ -46,6 +52,8 @@ import {
   AlertTriangle,
   Loader2,
   X,
+  Clock,
+  Calendar,
 } from "lucide-react";
 
 export interface Account {
@@ -125,7 +133,6 @@ export default function GeneralJournalClient() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
-  // Fetching data via RTK Query Hook
   const {
     data: responseData,
     isLoading,
@@ -134,7 +141,6 @@ export default function GeneralJournalClient() {
     refetch,
   } = useGetApiV1ReportsJournalsGeneralQuery();
 
-  // Mutation Hook delete journal
   const [deleteJournalEntry, { isLoading: isDeleting }] =
     useDeleteApiV1JournalEntryDeleteByIdMutation();
 
@@ -163,7 +169,7 @@ export default function GeneralJournalClient() {
   const handlePromptDelete = (entry: JournalEntry) => {
     if (isPeriodClosed) {
       setErrorMessage(
-        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`,
+        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`
       );
       return;
     }
@@ -177,14 +183,13 @@ export default function GeneralJournalClient() {
       refetch();
     } catch (err: any) {
       setErrorMessage(
-        err?.data?.message || err?.message || "Gagal menghapus entri jurnal.",
+        err?.data?.message || err?.message || "Gagal menghapus entri jurnal."
       );
     } finally {
       setEntryToDelete(null);
     }
   };
 
-  // Menjadikan baris nested jurnal menjadi data datar (flat) untuk TanStack Table
   const flatData = useMemo<FlatJournalRow[]>(() => {
     let currentDateTracker = "";
     let groupIdx = 0;
@@ -192,7 +197,7 @@ export default function GeneralJournalClient() {
 
     entries.forEach((entry) => {
       const sorted = [...(entry.lines || [])].sort(
-        (a, b) => a.lineOrder - b.lineOrder,
+        (a, b) => a.lineOrder - b.lineOrder
       );
       const curDate = formatDateDisplay(entry.entryDate);
       const showHeader = curDate !== currentDateTracker;
@@ -229,97 +234,101 @@ export default function GeneralJournalClient() {
     return rows;
   }, [entries]);
 
-  // TanStack Table Column Definitions
   const columns = useMemo<ColumnDef<FlatJournalRow>[]>(
     () => [
       {
-        id: "dateAndRef",
+        id: "transactionNumber",
         header: () => (
-          /* Label kecil (11px) */
-          <span className="pl-6 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Date & Ref
+          <span className="pl-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+            No. Transaksi
           </span>
         ),
         meta: {
-          headerClassName: "w-[16%] pl-6",
-          cellClassName: "align-top py-2 text-xs pl-6",
+          headerClassName: "w-[18%] pl-4",
+          cellClassName: "align-middle py-2.5 text-xs pl-4 h-10",
         },
         cell: ({ row }) => {
           const item = row.original;
+          if (!item.isFirstLine) return null;
+
           return (
-            <>
-              {item.showHeader && (
-                /* Caption (12px) */
-                <Badge variant="secondary" className="mb-1 font-mono text-xs">
-                  {item.formattedDate}
-                </Badge>
-              )}
-              {item.isFirstLine && (
-                <div className="flex flex-col gap-0.5">
-                  {/* Caption (12px) */}
-                  <span className="font-mono font-bold text-xs text-amber-500">
-                    {item.transactionNumber}
-                  </span>
-                  {item.createdAt && (
-                    /* Caption (12px) */
-                    <span className="text-xs text-muted-foreground">
-                      {formatDateTimeDisplay(item.createdAt)}
-                    </span>
-                  )}
-                  {item.updatedAt && (
-                    /* Caption (12px) */
-                    <span className="flex items-center gap-0.5 text-xs text-sky-500">
-                      <Pencil className="h-2.5 w-2.5" />{" "}
-                      {formatDateTimeDisplay(item.updatedAt)}
-                    </span>
-                  )}
-                  {editMode && (
-                    <div className="mt-1 flex gap-1">
-                      <Button
-                        asChild
-                        variant="outline"
-                        size="icon"
-                        className="h-6 w-6"
-                      >
-                        <Link href={`/journal-entry?id=${item.entryId}`}>
-                          <Pencil className="h-3 w-3" />
-                        </Link>
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="h-6 w-6 text-destructive hover:text-destructive"
-                        onClick={() => handlePromptDelete(item.originalEntry)}
-                        disabled={isDeleting}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  )}
+            <div className="flex items-center gap-2">
+              <span className="font-mono font-bold text-xs text-amber-500 whitespace-nowrap">
+                {item.transactionNumber}
+              </span>
+
+              {/* Timestamp Indicator via Tooltip (Hemat ruang vertikal) */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button className="inline-flex items-center justify-center text-muted-foreground hover:text-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" className="text-xs space-y-1">
+                    {item.createdAt && (
+                      <div>
+                        <span className="font-semibold text-muted-foreground">Dibuat: </span>
+                        {formatDateTimeDisplay(item.createdAt)}
+                      </div>
+                    )}
+                    {item.updatedAt && (
+                      <div className="text-sky-400">
+                        <span className="font-semibold">Diubah: </span>
+                        {formatDateTimeDisplay(item.updatedAt)}
+                      </div>
+                    )}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              {/* Tombol aksi Inline jika mode Edit aktif */}
+              {editMode && (
+                <div className="inline-flex items-center gap-1 ml-auto">
+                  <Button
+                    asChild
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6"
+                  >
+                    <Link href={`/journal-entry?id=${item.entryId}`}>
+                      <Pencil className="h-3 w-3" />
+                    </Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-destructive hover:text-destructive"
+                    onClick={() => handlePromptDelete(item.originalEntry)}
+                    disabled={isDeleting}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
                 </div>
               )}
-            </>
+            </div>
           );
         },
       },
       {
         accessorKey: "accountName",
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Account
           </span>
         ),
-        meta: { headerClassName: "w-[26%]" },
+        meta: {
+          headerClassName: "w-[28%]",
+          cellClassName: "align-middle py-2.5 text-xs h-10",
+        },
         cell: ({ row, getValue }) => {
           const isDebit = row.original.debit > 0;
           return (
-            /* Caption (12px) */
             <div
               className={
                 isDebit
-                  ? "align-top py-2 text-xs font-semibold text-foreground"
-                  : "align-top py-2 pl-6 text-xs text-muted-foreground"
+                  ? "font-semibold text-foreground truncate"
+                  : "pl-6 text-muted-foreground truncate"
               }
             >
               {String(getValue() ?? "")}
@@ -330,31 +339,28 @@ export default function GeneralJournalClient() {
       {
         accessorKey: "lineDescription",
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Description
           </span>
         ),
         meta: {
-          headerClassName: "w-[26%]",
-          cellClassName: "align-top py-2 text-xs text-muted-foreground",
+          headerClassName: "w-[24%]",
+          cellClassName: "align-middle py-2.5 text-xs text-muted-foreground h-10 truncate",
         },
         cell: ({ getValue }) => String(getValue() || "-"),
       },
       {
         accessorKey: "referenceNumber",
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Ref #
           </div>
         ),
         meta: {
           headerClassName: "w-[10%] text-center",
-          cellClassName: "align-top py-2 text-xs text-center",
+          cellClassName: "align-middle py-2.5 text-xs text-center h-10",
         },
         cell: ({ getValue }) => (
-          /* Caption (12px) */
           <Badge variant="outline" className="font-mono text-xs text-amber-500">
             {String(getValue())}
           </Badge>
@@ -363,15 +369,14 @@ export default function GeneralJournalClient() {
       {
         accessorKey: "debit",
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Debit (Rp)
           </div>
         ),
         meta: {
-          headerClassName: "w-[11%] text-right",
+          headerClassName: "w-[10%] text-right",
           cellClassName:
-            "align-top py-2 text-right font-mono text-xs font-medium text-emerald-500",
+            "align-middle py-2.5 text-right font-mono text-xs font-medium text-emerald-500 h-10",
         },
         cell: ({ getValue }) => {
           const val = Number(getValue() || 0);
@@ -381,15 +386,14 @@ export default function GeneralJournalClient() {
       {
         accessorKey: "credit",
         header: () => (
-          /* Label kecil (11px) */
-          <div className="text-right pr-6 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+          <div className="text-right pr-4 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Credit (Rp)
           </div>
         ),
         meta: {
-          headerClassName: "w-[11%] pr-6 text-right",
+          headerClassName: "w-[10%] pr-4 text-right",
           cellClassName:
-            "align-top py-2 pr-6 text-right font-mono text-xs font-medium text-red-500",
+            "align-middle py-2.5 pr-4 text-right font-mono text-xs font-medium text-red-500 h-10",
         },
         cell: ({ getValue }) => {
           const val = Number(getValue() || 0);
@@ -397,7 +401,7 @@ export default function GeneralJournalClient() {
         },
       },
     ],
-    [editMode, isDeleting],
+    [editMode, isDeleting]
   );
 
   const table = useReactTable({
@@ -415,7 +419,6 @@ export default function GeneralJournalClient() {
         >
           <div className="flex items-center gap-2">
             <AlertTriangle className="h-4 w-4" />
-            {/* Caption (12px) */}
             <AlertDescription className="text-xs">
               {errorMessage}
             </AlertDescription>
@@ -433,11 +436,9 @@ export default function GeneralJournalClient() {
 
       <div className="flex flex-wrap sm:flex-row items-center justify-between gap-3 sm:gap-4">
         <div>
-          {/* H3 (20px) */}
           <h1 className="flex items-center gap-2 text-xl font-bold">
             <Book className="h-5.5 w-5.5 text-amber-500" /> General Journal
           </h1>
-          {/* UI (14px) */}
           <p className="mt-1 text-sm text-muted-foreground">
             Chronological record{" "}
             {selectedPeriodName ? `(Viewing: ${selectedPeriodName})` : ""} • All
@@ -445,13 +446,11 @@ export default function GeneralJournalClient() {
           </p>
         </div>
         <div className="flex gap-2">
-          {/* UI (14px) */}
           <Button asChild size="sm" className="gap-1.5 text-sm font-medium">
             <Link href="/journal-entry">
               <Plus className="h-3.5 w-3.5" /> Add Entry
             </Link>
           </Button>
-          {/* UI (14px) */}
           <Button
             variant={editMode ? "secondary" : "outline"}
             size="sm"
@@ -467,13 +466,14 @@ export default function GeneralJournalClient() {
       <Card className="w-full">
         <CardContent className="p-0">
           <div className="w-full overflow-x-auto">
-            <Table className="min-w-[650px]">
+            <Table className="min-w-[650px] table-fixed">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       const meta = header.column.columnDef.meta as
-                        { headerClassName?: string } | undefined;
+                        | { headerClassName?: string }
+                        | undefined;
                       return (
                         <TableHead
                           key={header.id}
@@ -483,7 +483,7 @@ export default function GeneralJournalClient() {
                             ? null
                             : flexRender(
                                 header.column.columnDef.header,
-                                header.getContext(),
+                                header.getContext()
                               )}
                         </TableHead>
                       );
@@ -494,7 +494,6 @@ export default function GeneralJournalClient() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    {/* Caption (12px) */}
                     <TableCell
                       colSpan={6}
                       className="py-10 text-center text-xs text-muted-foreground"
@@ -505,28 +504,45 @@ export default function GeneralJournalClient() {
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map((row) => {
-                    const groupIdx = row.original.groupIdx;
+                    const item = row.original;
+                    const groupIdx = item.groupIdx;
                     const shade =
-                      groupIdx % 2 === 0 ? "bg-muted/20" : "bg-transparent";
+                      groupIdx % 2 === 0 ? "bg-muted/10" : "bg-transparent";
 
                     return (
-                      <TableRow key={row.id} className={shade}>
-                        {row.getVisibleCells().map((cell) => {
-                          const meta = cell.column.columnDef.meta as
-                            { cellClassName?: string } | undefined;
-                          return (
-                            <TableCell
-                              key={cell.id}
-                              className={meta?.cellClassName}
-                            >
-                              {flexRender(
-                                cell.column.columnDef.cell,
-                                cell.getContext(),
-                              )}
+                      <Fragment key={row.id}>
+                        {/* Header Baris Pemisah Tanggal Jurnal (Full Spanning Header) */}
+                        {item.showHeader && (
+                          <TableRow className="bg-muted/40 hover:bg-muted/40 border-y border-border">
+                            <TableCell colSpan={6} className="py-1.5 pl-4 text-xs font-semibold text-muted-foreground">
+                              <div className="flex items-center gap-1.5">
+                                <Calendar className="h-3.5 w-3.5 text-amber-500" />
+                                <span>{item.formattedDate}</span>
+                              </div>
                             </TableCell>
-                          );
-                        })}
-                      </TableRow>
+                          </TableRow>
+                        )}
+
+                        {/* Baris Data Jurnal Standar dengan Tinggi Sel Seragam */}
+                        <TableRow className={`${shade} hover:bg-muted/20 border-b-0`}>
+                          {row.getVisibleCells().map((cell) => {
+                            const meta = cell.column.columnDef.meta as
+                              | { cellClassName?: string }
+                              | undefined;
+                            return (
+                              <TableCell
+                                key={cell.id}
+                                className={meta?.cellClassName}
+                              >
+                                {flexRender(
+                                  cell.column.columnDef.cell,
+                                  cell.getContext()
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      </Fragment>
                     );
                   })
                 ) : (
@@ -536,11 +552,9 @@ export default function GeneralJournalClient() {
                         {selectedPeriodName === null ? (
                           <>
                             <EyeOff className="h-7 w-7" />
-                            {/* UI (14px) */}
                             <p className="text-sm font-medium">
                               No Period Selected
                             </p>
-                            {/* Caption (12px) */}
                             <p className="text-xs">
                               Go to{" "}
                               <Link
@@ -554,11 +568,9 @@ export default function GeneralJournalClient() {
                         ) : (
                           <>
                             <BookX className="h-7 w-7" />
-                            {/* UI (14px) */}
                             <p className="text-sm font-medium">
                               No Entries Found
                             </p>
-                            {/* Caption (12px) */}
                             <p className="text-xs">
                               No entries in{" "}
                               <strong>{selectedPeriodName}</strong>
@@ -582,11 +594,9 @@ export default function GeneralJournalClient() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            {/* H3 (20px) */}
             <AlertDialogTitle className="text-xl font-bold">
               Delete Journal Entry
             </AlertDialogTitle>
-            {/* Caption (12px) */}
             <AlertDialogDescription className="text-xs text-muted-foreground">
               Are you sure you want to delete entry &quot;
               {entryToDelete?.transactionNumber}&quot;? This action cannot be
@@ -594,11 +604,9 @@ export default function GeneralJournalClient() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            {/* UI (14px) */}
             <AlertDialogCancel disabled={isDeleting} className="text-sm">
               Cancel
             </AlertDialogCancel>
-            {/* UI (14px) */}
             <AlertDialogAction
               onClick={handleDeleteConfirm}
               disabled={isDeleting}
