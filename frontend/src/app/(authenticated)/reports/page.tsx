@@ -45,12 +45,39 @@ type ReportItem = {
 };
 
 const REPORTS: ReportItem[] = [
+  // --- JOURNALS & LEDGERS (DITARUH ATAS SENDIRI) ---
+  {
+    slug: "general-journal",
+    title: "General Journal",
+    desc: "Buku harian semua transaksi",
+    category: "Journals & Ledgers",
+    step: "01",
+    icon: Receipt,
+  },
+  {
+    slug: "general-ledger-permanent",
+    title: "General Ledger - Permanent",
+    desc: "Buku besar akun riil",
+    category: "Journals & Ledgers",
+    step: "02",
+    icon: Library,
+  },
+  {
+    slug: "general-ledger-temporary",
+    title: "General Ledger - Temporary",
+    desc: "Buku besar akun nominal",
+    category: "Journals & Ledgers",
+    step: "03",
+    icon: Book,
+  },
+
+  // --- TRIAL BALANCE CYCLE ---
   {
     slug: "unadjusted-trial-balance",
     title: "Unadjusted Trial Balance",
     desc: "Neraca saldo awal sebelum penyesuaian",
     category: "Trial Balance Cycle",
-    step: "01",
+    step: "04",
     icon: ClipboardList,
   },
   {
@@ -58,7 +85,7 @@ const REPORTS: ReportItem[] = [
     title: "Worksheet",
     desc: "10-column worksheet & kertas kerja",
     category: "Trial Balance Cycle",
-    step: "02",
+    step: "05",
     icon: TableIcon,
   },
   {
@@ -66,7 +93,7 @@ const REPORTS: ReportItem[] = [
     title: "Adjusting Journal",
     desc: "Jurnal penyesuaian akhir periode",
     category: "Trial Balance Cycle",
-    step: "03",
+    step: "06",
     icon: BookOpen,
   },
   {
@@ -74,33 +101,11 @@ const REPORTS: ReportItem[] = [
     title: "Adjusted Trial Balance",
     desc: "Neraca saldo setelah penyesuaian",
     category: "Trial Balance Cycle",
-    step: "04",
+    step: "07",
     icon: FileCheck,
   },
-  {
-    slug: "general-journal",
-    title: "General Journal",
-    desc: "Buku harian semua transaksi",
-    category: "Journals & Ledgers",
-    step: "05",
-    icon: Receipt,
-  },
-  {
-    slug: "general-ledger-temporary",
-    title: "General Ledger - Temporary",
-    desc: "Buku besar akun nominal",
-    category: "Journals & Ledgers",
-    step: "06",
-    icon: Book,
-  },
-  {
-    slug: "general-ledger-permanent",
-    title: "General Ledger - Permanent",
-    desc: "Buku besar akun riil",
-    category: "Journals & Ledgers",
-    step: "07",
-    icon: Library,
-  },
+
+  // --- FINANCIAL STATEMENTS ---
   {
     slug: "income-statement",
     title: "Income Statement",
@@ -133,6 +138,8 @@ const REPORTS: ReportItem[] = [
     step: "11",
     icon: Banknote,
   },
+
+  // --- CLOSING CYCLE ---
   {
     slug: "closing-journal",
     title: "Closing Journal",
@@ -153,14 +160,14 @@ const REPORTS: ReportItem[] = [
 
 const CATEGORIES = [
   {
-    id: "Trial Balance Cycle",
-    label: "Trial Balance & Worksheet",
-    hint: "Tahap awal hingga penyesuaian",
-  },
-  {
     id: "Journals & Ledgers",
     label: "Journals & Ledgers",
     hint: "Pencatatan harian & buku besar",
+  },
+  {
+    id: "Trial Balance Cycle",
+    label: "Trial Balance & Worksheet",
+    hint: "Tahap awal hingga penyesuaian",
   },
   {
     id: "Financial Statements",
@@ -271,15 +278,15 @@ export default function ReportsPage() {
           </div>
 
           {/* SUMMARY DARI /api/v1/Summary VIA RTK */}
-          <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/10 p-">
+          <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/10">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-transparent to-violet-500/20 opacity-60" />
-            <div className="relative grid grid-cols-1 divide-y divide-white/10 rounded- bg-[#0B1226]/90 backdrop-blur md:grid-cols-3 md:divide-x md:divide-y-0">
+            <div className="relative grid grid-cols-1 divide-y divide-white/10 bg-[#0B1226]/90 backdrop-blur md:grid-cols-3 md:divide-x md:divide-y-0">
               <div className="flex items-center gap-4 p-5">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/15 text-indigo-300">
                   <Receipt className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text- uppercase tracking-widest text-white/40">
+                  <p className="text-xs uppercase tracking-widest text-white/40">
                     Total Journal
                   </p>
                   {summaryLoading ? (
@@ -300,7 +307,7 @@ export default function ReportsPage() {
                   <Layers className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text- uppercase tracking-widest text-white/40">
+                  <p className="text-xs uppercase tracking-widest text-white/40">
                     Active COA
                   </p>
                   {summaryLoading ? (
@@ -319,13 +326,13 @@ export default function ReportsPage() {
                   <CalendarCheck2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text- uppercase tracking-widest text-white/40">
+                  <p className="text-xs uppercase tracking-widest text-white/40">
                     Active Period
                   </p>
                   {summaryLoading ? (
                     <div className="mt-1 h-6 w-32 animate-pulse rounded bg-white/10" />
                   ) : (
-                    <p className="truncate text- font-semibold text-white">
+                    <p className="truncate text-sm font-semibold text-white">
                       {isError ? "Gagal load" : summary?.activePeriodName}
                     </p>
                   )}
