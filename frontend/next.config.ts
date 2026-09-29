@@ -1,3 +1,4 @@
+import type { NextConfig } from "next";
 import path from "node:path";
 
 export const aumoConfig = {
@@ -28,8 +29,8 @@ export const aumoConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "*.supabase.co", // Wilcard ini mencakup semua subdomain Supabase
+        protocol: "https" as const,
+        hostname: "*.supabase.co", // Wildcard ini mencakup semua subdomain Supabase
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
@@ -55,4 +56,18 @@ export const aumoConfig = {
   },
 };
 
-export default aumoConfig;
+const nextConfig: NextConfig = {
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  images: aumoConfig.images,
+  async rewrites() {
+    return aumoConfig.getRewrites();
+  },
+  experimental: {
+    // Dipindahkan ke bawah experimental sesuai konvensi Next.js
+    // cacheComponents: true, 
+  },
+};
+
+export default nextConfig;
