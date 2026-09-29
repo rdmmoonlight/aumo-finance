@@ -33,15 +33,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={inter.variable}>
-      <body className={`${inter.className} min-h-screen bg-background text-foreground text-sm antialiased selection:bg-primary selection:text-primary-foreground`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-        >
-          <ReduxProvider>
-            {children}
-          </ReduxProvider>
+      <body
+        className={`${inter.className} min-h-screen bg-background text-foreground text-sm antialiased selection:bg-primary selection:text-primary-foreground`}
+      >
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <ReduxProvider>{children}</ReduxProvider>
         </ThemeProvider>
       </body>
     </html>
