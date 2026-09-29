@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 function LoginFormContent() {
   const searchParams = useSearchParams();
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
