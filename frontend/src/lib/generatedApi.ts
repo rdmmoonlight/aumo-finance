@@ -6,6 +6,7 @@ export const addTagTypes = [
   "Dashboard",
   "Health",
   "JournalEntry",
+  "Market",
   "Notifications",
   "Periods",
   "Settings",
@@ -204,6 +205,13 @@ const injectedRtkApi = api
           },
         }),
         providesTags: ["JournalEntry"],
+      }),
+      getApiV1Market: build.query<
+        GetApiV1MarketApiResponse,
+        GetApiV1MarketApiArg
+      >({
+        query: () => ({ url: `/api/v1/Market` }),
+        providesTags: ["Market"],
       }),
       getApiV1Notifications: build.query<
         GetApiV1NotificationsApiResponse,
@@ -585,6 +593,8 @@ export type GetApiV1JournalEntryNextTransactionNumberApiArg = {
   journalType?: string;
   entryDate?: string;
 };
+export type GetApiV1MarketApiResponse = unknown;
+export type GetApiV1MarketApiArg = void;
 export type GetApiV1NotificationsApiResponse = unknown;
 export type GetApiV1NotificationsApiArg = {
   limit?: number | string;
@@ -838,6 +848,7 @@ export const {
   useDeleteApiV1JournalEntryDeleteByIdMutation,
   useGetApiV1JournalEntrySearchDescriptionsQuery,
   useGetApiV1JournalEntryNextTransactionNumberQuery,
+  useGetApiV1MarketQuery,
   useGetApiV1NotificationsQuery,
   usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
