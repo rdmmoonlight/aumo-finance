@@ -32,21 +32,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
-        <ReduxProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
-            {/* UI (14px) set sebagai basis teks default aplikasi */}
-            <div className="min-h-screen bg-background text-foreground text-sm antialiased selection:bg-primary selection:text-primary-foreground">
-              {children}
-            </div>
-          </ThemeProvider>
-        </ReduxProvider>
+    <html lang="en" suppressHydrationWarning className={inter.variable}>
+      <body className={`${inter.className} min-h-screen bg-background text-foreground text-sm antialiased selection:bg-primary selection:text-primary-foreground`}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+        >
+          <ReduxProvider>
+            {children}
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
