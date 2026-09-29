@@ -44,6 +44,7 @@ import {
   Trash2,
   X,
   Search,
+  Check,
 } from "lucide-react";
 
 // Tipe presisi yang cocok dengan ekspektasi ChartOfAccount pada coa-dialogs.tsx
@@ -98,9 +99,10 @@ function ChartOfAccountsContent() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
 
-  // Local UI Filter States
+  // Local UI Filter States & Edit Mode
   const [searchText, setSearchText] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("");
+  const [isEditMode, setIsEditMode] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -165,19 +167,17 @@ function ChartOfAccountsContent() {
   }, [rawAccounts, searchText, categoryFilter]);
 
   // TanStack Table Column Definitions
-  const columns = useMemo<ColumnDef<AccountItem>[]>(
-    () => [
+  const columns = useMemo<ColumnDef<AccountItem>[]>(() => {
+    const cols: ColumnDef<AccountItem>[] = [
       {
         accessorKey: "referenceNumber",
         header: () => (
-          /* Label kecil (11px) */
           <span className="pl-6 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Ref
           </span>
         ),
         meta: { headerClassName: "w-24 pl-6", cellClassName: "pl-6" },
         cell: ({ getValue }) => (
-          /* UI (14px) */
           <span className="font-mono text-primary text-sm font-medium">
             {String(getValue() ?? "")}
           </span>
@@ -186,13 +186,11 @@ function ChartOfAccountsContent() {
       {
         accessorKey: "accountName",
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Name
           </span>
         ),
         cell: ({ getValue }) => (
-          /* UI (14px) */
           <span className="text-sm font-medium">
             {String(getValue() ?? "")}
           </span>
@@ -201,13 +199,11 @@ function ChartOfAccountsContent() {
       {
         accessorKey: "type",
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Category
           </span>
         ),
         cell: ({ getValue }) => (
-          /* Caption (12px) */
           <Badge variant="outline" className="text-xs">
             {String(getValue() ?? "")}
           </Badge>
@@ -216,7 +212,6 @@ function ChartOfAccountsContent() {
       {
         accessorKey: "role",
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Role
           </span>
@@ -224,12 +219,10 @@ function ChartOfAccountsContent() {
         cell: ({ getValue }) => {
           const role = getValue<string | undefined>();
           return role && role !== "Default" ? (
-            /* Caption (12px) */
             <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
               {role}
             </Badge>
           ) : (
-            /* Caption (12px) */
             <span className="text-xs text-muted-foreground">Standard</span>
           );
         },
@@ -237,23 +230,21 @@ function ChartOfAccountsContent() {
       {
         accessorKey: "balance",
         header: () => (
-          /* Label kecil (11px) dengan keterangan mata uang (IDR) */
           <div className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Balance (IDR)
+            Balance
           </div>
         ),
         meta: { cellClassName: "text-right" },
         cell: ({ getValue }) => {
           const balance = Number(getValue() || 0);
           return (
-            /* UI (14px) tanpa prefix Rp */
             <span
               className={cn(
                 "font-medium font-mono text-sm",
                 balance >= 0 ? "text-emerald-500" : "text-red-500",
               )}
             >
-              {balance.toLocaleString("en-US")}
+              {balance.toLocaleString("id-ID")}
             </span>
           );
         },
@@ -261,7 +252,6 @@ function ChartOfAccountsContent() {
       {
         accessorKey: "isActive",
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Status
           </div>
@@ -270,7 +260,6 @@ function ChartOfAccountsContent() {
         cell: ({ getValue }) => {
           const isActive = Boolean(getValue());
           return (
-            /* Caption (12px) */
             <Badge
               variant={isActive ? "default" : "secondary"}
               className={cn(
@@ -284,10 +273,12 @@ function ChartOfAccountsContent() {
           );
         },
       },
-      {
+    ];
+
+    if (isEditMode) {
+      cols.push({
         id: "actions",
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-center pr-6 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Action
           </div>
@@ -326,10 +317,11 @@ function ChartOfAccountsContent() {
             </div>
           );
         },
-      },
-    ],
-    [],
-  );
+      });
+    }
+
+    return cols;
+  }, [isEditMode]);
 
   const table = useReactTable({
     data: filteredAccounts,
@@ -341,23 +333,30 @@ function ChartOfAccountsContent() {
     <div className="space-y-6 max-w-7xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          {/* H2 (24px) */}
           <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             <Network className="text-primary" size={24} /> Chart of Accounts
           </h1>
-          {/* UI (14px) */}
           <p className="text-sm text-muted-foreground mt-1">
             Master list of financial accounts • {filteredAccounts.length}{" "}
             accounts
           </p>
         </div>
-        {/* UI (14px) */}
-        <Button
-          onClick={() => setIsAddModalOpen(true)}
-          className="gap-2 text-sm font-medium"
-        >
-          <Plus size={16} /> New Account
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="gap-2 text-sm font-medium"
+          >
+            <Plus size={16} /> New Account
+          </Button>
+          <Button
+            variant={isEditMode ? "default" : "outline"}
+            onClick={() => setIsEditMode((prev) => !prev)}
+            className="gap-2 text-sm font-medium"
+          >
+            {isEditMode ? <Check size={16} /> : <Pencil size={16} />}
+            {isEditMode ? "Done Editing" : "Edit"}
+          </Button>
+        </div>
       </div>
 
       {(errorMessage || isError) && (
@@ -365,7 +364,6 @@ function ChartOfAccountsContent() {
           variant="destructive"
           className="flex justify-between items-center py-2"
         >
-          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             {errorMessage ||
               "Gagal mengambil data Chart of Accounts dari server."}
@@ -383,7 +381,6 @@ function ChartOfAccountsContent() {
 
       {successMessage && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex justify-between items-center py-2">
-          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             {successMessage}
           </AlertDescription>
@@ -406,7 +403,6 @@ function ChartOfAccountsContent() {
                 size={14}
                 className="absolute left-3 top-3 text-muted-foreground"
               />
-              {/* UI (14px) */}
               <Input
                 className="pl-8 h-9 w-60 text-sm"
                 placeholder="Search..."
@@ -415,11 +411,9 @@ function ChartOfAccountsContent() {
               />
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              {/* UI (14px) */}
               <SelectTrigger className="h-9 w-44 text-sm">
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
-              {/* UI (14px) */}
               <SelectContent className="text-sm">
                 {ACCOUNT_TYPES.map((t) => (
                   <SelectItem key={t} value={t}>
@@ -439,10 +433,14 @@ function ChartOfAccountsContent() {
               </Button>
             )}
           </div>
-          {/* Caption (12px) */}
-          <Badge variant="secondary" className="font-mono text-xs">
-            {filteredAccounts.length} total
-          </Badge>
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="font-mono text-xs">
+              {filteredAccounts.length} total
+            </Badge>
+            <span className="text-xs text-muted-foreground font-medium">
+              All amounts in IDR (Rp)
+            </span>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <Table>
@@ -451,7 +449,8 @@ function ChartOfAccountsContent() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      { headerClassName?: string } | undefined;
+                      | { headerClassName?: string }
+                      | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -472,7 +471,6 @@ function ChartOfAccountsContent() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  {/* Caption (12px) */}
                   <TableCell
                     colSpan={columns.length}
                     className="text-center py-10 text-xs text-muted-foreground"
@@ -492,7 +490,8 @@ function ChartOfAccountsContent() {
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          { cellClassName?: string } | undefined;
+                          | { cellClassName?: string }
+                          | undefined;
                         return (
                           <TableCell
                             key={cell.id}
@@ -510,7 +509,6 @@ function ChartOfAccountsContent() {
                 })
               ) : (
                 <TableRow>
-                  {/* Caption (12px) */}
                   <TableCell
                     colSpan={columns.length}
                     className="text-center py-12 text-xs text-muted-foreground"
@@ -555,7 +553,6 @@ export default function ChartOfAccountsPage() {
   return (
     <Suspense
       fallback={
-        /* UI (14px) */
         <div className="py-20 text-center text-sm text-muted-foreground">
           Loading chart of accounts...
         </div>
