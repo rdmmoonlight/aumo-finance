@@ -130,15 +130,15 @@ function LoginFormContent() {
               {showPass ? "Hide" : "Show"}
             </button>
           </div>
-          <Input
-            id="password"
-            type={showPass ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
-            className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white"
-            required
-          />
+            <Input
+              id="password"
+              type={showPass ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white font-sans"
+              required
+            />
         </div>
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center space-x-2">
