@@ -237,23 +237,23 @@ function ChartOfAccountsContent() {
       {
         accessorKey: "balance",
         header: () => (
-          /* Label kecil (11px) */
+          /* Label kecil (11px) dengan keterangan mata uang (IDR) */
           <div className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-            Balance
+            Balance (IDR)
           </div>
         ),
         meta: { cellClassName: "text-right" },
         cell: ({ getValue }) => {
           const balance = Number(getValue() || 0);
           return (
-            /* UI (14px) */
+            /* UI (14px) tanpa prefix Rp */
             <span
               className={cn(
                 "font-medium font-mono text-sm",
                 balance >= 0 ? "text-emerald-500" : "text-red-500",
               )}
             >
-              Rp {balance.toLocaleString("en-US")}
+              {balance.toLocaleString("en-US")}
             </span>
           );
         },
@@ -451,7 +451,8 @@ function ChartOfAccountsContent() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      { headerClassName?: string } | undefined;
+                      | { headerClassName?: string }
+                      | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -492,7 +493,8 @@ function ChartOfAccountsContent() {
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          { cellClassName?: string } | undefined;
+                          | { cellClassName?: string }
+                          | undefined;
                         return (
                           <TableCell
                             key={cell.id}
