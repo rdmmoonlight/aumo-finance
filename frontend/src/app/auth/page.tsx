@@ -2,10 +2,12 @@
 
 import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { baseApi } from "@/lib/apiClient";
-import { usePostApiV1AuthLoginMutation } from "@/lib/generatedApi";
-import { useUserProfile } from "@/lib/auth";
+import {
+  usePostApiV1AuthLoginMutation,
+  useGetApiV1AuthMeQuery,
+  generatedApi,
+} from "@/lib/generatedApi";
+import { useAppDispatch } from "@/lib/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 
 function LoginFormContent() {
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,8 +23,11 @@ function LoginFormContent() {
   const [showPass, setShowPass] = useState(false);
   const [err, setErr] = useState("");
 
-  const { profile, isLoading: isProfileLoading } = useUserProfile();
+  // Gunakan RTK Query untuk cek status login/profile pengguna
+  const { data: profile, isLoading: isProfileLoading } =
+    useGetApiV1AuthMeQuery();
 
+  // Hook Mutation untuk Login
   const [loginMutation, { isLoading: isLoggingIn }] =
     usePostApiV1AuthLoginMutation();
 
@@ -46,7 +51,9 @@ function LoginFormContent() {
     e.preventDefault();
     setErr("");
     try {
-      dispatch(baseApi.util.resetApiState());
+      // Reset state API menggunakan aksi RTK Query dari generatedApi
+      dispatch(generatedApi.util.resetApiState());
+
       await loginMutation({
         loginRequest: {
           email,
@@ -84,23 +91,19 @@ function LoginFormContent() {
   return (
     <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200 selection:bg-black selection:text-white [&_*::selection]:bg-black [&_*::selection]:text-white">
       <div className="mb-8">
-        {/* H2 (24px) */}
         <h2 className="text-2xl font-semibold tracking-tight text-black">
           Sign in
         </h2>
-        {/* UI (14px) */}
         <p className="text-sm text-zinc-600 mt-2">Masuk ke workspace kamu.</p>
       </div>
       <form onSubmit={onLogin} className="space-y-5">
         <div className="space-y-2">
-          {/* Label kecil (11px) */}
           <Label
             htmlFor="email"
             className="text-[11px] tracking-widest uppercase font-semibold text-black"
           >
             Email
           </Label>
-          {/* UI (14px) */}
           <Input
             id="email"
             type="email"
@@ -113,14 +116,12 @@ function LoginFormContent() {
         </div>
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            {/* Label kecil (11px) */}
             <Label
               htmlFor="password"
               className="text-[11px] tracking-widest uppercase font-semibold text-black"
             >
               Password
             </Label>
-            {/* Caption (12px) */}
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
@@ -129,7 +130,6 @@ function LoginFormContent() {
               {showPass ? "Hide" : "Show"}
             </button>
           </div>
-          {/* UI (14px) */}
           <Input
             id="password"
             type={showPass ? "text" : "password"}
@@ -148,7 +148,6 @@ function LoginFormContent() {
               onCheckedChange={(v) => setKeepMe(v === true)}
               className="h-4 w-4 rounded border border-zinc-400 bg-white shadow-none data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white [&_svg]:h-3 [&_svg]:w-3 [&_svg]:stroke-[3]"
             />
-            {/* Caption (12px) */}
             <Label
               htmlFor="keepMe"
               className="text-xs font-normal cursor-pointer leading-none text-black"
@@ -156,7 +155,6 @@ function LoginFormContent() {
               Keep me signed in
             </Label>
           </div>
-          {/* Caption (12px) */}
           <a
             href="#"
             className="text-xs text-zinc-600 hover:text-black underline underline-offset-4"
@@ -165,12 +163,10 @@ function LoginFormContent() {
           </a>
         </div>
         {err && (
-          /* Caption (12px) */
           <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl font-medium">
             {err}
           </div>
         )}
-        {/* UI (14px) */}
         <Button
           type="submit"
           disabled={isLoggingIn}
@@ -178,7 +174,6 @@ function LoginFormContent() {
         >
           {isLoggingIn ? "Processing..." : "Sign In"}
         </Button>
-        {/* Caption (12px) */}
         <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>
           <span>Keep your data safe</span>
@@ -190,7 +185,6 @@ function LoginFormContent() {
 
 function LoginFormSkeleton() {
   return (
-    /* UI (14px) */
     <div className="light w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-zinc-200 animate-pulse h-64 flex flex-col justify-center items-center">
       <p className="text-sm font-medium text-zinc-400">Loading workspace...</p>
     </div>
