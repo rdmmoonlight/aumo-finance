@@ -8,6 +8,7 @@ const nextConfig = {
   async rewrites() {
     return aumoConfig.getRewrites();
   },
+  cacheComponents: true,
 };
 
 export default nextConfig;
