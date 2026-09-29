@@ -66,7 +66,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     // Dipindahkan ke bawah experimental sesuai konvensi Next.js
-    // cacheComponents: true, 
+    // cacheComponents: true,
   },
 };
 
