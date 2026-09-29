@@ -825,7 +825,7 @@ export function ChartOfAccountsTable() {
                       })}
                     </TableRow>
                   );
-                })}
+                })
               ) : (
                 <TableRow>
                   <TableCell
