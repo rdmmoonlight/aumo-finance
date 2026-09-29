@@ -9,10 +9,10 @@
     "#/*": "./src/*",
     "@/*": "./src/*"
   },
-  "scripts": {
-    "predev": "npm run generate:api",
+ "scripts": {
+    "predev": "pnpm run generate:api",
     "dev": "next dev -p 3000",
-    "prebuild": "npm run generate:api",
+    "prebuild": "pnpm run generate:api",
     "build": "next build",
     "start": "next start -p 3000",
     "typecheck": "tsc --noEmit",
