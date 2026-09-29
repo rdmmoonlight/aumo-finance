@@ -169,7 +169,7 @@ export default function GeneralJournalClient() {
   const handlePromptDelete = (entry: JournalEntry) => {
     if (isPeriodClosed) {
       setErrorMessage(
-        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`
+        `Jurnal ${entry.transactionNumber} tidak dapat dihapus karena berada di periode yang telah ditutup.`,
       );
       return;
     }
@@ -183,7 +183,7 @@ export default function GeneralJournalClient() {
       refetch();
     } catch (err: any) {
       setErrorMessage(
-        err?.data?.message || err?.message || "Gagal menghapus entri jurnal."
+        err?.data?.message || err?.message || "Gagal menghapus entri jurnal.",
       );
     } finally {
       setEntryToDelete(null);
@@ -197,7 +197,7 @@ export default function GeneralJournalClient() {
 
     entries.forEach((entry) => {
       const sorted = [...(entry.lines || [])].sort(
-        (a, b) => a.lineOrder - b.lineOrder
+        (a, b) => a.lineOrder - b.lineOrder,
       );
       const curDate = formatDateDisplay(entry.entryDate);
       const showHeader = curDate !== currentDateTracker;
@@ -268,7 +268,9 @@ export default function GeneralJournalClient() {
                   <TooltipContent side="right" className="text-xs space-y-1">
                     {item.createdAt && (
                       <div>
-                        <span className="font-semibold text-muted-foreground">Dibuat: </span>
+                        <span className="font-semibold text-muted-foreground">
+                          Dibuat:{" "}
+                        </span>
                         {formatDateTimeDisplay(item.createdAt)}
                       </div>
                     )}
@@ -345,7 +347,8 @@ export default function GeneralJournalClient() {
         ),
         meta: {
           headerClassName: "w-[24%]",
-          cellClassName: "align-middle py-2.5 text-xs text-muted-foreground h-10 truncate",
+          cellClassName:
+            "align-middle py-2.5 text-xs text-muted-foreground h-10 truncate",
         },
         cell: ({ getValue }) => String(getValue() || "-"),
       },
@@ -401,7 +404,7 @@ export default function GeneralJournalClient() {
         },
       },
     ],
-    [editMode, isDeleting]
+    [editMode, isDeleting],
   );
 
   const table = useReactTable({
@@ -472,8 +475,7 @@ export default function GeneralJournalClient() {
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map((header) => {
                       const meta = header.column.columnDef.meta as
-                        | { headerClassName?: string }
-                        | undefined;
+                        { headerClassName?: string } | undefined;
                       return (
                         <TableHead
                           key={header.id}
@@ -483,7 +485,7 @@ export default function GeneralJournalClient() {
                             ? null
                             : flexRender(
                                 header.column.columnDef.header,
-                                header.getContext()
+                                header.getContext(),
                               )}
                         </TableHead>
                       );
@@ -514,7 +516,10 @@ export default function GeneralJournalClient() {
                         {/* Header Baris Pemisah Tanggal Jurnal (Full Spanning Header) */}
                         {item.showHeader && (
                           <TableRow className="bg-muted/40 hover:bg-muted/40 border-y border-border">
-                            <TableCell colSpan={6} className="py-1.5 pl-4 text-xs font-semibold text-muted-foreground">
+                            <TableCell
+                              colSpan={6}
+                              className="py-1.5 pl-4 text-xs font-semibold text-muted-foreground"
+                            >
                               <div className="flex items-center gap-1.5">
                                 <Calendar className="h-3.5 w-3.5 text-amber-500" />
                                 <span>{item.formattedDate}</span>
@@ -524,11 +529,12 @@ export default function GeneralJournalClient() {
                         )}
 
                         {/* Baris Data Jurnal Standar dengan Tinggi Sel Seragam */}
-                        <TableRow className={`${shade} hover:bg-muted/20 border-b-0`}>
+                        <TableRow
+                          className={`${shade} hover:bg-muted/20 border-b-0`}
+                        >
                           {row.getVisibleCells().map((cell) => {
                             const meta = cell.column.columnDef.meta as
-                              | { cellClassName?: string }
-                              | undefined;
+                              { cellClassName?: string } | undefined;
                             return (
                               <TableCell
                                 key={cell.id}
@@ -536,7 +542,7 @@ export default function GeneralJournalClient() {
                               >
                                 {flexRender(
                                   cell.column.columnDef.cell,
-                                  cell.getContext()
+                                  cell.getContext(),
                                 )}
                               </TableCell>
                             );
