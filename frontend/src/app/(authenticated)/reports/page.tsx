@@ -28,12 +28,17 @@ import {
   Layers,
   CalendarCheck2,
   Activity,
+  Loader2,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useGetApiV1SummaryQuery } from "@/lib/generatedApi";
+import {
+  useGetApiV1SummaryQuery,
+  useGetApiV1PeriodsQuery,
+  usePostApiV1PeriodsSelectByIdMutation,
+} from "@/lib/generatedApi";
 
 type ReportItem = {
   slug: string;
@@ -45,7 +50,7 @@ type ReportItem = {
 };
 
 const REPORTS: ReportItem[] = [
-  // --- JOURNALS & LEDGERS (DITARUH ATAS SENDIRI) ---
+  // --- JOURNALS & LEDGERS ---
   {
     slug: "general-journal",
     title: "General Journal",
@@ -186,13 +191,38 @@ const columnHelper = createColumnHelper<ReportItem>();
 export default function ReportsPage() {
   const [globalFilter, setGlobalFilter] = useState("");
 
+  // RTK Queries & Mutation
   const {
     data: summaryRes,
     isLoading: summaryLoading,
-    isError,
+    isError: summaryError,
   } = useGetApiV1SummaryQuery();
 
-  const summary = (summaryRes as any)?.data ?? (summaryRes as any);
+  const { data: periodsRes, isLoading: periodsLoading } =
+    useGetApiV1PeriodsQuery();
+
+  const [selectPeriod, { isLoading: isSelecting }] =
+    usePostApiV1PeriodsSelectByIdMutation();
+
+  // Parsing data dari response backend
+  const summary = (summaryRes as any)?.data ?? summaryRes;
+  const periodsData = (periodsRes as any)?.periods ?? [];
+  const selectedPeriodId =
+    (periodsRes as any)?.selectedPeriodId ?? summary?.selectedPeriodId;
+
+  // Handler pergantian periode melalui select dropdown
+  const handlePeriodChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const periodId = Number(e.target.value);
+    if (!periodId) return;
+
+    try {
+      await selectPeriod({ id: periodId }).unwrap();
+    } catch (err) {
+      console.error("Gagal mengubah periode:", err);
+    }
+  };
 
   const columns = useMemo(
     () => [
@@ -281,6 +311,8 @@ export default function ReportsPage() {
           <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/10">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-transparent to-violet-500/20 opacity-60" />
             <div className="relative grid grid-cols-1 divide-y divide-white/10 bg-[#0B1226]/90 backdrop-blur md:grid-cols-3 md:divide-x md:divide-y-0">
+              
+              {/* Card 1: Total Journal */}
               <div className="flex items-center gap-4 p-5">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-indigo-400/20 bg-indigo-500/15 text-indigo-300">
                   <Receipt className="h-5 w-5" />
@@ -289,11 +321,11 @@ export default function ReportsPage() {
                   <p className="text-xs uppercase tracking-widest text-white/40">
                     Total Journal
                   </p>
-                  {summaryLoading ? (
+                  {summaryLoading || isSelecting ? (
                     <div className="mt-1 h-6 w-16 animate-pulse rounded bg-white/10" />
                   ) : (
                     <p className="text-2xl font-bold tabular-nums text-white">
-                      {isError ? "-" : (summary?.totalJournal ?? 0)}
+                      {summaryError ? "-" : (summary?.totalJournal ?? 0)}
                     </p>
                   )}
                   <p className="mt-0.5 flex items-center gap-1 text-xs text-white/40">
@@ -302,6 +334,7 @@ export default function ReportsPage() {
                 </div>
               </div>
 
+              {/* Card 2: Active COA */}
               <div className="flex items-center gap-4 p-5">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-500/15 text-violet-300">
                   <Layers className="h-5 w-5" />
@@ -314,46 +347,83 @@ export default function ReportsPage() {
                     <div className="mt-1 h-6 w-16 animate-pulse rounded bg-white/10" />
                   ) : (
                     <p className="text-2xl font-bold tabular-nums text-white">
-                      {isError ? "-" : (summary?.activeCoa ?? 0)}
+                      {summaryError ? "-" : (summary?.activeCoa ?? 0)}
                     </p>
                   )}
                   <p className="text-xs text-white/40">akun aktif</p>
                 </div>
               </div>
 
+              {/* Card 3: Selected Period Filter Dropdown */}
               <div className="flex items-center gap-4 p-5">
                 <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/70">
                   <CalendarCheck2 className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs uppercase tracking-widest text-white/40">
-                    Active Period
-                  </p>
-                  {summaryLoading ? (
-                    <div className="mt-1 h-6 w-32 animate-pulse rounded bg-white/10" />
-                  ) : (
-                    <p className="truncate text-sm font-semibold text-white">
-                      {isError ? "Gagal load" : summary?.activePeriodName}
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs uppercase tracking-widest text-white/40">
+                      Selected Period
                     </p>
+                    {isSelecting && (
+                      <Loader2 className="h-3 w-3 animate-spin text-indigo-400" />
+                    )}
+                  </div>
+
+                  {periodsLoading ? (
+                    <div className="mt-1.5 h-8 w-full animate-pulse rounded-lg bg-white/10" />
+                  ) : (
+                    <div className="relative mt-1">
+                      <select
+                        value={selectedPeriodId ?? ""}
+                        onChange={handlePeriodChange}
+                        disabled={isSelecting}
+                        className="w-full rounded-lg border border-white/10 bg-black/50 px-2.5 py-1.5 text-xs font-semibold text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 disabled:opacity-50"
+                      >
+                        {periodsData.length === 0 && (
+                          <option value="" disabled>
+                            Belum ada periode
+                          </option>
+                        )}
+                        {periodsData.map((p: any) => (
+                          <option
+                            key={p.id}
+                            value={p.id}
+                            className="bg-slate-900 text-white"
+                          >
+                            {p.periodName} {p.isClosed ? "(Closed)" : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   )}
+
                   <div className="mt-1.5 flex items-center gap-2">
                     {!summaryLoading && (
                       <>
                         <span
-                          className={`h-2 w-2 rounded-full ${summary?.isPeriodOpen ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse" : "bg-amber-400"}`}
+                          className={`h-2 w-2 rounded-full ${
+                            summary?.isPeriodOpen
+                              ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"
+                              : "bg-amber-400"
+                          }`}
                         />
                         <span
-                          className={`text-xs ${summary?.isPeriodOpen ? "text-emerald-300" : "text-amber-300/80"}`}
+                          className={`text-xs ${
+                            summary?.isPeriodOpen
+                              ? "text-emerald-300"
+                              : "text-amber-300/80"
+                          }`}
                         >
                           {summary?.isPeriodOpen
                             ? "Open"
-                            : "Closed / Tidak ada"}
+                            : "Closed / Tidak aktif"}
                         </span>
                       </>
                     )}
                   </div>
                 </div>
               </div>
+
             </div>
           </div>
 
