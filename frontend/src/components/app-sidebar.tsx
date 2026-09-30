@@ -104,7 +104,7 @@ export function AppSidebar() {
       dispatch(baseApi.util.resetApiState());
       document.cookie =
         "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      window.location.replace("/auth");
+      window.location.replace("/");
     }
   };
 
