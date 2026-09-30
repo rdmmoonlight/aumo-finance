@@ -15,8 +15,8 @@ Tech stack:
 - Bahasa: Kotlin, JDK 17
 - Build: Gradle Kotlin DSL (`build.gradle.kts`), Android Gradle Plugin 8.5.0, Gradle Wrapper (`./gradlew`, tidak butuh Android Studio untuk build)
 - SDK: `minSdk` 28 (Android 9, dikunci — tidak boleh dinaikkan tanpa instruksi eksplisit), `targetSdk`/`compileSdk` 34
-- UI: campuran View/XML lama (Material Components, ConstraintLayout) + Jetpack Compose (Material3) untuk layar baru — migrasi bertahap, belum 100% Compose
-- Networking: Ktor Client (engine OkHttp) + Gson sebagai serializer, menggantikan Retrofit lama. Base URL backend: `https://aumonext-api.onrender.com`
+- UI: 100% Jetpack Compose (Material3) — tidak ada layout XML, View, RecyclerView, maupun Material Components. Seluruh Activity adalah host tipis (`setContent`). Pesan singkat memakai Snackbar, dialog memakai `AlertDialog`/`DatePickerDialog` Compose. Tema XML (`Theme.AumoFinance`) hanya mengatur latar window, dan `FragmentActivity` (Login, Splash) hanya dipakai karena `BiometricPrompt` mewajibkannya
+- Networking: Ktor Client (engine OkHttp) + Gson sebagai serializer. Base URL backend: `https://aumonext-api.onrender.com`
 - Sesi: `EncryptedSharedPreferences` (AES256-GCM via Android Keystore) untuk "ingat saya", `BiometricPrompt` untuk login sidik jari/wajah
 - Async: Kotlinx Coroutines
 - Lint: ktlint (plugin `org.jlleitschuh.gradle.ktlint`)
@@ -44,6 +44,7 @@ Struktur folder (`app/src/main/java/com/aumofinance/app/`), per fungsi:
   - `menu/` — menu navigasi ke semua laporan di atas
 - `settings/` — pengaturan aplikasi
 - `splash/` — splash screen, titik pemulihan sesi tersimpan saat app dibuka
+- `ui/components/` — komponen Compose bersama (`SnackbarMessageHost`, `ConfirmDialog`, `AumoDatePickerDialog`)
 - `ui/icons/`, `ui/theme/` — ikon (Tabler, via font glyph) dan tema Compose
 - `update/` — `AppUpdateService`, pengecekan & pemasangan APK versi baru otomatis lewat GitHub Releases
 

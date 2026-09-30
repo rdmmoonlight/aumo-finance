@@ -33,10 +33,7 @@ class SplashActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContent { SplashScreen() }
 
-        // Cek update di background, silent, setiap app dibuka — porting
-        // persis perilaku App.xaml.cs di versi MAUI lama (dulu TIDAK ADA
-        // SAMA SEKALI di app Kotlin ini, itu sebabnya auto-update tidak
-        // pernah terdeteksi sejak migrasi).
+        // Cek update di background, silent, setiap app dibuka.
         AppUpdateService.checkForUpdateSilently(applicationContext)
 
         Handler(Looper.getMainLooper()).postDelayed({ proceedAfterSplash() }, SPLASH_DURATION_MS)

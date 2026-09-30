@@ -21,8 +21,7 @@ sealed class LoginState {
     data class Error(val message: String) : LoginState()
 }
 
-// State Compose (bukan LiveData) — mengikuti pola JournalEntryViewModel/PeriodsViewModel
-// sejak halaman ini dipindah dari Activity/View ke Jetpack Compose.
+// State Compose (mutableStateOf), bukan LiveData.
 class LoginViewModel : ViewModel() {
     private val api = AuthApi()
 

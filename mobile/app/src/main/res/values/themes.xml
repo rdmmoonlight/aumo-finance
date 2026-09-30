@@ -1,18 +1,16 @@
 <resources>
-    <!-- Ningrat Purple / Matte Black palette, carried over from the MAUI app -->
+    <!-- Warna latar window (tampil sebelum Compose pertama kali digambar).
+         Nilainya harus sama dengan AumoColors di ui/theme/Theme.kt. -->
     <color name="colorPrimary">#523363</color>
     <color name="colorBackground">#0A0A0A</color>
-    <color name="colorSurface">#141014</color>
-    <color name="colorSurfaceElevated">#1E121F</color>
-    <color name="colorGood">#4FA36A</color>
-    <color name="colorBad">#D7192F</color>
 
-    <!-- Background adaptive icon — putih, mengikuti desain appicon.png yang
-         dibuat dengan latar putih (logo "A" emas). -->
+    <!-- Warna latar adaptive icon (dirujuk mipmap-anydpi-v26/ic_launcher*.xml). -->
     <color name="ic_launcher_background">#0A0A0A</color>
 
-    <style name="Theme.AumoFinance" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
+    <!-- Tema platform tanpa ActionBar: seluruh UI digambar oleh Compose
+         (lihat AumoTheme), tema XML hanya mengatur window. -->
+    <style name="Theme.AumoFinance" parent="android:Theme.Material.NoActionBar">
+        <item name="android:colorPrimary">@color/colorPrimary</item>
         <item name="android:windowBackground">@color/colorBackground</item>
     </style>
 </resources>

@@ -35,8 +35,7 @@ import com.aumofinance.app.ui.theme.AumoDimens
 
 // Lebar indentasi/tab nomor referensi baris kredit — dipakai juga untuk
 // menggeser mundur (backspace) nominal debit sejauh jarak yang sama, supaya
-// nominal debit & kredit sengaja tidak sejajar. Sama persis dengan versi
-// View/XML sebelumnya (RecyclerView + JournalReportAdapter, sekarang dihapus).
+// nominal debit & kredit sengaja tidak sejajar.
 private const val CREDIT_INDENT = "        "
 
 private val inputDateTimeFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
@@ -44,14 +43,11 @@ private val displayDateFormat = SimpleDateFormat("dd MMMM yyyy", Locale("in", "I
 private val displayTimestampFormat = SimpleDateFormat("dd/MM HH:mm", Locale("in", "ID"))
 
 /**
- * Halaman General/Adjusting Journal, ditulis dengan Jetpack Compose
- * (sebelumnya RecyclerView + View/XML biasa — activity_general_journal_report.xml,
- * item_journal_date_header.xml, item_journal_entry_group.xml,
- * item_journal_report_line.xml, JournalReportAdapter, semuanya dihapus).
+ * Halaman General/Adjusting Journal.
  * Dipakai bersama oleh GeneralJournalReportActivity (showToggle=true,
  * showActions dikontrol toggle Edit/Selesai) dan AdjustingJournalReportActivity
  * (showToggle=false, showActions selalu true). Ikon pensil/trash memakai
- * TablerIcon — sama seperti Journal Entry, Home & Periods.
+ * TablerIcon.
  */
 @Composable
 fun JournalReportScreen(
@@ -170,8 +166,7 @@ private fun EntryCard(
                 // Ikon pensil/trash sengaja pakai clickable polos (bukan
                 // IconButton) supaya benar-benar compact — IconButton
                 // Material3 memaksa target sentuh minimum ~48dp yang bikin
-                // ikon terlihat besar lagi, sama seperti masalah ImageButton
-                // di versi View/XML sebelumnya.
+                // ikon terlihat besar.
                 TablerIcon(
                     TablerIcons.Edit,
                     tint = AumoColors.TextSecondary,
@@ -200,7 +195,7 @@ private fun EntryCard(
 // sudah dinyatakan sekali di header halaman). Debit & kredit sama-sama
 // rata kanan. Kredit mepet penuh ke tepi; nominal debit sengaja digeser
 // mundur (backspace) sejauh lebar CREDIT_INDENT — dicapai dengan spasi
-// kosong di akhir teks nominal debit, sama seperti versi View/XML.
+// kosong di akhir teks nominal debit.
 @Composable
 private fun JournalLineRow(line: JournalReportLine) {
     val label =

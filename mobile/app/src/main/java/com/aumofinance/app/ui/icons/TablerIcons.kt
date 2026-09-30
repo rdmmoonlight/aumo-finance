@@ -21,7 +21,7 @@ import com.aumofinance.app.R
 private val TablerIconFont = FontFamily(Font(R.font.tabler_icons))
 
 /** Kumpulan glyph Tabler Icons yang dipakai di seluruh app (Journal Entry
- * & Home). Satu-satunya sumber ikon Tabler — TIDAK memakai library
+ * dan Home, dst.). Satu-satunya sumber ikon Tabler — TIDAK memakai library
  * `br.com.devsrsouza.compose.icons` (sempat ditambahkan lalu memutus build
  * karena salah artifact ID/versi dan jcenter() sudah mati total sejak 2022)
  * supaya tidak ada dua sistem Tabler Icons yang saling tumpang tindih. */

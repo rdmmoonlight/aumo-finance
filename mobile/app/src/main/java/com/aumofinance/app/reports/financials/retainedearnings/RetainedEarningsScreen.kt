@@ -6,7 +6,7 @@ import com.aumofinance.app.reports.financials.ReportDivider
 import com.aumofinance.app.reports.financials.ReportRow
 import com.aumofinance.app.reports.financials.RetainedEarningsReport
 
-/** Padanan Compose dari activity_retained_earnings.xml. */
+/** Laporan Perubahan Modal (Retained Earnings). */
 @Composable
 fun RetainedEarningsScreen(report: RetainedEarningsReport?) {
     FinancialReportScaffold(periodName = report?.selectedPeriodName) {

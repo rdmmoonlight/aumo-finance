@@ -11,10 +11,9 @@ import io.ktor.client.call.body
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
-// State Compose (bukan LiveData lagi) — mengikuti pola PeriodsViewModel/
-// JournalEntryViewModel sejak halaman ini dipindah dari Activity/View ke
-// Jetpack Compose (lihat JournalReportScreen.kt). Satu ViewModel dipakai
-// baik oleh General maupun Adjusting Journal — loadGeneral()/loadAdjusting()
+// State Compose (mutableStateOf), bukan LiveData (lihat
+// JournalReportScreen.kt). Satu ViewModel dipakai baik oleh General maupun
+// Adjusting Journal — loadGeneral()/loadAdjusting()
 // beda endpoint, delete() otomatis reload endpoint yang terakhir dipakai.
 class JournalReportViewModel : ViewModel() {
     private val reportApi = JournalReportApi()
@@ -24,7 +23,7 @@ class JournalReportViewModel : ViewModel() {
         private set
     var selectedPeriodName: String? by mutableStateOf(null)
         private set
-    var toastMessage: String? by mutableStateOf(null)
+    var snackbarMessage: String? by mutableStateOf(null)
         private set
 
     private var isAdjusting = false
@@ -71,15 +70,15 @@ class JournalReportViewModel : ViewModel() {
                 if (response.status.isSuccess() && body.success) {
                     reload()
                 } else {
-                    toastMessage = body.message.ifBlank { "Failed to delete entry." }
+                    snackbarMessage = body.message.ifBlank { "Failed to delete entry." }
                 }
             } catch (t: Throwable) {
-                toastMessage = t.message ?: "Connection failed."
+                snackbarMessage = t.message ?: "Connection failed."
             }
         }
     }
 
-    fun clearToast() {
-        toastMessage = null
+    fun clearSnackbar() {
+        snackbarMessage = null
     }
 }

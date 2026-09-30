@@ -11,7 +11,6 @@ import com.aumofinance.app.reports.financials.ReportSectionTitle
  * Bagian "Other Income & Expenses" hanya ditampilkan jika berisi data
  * (disembunyikan jika kosong). Operating Income ditampilkan terpisah dari
  * Net Income — keduanya bisa berbeda kalau ada Other Income/Expense.
- * Padanan Compose dari activity_income_statement.xml.
  */
 @Composable
 fun IncomeStatementScreen(report: IncomeStatementReport?) {

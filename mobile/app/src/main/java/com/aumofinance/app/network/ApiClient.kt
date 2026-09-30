@@ -49,10 +49,8 @@ object ApiClient {
 
     val client: HttpClient by lazy {
         HttpClient(OkHttp) {
-            // Retrofit dulu selalu mengembalikan Response<T> sukses/gagal
-            // apa adanya ke caller (isSuccessful dicek manual) — expectSuccess
-            // = false menjaga perilaku yang sama di Ktor (tidak throw untuk
-            // status 4xx/5xx, body error tetap bisa dibaca oleh caller).
+            // expectSuccess = false: Ktor tidak throw untuk status 4xx/5xx,
+            // sehingga caller bisa memeriksa status dan membaca body error.
             expectSuccess = false
             install(AuthPlugin)
             install(ContentNegotiation) {

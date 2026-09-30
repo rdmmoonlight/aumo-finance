@@ -8,8 +8,7 @@ import androidx.lifecycle.viewModelScope
 import io.ktor.client.call.body
 import kotlinx.coroutines.launch
 
-// State Compose (bukan LiveData) — mengikuti pola JournalEntryViewModel/PeriodsViewModel
-// sejak halaman ini dipindah dari Activity/View ke Jetpack Compose.
+// State Compose (mutableStateOf), bukan LiveData.
 class DashboardViewModel : ViewModel() {
     private val api = DashboardApi()
 

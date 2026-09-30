@@ -22,8 +22,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import com.aumofinance.app.ui.theme.AumoDimens
 
-// Padanan Compose dari activity_general_ledger.xml + LedgerAdapter/item_ledger_account/item_ledger_line.
-// Dipakai bareng oleh halaman Permanent & Temporary (satu-satunya beda: parameter isTemporary saat load()).
+// Buku Besar per akun. Dipakai bareng oleh halaman Permanent & Temporary (satu-satunya beda: parameter isTemporary saat load()).
 @Composable
 fun LedgerScreen(report: LedgerResponse?) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->

@@ -39,10 +39,11 @@ private val AumoTypography: Typography =
         )
     }
 
-// Palet Matte Black + Ningrat Purple — nilai sama persis dengan
-// app/src/main/res/values/themes.xml (colorPrimary, colorBackground, dst).
-// Disalin manual (bukan dibaca dari resource) karena ColorScheme Compose
-// butuh tipe androidx.compose.ui.graphics.Color, bukan Int resource.
+// Palet Matte Black + Ningrat Purple. Primary dan Background harus sama
+// dengan colorPrimary dan colorBackground di res/values/themes.xml (latar
+// window sebelum Compose tergambar). Disalin manual (bukan dibaca dari
+// resource) karena ColorScheme Compose butuh tipe
+// androidx.compose.ui.graphics.Color, bukan Int resource.
 object AumoColors {
     val Primary = Color(0xFF523363)
     val Background = Color(0xFF0A0A0A)

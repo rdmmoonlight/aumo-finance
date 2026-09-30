@@ -32,7 +32,7 @@ import com.aumofinance.app.R
 import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
-/** Padanan Compose dari activity_login.xml. */
+/** Halaman login (email, kata sandi, biometrik). */
 @Composable
 fun LoginScreen(
     email: String,

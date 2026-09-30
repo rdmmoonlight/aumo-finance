@@ -51,10 +51,8 @@ import java.util.Calendar
 import com.aumofinance.app.ui.theme.AumoDimens
 
 /**
- * Halaman Periods, ditulis ulang dengan Jetpack Compose (sebelumnya
- * RecyclerView + AlertDialog berbasis View/XML biasa). Font mengikuti
- * MaterialTheme.typography global (Aptos Regular/Bold, lihat AumoTheme),
- * ikon memakai TablerIcon — sama seperti Journal Entry & Home.
+ * Halaman Periods. Font mengikuti MaterialTheme.typography global
+ * (Aptos Regular/Bold, lihat AumoTheme), ikon memakai TablerIcon.
  */
 @Composable
 fun PeriodsScreen(

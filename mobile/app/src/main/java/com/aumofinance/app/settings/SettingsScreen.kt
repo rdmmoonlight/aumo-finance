@@ -27,7 +27,7 @@ import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
 /**
- * Padanan Compose dari activity_settings.xml. State dua switch (Notifikasi,
+ * Halaman pengaturan. State dua switch (Notifikasi,
  * Perbarui Otomatis) di-hoist ke SettingsActivity karena sumbernya
  * SharedPreferences (murni preferensi perangkat, belum ada backend untuk ini).
  */

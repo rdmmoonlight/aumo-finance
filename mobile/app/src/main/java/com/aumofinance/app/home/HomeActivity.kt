@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 class HomeActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Modern splash + edge to edge, biar HomeScreen lu yang sebelumnya bisa full bleed
+        // Splash modern + edge to edge agar HomeScreen bisa tampil full bleed.
         installSplashScreen()
         // dark(...) = paksa ikon status bar/nav bar TERANG selamanya, gak ikut mode
         // terang/gelap sistem HP - soalnya tema app ini emang sengaja selalu gelap.

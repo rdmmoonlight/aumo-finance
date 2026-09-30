@@ -14,7 +14,7 @@ import com.aumofinance.app.reports.financials.ReportSectionTitle
 import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
-/** Statement of Financial Position (Neraca): Aset = Liabilitas + Ekuitas. Padanan Compose dari activity_financial_position.xml. */
+/** Statement of Financial Position (Neraca): Aset = Liabilitas + Ekuitas. */
 @Composable
 fun FinancialPositionScreen(report: FinancialPositionReport?) {
     FinancialReportScaffold(periodName = report?.selectedPeriodName) {

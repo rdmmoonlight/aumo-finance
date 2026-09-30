@@ -1,24 +1,27 @@
 package com.aumofinance.app.reports.journal
 
-import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import com.aumofinance.app.journal.JournalEntryActivity
+import com.aumofinance.app.ui.components.ConfirmDialog
+import com.aumofinance.app.ui.components.SnackbarMessageHost
+import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoTheme
 
 // Sama seperti General Journal, tapi backend sudah memfilter journalType
 // "Adjusting" saja; selalu menampilkan tombol edit/delete (tanpa toggle
 // Edit/Selesai terpisah seperti General Journal). Host Compose tipis —
-// semua tampilan ada di JournalReportScreen.kt, state ada di
-// JournalReportViewModel. Sebelumnya berbasis RecyclerView + View/XML biasa
-// (activity_adjusting_journal_report.xml + JournalReportAdapter, sudah
-// dihapus); dipindah ke Jetpack Compose menyusul Journal Entry, Home, dan
-// Periods.
+// tampilan ada di JournalReportScreen.kt, state ada di JournalReportViewModel.
 class AdjustingJournalReportActivity : ComponentActivity() {
     private val viewModel: JournalReportViewModel by viewModels()
 
@@ -27,26 +30,40 @@ class AdjustingJournalReportActivity : ComponentActivity() {
         viewModel.loadAdjusting()
 
         setContent {
-            val toastMessage = viewModel.toastMessage
-
-            LaunchedEffect(toastMessage) {
-                toastMessage?.let { message ->
-                    Toast.makeText(this@AdjustingJournalReportActivity, message, Toast.LENGTH_LONG).show()
-                    viewModel.clearToast()
-                }
-            }
+            var entryPendingDelete by remember { mutableStateOf<JournalReportEntry?>(null) }
 
             AumoTheme {
-                JournalReportScreen(
-                    entries = viewModel.entries,
-                    selectedPeriodName = viewModel.selectedPeriodName,
-                    defaultPeriodLabel = "Belum ada periode dipilih",
-                    showToggle = false,
-                    showActions = true,
-                    onToggleShowActions = {},
-                    onEdit = { entry -> openEdit(entry.id) },
-                    onDeleteRequest = { entry -> confirmDelete(entry) },
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    JournalReportScreen(
+                        entries = viewModel.entries,
+                        selectedPeriodName = viewModel.selectedPeriodName,
+                        defaultPeriodLabel = "Belum ada periode dipilih",
+                        showToggle = false,
+                        showActions = true,
+                        onToggleShowActions = {},
+                        onEdit = { entry -> openEdit(entry.id) },
+                        onDeleteRequest = { entry -> entryPendingDelete = entry },
+                    )
+                    SnackbarMessageHost(
+                        message = viewModel.snackbarMessage,
+                        onConsumed = { viewModel.clearSnackbar() },
+                    )
+                }
+
+                entryPendingDelete?.let { entry ->
+                    ConfirmDialog(
+                        title = "Hapus Entri?",
+                        message = "Entri \"${entry.transactionNumber}\" akan dihapus permanen. Lanjutkan?",
+                        confirmText = "Hapus",
+                        dismissText = "Batal",
+                        confirmColor = AumoColors.Bad,
+                        onConfirm = {
+                            viewModel.delete(entry)
+                            entryPendingDelete = null
+                        },
+                        onDismiss = { entryPendingDelete = null },
+                    )
+                }
             }
         }
     }
@@ -62,14 +79,5 @@ class AdjustingJournalReportActivity : ComponentActivity() {
                 putExtra(JournalEntryActivity.EXTRA_ENTRY_ID, entryId)
             },
         )
-    }
-
-    private fun confirmDelete(entry: JournalReportEntry) {
-        AlertDialog.Builder(this)
-            .setTitle("Hapus Entri?")
-            .setMessage("Entri \"${entry.transactionNumber}\" akan dihapus permanen. Lanjutkan?")
-            .setPositiveButton("Hapus") { _, _ -> viewModel.delete(entry) }
-            .setNegativeButton("Batal", null)
-            .show()
     }
 }

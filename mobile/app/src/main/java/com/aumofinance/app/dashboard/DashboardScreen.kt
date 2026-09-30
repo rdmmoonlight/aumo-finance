@@ -20,7 +20,7 @@ import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
-/** Padanan Compose dari activity_dashboard.xml. */
+/** Ringkasan posisi keuangan periode berjalan. */
 @Composable
 fun DashboardScreen(summary: DashboardSummary?) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->

@@ -22,8 +22,7 @@ import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
 // Dipakai bersama oleh Income Statement, Retained Earnings, Financial
-// Position, Cash Flow, Closing Journal — padanan Compose dari ReportRowBuilder
-// (dulu View/XML programatik). Satu baris "label (kiri) — nominal (kanan)",
+// Position, Cash Flow, Closing Journal. Satu baris "label (kiri) — nominal (kanan)",
 // dengan opsi tebal untuk baris total/subtotal dan indentasi untuk sub-item.
 
 /** Kerangka umum: header nama periode + isi laporan yang bisa di-scroll. */

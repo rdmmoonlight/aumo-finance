@@ -18,8 +18,7 @@ import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
-// Padanan Compose dari activity_trial_balance.xml + TrialBalanceAdapter/item_trial_balance_row.
-// Dipakai bareng oleh 3 varian: Unadjusted, Adjusted, Post-Closing (beda cuma
+// Tabel Neraca Saldo. Dipakai bareng oleh 3 varian: Unadjusted, Adjusted, Post-Closing (beda cuma
 // parameter "type" saat load() di masing-masing ViewModel).
 @Composable
 fun TrialBalanceScreen(

@@ -19,10 +19,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-// Tidak ada konten yang benar-benar ditampilkan (activity_logout.xml lama
-// juga kosong, hanya latar belakang) — tetap pakai setContent supaya tidak
-// nge-flash putih default sebelum pindah ke Login, dan agar tidak ada
-// dependensi XML sama sekali di halaman ini.
+// Tidak ada konten yang ditampilkan selain latar belakang — tetap pakai
+// setContent supaya tidak nge-flash putih default sebelum pindah ke Login.
 class LogoutActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
