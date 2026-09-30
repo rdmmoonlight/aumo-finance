@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import {
   usePostApiV1AuthLoginMutation,
   usePostApiV1AuthGoogleLoginMutation,
@@ -24,7 +25,8 @@ type AuthFormData = {
   keepMe?: boolean;
 };
 
-// SVG Icon Google
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
 function GoogleIcon() {
   return (
     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -45,6 +47,43 @@ function GoogleIcon() {
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
       />
     </svg>
+  );
+}
+
+function GoogleAuthButton({
+  isPending,
+  onSuccessHandler,
+  onError,
+}: {
+  isPending: boolean;
+  onSuccessHandler: (idToken: string) => void;
+  onError: (msg: string) => void;
+}) {
+  const googleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      const idToken = tokenResponse.access_token;
+      if (idToken) {
+        onSuccessHandler(idToken);
+      } else {
+        onError("Gagal mendapatkan token autentikasi Google.");
+      }
+    },
+    onError: () => {
+      onError("Autentikasi Google dibatalkan atau gagal.");
+    },
+  });
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      disabled={isPending || !GOOGLE_CLIENT_ID}
+      onClick={() => googleLogin()}
+      className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
+    >
+      <GoogleIcon />
+      Continue with Google
+    </Button>
   );
 }
 
@@ -113,7 +152,6 @@ function AuthFormContent() {
     });
   };
 
-  // Submit Handler Email/Password Manual
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
     try {
@@ -160,14 +198,14 @@ function AuthFormContent() {
     }
   };
 
-  // Google Login Handler via POST Mutation
-  const handleGoogleAuth = async () => {
+  const handleGoogleSuccess = async (idToken: string) => {
     setApiErr("");
     try {
       dispatch(generatedApi.util.resetApiState());
 
       await googleLoginMutation({
         googleLoginRequest: {
+          idToken: idToken,
           isMobileClient: false,
         },
       }).unwrap();
@@ -179,7 +217,7 @@ function AuthFormContent() {
       const errorMessage =
         e?.data?.message ||
         e?.data?.title ||
-        "Gagal terhubung ke layanan Google Auth backend.";
+        "Gagal memverifikasi akun Google dengan server backend.";
       setApiErr(errorMessage);
     }
   };
@@ -192,7 +230,6 @@ function AuthFormContent() {
 
   return (
     <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200 selection:bg-black selection:text-white [&_*::selection]:bg-black [&_*::selection]:text-white">
-      {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold tracking-tight text-black">
           {mode === "login" ? "Sign in" : "Create account"}
@@ -204,18 +241,20 @@ function AuthFormContent() {
         </p>
       </div>
 
-      {/* Button Google Auth */}
       <div className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={isPending}
-          onClick={handleGoogleAuth}
-          className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </Button>
+        {GOOGLE_CLIENT_ID ? (
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <GoogleAuthButton
+              isPending={isPending}
+              onSuccessHandler={handleGoogleSuccess}
+              onError={(msg) => setApiErr(msg)}
+            />
+          </GoogleOAuthProvider>
+        ) : (
+          <div className="text-center p-2 text-xs text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.
+          </div>
+        )}
 
         <div className="relative flex items-center justify-center">
           <div className="border-t border-zinc-200 w-full" />
@@ -225,9 +264,7 @@ function AuthFormContent() {
         </div>
       </div>
 
-      {/* Form Input */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
-        {/* Field Email */}
         <div className="space-y-1.5">
           <Label
             htmlFor="email"
@@ -249,7 +286,6 @@ function AuthFormContent() {
           )}
         </div>
 
-        {/* Field Password */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
             <Label
@@ -280,7 +316,6 @@ function AuthFormContent() {
           )}
         </div>
 
-        {/* Field Confirm Password (Mode Register) */}
         {mode === "register" && (
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
@@ -313,7 +348,6 @@ function AuthFormContent() {
           </div>
         )}
 
-        {/* Checkbox Keep Me & Forgot Link (Mode Login) */}
         {mode === "login" && (
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center space-x-2">
@@ -339,14 +373,12 @@ function AuthFormContent() {
           </div>
         )}
 
-        {/* Alert Error */}
         {apiErr && (
           <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl font-medium">
             {apiErr}
           </div>
         )}
 
-        {/* Submit Button */}
         <Button
           type="submit"
           disabled={isPending}
@@ -360,7 +392,6 @@ function AuthFormContent() {
         </Button>
       </form>
 
-      {/* Switcher Mode Login / Register */}
       <div className="mt-5 text-center text-xs text-zinc-600">
         {mode === "login" ? (
           <>
