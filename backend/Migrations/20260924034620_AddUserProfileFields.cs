@@ -1,24 +1,24 @@
-﻿using System; 
-using Microsoft.EntityFrameworkCore.Migrations; 
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata; 
- 
-#nullable disable 
- 
-namespace AumoBackend.Migrations 
-{ 
-    public partial class AddUserProfileFields : Migration 
-    { 
-        protected override void Up(MigrationBuilder migrationBuilder) 
-        { 
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
+#nullable disable
+
+namespace AumoBackend.Migrations
+{
+    public partial class AddUserProfileFields : Migration
+    {
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
             // 1. Drop Index secara aman (IF EXISTS)
-            migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_JournalEntries_ReferenceNumber\";"); 
-            migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_ChartOfAccounts_ReferenceNumber\";"); 
- 
+            migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_JournalEntries_ReferenceNumber\";");
+            migrationBuilder.Sql("DROP INDEX IF EXISTS \"IX_ChartOfAccounts_ReferenceNumber\";");
+
             // 2. Drop Column secara aman (IF EXISTS)
-            migrationBuilder.Sql("ALTER TABLE \"LoginActivities\" DROP COLUMN IF EXISTS \"Description\";"); 
-            migrationBuilder.Sql("ALTER TABLE \"JournalEntries\" DROP COLUMN IF EXISTS \"MobileNote\";"); 
-            migrationBuilder.Sql("ALTER TABLE \"JournalEntries\" DROP COLUMN IF EXISTS \"NeedsClassification\";"); 
-            migrationBuilder.Sql("ALTER TABLE \"JournalEntries\" DROP COLUMN IF EXISTS \"Source\";"); 
+            migrationBuilder.Sql("ALTER TABLE \"LoginActivities\" DROP COLUMN IF EXISTS \"Description\";");
+            migrationBuilder.Sql("ALTER TABLE \"JournalEntries\" DROP COLUMN IF EXISTS \"MobileNote\";");
+            migrationBuilder.Sql("ALTER TABLE \"JournalEntries\" DROP COLUMN IF EXISTS \"NeedsClassification\";");
+            migrationBuilder.Sql("ALTER TABLE \"JournalEntries\" DROP COLUMN IF EXISTS \"Source\";");
 
             // 3. Rename Column secara aman
             migrationBuilder.Sql(@"
@@ -33,143 +33,143 @@ namespace AumoBackend.Migrations
                         ALTER TABLE ""JournalEntries"" RENAME COLUMN ""ReferenceNumber"" TO ""TransactionNumber"";
                     END IF;
                 END $$;
-            "); 
- 
+            ");
+
             // 4. Alter Columns UserSessions & LoginActivities
-            migrationBuilder.AlterColumn<string>( 
-                name: "UserAgent", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(500)", 
-                oldMaxLength: 500); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "RefreshTokenHash", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(255)", 
-                oldMaxLength: 255); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "OperatingSystem", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(100)", 
-                oldMaxLength: 100); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "IpAddress", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(45)", 
-                oldMaxLength: 45); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "DeviceName", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(150)", 
-                oldMaxLength: 150); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "Country", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(100)", 
-                oldMaxLength: 100); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "Browser", 
-                table: "UserSessions", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(100)", 
-                oldMaxLength: 100); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "UserAgent", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(500)", 
-                oldMaxLength: 500); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "OperatingSystem", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(100)", 
-                oldMaxLength: 100); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "IpAddress", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(45)", 
-                oldMaxLength: 45); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "Device", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(150)", 
-                oldMaxLength: 150); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "Country", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(100)", 
-                oldMaxLength: 100); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "Browser", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(100)", 
-                oldMaxLength: 100); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "ActivityType", 
-                table: "LoginActivities", 
-                type: "text", 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "character varying(50)", 
-                oldMaxLength: 50); 
- 
-            migrationBuilder.AlterColumn<string>( 
-                name: "JournalType", 
-                table: "JournalEntries", 
-                type: "character varying(50)", 
-                maxLength: 50, 
-                nullable: false, 
-                oldClrType: typeof(string), 
-                oldType: "text"); 
+            migrationBuilder.AlterColumn<string>(
+                name: "UserAgent",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(500)",
+                oldMaxLength: 500);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "RefreshTokenHash",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(255)",
+                oldMaxLength: 255);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "OperatingSystem",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "IpAddress",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(45)",
+                oldMaxLength: 45);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "DeviceName",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(150)",
+                oldMaxLength: 150);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Country",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Browser",
+                table: "UserSessions",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "UserAgent",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(500)",
+                oldMaxLength: 500);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "OperatingSystem",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "IpAddress",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(45)",
+                oldMaxLength: 45);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Device",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(150)",
+                oldMaxLength: 150);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Country",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Browser",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(100)",
+                oldMaxLength: 100);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "ActivityType",
+                table: "LoginActivities",
+                type: "text",
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "character varying(50)",
+                oldMaxLength: 50);
+
+            migrationBuilder.AlterColumn<string>(
+                name: "JournalType",
+                table: "JournalEntries",
+                type: "character varying(50)",
+                maxLength: 50,
+                nullable: false,
+                oldClrType: typeof(string),
+                oldType: "text");
 
             // 5. Tambah Kolom UserId secara aman (hanya jika belum ada)
             migrationBuilder.Sql(@"
@@ -203,8 +203,8 @@ namespace AumoBackend.Migrations
                         ALTER TABLE ""AspNetUsers"" ADD COLUMN ""Bio"" text NULL;
                     END IF;
                 END $$;
-            "); 
- 
+            ");
+
             // 6. Create Table secara aman (CREATE TABLE IF NOT EXISTS)
             migrationBuilder.Sql(@"
                 CREATE TABLE IF NOT EXISTS ""DataProtectionKeys"" (
@@ -264,7 +264,7 @@ namespace AumoBackend.Migrations
                     CONSTRAINT ""FK_EconomicDocuments_JournalEntries_JournalEntryId"" FOREIGN KEY (""JournalEntryId"") REFERENCES ""JournalEntries"" (""Id"")
                 );
             ");
- 
+
             // 7. Buat Index Baru secara aman
             migrationBuilder.Sql("CREATE UNIQUE INDEX IF NOT EXISTS \"IX_JournalEntries_UserId_TransactionNumber\" ON \"JournalEntries\" (\"UserId\", \"TransactionNumber\");");
             migrationBuilder.Sql("CREATE UNIQUE INDEX IF NOT EXISTS \"IX_ChartOfAccounts_UserId_ReferenceNumber\" ON \"ChartOfAccounts\" (\"UserId\", \"ReferenceNumber\");");
@@ -276,10 +276,10 @@ namespace AumoBackend.Migrations
             migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS \"IX_Folders_ParentFolderId\" ON \"Folders\" (\"ParentFolderId\");");
             migrationBuilder.Sql("CREATE INDEX IF NOT EXISTS \"IX_Folders_UserId\" ON \"Folders\" (\"UserId\");");
             migrationBuilder.Sql("CREATE UNIQUE INDEX IF NOT EXISTS \"IX_TransactionCounters_UserId_CounterKey\" ON \"TransactionCounters\" (\"UserId\", \"CounterKey\");");
-        } 
+        }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }
-    } 
+    }
 }
