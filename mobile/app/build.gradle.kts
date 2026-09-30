@@ -55,8 +55,8 @@ android {
         jvmTarget = "17"
     }
 
-    // AGP 8+ mewajibkan opt-in eksplisit ini untuk generate kelas BuildConfig.
-    // Ditambahkan juga dukungan Compose agar bisa digunakan bersama XML secara bertahap.
+    // AGP 8+ mewajibkan opt-in eksplisit untuk generate kelas BuildConfig.
+    // compose = true mengaktifkan Jetpack Compose (seluruh UI aplikasi).
     buildFeatures {
         buildConfig = true
         compose = true
@@ -71,14 +71,13 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.core:core-splashscreen:1.0.1")
+    // Hanya untuk FragmentActivity yang dibutuhkan androidx.biometric
+    // (LoginActivity, SplashActivity); tidak ada AppCompatActivity/View UI.
     implementation("androidx.appcompat:appcompat:1.7.0")
-    implementation("com.google.android.material:material:1.12.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("androidx.recyclerview:recyclerview:1.3.2")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.8.4")
     implementation("androidx.activity:activity-ktx:1.9.1")
-    // --- KLIEN HTTP: KTOR (menggantikan Retrofit + OkHttp manual) ---
-    // Engine OkHttp dipakai di bawah Ktor (bukan dipanggil langsung lagi),
+    // --- KLIEN HTTP: KTOR ---
+    // Engine OkHttp dipakai di bawah Ktor,
     // Gson dipertahankan sebagai serializer supaya semua data class model
     // (request/response) di ApiX.kt tidak perlu anotasi kotlinx.serialization.
     implementation("io.ktor:ktor-client-core:2.3.12")
@@ -92,7 +91,7 @@ dependencies {
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
     implementation("androidx.biometric:biometric:1.1.0")
 
-    // --- INTEGRASI JETPACK COMPOSE (MIGRASI BERTAHAP) ---
+    // --- JETPACK COMPOSE (Material3) ---
     val composeBom = platform("androidx.compose:compose-bom:2024.05.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -102,8 +101,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     // Dipakai untuk ikon outline Material di halaman Reports menu
-    // (ReportsMenuScreen.kt) — Home page sudah pindah ke TablerIcon
-    // (font glyph, lihat com.aumofinance.app.ui.icons.TablerIcons).
+    // (ReportsMenuScreen.kt); layar lain memakai TablerIcon (font glyph,
+    // lihat com.aumofinance.app.ui.icons.TablerIcons).
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.activity:activity-compose:1.9.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.4")

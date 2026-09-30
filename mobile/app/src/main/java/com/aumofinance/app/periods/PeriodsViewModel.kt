@@ -10,8 +10,7 @@ import io.ktor.client.call.body
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
-// State Compose (bukan LiveData lagi) — mengikuti pola JournalEntryViewModel
-// sejak halaman ini dipindah dari Activity/View ke Jetpack Compose.
+// State Compose (mutableStateOf), bukan LiveData.
 class PeriodsViewModel : ViewModel() {
     private val api = PeriodsApi()
 
@@ -26,10 +25,10 @@ class PeriodsViewModel : ViewModel() {
     var openPeriodInfo: OpenPeriodInfoResponse? by mutableStateOf(null)
         private set
 
-    // Pesan sukses/gagal terakhir dari backend, ditampilkan sebagai Toast lalu
-    // dibersihkan lewat clearToast() — supaya kegagalan (mis. "period already
-    // exists") tidak lagi diam saja seperti sebelumnya.
-    var toastMessage: String? by mutableStateOf(null)
+    // Pesan sukses/gagal terakhir dari backend, ditampilkan sebagai Snackbar lalu
+    // dibersihkan lewat clearSnackbar() — supaya kegagalan (mis. "period already
+    // exists") terlihat oleh pengguna.
+    var snackbarMessage: String? by mutableStateOf(null)
         private set
 
     fun load() {
@@ -56,7 +55,7 @@ class PeriodsViewModel : ViewModel() {
             try {
                 openPeriodInfo = api.openInfo().body<OpenPeriodInfoResponse>()
             } catch (t: Throwable) {
-                toastMessage = t.message ?: "Network error."
+                snackbarMessage = t.message ?: "Network error."
             }
         }
     }
@@ -75,13 +74,13 @@ class PeriodsViewModel : ViewModel() {
                     } catch (parseError: Throwable) {
                         SimpleApiResponse(success = false, message = "Failed to open period (HTTP ${response.status.value}).")
                     }
-                toastMessage = body.message
+                snackbarMessage = body.message
                 if (body.success) {
                     openPeriodInfo = null
                     load()
                 }
             } catch (t: Throwable) {
-                toastMessage = t.message ?: "Network error."
+                snackbarMessage = t.message ?: "Network error."
             }
         }
     }
@@ -97,10 +96,10 @@ class PeriodsViewModel : ViewModel() {
                 if (response.status.isSuccess() && body.success) {
                     load()
                 } else {
-                    toastMessage = body.message.ifBlank { "Failed to switch period (HTTP ${response.status.value})." }
+                    snackbarMessage = body.message.ifBlank { "Failed to switch period (HTTP ${response.status.value})." }
                 }
             } catch (t: Throwable) {
-                toastMessage = t.message ?: "Network error."
+                snackbarMessage = t.message ?: "Network error."
             }
         }
     }
@@ -109,15 +108,15 @@ class PeriodsViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.close(id)
-                toastMessage = response.body<SimpleApiResponse>().message
+                snackbarMessage = response.body<SimpleApiResponse>().message
                 load()
             } catch (t: Throwable) {
-                toastMessage = t.message ?: "Network error."
+                snackbarMessage = t.message ?: "Network error."
             }
         }
     }
 
-    fun clearToast() {
-        toastMessage = null
+    fun clearSnackbar() {
+        snackbarMessage = null
     }
 }

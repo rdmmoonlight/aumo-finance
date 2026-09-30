@@ -13,8 +13,7 @@ import com.aumofinance.app.R
 
 /**
  * Splash penuh (logo + atribusi) — bukan API splash minimalis Android 12+,
- * lihat catatan di SplashActivity. Padanan Compose dari activity_splash.xml
- * (FrameLayout putih + ImageView fitCenter).
+ * lihat catatan di SplashActivity. Latar putih dengan logo di tengah.
  */
 @Composable
 fun SplashScreen() {

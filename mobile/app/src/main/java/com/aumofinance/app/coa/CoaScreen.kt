@@ -52,7 +52,7 @@ val CoaAccountTypes =
         "OtherExpenses",
     )
 
-/** Padanan Compose dari activity_coa.xml + item_account.xml + dialog Add/Edit Account. */
+/** Daftar Chart of Accounts beserta dialog Add/Edit Account. */
 @Composable
 fun CoaScreen(
     accounts: List<Account>,

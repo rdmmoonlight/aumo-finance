@@ -17,7 +17,7 @@ mengembalikan token, dikirim di setiap request berikutnya lewat header
 | Bahasa | Kotlin, JDK 17 |
 | Build | Gradle Kotlin DSL (`build.gradle.kts`), AGP 8.5.0, Gradle Wrapper (`./gradlew`, tidak butuh Android Studio) |
 | SDK | `minSdk` 28 / Android 9 — **dikunci**, jangan dinaikkan tanpa instruksi eksplisit. `compileSdk`/`targetSdk` 34 |
-| UI | Campuran View/XML lama (Material Components, ConstraintLayout) + Jetpack Compose (Material3) untuk layar baru — migrasi masih bertahap |
+| UI | 100% Jetpack Compose (Material3) — tanpa layout XML, View, RecyclerView, atau Material Components. Activity hanya host tipis (`setContent`); pesan singkat lewat Snackbar, dialog lewat komponen Compose. Tema XML hanya mengatur latar window; `FragmentActivity` (Login, Splash) dipakai karena `BiometricPrompt` mewajibkannya |
 | Networking | Ktor Client (engine OkHttp) + Gson, base URL `https://aumonext-api.onrender.com` |
 | Sesi | `EncryptedSharedPreferences` (AES256-GCM via Android Keystore) untuk "ingat saya", `BiometricPrompt` untuk login sidik jari/wajah |
 | Async | Kotlinx Coroutines |
@@ -64,6 +64,7 @@ Package: `app/src/main/java/com/aumofinance/app/`
 | `reports/` | Seluruh laporan, dipecah per jenis: `financials/` (Posisi Keuangan, Laba Rugi, Perubahan Modal, Arus Kas, Jurnal Penutup), `journal/` (Jurnal Umum & Penyesuaian), `ledger/` (Buku Besar permanent/temporary), `trialbalance/` (Neraca Saldo unadjusted/adjusted/post-closing), `worksheet/` (Kertas Kerja), `menu/` (navigasi ke semua laporan) |
 | `settings/` | Pengaturan aplikasi |
 | `splash/` | Splash screen, titik pemulihan sesi tersimpan saat app dibuka |
+| `ui/components/` | Komponen Compose bersama: `SnackbarMessageHost`, `ConfirmDialog`, `AumoDatePickerDialog` |
 | `ui/icons/`, `ui/theme/` | Ikon (Tabler, via font glyph) dan tema Compose (`AumoColors`, dll) |
 | `update/` | `AppUpdateService` — cek & pasang APK versi baru otomatis lewat GitHub Releases |
 

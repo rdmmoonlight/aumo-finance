@@ -10,8 +10,7 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
-// State Compose (bukan LiveData) — mengikuti pola JournalEntryViewModel/PeriodsViewModel
-// sejak halaman ini dipindah dari Activity/View ke Jetpack Compose.
+// State Compose (mutableStateOf), bukan LiveData.
 class CoaViewModel : ViewModel() {
     private val api = CoaApi()
 

@@ -20,7 +20,6 @@ import com.aumofinance.app.ui.theme.AumoDimens
  * Read-only: entri Closing bersifat system-generated (dihitung on-the-fly
  * dari Trial Balance oleh backend, TIDAK PERNAH tersimpan sebagai entri
  * jurnal sungguhan) — tidak ada tombol tambah/edit/hapus di halaman ini.
- * Padanan Compose dari activity_closing_journal.xml.
  */
 @Composable
 fun ClosingJournalScreen(report: ClosingJournalReport?) {

@@ -32,8 +32,7 @@ private fun fmt(value: Double): String = if (value == 0.0) "" else CurrencyForma
  * Footer WAJIB menampilkan 3 baris total standar akuntansi: 1) Total (sebelum
  * plug), 2) Laba/Rugi Bersih (plug ke Neraca), 3) Total Akhir (setelah plug).
  * Istilah "plug" tidak ditampilkan ke pengguna. Tabel 11 kolom terlalu lebar
- * untuk layar ponsel, jadi dibungkus horizontalScroll. Padanan Compose dari
- * activity_worksheet.xml (dulu dibangun programatik dengan LinearLayout).
+ * untuk layar ponsel, jadi dibungkus horizontalScroll.
  */
 @Composable
 fun WorksheetScreen(report: WorksheetReport?) {

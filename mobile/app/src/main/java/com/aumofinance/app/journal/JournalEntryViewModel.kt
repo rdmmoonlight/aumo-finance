@@ -18,8 +18,8 @@ import java.util.Locale
 
 // Menangani satu form Journal Entry (create/edit satu entri) SEKALIGUS
 // state Compose-nya (journal type, tanggal, nomor transaksi, baris, daftar
-// akun) — sebelumnya state form ini hidup di JournalEntryActivity, dipindah
-// ke sini supaya Activity cukup jadi host tipis untuk JournalEntryScreen.
+// akun), sehingga JournalEntryActivity cukup menjadi host tipis untuk
+// JournalEntryScreen.
 // Daftar entri (halaman General Journal / Adjusting Journal) ada di
 // reports.journal.JournalReportViewModel, bukan di sini — mengikuti pemisahan
 // endpoint yang sama di aumo-finance-web (journal-entry vs journal-entries).
@@ -60,7 +60,7 @@ class JournalEntryViewModel : ViewModel() {
     var updateResult: Boolean? by mutableStateOf(null)
         private set
 
-    // Dipanggil oleh Activity setelah menampilkan Toast/navigasi, supaya
+    // Dipanggil oleh Activity setelah menampilkan Snackbar/navigasi, supaya
     // sinyal ini tidak "nyangkut" dan terpicu ulang tiap recomposition
     // Compose (mis. tiap kali user mengetik di baris lain).
     fun clearError() {
@@ -114,7 +114,7 @@ class JournalEntryViewModel : ViewModel() {
             try {
                 accounts = coaApi.list().body<AccountsResponse>().accounts.filter { it.isActive }
             } catch (t: Throwable) {
-                // diam saja, sama seperti onFailure kosong sebelumnya
+                // kegagalan diabaikan (tidak ada pesan ke pengguna)
             }
         }
     }
@@ -126,7 +126,7 @@ class JournalEntryViewModel : ViewModel() {
                 val body = api.nextTransactionNumber(_journalType, entryDateIso).body<NextTransactionNumberResponse>()
                 transactionNumber = body.transactionNumber
             } catch (t: Throwable) {
-                // diam saja, sama seperti onFailure kosong sebelumnya
+                // kegagalan diabaikan (tidak ada pesan ke pengguna)
             }
         }
     }
@@ -136,7 +136,7 @@ class JournalEntryViewModel : ViewModel() {
             try {
                 api.getById(id).body<JournalEntryDetailResponse>().entry?.let { bindExistingEntry(it) }
             } catch (t: Throwable) {
-                // diam saja, sama seperti onFailure kosong sebelumnya
+                // kegagalan diabaikan (tidak ada pesan ke pengguna)
             }
         }
     }

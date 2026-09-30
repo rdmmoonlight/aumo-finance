@@ -1,17 +1,22 @@
 package com.aumofinance.app.periods
 
-import android.app.AlertDialog
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import com.aumofinance.app.ui.components.ConfirmDialog
+import com.aumofinance.app.ui.components.SnackbarMessageHost
 import com.aumofinance.app.ui.theme.AumoTheme
 
-// Host Compose tipis — semua tampilan ada di PeriodsScreen.kt / OpenPeriodDialog,
-// state ada di PeriodsViewModel. Sebelumnya berbasis RecyclerView + AlertDialog
-// View/XML biasa; dipindah ke Jetpack Compose menyusul Journal Entry & Home.
+// Host Compose tipis — tampilan ada di PeriodsScreen.kt (termasuk
+// OpenPeriodDialog), state ada di PeriodsViewModel.
 class PeriodsActivity : ComponentActivity() {
     private val viewModel: PeriodsViewModel by viewModels()
 
@@ -20,31 +25,42 @@ class PeriodsActivity : ComponentActivity() {
         viewModel.load()
 
         setContent {
-            val toastMessage = viewModel.toastMessage
-
-            // LaunchedEffect supaya Toast hanya muncul SEKALI saat pesan berubah,
-            // bukan berulang setiap recomposition.
-            LaunchedEffect(toastMessage) {
-                toastMessage?.let { message ->
-                    Toast.makeText(this@PeriodsActivity, message, Toast.LENGTH_LONG).show()
-                    viewModel.clearToast()
-                }
-            }
+            var periodPendingClose by remember { mutableStateOf<Period?>(null) }
 
             AumoTheme {
-                PeriodsScreen(
-                    periods = viewModel.periods,
-                    selectedPeriodId = viewModel.selectedPeriodId,
-                    onSelect = { period -> viewModel.select(period.id) },
-                    onCloseRequest = { period -> confirmClose(period) },
-                    onOpenNewPeriodClick = { viewModel.openNewPeriodDialog() },
-                )
+                Box(modifier = Modifier.fillMaxSize()) {
+                    PeriodsScreen(
+                        periods = viewModel.periods,
+                        selectedPeriodId = viewModel.selectedPeriodId,
+                        onSelect = { period -> viewModel.select(period.id) },
+                        onCloseRequest = { period -> periodPendingClose = period },
+                        onOpenNewPeriodClick = { viewModel.openNewPeriodDialog() },
+                    )
+                    SnackbarMessageHost(
+                        message = viewModel.snackbarMessage,
+                        onConsumed = { viewModel.clearSnackbar() },
+                    )
+                }
 
                 viewModel.openPeriodInfo?.let { info ->
                     OpenPeriodDialog(
                         info = info,
                         onDismiss = { viewModel.dismissOpenPeriodDialog() },
                         onSubmit = { request -> viewModel.open(request) },
+                    )
+                }
+
+                periodPendingClose?.let { period ->
+                    ConfirmDialog(
+                        title = "Close Period?",
+                        message = "Period \"${period.periodName}\" will be closed and cannot accept new entries anymore. Continue?",
+                        confirmText = "Close",
+                        dismissText = "Cancel",
+                        onConfirm = {
+                            viewModel.close(period.id)
+                            periodPendingClose = null
+                        },
+                        onDismiss = { periodPendingClose = null },
                     )
                 }
             }
@@ -54,17 +70,5 @@ class PeriodsActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.load()
-    }
-
-    // Dialog konfirmasi native (bukan Compose) sudah cukup untuk aksi
-    // sekali-tap sederhana seperti ini — tidak perlu jadi bagian dari
-    // PeriodsScreen composable.
-    private fun confirmClose(period: Period) {
-        AlertDialog.Builder(this)
-            .setTitle("Close Period?")
-            .setMessage("Period \"${period.periodName}\" will be closed and cannot accept new entries anymore. Continue?")
-            .setPositiveButton("Close") { _, _ -> viewModel.close(period.id) }
-            .setNegativeButton("Cancel", null)
-            .show()
     }
 }

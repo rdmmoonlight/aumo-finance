@@ -92,7 +92,6 @@
         <activity
             android:name=".crashlog.CrashLogActivity"
             android:exported="false" />
-        <!-- Activities added incrementally per phase (Login, Home, Dashboard, etc.) -->
         <!-- FileProvider untuk memberi akses APK hasil unduhan update ke
              installer sistem — authorities harus persis "{applicationId}.fileprovider"
              (dipakai apa adanya di AppUpdateService.kt). -->

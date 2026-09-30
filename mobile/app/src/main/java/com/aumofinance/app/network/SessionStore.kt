@@ -25,7 +25,7 @@ import androidx.security.crypto.MasterKey
 // HP tak terkunci langsung masuk app tanpa sidik jari/wajah pemilik, tapi
 // bukan proteksi kriptografis penuh terhadap ekstraksi token dari
 // penyimpanan perangkat yang di-root. Peningkatan ke CryptoObject-based
-// binding dicatat sebagai utang teknis di PHASES.md.
+// binding masih menjadi utang teknis.
 object SessionStore {
     private const val PREFS_NAME = "aumo_secure_session"
     private const val KEY_TOKEN = "auth_token"

@@ -7,7 +7,7 @@ import com.aumofinance.app.reports.financials.ReportDivider
 import com.aumofinance.app.reports.financials.ReportRow
 import com.aumofinance.app.reports.financials.ReportSectionTitle
 
-/** Padanan Compose dari activity_cash_flow.xml. */
+/** Laporan Arus Kas (Cash Flow). */
 @Composable
 fun CashFlowScreen(report: CashFlowReport?) {
     FinancialReportScaffold(periodName = report?.selectedPeriodName) {

@@ -60,11 +60,9 @@ import com.aumofinance.app.ui.theme.AumoDimens
 private val DATE_DISPLAY = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
 
 /**
- * Halaman Journal Entry, ditulis ulang dengan Jetpack Compose (sebelumnya
- * RecyclerView + XML). Susunan kotak Journal Type / Entry Date / Transaction
+ * Halaman Journal Entry. Susunan kotak Journal Type / Entry Date / Transaction
  * Number sengaja dibuat SATU KOLOM penuh (bukan sejajar horizontal) supaya
- * semua kotak rata kiri konsisten — sebelumnya kotak tanggal berbagi baris
- * dengan Journal Type sehingga terlihat lebih ke kanan dibanding kotak lain.
+ * semua kotak rata kiri konsisten.
  */
 @Composable
 fun JournalEntryScreen(
@@ -194,8 +192,7 @@ private fun LockedPeriodWarning() {
 /**
  * Kartu Journal Type + Entry Date + Transaction Number.
  * Ketiganya SATU KOLOM (fillMaxWidth masing-masing) sehingga rata kiri
- * konsisten satu sama lain — memperbaiki kotak tanggal yang sebelumnya
- * lebih ke kanan karena berbagi baris dengan Journal Type.
+ * konsisten satu sama lain.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -256,7 +253,7 @@ private fun JournalDetailsCard(
             // --- Entry Date ---
             // OutlinedTextField dengan readOnly=true tetap "menelan" event
             // klik-nya sendiri (buat fokus/kursor) sebelum sampai ke
-            // Modifier.clickable di atasnya — makanya sebelumnya tidak bisa
+            // Modifier.clickable di atasnya — sehingga field tidak bisa
             // di-klik. Solusinya: taruh Box transparan tanpa ripple di ATAS
             // field itu untuk menangkap klik-nya.
             FieldLabel("Entry Date")
@@ -360,8 +357,8 @@ private fun JournalLineCard(
                         modifier = Modifier.fillMaxWidth().menuAnchor(),
                     )
                     // Popup di-background eksplisit + teks putih terang —
-                    // sebelumnya daftar akun ini TIDAK TERLIHAT karena popup
-                    // memakai warna default (gelap di atas gelap).
+                    // warna default popup gelap di atas latar gelap sehingga
+                    // daftar akun tidak terlihat.
                     DropdownMenu(
                         expanded = expanded && isEditable,
                         onDismissRequest = { expanded = false },

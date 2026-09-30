@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
-/** Padanan Compose dari activity_crash_log.xml. */
+/** Layar untuk melihat dan menyalin crash log tersimpan. */
 @Composable
 fun CrashLogScreen(
     content: String,

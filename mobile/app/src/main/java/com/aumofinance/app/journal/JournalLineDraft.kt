@@ -7,7 +7,7 @@ import androidx.compose.runtime.setValue
 // Representasi satu baris form selagi diedit user (sebelum dikirim ke API).
 // accountId null berarti user belum memilih akun untuk baris ini.
 // Field berbasis mutableStateOf agar tiap baris di Compose recompose
-// sendiri saat diketik, tanpa perlu notifyDataSetChanged ala RecyclerView.
+// sendiri saat diketik.
 // debit/credit menyimpan STRING DIGIT MENTAH (tanpa titik pemisah ribuan) —
 // format tampilan (mis. "150.000") dihitung ulang di layer UI.
 class JournalLineDraft(
