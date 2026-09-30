@@ -6,6 +6,8 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AumoBackend.Core;
+using AumoBackend.DTOs;
+using AumoBackend.Services;
 using FluentValidation;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
