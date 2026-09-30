@@ -416,3 +416,24 @@ public class StatementOfFinancialPositionApiResponse
     public decimal TotalLiabilitiesAndEquity { get; set; }
     public bool IsBalanced { get; set; }
 }
+
+public class LedgerLineResponse
+{
+    public int JournalEntryId { get; set; }
+    public string EntryDate { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public decimal Debit { get; set; }
+    public decimal Credit { get; set; }
+    public decimal RunningBalance { get; set; }
+}
+
+public class LedgerAccountResponse
+{
+    public int AccountId { get; set; }
+    public string ReferenceNumber { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public bool NormalBalanceIsDebit { get; set; }
+    public decimal EndingBalance { get; set; }
+    public List<LedgerLineResponse> Lines { get; set; } = new();
+}
