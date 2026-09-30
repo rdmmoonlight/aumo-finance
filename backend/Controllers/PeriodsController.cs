@@ -126,40 +126,19 @@ public class PeriodsController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        if (request.Month < 1 || request.Month > 12)
-            return BadRequest(new { success = false, message = "Please select a valid month." });
-
-        if (request.Year < 2000 || request.Year > 2100)
-            return BadRequest(new { success = false, message = "Please provide a valid year." });
+        // Catatan: Validasi skema (Month, Year, Field Kebutuhan Mode, Format Numeric) 
+        // sudah secara otomatis dieksekusi oleh FluentValidation sebelum masuk ke baris ini.
 
         var startDate = DateTime.SpecifyKind(new DateTime(request.Year, request.Month, 1), DateTimeKind.Utc);
         var endDate = startDate.AddMonths(1).AddDays(-1);
         var periodName = startDate.ToString("MMMM yyyy");
 
+        // Cek keberadaan periode di Database
         var periodExists = await _db.Periods.AnyAsync(p => p.UserId == userId && p.StartDate == startDate);
         if (periodExists)
             return BadRequest(new { success = false, message = $"Period {periodName} already exists." });
 
         var isLoadExisting = request.SetupMode == CreatePeriodRequest.ModeLoadExisting;
-
-        if (isLoadExisting)
-        {
-            if (request.CashAccountId == null || request.BankAccountId == null || request.RetainedEarningsAccountId == null)
-                return BadRequest(new { success = false, message = "Please select the Cash, Bank, and Retained Earnings accounts to carry forward." });
-
-            if (request.CashAccountId == request.BankAccountId)
-                return BadRequest(new { success = false, message = "Cash Account and Bank Account cannot be the same account." });
-        }
-        else
-        {
-            if (string.IsNullOrWhiteSpace(request.CashAccountCode) || string.IsNullOrWhiteSpace(request.CashAccountName) ||
-                string.IsNullOrWhiteSpace(request.BankAccountCode) || string.IsNullOrWhiteSpace(request.BankAccountName) ||
-                string.IsNullOrWhiteSpace(request.RetainedEarningsAccountCode) || string.IsNullOrWhiteSpace(request.RetainedEarningsAccountName))
-                return BadRequest(new { success = false, message = "Please complete all new account fields (reference code & name)." });
-
-            if (!int.TryParse(request.CashAccountCode, out _) || !int.TryParse(request.BankAccountCode, out _) || !int.TryParse(request.RetainedEarningsAccountCode, out _))
-                return BadRequest(new { success = false, message = "Account reference codes must be numeric." });
-        }
 
         using var transaction = await _db.Database.BeginTransactionAsync();
         try
@@ -296,7 +275,6 @@ public class PeriodsController : ControllerBase
             return NotFound(new { success = false, message = "Accounting period not found." });
 
         // TAHAP 1: Reset SEMUA IsSelected milik user ini menjadi false
-        // Hal ini menjamin tidak ada konflik pada IX_Periods_IsSelected_Unique saat update berjalan
         await _db.Periods
             .Where(p => p.UserId == userId && p.IsSelected)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
@@ -364,11 +342,6 @@ public class PeriodsController : ControllerBase
         if (hasEarlierOpenPeriod)
             return BadRequest(new { success = false, message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first." });
 
-        // Catatan: tidak ada ayat jurnal penutup yang disimpan ke tabel
-        // JournalEntry/JournalEntryLine di sini — tabel itu hanya untuk
-        // General & Adjusting. Saldo akun sementara pasca-tutup dihitung
-        // langsung (on-the-fly) di General Ledger Temporary, lihat
-        // GeneralLedgerController.
         entity.IsClosed = true;
         await _db.SaveChangesAsync();
 
@@ -387,4 +360,3 @@ public class PeriodsController : ControllerBase
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }
-
