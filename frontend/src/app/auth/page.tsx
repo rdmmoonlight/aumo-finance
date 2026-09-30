@@ -50,7 +50,7 @@ function GoogleIcon() {
   );
 }
 
-function GoogleAuthButton({
+function GoogleAuthButtonInner({
   isPending,
   onSuccessHandler,
   onError,
@@ -65,21 +65,30 @@ function GoogleAuthButton({
       if (idToken) {
         onSuccessHandler(idToken);
       } else {
-        onError("Gagal mendapatkan token autentikasi Google.");
+        onError("Gagal mendapatkan Token autentikasi dari Google.");
       }
     },
-    onError: () => {
-      onError("Autentikasi Google dibatalkan atau gagal.");
+    onError: (errorResponse) => {
+      console.error("[Google OAuth Error]", errorResponse);
+      onError("Autentikasi Google dibatalkan atau terjadi kesalahan.");
     },
   });
+
+  const handleClick = () => {
+    if (!GOOGLE_CLIENT_ID) {
+      onError("NEXT_PUBLIC_GOOGLE_CLIENT_ID belum diset di .env.local atau Vercel.");
+      return;
+    }
+    googleLogin();
+  };
 
   return (
     <Button
       type="button"
       variant="outline"
-      disabled={isPending || !GOOGLE_CLIENT_ID}
-      onClick={() => googleLogin()}
-      className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
+      disabled={isPending}
+      onClick={handleClick}
+      className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors cursor-pointer"
     >
       <GoogleIcon />
       Continue with Google
@@ -217,7 +226,7 @@ function AuthFormContent() {
       const errorMessage =
         e?.data?.message ||
         e?.data?.title ||
-        "Gagal memverifikasi akun Google dengan server backend.";
+        "Gagal verifikasi akun Google dengan server backend.";
       setApiErr(errorMessage);
     }
   };
@@ -230,6 +239,7 @@ function AuthFormContent() {
 
   return (
     <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200 selection:bg-black selection:text-white [&_*::selection]:bg-black [&_*::selection]:text-white">
+      {/* Header */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold tracking-tight text-black">
           {mode === "login" ? "Sign in" : "Create account"}
@@ -241,20 +251,28 @@ function AuthFormContent() {
         </p>
       </div>
 
+      {/* Google Login Section */}
       <div className="space-y-4">
         {GOOGLE_CLIENT_ID ? (
           <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            <GoogleAuthButton
+            <GoogleAuthButtonInner
               isPending={isPending}
               onSuccessHandler={handleGoogleSuccess}
               onError={(msg) => setApiErr(msg)}
             />
           </GoogleOAuthProvider>
         ) : (
-          <div className="text-center p-2 text-xs text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
-            NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment
-            Variable.
-          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() =>
+              setApiErr("NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.")
+            }
+            className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 flex items-center justify-center"
+          >
+            <GoogleIcon />
+            Continue with Google
+          </Button>
         )}
 
         <div className="relative flex items-center justify-center">
@@ -265,6 +283,7 @@ function AuthFormContent() {
         </div>
       </div>
 
+      {/* Form Input */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
         <div className="space-y-1.5">
           <Label
