@@ -134,7 +134,7 @@ export function AppTopBar() {
   return (
     <header className="flex flex-col w-full border-b bg-background sticky top-0 z-10 shadow-sm">
       {/* KELOMPOK 1: Bar Utama (Search & Notifications) */}
-      <div className="flex h-16 items-center justify-between px-6 gap-4">
+      <div className="flex h-16 items-center justify-between pl-3 pr-4 gap-4">
         {/* Sisi Kiri: Search Bar */}
         <div className="flex items-center flex-1 max-w-md">
           <div className="relative w-full">
@@ -251,7 +251,7 @@ export function AppTopBar() {
       <Separator />
 
       {/* KELOMPOK 2: Bar Sekunder */}
-      <div className="flex h-10 items-center justify-between px-6 bg-muted/20 text-xs">
+      <div className="flex h-10 items-center justify-between pl-3 pr-4 bg-muted/20 text-xs">
         {/* Dynamic Breadcrumbs */}
         <Breadcrumb>
           <BreadcrumbList>
