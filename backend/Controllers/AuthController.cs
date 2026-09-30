@@ -1,15 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AumoBackend.Core;
+using FluentValidation;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -18,32 +21,43 @@ namespace AumoBackend.Controllers;
 [ApiController]
 [Route("/api/v1/auth")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+[EnableRateLimiting("auth-strict")]
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
     private readonly IGuardianService _guardianService;
     private readonly IConfiguration _configuration;
+    private readonly IValidator<LoginRequest> _loginValidator;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IGuardianService guardianService,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IValidator<LoginRequest> loginValidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _guardianService = guardianService;
         _configuration = configuration;
+        _loginValidator = loginValidator;
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.Email) || string.IsNullOrWhiteSpace(request.Password))
+        // 0. VALIDASI REQUEST MENGGUNAKAN FLUENTVALIDATION
+        var validationResult = await _loginValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            return BadRequest(new { success = false, message = "Email and password are required." });
+            return BadRequest(new
+            {
+                success = false,
+                message = "Validation failed.",
+                errors = validationResult.Errors.Select(e => e.ErrorMessage)
+            });
         }
 
         var user = await _userManager.FindByEmailAsync(request.Email)
