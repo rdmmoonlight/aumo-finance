@@ -12,7 +12,7 @@ namespace AumoBackend.Controllers;
 [ApiController]
 [Route("api/v1/[controller]")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-public class MarketController : ControllerBase
+public class HomeController : ControllerBase
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private static readonly CultureInfo IdCulture = CultureInfo.GetCultureInfo("id-ID");
