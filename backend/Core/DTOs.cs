@@ -101,3 +101,30 @@ public class DashboardSummaryDto
     public string ActivePeriodName { get; set; } = string.Empty;
     public bool IsPeriodOpen { get; set; }
 }
+
+public class CreatePeriodRequest
+{
+    public const string ModeLoadExisting = "LoadExisting";
+    public const string ModeCreateNew = "CreateNew";
+
+    public int Month { get; set; }
+    public int Year { get; set; }
+    public string SetupMode { get; set; } = ModeCreateNew;
+
+    // Untuk Mode: LoadExisting
+    public int? CashAccountId { get; set; }
+    public int? BankAccountId { get; set; }
+    public int? RetainedEarningsAccountId { get; set; }
+
+    // Untuk Mode: CreateNew
+    public string? CashAccountCode { get; set; }
+    public string? CashAccountName { get; set; }
+    public string? BankAccountCode { get; set; }
+    public string? BankAccountName { get; set; }
+    public string? RetainedEarningsAccountCode { get; set; }
+    public string? RetainedEarningsAccountName { get; set; }
+
+    // Opening Balances
+    public decimal? CashBalance { get; set; }
+    public decimal? BankBalance { get; set; }
+}
