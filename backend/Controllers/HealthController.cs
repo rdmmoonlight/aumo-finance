@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using AumoBackend.Core;
+using AumoBackend.DTOs;
+using AumoBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
