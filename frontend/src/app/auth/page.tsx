@@ -17,17 +17,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
 
-// Deklarasi global type Google GIS SDK
-declare global {
-  interface Window {
-    google?: any;
-  }
-}
-
-// Icon Google SVG
-function GoogleIcon({ className = "w-5 h-5" }: { className?: string }) {
+// SVG Icon Google
+function GoogleIcon() {
   return (
-    <svg className={className} viewBox="0 0 24 24">
+    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -48,10 +41,12 @@ function GoogleIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-function LoginFormContent() {
+function AuthFormContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
+  // Mode state: 'login' | 'register'
+  const [mode, setMode] = useState<"login" | "register">("login");
   const [showPass, setShowPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
 
@@ -61,7 +56,6 @@ function LoginFormContent() {
   const [loginMutation, { isLoading: isLoggingIn }] =
     usePostApiV1AuthLoginMutation();
 
-  // RTK Query Hook untuk Google Login
   const [googleLoginMutation, { isLoading: isGoogleLoggingIn }] =
     usePostApiV1AuthGoogleLoginMutation();
 
@@ -90,28 +84,15 @@ function LoginFormContent() {
   }, [profile, isProfileLoading, searchParams]);
 
   useEffect(() => {
-    document.title = "Sign In | Aumo Workspace";
+    document.title = `${mode === "login" ? "Sign In" : "Sign Up"} | Aumo Workspace`;
     const saved = localStorage.getItem("aumo_saved_email");
     if (saved) {
       setValue("email", saved);
       setValue("keepMe", true);
     }
-  }, [setValue]);
+  }, [setValue, mode]);
 
-  // Load Google Identity Services SDK secara konsisten
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://accounts.google.com/gsi/client";
-    script.async = true;
-    script.defer = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  // Handler Login Biasa
+  // Handler Login Email & Password
   const onSubmit = async (values: LoginFormValues) => {
     setApiErr("");
     try {
@@ -147,102 +128,83 @@ function LoginFormContent() {
     }
   };
 
-  // Handler Trigger Login Google
-  const handleGoogleLogin = () => {
+  // Handler Continue with Google
+  const handleGoogleAuth = async () => {
     setApiErr("");
 
-    if (!window.google?.accounts?.id) {
-      setApiErr("Layanan Google Login belum siap, silakan coba lagi.");
-      return;
+    // OPSI A: Jika backend menyediakan URL redirect OAuth langsung
+    // const backendGoogleUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
+    // window.location.href = backendGoogleUrl;
+
+    // OPSI B: Jika menggunakan mutation API yang terdefinisi di RTK Query
+    try {
+      dispatch(generatedApi.util.resetApiState());
+
+      await googleLoginMutation({
+        googleLoginRequest: {
+          isMobileClient: false,
+        },
+      }).unwrap();
+
+      const targetUrl = searchParams.get("redirectTo") || "/home";
+      window.location.replace(targetUrl);
+    } catch (e: any) {
+      console.error("[GOOGLE AUTH FAIL]", e);
+      const errorMessage =
+        e?.data?.message ||
+        e?.data?.title ||
+        "Gagal terhubung ke layanan Google Auth backend.";
+      setApiErr(errorMessage);
     }
-
-    // Inisialisasi Google Token Client untuk OAuth2 Popup
-    const client = window.google.accounts.oauth2.initTokenClient({
-      // Scope dasar untuk autentikasi user
-      scope: "openid email profile",
-      callback: async (response: any) => {
-        if (response.error) {
-          console.error("[GOOGLE AUTH ERROR]", response);
-          setApiErr("Gagal melakukan autentikasi dengan Google.");
-          return;
-        }
-
-        // Ambil access_token / id_token dari respon Google
-        const idToken = response.access_token || response.id_token;
-
-        try {
-          dispatch(generatedApi.util.resetApiState());
-
-          // Kirim Token ke Backend melalui RTK Query
-          await googleLoginMutation({
-            googleLoginRequest: {
-              idToken: idToken,
-              isMobileClient: false,
-            },
-          }).unwrap();
-
-          const targetUrl = searchParams.get("redirectTo") || "/home";
-          window.location.replace(targetUrl);
-        } catch (e: any) {
-          console.error("[GOOGLE LOGIN FAIL]", e);
-          const errorMessage =
-            e?.data?.message ||
-            e?.data?.title ||
-            (e?.status === "FETCH_ERROR"
-              ? "Gagal terhubung ke server backend."
-              : "Autentikasi Google gagal atau akun tidak terdaftar.");
-          setApiErr(errorMessage);
-        }
-      },
-    });
-
-    // Buka Popup Login Google
-    client.requestAccessToken();
   };
 
   if (isProfileLoading) {
-    return <LoginFormSkeleton />;
+    return <AuthFormSkeleton />;
   }
+
+  const isPending = isLoggingIn || isGoogleLoggingIn;
 
   return (
     <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200 selection:bg-black selection:text-white [&_*::selection]:bg-black [&_*::selection]:text-white">
-      <div className="mb-8">
+      {/* Header */}
+      <div className="mb-6">
         <h2 className="text-2xl font-semibold tracking-tight text-black">
-          Sign in
+          {mode === "login" ? "Sign in" : "Create account"}
         </h2>
-        <p className="text-sm text-zinc-600 mt-2">Masuk ke workspace kamu.</p>
+        <p className="text-sm text-zinc-600 mt-1">
+          {mode === "login"
+            ? "Masuk ke workspace kamu."
+            : "Daftar untuk membuat workspace baru."}
+        </p>
       </div>
 
-      {/* Tombol Continue with Google */}
+      {/* Tombol Google Auth (Pure Backend Call) */}
       <div className="space-y-4">
         <Button
           type="button"
-          onClick={handleGoogleLogin}
-          disabled={isGoogleLoggingIn || isLoggingIn}
           variant="outline"
-          className="w-full h-11 rounded-xl text-sm font-medium border-zinc-300 bg-white hover:bg-zinc-50 text-zinc-800 flex items-center justify-center gap-3 transition-colors"
+          disabled={isPending}
+          onClick={handleGoogleAuth}
+          className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
         >
-          <GoogleIcon className="w-5 h-5" />
-          <span>
-            {isGoogleLoggingIn ? "Authenticating..." : "Continue with Google"}
-          </span>
+          <GoogleIcon />
+          Continue with Google
         </Button>
 
-        {/* Separator Divider */}
-        <div className="relative flex items-center justify-center my-4">
-          <div className="border-t border-zinc-200 w-full"></div>
-          <span className="bg-white px-3 text-xs font-medium text-zinc-500 uppercase tracking-wider absolute">
-            or
+        <div className="relative flex items-center justify-center">
+          <div className="border-t border-zinc-200 w-full" />
+          <span className="bg-white px-2 text-[10px] uppercase font-mono tracking-wider text-zinc-400 absolute">
+            OR
           </span>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-        {/* Field Email */}
-        <div className="space-y-2">
+      {/* Form Email & Password */}
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+        <div className="space-y-1.5">
           <Label
             htmlFor="email"
-            className="tracking-widest uppercase font-semibold text-black"
+            className="text-[11px] tracking-widest uppercase font-semibold text-black"
           >
             Email
           </Label>
@@ -260,12 +222,11 @@ function LoginFormContent() {
           )}
         </div>
 
-        {/* Field Password */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="flex justify-between items-center">
             <Label
               htmlFor="password"
-              className="tracking-widest uppercase font-semibold text-black"
+              className="text-[11px] tracking-widest uppercase font-semibold text-black"
             >
               Password
             </Label>
@@ -291,31 +252,31 @@ function LoginFormContent() {
           )}
         </div>
 
-        {/* Checkbox Keep Me & Forgot Link */}
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="keepMe"
-              checked={keepMeValue}
-              onCheckedChange={(v) => setValue("keepMe", v === true)}
-              className="h-4 w-4 rounded border border-zinc-400 bg-white shadow-none data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white [&_svg]:h-3 [&_svg]:w-3 [&_svg]:stroke-[3]"
-            />
-            <Label
-              htmlFor="keepMe"
-              className="text-xs font-normal cursor-pointer leading-none text-black"
+        {mode === "login" && (
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="keepMe"
+                checked={keepMeValue}
+                onCheckedChange={(v) => setValue("keepMe", v === true)}
+                className="h-4 w-4 rounded border border-zinc-400 bg-white shadow-none data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white [&_svg]:h-3 [&_svg]:w-3 [&_svg]:stroke-[3]"
+              />
+              <Label
+                htmlFor="keepMe"
+                className="text-xs font-normal cursor-pointer leading-none text-black"
+              >
+                Keep me signed in
+              </Label>
+            </div>
+            <a
+              href="#"
+              className="text-xs text-zinc-600 hover:text-black underline underline-offset-4"
             >
-              Keep me signed in
-            </Label>
+              Forgot?
+            </a>
           </div>
-          <a
-            href="#"
-            className="text-xs text-zinc-600 hover:text-black underline underline-offset-4"
-          >
-            Forgot?
-          </a>
-        </div>
+        )}
 
-        {/* Alert Error dari Backend */}
         {apiErr && (
           <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl font-medium">
             {apiErr}
@@ -324,24 +285,61 @@ function LoginFormContent() {
 
         <Button
           type="submit"
-          disabled={isLoggingIn || isGoogleLoggingIn}
-          className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800"
+          disabled={isPending}
+          className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800 transition-colors"
         >
-          {isLoggingIn ? "Processing..." : "Sign In"}
+          {isPending
+            ? "Processing..."
+            : mode === "login"
+            ? "Sign In"
+            : "Create Account"}
         </Button>
-
-        <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
-          <span>SECURE COOKIE</span>
-          <span>Keep your data safe</span>
-        </div>
       </form>
+
+      {/* Switcher Mode Login / Register */}
+      <div className="mt-5 text-center text-xs text-zinc-600">
+        {mode === "login" ? (
+          <>
+            Belum punya akun?{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setApiErr("");
+                setMode("register");
+              }}
+              className="font-semibold text-black underline underline-offset-4 hover:text-zinc-700"
+            >
+              Sign Up
+            </button>
+          </>
+        ) : (
+          <>
+            Sudah punya akun?{" "}
+            <button
+              type="button"
+              onClick={() => {
+                setApiErr("");
+                setMode("login");
+              }}
+              className="font-semibold text-black underline underline-offset-4 hover:text-zinc-700"
+            >
+              Sign In
+            </button>
+          </>
+        )}
+      </div>
+
+      <div className="flex justify-between mt-6 pt-5 border-t border-zinc-200 text-[10px] font-mono text-zinc-400">
+        <span>SECURE COOKIE</span>
+        <span>Keep your data safe</span>
+      </div>
     </div>
   );
 }
 
-function LoginFormSkeleton() {
+function AuthFormSkeleton() {
   return (
-    <div className="light w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-zinc-200 animate-pulse h-64 flex flex-col justify-center items-center">
+    <div className="light w-full max-w-sm bg-white p-6 rounded-2xl shadow-sm border border-zinc-200 animate-pulse h-80 flex flex-col justify-center items-center">
       <p className="text-sm font-medium text-zinc-400">Loading workspace...</p>
     </div>
   );
@@ -349,9 +347,9 @@ function LoginFormSkeleton() {
 
 export default function LoginPage() {
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
-      <Suspense fallback={<LoginFormSkeleton />}>
-        <LoginFormContent />
+    <main className="flex min-h-screen items-center justify-center p-4 bg-zinc-50">
+      <Suspense fallback={<AuthFormSkeleton />}>
+        <AuthFormContent />
       </Suspense>
     </main>
   );
