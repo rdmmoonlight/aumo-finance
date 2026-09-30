@@ -361,8 +361,8 @@ function AuthFormContent() {
           {isPending
             ? "Processing..."
             : mode === "login"
-            ? "Sign In"
-            : "Create Account"}
+              ? "Sign In"
+              : "Create Account"}
         </Button>
       </form>
 
