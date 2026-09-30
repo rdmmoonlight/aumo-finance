@@ -165,7 +165,7 @@ function AuthFormContent() {
 
     // Direct redirect ke endpoint backend untuk menginisiasi OAuth Challenge
     window.location.href = `${backendBaseUrl}/api/v1/auth/google-login?redirectTo=${encodeURIComponent(
-      redirectTo
+      redirectTo,
     )}`;
   };
 
