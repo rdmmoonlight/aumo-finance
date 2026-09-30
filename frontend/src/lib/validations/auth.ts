@@ -12,4 +12,5 @@ export const loginSchema = z.object({
   keepMe: z.boolean().default(false),
 });
 
-export type LoginFormValues = z.infer<typeof loginSchema>;
+// Gunakan z.input agar tipe merepresentasikan data input form (keepMe?: boolean)
+export type LoginFormValues = z.input<typeof loginSchema>;

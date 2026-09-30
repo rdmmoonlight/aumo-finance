@@ -3,12 +3,15 @@
 import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useReactTable,
   getCoreRowModel,
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -51,6 +54,13 @@ import {
   Loader2,
 } from "lucide-react";
 
+import {
+  journalEntrySchema,
+  parseFormattedNumber,
+  type JournalEntryFormValues,
+} from "@/lib/validations/journal-entry";
+import { z } from "zod";
+
 export interface LineItem {
   id: string;
   accountId: number;
@@ -76,12 +86,6 @@ const formatNumberWithDots = (val: string | number): string => {
   return new Intl.NumberFormat("id-ID").format(parseInt(clean, 10));
 };
 
-const parseFormattedNumber = (val: string): number => {
-  if (!val) return 0;
-  const clean = val.replace(/\D/g, "");
-  return clean ? parseInt(clean, 10) : 0;
-};
-
 const columnHelper = createColumnHelper<LineItem>();
 
 function JournalEntryContent() {
@@ -91,19 +95,44 @@ function JournalEntryContent() {
   const isEdit = Boolean(entryIdParam);
   const entryId = entryIdParam ? parseInt(entryIdParam, 10) : 0;
 
-  // Form States
-  const [journalType, setJournalType] = useState("General");
-  const [entryDate, setEntryDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
-  const [lines, setLines] = useState<LineItem[]>([
-    { id: "1", accountId: 0, lineDescription: "", debit: "", credit: "" },
-    { id: "2", accountId: 0, lineDescription: "", debit: "", credit: "" },
-  ]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [apiError, setApiError] = useState<string | null>(null);
 
-  // 1. RTK Query Hooks Integration
+  // 1. Setup React Hook Form & Zod dengan penanganan Tipe Generic z.input & z.output
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm<
+    z.input<typeof journalEntrySchema>,
+    any,
+    z.output<typeof journalEntrySchema>
+  >({
+    resolver: zodResolver(journalEntrySchema),
+    defaultValues: {
+      journalType: "General",
+      entryDate: new Date().toISOString().split("T")[0],
+      lines: [
+        { id: "1", accountId: 0, lineDescription: "", debit: "", credit: "" },
+        { id: "2", accountId: 0, lineDescription: "", debit: "", credit: "" },
+      ],
+    },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "lines",
+  });
+
+  const journalType = watch("journalType");
+  const entryDate = watch("entryDate");
+  const watchedLines = watch("lines");
+
+  // 2. RTK Query Hooks Integration
   const { data: rawAccountsData, isLoading: isAccountsLoading } =
     useGetApiV1ChartOfAccountsQuery({});
 
@@ -127,13 +156,13 @@ function JournalEntryContent() {
   const { data: rawNextTxNumber, isFetching: isTxLoading } =
     useGetApiV1JournalEntryNextTransactionNumberQuery(
       { journalType, entryDate },
-      { skip: isEdit },
+      { skip: isEdit }
     );
 
   const { data: editDataResponse, isLoading: isEditLoading } =
     useGetApiV1JournalEntryByIdQuery(
       { id: entryId },
-      { skip: !isEdit || isNaN(entryId) },
+      { skip: !isEdit || isNaN(entryId) }
     );
 
   const [createJournalEntry, { isLoading: isCreating }] =
@@ -144,27 +173,29 @@ function JournalEntryContent() {
   const isSubmitting = isCreating || isUpdating;
   const editData = (editDataResponse as any) || null;
 
+  // Hydrate form pada mode Edit
   useEffect(() => {
     if (isEdit && editData) {
       const jData = editData.entry || editData.data || editData;
       if (jData && typeof jData === "object") {
-        if (jData.journalType) setJournalType(jData.journalType);
-        if (jData.entryDate) setEntryDate(jData.entryDate.split("T")[0]);
+        if (jData.journalType) setValue("journalType", jData.journalType);
+        if (jData.entryDate) setValue("entryDate", jData.entryDate.split("T")[0]);
 
         if (Array.isArray(jData.lines) && jData.lines.length > 0) {
-          setLines(
+          setValue(
+            "lines",
             jData.lines.map((l: any, i: number) => ({
               id: l.id?.toString() || `${Date.now()}-${i}`,
               accountId: Number(l.accountId || 0),
               lineDescription: l.lineDescription || "",
               debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
               credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-            })),
+            }))
           );
         }
       }
     }
-  }, [isEdit, editData]);
+  }, [isEdit, editData, setValue]);
 
   const displayedTxNumber = useMemo(() => {
     if (isEdit) {
@@ -186,56 +217,54 @@ function JournalEntryContent() {
   }, [isEdit, editData, rawNextTxNumber]);
 
   const isLocked = Boolean(
-    isEdit && (editData?.isLocked || editData?.entry?.isLocked),
+    isEdit && (editData?.isLocked || editData?.entry?.isLocked)
   );
 
+  // Kalkulasi Total Debit & Credit
   const totalDebit = useMemo(
-    () => lines.reduce((s, l) => s + parseFormattedNumber(l.debit), 0),
-    [lines],
+    () => (watchedLines || []).reduce((s, l) => s + parseFormattedNumber(l?.debit || ""), 0),
+    [watchedLines]
   );
   const totalCredit = useMemo(
-    () => lines.reduce((s, l) => s + parseFormattedNumber(l.credit), 0),
-    [lines],
+    () => (watchedLines || []).reduce((s, l) => s + parseFormattedNumber(l?.credit || ""), 0),
+    [watchedLines]
   );
   const isBalanced = useMemo(
     () => totalDebit > 0 && totalDebit === totalCredit,
-    [totalDebit, totalCredit],
+    [totalDebit, totalCredit]
   );
 
   const addLine = () => {
-    setValidationErrors([]);
-    setLines((prev) => [
-      ...prev,
-      {
-        id: `${Date.now()}-${Math.random()}`,
-        accountId: 0,
-        lineDescription: "",
-        debit: "",
-        credit: "",
-      },
-    ]);
+    append({
+      id: `${Date.now()}-${Math.random()}`,
+      accountId: 0,
+      lineDescription: "",
+      debit: "",
+      credit: "",
+    });
   };
 
-  const removeLine = (id: string) => {
-    if (lines.length <= 2) {
-      setValidationErrors(["Minimal 2 baris jurnal wajib ada."]);
+  const removeLine = (index: number) => {
+    if (fields.length <= 2) {
+      setApiError("Minimal 2 baris jurnal wajib ada.");
       return;
     }
-    setValidationErrors([]);
-    setLines((prev) => prev.filter((l) => l.id !== id));
+    setApiError(null);
+    remove(index);
   };
 
-  const updateLine = (id: string, field: keyof LineItem, value: any) => {
-    setLines((prev) =>
-      prev.map((l) => {
-        if (l.id !== id) return l;
-        if (field === "debit" && value !== "")
-          return { ...l, debit: formatNumberWithDots(value), credit: "" };
-        if (field === "credit" && value !== "")
-          return { ...l, credit: formatNumberWithDots(value), debit: "" };
-        return { ...l, [field]: value };
-      }),
-    );
+  const handleAmountChange = (
+    index: number,
+    field: "debit" | "credit",
+    value: string
+  ) => {
+    const formatted = formatNumberWithDots(value);
+    setValue(`lines.${index}.${field}`, formatted, { shouldValidate: true });
+    // Reset nilai yang berseberangan agar bersifat mutually exclusive
+    const oppositeField = field === "debit" ? "credit" : "debit";
+    if (value !== "") {
+      setValue(`lines.${index}.${oppositeField}`, "", { shouldValidate: true });
+    }
   };
 
   // TanStack Table Column Definitions
@@ -244,17 +273,15 @@ function JournalEntryContent() {
       columnHelper.accessor((row) => row.accountId, {
         id: "referenceNumber",
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Ref
           </span>
         ),
         cell: ({ row }) => {
           const ref = availableAccounts.find(
-            (a) => a.id === row.original.accountId,
+            (a) => a.id === row.original.accountId
           )?.referenceNumber;
           return (
-            /* Caption (12px) */
             <Input
               className="h-8 text-center text-xs bg-muted font-mono"
               readOnly
@@ -266,98 +293,100 @@ function JournalEntryContent() {
       }),
       columnHelper.accessor("accountId", {
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Account
           </span>
         ),
-        cell: ({ row }) => (
-          <Select
-            value={row.original.accountId ? String(row.original.accountId) : ""}
-            onValueChange={(v) =>
-              updateLine(row.original.id, "accountId", Number(v))
-            }
-          >
-            {/* Caption (12px) */}
-            <SelectTrigger className="h-8 text-xs">
-              <SelectValue placeholder="Select Account" />
-            </SelectTrigger>
-            {/* Caption (12px) */}
-            <SelectContent className="text-xs">
-              {availableAccounts.map((acc) => (
-                <SelectItem
-                  key={acc.id}
-                  value={String(acc.id)}
-                  className="text-xs"
-                >
-                  {acc.referenceNumber} - {acc.accountName}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ),
+        cell: ({ row }) => {
+          const index = row.index;
+          const currentAccountId = watchedLines?.[index]?.accountId;
+          return (
+            <Select
+              value={currentAccountId ? String(currentAccountId) : ""}
+              onValueChange={(v) =>
+                setValue(`lines.${index}.accountId`, Number(v), {
+                  shouldValidate: true,
+                })
+              }
+            >
+              <SelectTrigger className="h-8 text-xs">
+                <SelectValue placeholder="Select Account" />
+              </SelectTrigger>
+              <SelectContent className="text-xs">
+                {availableAccounts.map((acc) => (
+                  <SelectItem
+                    key={acc.id}
+                    value={String(acc.id)}
+                    className="text-xs"
+                  >
+                    {acc.referenceNumber} - {acc.accountName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          );
+        },
       }),
       columnHelper.accessor("lineDescription", {
         header: () => (
-          /* Label kecil (11px) */
           <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Description
           </span>
         ),
-        cell: ({ row }) => (
-          /* Caption (12px) */
-          <Input
-            className="h-8 text-xs"
-            placeholder="Note..."
-            value={row.original.lineDescription}
-            onChange={(e) =>
-              updateLine(row.original.id, "lineDescription", e.target.value)
-            }
-          />
-        ),
+        cell: ({ row }) => {
+          const index = row.index;
+          return (
+            <Input
+              className="h-8 text-xs"
+              placeholder="Note..."
+              {...register(`lines.${index}.lineDescription`)}
+            />
+          );
+        },
       }),
       columnHelper.accessor("debit", {
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Debit
           </div>
         ),
-        cell: ({ row }) => (
-          /* Caption (12px) */
-          <Input
-            className="h-8 text-xs text-right font-mono"
-            placeholder="0"
-            value={row.original.debit}
-            onChange={(e) =>
-              updateLine(row.original.id, "debit", e.target.value)
-            }
-          />
-        ),
+        cell: ({ row }) => {
+          const index = row.index;
+          return (
+            <Input
+              className="h-8 text-xs text-right font-mono"
+              placeholder="0"
+              value={watchedLines?.[index]?.debit || ""}
+              onChange={(e) =>
+                handleAmountChange(index, "debit", e.target.value)
+              }
+            />
+          );
+        },
       }),
       columnHelper.accessor("credit", {
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Credit
           </div>
         ),
-        cell: ({ row }) => (
-          /* Caption (12px) */
-          <Input
-            className="h-8 text-xs text-right font-mono"
-            placeholder="0"
-            value={row.original.credit}
-            onChange={(e) =>
-              updateLine(row.original.id, "credit", e.target.value)
-            }
-          />
-        ),
+        cell: ({ row }) => {
+          const index = row.index;
+          return (
+            <Input
+              className="h-8 text-xs text-right font-mono"
+              placeholder="0"
+              value={watchedLines?.[index]?.credit || ""}
+              onChange={(e) =>
+                handleAmountChange(index, "credit", e.target.value)
+              }
+            />
+          );
+        },
       }),
       columnHelper.display({
         id: "actions",
         header: () => (
-          /* Label kecil (11px) */
           <div className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
             Action
           </div>
@@ -368,105 +397,85 @@ function JournalEntryContent() {
             variant="ghost"
             size="icon"
             className="h-8 w-8 text-destructive hover:text-destructive"
-            onClick={() => removeLine(row.original.id)}
+            onClick={() => removeLine(row.index)}
           >
             <Trash2 size={14} />
           </Button>
         ),
       }),
     ],
-    [availableAccounts],
+    [availableAccounts, watchedLines, register, setValue]
   );
 
   // TanStack Table Instance
   const table = useReactTable({
-    data: lines,
+    data: (fields as LineItem[]) || [],
     columns,
     getCoreRowModel: getCoreRowModel(),
     getRowId: (row) => row.id,
   });
 
   const resetForm = () => {
-    const defaultDate = new Date().toISOString().split("T")[0];
-    setJournalType("General");
-    setEntryDate(defaultDate);
-    setLines([
-      {
-        id: Date.now() + "-1",
-        accountId: 0,
-        lineDescription: "",
-        debit: "",
-        credit: "",
-      },
-      {
-        id: Date.now() + "-2",
-        accountId: 0,
-        lineDescription: "",
-        debit: "",
-        credit: "",
-      },
-    ]);
-    setValidationErrors([]);
+    reset({
+      journalType: "General",
+      entryDate: new Date().toISOString().split("T")[0],
+      lines: [
+        { id: `${Date.now()}-1`, accountId: 0, lineDescription: "", debit: "", credit: "" },
+        { id: `${Date.now()}-2`, accountId: 0, lineDescription: "", debit: "", credit: "" },
+      ],
+    });
+    setApiError(null);
     setSuccessMessage(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setValidationErrors([]);
+  // Submit Handler dengan tipe ter-infer dari Zod
+  const onSubmit: SubmitHandler<z.output<typeof journalEntrySchema>> = async (data) => {
+    setApiError(null);
     setSuccessMessage(null);
 
-    const effective = lines.filter(
+    const effective = data.lines.filter(
       (l) =>
-        l.accountId !== 0 &&
-        (parseFormattedNumber(l.debit) > 0 ||
-          parseFormattedNumber(l.credit) > 0),
+        Number(l.accountId) > 0 &&
+        (parseFormattedNumber(l.debit || "") > 0 ||
+          parseFormattedNumber(l.credit || "") > 0)
     );
-
-    if (effective.length < 2) {
-      setValidationErrors(["Min 2 valid lines required"]);
-      return;
-    }
-    if (!isBalanced) {
-      setValidationErrors(["Debit must equal Credit"]);
-      return;
-    }
 
     try {
       if (isEdit) {
         const updatePayload = {
           id: entryId,
           updateJournalEntryRequest: {
-            entryDate,
-            journalType,
+            entryDate: data.entryDate,
+            journalType: data.journalType,
             transactionNumber: displayedTxNumber,
             lines: effective.map((l) => ({
-              accountId: l.accountId,
-              lineDescription: l.lineDescription,
-              debit: parseFormattedNumber(l.debit),
-              credit: parseFormattedNumber(l.credit),
+              accountId: Number(l.accountId),
+              lineDescription: l.lineDescription || "",
+              debit: parseFormattedNumber(l.debit || ""),
+              credit: parseFormattedNumber(l.credit || ""),
             })),
           },
         };
 
-        const res: any = await updateJournalEntry(updatePayload).unwrap();
+        const res: any = await updateJournalEntry(updatePayload as any).unwrap();
         const txNum = res?.transactionNumber || displayedTxNumber;
         setSuccessMessage(`Updated ${txNum}`);
         setTimeout(() => router.push("/reports/general-journal"), 1200);
       } else {
         const createPayload = {
           createJournalEntryRequest: {
-            journalType,
-            entryDate,
+            journalType: data.journalType,
+            entryDate: data.entryDate,
             lines: effective.map((l) => ({
-              accountId: l.accountId,
-              lineDescription: l.lineDescription,
-              debit: parseFormattedNumber(l.debit),
-              credit: parseFormattedNumber(l.credit),
+              accountId: Number(l.accountId),
+              lineDescription: l.lineDescription || "",
+              debit: parseFormattedNumber(l.debit || ""),
+              credit: parseFormattedNumber(l.credit || ""),
             })),
           },
         };
 
-        const res: any = await createJournalEntry(createPayload).unwrap();
+        const res: any = await createJournalEntry(createPayload as any).unwrap();
         const txNum =
           res?.transactionNumber ||
           res?.data?.transactionNumber ||
@@ -475,9 +484,9 @@ function JournalEntryContent() {
         resetForm();
       }
     } catch (err: any) {
-      setValidationErrors([
-        err?.data?.message || err?.message || "Failed to post journal entry",
-      ]);
+      setApiError(
+        err?.data?.message || err?.message || "Failed to post journal entry"
+      );
     }
   };
 
@@ -485,7 +494,6 @@ function JournalEntryContent() {
     return (
       <div className="flex flex-col items-center py-16 gap-3 text-muted-foreground">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        {/* UI (14px) */}
         <span className="text-sm">Loading...</span>
       </div>
     );
@@ -495,7 +503,6 @@ function JournalEntryContent() {
     <div className="space-y-6 max-w-7xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          {/* H2 (24px) */}
           <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
             {isEdit ? (
               <Edit className="text-primary" />
@@ -504,18 +511,15 @@ function JournalEntryContent() {
             )}
             {isEdit ? "Edit Journal Entry" : "Create Journal Entry"}
             {isEdit && (
-              /* Caption (12px) */
               <Badge variant="secondary" className="font-mono text-xs">
                 {displayedTxNumber}
               </Badge>
             )}
           </h2>
-          {/* UI (14px) */}
           <p className="text-sm text-muted-foreground mt-1">
             Record double-entry transactions
           </p>
         </div>
-        {/* UI (14px) */}
         <Button variant="outline" size="sm" asChild className="text-sm">
           <Link href="/reports/general-journal" className="gap-1.5">
             <ArrowLeft size={14} /> Back to Journal
@@ -526,22 +530,21 @@ function JournalEntryContent() {
       {successMessage && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-300">
           <CheckCircle2 size={16} />
-          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             {successMessage}
           </AlertDescription>
         </Alert>
       )}
 
-      {validationErrors.length > 0 && (
+      {(errors.lines || apiError) && (
         <Alert variant="destructive">
           <AlertTriangle size={16} />
-          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             <ul className="list-disc ml-4">
-              {validationErrors.map((e, i) => (
-                <li key={i}>{e}</li>
-              ))}
+              {errors.lines?.root?.message && (
+                <li>{errors.lines.root.message}</li>
+              )}
+              {apiError && <li>{apiError}</li>}
             </ul>
           </AlertDescription>
         </Alert>
@@ -550,7 +553,6 @@ function JournalEntryContent() {
       {isLocked ? (
         <Alert>
           <Lock size={16} />
-          {/* Caption (12px) */}
           <AlertDescription className="text-xs">
             Journal {displayedTxNumber} is in closed period.{" "}
             <Link href="/reports/general-journal" className="underline">
@@ -559,17 +561,15 @@ function JournalEntryContent() {
           </AlertDescription>
         </Alert>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card>
             <CardHeader className="pb-3">
-              {/* UI (14px) */}
               <CardTitle className="text-sm font-semibold">
                 Transaction Info
               </CardTitle>
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                {/* Caption (12px) */}
                 <Label className="text-xs font-medium flex items-center justify-between">
                   <span>Transaction No.</span>
                   {isTxLoading && (
@@ -579,22 +579,24 @@ function JournalEntryContent() {
                     />
                   )}
                 </Label>
-                {/* UI (14px) */}
                 <Input
                   className="h-9 font-mono bg-muted text-sm"
                   value={displayedTxNumber}
                   readOnly
                 />
               </div>
+
               <div className="space-y-1.5">
-                {/* Caption (12px) */}
                 <Label className="text-xs font-medium">Journal Type</Label>
-                <Select value={journalType} onValueChange={setJournalType}>
-                  {/* UI (14px) */}
+                <Select
+                  value={journalType}
+                  onValueChange={(v) =>
+                    setValue("journalType", v, { shouldValidate: true })
+                  }
+                >
                   <SelectTrigger className="h-9 text-sm">
                     <SelectValue />
                   </SelectTrigger>
-                  {/* UI (14px) */}
                   <SelectContent className="text-sm">
                     <SelectItem value="General">
                       General Journal (GJ)
@@ -604,29 +606,34 @@ function JournalEntryContent() {
                     </SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.journalType && (
+                  <p className="text-xs text-red-500 font-medium">
+                    {errors.journalType.message}
+                  </p>
+                )}
               </div>
+
               <div className="space-y-1.5">
-                {/* Caption (12px) */}
                 <Label className="text-xs font-medium">Date</Label>
-                {/* UI (14px) */}
                 <Input
                   type="date"
                   className="h-9 text-sm"
-                  value={entryDate}
-                  onChange={(e) => setEntryDate(e.target.value)}
-                  required
+                  {...register("entryDate")}
                 />
+                {errors.entryDate && (
+                  <p className="text-xs text-red-500 font-medium">
+                    {errors.entryDate.message}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
 
           <Card className="overflow-hidden">
             <CardHeader className="py-3 flex-row items-center justify-between space-y-0">
-              {/* UI (14px) */}
               <CardTitle className="text-sm font-semibold">
                 Journal Lines
               </CardTitle>
-              {/* Caption (12px) */}
               <Button
                 type="button"
                 variant="outline"
@@ -660,7 +667,7 @@ function JournalEntryContent() {
                               ? null
                               : flexRender(
                                   header.column.columnDef.header,
-                                  header.getContext(),
+                                  header.getContext()
                                 )}
                           </TableHead>
                         );
@@ -675,7 +682,7 @@ function JournalEntryContent() {
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext(),
+                            cell.getContext()
                           )}
                         </TableCell>
                       ))}
@@ -684,36 +691,30 @@ function JournalEntryContent() {
                 </TableBody>
                 <TableFooter>
                   <TableRow>
-                    {/* Caption (12px) */}
                     <TableCell
                       colSpan={3}
                       className="text-right text-xs font-medium"
                     >
                       Total:
                     </TableCell>
-                    {/* Caption (12px) */}
                     <TableCell className="text-right font-mono text-xs text-emerald-500">
                       Rp {formatIDR(totalDebit)}
                     </TableCell>
-                    {/* Caption (12px) */}
                     <TableCell className="text-right font-mono text-xs text-red-500">
                       Rp {formatIDR(totalCredit)}
                     </TableCell>
                     <TableCell />
                   </TableRow>
                   <TableRow>
-                    {/* Caption (12px) */}
                     <TableCell colSpan={3} className="text-right text-xs">
                       Status:
                     </TableCell>
                     <TableCell colSpan={2} className="text-center">
                       {isBalanced ? (
-                        /* Label kecil (11px) */
                         <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 text-[11px] gap-1">
                           <CheckCircle2 size={12} /> Balanced
                         </Badge>
                       ) : (
-                        /* Label kecil (11px) */
                         <Badge
                           variant="destructive"
                           className="gap-1 bg-red-500/15 text-red-500 border-red-500/20 text-[11px]"
@@ -731,7 +732,6 @@ function JournalEntryContent() {
           </Card>
 
           <div className="flex justify-end gap-2">
-            {/* UI (14px) */}
             <Button
               type="button"
               variant="outline"
@@ -740,7 +740,6 @@ function JournalEntryContent() {
             >
               Reset
             </Button>
-            {/* UI (14px) */}
             <Button
               type="submit"
               disabled={!isBalanced || isSubmitting}
@@ -764,7 +763,6 @@ export default function JournalEntryPage() {
   return (
     <Suspense
       fallback={
-        /* Caption (12px) */
         <div className="py-16 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
           <Loader2 className="animate-spin" size={16} /> Loading...
         </div>
