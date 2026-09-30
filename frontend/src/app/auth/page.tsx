@@ -5,8 +5,10 @@ import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import {
   usePostApiV1AuthLoginMutation,
+  usePostApiV1AuthGoogleLoginMutation,
   useGetApiV1AuthMeQuery,
   generatedApi,
 } from "@/lib/generatedApi";
@@ -23,7 +25,9 @@ type AuthFormData = {
   keepMe?: boolean;
 };
 
-// SVG Icon Google
+// Google Client ID dari Environment Variable Frontend
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+
 function GoogleIcon() {
   return (
     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -47,6 +51,45 @@ function GoogleIcon() {
   );
 }
 
+// Sub-komponen Tombol Google Login (Memicu OAuth Google -> Panggil POST Mutation)
+function GoogleAuthButton({
+  isPending,
+  onSuccessHandler,
+  onError,
+}: {
+  isPending: boolean;
+  onSuccessHandler: (idToken: string) => void;
+  onError: (msg: string) => void;
+}) {
+  const googleLogin = useGoogleLogin({
+    onSuccess: (tokenResponse) => {
+      // Ambil token hasil autentikasi dari SDK Google
+      const idToken = tokenResponse.access_token;
+      if (idToken) {
+        onSuccessHandler(idToken);
+      } else {
+        onError("Gagal mendapatkan token autentikasi dari Google.");
+      }
+    },
+    onError: () => {
+      onError("Autentikasi Google dibatalkan atau gagal.");
+    },
+  });
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      disabled={isPending || !GOOGLE_CLIENT_ID}
+      onClick={() => googleLogin()}
+      className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
+    >
+      <GoogleIcon />
+      Continue with Google
+    </Button>
+  );
+}
+
 function AuthFormContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
@@ -61,6 +104,9 @@ function AuthFormContent() {
 
   const [loginMutation, { isLoading: isLoggingIn }] =
     usePostApiV1AuthLoginMutation();
+
+  const [googleLoginMutation, { isLoading: isGoogleLoggingIn }] =
+    usePostApiV1AuthGoogleLoginMutation();
 
   const {
     register,
@@ -109,7 +155,7 @@ function AuthFormContent() {
     });
   };
 
-  // Handler Submit Form Manual (Email & Password)
+  // Handler Submit Manual (Email & Password)
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
     try {
@@ -156,22 +202,37 @@ function AuthFormContent() {
     }
   };
 
-  // Handler Google OAuth via Server Redirect
-  const handleGoogleAuth = () => {
+  // Handler Google OAuth -> Mengirimkan idToken via HTTP POST
+  const handleGoogleSuccess = async (idToken: string) => {
     setApiErr("");
-    const backendBaseUrl =
-      process.env.NEXT_PUBLIC_API_URL || "https://aumonext-api.onrender.com";
-    const redirectTo = searchParams.get("redirectTo") || "/home";
+    try {
+      dispatch(generatedApi.util.resetApiState());
 
-    // Direct redirect ke endpoint backend untuk menginisiasi OAuth Challenge
-    window.location.href = `${backendBaseUrl}/api/v1/auth/google-login?redirectTo=${encodeURIComponent(
-      redirectTo,
-    )}`;
+      // Panggil endpoint POST /api/v1/auth/google-login beserta idToken yang didapatkan
+      await googleLoginMutation({
+        googleLoginRequest: {
+          idToken: idToken,
+          isMobileClient: false,
+        },
+      }).unwrap();
+
+      const targetUrl = searchParams.get("redirectTo") || "/home";
+      window.location.replace(targetUrl);
+    } catch (e: any) {
+      console.error("[GOOGLE AUTH FAIL]", e);
+      const errorMessage =
+        e?.data?.message ||
+        e?.data?.title ||
+        "Gagal memverifikasi akun Google dengan server backend.";
+      setApiErr(errorMessage);
+    }
   };
 
   if (isProfileLoading) {
     return <AuthFormSkeleton />;
   }
+
+  const isPending = isLoggingIn || isGoogleLoggingIn;
 
   return (
     <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200 selection:bg-black selection:text-white [&_*::selection]:bg-black [&_*::selection]:text-white">
@@ -187,18 +248,21 @@ function AuthFormContent() {
         </p>
       </div>
 
-      {/* Tombol Google Auth Direct */}
+      {/* Google Login Section */}
       <div className="space-y-4">
-        <Button
-          type="button"
-          variant="outline"
-          disabled={isLoggingIn}
-          onClick={handleGoogleAuth}
-          className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
-        >
-          <GoogleIcon />
-          Continue with Google
-        </Button>
+        {GOOGLE_CLIENT_ID ? (
+          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+            <GoogleAuthButton
+              isPending={isPending}
+              onSuccessHandler={handleGoogleSuccess}
+              onError={(msg) => setApiErr(msg)}
+            />
+          </GoogleOAuthProvider>
+        ) : (
+          <div className="text-center p-2 text-xs text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.
+          </div>
+        )}
 
         <div className="relative flex items-center justify-center">
           <div className="border-t border-zinc-200 w-full" />
@@ -332,10 +396,10 @@ function AuthFormContent() {
         {/* Submit Button */}
         <Button
           type="submit"
-          disabled={isLoggingIn}
+          disabled={isPending}
           className="w-full h-11 rounded-xl text-sm font-medium bg-black text-white hover:bg-zinc-800 transition-colors"
         >
-          {isLoggingIn
+          {isPending
             ? "Processing..."
             : mode === "login"
               ? "Sign In"
