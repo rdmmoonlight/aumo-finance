@@ -76,7 +76,9 @@ function GoogleAuthButtonInner({
 
   const handleClick = () => {
     if (!GOOGLE_CLIENT_ID) {
-      onError("NEXT_PUBLIC_GOOGLE_CLIENT_ID belum diset di .env.local atau Vercel.");
+      onError(
+        "NEXT_PUBLIC_GOOGLE_CLIENT_ID belum diset di .env.local atau Vercel.",
+      );
       return;
     }
     googleLogin();
@@ -266,7 +268,9 @@ function AuthFormContent() {
             type="button"
             variant="outline"
             onClick={() =>
-              setApiErr("NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.")
+              setApiErr(
+                "NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.",
+              )
             }
             className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 flex items-center justify-center"
           >
