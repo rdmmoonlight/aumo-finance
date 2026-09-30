@@ -2,7 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using AumoBackend.Core;
+using AumoBackend.DTOs;
+using AumoBackend.Services;
 
 namespace AumoBackend.Controllers;
 
