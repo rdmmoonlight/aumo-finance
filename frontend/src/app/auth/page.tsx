@@ -5,7 +5,6 @@ import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import {
   usePostApiV1AuthLoginMutation,
   usePostApiV1AuthGoogleLoginMutation,
@@ -25,9 +24,7 @@ type AuthFormData = {
   keepMe?: boolean;
 };
 
-// Google Client ID dari Environment Variable Frontend
-const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
-
+// SVG Icon Google
 function GoogleIcon() {
   return (
     <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -48,45 +45,6 @@ function GoogleIcon() {
         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
       />
     </svg>
-  );
-}
-
-// Sub-komponen Tombol Google Login (Memicu OAuth Google -> Panggil POST Mutation)
-function GoogleAuthButton({
-  isPending,
-  onSuccessHandler,
-  onError,
-}: {
-  isPending: boolean;
-  onSuccessHandler: (idToken: string) => void;
-  onError: (msg: string) => void;
-}) {
-  const googleLogin = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      // Ambil token hasil autentikasi dari SDK Google
-      const idToken = tokenResponse.access_token;
-      if (idToken) {
-        onSuccessHandler(idToken);
-      } else {
-        onError("Gagal mendapatkan token autentikasi dari Google.");
-      }
-    },
-    onError: () => {
-      onError("Autentikasi Google dibatalkan atau gagal.");
-    },
-  });
-
-  return (
-    <Button
-      type="button"
-      variant="outline"
-      disabled={isPending || !GOOGLE_CLIENT_ID}
-      onClick={() => googleLogin()}
-      className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
-    >
-      <GoogleIcon />
-      Continue with Google
-    </Button>
   );
 }
 
@@ -155,7 +113,7 @@ function AuthFormContent() {
     });
   };
 
-  // Handler Submit Manual (Email & Password)
+  // Submit Handler Email/Password Manual
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
     try {
@@ -202,16 +160,14 @@ function AuthFormContent() {
     }
   };
 
-  // Handler Google OAuth -> Mengirimkan idToken via HTTP POST
-  const handleGoogleSuccess = async (idToken: string) => {
+  // Google Login Handler via POST Mutation
+  const handleGoogleAuth = async () => {
     setApiErr("");
     try {
       dispatch(generatedApi.util.resetApiState());
 
-      // Panggil endpoint POST /api/v1/auth/google-login beserta idToken yang didapatkan
       await googleLoginMutation({
         googleLoginRequest: {
-          idToken: idToken,
           isMobileClient: false,
         },
       }).unwrap();
@@ -223,7 +179,7 @@ function AuthFormContent() {
       const errorMessage =
         e?.data?.message ||
         e?.data?.title ||
-        "Gagal memverifikasi akun Google dengan server backend.";
+        "Gagal terhubung ke layanan Google Auth backend.";
       setApiErr(errorMessage);
     }
   };
@@ -248,21 +204,18 @@ function AuthFormContent() {
         </p>
       </div>
 
-      {/* Google Login Section */}
+      {/* Button Google Auth */}
       <div className="space-y-4">
-        {GOOGLE_CLIENT_ID ? (
-          <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-            <GoogleAuthButton
-              isPending={isPending}
-              onSuccessHandler={handleGoogleSuccess}
-              onError={(msg) => setApiErr(msg)}
-            />
-          </GoogleOAuthProvider>
-        ) : (
-          <div className="text-center p-2 text-xs text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
-            NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.
-          </div>
-        )}
+        <Button
+          type="button"
+          variant="outline"
+          disabled={isPending}
+          onClick={handleGoogleAuth}
+          className="w-full h-11 rounded-xl text-sm font-medium bg-white border border-zinc-300 text-zinc-700 hover:bg-zinc-50 hover:text-black shadow-none flex items-center justify-center transition-colors"
+        >
+          <GoogleIcon />
+          Continue with Google
+        </Button>
 
         <div className="relative flex items-center justify-center">
           <div className="border-t border-zinc-200 w-full" />
