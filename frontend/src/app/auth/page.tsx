@@ -3,6 +3,8 @@
 import React, { Suspense, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   usePostApiV1AuthLoginMutation,
   useGetApiV1AuthMeQuery,
@@ -12,24 +14,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
 
 function LoginFormContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [keepMe, setKeepMe] = useState(false);
   const [showPass, setShowPass] = useState(false);
-  const [err, setErr] = useState("");
+  const [apiErr, setApiErr] = useState("");
 
-  // Gunakan RTK Query untuk cek status login/profile pengguna
-  const { data: profile, isLoading: isProfileLoading } =
-    useGetApiV1AuthMeQuery();
+  const { data: profile, isLoading: isProfileLoading } = useGetApiV1AuthMeQuery();
 
-  // Hook Mutation untuk Login
-  const [loginMutation, { isLoading: isLoggingIn }] =
-    usePostApiV1AuthLoginMutation();
+  const [loginMutation, { isLoading: isLoggingIn }] = usePostApiV1AuthLoginMutation();
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      keepMe: false,
+    },
+  });
+
+  const keepMeValue = watch("keepMe");
 
   useEffect(() => {
     if (!isProfileLoading && profile) {
@@ -42,29 +55,28 @@ function LoginFormContent() {
     document.title = "Sign In | Aumo Workspace";
     const saved = localStorage.getItem("aumo_saved_email");
     if (saved) {
-      setEmail(saved);
-      setKeepMe(true);
+      setValue("email", saved);
+      setValue("keepMe", true);
     }
-  }, []);
+  }, [setValue]);
 
-  const onLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErr("");
+  // Submit Handler
+  const onSubmit = async (values: LoginFormValues) => {
+    setApiErr("");
     try {
-      // Reset state API menggunakan aksi RTK Query dari generatedApi
       dispatch(generatedApi.util.resetApiState());
 
       await loginMutation({
         loginRequest: {
-          email,
-          password,
-          rememberMe: keepMe,
+          email: values.email,
+          password: values.password,
+          rememberMe: values.keepMe,
           isMobileClient: false,
         },
       }).unwrap();
 
-      if (keepMe) {
-        localStorage.setItem("aumo_saved_email", email);
+      if (values.keepMe) {
+        localStorage.setItem("aumo_saved_email", values.email);
       } else {
         localStorage.removeItem("aumo_saved_email");
       }
@@ -80,7 +92,7 @@ function LoginFormContent() {
         (e?.status === "FETCH_ERROR"
           ? "Gagal terhubung ke server backend."
           : "Email atau password salah / terjadi kesalahan sistem.");
-      setErr(errorMessage);
+      setApiErr(errorMessage);
     }
   };
 
@@ -96,7 +108,9 @@ function LoginFormContent() {
         </h2>
         <p className="text-sm text-zinc-600 mt-2">Masuk ke workspace kamu.</p>
       </div>
-      <form onSubmit={onLogin} className="space-y-5">
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+        {/* Field Email */}
         <div className="space-y-2">
           <Label
             htmlFor="email"
@@ -107,13 +121,16 @@ function LoginFormContent() {
           <Input
             id="email"
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="nama@email.com"
+            {...register("email")}
             className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white"
-            required
           />
+          {errors.email && (
+            <p className="text-xs text-red-600 font-medium">{errors.email.message}</p>
+          )}
         </div>
+
+        {/* Field Password */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <Label
@@ -133,19 +150,22 @@ function LoginFormContent() {
           <Input
             id="password"
             type={showPass ? "text" : "password"}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
+            {...register("password")}
             className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white font-sans"
-            required
           />
+          {errors.password && (
+            <p className="text-xs text-red-600 font-medium">{errors.password.message}</p>
+          )}
         </div>
+
+        {/* Checkbox Keep Me & Forgot Link */}
         <div className="flex items-center justify-between pt-1">
           <div className="flex items-center space-x-2">
             <Checkbox
               id="keepMe"
-              checked={keepMe}
-              onCheckedChange={(v) => setKeepMe(v === true)}
+              checked={keepMeValue}
+              onCheckedChange={(v) => setValue("keepMe", v === true)}
               className="h-4 w-4 rounded border border-zinc-400 bg-white shadow-none data-[state=checked]:bg-black data-[state=checked]:border-black data-[state=checked]:text-white [&_svg]:h-3 [&_svg]:w-3 [&_svg]:stroke-[3]"
             />
             <Label
@@ -162,11 +182,14 @@ function LoginFormContent() {
             Forgot?
           </a>
         </div>
-        {err && (
+
+        {/* Alert Error dari Backend */}
+        {apiErr && (
           <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl font-medium">
-            {err}
+            {apiErr}
           </div>
         )}
+
         <Button
           type="submit"
           disabled={isLoggingIn}
@@ -174,6 +197,7 @@ function LoginFormContent() {
         >
           {isLoggingIn ? "Processing..." : "Sign In"}
         </Button>
+
         <div className="flex justify-between pt-6 border-t border-zinc-200 text-xs font-mono text-zinc-500">
           <span>SECURE COOKIE</span>
           <span>Keep your data safe</span>
