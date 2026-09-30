@@ -349,3 +349,70 @@ public class SmtpSettings
     public string Username { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
 }
+
+// DTO untuk Cash Flow Line Item
+public class StatementOfCashFlowLineResponse
+{
+    public string Description { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+
+// DTO untuk Line Item Laporan Laba Rugi
+public class IncomeStatementLineApiResponse
+{
+    public string ReferenceNumber { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+
+// DTO untuk Laporan Laba Rugi Lengkap
+public class IncomeStatementApiResponse
+{
+    public DateTime AsOfDate { get; set; }
+    public List<IncomeStatementLineApiResponse> Revenues { get; set; } = new();
+    public decimal TotalRevenue { get; set; }
+    public List<IncomeStatementLineApiResponse> OperatingExpenses { get; set; } = new();
+    public decimal TotalOperatingExpenses { get; set; }
+    public decimal OperatingIncome { get; set; }
+    public List<IncomeStatementLineApiResponse> OtherIncome { get; set; } = new();
+    public decimal TotalOtherIncome { get; set; }
+    public List<IncomeStatementLineApiResponse> OtherExpenses { get; set; } = new();
+    public decimal TotalOtherExpenses { get; set; }
+    public decimal NetIncome { get; set; }
+}
+
+// DTO untuk Laporan Perubahan Ekuitas / Saldo Laba
+public class RetainedEarningsApiResponse
+{
+    public string AccountName { get; set; } = string.Empty;
+    public DateTime? StartDate { get; set; }
+    public DateTime? EndDate { get; set; }
+    public decimal BeginningBalance { get; set; }
+    public decimal NetIncome { get; set; }
+    public decimal Dividends { get; set; }
+    public decimal EndingBalance { get; set; }
+}
+
+// DTO untuk Line Item Posisi Keuangan (Neraca)
+public class FinancialPositionLineApiResponse
+{
+    public string ReferenceNumber { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
+
+// DTO untuk Laporan Posisi Keuangan (Neraca)
+public class StatementOfFinancialPositionApiResponse
+{
+    public DateTime AsOfDate { get; set; }
+    public bool IsPostClosing { get; set; }
+    public List<FinancialPositionLineApiResponse> Assets { get; set; } = new();
+    public decimal TotalAssets { get; set; }
+    public List<FinancialPositionLineApiResponse> Liabilities { get; set; } = new();
+    public decimal TotalLiabilities { get; set; }
+    public List<FinancialPositionLineApiResponse> EquityExcludingRetainedEarnings { get; set; } = new();
+    public decimal RetainedEarningsEnding { get; set; }
+    public decimal TotalEquity { get; set; }
+    public decimal TotalLiabilitiesAndEquity { get; set; }
+    public bool IsBalanced { get; set; }
+}
