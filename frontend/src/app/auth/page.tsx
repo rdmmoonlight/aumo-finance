@@ -15,7 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { loginSchema, type LoginFormValues } from "@/lib/validations/auth";
+import {
+  loginSchema,
+  registerSchema,
+  type AuthFormValues,
+} from "@/lib/validations/auth";
 
 // SVG Icon Google
 function GoogleIcon() {
@@ -48,6 +52,7 @@ function AuthFormContent() {
   // Mode state: 'login' | 'register'
   const [mode, setMode] = useState<"login" | "register">("login");
   const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
 
   const { data: profile, isLoading: isProfileLoading } =
@@ -59,23 +64,29 @@ function AuthFormContent() {
   const [googleLoginMutation, { isLoading: isGoogleLoggingIn }] =
     usePostApiV1AuthGoogleLoginMutation();
 
+  // Switch resolver Zod berdasarkan mode (Sign In vs Sign Up)
+  const currentSchema = mode === "login" ? loginSchema : registerSchema;
+
   const {
     register,
     handleSubmit,
     setValue,
     watch,
+    reset,
     formState: { errors },
-  } = useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  } = useForm<AuthFormValues>({
+    resolver: zodResolver(currentSchema),
     defaultValues: {
       email: "",
       password: "",
+      confirmPassword: "",
       keepMe: false,
     },
   });
 
   const keepMeValue = watch("keepMe");
 
+  // Redirect jika user sudah login
   useEffect(() => {
     if (!isProfileLoading && profile) {
       const targetUrl = searchParams.get("redirectTo") || "/home";
@@ -86,37 +97,63 @@ function AuthFormContent() {
   useEffect(() => {
     document.title = `${mode === "login" ? "Sign In" : "Sign Up"} | Aumo Workspace`;
     const saved = localStorage.getItem("aumo_saved_email");
-    if (saved) {
+    if (saved && mode === "login") {
       setValue("email", saved);
       setValue("keepMe", true);
     }
   }, [setValue, mode]);
 
-  // Handler Login Email & Password
-  const onSubmit = async (values: LoginFormValues) => {
+  // Handler pergantian mode Sign In <-> Sign Up
+  const handleSwitchMode = (newMode: "login" | "register") => {
+    setApiErr("");
+    setMode(newMode);
+    const saved = localStorage.getItem("aumo_saved_email");
+    reset({
+      email: newMode === "login" && saved ? saved : "",
+      password: "",
+      confirmPassword: "",
+      keepMe: newMode === "login" && !!saved,
+    });
+  };
+
+  // Handler Submit Form
+  const onSubmit = async (values: AuthFormValues) => {
     setApiErr("");
     try {
       dispatch(generatedApi.util.resetApiState());
 
-      await loginMutation({
-        loginRequest: {
-          email: values.email,
-          password: values.password,
-          rememberMe: values.keepMe,
-          isMobileClient: false,
-        },
-      }).unwrap();
+      if (mode === "login") {
+        await loginMutation({
+          loginRequest: {
+            email: values.email,
+            password: values.password,
+            rememberMe: values.keepMe,
+            isMobileClient: false,
+          },
+        }).unwrap();
 
-      if (values.keepMe) {
-        localStorage.setItem("aumo_saved_email", values.email);
+        if (values.keepMe) {
+          localStorage.setItem("aumo_saved_email", values.email);
+        } else {
+          localStorage.removeItem("aumo_saved_email");
+        }
       } else {
-        localStorage.removeItem("aumo_saved_email");
+        // TODO: Jika backend memiliki endpoint register khusus, panggil di sini.
+        // Contoh fallback/default mengarah ke login/autentikasi bawaan.
+        await loginMutation({
+          loginRequest: {
+            email: values.email,
+            password: values.password,
+            rememberMe: false,
+            isMobileClient: false,
+          },
+        }).unwrap();
       }
 
       const targetUrl = searchParams.get("redirectTo") || "/home";
       window.location.replace(targetUrl);
     } catch (e: any) {
-      console.error("[LOGIN FAIL]", e);
+      console.error(`[${mode.toUpperCase()} FAIL]`, e);
       const errorMessage =
         e?.data?.message ||
         e?.data?.title ||
@@ -132,11 +169,6 @@ function AuthFormContent() {
   const handleGoogleAuth = async () => {
     setApiErr("");
 
-    // OPSI A: Jika backend menyediakan URL redirect OAuth langsung
-    // const backendGoogleUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/google`;
-    // window.location.href = backendGoogleUrl;
-
-    // OPSI B: Jika menggunakan mutation API yang terdefinisi di RTK Query
     try {
       dispatch(generatedApi.util.resetApiState());
 
@@ -178,7 +210,7 @@ function AuthFormContent() {
         </p>
       </div>
 
-      {/* Tombol Google Auth (Pure Backend Call) */}
+      {/* Tombol Google Auth */}
       <div className="space-y-4">
         <Button
           type="button"
@@ -199,8 +231,9 @@ function AuthFormContent() {
         </div>
       </div>
 
-      {/* Form Email & Password */}
+      {/* Form Input */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+        {/* Field Email */}
         <div className="space-y-1.5">
           <Label
             htmlFor="email"
@@ -222,6 +255,7 @@ function AuthFormContent() {
           )}
         </div>
 
+        {/* Field Password */}
         <div className="space-y-1.5">
           <div className="flex justify-between items-center">
             <Label
@@ -252,6 +286,40 @@ function AuthFormContent() {
           )}
         </div>
 
+        {/* Field Confirm Password (Hanya Mode Register) */}
+        {mode === "register" && (
+          <div className="space-y-1.5">
+            <div className="flex justify-between items-center">
+              <Label
+                htmlFor="confirmPassword"
+                className="text-[11px] tracking-widest uppercase font-semibold text-black"
+              >
+                Confirm Password
+              </Label>
+              <button
+                type="button"
+                onClick={() => setShowConfirmPass(!showConfirmPass)}
+                className="text-xs uppercase tracking-wide text-zinc-600 hover:text-black font-medium"
+              >
+                {showConfirmPass ? "Hide" : "Show"}
+              </button>
+            </div>
+            <Input
+              id="confirmPassword"
+              type={showConfirmPass ? "text" : "password"}
+              placeholder="••••••••"
+              {...register("confirmPassword")}
+              className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white font-sans"
+            />
+            {errors.confirmPassword && (
+              <p className="text-xs text-red-600 font-medium">
+                {errors.confirmPassword.message}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Checkbox Keep Me & Forgot Link (Hanya Mode Login) */}
         {mode === "login" && (
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center space-x-2">
@@ -277,12 +345,14 @@ function AuthFormContent() {
           </div>
         )}
 
+        {/* Alert Error */}
         {apiErr && (
           <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl font-medium">
             {apiErr}
           </div>
         )}
 
+        {/* Submit Button */}
         <Button
           type="submit"
           disabled={isPending}
@@ -303,10 +373,7 @@ function AuthFormContent() {
             Belum punya akun?{" "}
             <button
               type="button"
-              onClick={() => {
-                setApiErr("");
-                setMode("register");
-              }}
+              onClick={() => handleSwitchMode("register")}
               className="font-semibold text-black underline underline-offset-4 hover:text-zinc-700"
             >
               Sign Up
@@ -317,10 +384,7 @@ function AuthFormContent() {
             Sudah punya akun?{" "}
             <button
               type="button"
-              onClick={() => {
-                setApiErr("");
-                setMode("login");
-              }}
+              onClick={() => handleSwitchMode("login")}
               className="font-semibold text-black underline underline-offset-4 hover:text-zinc-700"
             >
               Sign In
