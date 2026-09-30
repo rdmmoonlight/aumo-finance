@@ -202,7 +202,7 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Google OAuth Login (Mendukung Web via Cookie & Mobile via JWT)
+    /// Google OAuth Login via POST (Mendukung Web via Cookie & Mobile via JWT dari SDK Frontend)
     /// </summary>
     [HttpPost("google-login")]
     [AllowAnonymous]
@@ -280,6 +280,77 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
+    /// Google OAuth Login via GET Redirect (Server-Initiated OAuth)
+    /// Menangani browser direct navigation via window.location.href tanpa memicu HTTP 405.
+    /// </summary>
+    [HttpGet("google-login")]
+    [AllowAnonymous]
+    public IActionResult GoogleLoginRedirect([FromQuery] string redirectTo = "/home")
+    {
+        var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth", new { redirectTo });
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+        return Challenge(properties, "Google");
+    }
+
+    /// <summary>
+    /// Callback handler setelah autentikasi OAuth Google eksternal berhasil
+    /// </summary>
+    [HttpGet("google-callback")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleCallback(string redirectTo = "/home", string? remoteError = null)
+    {
+        if (remoteError != null)
+        {
+            return BadRequest(new { success = false, message = $"Error from external provider: {remoteError}" });
+        }
+
+        var info = await _signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
+        {
+            return BadRequest(new { success = false, message = "Error loading external login information." });
+        }
+
+        var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
+        
+        if (!result.Succeeded)
+        {
+            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                return BadRequest(new { success = false, message = "Email claim not received from Google." });
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                user = new ApplicationUser
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true,
+                    FullName = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email,
+                    AvatarUrl = info.Principal.FindFirstValue("picture")
+                };
+
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    return BadRequest(new { success = false, message = "Failed to create user from Google callback." });
+                }
+
+                await _userManager.AddToRoleAsync(user, "User");
+            }
+
+            await _userManager.AddLoginAsync(user, info);
+            await _signInManager.SignInAsync(user, isPersistent: true);
+        }
+
+        // Redirect kembali ke aplikasi frontend Next.js setelah cookie session terbentuk
+        return Redirect(redirectTo);
+    }
+
+    /// <summary>
     /// Endpoint untuk mendapatkan profil user aktif secara realtime
     /// </summary>
     [HttpGet("me")]
@@ -322,7 +393,6 @@ public class AuthController : ControllerBase
             customClaims = userClaims
         };
 
-        // Mereturn ganda (data wrapper & flat) agar kompatibel dengan (me as any)?.data maupun me
         return Ok(new
         {
             success = true,
