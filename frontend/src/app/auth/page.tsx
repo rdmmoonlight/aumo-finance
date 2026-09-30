@@ -3,7 +3,7 @@
 import React, { Suspense, useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useSearchParams } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   usePostApiV1AuthLoginMutation,
@@ -15,11 +15,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  loginSchema,
-  registerSchema,
-  type AuthFormValues,
-} from "@/lib/validations/auth";
+import { loginSchema, registerSchema } from "@/lib/validations/auth";
+
+// Tipe unified untuk React Hook Form
+type AuthFormData = {
+  email: string;
+  password: string;
+  confirmPassword?: string;
+  keepMe?: boolean;
+};
 
 // SVG Icon Google
 function GoogleIcon() {
@@ -49,7 +53,6 @@ function AuthFormContent() {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
-  // Mode state: 'login' | 'register'
   const [mode, setMode] = useState<"login" | "register">("login");
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
@@ -64,9 +67,6 @@ function AuthFormContent() {
   const [googleLoginMutation, { isLoading: isGoogleLoggingIn }] =
     usePostApiV1AuthGoogleLoginMutation();
 
-  // Switch resolver Zod berdasarkan mode (Sign In vs Sign Up)
-  const currentSchema = mode === "login" ? loginSchema : registerSchema;
-
   const {
     register,
     handleSubmit,
@@ -74,8 +74,8 @@ function AuthFormContent() {
     watch,
     reset,
     formState: { errors },
-  } = useForm<AuthFormValues>({
-    resolver: zodResolver(currentSchema),
+  } = useForm<AuthFormData>({
+    resolver: zodResolver(mode === "login" ? loginSchema : registerSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -86,7 +86,6 @@ function AuthFormContent() {
 
   const keepMeValue = watch("keepMe");
 
-  // Redirect jika user sudah login
   useEffect(() => {
     if (!isProfileLoading && profile) {
       const targetUrl = searchParams.get("redirectTo") || "/home";
@@ -103,7 +102,6 @@ function AuthFormContent() {
     }
   }, [setValue, mode]);
 
-  // Handler pergantian mode Sign In <-> Sign Up
   const handleSwitchMode = (newMode: "login" | "register") => {
     setApiErr("");
     setMode(newMode);
@@ -116,8 +114,7 @@ function AuthFormContent() {
     });
   };
 
-  // Handler Submit Form
-  const onSubmit = async (values: AuthFormValues) => {
+  const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
     try {
       dispatch(generatedApi.util.resetApiState());
@@ -127,7 +124,7 @@ function AuthFormContent() {
           loginRequest: {
             email: values.email,
             password: values.password,
-            rememberMe: values.keepMe,
+            rememberMe: values.keepMe ?? false,
             isMobileClient: false,
           },
         }).unwrap();
@@ -138,8 +135,6 @@ function AuthFormContent() {
           localStorage.removeItem("aumo_saved_email");
         }
       } else {
-        // TODO: Jika backend memiliki endpoint register khusus, panggil di sini.
-        // Contoh fallback/default mengarah ke login/autentikasi bawaan.
         await loginMutation({
           loginRequest: {
             email: values.email,
@@ -165,10 +160,8 @@ function AuthFormContent() {
     }
   };
 
-  // Handler Continue with Google
   const handleGoogleAuth = async () => {
     setApiErr("");
-
     try {
       dispatch(generatedApi.util.resetApiState());
 
@@ -286,7 +279,7 @@ function AuthFormContent() {
           )}
         </div>
 
-        {/* Field Confirm Password (Hanya Mode Register) */}
+        {/* Field Confirm Password (Mode Register) */}
         {mode === "register" && (
           <div className="space-y-1.5">
             <div className="flex justify-between items-center">
@@ -319,7 +312,7 @@ function AuthFormContent() {
           </div>
         )}
 
-        {/* Checkbox Keep Me & Forgot Link (Hanya Mode Login) */}
+        {/* Checkbox Keep Me & Forgot Link (Mode Login) */}
         {mode === "login" && (
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center space-x-2">
@@ -361,8 +354,8 @@ function AuthFormContent() {
           {isPending
             ? "Processing..."
             : mode === "login"
-              ? "Sign In"
-              : "Create Account"}
+            ? "Sign In"
+            : "Create Account"}
         </Button>
       </form>
 
