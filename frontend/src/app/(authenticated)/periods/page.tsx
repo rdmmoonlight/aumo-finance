@@ -40,10 +40,8 @@ import {
   usePostApiV1PeriodsCloseByIdMutation,
 } from "@/lib/generatedApi";
 import {
-  PeriodList,
-  CreatePeriodForm,
   getPeriodColumns,
-  type PeriodListProps,
+  CreatePeriodForm,
   type PeriodItem,
   type ApiError,
 } from "./components";
@@ -51,6 +49,23 @@ import {
 /* -------------------------------------------------------------------------- */
 /*                                MAIN PAGE                                   */
 /* -------------------------------------------------------------------------- */
+
+interface CreatePeriodValues {
+  month?: number;
+  year?: number;
+  setupMode?: "LoadExisting" | "CreateNew";
+  cashAccountId?: string;
+  bankAccountId?: string;
+  retainedId?: string;
+  cashAccountCode?: string;
+  cashAccountName?: string;
+  cashBalance?: number | "";
+  bankAccountCode?: string;
+  bankAccountName?: string;
+  bankBalance?: number | "";
+  retainedCode?: string;
+  retainedName?: string;
+}
 
 export default function PeriodsPage() {
   const {
@@ -172,50 +187,85 @@ export default function PeriodsPage() {
     }
   };
 
-  const handleCreateSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateSubmit = async (values?: CreatePeriodValues) => {
     setErrorMessage(null);
+
+    const currentSetupMode = values?.setupMode ?? setupMode;
+    const currentMonth = values?.month ?? month;
+    const currentYear = values?.year ?? year;
+    const currentCashAccId = values?.cashAccountId ?? cashAccountId;
+    const currentBankAccId = values?.bankAccountId ?? bankAccountId;
+    const currentRetainedId = values?.retainedId ?? retainedId;
+
     if (
-      setupMode === "LoadExisting" &&
-      (!cashAccountId || !bankAccountId || !retainedId)
+      currentSetupMode === "LoadExisting" &&
+      (!currentCashAccId || !currentBankAccId || !currentRetainedId)
     ) {
       setErrorMessage("Select Cash, Bank, and Retained Earnings accounts.");
       return;
     }
-    if (setupMode === "LoadExisting" && cashAccountId === bankAccountId) {
+
+    if (
+      currentSetupMode === "LoadExisting" &&
+      currentCashAccId === currentBankAccId
+    ) {
       setErrorMessage("Cash and Bank Account cannot be the same account.");
       return;
     }
+
     try {
       await createPeriodMutation({
         createPeriodRequest: {
-          month,
-          year,
-          setupMode,
+          month: Number(currentMonth),
+          year: Number(currentYear),
+          setupMode: currentSetupMode,
           cashAccountId:
-            setupMode === "LoadExisting" ? parseInt(cashAccountId, 10) : null,
+            currentSetupMode === "LoadExisting"
+              ? parseInt(currentCashAccId, 10)
+              : null,
           bankAccountId:
-            setupMode === "LoadExisting" ? parseInt(bankAccountId, 10) : null,
+            currentSetupMode === "LoadExisting"
+              ? parseInt(currentBankAccId, 10)
+              : null,
           retainedEarningsAccountId:
-            setupMode === "LoadExisting" ? parseInt(retainedId, 10) : null,
+            currentSetupMode === "LoadExisting"
+              ? parseInt(currentRetainedId, 10)
+              : null,
           cashAccountCode:
-            setupMode === "CreateNew" ? cashAccountCode : undefined,
+            currentSetupMode === "CreateNew"
+              ? values?.cashAccountCode ?? cashAccountCode
+              : undefined,
           cashAccountName:
-            setupMode === "CreateNew" ? cashAccountName : undefined,
+            currentSetupMode === "CreateNew"
+              ? values?.cashAccountName ?? cashAccountName
+              : undefined,
           cashBalance:
-            setupMode === "CreateNew" ? Number(cashBalance) || 0 : undefined,
+            currentSetupMode === "CreateNew"
+              ? Number(values?.cashBalance ?? cashBalance) || 0
+              : undefined,
           bankAccountCode:
-            setupMode === "CreateNew" ? bankAccountCode : undefined,
+            currentSetupMode === "CreateNew"
+              ? values?.bankAccountCode ?? bankAccountCode
+              : undefined,
           bankAccountName:
-            setupMode === "CreateNew" ? bankAccountName : undefined,
+            currentSetupMode === "CreateNew"
+              ? values?.bankAccountName ?? bankAccountName
+              : undefined,
           bankBalance:
-            setupMode === "CreateNew" ? Number(bankBalance) || 0 : undefined,
+            currentSetupMode === "CreateNew"
+              ? Number(values?.bankBalance ?? bankBalance) || 0
+              : undefined,
           retainedEarningsAccountCode:
-            setupMode === "CreateNew" ? retainedCode : undefined,
+            currentSetupMode === "CreateNew"
+              ? values?.retainedCode ?? retainedCode
+              : undefined,
           retainedEarningsAccountName:
-            setupMode === "CreateNew" ? retainedName : undefined,
+            currentSetupMode === "CreateNew"
+              ? values?.retainedName ?? retainedName
+              : undefined,
         },
       }).unwrap();
+
       setSuccessMessage("Period opened successfully.");
       setViewMode("list");
       refetchPeriods();
@@ -387,20 +437,22 @@ export default function PeriodsPage() {
         </Card>
       ) : (
         <CreatePeriodForm
-          month={month}
-          year={year}
-          setupMode={setupMode}
-          cashAccountId={cashAccountId}
-          bankAccountId={bankAccountId}
-          retainedId={retainedId}
-          cashAccountCode={cashAccountCode}
-          cashAccountName={cashAccountName}
-          cashBalance={cashBalance}
-          bankAccountCode={bankAccountCode}
-          bankAccountName={bankAccountName}
-          bankBalance={bankBalance}
-          retainedCode={retainedCode}
-          retainedName={retainedName}
+          initialValues={{
+            month,
+            year,
+            setupMode,
+            cashAccountId,
+            bankAccountId,
+            retainedId,
+            cashAccountCode,
+            cashAccountName,
+            cashBalance,
+            bankAccountCode,
+            bankAccountName,
+            bankBalance,
+            retainedCode,
+            retainedName,
+          }}
           openInfo={openInfo}
           isLoadingOpenInfo={isLoadingOpenInfo}
           isCreating={isCreating}

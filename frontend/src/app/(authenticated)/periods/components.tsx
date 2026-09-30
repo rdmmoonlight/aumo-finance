@@ -1,26 +1,32 @@
-import React from "react";
+"use client";
+
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ColumnDef } from "@tanstack/react-table";
 import {
-  CalendarPlus,
   ArrowLeft,
-  RefreshCw,
-  PlusCircle,
+  CalendarPlus,
+  Eye,
+  EyeOff,
   Loader2,
   Lock,
   LockOpen,
-  Eye,
-  EyeOff,
+  PlusCircle,
+  RefreshCw,
 } from "lucide-react";
+import { useForm } from "react-hook-form";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -28,9 +34,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+
+import {
+  createPeriodSchema,
+  type CreatePeriodFormValues,
+  type CreatePeriodOutputValues,
+} from "@/lib/validations/period";
 
 /* -------------------------------------------------------------------------- */
 /*                            TYPES & INTERFACES                              */
@@ -76,6 +86,19 @@ export interface PeriodListProps {
   onOpenCreateView: () => void;
 }
 
+export interface CreatePeriodFormProps {
+  openInfo?: OpenInfoData | null;
+  isLoadingOpenInfo?: boolean;
+  isCreating?: boolean;
+  isLoading?: boolean;
+  initialValues?: Partial<CreatePeriodFormValues>;
+  defaultValues?: Partial<CreatePeriodFormValues>;
+  onSubmit: (values: CreatePeriodOutputValues) => void | Promise<void>;
+  onCancel: () => void;
+  // Mengizinkan tambahan props tak terduga yang di-pass dari parent
+  [key: string]: any;
+}
+
 export const MONTH_NAMES = [
   "January",
   "February",
@@ -92,19 +115,13 @@ export const MONTH_NAMES = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*                                 PERIOD LIST                                */
+/*                                PERIOD LIST                                 */
 /* -------------------------------------------------------------------------- */
 
 export function PeriodList({
-  periods,
   selectedPeriod,
-  isLoading,
   isClearing,
-  selectingId,
-  closingId,
   onClearSelection,
-  onSelectPeriod,
-  onClosePeriod,
   onOpenCreateView,
 }: PeriodListProps) {
   return (
@@ -133,80 +150,59 @@ export function PeriodList({
 }
 
 /* -------------------------------------------------------------------------- */
-/*                             CREATE PERIOD FORM                             */
+/*                            CREATE PERIOD FORM                              */
 /* -------------------------------------------------------------------------- */
 
-export interface CreatePeriodFormProps {
-  month: number;
-  year: number;
-  setupMode: "LoadExisting" | "CreateNew";
-  cashAccountId: string;
-  bankAccountId: string;
-  retainedId: string;
-  cashAccountCode: string;
-  cashAccountName: string;
-  cashBalance: number | "";
-  bankAccountCode: string;
-  bankAccountName: string;
-  bankBalance: number | "";
-  retainedCode: string;
-  retainedName: string;
-  openInfo: OpenInfoData | null;
-  isLoadingOpenInfo: boolean;
-  isCreating: boolean;
-  setMonth: (v: number) => void;
-  setYear: (v: number) => void;
-  setSetupMode: (v: "LoadExisting" | "CreateNew") => void;
-  setCashAccountId: (v: string) => void;
-  setBankAccountId: (v: string) => void;
-  setRetainedId: (v: string) => void;
-  setCashAccountCode: (v: string) => void;
-  setCashAccountName: (v: string) => void;
-  setCashBalance: (v: number | "") => void;
-  setBankAccountCode: (v: string) => void;
-  setBankAccountName: (v: string) => void;
-  setBankBalance: (v: number | "") => void;
-  setRetainedCode: (v: string) => void;
-  setRetainedName: (v: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
-}
-
 export function CreatePeriodForm({
-  month,
-  year,
-  setupMode,
-  cashAccountId,
-  bankAccountId,
-  retainedId,
-  cashAccountCode,
-  cashAccountName,
-  cashBalance,
-  bankAccountCode,
-  bankAccountName,
-  bankBalance,
-  retainedCode,
-  retainedName,
   openInfo,
   isLoadingOpenInfo,
   isCreating,
-  setMonth,
-  setYear,
-  setSetupMode,
-  setCashAccountId,
-  setBankAccountId,
-  setRetainedId,
-  setCashAccountCode,
-  setCashAccountName,
-  setCashBalance,
-  setBankAccountCode,
-  setBankAccountName,
-  setBankBalance,
-  setRetainedCode,
-  setRetainedName,
+  isLoading,
+  initialValues,
+  defaultValues,
   onSubmit,
   onCancel,
 }: CreatePeriodFormProps) {
+  const mergedDefaultValues: Partial<CreatePeriodFormValues> = {
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    setupMode: openInfo?.hasExistingPermanentAccounts
+      ? "LoadExisting"
+      : "CreateNew",
+    cashAccountId: "",
+    bankAccountId: "",
+    retainedId: "",
+    cashAccountCode: "",
+    cashAccountName: "",
+    cashBalance: "",
+    bankAccountCode: "",
+    bankAccountName: "",
+    bankBalance: "",
+    retainedCode: "",
+    retainedName: "",
+    ...defaultValues,
+    ...initialValues,
+  };
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useForm<CreatePeriodFormValues, any, CreatePeriodOutputValues>({
+    resolver: zodResolver(createPeriodSchema),
+    defaultValues: mergedDefaultValues,
+  });
+
+  const setupMode = watch("setupMode");
+  const month = watch("month");
+  const cashAccountId = watch("cashAccountId");
+  const bankAccountId = watch("bankAccountId");
+  const retainedId = watch("retainedId");
+
+  const submitting = isCreating || isLoading;
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -228,7 +224,8 @@ export function CreatePeriodForm({
         </Button>
       </div>
 
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Card Period */}
         <Card className="bg-[#151519] border-white/[0.07]">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-white">
@@ -239,11 +236,13 @@ export function CreatePeriodForm({
             <div className="space-y-1.5">
               <Label className="text-sm text-zinc-300">Month</Label>
               <Select
-                value={String(month)}
-                onValueChange={(v) => setMonth(Number(v))}
+                value={
+                  month !== undefined && month !== null ? String(month) : ""
+                }
+                onValueChange={(v) => setValue("month", Number(v))}
               >
                 <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
-                  <SelectValue />
+                  <SelectValue placeholder="Pilih Bulan" />
                 </SelectTrigger>
                 <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                   {MONTH_NAMES.map((n, i) => (
@@ -253,20 +252,30 @@ export function CreatePeriodForm({
                   ))}
                 </SelectContent>
               </Select>
+              {errors.month && (
+                <p className="text-xs text-red-500 font-medium">
+                  {errors.month.message}
+                </p>
+              )}
             </div>
+
             <div className="space-y-1.5">
               <Label className="text-sm text-zinc-300">Year</Label>
               <Input
                 type="number"
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                required
+                {...register("year", { valueAsNumber: true })}
                 className="bg-[#0e0e10] border-white/10 text-white text-sm"
               />
+              {errors.year && (
+                <p className="text-xs text-red-500 font-medium">
+                  {errors.year.message}
+                </p>
+              )}
             </div>
           </CardContent>
         </Card>
 
+        {/* Card Permanent Accounts Setup */}
         <Card className="bg-[#151519] border-white/[0.07]">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-semibold text-white">
@@ -279,15 +288,15 @@ export function CreatePeriodForm({
           <CardContent className="space-y-4">
             {isLoadingOpenInfo ? (
               <div className="text-center py-4 text-xs text-zinc-500">
-                <Loader2 className="animate-spin inline mr-1" size={14} />
-                Memuat informasi akun...
+                <Loader2 className="animate-spin inline mr-1" size={14} /> Memuat
+                informasi akun...
               </div>
             ) : (
               <>
                 <RadioGroup
                   value={setupMode}
                   onValueChange={(v: "LoadExisting" | "CreateNew") =>
-                    setSetupMode(v)
+                    setValue("setupMode", v)
                   }
                   className="flex gap-4"
                 >
@@ -322,16 +331,17 @@ export function CreatePeriodForm({
 
                 {setupMode === "LoadExisting" ? (
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Select Cash Account */}
                     <div className="space-y-1.5">
                       <Label className="text-sm text-zinc-300">
                         Cash Account
                       </Label>
                       <Select
-                        value={cashAccountId}
-                        onValueChange={setCashAccountId}
+                        value={cashAccountId || ""}
+                        onValueChange={(v) => setValue("cashAccountId", v)}
                       >
                         <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
-                          <SelectValue />
+                          <SelectValue placeholder="Pilih Akun Kas" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                           {openInfo?.availableCashAndBankAccounts?.map(
@@ -343,22 +353,28 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            ),
+                            )
                           )}
                         </SelectContent>
                       </Select>
+                      {errors.cashAccountId && (
+                        <p className="text-xs text-red-500 font-medium">
+                          {errors.cashAccountId.message}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Select Bank Account */}
                     <div className="space-y-1.5">
                       <Label className="text-sm text-zinc-300">
                         Bank Account
                       </Label>
                       <Select
-                        value={bankAccountId}
-                        onValueChange={setBankAccountId}
+                        value={bankAccountId || ""}
+                        onValueChange={(v) => setValue("bankAccountId", v)}
                       >
                         <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
-                          <SelectValue />
+                          <SelectValue placeholder="Pilih Akun Bank" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                           {openInfo?.availableCashAndBankAccounts?.map(
@@ -370,19 +386,28 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            ),
+                            )
                           )}
                         </SelectContent>
                       </Select>
+                      {errors.bankAccountId && (
+                        <p className="text-xs text-red-500 font-medium">
+                          {errors.bankAccountId.message}
+                        </p>
+                      )}
                     </div>
 
+                    {/* Select Retained Earnings Account */}
                     <div className="space-y-1.5">
                       <Label className="text-sm text-zinc-300">
                         Retained Earnings
                       </Label>
-                      <Select value={retainedId} onValueChange={setRetainedId}>
+                      <Select
+                        value={retainedId || ""}
+                        onValueChange={(v) => setValue("retainedId", v)}
+                      >
                         <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
-                          <SelectValue />
+                          <SelectValue placeholder="Pilih Retained Earnings" />
                         </SelectTrigger>
                         <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
                           {openInfo?.availableRetainedEarningsAccounts?.map(
@@ -394,34 +419,48 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            ),
+                            )
                           )}
                         </SelectContent>
                       </Select>
+                      {errors.retainedId && (
+                        <p className="text-xs text-red-500 font-medium">
+                          {errors.retainedId.message}
+                        </p>
+                      )}
                     </div>
                   </div>
                 ) : (
                   <div className="space-y-4">
+                    {/* Row Inputs - Cash */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
                           Cash Code
                         </Label>
                         <Input
-                          value={cashAccountCode}
-                          onChange={(e) => setCashAccountCode(e.target.value)}
+                          {...register("cashAccountCode")}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
+                        {errors.cashAccountCode && (
+                          <p className="text-xs text-red-500 font-medium">
+                            {errors.cashAccountCode.message}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
                           Cash Name
                         </Label>
                         <Input
-                          value={cashAccountName}
-                          onChange={(e) => setCashAccountName(e.target.value)}
+                          {...register("cashAccountName")}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
+                        {errors.cashAccountName && (
+                          <p className="text-xs text-red-500 font-medium">
+                            {errors.cashAccountName.message}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
@@ -429,39 +468,43 @@ export function CreatePeriodForm({
                         </Label>
                         <Input
                           type="number"
-                          value={cashBalance}
-                          onChange={(e) =>
-                            setCashBalance(
-                              e.target.value === ""
-                                ? ""
-                                : Number(e.target.value),
-                            )
-                          }
+                          {...register("cashBalance", {
+                            setValueAs: (v) => (v === "" ? "" : Number(v)),
+                          })}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                     </div>
 
+                    {/* Row Inputs - Bank */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
                           Bank Code
                         </Label>
                         <Input
-                          value={bankAccountCode}
-                          onChange={(e) => setBankAccountCode(e.target.value)}
+                          {...register("bankAccountCode")}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
+                        {errors.bankAccountCode && (
+                          <p className="text-xs text-red-500 font-medium">
+                            {errors.bankAccountCode.message}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
                           Bank Name
                         </Label>
                         <Input
-                          value={bankAccountName}
-                          onChange={(e) => setBankAccountName(e.target.value)}
+                          {...register("bankAccountName")}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
+                        {errors.bankAccountName && (
+                          <p className="text-xs text-red-500 font-medium">
+                            {errors.bankAccountName.message}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
@@ -469,39 +512,43 @@ export function CreatePeriodForm({
                         </Label>
                         <Input
                           type="number"
-                          value={bankBalance}
-                          onChange={(e) =>
-                            setBankBalance(
-                              e.target.value === ""
-                                ? ""
-                                : Number(e.target.value),
-                            )
-                          }
+                          {...register("bankBalance", {
+                            setValueAs: (v) => (v === "" ? "" : Number(v)),
+                          })}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
                       </div>
                     </div>
 
+                    {/* Row Inputs - Retained Earnings */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
                           Retained Code
                         </Label>
                         <Input
-                          value={retainedCode}
-                          onChange={(e) => setRetainedCode(e.target.value)}
+                          {...register("retainedCode")}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
+                        {errors.retainedCode && (
+                          <p className="text-xs text-red-500 font-medium">
+                            {errors.retainedCode.message}
+                          </p>
+                        )}
                       </div>
                       <div className="space-y-1.5">
                         <Label className="text-sm text-zinc-300">
                           Retained Name
                         </Label>
                         <Input
-                          value={retainedName}
-                          onChange={(e) => setRetainedName(e.target.value)}
+                          {...register("retainedName")}
                           className="bg-[#0e0e10] border-white/10 text-white text-sm"
                         />
+                        {errors.retainedName && (
+                          <p className="text-xs text-red-500 font-medium">
+                            {errors.retainedName.message}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -511,6 +558,7 @@ export function CreatePeriodForm({
           </CardContent>
         </Card>
 
+        {/* Action Buttons */}
         <div className="flex justify-end gap-2">
           <Button
             type="button"
@@ -522,10 +570,10 @@ export function CreatePeriodForm({
           </Button>
           <Button
             type="submit"
-            disabled={isCreating}
+            disabled={submitting}
             className="bg-white text-black text-sm font-medium hover:bg-zinc-200"
           >
-            {isCreating ? "Creating..." : "Submit Period"}
+            {submitting ? "Creating..." : "Submit Period"}
           </Button>
         </div>
       </form>
@@ -534,7 +582,7 @@ export function CreatePeriodForm({
 }
 
 /* -------------------------------------------------------------------------- */
-/*                             GET PERIOD COLUMNS                             */
+/*                            GET PERIOD COLUMNS                              */
 /* -------------------------------------------------------------------------- */
 
 export interface GetPeriodColumnsProps {
@@ -568,7 +616,7 @@ export const getPeriodColumns = ({
             <span
               className={cn(
                 "text-sm font-bold",
-                isSelected ? "text-white" : "text-zinc-200",
+                isSelected ? "text-white" : "text-zinc-200"
               )}
             >
               {p.periodName}
@@ -662,7 +710,7 @@ export const getPeriodColumns = ({
               "h-7 text-[11px] gap-1.5 font-bold tracking-wide border transition-all",
               isSelected
                 ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
-                : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white",
+                : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white"
             )}
             onClick={() => onSelectPeriod(p)}
             disabled={isSelectingThis}
