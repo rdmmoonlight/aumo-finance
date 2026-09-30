@@ -4,15 +4,15 @@ import { z } from "zod";
  * Helper function untuk parsing format angka/ribuan.
  * Mendukung pemisah desimal (koma/titik) dan nilai string kosong.
  */
-export function parseFormattedNumber(val: string | number | undefined | null): number {
+export function parseFormattedNumber(
+  val: string | number | undefined | null,
+): number {
   if (val === undefined || val === null || val === "") return 0;
   if (typeof val === "number") return isNaN(val) ? 0 : val;
 
   // Bersihkan format ribuan (titik/koma) dan ganti desimal ke format standar JS (.)
   // Mengakomodasi format IDR (misal: "1.500,50" -> "1500.50")
-  const clean = val
-    .replace(/\./g, "")
-    .replace(",", ".");
+  const clean = val.replace(/\./g, "").replace(",", ".");
 
   const parsed = parseFloat(clean);
   return isNaN(parsed) ? 0 : parsed;
@@ -35,7 +35,8 @@ export const journalLineSchema = z
     if (debitNum > 0 && creditNum > 0) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Pilih salah satu antara Debit atau Credit (tidak boleh keduanya)",
+        message:
+          "Pilih salah satu antara Debit atau Credit (tidak boleh keduanya)",
         path: ["debit"],
       });
     }
@@ -63,7 +64,7 @@ export const journalEntrySchema = z
       const hasAccount = Boolean(l.accountId && l.accountId > 0);
       const debitNum = parseFormattedNumber(l.debit);
       const creditNum = parseFormattedNumber(l.credit);
-      
+
       return hasAccount && (debitNum > 0 || creditNum > 0);
     });
 
@@ -71,7 +72,8 @@ export const journalEntrySchema = z
     if (effectiveLines.length < 2) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "Jurnal minimal harus terdiri dari 2 baris transaksi yang valid",
+        message:
+          "Jurnal minimal harus terdiri dari 2 baris transaksi yang valid",
         path: ["lines"],
       });
       return; // Stop dulu jika baris tidak cukup
@@ -80,11 +82,11 @@ export const journalEntrySchema = z
     // C. Validasi Keseimbangan Debit vs Credit
     const totalDebit = effectiveLines.reduce(
       (sum, l) => sum + parseFormattedNumber(l.debit),
-      0
+      0,
     );
     const totalCredit = effectiveLines.reduce(
       (sum, l) => sum + parseFormattedNumber(l.credit),
-      0
+      0,
     );
 
     // Gunakan Math.abs toleransi desimal JS (misal 0.0001) untuk mencegah bug floating point

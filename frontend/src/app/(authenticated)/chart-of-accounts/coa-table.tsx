@@ -139,7 +139,7 @@ export function AddAccountDialog({
       reset();
     } catch (err: any) {
       setApiError(
-        err?.data?.message || err?.message || "Failed to create account"
+        err?.data?.message || err?.message || "Failed to create account",
       );
     }
   };
@@ -314,7 +314,7 @@ export function EditAccountDialog({
       onOpenChange(false);
     } catch (err: any) {
       setApiError(
-        err?.data?.message || err?.message || "Failed to update account"
+        err?.data?.message || err?.message || "Failed to update account",
       );
     }
   };
@@ -496,7 +496,7 @@ export function ChartOfAccountsTable() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
   const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
-    null
+    null,
   );
 
   // Client-side fallback filter
@@ -587,7 +587,7 @@ export function ChartOfAccountsTable() {
             <span
               className={cn(
                 "font-medium font-mono text-sm",
-                balance >= 0 ? "text-emerald-500" : "text-red-500"
+                balance >= 0 ? "text-emerald-500" : "text-red-500",
               )}
             >
               {balance.toLocaleString("id-ID")}
@@ -611,7 +611,7 @@ export function ChartOfAccountsTable() {
               className={cn(
                 "text-xs",
                 isActive &&
-                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20"
+                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
               )}
             >
               {isActive ? "Active" : "Inactive"}
@@ -798,8 +798,7 @@ export function ChartOfAccountsTable() {
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => {
                     const meta = header.column.columnDef.meta as
-                      | { headerClassName?: string }
-                      | undefined;
+                      { headerClassName?: string } | undefined;
                     return (
                       <TableHead
                         key={header.id}
@@ -809,7 +808,7 @@ export function ChartOfAccountsTable() {
                           ? null
                           : flexRender(
                               header.column.columnDef.header,
-                              header.getContext()
+                              header.getContext(),
                             )}
                       </TableHead>
                     );
@@ -834,13 +833,12 @@ export function ChartOfAccountsTable() {
                     <TableRow
                       key={row.id}
                       className={cn(
-                        highlightId === String(acc.id) && "bg-primary/10"
+                        highlightId === String(acc.id) && "bg-primary/10",
                       )}
                     >
                       {row.getVisibleCells().map((cell) => {
                         const meta = cell.column.columnDef.meta as
-                          | { cellClassName?: string }
-                          | undefined;
+                          { cellClassName?: string } | undefined;
                         return (
                           <TableCell
                             key={cell.id}
@@ -848,7 +846,7 @@ export function ChartOfAccountsTable() {
                           >
                             {flexRender(
                               cell.column.columnDef.cell,
-                              cell.getContext()
+                              cell.getContext(),
                             )}
                           </TableCell>
                         );
