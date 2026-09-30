@@ -8,10 +8,12 @@ const app = new Hono();
 app.route('/api/v1/periods', periodController);
 
 app.get('/', (c) => {
-  return c.text('Aumo Hono Backend Service is Running!');
+  return c.text('Aumo Hono Backend Service is Running on Render!');
 });
 
-const port = 3000;
+// Ambil port dinamis dari Render (Default fallback ke 3000 jika dijalankan lokal)
+const port = Number(process.env.PORT) || 3000;
+
 console.log(`Server is running on port ${port}`);
 
 serve({
