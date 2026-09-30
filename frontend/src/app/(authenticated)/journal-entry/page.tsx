@@ -156,13 +156,13 @@ function JournalEntryContent() {
   const { data: rawNextTxNumber, isFetching: isTxLoading } =
     useGetApiV1JournalEntryNextTransactionNumberQuery(
       { journalType, entryDate },
-      { skip: isEdit }
+      { skip: isEdit },
     );
 
   const { data: editDataResponse, isLoading: isEditLoading } =
     useGetApiV1JournalEntryByIdQuery(
       { id: entryId },
-      { skip: !isEdit || isNaN(entryId) }
+      { skip: !isEdit || isNaN(entryId) },
     );
 
   const [createJournalEntry, { isLoading: isCreating }] =
@@ -179,7 +179,8 @@ function JournalEntryContent() {
       const jData = editData.entry || editData.data || editData;
       if (jData && typeof jData === "object") {
         if (jData.journalType) setValue("journalType", jData.journalType);
-        if (jData.entryDate) setValue("entryDate", jData.entryDate.split("T")[0]);
+        if (jData.entryDate)
+          setValue("entryDate", jData.entryDate.split("T")[0]);
 
         if (Array.isArray(jData.lines) && jData.lines.length > 0) {
           setValue(
@@ -190,7 +191,7 @@ function JournalEntryContent() {
               lineDescription: l.lineDescription || "",
               debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
               credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-            }))
+            })),
           );
         }
       }
@@ -217,21 +218,29 @@ function JournalEntryContent() {
   }, [isEdit, editData, rawNextTxNumber]);
 
   const isLocked = Boolean(
-    isEdit && (editData?.isLocked || editData?.entry?.isLocked)
+    isEdit && (editData?.isLocked || editData?.entry?.isLocked),
   );
 
   // Kalkulasi Total Debit & Credit
   const totalDebit = useMemo(
-    () => (watchedLines || []).reduce((s, l) => s + parseFormattedNumber(l?.debit || ""), 0),
-    [watchedLines]
+    () =>
+      (watchedLines || []).reduce(
+        (s, l) => s + parseFormattedNumber(l?.debit || ""),
+        0,
+      ),
+    [watchedLines],
   );
   const totalCredit = useMemo(
-    () => (watchedLines || []).reduce((s, l) => s + parseFormattedNumber(l?.credit || ""), 0),
-    [watchedLines]
+    () =>
+      (watchedLines || []).reduce(
+        (s, l) => s + parseFormattedNumber(l?.credit || ""),
+        0,
+      ),
+    [watchedLines],
   );
   const isBalanced = useMemo(
     () => totalDebit > 0 && totalDebit === totalCredit,
-    [totalDebit, totalCredit]
+    [totalDebit, totalCredit],
   );
 
   const addLine = () => {
@@ -256,7 +265,7 @@ function JournalEntryContent() {
   const handleAmountChange = (
     index: number,
     field: "debit" | "credit",
-    value: string
+    value: string,
   ) => {
     const formatted = formatNumberWithDots(value);
     setValue(`lines.${index}.${field}`, formatted, { shouldValidate: true });
@@ -279,7 +288,7 @@ function JournalEntryContent() {
         ),
         cell: ({ row }) => {
           const ref = availableAccounts.find(
-            (a) => a.id === row.original.accountId
+            (a) => a.id === row.original.accountId,
           )?.referenceNumber;
           return (
             <Input
@@ -404,7 +413,7 @@ function JournalEntryContent() {
         ),
       }),
     ],
-    [availableAccounts, watchedLines, register, setValue]
+    [availableAccounts, watchedLines, register, setValue],
   );
 
   // TanStack Table Instance
@@ -420,8 +429,20 @@ function JournalEntryContent() {
       journalType: "General",
       entryDate: new Date().toISOString().split("T")[0],
       lines: [
-        { id: `${Date.now()}-1`, accountId: 0, lineDescription: "", debit: "", credit: "" },
-        { id: `${Date.now()}-2`, accountId: 0, lineDescription: "", debit: "", credit: "" },
+        {
+          id: `${Date.now()}-1`,
+          accountId: 0,
+          lineDescription: "",
+          debit: "",
+          credit: "",
+        },
+        {
+          id: `${Date.now()}-2`,
+          accountId: 0,
+          lineDescription: "",
+          debit: "",
+          credit: "",
+        },
       ],
     });
     setApiError(null);
@@ -429,7 +450,9 @@ function JournalEntryContent() {
   };
 
   // Submit Handler dengan tipe ter-infer dari Zod
-  const onSubmit: SubmitHandler<z.output<typeof journalEntrySchema>> = async (data) => {
+  const onSubmit: SubmitHandler<z.output<typeof journalEntrySchema>> = async (
+    data,
+  ) => {
     setApiError(null);
     setSuccessMessage(null);
 
@@ -437,7 +460,7 @@ function JournalEntryContent() {
       (l) =>
         Number(l.accountId) > 0 &&
         (parseFormattedNumber(l.debit || "") > 0 ||
-          parseFormattedNumber(l.credit || "") > 0)
+          parseFormattedNumber(l.credit || "") > 0),
     );
 
     try {
@@ -457,7 +480,9 @@ function JournalEntryContent() {
           },
         };
 
-        const res: any = await updateJournalEntry(updatePayload as any).unwrap();
+        const res: any = await updateJournalEntry(
+          updatePayload as any,
+        ).unwrap();
         const txNum = res?.transactionNumber || displayedTxNumber;
         setSuccessMessage(`Updated ${txNum}`);
         setTimeout(() => router.push("/reports/general-journal"), 1200);
@@ -475,7 +500,9 @@ function JournalEntryContent() {
           },
         };
 
-        const res: any = await createJournalEntry(createPayload as any).unwrap();
+        const res: any = await createJournalEntry(
+          createPayload as any,
+        ).unwrap();
         const txNum =
           res?.transactionNumber ||
           res?.data?.transactionNumber ||
@@ -485,7 +512,7 @@ function JournalEntryContent() {
       }
     } catch (err: any) {
       setApiError(
-        err?.data?.message || err?.message || "Failed to post journal entry"
+        err?.data?.message || err?.message || "Failed to post journal entry",
       );
     }
   };
@@ -667,7 +694,7 @@ function JournalEntryContent() {
                               ? null
                               : flexRender(
                                   header.column.columnDef.header,
-                                  header.getContext()
+                                  header.getContext(),
                                 )}
                           </TableHead>
                         );
@@ -682,7 +709,7 @@ function JournalEntryContent() {
                         <TableCell key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </TableCell>
                       ))}

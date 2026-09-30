@@ -1,5 +1,9 @@
 import { z } from "zod";
-import { ACCOUNT_TYPES, ACCOUNT_RANGES, ChartOfAccount } from "@/app/(authenticated)/chart-of-accounts/coa-types";
+import {
+  ACCOUNT_TYPES,
+  ACCOUNT_RANGES,
+  ChartOfAccount,
+} from "@/app/(authenticated)/chart-of-accounts/coa-types";
 
 export const addAccountSchema = (accounts: ChartOfAccount[]) =>
   z
@@ -50,7 +54,9 @@ export const editAccountSchema = z.object({
 // Tipe untuk Input (apa yang dimasukkan ke form / nilai awal)
 export type AddAccountFormInput = z.input<ReturnType<typeof addAccountSchema>>;
 // Tipe untuk Output (apa yang dihasilkan setelah divalidasi oleh Zod)
-export type AddAccountFormValues = z.output<ReturnType<typeof addAccountSchema>>;
+export type AddAccountFormValues = z.output<
+  ReturnType<typeof addAccountSchema>
+>;
 
 export type EditAccountFormInput = z.input<typeof editAccountSchema>;
 export type EditAccountFormValues = z.output<typeof editAccountSchema>;

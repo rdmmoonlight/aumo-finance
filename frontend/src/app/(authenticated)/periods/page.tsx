@@ -233,11 +233,11 @@ export default function PeriodsPage() {
               : null,
           cashAccountCode:
             currentSetupMode === "CreateNew"
-              ? values?.cashAccountCode ?? cashAccountCode
+              ? (values?.cashAccountCode ?? cashAccountCode)
               : undefined,
           cashAccountName:
             currentSetupMode === "CreateNew"
-              ? values?.cashAccountName ?? cashAccountName
+              ? (values?.cashAccountName ?? cashAccountName)
               : undefined,
           cashBalance:
             currentSetupMode === "CreateNew"
@@ -245,11 +245,11 @@ export default function PeriodsPage() {
               : undefined,
           bankAccountCode:
             currentSetupMode === "CreateNew"
-              ? values?.bankAccountCode ?? bankAccountCode
+              ? (values?.bankAccountCode ?? bankAccountCode)
               : undefined,
           bankAccountName:
             currentSetupMode === "CreateNew"
-              ? values?.bankAccountName ?? bankAccountName
+              ? (values?.bankAccountName ?? bankAccountName)
               : undefined,
           bankBalance:
             currentSetupMode === "CreateNew"
@@ -257,11 +257,11 @@ export default function PeriodsPage() {
               : undefined,
           retainedEarningsAccountCode:
             currentSetupMode === "CreateNew"
-              ? values?.retainedCode ?? retainedCode
+              ? (values?.retainedCode ?? retainedCode)
               : undefined,
           retainedEarningsAccountName:
             currentSetupMode === "CreateNew"
-              ? values?.retainedName ?? retainedName
+              ? (values?.retainedName ?? retainedName)
               : undefined,
         },
       }).unwrap();

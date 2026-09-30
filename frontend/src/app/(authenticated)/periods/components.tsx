@@ -288,8 +288,8 @@ export function CreatePeriodForm({
           <CardContent className="space-y-4">
             {isLoadingOpenInfo ? (
               <div className="text-center py-4 text-xs text-zinc-500">
-                <Loader2 className="animate-spin inline mr-1" size={14} /> Memuat
-                informasi akun...
+                <Loader2 className="animate-spin inline mr-1" size={14} />{" "}
+                Memuat informasi akun...
               </div>
             ) : (
               <>
@@ -353,7 +353,7 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -386,7 +386,7 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -419,7 +419,7 @@ export function CreatePeriodForm({
                                 {a.displayLabel ||
                                   `${a.referenceNumber} - ${a.accountName}`}
                               </SelectItem>
-                            )
+                            ),
                           )}
                         </SelectContent>
                       </Select>
@@ -616,7 +616,7 @@ export const getPeriodColumns = ({
             <span
               className={cn(
                 "text-sm font-bold",
-                isSelected ? "text-white" : "text-zinc-200"
+                isSelected ? "text-white" : "text-zinc-200",
               )}
             >
               {p.periodName}
@@ -710,7 +710,7 @@ export const getPeriodColumns = ({
               "h-7 text-[11px] gap-1.5 font-bold tracking-wide border transition-all",
               isSelected
                 ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
-                : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white"
+                : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white",
             )}
             onClick={() => onSelectPeriod(p)}
             disabled={isSelectingThis}
