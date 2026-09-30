@@ -23,9 +23,11 @@ function LoginFormContent() {
   const [showPass, setShowPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
 
-  const { data: profile, isLoading: isProfileLoading } = useGetApiV1AuthMeQuery();
+  const { data: profile, isLoading: isProfileLoading } =
+    useGetApiV1AuthMeQuery();
 
-  const [loginMutation, { isLoading: isLoggingIn }] = usePostApiV1AuthLoginMutation();
+  const [loginMutation, { isLoading: isLoggingIn }] =
+    usePostApiV1AuthLoginMutation();
 
   const {
     register,
@@ -126,7 +128,9 @@ function LoginFormContent() {
             className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white"
           />
           {errors.email && (
-            <p className="text-xs text-red-600 font-medium">{errors.email.message}</p>
+            <p className="text-xs text-red-600 font-medium">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
@@ -155,7 +159,9 @@ function LoginFormContent() {
             className="h-11 rounded-xl bg-zinc-50 border-zinc-300 text-black text-sm placeholder:text-zinc-400 focus-visible:ring-black selection:bg-black selection:text-white font-sans"
           />
           {errors.password && (
-            <p className="text-xs text-red-600 font-medium">{errors.password.message}</p>
+            <p className="text-xs text-red-600 font-medium">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
