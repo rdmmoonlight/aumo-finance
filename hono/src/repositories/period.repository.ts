@@ -1,18 +1,40 @@
+import { db } from '../db/index.js';
+import { periodsTable } from '../db/schema.js';
+import { eq, and } from 'drizzle-orm';
 import { CreatePeriodDTO } from '../dtos/period.dto.js';
 
 export class PeriodRepository {
-  async findExists(userId: string, year: number, month: number): Promise<boolean> {
-    // Logic query DB (Drizzle/Prisma/PostgreSQL) di sini
-    return false;
+  async findByUserId(userId: string) {
+    return await db
+      .select()
+      .from(periodsTable)
+      .where(eq(periodsTable.userId, userId))
+      .orderBy(periodsTable.startDate);
   }
 
-  async createPeriod(userId: string, dto: CreatePeriodDTO) {
-    // Logic insert DB di sini
-    return {
-      id: 1,
-      userId,
-      periodName: `Period ${dto.month}/${dto.year}`,
-      isClosed: false,
-    };
+  async findExists(userId: string, startDate: Date): Promise<boolean> {
+    const existing = await db
+      .select()
+      .from(periodsTable)
+      .where(and(eq(periodsTable.userId, userId), eq(periodsTable.startDate, startDate)))
+      .limit(1);
+
+    return existing.length > 0;
   }
-      }
+
+  async createPeriod(userId: string, periodName: string, startDate: Date, endDate: Date) {
+    const [inserted] = await db
+      .insert(periodsTable)
+      .values({
+        userId,
+        periodName,
+        startDate,
+        endDate,
+        isClosed: false,
+        isSelected: false,
+      })
+      .returning();
+
+    return inserted;
+  }
+}
