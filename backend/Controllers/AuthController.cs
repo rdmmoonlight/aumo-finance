@@ -311,7 +311,7 @@ public class AuthController : ControllerBase
         }
 
         var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
-        
+
         if (!result.Succeeded)
         {
             var email = info.Principal.FindFirstValue(ClaimTypes.Email);

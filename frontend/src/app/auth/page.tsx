@@ -252,7 +252,8 @@ function AuthFormContent() {
           </GoogleOAuthProvider>
         ) : (
           <div className="text-center p-2 text-xs text-amber-600 bg-amber-50 rounded-lg border border-amber-200">
-            NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment Variable.
+            NEXT_PUBLIC_GOOGLE_CLIENT_ID belum dikonfigurasi di Environment
+            Variable.
           </div>
         )}
 
