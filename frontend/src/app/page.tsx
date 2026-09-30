@@ -106,9 +106,7 @@ export default function LandingPage() {
             className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50 transition-colors"
           >
             <Lock className="w-4 h-4" />
-            <span>
-              {checkingAuth ? "Checking..." : "Sign In"}
-            </span>
+            <span>{checkingAuth ? "Checking..." : "Sign In"}</span>
             <ArrowRight className="w-4 h-4" />
           </Button>
 
