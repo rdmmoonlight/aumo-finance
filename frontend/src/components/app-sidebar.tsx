@@ -116,7 +116,7 @@ export function AppSidebar() {
       className="border-r h-screen sticky top-0 flex flex-col justify-between"
       style={
         {
-          "--sidebar-width": "225px",
+          "--sidebar-width": "250px",
           "--sidebar-width-icon": "4rem",
         } as React.CSSProperties
       }
