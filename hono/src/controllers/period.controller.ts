@@ -9,9 +9,28 @@ export const periodController = new Hono();
 const repo = new PeriodRepository();
 const service = new PeriodService(repo);
 
+// GET: /api/v1/periods
+periodController.get('/', async (c) => {
+  const userId = c.req.header('x-user-id');
+  if (!userId) {
+    return c.json({ success: false, message: 'User ID is required in header (x-user-id)' }, 401);
+  }
+
+  try {
+    const periods = await service.getPeriods(userId);
+    return c.json({ success: true, periods });
+  } catch (err: any) {
+    return c.json({ success: false, message: err.message }, 500);
+  }
+});
+
+// POST: /api/v1/periods
 periodController.post('/', zValidator('json', CreatePeriodSchema), async (c) => {
-  // Simulasi Ambil userId dari JWT / Auth Context
-  const userId = c.req.header('x-user-id') || 'guest-user';
+  const userId = c.req.header('x-user-id');
+  if (!userId) {
+    return c.json({ success: false, message: 'User ID is required in header (x-user-id)' }, 401);
+  }
+
   const dto = c.req.valid('json');
 
   try {
@@ -21,3 +40,4 @@ periodController.post('/', zValidator('json', CreatePeriodSchema), async (c) => 
     return c.json({ success: false, message: err.message }, 400);
   }
 });
+  
