@@ -1,7 +1,7 @@
-import { db } from '../db/index.js';
-import { periods } from '../db/schema.js';
+import { db } from '@/db/index.js';
+import { periods } from '@/db/schema.js';
 import { eq, and } from 'drizzle-orm';
-import { CreatePeriodDTO } from '../dtos/period.dto.js';
+import { CreatePeriodDTO } from '@/dtos/period.dto.js';
 
 export class PeriodRepository {
   async findByUserId(userId: string) {
