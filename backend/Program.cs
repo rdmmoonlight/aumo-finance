@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using AumoBackend.Core;
 using AumoBackend.DTOs;
 using AumoBackend.Services;
+using AumoBackend.Models;
+using AumoBackend.ViewModels;
 using FluentValidation;
 using Hangfire;
 using Hangfire.Dashboard;
