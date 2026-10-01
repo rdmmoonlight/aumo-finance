@@ -493,3 +493,5 @@ export const aspNetUserTokens = pgTable("AspNetUserTokens", {
 		}).onDelete("cascade"), 
 	primaryKey({ columns: [table.userId, table.name, table.loginProvider], name: "PK_AspNetUserTokens"}), 
 ]);
+
+export { periods as periodsTable };
