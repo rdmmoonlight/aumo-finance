@@ -453,3 +453,16 @@ public class ClosingJournalEntryGroupApiResponse
     public decimal TotalDebit => Lines.Sum(l => l.Debit);
     public decimal TotalCredit => Lines.Sum(l => l.Credit);
 }
+
+public class TrialBalanceRow
+{
+    public int AccountId { get; set; }
+    public string ReferenceNumber { get; set; } = string.Empty;
+    public string AccountName { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public string? Role { get; set; }
+    public bool NormalBalanceIsDebit { get; set; }
+    public decimal NetBalance { get; set; }
+    public decimal Debit { get; set; }
+    public decimal Credit { get; set; }
+}
