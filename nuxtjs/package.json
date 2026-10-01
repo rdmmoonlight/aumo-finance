@@ -5,16 +5,14 @@
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
-    "postinstall": "prisma generate && nuxt prepare",
+    "postinstall": "nuxt prepare",
     "preview": "nuxt preview",
     "start": "node --import=data:text/javascript, .output/server/index.mjs",
     "lint": "eslint .",
     "typecheck": "nuxt typecheck",
-    "contract:emit": "prisma contract emit"
   },
   "dependencies": {
     "@internationalized/date": "^3.12.4",
-    "@prisma/nuxt": "^0.3.0",
     "@tanstack/table-core": "^8.21.3",
     "@unovis/ts": "^1.7.0",
     "@unovis/vue": "^1.7.0",
