@@ -2,14 +2,18 @@
   "name": "aumo-nuxtjs",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "^20.0.0 || ^22.0.0",
+    "pnpm": ">=9.0.0"
+  },
   "scripts": {
     "build": "nuxt build",
     "dev": "nuxt dev",
     "postinstall": "nuxt prepare",
     "preview": "nuxt preview",
-    "start": "node --import=data:text/javascript, .output/server/index.mjs",
+    "start": "node .output/server/index.mjs",
     "lint": "eslint .",
-    "typecheck": "nuxt typecheck",
+    "typecheck": "nuxt typecheck"
   },
   "dependencies": {
     "@internationalized/date": "^3.12.4",
