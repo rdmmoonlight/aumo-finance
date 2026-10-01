@@ -135,7 +135,7 @@ namespace AumoBackend
                     .SetApplicationName("AumoFinanceApp");
 
                 // ===================================== 
-                // 4. ASP.NET CORE IDENTITY SETUP 
+                // 4. ASP.NET CORE IDENTITY SETUP (OPSI A: IdentityRole<Guid>)
                 // ===================================== 
                 builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
                 {
