@@ -1,0 +1,19 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using System;
+using System.Threading.Tasks;
+using AumoBackend.DTOs;
+
+using AumoBackend.Models;
+
+namespace AumoBackend.Services.ChartOfAccounts;
+
+public interface IChartOfAccountsService
+{
+    Task<ChartOfAccountsListResponseDto> GetAccountsAsync(Guid userId, string? search, string? category);
+    Task<ServiceResultDto> CreateAccountAsync(Guid userId, CreateAccountRequestDto request);
+    Task<ServiceResultDto> UpdateAccountAsync(Guid userId, int accountId, UpdateAccountRequestDto request);
+    Task<ServiceResultDto> DeleteAccountAsync(Guid userId, int accountId);
+}

@@ -1,22 +1,19 @@
-import { serve } from '@hono/node-server';
-import { Hono } from 'hono';
-import { periodController } from './controllers/period.controller.js';
+import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 
-const app = new Hono();
+const app = new Hono()
 
-// Mount Routes
-app.route('/api/v1/periods', periodController);
+app.use('*', cors({
+  origin: ['http://localhost:3000', 'https://domain-nuxt-anda.vercel.app'], // Izinkan domain Nuxt
+  allowHeaders: ['Content-Type', 'Authorization'],
+  allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
+  exposeHeaders: ['Content-Length'],
+  maxAge: 600,
+  credentials: true,
+}))
 
-app.get('/', (c) => {
-  return c.text('Aumo Hono Backend Service is Running on Render!');
-});
+app.get('/periods', async (c) => {
+  return c.json([])
+})
 
-// Ambil port dinamis dari Render (Default fallback ke 3000 jika dijalankan lokal)
-const port = Number(process.env.PORT) || 3000;
-
-console.log(`Server is running on port ${port}`);
-
-serve({
-  fetch: app.fetch,
-  port,
-});
+export default app

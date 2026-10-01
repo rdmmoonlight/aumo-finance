@@ -1,3 +1,11 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.JournalEntries;
+using AumoBackend.Models;
+using AumoBackend.Services.Periods;
+using AumoBackend.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +22,7 @@ namespace AumoBackend.Controllers;
 [ApiController]
 [Route("/api/v1/periods")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class PeriodsController : ControllerBase
 {
     private readonly AppDbContext _db;

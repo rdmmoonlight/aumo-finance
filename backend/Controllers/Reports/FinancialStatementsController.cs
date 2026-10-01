@@ -1,3 +1,10 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
+using AumoBackend.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +20,7 @@ namespace AumoBackend.Controllers.Reports;
 [ApiController]
 [Route("/api/v1/reports")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class FinancialStatementsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -50,7 +58,7 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting: true);
+        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, true);
         var statementData = _reportService.BuildIncomeStatement(rows, period);
 
         return Ok(new
@@ -149,7 +157,7 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting: true);
+        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, true);
         var incomeStatement = _reportService.BuildIncomeStatement(rows, period);
 
         var cashRows = rows.Where(r => r.Role == "CashAndEquivalents").ToList();
@@ -174,7 +182,7 @@ public class FinancialStatementsController : ControllerBase
 
             int.TryParse(r.ReferenceNumber, out int refNum);
 
-            if (AccountClassification.IsTemporary(r.Type ?? string.Empty) || refNum >= 400)
+            if (AccountClassificationHelper.IsTemporary(r.Type ?? string.Empty) || refNum >= 400)
                 continue;
 
             if (r.Type == "Assets" || (refNum >= 100 && refNum <= 199))
