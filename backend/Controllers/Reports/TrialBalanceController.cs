@@ -17,10 +17,12 @@ namespace AumoBackend.Controllers.Reports;
 public class TrialBalanceController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly ITrialBalanceService _trialBalanceService;
 
-    public TrialBalanceController(AppDbContext db)
+    public TrialBalanceController(AppDbContext db, ITrialBalanceService trialBalanceService)
     {
         _db = db;
+        _trialBalanceService = trialBalanceService;
     }
 
     [HttpGet]
@@ -85,16 +87,14 @@ public class TrialBalanceController : ControllerBase
         }
 
         bool includeAdjusting = normalizedType == "adjusted" || normalizedType == "post-closing";
-        var rows = await BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting, normalizedType);
+        var rows = await _trialBalanceService.BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting, normalizedType);
 
         if (normalizedType == "post-closing")
         {
-            var reEndingBalance = await ComputeRetainedEarningsEndingAsync(_db, userId, period);
+            var reEndingBalance = await _trialBalanceService.ComputeRetainedEarningsEndingAsync(_db, userId, period);
 
             var reRowIndex = rows.FindIndex(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
 
-            // Retained Earnings adalah akun Ekuitas (Normal Balance = Credit)
-            // Saldo positif berarti Credit, saldo negatif berarti Debit
             decimal reDebit = reEndingBalance < 0 ? Math.Abs(reEndingBalance) : 0m;
             decimal reCredit = reEndingBalance >= 0 ? reEndingBalance : 0m;
 
@@ -121,7 +121,7 @@ public class TrialBalanceController : ControllerBase
 
                 if (reAccount != null)
                 {
-                    bool isDebit = IsAccountNormalBalanceDebit(reAccount);
+                    bool isDebit = AccountClassification.NormalBalanceIsDebit(reAccount.Type);
 
                     rows.Add(new TrialBalanceRow
                     {
@@ -156,133 +156,6 @@ public class TrialBalanceController : ControllerBase
             isBalanced = isBalanced,
             rows = rows
         });
-    }
-
-    public static async Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
-        AppDbContext db,
-        Guid userId,
-        Period period,
-        bool includeAdjusting = false,
-        string reportType = "unadjusted")
-    {
-        var accounts = await db.ChartOfAccounts
-            .Where(a => a.IsActive && a.UserId == userId)
-            .OrderBy(a => a.ReferenceNumber)
-            .ToListAsync();
-
-        var accountIds = accounts.Select(a => a.Id).ToList();
-
-        var startUtc = period.StartDate.Date;
-        var endUtc = period.EndDate.Date.AddDays(1).AddTicks(-1);
-
-        var linesQuery = db.JournalEntryLines
-            .Include(l => l.JournalEntry)
-            .Where(l => accountIds.Contains(l.AccountId)
-                     && l.JournalEntry!.UserId == userId
-                     && l.JournalEntry!.EntryDate >= startUtc
-                     && l.JournalEntry!.EntryDate <= endUtc);
-
-        bool includeAdjustingLines = includeAdjusting || reportType == "adjusted" || reportType == "post-closing";
-
-        var lines = includeAdjustingLines
-            ? await linesQuery.Where(l => l.JournalEntry!.JournalType == "General"
-                                       || l.JournalEntry!.JournalType == "Adjusting").ToListAsync()
-            : await linesQuery.Where(l => l.JournalEntry!.JournalType == "General").ToListAsync();
-
-        var rows = new List<TrialBalanceRow>();
-        foreach (var account in accounts)
-        {
-            bool isPermanent = IsAccountPermanent(account);
-
-            if (reportType == "post-closing" && !isPermanent)
-            {
-                continue;
-            }
-
-            var accountLines = lines.Where(l => l.AccountId == account.Id).ToList();
-            if (!accountLines.Any()) continue;
-
-            bool normalDebit = IsAccountNormalBalanceDebit(account);
-
-            decimal totalDebitLines = accountLines.Sum(l => l.Debit);
-            decimal totalCreditLines = accountLines.Sum(l => l.Credit);
-
-            // Hitung net balance sesuai saldo normal
-            decimal netBalance = normalDebit
-                ? (totalDebitLines - totalCreditLines)
-                : (totalCreditLines - totalDebitLines);
-
-            decimal debit = 0m;
-            decimal credit = 0m;
-
-            // Masukkan angka selisih ke kolom Debit/Credit murni berdasarkan mana yang lebih besar
-            // (Mencegah pergeseran kolom berlebihan pada kontra akun)
-            if (totalDebitLines >= totalCreditLines)
-            {
-                debit = totalDebitLines - totalCreditLines;
-            }
-            else
-            {
-                credit = totalCreditLines - totalDebitLines;
-            }
-
-            rows.Add(new TrialBalanceRow
-            {
-                AccountId = account.Id,
-                ReferenceNumber = account.ReferenceNumber.ToString(),
-                AccountName = account.AccountName,
-                Type = account.Type,
-                Role = account.Role,
-                NormalBalanceIsDebit = normalDebit,
-                NetBalance = netBalance,
-                Debit = debit,
-                Credit = credit
-            });
-        }
-
-        return rows;
-    }
-
-    private static async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
-    {
-        // Ambil data Adjusted Trial Balance lengkap (termasuk akun sementara)
-        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
-
-        // Pendapatan: Akun sementara dengan saldo normal Credit (NetBalance positif = Kredit > Debit)
-        decimal totalRevenue = rows
-            .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
-            .Sum(r => r.NetBalance);
-
-        // Beban: Akun sementara dengan saldo normal Debit (NetBalance positif = Debit > Kredit)
-        decimal totalExpense = rows
-            .Where(r => r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
-            .Sum(r => r.NetBalance);
-
-        decimal netIncome = totalRevenue - totalExpense;
-
-        // Ambil saldo awal Retained Earnings sebelum jurnal penutup
-        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
-        decimal initialRE = reRow?.NetBalance ?? 0m;
-
-        return initialRE + netIncome;
-    }
-
-    private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
-    {
-        if (string.IsNullOrEmpty(account.Type)) return false;
-        return AccountClassification.NormalBalanceIsDebit(account.Type);
-    }
-
-    private static bool IsAccountPermanent(ChartOfAccount account)
-    {
-        if (string.IsNullOrEmpty(account.Type)) return false;
-        return AccountClassification.IsPermanent(account.Type);
-    }
-
-    private static bool IsTemporaryType(string? typeStr)
-    {
-        if (string.IsNullOrEmpty(typeStr)) return false;
-        return AccountClassification.IsTemporary(typeStr);
     }
 
     private Guid GetCurrentUserId()
