@@ -7,7 +7,6 @@ using AumoBackend.DTOs;
 using AumoBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Controllers.Reports;
 
@@ -17,10 +16,17 @@ namespace AumoBackend.Controllers.Reports;
 public class WorksheetController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IWorksheetService _worksheetService;
+    private readonly ITrialBalanceService _trialBalanceService;
 
-    public WorksheetController(AppDbContext db)
+    public WorksheetController(
+        AppDbContext db,
+        IWorksheetService worksheetService,
+        ITrialBalanceService trialBalanceService)
     {
         _db = db;
+        _worksheetService = worksheetService;
+        _trialBalanceService = trialBalanceService;
     }
 
     // ==========================================
@@ -47,66 +53,7 @@ public class WorksheetController : ControllerBase
             });
         }
 
-        var unadjusted = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting: false);
-        var adjusted = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting: true);
-
-        var accounts = await _db.ChartOfAccounts
-            .Where(a => a.IsActive && a.UserId == userId)
-            .OrderBy(a => a.ReferenceNumber)
-            .ToListAsync();
-
-        var worksheetRows = new List<WorksheetRowApiResponse>();
-        var allAccountIds = unadjusted.Select(r => r.AccountId)
-            .Union(adjusted.Select(r => r.AccountId))
-            .ToList();
-
-        foreach (var accountId in allAccountIds)
-        {
-            var account = accounts.FirstOrDefault(a => a.Id == accountId);
-            if (account == null) continue;
-
-            var u = unadjusted.FirstOrDefault(r => r.AccountId == accountId);
-            var a = adjusted.FirstOrDefault(r => r.AccountId == accountId);
-            var normalDebit = AccountClassification.NormalBalanceIsDebit(account.Type);
-
-            var uDebit = u?.Debit ?? 0m;
-            var uCredit = u?.Credit ?? 0m;
-            var aDebit = a?.Debit ?? 0m;
-            var aCredit = a?.Credit ?? 0m;
-
-            var adjNet = (aDebit - aCredit) - (uDebit - uCredit);
-
-            var row = new WorksheetRowApiResponse
-            {
-                AccountId = accountId,
-                ReferenceNumber = account.ReferenceNumber,
-                AccountName = account.AccountName,
-                Type = account.Type,
-                NormalBalanceIsDebit = normalDebit,
-                UnadjustedDebit = uDebit,
-                UnadjustedCredit = uCredit,
-                AdjustmentDebit = adjNet > 0 ? adjNet : 0m,
-                AdjustmentCredit = adjNet < 0 ? -adjNet : 0m,
-                AdjustedDebit = aDebit,
-                AdjustedCredit = aCredit
-            };
-
-            var isTemporary = AccountClassification.IsTemporary(account.Type);
-            if (isTemporary)
-            {
-                row.IncomeStatementDebit = aDebit;
-                row.IncomeStatementCredit = aCredit;
-            }
-            else
-            {
-                row.FinancialPositionDebit = aDebit;
-                row.FinancialPositionCredit = aCredit;
-            }
-
-            worksheetRows.Add(row);
-        }
-
-        worksheetRows = worksheetRows.OrderBy(r => r.ReferenceNumber).ToList();
+        var worksheetRows = await _worksheetService.BuildWorksheetRowsAsync(_db, userId, period, _trialBalanceService);
 
         decimal totalUnadjustedDebit = worksheetRows.Sum(r => r.UnadjustedDebit);
         decimal totalUnadjustedCredit = worksheetRows.Sum(r => r.UnadjustedCredit);
@@ -169,4 +116,3 @@ public class WorksheetController : ControllerBase
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }
-
