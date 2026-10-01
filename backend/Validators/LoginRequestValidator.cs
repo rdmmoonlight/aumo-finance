@@ -1,6 +1,10 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.DTOs;
 using FluentValidation;
-using AumoBackend.Core;
-
 namespace AumoBackend.Validators
 {
     public class LoginRequestValidator : AbstractValidator<LoginRequest>

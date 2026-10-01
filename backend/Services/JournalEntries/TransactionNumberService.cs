@@ -1,0 +1,51 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.JournalEntries;
+using AumoBackend.Models;
+using AumoBackend.Services.Periods;
+using System;
+using System.Data;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using AumoBackend.Data;
+
+namespace AumoBackend.Services.JournalEntries;
+
+public class TransactionNumberService : ITransactionNumberService
+{
+    private readonly AppDbContext _db;
+    public TransactionNumberService(AppDbContext db) => _db = db;
+
+    public async Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate)
+    {
+        string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
+        string counterKey = $"{prefix}{entryDate:yyMM}";
+        var connection = _db.Database.GetDbConnection();
+        if (connection.State != ConnectionState.Open) await connection.OpenAsync();
+        using var command = connection.CreateCommand();
+        command.CommandText = @"
+                INSERT INTO ""TransactionCounters"" (""UserId"", ""CounterKey"", ""LastSequence"")
+                VALUES (@userId, @counterKey, 1)
+                ON CONFLICT (""UserId"", ""CounterKey"")
+                DO UPDATE SET ""LastSequence"" = ""TransactionCounters"".""LastSequence"" + 1
+                RETURNING ""LastSequence"";";
+        var userIdParam = command.CreateParameter(); userIdParam.ParameterName = "userId"; userIdParam.Value = userId; command.Parameters.Add(userIdParam);
+        var counterKeyParam = command.CreateParameter(); counterKeyParam.ParameterName = "counterKey"; counterKeyParam.Value = counterKey; command.Parameters.Add(counterKeyParam);
+        var rawResult = await command.ExecuteScalarAsync() ?? throw new InvalidOperationException($"Transaction counter upsert for {counterKey} returned no result.");
+        int nextSeq = Convert.ToInt32(rawResult);
+        if (nextSeq > 9999) throw new InvalidOperationException($"Transaction number sequence for {counterKey} has reached its 9999 capacity.");
+        return $"{counterKey}{nextSeq:D4}";
+    }
+
+    public async Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate)
+    {
+        string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
+        string counterKey = $"{prefix}{entryDate:yyMM}";
+        var current = await _db.TransactionCounters.Where(c => c.UserId == userId && c.CounterKey == counterKey).Select(c => (int?)c.LastSequence).FirstOrDefaultAsync();
+        var previewSeq = (current ?? 0) + 1;
+        return $"{counterKey}{previewSeq:D4}";
+    }
+}

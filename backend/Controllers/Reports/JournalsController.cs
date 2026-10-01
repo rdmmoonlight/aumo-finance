@@ -1,3 +1,10 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
+using AumoBackend.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +21,7 @@ namespace AumoBackend.Controllers.Reports;
 [ApiController]
 [Route("/api/v1/reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class JournalController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -220,7 +228,7 @@ public class JournalController : ControllerBase
         }
 
         var groups = await _journalService.BuildClosingJournalGroupsAsync(_db, userId, period, _reportService);
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, includeAdjusting: true);
+        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, true);
         var incomeStatement = _reportService.BuildIncomeStatement(rows, period);
         var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
 

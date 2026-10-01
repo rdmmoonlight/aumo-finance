@@ -1,3 +1,9 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.Models;
+using AumoBackend.Data;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
@@ -15,6 +21,7 @@ namespace AumoBackend.Controllers;
 [ApiController]
 [Route("/api/v1/[controller]")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class SummaryController : ControllerBase
 {
     private readonly AppDbContext _context;

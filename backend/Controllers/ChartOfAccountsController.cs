@@ -1,3 +1,9 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.Models;
+using AumoBackend.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +20,7 @@ namespace AumoBackend.Controllers;
 [ApiController]
 [Route("/api/v1/chart-of-accounts")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class ChartOfAccountsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -81,7 +88,7 @@ public class ChartOfAccountsController : ControllerBase
             {
                 if (accountBalances.TryGetValue(account.Id, out var balance))
                 {
-                    account.Balance = AccountClassification.NormalBalanceIsDebit(account.Type)
+                    account.Balance = AccountClassificationHelper.NormalBalanceIsDebit(account.Type)
                         ? balance.TotalDebit - balance.TotalCredit
                         : balance.TotalCredit - balance.TotalDebit;
                 }
@@ -126,7 +133,7 @@ public class ChartOfAccountsController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.Type))
             return BadRequest(new { success = false, message = "Account category type is required." });
 
-        if (!AccountClassification.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
+        if (!AccountClassificationHelper.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
         {
             return BadRequest(new { success = false, message = $"Invalid reference number {request.ReferenceNumber} for category {request.Type}." });
         }
@@ -188,7 +195,7 @@ public class ChartOfAccountsController : ControllerBase
         if (string.IsNullOrWhiteSpace(request.AccountName))
             return BadRequest(new { success = false, message = "Account name is required." });
 
-        if (!AccountClassification.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
+        if (!AccountClassificationHelper.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
         {
             return BadRequest(new { success = false, message = $"Invalid reference number {request.ReferenceNumber} for category {request.Type}." });
         }
@@ -271,4 +278,3 @@ public class ChartOfAccountsController : ControllerBase
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }
-

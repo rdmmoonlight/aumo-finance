@@ -1,3 +1,8 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable

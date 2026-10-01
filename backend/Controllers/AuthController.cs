@@ -1,3 +1,8 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.Models;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -6,7 +11,6 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
-using AumoBackend.Services;
 using FluentValidation;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
@@ -23,6 +27,7 @@ namespace AumoBackend.Controllers;
 [Route("/api/v1/auth")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 [EnableRateLimiting("auth-strict")]
+
 public class AuthController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
@@ -107,8 +112,8 @@ public class AuthController : ControllerBase
                 ip,
                 "ID",
                 false,
-                operatingSystem: osValue,
-                userAgent: safeUserAgent
+                osValue,
+                safeUserAgent
             );
 
             return StatusCode(StatusCodes.Status429TooManyRequests, new
@@ -129,8 +134,8 @@ public class AuthController : ControllerBase
                 ip,
                 "ID",
                 false,
-                operatingSystem: osValue,
-                userAgent: safeUserAgent
+                osValue,
+                safeUserAgent
             );
 
             return Unauthorized(new { success = false, message = "Invalid email/username or password." });
@@ -159,12 +164,12 @@ public class AuthController : ControllerBase
         await _guardianService.CreateSessionAsync(
             user.Id,
             deviceName: deviceCategory,
-            operatingSystem: osValue,
-            browser: isMobile ? "Mobile App" : "Web Browser",
-            ipAddress: ip,
-            country: "ID",
-            refreshTokenHash: isMobile ? "JWT_BEARER" : "COOKIE_SESSION",
-            userAgent: safeUserAgent
+            osValue,
+            isMobile ? "Mobile App" : "Web Browser",
+            ip,
+            "ID",
+            isMobile ? "JWT_BEARER" : "COOKIE_SESSION",
+            safeUserAgent
         );
 
         await _guardianService.CreateLoginActivityAsync(
@@ -175,8 +180,8 @@ public class AuthController : ControllerBase
             ip,
             "ID",
             true,
-            operatingSystem: osValue,
-            userAgent: safeUserAgent
+            osValue,
+            safeUserAgent
         );
 
         if (isMobile)

@@ -1,3 +1,9 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.Models;
+using AumoBackend.Data;
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -13,6 +19,7 @@ namespace AumoBackend.Controllers;
 [ApiController]
 [Route("/api/v1/dashboard")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class DashboardController : ControllerBase
 {
     private readonly AppDbContext _db;

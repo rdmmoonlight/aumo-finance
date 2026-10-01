@@ -1,9 +1,14 @@
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.Auth;
+using AumoBackend.ViewModels;
+using AumoBackend.Models;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
-using AumoBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -15,6 +20,7 @@ namespace AumoBackend.Controllers
     [ApiController]
     [Route("api/v1/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
     public class SettingsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
