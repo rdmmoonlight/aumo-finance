@@ -1,5 +1,5 @@
 import { db } from '../db/index.js';
-import { periodsTable } from '../db/schema.js';
+import { periods } from '../db/schema.js';
 import { eq, and } from 'drizzle-orm';
 import { CreatePeriodDTO } from '../dtos/period.dto.js';
 
@@ -7,16 +7,21 @@ export class PeriodRepository {
   async findByUserId(userId: string) {
     return await db
       .select()
-      .from(periodsTable)
-      .where(eq(periodsTable.userId, userId))
-      .orderBy(periodsTable.startDate);
+      .from(periods)
+      .where(eq(periods.userId, userId))
+      .orderBy(periods.startDate);
   }
 
   async findExists(userId: string, startDate: Date): Promise<boolean> {
     const existing = await db
       .select()
-      .from(periodsTable)
-      .where(and(eq(periodsTable.userId, userId), eq(periodsTable.startDate, startDate)))
+      .from(periods)
+      .where(
+        and(
+          eq(periods.userId, userId),
+          eq(periods.startDate, startDate.toISOString())
+        )
+      )
       .limit(1);
 
     return existing.length > 0;
@@ -24,12 +29,12 @@ export class PeriodRepository {
 
   async createPeriod(userId: string, periodName: string, startDate: Date, endDate: Date) {
     const [inserted] = await db
-      .insert(periodsTable)
+      .insert(periods)
       .values({
         userId,
         periodName,
-        startDate,
-        endDate,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         isClosed: false,
         isSelected: false,
       })
