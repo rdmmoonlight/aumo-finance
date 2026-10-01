@@ -1,7 +1,4 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
+using System;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -10,11 +7,11 @@ using AumoBackend.Models;
 
 namespace AumoBackend.Services.Identity
 {
-    public class AumoUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole>
+    public class AumoUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole<Guid>>
     {
         public AumoUserClaimsPrincipalFactory(
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager,
+            RoleManager<IdentityRole<Guid>> roleManager,
             IOptions<IdentityOptions> optionsAccessor)
             : base(userManager, roleManager, optionsAccessor)
         {
@@ -23,6 +20,10 @@ namespace AumoBackend.Services.Identity
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
         {
             var identity = await base.GenerateClaimsAsync(user);
+
+            // Tambahkan custom claims di sini jika diperlukan
+            // identity.AddClaim(new Claim("TenantId", user.TenantId.ToString()));
+
             return identity;
         }
     }
