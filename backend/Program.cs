@@ -471,8 +471,6 @@ namespace AumoBackend
                     });
                 }
 
-                app.UseStaticFiles();
-
                 // Serilog HTTP Request Logging 
                 app.UseSerilogRequestLogging();
 
