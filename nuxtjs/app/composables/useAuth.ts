@@ -44,8 +44,8 @@ export async function fetchAuthUser() {
   const api = useApi()
 
   try {
-    // Dipanggil ke Hono /api/auth/me
-    const response = await api<MeResponse>('/auth/me', {
+    // 👈 Diperbaiki: Ditambahkan prefix /api
+    const response = await api<MeResponse>('/api/auth/me', {
       method: 'GET'
     })
 
@@ -72,8 +72,8 @@ export async function login(payload: {
   const checked = useAuthChecked()
   const api = useApi()
 
-  // Kirim payload sesuai kontrak Hono
-  const response = await api<LoginResponse>('/auth/login', {
+  // 👈 Diperbaiki: Ditambahkan prefix /api
+  const response = await api<LoginResponse>('/api/auth/login', {
     method: 'POST',
     body: {
       username: payload.email, // 👈 Hono membaca 'username'
@@ -102,7 +102,8 @@ export async function login(payload: {
 export async function register(payload: RegisterPayload) {
   const api = useApi()
 
-  const response = await api<RegisterResponse>('/auth/register', {
+  // 👈 Diperbaiki: Ditambahkan prefix /api
+  const response = await api<RegisterResponse>('/api/auth/register', {
     method: 'POST',
     body: payload
   })
@@ -114,7 +115,8 @@ export async function logout() {
   const api = useApi()
 
   try {
-    await api('/auth/logout', { method: 'POST' })
+    // 👈 Diperbaiki: Ditambahkan prefix /api
+    await api('/api/auth/logout', { method: 'POST' })
   } catch {
     // Abaikan error jaringan saat logout
   } finally {
