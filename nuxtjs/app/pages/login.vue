@@ -25,18 +25,15 @@ const state = reactive<Schema>({
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
-
-  // Ambil data dengan fallback konsisten dari state jika event.data bernilai undefined
-  const emailInput = event.data?.email || state.email
-  const passwordInput = event.data?.password || state.password
-  const rememberMeInput = event.data?.rememberMe ?? state.rememberMe
-
   try {
-    const res = await login({
-      username: emailInput.trim(), // 👈 Dijamin tidak undefined dan dipangkas spasi
-      password: passwordInput,
-      rememberMe: rememberMeInput
-    })
+    // ⚠️ PASTIKAN MENGGUNAKAN event.data.email (Milik UForm Nuxt UI v3)
+    const payload = {
+      username: event.data.email, // Mapping field email ke username untuk Hono
+      password: event.data.password,
+      rememberMe: event.data.rememberMe
+    }
+
+    const res = await login(payload)
 
     if (res && (res.userId || res.message)) {
       toast.add({
@@ -52,7 +49,6 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       await navigateTo(redirect, { replace: true })
     }
   } catch (err: any) {
-    console.error('[Login Component Error]:', err)
     const message = err.data?.message || err.message || 'Invalid email/username or password.'
 
     toast.add({
