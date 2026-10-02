@@ -14,10 +14,17 @@ builder.Services.AddCascadingAuthenticationState();
 // Mock AuthenticationStateProvider jika otentikasi dikelola oleh Hono API
 builder.Services.AddScoped<AuthenticationStateProvider, AnonymousAuthStateProvider>();
 
+// Konfigurasi HttpClient yang rapi
 builder.Services.AddHttpClient();
-builder.Services.AddScoped(sp => new HttpClient 
-{ 
-    BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000/") 
+builder.Services.AddScoped(sp =>
+{
+    // Mengambil dari appsettings.json, jika tidak ada baru fallback ke URL Render / Localhost
+    var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://aumohono.onrender.com/";
+    
+    return new HttpClient
+    {
+        BaseAddress = new Uri(apiBaseUrl)
+    };
 });
 
 var app = builder.Build();
@@ -42,7 +49,7 @@ public class AnonymousAuthStateProvider : AuthenticationStateProvider
 {
     public override Task<AuthenticationState> GetAuthenticationStateAsync()
     {
-        // Secara default mengembalikan user dummy terautentikasi / anonim
+        // Secara default mengembalikan user terautentikasi
         var identity = new ClaimsIdentity(new[]
         {
             new Claim(ClaimTypes.Name, "Ghofur User")
