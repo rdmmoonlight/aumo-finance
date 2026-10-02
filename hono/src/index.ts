@@ -15,6 +15,7 @@ const app = new Hono<{ Variables: Variables }>()
 
 const sql = postgres(process.env.DATABASE_URL!)
 const JWT_SECRET = process.env.JWT_SECRET || 'ganti-dengan-secret-key-yang-sangat-aman-12345'
+const IS_PROD = process.env.NODE_ENV === 'production' || process.env.RENDER === 'true'
 
 // Daftar tabel yang diizinkan untuk dibaca (mencegah SQL Injection)
 const ALLOWED_TABLES = new Set([
@@ -115,8 +116,9 @@ app.post('/api/auth/login', async (c) => {
     if (clientType === 'web') {
       setCookie(c, 'auth_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'Lax',
+        // WAJIB: SameSite=None & Secure=true untuk Cross-Site Cookie (Vercel <-> Render)
+        secure: IS_PROD,
+        sameSite: IS_PROD ? 'None' : 'Lax',
         path: '/',
         maxAge: expSeconds,
       })
@@ -144,7 +146,11 @@ app.post('/api/auth/login', async (c) => {
 
 // Logout untuk Web Client
 app.post('/api/auth/logout', (c) => {
-  deleteCookie(c, 'auth_token', { path: '/' })
+  deleteCookie(c, 'auth_token', {
+    path: '/',
+    secure: IS_PROD,
+    sameSite: IS_PROD ? 'None' : 'Lax',
+  })
   return c.json({ message: 'Logout berhasil' })
 })
 
@@ -179,7 +185,7 @@ app.use('/api/*', async (c, next) => {
     return c.json({ error: 'Header "X-Client-Type" wajib diset ("web" atau "mobile")' }, 400)
   }
 
-  // Verifikasi JWT Token (3 Argumen untuk menghindari TS2554)
+  // Verifikasi JWT Token
   try {
     const payload = await verify(token, JWT_SECRET, 'HS256')
     c.set('userId', payload.sub as string)
@@ -190,7 +196,7 @@ app.use('/api/*', async (c, next) => {
 })
 
 // ==========================================
-// 3. ENDPOINTS DATA
+// 3. ENDPOINTS DATA (Terproteksi)
 // ==========================================
 app.get('/api/tables', (c) => {
   return c.json({ tables: Array.from(ALLOWED_TABLES) })
