@@ -1,22 +1,34 @@
 // Composables Auth untuk Hono Backend Render
 
 export interface AuthUser {
-  userId: string
+  id: string
+  userId?: string
   email: string
-  userName: string
-  fullName: string
-  roles: string[]
+  username: string
+  fullName?: string
+  roles?: string[]
 }
 
 export interface MeResponse {
   authenticated: boolean
-  user?: AuthUser
+  user?: {
+    id: string
+    username: string
+    email: string
+  }
   message?: string
 }
 
 export interface LoginResponse {
   message: string
   userId?: string
+}
+
+export interface LoginPayload {
+  email?: string
+  username?: string
+  password: string
+  rememberMe?: boolean
 }
 
 export interface RegisterPayload {
@@ -44,13 +56,19 @@ export async function fetchAuthUser() {
   const api = useApi()
 
   try {
-    // 👈 Diperbaiki: Ditambahkan prefix /api
     const response = await api<MeResponse>('/api/auth/me', {
       method: 'GET'
     })
 
     if (response && response.authenticated && response.user) {
-      user.value = response.user
+      user.value = {
+        id: response.user.id,
+        userId: response.user.id,
+        email: response.user.email,
+        username: response.user.username,
+        fullName: response.user.username ? response.user.username.split('@')[0] : 'User',
+        roles: []
+      }
     } else {
       user.value = null
     }
@@ -63,20 +81,18 @@ export async function fetchAuthUser() {
   return user.value
 }
 
-export async function login(payload: {
-  email: string
-  password: string
-  rememberMe?: boolean
-}) {
+export async function login(payload: LoginPayload) {
   const user = useAuthUser()
   const checked = useAuthChecked()
   const api = useApi()
 
-  // 👈 Diperbaiki: Ditambahkan prefix /api
+  // ⚠️ DUKUNGAN GANDA: Baca dari payload.username ATAU payload.email
+  const inputIdentifier = payload.username || payload.email || ''
+
   const response = await api<LoginResponse>('/api/auth/login', {
     method: 'POST',
     body: {
-      username: payload.email, // 👈 Hono membaca 'username'
+      username: inputIdentifier, // Wajib terisi string non-empty
       password: payload.password,
       rememberMe: payload.rememberMe ?? false
     }
@@ -84,15 +100,16 @@ export async function login(payload: {
 
   if (response && response.userId) {
     user.value = {
+      id: response.userId,
       userId: response.userId,
-      email: payload.email,
-      userName: payload.email,
-      fullName: payload.email.split('@')[0],
+      email: inputIdentifier,
+      username: inputIdentifier,
+      fullName: inputIdentifier.split('@')[0],
       roles: []
     }
     checked.value = true
 
-    // Refresh detail profil user dari backend
+    // Refresh detail profil user secara asynchronous dari Hono
     fetchAuthUser().catch(() => {})
   }
 
@@ -102,7 +119,6 @@ export async function login(payload: {
 export async function register(payload: RegisterPayload) {
   const api = useApi()
 
-  // 👈 Diperbaiki: Ditambahkan prefix /api
   const response = await api<RegisterResponse>('/api/auth/register', {
     method: 'POST',
     body: payload
@@ -115,7 +131,6 @@ export async function logout() {
   const api = useApi()
 
   try {
-    // 👈 Diperbaiki: Ditambahkan prefix /api
     await api('/api/auth/logout', { method: 'POST' })
   } catch {
     // Abaikan error jaringan saat logout
