@@ -11,20 +11,26 @@
 }
 
 [data-bs-theme="light"] {
-    --aumo-bg: #FFFFFF;
+    --aumo-bg: #F8FAFC; /* Diubah sedikit dari pure #FFF agar ada kontras dengan surface */
     --aumo-surface: #FFFFFF;
     --aumo-text: #0F172A;
     --aumo-text-muted: #64748B;
     --aumo-border: #E2E8F0;
 }
 
+/* Base Shell Setup */
 .aumo-main-shell {
     background-color: var(--aumo-bg);
     color: var(--aumo-text);
     font-family: var(--font-body);
 }
 
-/* KUNCI FLEXBOX LAYOUT (Side-by-Side Protection) */
+.topbar-container {
+    background-color: var(--aumo-surface);
+    border-bottom: 1px solid var(--aumo-border);
+}
+
+/* Flexbox Layout Structure */
 .aumo-body-shell {
     display: flex !important;
     flex-direction: row !important;
@@ -32,21 +38,48 @@
     width: 100% !important;
 }
 
+/* Sidebar Specifics */
 .sidebar-container {
     display: flex !important;
+    flex-direction: column;
     flex-shrink: 0 !important;
+    width: 260px; /* Atur lebar ideal sidebar kamu di sini */
+    background-color: var(--aumo-surface);
+    border-right: 1px solid var(--aumo-border);
     z-index: 100;
+    transition: width 0.2s ease-in-out;
 }
 
-/* Memaksa Main Content Tetap Sejajar di Kanan Sidebar */
+/* Main Content Area */
 #mainContent {
     background-color: var(--aumo-bg);
     color: var(--aumo-text);
     flex: 1 1 auto !important;
-    min-width: 0 !important;
+    min-width: 0 !important; /* Mencegah overflow flexbox */
     width: auto !important;
 }
 
+/* Typography scoping */
 ::deep h1, ::deep h2, ::deep h3, ::deep h4, ::deep h5, ::deep h6 {
     font-family: var(--font-heading);
+    color: var(--aumo-text);
+}
+
+/* Custom Scrollbar minimalis agar selaras dengan tema dark/light */
+::deep ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::deep ::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::deep ::-webkit-scrollbar-thumb {
+    background: var(--aumo-border);
+    border-radius: 4px;
+}
+
+::deep ::-webkit-scrollbar-thumb:hover {
+    background: var(--aumo-text-muted);
 }
