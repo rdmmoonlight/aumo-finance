@@ -28,7 +28,19 @@ const ALLOWED_TABLES = new Set([
 ])
 
 // ============================================================
-// 🚪 PINTU MASUK UTAMA: GLOBAL LOGGING MIDDLEWARE
+// 1. CORS MIDDLEWARE (PINTU PERTAMA UNTUK HANDSHAKE OPTIONS)
+// ============================================================
+app.use('*', cors({
+  origin: ['http://localhost:3000', 'https://aumonuxtjs.vercel.app'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Client-Type'],
+  allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
+  exposeHeaders: ['Content-Length'],
+  maxAge: 600,
+  credentials: true,
+}))
+
+// ============================================================
+// 2. GLOBAL LOGGING MIDDLEWARE (MENCATAT SEMUA TRAFIK IN/OUT)
 // ============================================================
 app.use('*', async (c, next) => {
   const start = Date.now()
@@ -92,20 +104,10 @@ function verifyAspNetCorePasswordHash(password: string, hashedPasswordBase64: st
   }
 }
 
-// Configuration CORS
-app.use('*', cors({
-  origin: ['http://localhost:3000', 'https://aumonuxtjs.vercel.app'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-Client-Type'],
-  allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
-  exposeHeaders: ['Content-Length'],
-  maxAge: 600,
-  credentials: true, // Wajib agar Cookie Web dikirim otomatis
-}))
-
 app.get('/', (c) => c.text('Hono Dual-Auth API is running!'))
 
 // ==========================================
-// 1. ENDPOINT AUTHENTICATION (Login & Logout)
+// 3. ENDPOINT AUTHENTICATION (Login & Logout)
 // ==========================================
 app.post('/api/auth/login', async (c) => {
   try {
@@ -131,7 +133,7 @@ app.post('/api/auth/login', async (c) => {
       LIMIT 1
     `
 
-    console.log('  🗄️️ [LOGIN] Hasil Query DB (User ditemukan):', users.length)
+    console.log('  🗄️ [LOGIN] Hasil Query DB (User ditemukan):', users.length)
 
     if (!users || users.length === 0) {
       console.log('  ❌ [LOGIN] User TIDAK DITEMUKAN di DB berdasarkan NormalizedUserName/Email:', normalizedInput)
@@ -209,7 +211,7 @@ app.post('/api/auth/logout', (c) => {
 })
 
 // ==========================================
-// 2. MIDDLEWARE PROTEKSI DUAL-AUTH
+// 4. MIDDLEWARE PROTEKSI DUAL-AUTH
 // ==========================================
 app.use('/api/*', async (c, next) => {
   if (c.req.path.startsWith('/api/auth/')) {
@@ -244,13 +246,13 @@ app.use('/api/*', async (c, next) => {
     c.set('userId', payload.sub as string)
     await next()
   } catch (err) {
-    console.log('  ⚠️️ [AUTH MIDDLEWARE] Ditolak: Token JWT kadaluwarsa/invalid')
+    console.log('  ⚠️ [AUTH MIDDLEWARE] Ditolak: Token JWT kadaluwarsa/invalid')
     return c.json({ error: 'Sesi / Token tidak valid atau telah kadaluwarsa' }, 401)
   }
 })
 
 // ==========================================
-// 3. ENDPOINTS DATA (Terproteksi)
+// 5. ENDPOINTS DATA (Terproteksi)
 // ==========================================
 app.get('/api/tables', (c) => {
   return c.json({ tables: Array.from(ALLOWED_TABLES) })
@@ -272,13 +274,24 @@ app.get('/api/:tableName', async (c) => {
   }
 })
 
+// ==========================================
+// 6. SERVER BOOTSTRAP (SOLUSI FIX ELIFECYCLE)
+// ==========================================
 const port = Number(process.env.PORT) || 3000
 
-console.log(`Server is running on port ${port}`)
-
-serve({
+const server = serve({
   fetch: app.fetch,
   port,
+}, (info) => {
+  console.log(`🚀 Server Node/Hono berjalan aktif di port ${info.port}`)
+})
+
+// Mencegah unhandled shutdown yang memicu ELIFECYCLE error di Render
+process.on('SIGTERM', () => {
+  console.log('🛑 Menerima SIGTERM, menutup server dengan aman...')
+  server.close(() => {
+    process.exit(0)
+  })
 })
 
 export default app
