@@ -6,7 +6,16 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
                 <NotAuthorized>
-                    <p role="alert">Anda tidak memiliki akses ke halaman ini.</p>
+                    @if (context.User.Identity?.IsAuthenticated != true)
+                    {
+                        <!-- Redirect otomatis ke / jika belum login -->
+                        <RedirectToLanding />
+                    }
+                    else
+                    {
+                        <!-- Tampilan jika user login tapi tidak punya hak akses/role tertentu -->
+                        <p role="alert">Anda tidak memiliki akses ke halaman ini.</p>
+                    }
                 </NotAuthorized>
                 <Authorizing>
                     <p>Memuat otentikasi...</p>
