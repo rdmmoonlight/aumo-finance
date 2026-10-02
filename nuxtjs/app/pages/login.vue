@@ -25,15 +25,19 @@ const state = reactive<Schema>({
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
+
+  // Ambil data dengan fallback konsisten dari state jika event.data bernilai undefined
+  const emailInput = event.data?.email || state.email
+  const passwordInput = event.data?.password || state.password
+  const rememberMeInput = event.data?.rememberMe ?? state.rememberMe
+
   try {
-    // Mapping event.data.email ke 'username' agar sesuai dengan Hono
     const res = await login({
-      username: event.data.email, // 👈 Terjemahkan ke username
-      password: event.data.password,
-      rememberMe: event.data.rememberMe
+      username: emailInput.trim(), // 👈 Dijamin tidak undefined dan dipangkas spasi
+      password: passwordInput,
+      rememberMe: rememberMeInput
     })
 
-    // Hono mengembalikan { message: 'Login web berhasil', userId: '...' }
     if (res && (res.userId || res.message)) {
       toast.add({
         title: 'Welcome back!',
@@ -48,6 +52,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       await navigateTo(redirect, { replace: true })
     }
   } catch (err: any) {
+    console.error('[Login Component Error]:', err)
     const message = err.data?.message || err.message || 'Invalid email/username or password.'
 
     toast.add({
