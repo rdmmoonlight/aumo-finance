@@ -31,7 +31,10 @@ const ALLOWED_TABLES = new Set([
 function verifyAspNetCorePasswordHash(password: string, hashedPasswordBase64: string): boolean {
   try {
     const decodedHash = Buffer.from(hashedPasswordBase64, 'base64')
-    if (decodedHash[0] !== 0x01) return false
+    if (decodedHash[0] !== 0x01) {
+      console.log('🔍 [HASH DEBUG] Format hash bukan V3 (0x01)')
+      return false
+    }
 
     const prf = decodedHash.readUInt32BE(1)
     const iterCount = decodedHash.readUInt32BE(5)
@@ -52,8 +55,11 @@ function verifyAspNetCorePasswordHash(password: string, hashedPasswordBase64: st
       algo
     )
 
-    return crypto.timingSafeEqual(expectedSubkey, actualSubkey)
-  } catch {
+    const isValid = crypto.timingSafeEqual(expectedSubkey, actualSubkey)
+    console.log('🔍 [HASH DEBUG] Hasil pencocokan password:', isValid)
+    return isValid
+  } catch (err) {
+    console.error('🔍 [HASH DEBUG] Error saat dekode password hash:', err)
     return false
   }
 }
@@ -74,34 +80,54 @@ app.get('/', (c) => c.text('Hono Dual-Auth API is running!'))
 // 1. ENDPOINT AUTHENTICATION (Login & Logout)
 // ==========================================
 app.post('/api/auth/login', async (c) => {
+  console.log('\n--- 🚀 LOGIN REQUEST MASUK ---')
   try {
-    const { username, password, rememberMe } = await c.req.json()
-    const clientType = c.req.header('X-Client-Type') // Wajib 'web' atau 'mobile'
+    const body = await c.req.json()
+    const { username, password, rememberMe } = body
+    const clientType = c.req.header('X-Client-Type')
+
+    console.log('📦 [LOGIN] Payload Body:', { username, passwordLength: password?.length, rememberMe })
+    console.log('🏷️ [LOGIN] Header X-Client-Type:', clientType)
 
     if (!username || !password) {
+      console.log('❌ [LOGIN] Username atau password kosong dalam payload')
       return c.json({ message: 'Username dan password wajib diisi' }, 400)
     }
 
     const normalizedInput = username.toUpperCase()
+    console.log('🔍 [LOGIN] Input dinormalisasi ke UpperCase:', normalizedInput)
+
     const users = await sql`
-      SELECT "Id", "PasswordHash", "LockoutEnabled", "LockoutEnd"
+      SELECT "Id", "UserName", "NormalizedUserName", "Email", "NormalizedEmail", "PasswordHash", "LockoutEnabled", "LockoutEnd"
       FROM "AspNetUsers"
       WHERE "NormalizedUserName" = ${normalizedInput} 
          OR "NormalizedEmail" = ${normalizedInput}
       LIMIT 1
     `
 
+    console.log('🗄️ [LOGIN] Hasil Query DB (User ditemukan):', users.length)
+
     if (!users || users.length === 0) {
+      console.log('❌ [LOGIN] User TIDAK DITEMUKAN di DB berdasarkan NormalizedUserName/Email:', normalizedInput)
       return c.json({ message: 'Username atau password salah' }, 401)
     }
 
     const user = users[0]
+    console.log('👤 [LOGIN] User DB Ditemukan:', { id: user.Id, username: user.UserName, email: user.Email, hasPasswordHash: !!user.PasswordHash })
 
-    if (!user.PasswordHash || !verifyAspNetCorePasswordHash(password, user.PasswordHash)) {
+    if (!user.PasswordHash) {
+      console.log('❌ [LOGIN] User tidak memiliki PasswordHash di DB')
+      return c.json({ message: 'Username atau password salah' }, 401)
+    }
+
+    const isPasswordValid = verifyAspNetCorePasswordHash(password, user.PasswordHash)
+    if (!isPasswordValid) {
+      console.log('❌ [LOGIN] Password TIDAK COCOK dengan PasswordHash')
       return c.json({ message: 'Username atau password salah' }, 401)
     }
 
     if (user.LockoutEnabled && user.LockoutEnd && new Date(user.LockoutEnd) > new Date()) {
+      console.log('⛔ [LOGIN] Akun sedang terkunci hingga:', user.LockoutEnd)
       return c.json({ message: 'Akun Anda sedang terkunci' }, 403)
     }
 
@@ -114,9 +140,9 @@ app.post('/api/auth/login', async (c) => {
 
     // PERATURAN WEB: Pakai Cookie HTTP-Only
     if (clientType === 'web') {
+      console.log('✅ [LOGIN] Skenario WEB: Setting Cookie auth_token...')
       setCookie(c, 'auth_token', token, {
         httpOnly: true,
-        // WAJIB: SameSite=None & Secure=true untuk Cross-Site Cookie (Vercel <-> Render)
         secure: IS_PROD,
         sameSite: IS_PROD ? 'None' : 'Lax',
         path: '/',
@@ -128,6 +154,7 @@ app.post('/api/auth/login', async (c) => {
 
     // PERATURAN MOBILE: Pakai Raw Token JWT
     if (clientType === 'mobile') {
+      console.log('✅ [LOGIN] Skenario MOBILE: Mengembalikan Raw JWT Token...')
       return c.json({
         message: 'Login mobile berhasil',
         token,
@@ -136,10 +163,11 @@ app.post('/api/auth/login', async (c) => {
       })
     }
 
+    console.log('❌ [LOGIN] Gagal: Header X-Client-Type bernilai invalid/tidak ada:', clientType)
     return c.json({ message: 'Header "X-Client-Type" wajib diset ke "web" atau "mobile"' }, 400)
 
   } catch (err) {
-    console.error('Login Error:', err)
+    console.error('💥 [LOGIN] Fatal Error/Exception:', err)
     return c.json({ message: 'Terjadi kesalahan pada server' }, 500)
   }
 })
