@@ -1,3 +1,4 @@
+<!-- pages/login.vue -->
 <script setup lang="ts">
 import * as z from 'zod'
 import type { FormSubmitEvent } from '@nuxt/ui'
@@ -26,11 +27,11 @@ const state = reactive<Schema>({
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   try {
-    // ⚠️ PASTIKAN MENGGUNAKAN event.data.email (Milik UForm Nuxt UI v3)
+    // ⚠️ MAPPING UTAMA: Pastikan field email dikirim ke Hono sebagai username
     const payload = {
-      username: event.data.email, // Mapping field email ke username untuk Hono
-      password: event.data.password,
-      rememberMe: event.data.rememberMe
+      username: event.data.email || state.email,
+      password: event.data.password || state.password,
+      rememberMe: event.data.rememberMe ?? state.rememberMe
     }
 
     const res = await login(payload)
