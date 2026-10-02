@@ -1,6 +1,16 @@
 <script setup lang="ts">
-import { VisXYContainer, VisLine, VisAxis, VisArea, VisCrosshair, VisTooltip } from '@unovis/vue'
-import type { DashboardData, DashboardTrendPoint } from '~/composables/useDashboardData'
+import {
+  VisXYContainer,
+  VisLine,
+  VisAxis,
+  VisArea,
+  VisCrosshair,
+  VisTooltip
+} from '@unovis/vue'
+import type {
+  DashboardData,
+  DashboardTrendPoint
+} from '~/composables/useDashboardData'
 
 const cardRef = useTemplateRef<HTMLElement | null>('cardRef')
 
@@ -10,7 +20,9 @@ const props = defineProps<{
 
 const { width } = useElementSize(cardRef)
 
-const data = computed<DashboardTrendPoint[]>(() => props.dashboard?.chartTrend ?? [])
+const data = computed<DashboardTrendPoint[]>(
+  () => props.dashboard?.chartTrend ?? []
+)
 
 const x = (_: DashboardTrendPoint, i: number) => i
 const y = (d: DashboardTrendPoint) => d.net
@@ -25,11 +37,15 @@ const xTicks = (i: number) => {
   return data.value[i]!.label
 }
 
-const template = (d: DashboardTrendPoint) => `${d.label}: ${formatCurrencyIDR(d.net)}`
+const template = (d: DashboardTrendPoint) =>
+  `${d.label}: ${formatCurrencyIDR(d.net)}`
 </script>
 
 <template>
-  <UCard ref="cardRef" :ui="{ root: 'overflow-visible', body: 'px-0! pt-0! pb-3!' }">
+  <UCard
+    ref="cardRef"
+    :ui="{ root: 'overflow-visible', body: 'px-0! pt-0! pb-3!' }"
+  >
     <template #header>
       <div>
         <p class="text-xs text-muted uppercase mb-1.5">
@@ -48,11 +64,7 @@ const template = (d: DashboardTrendPoint) => `${d.label}: ${formatCurrencyIDR(d.
       class="h-96"
       :width="width"
     >
-      <VisLine
-        :x="x"
-        :y="y"
-        color="var(--ui-primary)"
-      />
+      <VisLine :x="x" :y="y" color="var(--ui-primary)" />
       <VisArea
         :x="x"
         :y="y"
@@ -60,16 +72,9 @@ const template = (d: DashboardTrendPoint) => `${d.label}: ${formatCurrencyIDR(d.
         :opacity="0.1"
       />
 
-      <VisAxis
-        type="x"
-        :x="x"
-        :tick-format="xTicks"
-      />
+      <VisAxis type="x" :x="x" :tick-format="xTicks" />
 
-      <VisCrosshair
-        color="var(--ui-primary)"
-        :template="template"
-      />
+      <VisCrosshair color="var(--ui-primary)" :template="template" />
 
       <VisTooltip />
     </VisXYContainer>

@@ -13,10 +13,12 @@ const { data: dashboard, pending } = useDashboardData(period)
 <template>
   <div class="space-y-6">
     <!-- Toolbar Kontrol Halaman Home -->
-    <div class="flex items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-gray-800">
+    <div
+      class="flex items-center justify-between gap-4 pb-2 border-b border-gray-200 dark:border-gray-800"
+    >
       <div class="flex items-center gap-3">
         <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
-          {{ dashboard?.selectedPeriodName ?? 'Current Period' }}
+          {{ dashboard?.selectedPeriodName ?? "Current Period" }}
         </span>
 
         <HomePeriodSelect v-model="period" />

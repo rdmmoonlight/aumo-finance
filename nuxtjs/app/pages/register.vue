@@ -9,15 +9,20 @@ const toast = useToast()
 const route = useRoute()
 const loading = ref(false)
 
-const schema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().min(1, 'Email is required').email('Invalid email address'),
-  password: z.string().min(8, 'Password must be at least 8 characters'),
-  confirmPassword: z.string().min(1, 'Please confirm your password')
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ['confirmPassword']
-})
+const schema = z
+  .object({
+    name: z.string().min(1, 'Name is required'),
+    email: z
+      .string()
+      .min(1, 'Email is required')
+      .email('Invalid email address'),
+    password: z.string().min(8, 'Password must be at least 8 characters'),
+    confirmPassword: z.string().min(1, 'Please confirm your password')
+  })
+  .refine(data => data.password === data.confirmPassword, {
+    message: 'Passwords don\'t match',
+    path: ['confirmPassword']
+  })
 
 type Schema = z.output<typeof schema>
 
@@ -43,11 +48,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       color: 'success'
     })
 
-    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
+    const redirect
+      = typeof route.query.redirect === 'string' ? route.query.redirect : '/'
     await navigateTo(redirect)
   } catch (err: any) {
-    const message = err?.data?.statusMessage || err?.data?.message || err?.message
-    
+    const message
+      = err?.data?.statusMessage || err?.data?.message || err?.message
+
     toast.add({
       title: 'Registration failed',
       description: message || 'Failed to create an account. Please try again.',
@@ -60,7 +67,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UPageCard class="w-full max-w-sm" title="Sign up" description="Create your AumoFinance account">
+  <UPageCard
+    class="w-full max-w-sm"
+    title="Sign up"
+    description="Create your AumoFinance account"
+  >
     <UForm
       :schema="schema"
       :state="state"

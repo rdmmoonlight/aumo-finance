@@ -35,12 +35,18 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         color: 'success'
       })
 
-      const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/home'
+      const redirect
+        = typeof route.query.redirect === 'string'
+          ? route.query.redirect
+          : '/home'
       await navigateTo(redirect, { replace: true })
     }
   } catch (err: any) {
-    const message = err.data?.statusMessage || err.data?.message || 'Invalid email/username or password.'
-    
+    const message
+      = err.data?.statusMessage
+        || err.data?.message
+        || 'Invalid email/username or password.'
+
     toast.add({
       title: 'Login failed',
       description: message,
@@ -53,7 +59,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <UPageCard class="w-full max-w-sm" title="Sign in" description="Sign in to your AumoFinance account">
+  <UPageCard
+    class="w-full max-w-sm"
+    title="Sign in"
+    description="Sign in to your AumoFinance account"
+  >
     <UForm
       :schema="schema"
       :state="state"
@@ -78,7 +88,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         />
       </UFormField>
 
-      <UCheckbox v-model="state.rememberMe" label="Remember me" name="rememberMe" />
+      <UCheckbox
+        v-model="state.rememberMe"
+        label="Remember me"
+        name="rememberMe"
+      />
 
       <UButton
         type="submit"

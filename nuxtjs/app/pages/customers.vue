@@ -14,10 +14,12 @@ const UCheckbox = resolveComponent('UCheckbox')
 const toast = useToast()
 const table = useTemplateRef('table')
 
-const columnFilters = ref([{
-  id: 'email',
-  value: ''
-}])
+const columnFilters = ref([
+  {
+    id: 'email',
+    value: ''
+  }
+])
 const columnVisibility = ref()
 const rowSelection = ref({ 1: true })
 
@@ -85,7 +87,8 @@ const columns: TableColumn<User>[] = [
     cell: ({ row }) =>
       h(UCheckbox, {
         'modelValue': row.getIsSelected(),
-        'onUpdate:modelValue': (value: boolean | 'indeterminate') => row.toggleSelected(!!value),
+        'onUpdate:modelValue': (value: boolean | 'indeterminate') =>
+          row.toggleSelected(!!value),
         'ariaLabel': 'Select row'
       })
   },
@@ -144,8 +147,10 @@ const columns: TableColumn<User>[] = [
         bounced: 'warning' as const
       }[row.original.status]
 
-      return h(UBadge, { class: 'capitalize', variant: 'subtle', color }, () =>
-        row.original.status
+      return h(
+        UBadge,
+        { class: 'capitalize', variant: 'subtle', color },
+        () => row.original.status
       )
     }
   },
@@ -178,25 +183,33 @@ const columns: TableColumn<User>[] = [
 
 const statusFilter = ref('all')
 
-watch(() => statusFilter.value, (newVal) => {
-  if (!table?.value?.tableApi) return
+watch(
+  () => statusFilter.value,
+  (newVal) => {
+    if (!table?.value?.tableApi) return
 
-  const statusColumn = table.value.tableApi.getColumn('status')
-  if (!statusColumn) return
+    const statusColumn = table.value.tableApi.getColumn('status')
+    if (!statusColumn) return
 
-  if (newVal === 'all') {
-    statusColumn.setFilterValue(undefined)
-  } else {
-    statusColumn.setFilterValue(newVal)
+    if (newVal === 'all') {
+      statusColumn.setFilterValue(undefined)
+    } else {
+      statusColumn.setFilterValue(newVal)
+    }
   }
-})
+)
 
 const email = computed({
   get: (): string => {
-    return (table.value?.tableApi?.getColumn('email')?.getFilterValue() as string) || ''
+    return (
+      (table.value?.tableApi?.getColumn('email')?.getFilterValue() as string)
+      || ''
+    )
   },
   set: (value: string) => {
-    table.value?.tableApi?.getColumn('email')?.setFilterValue(value || undefined)
+    table.value?.tableApi
+      ?.getColumn('email')
+      ?.setFilterValue(value || undefined)
   }
 })
 
@@ -230,7 +243,9 @@ const pagination = ref({
         />
 
         <div class="flex flex-wrap items-center gap-1.5">
-          <CustomersDeleteModal :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length">
+          <CustomersDeleteModal
+            :count="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
+          >
             <UButton
               v-if="table?.tableApi?.getFilteredSelectedRowModel().rows.length"
               label="Delete"
@@ -240,7 +255,9 @@ const pagination = ref({
             >
               <template #trailing>
                 <UKbd>
-                  {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length }}
+                  {{
+                    table?.tableApi?.getFilteredSelectedRowModel().rows.length
+                  }}
                 </UKbd>
               </template>
             </UButton>
@@ -254,7 +271,10 @@ const pagination = ref({
               { label: 'Unsubscribed', value: 'unsubscribed' },
               { label: 'Bounced', value: 'bounced' }
             ]"
-            :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
+            :ui="{
+              trailingIcon:
+                'group-data-[state=open]:rotate-180 transition-transform duration-200'
+            }"
             placeholder="Filter status"
             class="min-w-28"
           />
@@ -268,10 +288,12 @@ const pagination = ref({
                   type: 'checkbox' as const,
                   checked: column.getIsVisible(),
                   onUpdateChecked(checked: boolean) {
-                    table?.tableApi?.getColumn(column.id)?.toggleVisibility(!!checked)
+                    table?.tableApi
+                      ?.getColumn(column.id)
+                      ?.toggleVisibility(!!checked);
                   },
                   onSelect(e?: Event) {
-                    e?.preventDefault()
+                    e?.preventDefault();
                   }
                 }))
             "
@@ -310,15 +332,23 @@ const pagination = ref({
         }"
       />
 
-      <div class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto">
+      <div
+        class="flex items-center justify-between gap-3 border-t border-default pt-4 mt-auto"
+      >
         <div class="text-sm text-muted">
-          {{ table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0 }} of
-          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s) selected.
+          {{
+            table?.tableApi?.getFilteredSelectedRowModel().rows.length || 0
+          }}
+          of
+          {{ table?.tableApi?.getFilteredRowModel().rows.length || 0 }} row(s)
+          selected.
         </div>
 
         <div class="flex items-center gap-1.5">
           <UPagination
-            :default-page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+            :default-page="
+              (table?.tableApi?.getState().pagination.pageIndex || 0) + 1
+            "
             :items-per-page="table?.tableApi?.getState().pagination.pageSize"
             :total="table?.tableApi?.getFilteredRowModel().rows.length"
             @update:page="(p: number) => table?.tableApi?.setPageIndex(p - 1)"

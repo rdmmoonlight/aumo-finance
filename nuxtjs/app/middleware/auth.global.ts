@@ -7,9 +7,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const checked = useAuthChecked()
 
   const publicRoutes = ['/', '/login', '/register']
-  const normalizedPath = to.path.length > 1 && to.path.endsWith('/') 
-    ? to.path.slice(0, -1) 
-    : to.path
+  const normalizedPath
+    = to.path.length > 1 && to.path.endsWith('/')
+      ? to.path.slice(0, -1)
+      : to.path
 
   const isPublicRoute = publicRoutes.includes(normalizedPath)
 

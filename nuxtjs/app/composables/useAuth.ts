@@ -46,12 +46,12 @@ export async function fetchAuthUser() {
 
   try {
     // Ambil header cookie hanya saat Server-Side Rendering (SSR)
-    const headers: Record<string, string> = import.meta.server 
-      ? (useRequestHeaders(['cookie']) as Record<string, string>) 
+    const headers: Record<string, string> = import.meta.server
+      ? (useRequestHeaders(['cookie']) as Record<string, string>)
       : {}
 
     const response = await $fetch<MeResponse>('/api/v1/auth/me', { headers })
-    
+
     if (response && response.success) {
       user.value = {
         userId: response.userId,
@@ -72,7 +72,11 @@ export async function fetchAuthUser() {
   return user.value
 }
 
-export async function login(payload: { email: string; password: string; rememberMe?: boolean }) {
+export async function login(payload: {
+  email: string
+  password: string
+  rememberMe?: boolean
+}) {
   const user = useAuthUser()
   const checked = useAuthChecked()
 
@@ -121,7 +125,7 @@ export async function logout() {
   } finally {
     useAuthUser().value = null
     useAuthChecked().value = true
-    
+
     // Redirect ke landing page setelah logout
     await navigateTo('/')
   }

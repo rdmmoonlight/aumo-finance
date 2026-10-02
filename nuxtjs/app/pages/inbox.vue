@@ -3,16 +3,21 @@ import { computed, ref, watch } from 'vue'
 import { breakpointsTailwind } from '@vueuse/core'
 import type { Mail } from '~/types'
 
-const tabItems = [{
-  label: 'All',
-  value: 'all'
-}, {
-  label: 'Unread',
-  value: 'unread'
-}]
+const tabItems = [
+  {
+    label: 'All',
+    value: 'all'
+  },
+  {
+    label: 'Unread',
+    value: 'unread'
+  }
+]
 const selectedTab = ref('all')
 
-const { data: mails } = await useFetch<Mail[]>('/api/mails', { default: () => [] })
+const { data: mails } = await useFetch<Mail[]>('/api/mails', {
+  default: () => []
+})
 
 // Filter mails based on the selected tab
 const filteredMails = computed(() => {
@@ -75,7 +80,11 @@ const isMobile = breakpoints.smaller('lg')
     <InboxList v-model="selectedMail" :mails="filteredMails" />
   </UDashboardPanel>
 
-  <InboxMail v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />
+  <InboxMail
+    v-if="selectedMail"
+    :mail="selectedMail"
+    @close="selectedMail = null"
+  />
   <div v-else class="hidden lg:flex flex-1 items-center justify-center">
     <UIcon name="i-lucide-inbox" class="size-32 text-dimmed" />
   </div>
@@ -83,7 +92,11 @@ const isMobile = breakpoints.smaller('lg')
   <ClientOnly>
     <USlideover v-if="isMobile" v-model:open="isMailPanelOpen">
       <template #content>
-        <InboxMail v-if="selectedMail" :mail="selectedMail" @close="selectedMail = null" />
+        <InboxMail
+          v-if="selectedMail"
+          :mail="selectedMail"
+          @close="selectedMail = null"
+        />
       </template>
     </USlideover>
   </ClientOnly>

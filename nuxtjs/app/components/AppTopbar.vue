@@ -10,18 +10,20 @@ defineProps<{
 const { isNotificationsSlideoverOpen } = useDashboard()
 
 // Menu dropdown aksi cepat global
-const items = [[
-  {
-    label: 'New mail',
-    icon: 'i-lucide-send',
-    to: '/inbox'
-  },
-  {
-    label: 'New customer',
-    icon: 'i-lucide-user-plus',
-    to: '/customers'
-  }
-]] satisfies DropdownMenuItem[][]
+const items = [
+  [
+    {
+      label: 'New mail',
+      icon: 'i-lucide-send',
+      to: '/inbox'
+    },
+    {
+      label: 'New customer',
+      icon: 'i-lucide-user-plus',
+      to: '/customers'
+    }
+  ]
+] satisfies DropdownMenuItem[][]
 </script>
 
 <template>
