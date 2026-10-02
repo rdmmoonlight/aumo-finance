@@ -16,7 +16,16 @@ import io.ktor.http.contentType
 // opsional, dipakai backend untuk mencatat riwayat sesi (fitur Guardian) —
 // tidak dikirim di sini, backend jatuh balik ke header User-Agent HTTP kalau
 // kosong.
-data class LoginRequest(val email: String, val password: String, val rememberMe: Boolean = false)
+// isMobileClient WAJIB true: backend memakai flag ini untuk memilih jalur JWT
+// (response berisi "token", tanpa cookie). Jika false, backend memakai jalur
+// cookie web dan field "token" tidak dikirim.
+data class LoginRequest(
+    val email: String,
+    val password: String,
+    val rememberMe: Boolean = false,
+    val isMobileClient: Boolean = true,
+    val operatingSystem: String = "Android",
+)
 
 // userId/fullName/token HANYA ada saat success == true — backend mengembalikan
 // success:false + message saja untuk kredensial salah/akun terkunci dsb.
