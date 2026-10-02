@@ -7,6 +7,7 @@ defineProps<{
 
 const colorMode = useColorMode()
 const appConfig = useAppConfig()
+const { logout } = useAuth() // 👈 Import fungsi logout dari composable useAuth
 
 const colors = [
   'red',
@@ -233,7 +234,7 @@ const items = computed<DropdownMenuItem[][]>(() => [
       icon: 'i-lucide-log-out',
       onSelect: async () => {
         await logout()
-        await navigateTo('/login')
+        await navigateTo('/') // 👈 Diarahkan langsung ke landing page /
       }
     }
   ]
