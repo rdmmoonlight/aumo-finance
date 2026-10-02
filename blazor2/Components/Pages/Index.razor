@@ -22,15 +22,15 @@
             <div class="d-flex align-items-center gap-2">
                 <AuthorizeView>
                     <Authorized>
-                        <NavLink href="/dashboard" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-medium">
+                        <NavLink href="/dashboard" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2 fw-medium">
                             <i class="bi bi-speedometer2 me-1"></i> Dashboard
                         </NavLink>
                     </Authorized>
                     <NotAuthorized>
-                        <NavLink href="/auth/login" class="btn btn-outline-light btn-sm rounded-pill px-3 py-1.5 fw-medium">
+                        <NavLink href="/auth/login" class="btn btn-outline-light btn-sm rounded-pill px-3 py-2 fw-medium">
                             <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
                         </NavLink>
-                        <NavLink href="/auth/register" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 fw-medium shadow-sm">
+                        <NavLink href="/auth/register" class="btn btn-primary btn-sm rounded-pill px-3 py-2 fw-medium shadow-sm">
                             <i class="bi bi-person-plus me-1"></i> Register
                         </NavLink>
                     </NotAuthorized>
@@ -46,9 +46,9 @@
                 
                 <!-- Hero Left: Text & CTA -->
                 <div class="col-12 col-lg-7 text-start">
-                    <div class="badge-status d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-4 border border-secondary border-opacity-25">
+                    <div class="badge-status d-inline-flex align-items-center gap-2 px-3 py-1.5 rounded-pill mb-4 border border-secondary border-opacity-25">
                         <span class="pulse-dot"></span>
-                        <span class="small text-muted fw-medium">Financial Intelligence Platform v1.0</span>
+                        <span class="small text-muted-custom fw-medium">Financial Intelligence Platform v1.0</span>
                     </div>
 
                     <h1 class="display-4 fw-bold text-white tracking-tight mb-3 lh-sm">
@@ -63,17 +63,17 @@
                     <div class="d-flex flex-wrap gap-3 align-items-center mb-5">
                         <AuthorizeView>
                             <Authorized>
-                                <NavLink href="/dashboard" class="btn btn-primary btn-lg rounded-pill px-4 py-2.5 fw-medium shadow">
+                                <NavLink href="/dashboard" class="btn btn-primary btn-lg rounded-pill px-4 py-2 fw-medium shadow">
                                     <span>Buka Dashboard</span>
                                     <i class="bi bi-arrow-right ms-1"></i>
                                 </NavLink>
                             </Authorized>
                             <NotAuthorized>
-                                <NavLink href="/auth/register" class="btn btn-primary btn-lg rounded-pill px-4 py-2.5 fw-medium shadow">
+                                <NavLink href="/auth/register" class="btn btn-primary btn-lg rounded-pill px-4 py-2 fw-medium shadow">
                                     <span>Get Started Free</span>
                                     <i class="bi bi-arrow-right ms-1"></i>
                                 </NavLink>
-                                <NavLink href="/auth/login" class="btn btn-outline-secondary btn-lg rounded-pill px-4 py-2.5 fw-medium text-white border-opacity-25">
+                                <NavLink href="/auth/login" class="btn btn-outline-secondary btn-lg rounded-pill px-4 py-2 fw-medium text-white border-opacity-25">
                                     <span>Sign In</span>
                                 </NavLink>
                             </NotAuthorized>
@@ -84,15 +84,15 @@
                     <div class="row g-3 border-top border-secondary border-opacity-25 pt-4">
                         <div class="col-4">
                             <h4 class="fw-bold text-white mb-0">99.9%</h4>
-                            <p class="small text-muted mb-0">System Uptime</p>
+                            <p class="small text-muted-custom mb-0">System Uptime</p>
                         </div>
                         <div class="col-4">
                             <h4 class="fw-bold text-white mb-0">Real-time</h4>
-                            <p class="small text-muted mb-0">Ledger Audit</p>
+                            <p class="small text-muted-custom mb-0">Ledger Audit</p>
                         </div>
                         <div class="col-4">
                             <h4 class="fw-bold text-white mb-0">AES-256</h4>
-                            <p class="small text-muted mb-0">Data Security</p>
+                            <p class="small text-muted-custom mb-0">Data Security</p>
                         </div>
                     </div>
                 </div>
@@ -110,27 +110,27 @@
 
                         <!-- System Metric Item -->
                         <div class="metric-box rounded-3 p-3 mb-3 border border-secondary border-opacity-10">
-                            <div class="d-flex justify-content-between small text-muted mb-1">
+                            <div class="d-flex justify-content-between small text-muted-custom mb-2">
                                 <span>General Ledger Engine</span>
                                 <span class="text-primary fw-medium">Active</span>
                             </div>
                             <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+                                <div class="progress-bar bg-primary" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
 
                         <div class="metric-box rounded-3 p-3 mb-3 border border-secondary border-opacity-10">
-                            <div class="d-flex justify-content-between small text-muted mb-1">
+                            <div class="d-flex justify-content-between small text-muted-custom mb-2">
                                 <span>Trial Balance Synchronizer</span>
                                 <span class="text-success fw-medium">Synced</span>
                             </div>
                             <div class="progress" style="height: 6px;">
-                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%"></div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 100%" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100"></div>
                             </div>
                         </div>
 
                         <div class="p-3 rounded-3 bg-dark bg-opacity-50 border border-secondary border-opacity-10">
-                            <p class="small text-muted mb-0">
+                            <p class="small text-muted-custom mb-0">
                                 <i class="bi bi-info-circle me-1 text-info"></i>
                                 All core API services are verified and operational.
                             </p>
@@ -145,8 +145,8 @@
     <!-- Simple Footer -->
     <footer class="py-4 border-top border-secondary border-opacity-25 text-center">
         <div class="container max-width-container">
-            <p class="small text-muted mb-0">
-                &copy; @DateTime.UtcNow.Year Aumo Finance. All rights reserved. By rdmmoonlight.
+            <p class="small text-muted-custom mb-0">
+                &copy; @DateTime.UtcNow.Year Aumo Finance. All rights reserved.
             </p>
         </div>
     </footer>
@@ -188,7 +188,7 @@
     }
 
     .text-muted-custom {
-        color: #9CA3AF;
+        color: #9CA3AF !important;
     }
 
     .hero-card {
@@ -200,7 +200,23 @@
         background-color: rgba(13, 17, 23, 0.6);
     }
 
+    .progress {
+        background-color: rgba(255, 255, 255, 0.1);
+    }
+
     .tracking-tight {
         letter-spacing: -0.025em;
+    }
+
+    /* Styling tambahan untuk Blazor NavLink */
+    ::deep .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease-in-out;
+    }
+
+    ::deep .btn:hover {
+        transform: translateY(-1px);
     }
 </style>
