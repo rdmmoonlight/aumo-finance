@@ -59,7 +59,7 @@ function verifyAspNetCorePasswordHash(password: string, hashedPasswordBase64: st
 
 // Configuration CORS
 app.use('*', cors({
-  origin: ['http://localhost:3000', 'https://aumo-blazor2.onrender.com'],
+  origin: ['http://localhost:3000', 'https://aumonuxtjs.vercel.app'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Client-Type'],
   allowMethods: ['POST', 'GET', 'PUT', 'DELETE', 'OPTIONS'],
   exposeHeaders: ['Content-Length'],
