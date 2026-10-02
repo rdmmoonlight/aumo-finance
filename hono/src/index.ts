@@ -27,12 +27,40 @@ const ALLOWED_TABLES = new Set([
   'UserSessions'
 ])
 
+// ============================================================
+// 🚪 PINTU MASUK UTAMA: GLOBAL LOGGING MIDDLEWARE
+// ============================================================
+app.use('*', async (c, next) => {
+  const start = Date.now()
+  const method = c.req.method
+  const path = c.req.path
+  const clientType = c.req.header('X-Client-Type') || 'N/A'
+  const userAgent = c.req.header('User-Agent') || 'Unknown'
+  const clientIp = c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'Local/Unknown'
+
+  console.log(`\n==================================================`)
+  console.log(`📥 [REQUEST IN] ${new Date().toISOString()}`)
+  console.log(`   --> ${method} ${path}`)
+  console.log(`   --> IP: ${clientIp}`)
+  console.log(`   --> X-Client-Type: ${clientType}`)
+  console.log(`   --> User-Agent: ${userAgent}`)
+
+  await next()
+
+  const ms = Date.now() - start
+  const status = c.res.status
+  const statusEmoji = status < 300 ? '✅' : status < 400 ? '🔀' : status < 500 ? '⚠️' : '💥'
+
+  console.log(`📤 [RESPONSE OUT] ${statusEmoji} Status: ${status} | Duration: ${ms}ms`)
+  console.log(`==================================================\n`)
+})
+
 // Verifikasi Hash Password ASP.NET Core Identity (PBKDF2)
 function verifyAspNetCorePasswordHash(password: string, hashedPasswordBase64: string): boolean {
   try {
     const decodedHash = Buffer.from(hashedPasswordBase64, 'base64')
     if (decodedHash[0] !== 0x01) {
-      console.log('🔍 [HASH DEBUG] Format hash bukan V3 (0x01)')
+      console.log('  🔍 [HASH DEBUG] Format hash bukan V3 (0x01)')
       return false
     }
 
@@ -56,10 +84,10 @@ function verifyAspNetCorePasswordHash(password: string, hashedPasswordBase64: st
     )
 
     const isValid = crypto.timingSafeEqual(expectedSubkey, actualSubkey)
-    console.log('🔍 [HASH DEBUG] Hasil pencocokan password:', isValid)
+    console.log('  🔍 [HASH DEBUG] Hasil pencocokan password:', isValid)
     return isValid
   } catch (err) {
-    console.error('🔍 [HASH DEBUG] Error saat dekode password hash:', err)
+    console.error('  🔍 [HASH DEBUG] Error saat dekode password hash:', err)
     return false
   }
 }
@@ -80,22 +108,20 @@ app.get('/', (c) => c.text('Hono Dual-Auth API is running!'))
 // 1. ENDPOINT AUTHENTICATION (Login & Logout)
 // ==========================================
 app.post('/api/auth/login', async (c) => {
-  console.log('\n--- 🚀 LOGIN REQUEST MASUK ---')
   try {
     const body = await c.req.json()
     const { username, password, rememberMe } = body
     const clientType = c.req.header('X-Client-Type')
 
-    console.log('📦 [LOGIN] Payload Body:', { username, passwordLength: password?.length, rememberMe })
-    console.log('🏷️ [LOGIN] Header X-Client-Type:', clientType)
+    console.log('  📦 [LOGIN] Payload Body:', { username, passwordLength: password?.length, rememberMe })
 
     if (!username || !password) {
-      console.log('❌ [LOGIN] Username atau password kosong dalam payload')
+      console.log('  ❌ [LOGIN] Username atau password kosong dalam payload')
       return c.json({ message: 'Username dan password wajib diisi' }, 400)
     }
 
     const normalizedInput = username.toUpperCase()
-    console.log('🔍 [LOGIN] Input dinormalisasi ke UpperCase:', normalizedInput)
+    console.log('  🔍 [LOGIN] Input dinormalisasi ke UpperCase:', normalizedInput)
 
     const users = await sql`
       SELECT "Id", "UserName", "NormalizedUserName", "Email", "NormalizedEmail", "PasswordHash", "LockoutEnabled", "LockoutEnd"
@@ -105,29 +131,29 @@ app.post('/api/auth/login', async (c) => {
       LIMIT 1
     `
 
-    console.log('🗄️ [LOGIN] Hasil Query DB (User ditemukan):', users.length)
+    console.log('  🗄️️ [LOGIN] Hasil Query DB (User ditemukan):', users.length)
 
     if (!users || users.length === 0) {
-      console.log('❌ [LOGIN] User TIDAK DITEMUKAN di DB berdasarkan NormalizedUserName/Email:', normalizedInput)
+      console.log('  ❌ [LOGIN] User TIDAK DITEMUKAN di DB berdasarkan NormalizedUserName/Email:', normalizedInput)
       return c.json({ message: 'Username atau password salah' }, 401)
     }
 
     const user = users[0]
-    console.log('👤 [LOGIN] User DB Ditemukan:', { id: user.Id, username: user.UserName, email: user.Email, hasPasswordHash: !!user.PasswordHash })
+    console.log('  👤 [LOGIN] User DB Ditemukan:', { id: user.Id, username: user.UserName, email: user.Email, hasPasswordHash: !!user.PasswordHash })
 
     if (!user.PasswordHash) {
-      console.log('❌ [LOGIN] User tidak memiliki PasswordHash di DB')
+      console.log('  ❌ [LOGIN] User tidak memiliki PasswordHash di DB')
       return c.json({ message: 'Username atau password salah' }, 401)
     }
 
     const isPasswordValid = verifyAspNetCorePasswordHash(password, user.PasswordHash)
     if (!isPasswordValid) {
-      console.log('❌ [LOGIN] Password TIDAK COCOK dengan PasswordHash')
+      console.log('  ❌ [LOGIN] Password TIDAK COCOK dengan PasswordHash')
       return c.json({ message: 'Username atau password salah' }, 401)
     }
 
     if (user.LockoutEnabled && user.LockoutEnd && new Date(user.LockoutEnd) > new Date()) {
-      console.log('⛔ [LOGIN] Akun sedang terkunci hingga:', user.LockoutEnd)
+      console.log('  ⛔ [LOGIN] Akun sedang terkunci hingga:', user.LockoutEnd)
       return c.json({ message: 'Akun Anda sedang terkunci' }, 403)
     }
 
@@ -140,7 +166,7 @@ app.post('/api/auth/login', async (c) => {
 
     // PERATURAN WEB: Pakai Cookie HTTP-Only
     if (clientType === 'web') {
-      console.log('✅ [LOGIN] Skenario WEB: Setting Cookie auth_token...')
+      console.log('  ✅ [LOGIN] Skenario WEB: Setting Cookie auth_token...')
       setCookie(c, 'auth_token', token, {
         httpOnly: true,
         secure: IS_PROD,
@@ -154,7 +180,7 @@ app.post('/api/auth/login', async (c) => {
 
     // PERATURAN MOBILE: Pakai Raw Token JWT
     if (clientType === 'mobile') {
-      console.log('✅ [LOGIN] Skenario MOBILE: Mengembalikan Raw JWT Token...')
+      console.log('  ✅ [LOGIN] Skenario MOBILE: Mengembalikan Raw JWT Token...')
       return c.json({
         message: 'Login mobile berhasil',
         token,
@@ -163,11 +189,11 @@ app.post('/api/auth/login', async (c) => {
       })
     }
 
-    console.log('❌ [LOGIN] Gagal: Header X-Client-Type bernilai invalid/tidak ada:', clientType)
+    console.log('  ❌ [LOGIN] Gagal: Header X-Client-Type bernilai invalid/tidak ada:', clientType)
     return c.json({ message: 'Header "X-Client-Type" wajib diset ke "web" atau "mobile"' }, 400)
 
   } catch (err) {
-    console.error('💥 [LOGIN] Fatal Error/Exception:', err)
+    console.error('  💥 [LOGIN] Fatal Error/Exception:', err)
     return c.json({ message: 'Terjadi kesalahan pada server' }, 500)
   }
 })
@@ -186,7 +212,6 @@ app.post('/api/auth/logout', (c) => {
 // 2. MIDDLEWARE PROTEKSI DUAL-AUTH
 // ==========================================
 app.use('/api/*', async (c, next) => {
-  // Biarkan endpoint auth bebas diakses
   if (c.req.path.startsWith('/api/auth/')) {
     return next()
   }
@@ -194,31 +219,32 @@ app.use('/api/*', async (c, next) => {
   const clientType = c.req.header('X-Client-Type')
   let token: string | undefined
 
-  // Skenario Web: Baca dari Cookie
   if (clientType === 'web') {
     token = getCookie(c, 'auth_token')
     if (!token) {
+      console.log('  ⚠️ [AUTH MIDDLEWARE] Ditolak: Cookie auth_token tidak ditemukan')
       return c.json({ error: 'Akses Ditolak: Cookie auth_token tidak ditemukan' }, 401)
     }
   } 
-  // Skenario Mobile: Baca dari Header Authorization
   else if (clientType === 'mobile') {
     const authHeader = c.req.header('Authorization')
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      console.log('  ⚠️ [AUTH MIDDLEWARE] Ditolak: Header Bearer JWT tidak ditemukan')
       return c.json({ error: 'Akses Ditolak: Header Bearer JWT tidak ditemukan' }, 401)
     }
     token = authHeader.substring(7)
   } 
   else {
+    console.log('  ⚠️ [AUTH MIDDLEWARE] Ditolak: Header X-Client-Type tidak valid')
     return c.json({ error: 'Header "X-Client-Type" wajib diset ("web" atau "mobile")' }, 400)
   }
 
-  // Verifikasi JWT Token
   try {
     const payload = await verify(token, JWT_SECRET, 'HS256')
     c.set('userId', payload.sub as string)
     await next()
   } catch (err) {
+    console.log('  ⚠️️ [AUTH MIDDLEWARE] Ditolak: Token JWT kadaluwarsa/invalid')
     return c.json({ error: 'Sesi / Token tidak valid atau telah kadaluwarsa' }, 401)
   }
 })
