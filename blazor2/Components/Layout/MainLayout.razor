@@ -1,31 +1,45 @@
 @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
 
-<div class="aumo-main-shell vh-100 vw-100 d-flex flex-column overflow-hidden bg-light">
+<AuthorizeView>
+    <Authorized>
+        <!-- Tampilan Layout Lengkap untuk User yang Sudah Login -->
+        <div class="aumo-main-shell vh-100 vw-100 d-flex flex-column overflow-hidden bg-light">
 
-    <!-- 1. TOPBAR (Fixed di Paling Atas) -->
-    <header class="topbar-container flex-shrink-0 w-100 z-3 border-bottom bg-white shadow-sm">
-        <AumoBlazor.Components.Layout.AppTopBar />
-    </header>
+            <!-- 1. TOPBAR (Fixed di Paling Atas) -->
+            <header class="topbar-container flex-shrink-0 w-100 z-3 border-bottom bg-white shadow-sm">
+                <AumoBlazor.Components.Layout.AppTopBar />
+            </header>
 
-    <!-- 2. SHELL UTAMA (Sidebar + Content) -->
-    <div class="aumo-body-shell flex-grow-1 d-flex flex-row overflow-hidden position-relative">
-        
-        <!-- SIDEBAR / NAVMENU (Fixed Scroll Sendiri jika Menu Panjang) -->
-        <aside class="sidebar-container flex-shrink-0 overflow-y-auto bg-white border-end shadow-sm">
-            <AumoBlazor.Components.Layout.NavMenu />
-        </aside>
+            <!-- 2. SHELL UTAMA (Sidebar + Content) -->
+            <div class="aumo-body-shell flex-grow-1 d-flex flex-row overflow-hidden position-relative">
+                
+                <!-- SIDEBAR / NAVMENU -->
+                <aside class="sidebar-container flex-shrink-0 overflow-y-auto bg-white border-end shadow-sm">
+                    <AumoBlazor.Components.Layout.NavMenu />
+                </aside>
 
-        <!-- MAIN CONTENT AREA (Kanan - Berdiri Sendiri dengan Scrollbar Sendiri) -->
-        <main id="mainContent" class="content flex-grow-1 overflow-y-auto p-3 p-md-4 d-flex flex-column min-w-0" role="main">
-            <div class="container-fluid p-0 flex-grow-1">
-                @Body
+                <!-- MAIN CONTENT AREA -->
+                <main id="mainContent" class="content flex-grow-1 overflow-y-auto p-3 p-md-4 d-flex flex-column min-w-0" role="main">
+                    <div class="container-fluid p-0 flex-grow-1">
+                        @Body
+                    </div>
+                </main>
+
             </div>
+
+        </div>
+    </Authorized>
+
+    <NotAuthorized>
+        <!-- Tampilan Polos (Hanya Konten Halaman) untuk User Belum Login / Landing Page -->
+        <main class="w-100 min-vh-100">
+            @Body
         </main>
+    </NotAuthorized>
+</AuthorizeView>
 
-    </div>
-
-</div>
-
+<style>
 /* Variable Tema Global Scope MainLayout */
 :root,
 [data-bs-theme="dark"] {
@@ -78,3 +92,4 @@
 ::deep h1, ::deep h2, ::deep h3, ::deep h4, ::deep h5, ::deep h6 {
     font-family: var(--font-heading);
 }
+</style>
