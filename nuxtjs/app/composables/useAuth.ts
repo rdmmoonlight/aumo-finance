@@ -1,4 +1,4 @@
-// Thin wrapper around AuthController's /api/v1/auth/* routes
+// Composables Auth untuk Hono Backend Render
 
 export interface AuthUser {
   userId: string
@@ -8,28 +8,26 @@ export interface AuthUser {
   roles: string[]
 }
 
-export interface MeResponse extends AuthUser {
-  success: boolean
+export interface MeResponse {
+  authenticated: boolean
+  user?: AuthUser
+  message?: string
 }
 
 export interface LoginResponse {
-  success: boolean
   message: string
-  userId: string
-  fullName: string
+  userId?: string
 }
 
 export interface RegisterPayload {
+  name: string
   email: string
   password: string
-  fullName?: string
-  userName?: string
 }
 
 export interface RegisterResponse {
-  success: boolean
   message: string
-  user?: AuthUser
+  user?: any
 }
 
 export function useAuthUser() {
@@ -43,23 +41,16 @@ export function useAuthChecked() {
 export async function fetchAuthUser() {
   const user = useAuthUser()
   const checked = useAuthChecked()
+  const api = useApi()
 
   try {
-    // Ambil header cookie hanya saat Server-Side Rendering (SSR)
-    const headers: Record<string, string> = import.meta.server
-      ? (useRequestHeaders(['cookie']) as Record<string, string>)
-      : {}
+    // Dipanggil ke Hono /api/auth/me
+    const response = await api<MeResponse>('/auth/me', {
+      method: 'GET'
+    })
 
-    const response = await $fetch<MeResponse>('/api/v1/auth/me', { headers })
-
-    if (response && response.success) {
-      user.value = {
-        userId: response.userId,
-        email: response.email,
-        userName: response.userName,
-        fullName: response.fullName,
-        roles: response.roles || []
-      }
+    if (response && response.authenticated && response.user) {
+      user.value = response.user
     } else {
       user.value = null
     }
@@ -79,29 +70,29 @@ export async function login(payload: {
 }) {
   const user = useAuthUser()
   const checked = useAuthChecked()
+  const api = useApi()
 
-  const response = await $fetch<LoginResponse>('/api/v1/auth/login', {
+  // Kirim payload sesuai kontrak Hono
+  const response = await api<LoginResponse>('/auth/login', {
     method: 'POST',
     body: {
-      email: payload.email,
+      username: payload.email, // 👈 Hono membaca 'username'
       password: payload.password,
-      rememberMe: payload.rememberMe ?? false,
-      isMobileClient: false
+      rememberMe: payload.rememberMe ?? false
     }
   })
 
-  // Set state user secara optimis dari respon login
-  if (response && response.success) {
+  if (response && response.userId) {
     user.value = {
       userId: response.userId,
       email: payload.email,
       userName: payload.email,
-      fullName: response.fullName || '',
+      fullName: payload.email.split('@')[0],
       roles: []
     }
     checked.value = true
 
-    // Ambil profil lengkap (roles, detail data) di background
+    // Refresh detail profil user dari backend
     fetchAuthUser().catch(() => {})
   }
 
@@ -109,7 +100,9 @@ export async function login(payload: {
 }
 
 export async function register(payload: RegisterPayload) {
-  const response = await $fetch<RegisterResponse>('/api/auth/register', {
+  const api = useApi()
+
+  const response = await api<RegisterResponse>('/auth/register', {
     method: 'POST',
     body: payload
   })
@@ -118,15 +111,16 @@ export async function register(payload: RegisterPayload) {
 }
 
 export async function logout() {
+  const api = useApi()
+
   try {
-    await $fetch('/api/v1/auth/logout', { method: 'POST' })
+    await api('/auth/logout', { method: 'POST' })
   } catch {
-    // Mengabaikan error network saat logout agar state lokal tetap dibersihkan
+    // Abaikan error jaringan saat logout
   } finally {
     useAuthUser().value = null
     useAuthChecked().value = true
 
-    // Redirect ke landing page setelah logout
     await navigateTo('/')
   }
 }
