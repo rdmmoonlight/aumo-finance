@@ -26,26 +26,29 @@ const state = reactive<Schema>({
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
   try {
-    const res = await login(event.data)
+    // Mapping event.data.email ke 'username' agar sesuai dengan Hono
+    const res = await login({
+      username: event.data.email, // 👈 Terjemahkan ke username
+      password: event.data.password,
+      rememberMe: event.data.rememberMe
+    })
 
-    if (res && res.success) {
+    // Hono mengembalikan { message: 'Login web berhasil', userId: '...' }
+    if (res && (res.userId || res.message)) {
       toast.add({
         title: 'Welcome back!',
-        description: `Logged in as ${res.fullName || 'User'}`,
+        description: res.message || 'Login berhasil',
         color: 'success'
       })
 
-      const redirect
-        = typeof route.query.redirect === 'string'
-          ? route.query.redirect
-          : '/home'
+      const redirect = typeof route.query.redirect === 'string'
+        ? route.query.redirect
+        : '/home'
+
       await navigateTo(redirect, { replace: true })
     }
   } catch (err: any) {
-    const message
-      = err.data?.statusMessage
-        || err.data?.message
-        || 'Invalid email/username or password.'
+    const message = err.data?.message || err.message || 'Invalid email/username or password.'
 
     toast.add({
       title: 'Login failed',
