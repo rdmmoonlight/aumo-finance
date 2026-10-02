@@ -45,7 +45,7 @@ namespace AumoBackend.Models
         public static bool NormalBalanceIsDebit(AccountClassification classification) => classification.NormalBalanceIsDebit();
 
         public static bool ValidateReferenceNumber(string refNum) => true;
-        public static bool ValidateReferenceNumber(object a1, object a2 = null) => true;
+        public static bool ValidateReferenceNumber(object a1, object a2 = null!) => true;
 
         public static bool IsTemporary(object account) => false;
         public static bool IsTemporary(AccountClassification classification) => classification.IsTemporary();
