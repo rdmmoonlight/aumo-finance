@@ -357,6 +357,27 @@ namespace AumoBackend
 
                 builder.Services.AddScoped<IGuardianService, GuardianService>();
                 builder.Services.AddScoped<ITransactionNumberService, TransactionNumberService>();
+
+                // Registrasi service aplikasi (DI)
+                builder.Services.AddScoped<AumoBackend.Services.Auth.IAuthService, AumoBackend.Services.Auth.AuthService>();
+                builder.Services.AddScoped<AumoBackend.Services.ChartOfAccounts.IChartOfAccountsService, AumoBackend.Services.ChartOfAccounts.ChartOfAccountsService>();
+                builder.Services.AddScoped<AumoBackend.Services.Dashboard.IDashboardService, AumoBackend.Services.Dashboard.DashboardService>();
+                builder.Services.AddScoped<AumoBackend.Services.Health.IHealthService, AumoBackend.Services.Health.HealthService>();
+                builder.Services.AddScoped<AumoBackend.Services.Home.IHomeService, AumoBackend.Services.Home.HomeService>();
+                builder.Services.AddScoped<AumoBackend.Services.JournalEntries.IJournalEntryService, AumoBackend.Services.JournalEntries.JournalEntryService>();
+                builder.Services.AddScoped<AumoBackend.Services.Notifications.INotificationsService, AumoBackend.Services.Notifications.NotificationsService>();
+                builder.Services.AddScoped<AumoBackend.Services.Periods.IPeriodsService, AumoBackend.Services.Periods.PeriodsService>();
+                builder.Services.AddScoped<AumoBackend.Services.IFinancialReportService, AumoBackend.Services.FinancialReportService>();
+                builder.Services.AddScoped<AumoBackend.Services.IGeneralLedgerService, AumoBackend.Services.GeneralLedgerService>();
+                builder.Services.AddScoped<AumoBackend.Services.IJournalService, AumoBackend.Services.JournalService>();
+                builder.Services.AddScoped<AumoBackend.Services.ITrialBalanceService, AumoBackend.Services.TrialBalanceService>();
+                builder.Services.AddScoped<AumoBackend.Services.IWorksheetService, AumoBackend.Services.WorksheetService>();
+                builder.Services.AddScoped<AumoBackend.Services.Settings.ISettingsService, AumoBackend.Services.Settings.SettingsService>();
+                builder.Services.AddScoped<AumoBackend.Services.Summary.ISummaryService, AumoBackend.Services.Summary.SummaryService>();
+                builder.Services.AddScoped<AumoBackend.Services.Tools.IAiService, AumoBackend.Services.Tools.AiService>();
+                builder.Services.AddScoped<AumoBackend.Services.Tools.ICloudStorageService, AumoBackend.Services.Tools.CloudinaryService>();
+                builder.Services.AddScoped<AumoBackend.Services.Tools.IMarketService, AumoBackend.Services.Tools.MarketService>();
+                builder.Services.AddScoped<AumoBackend.Services.Tools.IToolsService, AumoBackend.Services.Tools.ToolsService>();
                 builder.Services.AddTransient<ResendEmailSender>();
                 builder.Services.AddTransient<AumoBackend.Core.IEmailSender, AumoBackend.Core.ResendEmailSender>();
 
