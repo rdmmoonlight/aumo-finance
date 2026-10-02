@@ -1,0 +1,49 @@
+@page "/reports/general-ledger"
+@using AumoBlazor.ViewModels
+@using System.Net.Http
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>General Ledger</PageTitle>
+
+<div class="container-fluid my-4">
+    <h3 class="mb-4">General Ledger</h3>
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (accounts == null)
+            {
+                <p><em>Loading data...</em></p>
+            }
+            else if (!accounts.Any())
+            {
+                <p>No general ledger data found.</p>
+            }
+            else
+            {
+                <p>Data General Ledger Siap Ditampilkan.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<LedgerAccountViewModel> accounts = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGeneralLedgerAsync();
+    }
+
+    private async Task LoadGeneralLedgerAsync()
+    {
+        try
+        {
+            var response = await Http.GetFromJsonAsync<List<LedgerAccountViewModel>>("api/reports/general-ledger");
+            accounts = response ?? new List<LedgerAccountViewModel>();
+        }
+        catch
+        {
+            accounts = new List<LedgerAccountViewModel>();
+        }
+    }
+}

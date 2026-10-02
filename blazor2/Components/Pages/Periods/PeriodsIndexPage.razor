@@ -1,0 +1,12 @@
+@page "/periods"
+@inject HttpClient Http
+
+<h3>Periode Akuntansi</h3>
+<p>Memuat data dari Hono API...</p>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+    }
+}

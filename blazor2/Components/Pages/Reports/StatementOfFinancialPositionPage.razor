@@ -1,0 +1,92 @@
+@page "/reports/financial-position"
+@using AumoBlazor.ViewModels
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>Posisi Keuangan</PageTitle>
+
+<div class="container-fluid my-4">
+    <h3 class="mb-4">Laporan Posisi Keuangan (Neraca)</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (vm == null)
+            {
+                <p><em>Loading data dari Hono API...</em></p>
+            }
+            else
+            {
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Aset</h5>
+                        <table class="table table-sm">
+                            <tbody>
+                                @foreach (var item in vm.Assets)
+                                {
+                                    <tr>
+                                        <td>@item.AccountCode - @item.AccountName</td>
+                                        <td class="text-end">@item.Amount.ToString("N2")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Total Aset</th>
+                                    <th class="text-end">@vm.TotalAssets.ToString("N2")</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Liabilitas & Ekuitas</h5>
+                        <table class="table table-sm">
+                            <tbody>
+                                @foreach (var item in vm.Liabilities)
+                                {
+                                    <tr>
+                                        <td>@item.AccountCode - @item.AccountName</td>
+                                        <td class="text-end">@item.Amount.ToString("N2")</td>
+                                    </tr>
+                                }
+                                @foreach (var item in vm.EquityExcludingRetainedEarnings)
+                                {
+                                    <tr>
+                                        <td>@item.AccountCode - @item.AccountName</td>
+                                        <td class="text-end">@item.Amount.ToString("N2")</td>
+                                    </tr>
+                                }
+                                <tr>
+                                    <td>Laba Ditahan Akhir</td>
+                                    <td class="text-end">@vm.RetainedEarningsEnding.ToString("N2")</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Total Liabilitas & Ekuitas</th>
+                                    <th class="text-end">@vm.TotalLiabilitiesAndEquity.ToString("N2")</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private StatementOfFinancialPositionViewModel? vm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            vm = await Http.GetFromJsonAsync<StatementOfFinancialPositionViewModel>("api/reports/financial-position");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetch Financial Position: {ex.Message}");
+            vm = new StatementOfFinancialPositionViewModel();
+        }
+    }
+}
