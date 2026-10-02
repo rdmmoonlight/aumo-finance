@@ -4,6 +4,7 @@
 @using System.Net.Http.Json
 @inject HttpClient Http
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Login - Aumo Finance</PageTitle>
 
@@ -32,6 +33,12 @@
                     <input type="password" class="form-control" @bind="loginModel.Password" placeholder="Masukkan kata sandi" required />
                 </div>
 
+                <!-- Checkbox Remember Me -->
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="rememberMe" @bind="loginModel.RememberMe" />
+                    <label class="form-check-label" for="rememberMe">Ingat Saya</label>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-100" disabled="@isSubmitting">
                     @(isSubmitting ? "Memproses..." : "Masuk")
                 </button>
@@ -41,9 +48,24 @@
 </div>
 
 @code {
-    private LoginModel loginModel = new();
+    private ExtendedLoginModel loginModel = new();
     private bool isSubmitting = false;
     private string? errorMessage;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Ambil username yang tersimpan di localStorage jika ada
+            var savedUser = await JS.InvokeAsync<string?>("localStorage.getItem", "remembered_username");
+            if (!string.IsNullOrEmpty(savedUser))
+            {
+                loginModel.Username = savedUser;
+                loginModel.RememberMe = true;
+                StateHasChanged();
+            }
+        }
+    }
 
     private async Task HandleLogin()
     {
@@ -56,6 +78,16 @@
 
             if (response.IsSuccessStatusCode)
             {
+                // Kelola simpan/hapus username berdasarkan status Remember Me
+                if (loginModel.RememberMe)
+                {
+                    await JS.InvokeVoidAsync("localStorage.setItem", "remembered_username", loginModel.Username);
+                }
+                else
+                {
+                    await JS.InvokeVoidAsync("localStorage.removeItem", "remembered_username");
+                }
+
                 Navigation.NavigateTo("/", forceLoad: true);
             }
             else
@@ -72,5 +104,11 @@
         {
             isSubmitting = false;
         }
+    }
+
+    // Model dengan properti RememberMe
+    public class ExtendedLoginModel : LoginModel
+    {
+        public bool RememberMe { get; set; }
     }
 }
