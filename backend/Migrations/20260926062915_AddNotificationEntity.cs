@@ -3,7 +3,7 @@ using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable

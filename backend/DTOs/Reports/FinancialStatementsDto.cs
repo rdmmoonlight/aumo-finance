@@ -5,11 +5,6 @@ using AumoBackend.Services.Auth;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.DTOs;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs;
 namespace AumoBackend.DTOs.Reports;
 
 public class IncomeStatementApiResponse

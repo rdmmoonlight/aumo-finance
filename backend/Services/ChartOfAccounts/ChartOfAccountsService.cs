@@ -28,7 +28,7 @@ public class ChartOfAccountsService : IChartOfAccountsService
         if (!string.IsNullOrWhiteSpace(search))
         {
             var keyword = search.Trim().ToLower();
-            query = query.Where(a => a.AccountName.ToLower().Contains(keyword) 
+            query = query.Where(a => a.AccountName.ToLower().Contains(keyword)
                                   || a.ReferenceNumber.ToString().Contains(keyword));
         }
 
@@ -59,11 +59,11 @@ public class ChartOfAccountsService : IChartOfAccountsService
                             j.JournalEntry.EntryDate >= currentPeriod.StartDate &&
                             j.JournalEntry.EntryDate <= currentPeriod.EndDate)
                 .GroupBy(j => j.AccountId)
-                .Select(g => new 
-                { 
-                    AccountId = g.Key, 
-                    TotalDebit = g.Sum(j => j.Debit), 
-                    TotalCredit = g.Sum(j => j.Credit) 
+                .Select(g => new
+                {
+                    AccountId = g.Key,
+                    TotalDebit = g.Sum(j => j.Debit),
+                    TotalCredit = g.Sum(j => j.Credit)
                 })
                 .ToDictionaryAsync(x => x.AccountId);
 
@@ -71,8 +71,8 @@ public class ChartOfAccountsService : IChartOfAccountsService
             {
                 if (accountBalances.TryGetValue(account.Id, out var balance))
                 {
-                    account.Balance = AccountClassificationHelper.NormalBalanceIsDebit(account.Type) 
-                        ? balance.TotalDebit - balance.TotalCredit 
+                    account.Balance = AccountClassificationHelper.NormalBalanceIsDebit(account.Type)
+                        ? balance.TotalDebit - balance.TotalCredit
                         : balance.TotalCredit - balance.TotalDebit;
                 }
                 else

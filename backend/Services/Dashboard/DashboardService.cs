@@ -144,7 +144,7 @@ public class DashboardService : IDashboardService
         var trendData = isAnnual
             ? Enumerable.Range(1, 12).Select(m =>
             {
-                var monthLines = periodLines.Where(l => l.EntryDate.Month  == m);
+                var monthLines = periodLines.Where(l => l.EntryDate.Month == m);
                 var rev = monthLines.Where(l => incomeIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
                 var exp = monthLines.Where(l => expenseAccountsMeta.Select(e => e.Id).Contains(l.AccountId)).Sum(l => l.Debit - l.Credit);
                 return new ChartTrendItemDto
