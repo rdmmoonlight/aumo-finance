@@ -25,7 +25,10 @@
  * route actually received. The h3 utility functions below accept any
  * H3Event shape at runtime, so this avoids the false type conflict.
  */
-export async function proxyToBackend<Event extends { method?: string }>(event: Event, backendPath: string) {
+export async function proxyToBackend<Event extends { method?: string }>(
+  event: Event,
+  backendPath: string
+) {
   const config = useRuntimeConfig()
   const method = (event.method || 'GET').toUpperCase()
 
@@ -36,9 +39,10 @@ export async function proxyToBackend<Event extends { method?: string }>(event: E
   // Read the raw bytes so JSON bodies, multipart/form-data (e.g. avatar
   // upload) and empty bodies (GET/DELETE) all pass through unchanged —
   // encoding: false keeps binary uploads intact.
-  const body = method === 'GET' || method === 'HEAD'
-    ? undefined
-    : await readRawBody(event as never, false)
+  const body
+    = method === 'GET' || method === 'HEAD'
+      ? undefined
+      : await readRawBody(event as never, false)
 
   try {
     const response = await $fetch.raw(backendPath, {
@@ -62,10 +66,13 @@ export async function proxyToBackend<Event extends { method?: string }>(event: E
   } catch (error: unknown) {
     // Surface the backend's real status + body (e.g. 401, 429 lockout,
     // validation errors) instead of a generic 500.
-    const fetchError = error as { response?: { status?: number, statusText?: string, _data?: unknown } }
+    const fetchError = error as {
+      response?: { status?: number, statusText?: string, _data?: unknown }
+    }
     throw createError({
       statusCode: fetchError?.response?.status ?? 502,
-      statusMessage: fetchError?.response?.statusText ?? 'Backend request failed',
+      statusMessage:
+        fetchError?.response?.statusText ?? 'Backend request failed',
       data: fetchError?.response?._data
     })
   }

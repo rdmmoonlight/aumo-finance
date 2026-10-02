@@ -26,11 +26,15 @@ const state = reactive<Schema>({
 const avatarPreview = ref<string | null>(null)
 
 // Sinkronkan data dari authUser jika sudah tersedia / diperbarui
-watch(authUser, (user) => {
-  if (!user) return
-  state.fullName = user.fullName ?? ''
-  state.userName = user.userName ?? ''
-}, { immediate: true })
+watch(
+  authUser,
+  (user) => {
+    if (!user) return
+    state.fullName = user.fullName ?? ''
+    state.userName = user.userName ?? ''
+  },
+  { immediate: true }
+)
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   loading.value = true
@@ -77,10 +81,13 @@ async function onAvatarChange(event: Event) {
     const form = new FormData()
     form.append('avatar', file)
 
-    const response = await $fetch<{ success: boolean; avatarUrl: string }>('/api/v1/settings/avatar', {
-      method: 'POST',
-      body: form
-    })
+    const response = await $fetch<{ success: boolean, avatarUrl: string }>(
+      '/api/v1/settings/avatar',
+      {
+        method: 'POST',
+        body: form
+      }
+    )
 
     avatarPreview.value = response.avatarUrl
 
@@ -153,7 +160,11 @@ async function onAvatarChange(event: Event) {
         </UFormField>
 
         <UFormField label="Email">
-          <UInput :model-value="authUser?.email || ''" disabled class="w-full" />
+          <UInput
+            :model-value="authUser?.email || ''"
+            disabled
+            class="w-full"
+          />
         </UFormField>
 
         <UFormField v-if="authUser?.roles?.length" label="Roles">

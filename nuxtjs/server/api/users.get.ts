@@ -5,16 +5,16 @@ export default defineEventHandler(async (event) => {
       select: {
         Id: true,
         FullName: true,
-        Email: true,
+        Email: true
       },
-      take: 10,
+      take: 10
     })
 
     return { success: true, data: users }
   } catch (error: any) {
     throw createError({
       statusCode: 500,
-      statusMessage: error.message,
+      statusMessage: error.message
     })
   }
 })

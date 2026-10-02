@@ -16,6 +16,9 @@ const periods = [
     value-key="value"
     variant="ghost"
     class="data-[state=open]:bg-elevated"
-    :ui="{ trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200' }"
+    :ui="{
+      trailingIcon:
+        'group-data-[state=open]:rotate-180 transition-transform duration-200'
+    }"
   />
 </template>

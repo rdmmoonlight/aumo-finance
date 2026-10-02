@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { h } from 'vue'
 import type { TableColumn } from '@nuxt/ui'
-import type { DashboardAccountBalance, DashboardData } from '~/composables/useDashboardData'
+import type {
+  DashboardAccountBalance,
+  DashboardData
+} from '~/composables/useDashboardData'
 
 const props = defineProps<{
   dashboard: DashboardData | null | undefined
@@ -27,7 +30,12 @@ const columns: TableColumn<DashboardAccountBalance>[] = [
   {
     accessorKey: 'balance',
     header: () => h('div', { class: 'text-right' }, 'Saldo'),
-    cell: ({ row }) => h('div', { class: 'text-right font-medium' }, formatCurrencyIDR(row.getValue('balance')))
+    cell: ({ row }) =>
+      h(
+        'div',
+        { class: 'text-right font-medium' },
+        formatCurrencyIDR(row.getValue('balance'))
+      )
   }
 ]
 </script>

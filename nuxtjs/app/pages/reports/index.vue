@@ -5,7 +5,11 @@ definePageMeta({
 })
 
 // Fetch Real Data dari API Summary
-const { data: summary, pending: isLoadingSummary, refresh } = await useFetch('/api/v1/reports/summary')
+const {
+  data: summary,
+  pending: isLoadingSummary,
+  refresh
+} = await useFetch('/api/v1/reports/summary')
 
 // Format angka ribuan (e.g. 1.284)
 const formatInt = (num?: number) => {
@@ -31,7 +35,9 @@ const summaryStats = computed(() => [
   {
     title: 'Periode Berjalan',
     value: summary.value?.activePeriodName || '-',
-    subtext: summary.value?.isPeriodOpen ? 'Status: Terbuka' : 'Status: Ditutup / Belum Set',
+    subtext: summary.value?.isPeriodOpen
+      ? 'Status: Terbuka'
+      : 'Status: Ditutup / Belum Set',
     icon: 'i-lucide-calendar-range',
     color: 'text-amber-500'
   }
@@ -45,14 +51,16 @@ const reportCategories = ref([
     items: [
       {
         title: 'General Journal Report',
-        description: 'Daftar rinci seluruh jurnal umum pencatatan debit & kredit harian.',
+        description:
+          'Daftar rinci seluruh jurnal umum pencatatan debit & kredit harian.',
         to: '/reports/general-journal',
         icon: 'i-lucide-notebook-tabs',
         badge: 'Utama'
       },
       {
         title: 'General Ledger (Buku Besar)',
-        description: 'Rincian pergerakan saldo dan mutasi untuk setiap akun COA.',
+        description:
+          'Rincian pergerakan saldo dan mutasi untuk setiap akun COA.',
         to: '/reports/general-ledger',
         icon: 'i-lucide-book-marked',
         badge: 'Segera'
@@ -72,7 +80,8 @@ const reportCategories = ref([
     items: [
       {
         title: 'Income Statement (Laba Rugi)',
-        description: 'Ringkasan pendapatan, beban, dan profit bersih perusahaan.',
+        description:
+          'Ringkasan pendapatan, beban, dan profit bersih perusahaan.',
         to: '/reports/income-statement',
         icon: 'i-lucide-trending-up',
         badge: 'Rencana'
@@ -110,30 +119,52 @@ const reportCategories = ref([
 
       <UDashboardPanelContent class="space-y-8 p-6">
         <!-- Banner Intro -->
-        <div class="rounded-xl bg-gradient-to-r from-blue-600/10 via-indigo-500/10 to-purple-500/10 p-6 border border-blue-500/20">
+        <div
+          class="rounded-xl bg-gradient-to-r from-blue-600/10 via-indigo-500/10 to-purple-500/10 p-6 border border-blue-500/20"
+        >
           <div class="flex items-start justify-between">
             <div class="space-y-2">
-              <h2 class="text-xl font-bold tracking-tight">Pusat Laporan & Analytics Keuangan</h2>
-              <p class="text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl">
-                Akses seluruh laporan akuntansi, audit pencatatan jurnal umum, hingga analisis neraca keuangan secara terpusat dan konsisten.
+              <h2 class="text-xl font-bold tracking-tight">
+                Pusat Laporan & Analytics Keuangan
+              </h2>
+              <p
+                class="text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl"
+              >
+                Akses seluruh laporan akuntansi, audit pencatatan jurnal umum,
+                hingga analisis neraca keuangan secara terpusat dan konsisten.
               </p>
             </div>
-            <UIcon name="i-lucide-file-pie-chart" class="w-12 h-12 text-blue-500 hidden sm:block opacity-80" />
+            <UIcon
+              name="i-lucide-file-pie-chart"
+              class="w-12 h-12 text-blue-500 hidden sm:block opacity-80"
+            />
           </div>
         </div>
 
         <!-- Quick Summary Cards (Real Data) -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <UCard v-for="(stat, idx) in summaryStats" :key="idx" class="relative overflow-hidden">
+          <UCard
+            v-for="(stat, idx) in summaryStats"
+            :key="idx"
+            class="relative overflow-hidden"
+          >
             <div class="flex items-center justify-between">
               <div class="space-y-1">
-                <p class="text-xs font-medium text-neutral-500 dark:text-neutral-400">{{ stat.title }}</p>
-                
+                <p
+                  class="text-xs font-medium text-neutral-500 dark:text-neutral-400"
+                >
+                  {{ stat.title }}
+                </p>
+
                 <!-- Skeleton Loader saat pending -->
                 <USkeleton v-if="isLoadingSummary" class="h-8 w-24 my-1" />
-                <p v-else class="text-2xl font-bold tracking-tight">{{ stat.value }}</p>
-                
-                <span class="text-xs text-neutral-500 font-medium block">{{ stat.subtext }}</span>
+                <p v-else class="text-2xl font-bold tracking-tight">
+                  {{ stat.value }}
+                </p>
+
+                <span class="text-xs text-neutral-500 font-medium block">{{
+                  stat.subtext
+                }}</span>
               </div>
               <div class="p-3 bg-neutral-100 dark:bg-neutral-800 rounded-lg">
                 <UIcon :name="stat.icon" class="w-6 h-6" :class="stat.color" />
@@ -143,10 +174,20 @@ const reportCategories = ref([
         </div>
 
         <!-- Section List Kategori Laporan -->
-        <div v-for="(group, gIdx) in reportCategories" :key="gIdx" class="space-y-4">
+        <div
+          v-for="(group, gIdx) in reportCategories"
+          :key="gIdx"
+          class="space-y-4"
+        >
           <div>
-            <h3 class="text-lg font-semibold text-neutral-800 dark:text-neutral-100">{{ group.category }}</h3>
-            <p class="text-xs text-neutral-500 dark:text-neutral-400">{{ group.description }}</p>
+            <h3
+              class="text-lg font-semibold text-neutral-800 dark:text-neutral-100"
+            >
+              {{ group.category }}
+            </h3>
+            <p class="text-xs text-neutral-500 dark:text-neutral-400">
+              {{ group.description }}
+            </p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -161,7 +202,9 @@ const reportCategories = ref([
               >
                 <div class="space-y-3">
                   <div class="flex items-center justify-between">
-                    <div class="p-2.5 bg-blue-50 dark:bg-blue-950/50 rounded-lg text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div
+                      class="p-2.5 bg-blue-50 dark:bg-blue-950/50 rounded-lg text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors"
+                    >
                       <UIcon :name="item.icon" class="w-5 h-5" />
                     </div>
                     <UBadge
@@ -174,11 +217,18 @@ const reportCategories = ref([
                   </div>
 
                   <div>
-                    <h4 class="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1">
+                    <h4
+                      class="font-semibold text-sm group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-1"
+                    >
                       {{ item.title }}
-                      <UIcon name="i-lucide-arrow-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all" />
+                      <UIcon
+                        name="i-lucide-arrow-right"
+                        class="w-4 h-4 opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all"
+                      />
                     </h4>
-                    <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2">
+                    <p
+                      class="text-xs text-neutral-500 dark:text-neutral-400 mt-1 line-clamp-2"
+                    >
                       {{ item.description }}
                     </p>
                   </div>

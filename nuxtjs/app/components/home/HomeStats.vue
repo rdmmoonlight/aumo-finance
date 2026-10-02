@@ -19,7 +19,9 @@ const stats = computed<Stat[]>(() => {
     {
       title: 'Cash & Bank',
       icon: 'i-lucide-banknote',
-      value: formatCurrencyIDR((d?.totalCashOnHand ?? 0) + (d?.totalBankBalance ?? 0))
+      value: formatCurrencyIDR(
+        (d?.totalCashOnHand ?? 0) + (d?.totalBankBalance ?? 0)
+      )
     },
     {
       title: 'Liabilities',
@@ -46,13 +48,17 @@ const stats = computed<Stat[]>(() => {
       :ui="{
         container: 'gap-y-1.5',
         wrapper: 'items-start',
-        leading: 'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25 flex-col',
+        leading:
+          'p-2.5 rounded-full bg-primary/10 ring ring-inset ring-primary/25 flex-col',
         title: 'font-normal text-muted text-xs uppercase'
       }"
       class="lg:rounded-none first:rounded-l-lg last:rounded-r-lg hover:z-1"
     >
       <div class="flex items-center gap-2">
-        <span v-if="pending" class="text-2xl font-semibold text-dimmed">···</span>
+        <span
+          v-if="pending"
+          class="text-2xl font-semibold text-dimmed"
+        >···</span>
         <span v-else class="text-2xl font-semibold text-highlighted">
           {{ stat.value }}
         </span>

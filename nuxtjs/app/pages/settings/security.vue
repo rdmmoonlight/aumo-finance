@@ -61,7 +61,11 @@ async function onSubmitPassword(event: FormSubmitEvent<PasswordSchema>) {
 
 // Hapus akun via API C#
 async function onDeleteAccount() {
-  if (!confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+  if (
+    !confirm(
+      'Are you sure you want to delete your account? This action cannot be undone.'
+    )
+  ) {
     return
   }
 
@@ -126,35 +130,59 @@ interface GuardianDashboard {
   activeSessions: ActiveSession[]
 }
 
-const { data: guardianResponse, pending: loadingGuardian, refresh: fetchGuardianDashboard } = await useAsyncData(
-  'guardian-dashboard',
-  () => {
-    const headers = import.meta.server
-      ? (useRequestHeaders(['cookie']) as Record<string, string>)
-      : {}
-    return $fetch<{ success: boolean; data: GuardianDashboard }>('/api/v1/settings/guardian/dashboard', { headers })
-  }
-)
+const {
+  data: guardianResponse,
+  pending: loadingGuardian,
+  refresh: fetchGuardianDashboard
+} = await useAsyncData('guardian-dashboard', () => {
+  const headers = import.meta.server
+    ? (useRequestHeaders(['cookie']) as Record<string, string>)
+    : {}
+  return $fetch<{ success: boolean, data: GuardianDashboard }>(
+    '/api/v1/settings/guardian/dashboard',
+    { headers }
+  )
+})
 
 const guardian = computed(() => guardianResponse.value?.data || null)
 
 async function revokeSession(sessionId: string) {
   try {
-    await $fetch(`/api/v1/settings/guardian/revoke-session/${sessionId}`, { method: 'POST' })
-    toast.add({ title: 'Success', description: 'Sesi berhasil dicabut.', color: 'success' })
+    await $fetch(`/api/v1/settings/guardian/revoke-session/${sessionId}`, {
+      method: 'POST'
+    })
+    toast.add({
+      title: 'Success',
+      description: 'Sesi berhasil dicabut.',
+      color: 'success'
+    })
     await fetchGuardianDashboard()
   } catch {
-    toast.add({ title: 'Error', description: 'Gagal mencabut sesi.', color: 'error' })
+    toast.add({
+      title: 'Error',
+      description: 'Gagal mencabut sesi.',
+      color: 'error'
+    })
   }
 }
 
 async function revokeAllSessions() {
   try {
-    await $fetch('/api/v1/settings/guardian/revoke-all-sessions', { method: 'POST' })
-    toast.add({ title: 'Success', description: 'Semua sesi lain berhasil dicabut.', color: 'success' })
+    await $fetch('/api/v1/settings/guardian/revoke-all-sessions', {
+      method: 'POST'
+    })
+    toast.add({
+      title: 'Success',
+      description: 'Semua sesi lain berhasil dicabut.',
+      color: 'success'
+    })
     await fetchGuardianDashboard()
   } catch {
-    toast.add({ title: 'Error', description: 'Gagal mencabut semua sesi.', color: 'error' })
+    toast.add({
+      title: 'Error',
+      description: 'Gagal mencabut semua sesi.',
+      color: 'error'
+    })
   }
 }
 </script>
@@ -164,7 +192,9 @@ async function revokeAllSessions() {
     <UCard>
       <template #header>
         <div>
-          <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
+          <h3
+            class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
+          >
             Password
           </h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -211,7 +241,9 @@ async function revokeAllSessions() {
       <template #header>
         <div class="flex items-center justify-between">
           <div>
-            <h3 class="text-base font-semibold leading-6 text-gray-900 dark:text-white">
+            <h3
+              class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
+            >
               Guardian
             </h3>
             <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -219,7 +251,10 @@ async function revokeAllSessions() {
             </p>
           </div>
           <UButton
-            v-if="guardian?.activeSessions?.length && guardian.activeSessions.length > 1"
+            v-if="
+              guardian?.activeSessions?.length
+                && guardian.activeSessions.length > 1
+            "
             label="Cabut Semua Sesi Lain"
             color="error"
             variant="soft"
@@ -229,20 +264,29 @@ async function revokeAllSessions() {
         </div>
       </template>
 
-      <div v-if="loadingGuardian" class="text-sm text-gray-500 dark:text-gray-400 py-2">
+      <div
+        v-if="loadingGuardian"
+        class="text-sm text-gray-500 dark:text-gray-400 py-2"
+      >
         Memuat data keamanan...
       </div>
 
       <template v-else-if="guardian">
         <div class="space-y-6">
-          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50">
+          <div
+            class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50"
+          >
             <div>
               <p class="text-xs text-gray-500 dark:text-gray-400">
                 Status Keamanan
               </p>
               <p
                 class="font-semibold"
-                :class="guardian.securityStatus.statusLevel === 'Warning' ? 'text-red-500' : 'text-emerald-500'"
+                :class="
+                  guardian.securityStatus.statusLevel === 'Warning'
+                    ? 'text-red-500'
+                    : 'text-emerald-500'
+                "
               >
                 {{ guardian.securityStatus.statusLevel }}
               </p>
@@ -260,7 +304,13 @@ async function revokeAllSessions() {
                 Login Berhasil Terakhir
               </p>
               <p class="font-semibold text-gray-900 dark:text-white">
-                {{ guardian.securityStatus.lastSuccessfulLogin ? new Date(guardian.securityStatus.lastSuccessfulLogin).toLocaleString('id-ID') : '-' }}
+                {{
+                  guardian.securityStatus.lastSuccessfulLogin
+                    ? new Date(
+                      guardian.securityStatus.lastSuccessfulLogin
+                    ).toLocaleString("id-ID")
+                    : "-"
+                }}
               </p>
             </div>
           </div>
@@ -277,7 +327,9 @@ async function revokeAllSessions() {
               >
                 <div class="text-sm">
                   <p class="font-medium text-gray-900 dark:text-white">
-                    {{ session.deviceName }} — {{ session.browser }} ({{ session.operatingSystem }})
+                    {{ session.deviceName }} — {{ session.browser }} ({{
+                      session.operatingSystem
+                    }})
                     <UBadge
                       v-if="session.isCurrent"
                       color="success"
@@ -316,14 +368,20 @@ async function revokeAllSessions() {
               >
                 <div>
                   <p class="font-medium text-gray-900 dark:text-white">
-                    {{ activity.activityType }} ({{ activity.browser }} / {{ activity.operatingSystem }})
+                    {{ activity.activityType }} ({{ activity.browser }} /
+                    {{ activity.operatingSystem }})
                   </p>
                   <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ new Date(activity.createdAt).toLocaleString('id-ID') }} • {{ activity.ipAddress }}
+                    {{ new Date(activity.createdAt).toLocaleString("id-ID") }} •
+                    {{ activity.ipAddress }}
                   </p>
                 </div>
-                <UBadge :color="activity.isSuccess ? 'success' : 'error'" variant="subtle" size="sm">
-                  {{ activity.isSuccess ? 'Sukses' : 'Gagal' }}
+                <UBadge
+                  :color="activity.isSuccess ? 'success' : 'error'"
+                  variant="subtle"
+                  size="sm"
+                >
+                  {{ activity.isSuccess ? "Sukses" : "Gagal" }}
                 </UBadge>
               </div>
             </div>
@@ -332,14 +390,20 @@ async function revokeAllSessions() {
       </template>
     </UCard>
 
-    <UCard class="border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/10">
+    <UCard
+      class="border-red-200 dark:border-red-900/50 bg-red-50/50 dark:bg-red-950/10"
+    >
       <template #header>
         <div>
-          <h3 class="text-base font-semibold leading-6 text-red-600 dark:text-red-400">
+          <h3
+            class="text-base font-semibold leading-6 text-red-600 dark:text-red-400"
+          >
             Delete Account
           </h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            No longer want to use our service? You can delete your account here. This action is not reversible. All information related to this account will be deleted permanently.
+            No longer want to use our service? You can delete your account here.
+            This action is not reversible. All information related to this
+            account will be deleted permanently.
           </p>
         </div>
       </template>
