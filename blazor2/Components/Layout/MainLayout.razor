@@ -1,23 +1,25 @@
 @inherits LayoutComponentBase
 
-<div class="aumo-main-shell min-vh-100 min-vw-0 d-flex flex-column">
+<div class="aumo-main-shell vh-100 vw-100 d-flex flex-column overflow-hidden bg-light">
 
-    <!-- 1. TOPBAR (Membentang Penuh 100% di Atas) -->
-    <div class="topbar-container flex-shrink-0 w-100">
+    <!-- 1. TOPBAR (Fixed di Paling Atas) -->
+    <header class="topbar-container flex-shrink-0 w-100 z-3 border-bottom bg-white shadow-sm">
         <AumoBlazor.Components.Layout.AppTopBar />
-    </div>
+    </header>
 
-    <!-- 2. SHELL UTAMA (Sidebar & Main Content Menyamping) -->
-    <div class="aumo-body-shell flex-grow-1 d-flex flex-row flex-nowrap w-100 align-items-stretch position-relative">
+    <!-- 2. SHELL UTAMA (Sidebar + Content) -->
+    <div class="aumo-body-shell flex-grow-1 d-flex flex-row overflow-hidden position-relative">
         
-        <!-- SIDEBAR / NAVMENU (Kiri) -->
-        <aside class="sidebar-container flex-shrink-0">
+        <!-- SIDEBAR / NAVMENU (Fixed Scroll Sendiri jika Menu Panjang) -->
+        <aside class="sidebar-container flex-shrink-0 overflow-y-auto bg-white border-end shadow-sm">
             <AumoBlazor.Components.Layout.NavMenu />
         </aside>
 
-        <!-- MAIN CONTENT AREA (Kanan - Mengisi Sisa Ruang) -->
-        <main id="mainContent" class="content flex-grow-1 p-2 p-md-4 d-flex flex-column" role="main">
-            @Body
+        <!-- MAIN CONTENT AREA (Kanan - Berdiri Sendiri dengan Scrollbar Sendiri) -->
+        <main id="mainContent" class="content flex-grow-1 overflow-y-auto p-3 p-md-4 d-flex flex-column min-w-0" role="main">
+            <div class="container-fluid p-0 flex-grow-1">
+                @Body
+            </div>
         </main>
 
     </div>
