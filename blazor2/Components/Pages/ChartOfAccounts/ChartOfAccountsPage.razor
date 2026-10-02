@@ -1,0 +1,116 @@
+@page "/chart-of-accounts"
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>Chart of Accounts</PageTitle>
+
+<div class="container my-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Daftar Akun (Chart of Accounts)</h3>
+        <button class="btn btn-primary" @onclick="() => showCreateModal = true">Tambah Akun</button>
+    </div>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+    @if (!string.IsNullOrEmpty(errorMessage))
+    {
+        <div class="alert alert-danger">@errorMessage</div>
+    }
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Cari akun..." @bind="searchText" @bind:event="oninput" />
+        </div>
+        <div class="col-md-6">
+            <select class="form-select" @bind="categoryFilter">
+                <option value="">Semua Kategori</option>
+                @foreach (var type in AccountTypes)
+                {
+                    <option value="@type">@type</option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (accounts == null)
+            {
+                <p><em>Loading accounts...</em></p>
+            }
+            else
+            {
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Kode Akun</th>
+                            <th>Nama Akun</th>
+                            <th>Tipe / Kategori</th>
+                            <th class="text-end">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var acc in FilteredAccounts)
+                        {
+                            <tr>
+                                <td>@acc.Code</td>
+                                <td>@acc.Name</td>
+                                <td><span class="badge bg-secondary">@acc.Type</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => OpenEditModal(acc)">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmAndDelete(acc.Id)">Hapus</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    public class AccountModel
+    {
+        public int Id { get; set; }
+        public string Code { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+    }
+
+    private List<AccountModel>? accounts;
+    private string searchText = "";
+    private string categoryFilter = "";
+    private string? successMessage;
+    private string? errorMessage;
+    private bool showCreateModal = false;
+
+    private List<string> AccountTypes = new() { "Asset", "Liability", "Equity", "Revenue", "Expense" };
+
+    private IEnumerable<AccountModel> FilteredAccounts => (accounts ?? new())
+        .Where(a => (string.IsNullOrEmpty(searchText) || a.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) || a.Code.Contains(searchText)) &&
+                    (string.IsNullOrEmpty(categoryFilter) || a.Type == categoryFilter));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAccountsAsync();
+    }
+
+    private async Task LoadAccountsAsync()
+    {
+        try
+        {
+            accounts = await Http.GetFromJsonAsync<List<AccountModel>>("api/chart-of-accounts");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Gagal memuat data akun: {ex.Message}";
+            accounts = new();
+        }
+    }
+
+    private void OpenEditModal(AccountModel acc) { }
+    private async Task ConfirmAndDelete(int id) { await Task.Yield(); }
+}

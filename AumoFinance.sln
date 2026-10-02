@@ -7,9 +7,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{1AE8
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AumoBackend", "backend\AumoBackend.csproj", "{004D5C46-EB41-47A4-919D-AA702FCD9718}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "blazor-legacy", "blazor-legacy", "{FBE5E7EC-4E7A-A0EF-F29E-CC5784E035EE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "blazor2", "blazor2", "{EDE1737E-C8A1-74FB-AEEA-39425A919C01}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AumoBlazor", "blazor-legacy\AumoBlazor.csproj", "{067B1845-DB60-4609-AA04-689BBEB18FF5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AumoBlazor", "blazor2\AumoBlazor.csproj", "{067B1845-DB60-4609-AA04-689BBEB18FF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +51,6 @@ Global
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{004D5C46-EB41-47A4-919D-AA702FCD9718} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
-		{067B1845-DB60-4609-AA04-689BBEB18FF5} = {FBE5E7EC-4E7A-A0EF-F29E-CC5784E035EE}
+		{067B1845-DB60-4609-AA04-689BBEB18FF5} = {EDE1737E-C8A1-74FB-AEEA-39425A919C01}
 	EndGlobalSection
 EndGlobal

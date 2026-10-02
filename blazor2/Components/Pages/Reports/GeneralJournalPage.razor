@@ -1,0 +1,12 @@
+@page "/reports/general-journal"
+@inject HttpClient Http
+
+<h3>Laporan Jurnal Umum</h3>
+<p>Memuat data dari Hono API...</p>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Yield();
+    }
+}

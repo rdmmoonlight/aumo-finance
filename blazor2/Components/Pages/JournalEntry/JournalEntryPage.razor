@@ -1,0 +1,113 @@
+@page "/journal-entry"
+@using System.Globalization
+@using AumoBlazor.ViewModels
+@inject HttpClient Http
+
+<PageTitle>Journal Entry</PageTitle>
+
+<div class="container my-4">
+    <h3>@(IsEdit ? "Edit Journal Entry" : "New Journal Entry")</h3>
+
+    @if (!string.IsNullOrEmpty(successMessage))
+    {
+        <div class="alert alert-success">@successMessage</div>
+    }
+
+    <div class="card shadow-sm mt-3">
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label class="form-label">No. Transaksi</label>
+                    <input class="form-control" @bind="transactionNumber" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tipe Jurnal</label>
+                    <input class="form-control" @bind="journalType" />
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Tanggal</label>
+                    <input type="date" class="form-control" @bind="entryDate" />
+                </div>
+            </div>
+
+            <button class="btn btn-sm btn-outline-primary mb-3" @onclick="AddLine">Tambah Baris</button>
+
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Akun</th>
+                        <th>Keterangan</th>
+                        <th class="text-end">Debit</th>
+                        <th class="text-end">Kredit</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var line in lines)
+                    {
+                        <tr>
+                            <td>
+                                <input class="form-control" @bind="line.AccountCode" />
+                            </td>
+                            <td>
+                                <input class="form-control" @bind="line.Description" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control text-end" @bind="line.Debit" />
+                            </td>
+                            <td>
+                                <input type="number" class="form-control text-end" @bind="line.Credit" />
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" @onclick="() => RemoveLine(line)">Hapus</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div>
+                    <strong>Total Debit:</strong> @TotalDebit.ToString("N2", CultureInfo) | 
+                    <strong>Total Kredit:</strong> @TotalCredit.ToString("N2", CultureInfo)
+                </div>
+                <div>
+                    <button class="btn btn-secondary me-2" @onclick="ResetForm">Reset</button>
+                    <button class="btn btn-primary" @onclick="HandleSubmit" disabled="@(!IsBalanced)">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    public class JournalLineModel
+    {
+        public string AccountCode { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Debit { get; set; }
+        public decimal Credit { get; set; }
+    }
+
+    private bool IsEdit = false;
+    private string? successMessage;
+    private string? lockedMessage;
+    private List<string> validationErrors = new();
+    private string transactionNumber = "JV-001";
+    private string journalType = "General";
+    private DateTime entryDate = DateTime.Today;
+    private List<JournalLineModel> lines = new() { new JournalLineModel() };
+    private List<string> availableAccounts = new();
+    private CultureInfo CultureInfo = new CultureInfo("id-ID");
+
+    private decimal TotalDebit => lines.Sum(l => l.Debit);
+    private decimal TotalCredit => lines.Sum(l => l.Credit);
+    private bool IsBalanced => TotalDebit == TotalCredit && TotalDebit > 0;
+
+    private void AddLine() => lines.Add(new JournalLineModel());
+    private void RemoveLine(JournalLineModel line) => lines.Remove(line);
+    private void OnDescriptionInput(object e) { }
+    private void SelectSuggestion(string s) { }
+    private void ResetForm() => lines.Clear();
+    private async Task HandleSubmit() { await Task.Yield(); }
+}

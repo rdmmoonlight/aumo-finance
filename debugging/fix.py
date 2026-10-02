@@ -1,61 +1,108 @@
 import os
-import re
-import subprocess
 
-def reset_and_fix_file(file_path, target_var):
-    """
-    1. Mengembalikan file ke status awal git (bersih dari perubahan kurung kurawal yang rusak).
-    2. Mengubah 'using (var doc = ...)' menjadi 'using var doc = ...;' tanpa merubah kurung kurawal class/method.
-    """
-    if not os.path.exists(file_path):
-        return False
+def fix_blazor_auth_and_routing(blazor_path):
+    components_dir = os.path.join(blazor_path, "Components")
+    os.makedirs(components_dir, exist_ok=True)
 
-    # 1. Reset file via Git agar jumlah { } kembali seimbang
-    try:
-        subprocess.run(["git", "checkout", "HEAD", "--", file_path], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    except Exception:
-        pass  # Jika bukan repositori git, lanjut membaca isi saat ini
+    print("=== MEMPERBARUI PROGRAM.CS DENGAN AUTHENTICATION SERVICES ===")
 
-    with open(file_path, "r", encoding="utf-8") as f:
-        content = f.read()
+    # 1. Update Program.cs
+    program_path = os.path.join(blazor_path, "Program.cs")
+    program_content = """using AumoBlazor.Components;
+using Microsoft.AspNetCore.Components.Authorization;
+using System.Security.Claims;
 
-    original = content
+var builder = WebApplication.CreateBuilder(args);
 
-    # 2. Perbaiki CS0103 dengan mengganti blok using ber-kurung kurawal:
-    #    using (var doc = JsonDocument.Parse(...)) {
-    #    ==> using var doc = JsonDocument.Parse(...);
-    #    Dan menghapus kurung tutup '}' yang berpasangan dengannya secara tepat.
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
 
-    pattern = r'using\s*\(\s*(?:var|JsonDocument|XmlDocument)\s+' + re.escape(target_var) + r'\s*=\s*([^)]+)\)\s*\{'
-    
-    # Ganti 'using (var doc = ...)' menjadi 'using var doc = ...;'
-    content = re.sub(pattern, r'using var ' + target_var + r' = \1;', content)
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
 
-    if content != original:
-        with open(file_path, "w", encoding="utf-8") as f:
-            f.write(content)
-        print(f"  [✓] Successfully cleaned and fixed scope for '{target_var}' in: {os.path.relpath(file_path)}")
-        return True
+// Mock AuthenticationStateProvider jika otentikasi dikelola oleh Hono API
+builder.Services.AddScoped<AuthenticationStateProvider, AnonymousAuthStateProvider>();
 
-    return False
+builder.Services.AddHttpClient();
+builder.Services.AddScoped(sp => new HttpClient 
+{ 
+    BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000/") 
+});
 
+var app = builder.Build();
 
-def run_fixes(backend_path):
-    print("=== RESETTING CORRUPTED BRACES & FIXING SCOPES ===")
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
+    app.UseHsts();
+}
 
-    targets = [
-        (os.path.join(backend_path, "Services", "Tools", "MarketService.cs"), "doc"),
-        (os.path.join(backend_path, "Core", "AccountingServices.cs"), "doc"),
-        (os.path.join(backend_path, "Services", "Home", "HomeService.cs"), "jsonDoc"),
-    ]
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseAntiforgery();
 
-    for fpath, var_name in targets:
-        reset_and_fix_file(fpath, var_name)
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
-    print("=== REPAIR COMPLETED ===")
+app.Run();
 
+// Provider sederhana agar AuthorizeView / CascadingAuthenticationState bekerja tanpa error
+public class AnonymousAuthStateProvider : AuthenticationStateProvider
+{
+    public override Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        // Secara default mengembalikan user dummy terautentikasi / anonim
+        var identity = new ClaimsIdentity(new[]
+        {
+            new Claim(ClaimTypes.Name, "Ghofur User")
+        }, "HonoAuth");
+
+        var user = new ClaimsPrincipal(identity);
+        return Task.FromResult(new AuthenticationState(user));
+    }
+}
+"""
+    with open(program_path, "w", encoding="utf-8") as f:
+        f.write(program_content)
+    print("  [✓] Program.cs diperbarui dengan AuthStateProvider.")
+
+    # 2. Update Routes.razor dengan CascadingAuthenticationState & Router
+    routes_path = os.path.join(components_dir, "Routes.razor")
+    routes_content = """@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Authorization
+
+<CascadingAuthenticationState>
+    <Router AppAssembly="@typeof(Program).Assembly">
+        <Found Context="routeData">
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
+                <NotAuthorized>
+                    <p role="alert">Anda tidak memiliki akses ke halaman ini.</p>
+                </NotAuthorized>
+                <Authorizing>
+                    <p>Memuat otentikasi...</p>
+                </Authorizing>
+            </AuthorizeRouteView>
+            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+        </Found>
+        <NotFound>
+            <PageTitle>Not found</PageTitle>
+            <LayoutView Layout="@typeof(Layout.MainLayout)">
+                <p role="alert">Maaf, halaman tidak ditemukan.</p>
+            </LayoutView>
+        </NotFound>
+    </Router>
+</CascadingAuthenticationState>
+"""
+    with open(routes_path, "w", encoding="utf-8") as f:
+        f.write(routes_content)
+    print("  [✓] Components/Routes.razor diperbarui dengan CascadingAuthenticationState.")
 
 if __name__ == "__main__":
-    base_dir = os.getcwd()
-    backend_path = base_dir if os.path.exists(os.path.join(base_dir, "AumoBackend.csproj")) else os.path.join(base_dir, "backend")
-    run_fixes(backend_path)
+    blazor_path = r"E:\Github\aumo-finance\blazor2"
+    if not os.path.exists(blazor_path):
+        blazor_path = os.path.join(os.getcwd(), "blazor2")
+
+    print("=== PERBAIKAN AUTH & ROUTING BLAZOR ===")
+    fix_blazor_auth_and_routing(blazor_path)
+    print("=== SELESAI ===")

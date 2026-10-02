@@ -1,0 +1,59 @@
+@page "/reports/retained-earnings"
+@using AumoBlazor.ViewModels
+@using System.Net.Http.Json
+@inject HttpClient Http
+
+<PageTitle>Laba Ditahan</PageTitle>
+
+<div class="container-fluid my-4">
+    <h3 class="mb-4">Laporan Laba Ditahan</h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            @if (vm == null)
+            {
+                <p><em>Loading data dari Hono API...</em></p>
+            }
+            else
+            {
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <td><strong>Saldo Awal Laba Ditahan</strong></td>
+                            <td class="text-end">@vm.BeginningBalance.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Laba Bersih Periode Berjalan</strong></td>
+                            <td class="text-end text-success">+ @vm.NetIncome.ToString("N2")</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Dividen / Pengambilan</strong></td>
+                            <td class="text-end text-danger">- @vm.Dividends.ToString("N2")</td>
+                        </tr>
+                        <tr class="table-secondary font-weight-bold">
+                            <td><strong>Saldo Akhir Laba Ditahan</strong></td>
+                            <td class="text-end"><strong>@vm.EndingBalance.ToString("N2")</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private RetainedEarningsViewModel? vm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            vm = await Http.GetFromJsonAsync<RetainedEarningsViewModel>("api/reports/retained-earnings");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetch Retained Earnings: {ex.Message}");
+            vm = new RetainedEarningsViewModel();
+        }
+    }
+}
