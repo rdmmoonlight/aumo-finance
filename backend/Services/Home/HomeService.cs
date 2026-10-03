@@ -1,22 +1,16 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
+using AumoBackend.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using AumoBackend.DTOs;
 
 namespace AumoBackend.Services.Home;
 
 public class HomeService : IHomeService
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private static readonly CultureInfo IdCulture = CultureInfo.GetCultureInfo("id-ID");
 
     public HomeService(IHttpClientFactory httpClientFactory)
     {
@@ -50,7 +44,7 @@ public class HomeService : IHomeService
     private static async Task<MarketIndicatorDto?> FetchUsdRateAsync(HttpClient client)
     {
         const string yahooUrl = "https://query1.finance.yahoo.com/v8/finance/chart/IDR=X";
-        var yahooResult = await FetchYahooChartDataAsync(client, yahooUrl, "USD/IDR", "Rupiah", isCurrency: true);
+        var yahooResult = await FetchYahooChartDataAsync(client, yahooUrl, "USD/IDR", "Rupiah");
         if (yahooResult != null) return yahooResult;
 
         try
@@ -70,9 +64,8 @@ public class HomeService : IHomeService
                 {
                     Symbol = "USD/IDR",
                     Name = "Rupiah",
-                    Price = $"Rp {Math.Round(rate):N0}",
-                    Change = "+0.00%",
-                    IsUp = true
+                    Price = rate,
+                    Change = 0m
                 };
             }
         }
@@ -87,15 +80,14 @@ public class HomeService : IHomeService
     private static async Task<MarketIndicatorDto?> FetchIhsgAsync(HttpClient client)
     {
         const string yahooUrl = "https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE";
-        return await FetchYahooChartDataAsync(client, yahooUrl, "IHSG", "Indeks Saham", isCurrency: false);
+        return await FetchYahooChartDataAsync(client, yahooUrl, "IHSG", "Indeks Saham");
     }
 
     private static async Task<MarketIndicatorDto?> FetchYahooChartDataAsync(
         HttpClient client,
         string url,
         string symbol,
-        string name,
-        bool isCurrency)
+        string name)
     {
         if (!url.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
         {
@@ -134,21 +126,14 @@ public class HomeService : IHomeService
                 prevClose = prevCloseElement.GetDecimal();
             }
 
-            decimal changePercent = prevClose != 0 ? ((price - prevClose) / prevClose) * 100 : 0;
-
-            string formattedPrice = isCurrency
-                ? $"Rp {Math.Round(price):N0}"
-                : price.ToString("N2", IdCulture);
-
-            string formattedChange = $"{(changePercent >= 0 ? "+" : "")}{changePercent:F2}%";
+            decimal changePercent = prevClose != 0 ? ((price - prevClose) / prevClose) * 100 : 0m;
 
             return new MarketIndicatorDto
             {
                 Symbol = symbol,
                 Name = name,
-                Price = formattedPrice,
-                Change = formattedChange,
-                IsUp = changePercent >= 0
+                Price = price,
+                Change = Math.Round(changePercent, 2)
             };
         }
         catch
