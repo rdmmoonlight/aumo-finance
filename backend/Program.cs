@@ -377,8 +377,6 @@ namespace AumoBackend
                 builder.Services.AddScoped<AumoBackend.Services.Tools.ICloudStorageService, AumoBackend.Services.Tools.CloudinaryService>();
                 builder.Services.AddScoped<AumoBackend.Services.Tools.IMarketService, AumoBackend.Services.Tools.MarketService>();
                 builder.Services.AddScoped<AumoBackend.Services.Tools.IToolsService, AumoBackend.Services.Tools.ToolsService>();
-                builder.Services.AddTransient<ResendEmailSender>();
-                builder.Services.AddTransient<AumoBackend.Core.IEmailSender, AumoBackend.Core.ResendEmailSender>();
 
                 // ===================================== 
                 // 8. FORWARDED HEADERS CONFIGURATION 
