@@ -46,6 +46,16 @@ namespace AumoBackend.Helpers
             await db.SaveChangesAsync();
         }
 
+        // 4. Hapus pilihan periode milik user (dipanggil dari PeriodsController dan PeriodsService)
+        public static async Task ClearSelectionAsync(AppDbContext db, Guid userId)
+        {
+            if (db == null || userId == Guid.Empty) return;
+
+            await db.Periods
+                .Where(p => p.UserId == userId && p.IsSelected)
+                .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
+        }
+
         // Keep stub lain jika diperlukan oleh kompilasi modul lain
         public static Period? GetSelectedPeriod(HttpContext context) => null;
         public static Task<Period?> GetSelectedPeriodAsync(HttpContext context) => Task.FromResult<Period?>(null);
