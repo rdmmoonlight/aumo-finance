@@ -59,7 +59,12 @@ public class ChartOfAccountsController : ControllerBase
 
         var accountIds = loadedAccounts.Select(a => a.Id).ToList();
 
-        var currentPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var currentPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId)
+            ?? await _db.Periods
+                .AsNoTracking()
+                .Where(p => p.UserId == userId)
+                .OrderByDescending(p => p.StartDate)
+                .FirstOrDefaultAsync();
 
         if (currentPeriod == null)
         {
@@ -70,11 +75,16 @@ public class ChartOfAccountsController : ControllerBase
         }
         else
         {
+            var startUtc = currentPeriod.StartDate.Date;
+            var endUtc = currentPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
+
             var accountBalances = await _db.JournalEntryLines
                 .Where(j => accountIds.Contains(j.AccountId) &&
                             j.JournalEntry != null &&
-                            j.JournalEntry.EntryDate >= currentPeriod.StartDate &&
-                            j.JournalEntry.EntryDate <= currentPeriod.EndDate)
+                            j.JournalEntry.UserId == userId &&
+                            (j.JournalEntry.JournalType == "General" || j.JournalEntry.JournalType == "Adjusting") &&
+                            j.JournalEntry.EntryDate >= startUtc &&
+                            j.JournalEntry.EntryDate <= endUtc)
                 .GroupBy(j => j.AccountId)
                 .Select(g => new
                 {

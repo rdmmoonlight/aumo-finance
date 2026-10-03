@@ -44,6 +44,23 @@ namespace AumoBackend.Models
         public static bool NormalBalanceIsDebit(object account) => true;
         public static bool NormalBalanceIsDebit(AccountClassification classification) => classification.NormalBalanceIsDebit();
 
+        // Saldo normal debit: Assets, OperatingExpenses, OtherExpenses.
+        // Saldo normal kredit: Liabilities, Equity, OperatingIncome, OtherIncome.
+        public static bool NormalBalanceIsDebit(string? accountType)
+        {
+            return accountType switch
+            {
+                "Assets" => true,
+                "OperatingExpenses" => true,
+                "OtherExpenses" => true,
+                "Liabilities" => false,
+                "Equity" => false,
+                "OperatingIncome" => false,
+                "OtherIncome" => false,
+                _ => true
+            };
+        }
+
         public static bool ValidateReferenceNumber(string refNum) => true;
         public static bool ValidateReferenceNumber(object a1, object a2 = null!) => true;
 
