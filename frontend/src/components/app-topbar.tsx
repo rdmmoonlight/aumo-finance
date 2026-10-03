@@ -29,14 +29,18 @@ import {
   Loader2,
 } from "lucide-react";
 import {
-  useGetApiV1AuthMeQuery,
-  useGetApiV1PeriodsQuery,
+  useGetApiV1AuthMeQuery
+} from "@/lib/store/auth/authApi";
+import {
+  useGetApiV1PeriodsQuery
+} from "@/lib/store/(authenticated)/periods/periodsApi";
+import {
   useGetApiV1HealthQuery,
   useGetApiV1NotificationsQuery,
   usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
   GetApiV1NotificationsApiResponse,
-} from "@/lib/generatedApi";
+} from "@/lib/store/commonApi";
 
 interface PeriodItem {
   id: number;

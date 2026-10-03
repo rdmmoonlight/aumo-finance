@@ -37,9 +37,11 @@ import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   useGetApiV1ChartOfAccountsQuery,
+} from "#/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
+import {
   usePostApiV1ToolsImportJournalEntriesMutation,
   AccountMappingDetailDto,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/tools/toolsApi";
 import {
   Upload,
   Eye,

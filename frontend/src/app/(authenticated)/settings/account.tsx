@@ -9,11 +9,13 @@ import {
 } from "@tanstack/react-table";
 import {
   useGetApiV1AuthMeQuery,
+} from "@/lib/store/auth/authApi";
+import {
   usePutApiV1SettingsProfileMutation,
   usePostApiV1SettingsAvatarMutation,
   usePostApiV1SettingsChangePasswordMutation,
   useDeleteApiV1SettingsDeleteAccountMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/settings/settingsApi";
 import {
   Card,
   CardContent,

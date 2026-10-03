@@ -1,0 +1,35 @@
+name: Auto Generate RTK Query API
+
+on:
+  push:
+    paths:
+      - 'frontend/openapi-config.cjs' # Jalankan otomatis jika config di dalam folder frontend berubah
+  workflow_dispatch: # Memungkinkan kamu klik tombol "Run workflow" manual dari web GitHub
+
+jobs:
+  generate-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json' # Menentukan lokasi lockfile untuk caching
+
+      - name: Install Dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Generate API
+        working-directory: ./frontend
+        run: npx @rtk-query/codegen-openapi openapi-config.cjs
+
+      - name: Commit & Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(frontend): auto-generate API client from OpenAPI spec"
+          file_pattern: "frontend/src/lib/store/**/*.ts"

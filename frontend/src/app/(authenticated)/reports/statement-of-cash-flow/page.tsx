@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useGetApiV1ReportsStatementOfCashFlowQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsStatementOfCashFlowQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
   Banknote,
   Calendar,

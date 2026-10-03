@@ -56,7 +56,7 @@ import {
   usePostApiV1ChartOfAccountsMutation,
   usePutApiV1ChartOfAccountsByIdMutation,
   useDeleteApiV1ChartOfAccountsByIdMutation,
-} from "@/lib/generatedApi";
+} from "#/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import {
   Network,
   Plus,

@@ -8,7 +8,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { useGetApiV1ReportsStatementOfFinancialPositionQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsStatementOfFinancialPositionQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,

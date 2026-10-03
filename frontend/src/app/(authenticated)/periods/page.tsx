@@ -38,7 +38,7 @@ import {
   usePostApiV1PeriodsSelectByIdMutation,
   usePostApiV1PeriodsClearSelectionMutation,
   usePostApiV1PeriodsCloseByIdMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/periods/periodsApi";
 import {
   getPeriodColumns,
   CreatePeriodForm,

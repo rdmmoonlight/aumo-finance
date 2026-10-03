@@ -8,7 +8,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { useGetApiV1ReportsGeneralLedgerPermanentQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsGeneralLedgerPermanentQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
