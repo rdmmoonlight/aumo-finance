@@ -7,9 +7,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import {
-  useGetApiV1AuthMeQuery,
-} from "@/lib/store/auth/authApi";
+import { useGetApiV1AuthMeQuery } from "@/lib/store/auth/authApi";
 import {
   usePutApiV1SettingsProfileMutation,
   usePostApiV1SettingsAvatarMutation,

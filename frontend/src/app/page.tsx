@@ -21,7 +21,11 @@ export default function LandingPage(): React.JSX.Element {
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
-  const { data: user, isLoading: checkingAuth, isSuccess } = useGetApiV1AuthMeQuery();
+  const {
+    data: user,
+    isLoading: checkingAuth,
+    isSuccess,
+  } = useGetApiV1AuthMeQuery();
   const isAuthenticated = isSuccess && Boolean(user);
 
   useEffect(() => {
@@ -55,20 +59,36 @@ export default function LandingPage(): React.JSX.Element {
       {/* LEFT */}
       <div className="flex flex-col justify-between border-r border-zinc-800 bg-zinc-950 p-8 lg:p-12">
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded bg-white font-bold text-black">A</div>
-          <span className="text-sm font-semibold tracking-tight">AUMO FINANCE</span>
+          <div className="flex h-8 w-8 items-center justify-center rounded bg-white font-bold text-black">
+            A
+          </div>
+          <span className="text-sm font-semibold tracking-tight">
+            AUMO FINANCE
+          </span>
         </div>
         <div className="mt-12 lg:mt-0">
           <h1 className="max-w-lg text-5xl font-semibold leading-[0.95] tracking-[-0.03em]">
-            Operations,<br /> neatly<br /> organized.
+            Operations,
+            <br /> neatly
+            <br /> organized.
           </h1>
           <p className="mt-6 max-w-sm text-sm leading-6 text-zinc-400">
-            Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan pameran.
+            Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan
+            pameran.
           </p>
           <div className="mt-12 border-t border-zinc-800">
-            <div className="flex justify-between border-b border-zinc-800 py-4 text-xs"><span className="font-mono text-zinc-500">01</span><span>Revenues & Expenses</span></div>
-            <div className="flex justify-between border-b border-zinc-800 py-4 text-xs"><span className="font-mono text-zinc-500">02</span><span>Tracking</span></div>
-            <div className="flex justify-between border-b border-zinc-800 py-4 text-xs"><span className="font-mono text-zinc-500">03</span><span>Finance & Costings</span></div>
+            <div className="flex justify-between border-b border-zinc-800 py-4 text-xs">
+              <span className="font-mono text-zinc-500">01</span>
+              <span>Revenues & Expenses</span>
+            </div>
+            <div className="flex justify-between border-b border-zinc-800 py-4 text-xs">
+              <span className="font-mono text-zinc-500">02</span>
+              <span>Tracking</span>
+            </div>
+            <div className="flex justify-between border-b border-zinc-800 py-4 text-xs">
+              <span className="font-mono text-zinc-500">03</span>
+              <span>Finance & Costings</span>
+            </div>
           </div>
         </div>
         <div className="hidden justify-between font-mono text-xs text-zinc-500 lg:flex">
@@ -80,18 +100,36 @@ export default function LandingPage(): React.JSX.Element {
       {/* RIGHT */}
       <div className="flex flex-col items-center justify-center gap-6 bg-black p-6 lg:p-12">
         <div className="max-w-sm text-center">
-          <h2 className="text-2xl font-semibold tracking-tight">Selamat Datang</h2>
-          <p className="mt-2 text-sm text-zinc-400">Silakan masuk atau buat akun baru untuk mengakses dashboard.</p>
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Selamat Datang
+          </h2>
+          <p className="mt-2 text-sm text-zinc-400">
+            Silakan masuk atau buat akun baru untuk mengakses dashboard.
+          </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
-          <Button disabled={checkingAuth} onClick={() => handleOpenModal("login")} className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50">
-            {checkingAuth ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+          <Button
+            disabled={checkingAuth}
+            onClick={() => handleOpenModal("login")}
+            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50"
+          >
+            {checkingAuth ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Lock className="w-4 h-4" />
+            )}
             <span>{checkingAuth ? "Checking..." : "Sign In"}</span>
             {!checkingAuth && <ArrowRight className="w-4 h-4" />}
           </Button>
-          <Button disabled={checkingAuth} onClick={() => handleOpenModal("register")} variant="outline" className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50">
-            <UserPlus className="w-4 h-4" /><span>Register</span>
+          <Button
+            disabled={checkingAuth}
+            onClick={() => handleOpenModal("register")}
+            variant="outline"
+            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Register</span>
           </Button>
         </div>
 
@@ -109,7 +147,10 @@ export default function LandingPage(): React.JSX.Element {
                   {authMode === "login" ? (
                     <LoginPage initialMode="login" onSuccess={handleSuccess} />
                   ) : (
-                    <RegisterPage initialMode="register" onSuccess={handleSuccess} />
+                    <RegisterPage
+                      initialMode="register"
+                      onSuccess={handleSuccess}
+                    />
                   )}
                 </Suspense>
               </GoogleOAuthProvider>

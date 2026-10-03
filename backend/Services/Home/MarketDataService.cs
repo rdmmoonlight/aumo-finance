@@ -17,8 +17,8 @@ namespace AumoBackend.Services
         private readonly IConfiguration _configuration;
 
         public MarketDataService(
-            HttpClient httpClient, 
-            ILogger<MarketDataService> logger, 
+            HttpClient httpClient,
+            ILogger<MarketDataService> logger,
             IConfiguration configuration)
         {
             _httpClient = httpClient;
@@ -35,7 +35,7 @@ namespace AumoBackend.Services
             {
                 var apiKey = _configuration["ApiIndonesia:ApiKey"];
                 var request = new HttpRequestMessage(HttpMethod.Get, "https://use.apiindonesia.id/api/v1/kurs/latest?base=USD&target=IDR");
-                
+
                 if (!string.IsNullOrEmpty(apiKey))
                 {
                     request.Headers.Add("x-api-key", apiKey);
