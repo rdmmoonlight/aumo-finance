@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useGetApiV1ReportsTrialBalanceAdjustedQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsWorksheetQuery } from "@/lib/generatedApi";
 import {
   ListChecks,
   Calendar,
@@ -218,7 +218,7 @@ function TrialTable({
 
 export default function AdjustedTrialBalancePage() {
   const { data, isLoading, isError, error } =
-    useGetApiV1ReportsTrialBalanceAdjustedQuery();
+    useGetApiV1ReportsWorksheetQuery();
 
   const noPeriod =
     (data as any)?.hasPeriodSelected === false ||
