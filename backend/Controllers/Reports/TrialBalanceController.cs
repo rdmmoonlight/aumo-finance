@@ -6,7 +6,7 @@ using AumoBackend.DTOs.Reports;
 namespace AumoBackend.Controllers.Reports
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("/api/v1/[controller]")]
     public class TrialBalanceController : ControllerBase
     {
         public static Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
