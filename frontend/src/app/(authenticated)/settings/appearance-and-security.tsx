@@ -12,7 +12,7 @@ import {
   useGetApiV1SettingsGuardianDashboardQuery,
   usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation,
   usePostApiV1SettingsGuardianRevokeAllSessionsMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/settings/settingsApi";
 import {
   Card,
   CardContent,

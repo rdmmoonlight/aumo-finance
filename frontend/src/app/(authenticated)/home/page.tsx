@@ -14,7 +14,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetApiV1KursQuery } from "@/lib/generatedApi";
+import { useGetApiV1KursQuery } from "@/lib/store/(authenticated)/home/homeApi";
 
 interface MarketItem {
   symbol: string;

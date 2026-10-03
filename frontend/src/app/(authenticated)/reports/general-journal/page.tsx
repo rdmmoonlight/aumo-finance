@@ -10,9 +10,11 @@ import {
   ColumnDef,
 } from "@tanstack/react-table";
 import {
-  useGetApiV1ReportsJournalsGeneralQuery,
   useDeleteApiV1JournalEntryDeleteByIdMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
+import {
+  useGetApiV1ReportsJournalsGeneralQuery,
+} from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,

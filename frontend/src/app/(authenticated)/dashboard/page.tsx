@@ -24,7 +24,7 @@ import {
 } from "chart.js";
 // @ts-ignore
 import { Doughnut, Bar, Line } from "react-chartjs-2";
-import { useGetApiV1DashboardQuery } from "@/lib/generatedApi";
+import { useGetApiV1DashboardQuery } from "@/lib/store/(authenticated)/dashboard/dashboardApi";
 import {
   Card,
   CardContent,

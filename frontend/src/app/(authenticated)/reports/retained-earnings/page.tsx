@@ -8,7 +8,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { useGetApiV1ReportsRetainedEarningsQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsRetainedEarningsQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
   Card,
   CardContent,

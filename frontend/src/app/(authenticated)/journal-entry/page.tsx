@@ -11,7 +11,6 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,12 +34,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  useGetApiV1ChartOfAccountsQuery,
   useGetApiV1JournalEntryNextTransactionNumberQuery,
   useGetApiV1JournalEntryByIdQuery,
   usePostApiV1JournalEntryCreateMutation,
   usePutApiV1JournalEntryEditByIdMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
+import {
+  useGetApiV1ChartOfAccountsQuery,
+} from "#/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import {
   Edit,
   BookOpen,

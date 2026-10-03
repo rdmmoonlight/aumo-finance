@@ -20,7 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useGetApiV1ReportsGeneralLedgerTemporaryQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsGeneralLedgerTemporaryQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
   BookOpen,
   Calendar,

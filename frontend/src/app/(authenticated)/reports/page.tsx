@@ -33,7 +33,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useGetApiV1SummaryQuery } from "@/lib/generatedApi";
+import { useGetApiV1SummaryQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 
 type ReportItem = {
   slug: string;

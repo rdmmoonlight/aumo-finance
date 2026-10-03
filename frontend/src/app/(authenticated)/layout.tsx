@@ -4,8 +4,10 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   useGetApiV1AuthMeQuery,
+} from "@/lib/store/auth/authApi";
+import {
   useGetApiV1PeriodsOpenInfoQuery,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/periods/periodsApi";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
 import { AppFooter } from "@/components/app-footer";

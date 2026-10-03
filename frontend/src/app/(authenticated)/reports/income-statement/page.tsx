@@ -21,7 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useGetApiV1ReportsIncomeStatementQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsIncomeStatementQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
   TrendingUp,
   Calendar,

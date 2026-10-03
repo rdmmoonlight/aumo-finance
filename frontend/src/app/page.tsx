@@ -3,7 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import LoginPage from "@/app/auth/page";
-import { useGetApiV1AuthMeQuery } from "@/lib/generatedApi";
+import { useGetApiV1AuthMeQuery } from "@/lib/store/auth/authApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,33 +11,46 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Lock, ArrowRight, UserPlus } from "lucide-react";
+import { Lock, ArrowRight, UserPlus, Loader2 } from "lucide-react";
 
 export default function LandingPage() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
-  // RTK Query untuk mengecek status autentikasi
+  // RTK Query untuk mengecek status autentikasi saat ini
   const {
     data: user,
     isLoading: checkingAuth,
     isSuccess,
   } = useGetApiV1AuthMeQuery();
 
+  const isAuthenticated = isSuccess && Boolean(user);
+
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";
 
-    // Jika fetching sukses dan user terautentikasi, redirect ke /home
-    if (isSuccess && user) {
+    if (isAuthenticated) {
       router.replace("/home");
     }
-  }, [isSuccess, user, router]);
+  }, [isAuthenticated, router]);
 
   const handleOpenModal = (mode: "login" | "register") => {
     setAuthMode(mode);
     setOpen(true);
   };
+
+  // Tampilan loading penuh jika sudah terautentikasi dan menunggu redirect
+  if (isAuthenticated) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-black text-white">
+        <div className="flex items-center gap-3 text-sm text-zinc-400">
+          <Loader2 className="h-4 w-4 animate-spin" />
+          <span>Redirecting to dashboard...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]">
@@ -105,9 +118,13 @@ export default function LandingPage() {
             onClick={() => handleOpenModal("login")}
             className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50 transition-colors"
           >
-            <Lock className="w-4 h-4" />
+            {checkingAuth ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Lock className="w-4 h-4" />
+            )}
             <span>{checkingAuth ? "Checking..." : "Sign In"}</span>
-            <ArrowRight className="w-4 h-4" />
+            {!checkingAuth && <ArrowRight className="w-4 h-4" />}
           </Button>
 
           <Button
@@ -124,20 +141,24 @@ export default function LandingPage() {
         {/* Modal Dialog Form */}
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent className="border-zinc-800 bg-zinc-950 text-white sm:max-w-md p-0 overflow-hidden">
-            <DialogHeader className="sr-only">
-              <DialogTitle>
-                {authMode === "login" ? "Sign In" : "Create Account"}
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="text-lg font-medium text-zinc-100">
+                {authMode === "login" ? "Sign In to Aumo" : "Create an Account"}
               </DialogTitle>
             </DialogHeader>
-            <div>
+            <div className="p-6 pt-4">
               <Suspense
                 fallback={
-                  <div className="p-8 text-center text-sm text-zinc-400 animate-pulse">
+                  <div className="flex items-center justify-center py-8 text-sm text-zinc-400">
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
                     Loading form...
                   </div>
                 }
               >
-                <LoginPage />
+                <LoginPage
+                  initialMode={authMode}
+                  onSuccess={() => setOpen(false)}
+                />
               </Suspense>
             </div>
           </DialogContent>

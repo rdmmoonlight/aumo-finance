@@ -17,7 +17,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   useGetApiV1ReportsJournalsAdjustingQuery,
   useDeleteApiV1ReportsJournalsAdjustingByIdMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
   SlidersHorizontal,
   Plus,

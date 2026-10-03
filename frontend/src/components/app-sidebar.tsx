@@ -47,7 +47,7 @@ import {
 import {
   useGetApiV1AuthMeQuery,
   usePostApiV1AuthLogoutMutation,
-} from "@/lib/generatedApi";
+} from "@/lib/store/auth/authApi";
 
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();

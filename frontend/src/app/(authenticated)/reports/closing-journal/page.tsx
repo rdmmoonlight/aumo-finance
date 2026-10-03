@@ -21,9 +21,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-// Import Auto-Generated Hook dari RTK Query
-import { useGetApiV1ReportsJournalsClosingQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsJournalsClosingQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
 
 import {
   Lock,
