@@ -46,7 +46,7 @@ public class JournalController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
         var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
-        
+
         // FIX 1: Ubah dari NotFound(404) menjadi Ok(200) agar RTK Query Frontend
         // bisa membaca payload { selectedPeriodName = null } dengan wajar tanpa melempar isError.
         if (selectedPeriod == null)
