@@ -8,7 +8,7 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { useGetApiV1ReportsTrialBalanceUnadjustedQuery } from "@/lib/generatedApi";
+import { useGetApiV1ReportsJournalsGeneralQuery } from "@/lib/generatedApi";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -221,7 +221,7 @@ function TrialTable({
 export default function UnadjustedTrialBalancePage() {
   // Panggil RTK Query auto-generated hook
   const { data, isLoading, isError, error } =
-    useGetApiV1ReportsTrialBalanceUnadjustedQuery();
+    useGetApiV1ReportsJournalsGeneralQuery();
 
   // Evaluasi jika belum ada periode dipilih (Response 404 / Object status khusus)
   const noPeriod = useMemo(() => {

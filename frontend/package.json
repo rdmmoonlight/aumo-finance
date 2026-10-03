@@ -10,9 +10,10 @@
     "@/*": "./src/*"
   },
   "scripts": {
-    "predev": "pnpm run generate:api",
+    "clean": "rimraf .next out node_modules/.cache",
+    "predev": "pnpm run clean && pnpm run generate:api",
     "dev": "next dev -p 3000",
-    "prebuild": "pnpm run generate:api",
+    "prebuild": "pnpm run clean && pnpm run generate:api",
     "build": "next build",
     "start": "next start -p 3000",
     "typecheck": "tsc --noEmit",
@@ -62,6 +63,7 @@
     "eslint-config-next": "^16.0.0",
     "postcss": "^8.5.0",
     "prettier": "^3.5.0",
+    "rimraf": "^6.1.3",
     "ts-node": "^10.9.2",
     "typescript": "~5.7.3"
   },

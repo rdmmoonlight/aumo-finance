@@ -14,7 +14,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetApiV1MarketQuery } from "@/lib/generatedApi";
+import { useGetApiV1KursQuery } from "@/lib/generatedApi";
 
 interface MarketItem {
   symbol: string;
@@ -32,7 +32,7 @@ export default function HomePage() {
     isError,
     fulfilledTimeStamp,
     refetch,
-  } = useGetApiV1MarketQuery();
+  } = useGetApiV1KursQuery({});
 
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -49,7 +49,7 @@ export default function HomePage() {
     }
   }, [fulfilledTimeStamp]);
 
-  // Ekstraksi data secara fleksibel (menangani array langsung maupun wrapped object like { data: [...] })
+  // Ekstraksi data secara fleksibel (menangani array langsung maupun wrapped object)
   const extractRawItems = (res: unknown): Record<string, unknown>[] => {
     if (!res) return [];
     if (Array.isArray(res)) return res;
@@ -58,6 +58,9 @@ export default function HomePage() {
       if (Array.isArray(obj.data)) return obj.data;
       if (Array.isArray(obj.items)) return obj.items;
       if (Array.isArray(obj.result)) return obj.result;
+      if (Array.isArray(obj.rates)) return obj.rates;
+      // Jika berupa objek tunggal, bungkus dalam array
+      return [obj];
     }
     return [];
   };
@@ -65,9 +68,13 @@ export default function HomePage() {
   // Normalisasi field dari Backend (mendukung PascalCase & camelCase)
   const rawList = extractRawItems(rawResponse);
   const marketData: MarketItem[] = rawList.map((item) => {
-    const symbol = String(item.symbol ?? item.Symbol ?? item.code ?? "N/A");
-    const name = String(item.name ?? item.Name ?? item.description ?? "");
-    const rawPrice = item.price ?? item.Price ?? item.value ?? 0;
+    const symbol = String(
+      item.symbol ?? item.Symbol ?? item.code ?? item.currency ?? "N/A",
+    );
+    const name = String(
+      item.name ?? item.Name ?? item.description ?? item.pair ?? "",
+    );
+    const rawPrice = item.price ?? item.Price ?? item.value ?? item.rate ?? 0;
     const rawChange = item.change ?? item.Change ?? item.changePercent ?? 0;
     const isUp = Boolean(item.isUp ?? item.IsUp ?? Number(rawChange) >= 0);
 

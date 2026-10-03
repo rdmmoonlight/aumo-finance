@@ -6,20 +6,16 @@ export const addTagTypes = [
   "Dashboard",
   "Health",
   "JournalEntry",
-  "Market",
   "Notifications",
   "Periods",
   "Settings",
   "Summary",
   "Tools",
+  "FinancialStatements",
   "GeneralLedger",
-  "IncomeStatement",
   "Journal",
-  "RetainedEarnings",
-  "StatementOfCashFlow",
-  "StatementOfFinancialPosition",
-  "TrialBalance",
   "Worksheet",
+  "MarketData",
 ] as const;
 const injectedRtkApi = api
   .enhanceEndpoints({
@@ -63,6 +59,31 @@ const injectedRtkApi = api
           body: queryArg.googleLoginRequest,
         }),
         invalidatesTags: ["Auth"],
+      }),
+      getApiV1AuthGoogleLogin: build.query<
+        GetApiV1AuthGoogleLoginApiResponse,
+        GetApiV1AuthGoogleLoginApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/auth/google-login`,
+          params: {
+            redirectTo: queryArg.redirectTo,
+          },
+        }),
+        providesTags: ["Auth"],
+      }),
+      getApiV1AuthGoogleCallback: build.query<
+        GetApiV1AuthGoogleCallbackApiResponse,
+        GetApiV1AuthGoogleCallbackApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/auth/google-callback`,
+          params: {
+            redirectTo: queryArg.redirectTo,
+            remoteError: queryArg.remoteError,
+          },
+        }),
+        providesTags: ["Auth"],
       }),
       getApiV1AuthMe: build.query<
         GetApiV1AuthMeApiResponse,
@@ -205,13 +226,6 @@ const injectedRtkApi = api
           },
         }),
         providesTags: ["JournalEntry"],
-      }),
-      getApiV1Market: build.query<
-        GetApiV1MarketApiResponse,
-        GetApiV1MarketApiArg
-      >({
-        query: () => ({ url: `/api/v1/Market` }),
-        providesTags: ["Market"],
       }),
       getApiV1Notifications: build.query<
         GetApiV1NotificationsApiResponse,
@@ -403,6 +417,39 @@ const injectedRtkApi = api
         }),
         invalidatesTags: ["Tools"],
       }),
+      getApiV1ReportsIncomeStatement: build.query<
+        GetApiV1ReportsIncomeStatementApiResponse,
+        GetApiV1ReportsIncomeStatementApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/income-statement` }),
+        providesTags: ["FinancialStatements"],
+      }),
+      getApiV1ReportsRetainedEarnings: build.query<
+        GetApiV1ReportsRetainedEarningsApiResponse,
+        GetApiV1ReportsRetainedEarningsApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/retained-earnings` }),
+        providesTags: ["FinancialStatements"],
+      }),
+      getApiV1ReportsStatementOfCashFlow: build.query<
+        GetApiV1ReportsStatementOfCashFlowApiResponse,
+        GetApiV1ReportsStatementOfCashFlowApiArg
+      >({
+        query: () => ({ url: `/api/v1/reports/statement-of-cash-flow` }),
+        providesTags: ["FinancialStatements"],
+      }),
+      getApiV1ReportsStatementOfFinancialPosition: build.query<
+        GetApiV1ReportsStatementOfFinancialPositionApiResponse,
+        GetApiV1ReportsStatementOfFinancialPositionApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/api/v1/reports/statement-of-financial-position`,
+          params: {
+            isPostClosing: queryArg.isPostClosing,
+          },
+        }),
+        providesTags: ["FinancialStatements"],
+      }),
       getApiV1ReportsGeneralLedgerPermanent: build.query<
         GetApiV1ReportsGeneralLedgerPermanentApiResponse,
         GetApiV1ReportsGeneralLedgerPermanentApiArg
@@ -416,13 +463,6 @@ const injectedRtkApi = api
       >({
         query: () => ({ url: `/api/v1/reports/general-ledger/temporary` }),
         providesTags: ["GeneralLedger"],
-      }),
-      getApiV1ReportsIncomeStatement: build.query<
-        GetApiV1ReportsIncomeStatementApiResponse,
-        GetApiV1ReportsIncomeStatementApiArg
-      >({
-        query: () => ({ url: `/api/v1/reports/income-statement` }),
-        providesTags: ["IncomeStatement"],
       }),
       getApiV1ReportsJournalsGeneral: build.query<
         GetApiV1ReportsJournalsGeneralApiResponse,
@@ -455,71 +495,22 @@ const injectedRtkApi = api
         query: () => ({ url: `/api/v1/reports/journals/closing` }),
         providesTags: ["Journal"],
       }),
-      getApiV1ReportsRetainedEarnings: build.query<
-        GetApiV1ReportsRetainedEarningsApiResponse,
-        GetApiV1ReportsRetainedEarningsApiArg
-      >({
-        query: () => ({ url: `/api/v1/reports/retained-earnings` }),
-        providesTags: ["RetainedEarnings"],
-      }),
-      getApiV1ReportsStatementOfCashFlow: build.query<
-        GetApiV1ReportsStatementOfCashFlowApiResponse,
-        GetApiV1ReportsStatementOfCashFlowApiArg
-      >({
-        query: () => ({ url: `/api/v1/reports/statement-of-cash-flow` }),
-        providesTags: ["StatementOfCashFlow"],
-      }),
-      getApiV1ReportsStatementOfFinancialPosition: build.query<
-        GetApiV1ReportsStatementOfFinancialPositionApiResponse,
-        GetApiV1ReportsStatementOfFinancialPositionApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/reports/statement-of-financial-position`,
-          params: {
-            isPostClosing: queryArg.isPostClosing,
-          },
-        }),
-        providesTags: ["StatementOfFinancialPosition"],
-      }),
-      getApiV1ReportsTrialBalance: build.query<
-        GetApiV1ReportsTrialBalanceApiResponse,
-        GetApiV1ReportsTrialBalanceApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/reports/trial-balance`,
-          params: {
-            type: queryArg["type"],
-          },
-        }),
-        providesTags: ["TrialBalance"],
-      }),
-      getApiV1ReportsTrialBalanceUnadjusted: build.query<
-        GetApiV1ReportsTrialBalanceUnadjustedApiResponse,
-        GetApiV1ReportsTrialBalanceUnadjustedApiArg
-      >({
-        query: () => ({ url: `/api/v1/reports/trial-balance/unadjusted` }),
-        providesTags: ["TrialBalance"],
-      }),
-      getApiV1ReportsTrialBalanceAdjusted: build.query<
-        GetApiV1ReportsTrialBalanceAdjustedApiResponse,
-        GetApiV1ReportsTrialBalanceAdjustedApiArg
-      >({
-        query: () => ({ url: `/api/v1/reports/trial-balance/adjusted` }),
-        providesTags: ["TrialBalance"],
-      }),
-      getApiV1ReportsTrialBalancePostClosing: build.query<
-        GetApiV1ReportsTrialBalancePostClosingApiResponse,
-        GetApiV1ReportsTrialBalancePostClosingApiArg
-      >({
-        query: () => ({ url: `/api/v1/reports/trial-balance/post-closing` }),
-        providesTags: ["TrialBalance"],
-      }),
       getApiV1ReportsWorksheet: build.query<
         GetApiV1ReportsWorksheetApiResponse,
         GetApiV1ReportsWorksheetApiArg
       >({
         query: () => ({ url: `/api/v1/reports/worksheet` }),
         providesTags: ["Worksheet"],
+      }),
+      getApiV1Kurs: build.query<GetApiV1KursApiResponse, GetApiV1KursApiArg>({
+        query: (queryArg) => ({
+          url: `/api/v1/kurs`,
+          params: {
+            baseCurrency: queryArg.baseCurrency,
+            targetCurrency: queryArg.targetCurrency,
+          },
+        }),
+        providesTags: ["MarketData"],
       }),
     }),
     overrideExisting: false,
@@ -538,6 +529,15 @@ export type PostApiV1AuthLoginApiArg = {
 export type PostApiV1AuthGoogleLoginApiResponse = unknown;
 export type PostApiV1AuthGoogleLoginApiArg = {
   googleLoginRequest: GoogleLoginRequest;
+};
+export type GetApiV1AuthGoogleLoginApiResponse = unknown;
+export type GetApiV1AuthGoogleLoginApiArg = {
+  redirectTo?: string;
+};
+export type GetApiV1AuthGoogleCallbackApiResponse = unknown;
+export type GetApiV1AuthGoogleCallbackApiArg = {
+  redirectTo?: string;
+  remoteError?: string;
 };
 export type GetApiV1AuthMeApiResponse = unknown;
 export type GetApiV1AuthMeApiArg = void;
@@ -593,8 +593,6 @@ export type GetApiV1JournalEntryNextTransactionNumberApiArg = {
   journalType?: string;
   entryDate?: string;
 };
-export type GetApiV1MarketApiResponse = unknown;
-export type GetApiV1MarketApiArg = void;
 export type GetApiV1NotificationsApiResponse = unknown;
 export type GetApiV1NotificationsApiArg = {
   limit?: number | string;
@@ -676,12 +674,20 @@ export type PostApiV1ToolsImportJournalEntriesApiResponse = unknown;
 export type PostApiV1ToolsImportJournalEntriesApiArg = {
   journalImportRequestDto: JournalImportRequestDto;
 };
+export type GetApiV1ReportsIncomeStatementApiResponse = unknown;
+export type GetApiV1ReportsIncomeStatementApiArg = void;
+export type GetApiV1ReportsRetainedEarningsApiResponse = unknown;
+export type GetApiV1ReportsRetainedEarningsApiArg = void;
+export type GetApiV1ReportsStatementOfCashFlowApiResponse = unknown;
+export type GetApiV1ReportsStatementOfCashFlowApiArg = void;
+export type GetApiV1ReportsStatementOfFinancialPositionApiResponse = unknown;
+export type GetApiV1ReportsStatementOfFinancialPositionApiArg = {
+  isPostClosing?: boolean;
+};
 export type GetApiV1ReportsGeneralLedgerPermanentApiResponse = unknown;
 export type GetApiV1ReportsGeneralLedgerPermanentApiArg = void;
 export type GetApiV1ReportsGeneralLedgerTemporaryApiResponse = unknown;
 export type GetApiV1ReportsGeneralLedgerTemporaryApiArg = void;
-export type GetApiV1ReportsIncomeStatementApiResponse = unknown;
-export type GetApiV1ReportsIncomeStatementApiArg = void;
 export type GetApiV1ReportsJournalsGeneralApiResponse = unknown;
 export type GetApiV1ReportsJournalsGeneralApiArg = void;
 export type GetApiV1ReportsJournalsAdjustingApiResponse = unknown;
@@ -692,26 +698,13 @@ export type DeleteApiV1ReportsJournalsAdjustingByIdApiArg = {
 };
 export type GetApiV1ReportsJournalsClosingApiResponse = unknown;
 export type GetApiV1ReportsJournalsClosingApiArg = void;
-export type GetApiV1ReportsRetainedEarningsApiResponse = unknown;
-export type GetApiV1ReportsRetainedEarningsApiArg = void;
-export type GetApiV1ReportsStatementOfCashFlowApiResponse = unknown;
-export type GetApiV1ReportsStatementOfCashFlowApiArg = void;
-export type GetApiV1ReportsStatementOfFinancialPositionApiResponse = unknown;
-export type GetApiV1ReportsStatementOfFinancialPositionApiArg = {
-  isPostClosing?: boolean;
-};
-export type GetApiV1ReportsTrialBalanceApiResponse = unknown;
-export type GetApiV1ReportsTrialBalanceApiArg = {
-  type?: string;
-};
-export type GetApiV1ReportsTrialBalanceUnadjustedApiResponse = unknown;
-export type GetApiV1ReportsTrialBalanceUnadjustedApiArg = void;
-export type GetApiV1ReportsTrialBalanceAdjustedApiResponse = unknown;
-export type GetApiV1ReportsTrialBalanceAdjustedApiArg = void;
-export type GetApiV1ReportsTrialBalancePostClosingApiResponse = unknown;
-export type GetApiV1ReportsTrialBalancePostClosingApiArg = void;
 export type GetApiV1ReportsWorksheetApiResponse = unknown;
 export type GetApiV1ReportsWorksheetApiArg = void;
+export type GetApiV1KursApiResponse = unknown;
+export type GetApiV1KursApiArg = {
+  baseCurrency?: string;
+  targetCurrency?: string;
+};
 export type LoginRequest = {
   email?: string;
   password?: string;
@@ -737,38 +730,26 @@ export type UpdateAccountRequest = {
   role?: string;
   isActive?: boolean;
 };
-export type CreateJournalEntryLineRequest = {
-  accountId?: number | string;
-  debit?: number | string;
-  credit?: number | string;
-  lineDescription?: null | string;
-  lineOrder?: number | string;
-};
-export type CreateJournalEntryRequest = {
-  createdAt?: string;
-  entryDate?: string;
-  journalType?: string;
-  mobileNote?: null | string;
-  lines?: CreateJournalEntryLineRequest[];
-};
-export type JournalEntryLineRequest = {
+export type JournalEntryLineDto = {
   accountId?: number | string;
   lineDescription?: string;
   debit?: number | string;
   credit?: number | string;
   lineOrder?: number | string;
 };
-export type UpdateJournalEntryRequest = {
-  entryDate?: string;
-  transactionNumber?: string;
+export type CreateJournalEntryRequest = {
   journalType?: string;
+  entryDate?: string;
+  createdAt?: string;
+  lines?: JournalEntryLineDto[];
+};
+export type UpdateJournalEntryRequest = {
+  journalType?: string;
+  entryDate?: string;
   updatedAt?: string;
-  lines?: JournalEntryLineRequest[];
+  lines?: JournalEntryLineDto[];
 };
 export type CreatePeriodRequest = {
-  periodName?: string;
-  startDate?: string;
-  endDate?: string;
   month?: number | string;
   year?: number | string;
   setupMode?: string;
@@ -777,12 +758,12 @@ export type CreatePeriodRequest = {
   retainedEarningsAccountId?: null | number | string;
   cashAccountCode?: null | string;
   cashAccountName?: null | string;
+  cashBalance?: null | number | string;
   bankAccountCode?: null | string;
   bankAccountName?: null | string;
+  bankBalance?: null | number | string;
   retainedEarningsAccountCode?: null | string;
   retainedEarningsAccountName?: null | string;
-  cashBalance?: null | number | string;
-  bankBalance?: null | number | string;
 };
 export type UpdateProfileRequest = {
   fullName?: null | string;
@@ -795,10 +776,20 @@ export type ChangePasswordRequest = {
   currentPassword?: string;
   newPassword?: string;
 };
-export type AccountMappingDetailDto = {
-  id?: number | string;
-  referenceNumber?: string;
+export type JournalLineDto = {
+  refNumber?: number | string;
   accountName?: string;
+  description?: string;
+  debit?: null | number | string;
+  credit?: null | number | string;
+};
+export type JournalTransactionDto = {
+  transactionNumber?: string;
+  date?: string;
+  journalType?: string;
+  lines?: JournalLineDto[];
+};
+export type AccountMappingDetailDto = {
   excelRef?: number | string;
   excelAccountName?: string;
   mappedRef?: number | string;
@@ -806,27 +797,11 @@ export type AccountMappingDetailDto = {
   status?: string;
   reason?: string;
 };
-export type JournalLineDto = {
-  accountReferenceNumber?: number | string;
-  refNumber?: number | string;
-  accountName?: string;
-  lineDescription?: string;
-  description?: string;
-  debit?: null | number | string;
-  credit?: null | number | string;
-};
-export type JournalTransactionDto = {
-  date?: string;
-  entryDate?: string;
-  transactionNumber?: string;
-  journalType?: string;
-  lines?: JournalLineDto[];
-};
 export type JournalImportRequestDto = {
   targetYear?: number | string;
   targetMonth?: number | string;
-  customMappings?: AccountMappingDetailDto[];
   transactions?: JournalTransactionDto[];
+  customMappings?: null | AccountMappingDetailDto[];
 };
 export const {
   use$getQuery,
@@ -834,6 +809,8 @@ export const {
   usePostAuthLogoutMutation,
   usePostApiV1AuthLoginMutation,
   usePostApiV1AuthGoogleLoginMutation,
+  useGetApiV1AuthGoogleLoginQuery,
+  useGetApiV1AuthGoogleCallbackQuery,
   useGetApiV1AuthMeQuery,
   usePostApiV1AuthLogoutMutation,
   useGetApiV1ChartOfAccountsQuery,
@@ -848,7 +825,6 @@ export const {
   useDeleteApiV1JournalEntryDeleteByIdMutation,
   useGetApiV1JournalEntrySearchDescriptionsQuery,
   useGetApiV1JournalEntryNextTransactionNumberQuery,
-  useGetApiV1MarketQuery,
   useGetApiV1NotificationsQuery,
   usePutApiV1NotificationsByIdReadMutation,
   usePutApiV1NotificationsReadAllMutation,
@@ -869,19 +845,16 @@ export const {
   useGetApiV1ToolsDownloadJournalTemplateQuery,
   usePostApiV1ToolsPreviewJournalImportMutation,
   usePostApiV1ToolsImportJournalEntriesMutation,
+  useGetApiV1ReportsIncomeStatementQuery,
+  useGetApiV1ReportsRetainedEarningsQuery,
+  useGetApiV1ReportsStatementOfCashFlowQuery,
+  useGetApiV1ReportsStatementOfFinancialPositionQuery,
   useGetApiV1ReportsGeneralLedgerPermanentQuery,
   useGetApiV1ReportsGeneralLedgerTemporaryQuery,
-  useGetApiV1ReportsIncomeStatementQuery,
   useGetApiV1ReportsJournalsGeneralQuery,
   useGetApiV1ReportsJournalsAdjustingQuery,
   useDeleteApiV1ReportsJournalsAdjustingByIdMutation,
   useGetApiV1ReportsJournalsClosingQuery,
-  useGetApiV1ReportsRetainedEarningsQuery,
-  useGetApiV1ReportsStatementOfCashFlowQuery,
-  useGetApiV1ReportsStatementOfFinancialPositionQuery,
-  useGetApiV1ReportsTrialBalanceQuery,
-  useGetApiV1ReportsTrialBalanceUnadjustedQuery,
-  useGetApiV1ReportsTrialBalanceAdjustedQuery,
-  useGetApiV1ReportsTrialBalancePostClosingQuery,
   useGetApiV1ReportsWorksheetQuery,
+  useGetApiV1KursQuery,
 } = injectedRtkApi;
