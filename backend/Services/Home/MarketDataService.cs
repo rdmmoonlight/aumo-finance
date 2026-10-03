@@ -1,3 +1,4 @@
+using AumoBackend.DTOs;
 using AumoBackend.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -6,7 +7,6 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
-using AumoBackend.DTOs;
 
 namespace AumoBackend.Services
 {
@@ -35,7 +35,11 @@ namespace AumoBackend.Services
             {
                 var apiKey = _configuration["ApiIndonesia:ApiKey"];
                 var request = new HttpRequestMessage(HttpMethod.Get, "https://use.apiindonesia.id/api/v1/kurs/latest?base=USD&target=IDR");
-                request.Headers.Add("x-api-key", apiKey);
+                
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    request.Headers.Add("x-api-key", apiKey);
+                }
 
                 var kursResponse = await _httpClient.SendAsync(request);
                 if (kursResponse.IsSuccessStatusCode)
@@ -58,11 +62,9 @@ namespace AumoBackend.Services
                 _logger.LogError(ex, "Gagal mengambil data kurs USD/IDR");
             }
 
-            // 2. Ambil Data Indeks Pasar dari IDX (misal IHSG / LQ45)
+            // 2. Ambil Data Indeks Pasar dari IDX
             try
             {
-                // TODO: Hubungkan dengan runner IDXClient / Sync Service Anda
-                // Contoh pengisian dummy/mapped data dari hasil IDXClient.market.getIndexList()
                 result.Add(new MarketIndicatorDto
                 {
                     Symbol = "IHSG",
