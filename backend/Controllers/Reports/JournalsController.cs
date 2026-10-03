@@ -21,7 +21,6 @@ namespace AumoBackend.Controllers.Reports;
 [ApiController]
 [Route("/api/v1/reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class JournalController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -47,11 +46,14 @@ public class JournalController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
         var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        
+        // FIX 1: Ubah dari NotFound(404) menjadi Ok(200) agar RTK Query Frontend
+        // bisa membaca payload { selectedPeriodName = null } dengan wajar tanpa melempar isError.
         if (selectedPeriod == null)
         {
-            return NotFound(new
+            return Ok(new
             {
-                success = false,
+                success = true,
                 hasPeriodSelected = false,
                 message = "No accounting period selected.",
                 selectedPeriodName = (string?)null,
@@ -148,7 +150,7 @@ public class JournalController : ControllerBase
                 j.Id,
                 j.TransactionNumber,
                 j.JournalType,
-                j.EntryDate,
+                EntryDate = j.EntryDate.ToString("yyyy-MM-dd"), // FIX 2: Konsistensi format string tanggal
                 j.CreatedAt,
                 j.UpdatedAt,
                 lines = j.Lines.OrderBy(l => l.LineOrder).Select(l => new
