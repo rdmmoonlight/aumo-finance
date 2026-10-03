@@ -15,7 +15,7 @@ namespace AumoBackend.Controllers;
 
 [Authorize]
 [ApiController]
-[Route("api/v1/notifications")]
+[Route("/api/v1/notifications")]
 
 public class NotificationsController : ControllerBase
 {

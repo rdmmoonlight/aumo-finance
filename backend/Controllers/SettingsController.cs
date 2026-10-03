@@ -18,7 +18,7 @@ using Supabase;
 namespace AumoBackend.Controllers
 {
     [ApiController]
-    [Route("api/v1/settings")]
+    [Route("/api/v1/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
     public class SettingsController : ControllerBase

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AumoBackend.Controllers.Api
 {
     [ApiController]
-    [Route("api/v1")]
+    [Route("/api/v1")]
     public class MarketDataController : ControllerBase
     {
         private readonly HttpClient _httpClient;
