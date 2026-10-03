@@ -2,7 +2,10 @@
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import AuthForm, { GOOGLE_CLIENT_ID, AuthPageProps } from "../auth";
 
-export default function LoginPage({ initialMode = "login", onSuccess }: AuthPageProps): React.JSX.Element {
+export default function LoginPage({
+  initialMode = "login",
+  onSuccess,
+}: AuthPageProps): React.JSX.Element {
   const content = <AuthForm initialMode={initialMode} onSuccess={onSuccess} />;
   if (onSuccess) return content; // dipake sebagai modal
   return (

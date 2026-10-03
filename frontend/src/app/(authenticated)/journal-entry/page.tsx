@@ -39,9 +39,7 @@ import {
   usePostApiV1JournalEntryCreateMutation,
   usePutApiV1JournalEntryEditByIdMutation,
 } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
-import {
-  useGetApiV1ChartOfAccountsQuery,
-} from "#/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
+import { useGetApiV1ChartOfAccountsQuery } from "#/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import {
   Edit,
   BookOpen,

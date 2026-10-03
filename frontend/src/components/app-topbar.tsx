@@ -28,12 +28,8 @@ import {
   AlertTriangle,
   Loader2,
 } from "lucide-react";
-import {
-  useGetApiV1AuthMeQuery
-} from "@/lib/store/auth/authApi";
-import {
-  useGetApiV1PeriodsQuery
-} from "@/lib/store/(authenticated)/periods/periodsApi";
+import { useGetApiV1AuthMeQuery } from "@/lib/store/auth/authApi";
+import { useGetApiV1PeriodsQuery } from "@/lib/store/(authenticated)/periods/periodsApi";
 import {
   useGetApiV1HealthQuery,
   useGetApiV1NotificationsQuery,
