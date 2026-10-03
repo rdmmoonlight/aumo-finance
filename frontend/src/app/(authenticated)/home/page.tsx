@@ -14,7 +14,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetApiV1KursQuery } from "@/lib/store/(authenticated)/home/homeApi";
+import { useGetApiV1HomeMarketIndicatorsQuery } from "@/lib/store/(authenticated)/home/homeApi";
 
 interface MarketItem {
   symbol: string;
@@ -32,7 +32,7 @@ export default function HomePage() {
     isError,
     fulfilledTimeStamp,
     refetch,
-  } = useGetApiV1KursQuery({});
+  } = useGetApiV1HomeMarketIndicatorsQuery();
 
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -78,17 +78,23 @@ export default function HomePage() {
     const rawChange = item.change ?? item.Change ?? item.changePercent ?? 0;
     const isUp = Boolean(item.isUp ?? item.IsUp ?? Number(rawChange) >= 0);
 
-    // Format harga jika berupa angka
-    const formattedPrice =
-      typeof rawPrice === "number"
-        ? `Rp ${Math.round(rawPrice).toLocaleString("id-ID")}`
-        : String(rawPrice);
+    // Format harga: kurs dalam Rupiah, indeks saham tanpa simbol mata uang
+    const numericPrice = Number(rawPrice);
+    const isCurrency = symbol.includes("/IDR");
+    const formattedPrice = Number.isFinite(numericPrice)
+      ? isCurrency
+        ? `Rp ${Math.round(numericPrice).toLocaleString("id-ID")}`
+        : numericPrice.toLocaleString("id-ID", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
+      : String(rawPrice);
 
     // Format persen perubahan
-    const formattedChange =
-      typeof rawChange === "number"
-        ? `${rawChange >= 0 ? "+" : ""}${rawChange.toFixed(2)}%`
-        : String(rawChange);
+    const numericChange = Number(rawChange);
+    const formattedChange = Number.isFinite(numericChange)
+      ? `${numericChange >= 0 ? "+" : ""}${numericChange.toFixed(2)}%`
+      : String(rawChange);
 
     return {
       symbol,

@@ -16,6 +16,13 @@ const injectedRtkApi = api
         }),
         providesTags: ["MarketData"],
       }),
+      getApiV1HomeMarketIndicators: build.query<
+        GetApiV1HomeMarketIndicatorsApiResponse,
+        GetApiV1HomeMarketIndicatorsApiArg
+      >({
+        query: () => ({ url: `/api/v1/home/market-indicators` }),
+        providesTags: ["MarketData"],
+      }),
     }),
     overrideExisting: false,
   });
@@ -25,4 +32,7 @@ export type GetApiV1KursApiArg = {
   baseCurrency?: string;
   targetCurrency?: string;
 };
-export const { useGetApiV1KursQuery } = injectedRtkApi;
+export type GetApiV1HomeMarketIndicatorsApiResponse = unknown;
+export type GetApiV1HomeMarketIndicatorsApiArg = void;
+export const { useGetApiV1KursQuery, useGetApiV1HomeMarketIndicatorsQuery } =
+  injectedRtkApi;
