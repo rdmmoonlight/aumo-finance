@@ -1,108 +1,53 @@
-import os
+from typing import Any
+from tailwind_merge import tw_merge
 
-def fix_blazor_auth_and_routing(blazor_path):
-    components_dir = os.path.join(blazor_path, "Components")
-    os.makedirs(components_dir, exist_ok=True)
 
-    print("=== MEMPERBARUI PROGRAM.CS DENGAN AUTHENTICATION SERVICES ===")
+def cn(*args: Any) -> str:
+    classes = []
 
-    # 1. Update Program.cs
-    program_path = os.path.join(blazor_path, "Program.cs")
-    program_content = """using AumoBlazor.Components;
-using Microsoft.AspNetCore.Components.Authorization;
-using System.Security.Claims;
+    for arg in args:
+        if not arg:
+            continue
 
-var builder = WebApplication.CreateBuilder(args);
+        # Jika input berupa string
+        if isinstance(arg, str):
+            classes.append(arg)
 
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
+        # Jika input berupa list/tuple
+        elif isinstance(arg, (list, tuple)):
+            nested = cn(*arg)
+            if nested:
+                classes.append(nested)
 
-builder.Services.AddAuthorizationCore();
-builder.Services.AddCascadingAuthenticationState();
+        # Jika input berupa dictionary (mirip gaya clsx: {"bg-red-500": True})
+        elif isinstance(arg, dict):
+            for key, value in arg.items():
+                if value:
+                    classes.append(key)
 
-// Mock AuthenticationStateProvider jika otentikasi dikelola oleh Hono API
-builder.Services.AddScoped<AuthenticationStateProvider, AnonymousAuthStateProvider>();
+    # Gabungin semua string lalu bersihkan bentrokan class pake tw_merge
+    return tw_merge(" ".join(classes))
 
-builder.Services.AddHttpClient();
-builder.Services.AddScoped(sp => new HttpClient 
-{ 
-    BaseAddress = new Uri(builder.Configuration["ApiBaseUrl"] ?? "http://localhost:5000/") 
-});
 
-var app = builder.Build();
+# --- CONTOH PENGGUNAAN ---
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Error", createScopeForErrors: true);
-    app.UseHsts();
-}
+# 1. Menangani class bentrok (px-2 vs px-4 -> menang px-4)
+print(cn("px-2 py-1 bg-red-500", "px-4"))
+# Output: 'py-1 bg-red-500 px-4'
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseAntiforgery();
+# 2. Kondisional dengan Dict/Kondisi Boolean
+is_active = True
+is_disabled = False
 
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
+print(
+    cn(
+        "btn rounded",
+        {"bg-blue-500": is_active, "opacity-50": is_disabled},
+        "hover:bg-blue-600",
+    )
+)
+# Output: 'btn rounded bg-blue-500 hover:bg-blue-600'
 
-app.Run();
-
-// Provider sederhana agar AuthorizeView / CascadingAuthenticationState bekerja tanpa error
-public class AnonymousAuthStateProvider : AuthenticationStateProvider
-{
-    public override Task<AuthenticationState> GetAuthenticationStateAsync()
-    {
-        // Secara default mengembalikan user dummy terautentikasi / anonim
-        var identity = new ClaimsIdentity(new[]
-        {
-            new Claim(ClaimTypes.Name, "Ghofur User")
-        }, "HonoAuth");
-
-        var user = new ClaimsPrincipal(identity);
-        return Task.FromResult(new AuthenticationState(user));
-    }
-}
-"""
-    with open(program_path, "w", encoding="utf-8") as f:
-        f.write(program_content)
-    print("  [✓] Program.cs diperbarui dengan AuthStateProvider.")
-
-    # 2. Update Routes.razor dengan CascadingAuthenticationState & Router
-    routes_path = os.path.join(components_dir, "Routes.razor")
-    routes_content = """@using Microsoft.AspNetCore.Components.Routing
-@using Microsoft.AspNetCore.Components.Authorization
-
-<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(Program).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
-                <NotAuthorized>
-                    <p role="alert">Anda tidak memiliki akses ke halaman ini.</p>
-                </NotAuthorized>
-                <Authorizing>
-                    <p>Memuat otentikasi...</p>
-                </Authorizing>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-        </Found>
-        <NotFound>
-            <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(Layout.MainLayout)">
-                <p role="alert">Maaf, halaman tidak ditemukan.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
-</CascadingAuthenticationState>
-"""
-    with open(routes_path, "w", encoding="utf-8") as f:
-        f.write(routes_content)
-    print("  [✓] Components/Routes.razor diperbarui dengan CascadingAuthenticationState.")
-
-if __name__ == "__main__":
-    blazor_path = r"E:\Github\aumo-finance\blazor2"
-    if not os.path.exists(blazor_path):
-        blazor_path = os.path.join(os.getcwd(), "blazor2")
-
-    print("=== PERBAIKAN AUTH & ROUTING BLAZOR ===")
-    fix_blazor_auth_and_routing(blazor_path)
-    print("=== SELESAI ===")
+# 3. Menerima None / Empty string tanpa ngerusak hasil
+print(cn("text-sm", None, "", "font-bold"))
+# Output: 'text-sm font-bold'

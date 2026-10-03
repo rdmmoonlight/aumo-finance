@@ -1,20 +1,20 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.DTOs;
 namespace AumoBackend.DTOs;
 
+/// <summary>
+/// DTO untuk indikator data pasar (IHSG, Saham, Kurs, Emas, dll)
+/// </summary>
 public class MarketIndicatorDto
 {
     public string Symbol { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
-    public string Price { get; set; } = string.Empty;
-    public string Change { get; set; } = string.Empty;
-    public bool IsUp { get; set; }
+    public decimal Price { get; set; }
+    public decimal Change { get; set; }
+    public bool IsUp => Change >= 0;
 }
 
+/// <summary>
+/// Wrapper standar untuk response API
+/// </summary>
 public class ApiResponseDto<T>
 {
     public bool Success { get; set; }
