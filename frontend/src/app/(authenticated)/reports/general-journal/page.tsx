@@ -143,24 +143,43 @@ export default function GeneralJournalClient() {
     useDeleteApiV1JournalEntryDeleteByIdMutation();
 
   const data = responseData as any;
-  const selectedPeriodName = data?.selectedPeriodName || null;
-  const isPeriodClosed = data?.isPeriodClosed || false;
+
+  // REVISI SELECTED PERIOD:
+  // Evaluasi keberadaan periode berdasarkan flag hasPeriodSelected & keberadaan selectedPeriodName
+  const hasPeriodSelected =
+    data?.hasPeriodSelected ?? Boolean(data?.selectedPeriodName);
+  const selectedPeriodName = hasPeriodSelected
+    ? data?.selectedPeriodName || null
+    : null;
+  const isPeriodClosed = Boolean(data?.isPeriodClosed);
   const entries: JournalEntry[] = data?.entries || [];
 
   useEffect(() => {
-    const handlePeriodChange = () => refetch();
+    const handlePeriodChange = () => {
+      setErrorMessage(null);
+      refetch();
+    };
+
     window.addEventListener("periodChanged", handlePeriodChange);
-    return () =>
+    window.addEventListener("focus", handlePeriodChange);
+
+    return () => {
       window.removeEventListener("periodChanged", handlePeriodChange);
+      window.removeEventListener("focus", handlePeriodChange);
+    };
   }, [refetch]);
 
   useEffect(() => {
     if (isError && error && "status" in error && error.status === 401) {
       router.push("/");
     } else if (isError && error) {
-      const msg =
-        (error as any)?.data?.message || "Gagal mengambil data jurnal umum.";
-      setErrorMessage(msg);
+      const status = (error as any)?.status;
+      // Jika status HTTP 404 dikirim controller lama, kita perlakukan sebagai "belum memilih periode"
+      if (status !== 404) {
+        const msg =
+          (error as any)?.data?.message || "Gagal mengambil data jurnal umum.";
+        setErrorMessage(msg);
+      }
     }
   }, [isError, error, router]);
 
@@ -255,7 +274,6 @@ export default function GeneralJournalClient() {
                 {item.transactionNumber}
               </span>
 
-              {/* Timestamp Indicator via Tooltip (Hemat ruang vertikal) */}
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -282,7 +300,6 @@ export default function GeneralJournalClient() {
                 </Tooltip>
               </TooltipProvider>
 
-              {/* Tombol aksi Inline jika mode Edit aktif */}
               {editMode && (
                 <div className="inline-flex items-center gap-1 ml-auto">
                   <Button
@@ -511,7 +528,6 @@ export default function GeneralJournalClient() {
 
                     return (
                       <Fragment key={row.id}>
-                        {/* Header Baris Pemisah Tanggal Jurnal (Full Spanning Header) */}
                         {item.showHeader && (
                           <TableRow className="bg-muted/40 hover:bg-muted/40 border-y border-border">
                             <TableCell
@@ -526,7 +542,6 @@ export default function GeneralJournalClient() {
                           </TableRow>
                         )}
 
-                        {/* Baris Data Jurnal Standar dengan Tinggi Sel Seragam */}
                         <TableRow
                           className={`${shade} hover:bg-muted/20 border-b-0`}
                         >
@@ -553,7 +568,7 @@ export default function GeneralJournalClient() {
                   <TableRow>
                     <TableCell colSpan={6} className="py-12 text-center">
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        {selectedPeriodName === null ? (
+                        {!hasPeriodSelected ? (
                           <>
                             <EyeOff className="h-7 w-7" />
                             <p className="text-sm font-medium">
@@ -591,7 +606,6 @@ export default function GeneralJournalClient() {
         </CardContent>
       </Card>
 
-      {/* DELETE CONFIRMATION DIALOG */}
       <AlertDialog
         open={!!entryToDelete}
         onOpenChange={(open) => !open && setEntryToDelete(null)}
