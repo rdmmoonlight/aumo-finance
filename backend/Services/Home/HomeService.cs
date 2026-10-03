@@ -43,9 +43,12 @@ public class HomeService : IHomeService
 
     private static async Task<MarketIndicatorDto?> FetchUsdRateAsync(HttpClient client)
     {
-        const string yahooUrl = "https://query1.finance.yahoo.com/v8/finance/chart/IDR=X";
-        var yahooResult = await FetchYahooChartDataAsync(client, yahooUrl, "USD/IDR", "Rupiah");
-        if (yahooResult != null) return yahooResult;
+        foreach (var host in new[] { "query1", "query2" })
+        {
+            var yahooUrl = $"https://{host}.finance.yahoo.com/v8/finance/chart/IDR=X";
+            var yahooResult = await FetchYahooChartDataAsync(client, yahooUrl, "USD/IDR", "Dolar AS / Rupiah");
+            if (yahooResult != null) return yahooResult;
+        }
 
         try
         {
@@ -63,7 +66,7 @@ public class HomeService : IHomeService
                 return new MarketIndicatorDto
                 {
                     Symbol = "USD/IDR",
-                    Name = "Rupiah",
+                    Name = "Dolar AS / Rupiah",
                     Price = rate,
                     Change = 0m
                 };
@@ -79,8 +82,14 @@ public class HomeService : IHomeService
 
     private static async Task<MarketIndicatorDto?> FetchIhsgAsync(HttpClient client)
     {
-        const string yahooUrl = "https://query1.finance.yahoo.com/v8/finance/chart/%5EJKSE";
-        return await FetchYahooChartDataAsync(client, yahooUrl, "IHSG", "Indeks Saham");
+        foreach (var host in new[] { "query1", "query2" })
+        {
+            var yahooUrl = $"https://{host}.finance.yahoo.com/v8/finance/chart/%5EJKSE";
+            var result = await FetchYahooChartDataAsync(client, yahooUrl, "IHSG", "Indeks Harga Saham Gabungan");
+            if (result != null) return result;
+        }
+
+        return null;
     }
 
     private static async Task<MarketIndicatorDto?> FetchYahooChartDataAsync(
