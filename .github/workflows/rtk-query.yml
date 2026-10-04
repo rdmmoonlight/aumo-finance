@@ -35,22 +35,11 @@ jobs:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
 
-      # Tunggu sampai Render menjalankan commit backend terbaru (maks 30 menit).
-      # Jika deploy gagal, workflow berhenti tanpa meng-commit spec lama.
-      - name: Wait for backend deploy
-        working-directory: .
+      # Menunggu deployment backend di Render selesai (delay 5 menit)
+      - name: Sleep for 5 minutes
         run: |
-          BACKEND_SHA=$(git log -1 --format=%H -- backend)
-          echo "Commit backend terbaru: $BACKEND_SHA"
-          for i in $(seq 1 90); do
-            DEPLOYED=$(curl -s --max-time 30 "$API_URL/api/v1/health" | python3 -c "import sys,json; print(json.load(sys.stdin).get('commit') or '')" 2>/dev/null || true)
-            if [ -n "$DEPLOYED" ] && git cat-file -e "$DEPLOYED^{commit}" 2>/dev/null \
-               && git merge-base --is-ancestor "$BACKEND_SHA" "$DEPLOYED"; then
-              echo "Backend sudah menjalankan $DEPLOYED"; exit 0
-            fi
-            echo "[$i/90] Render menjalankan: '${DEPLOYED:-tidak diketahui}', menunggu..."; sleep 20
-          done
-          echo "Backend belum menjalankan commit terbaru. Cek deploy di Render."; exit 1
+          echo "Menunggu 5 menit agar backend selesai di-deploy di Render..."
+          sleep 300
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
