@@ -18,21 +18,21 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("api/v1/reports/general-ledger")]
+[Route("/api/v1/reports/general-ledgers")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class GeneralLedgerController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly IGeneralLedgerService _glService;
+    private readonly IGeneralLedgersService _glService;
 
-    public GeneralLedgerController(AppDbContext db, IGeneralLedgerService glService)
+    public GeneralLedgerController(AppDbContext db, IGeneralLedgersService glService)
     {
         _db = db;
         _glService = glService;
     }
 
     // ==========================================
-    // 1. GET: /api/v1/reports/general-ledger/permanent
+    // 1. GET: /api/v1/reports/general-ledgers/permanent
     // ==========================================
     [HttpGet("permanent")]
     public async Task<IActionResult> GetPermanentGeneralLedger()
@@ -52,8 +52,8 @@ public class GeneralLedgerController : ControllerBase
             });
         }
 
-        // Ambil data langsung dari tabel staging Permanent Account
-        var ledgers = await _db.PermanentAccountGeneralLedgers
+        // Ambil data langsung dari DbSet PermanentAccountsGeneralLedger
+        var ledgers = await _db.PermanentAccountsGeneralLedger
             .AsNoTracking()
             .Include(x => x.Account)
             .Where(x => x.UserId == userId && x.PeriodId == period.Id)
@@ -88,7 +88,7 @@ public class GeneralLedgerController : ControllerBase
     }
 
     // ==========================================
-    // 2. GET: /api/v1/reports/general-ledger/temporary
+    // 2. GET: /api/v1/reports/general-ledgers/temporary
     // ==========================================
     [HttpGet("temporary")]
     public async Task<IActionResult> GetTemporaryGeneralLedger()
@@ -108,8 +108,8 @@ public class GeneralLedgerController : ControllerBase
             });
         }
 
-        // Ambil data langsung dari tabel staging Temporary Account
-        var ledgers = await _db.TemporaryAccountGeneralLedgers
+        // Ambil data langsung dari DbSet TemporaryAccountsGeneralLedger
+        var ledgers = await _db.TemporaryAccountsGeneralLedger
             .AsNoTracking()
             .Include(x => x.Account)
             .Where(x => x.UserId == userId && x.PeriodId == period.Id)
@@ -151,7 +151,7 @@ public class GeneralLedgerController : ControllerBase
     }
 
     // ==========================================
-    // 3. POST: /api/v1/reports/general-ledger/refresh
+    // 3. POST: /api/v1/reports/general-ledgers/refresh
     // ==========================================
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshLedgerData()
