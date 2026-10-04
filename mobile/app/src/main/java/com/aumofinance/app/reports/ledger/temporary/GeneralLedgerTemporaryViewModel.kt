@@ -7,25 +7,35 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aumofinance.app.reports.ledger.LedgerApi
 import com.aumofinance.app.reports.ledger.LedgerResponse
-import io.ktor.client.call.body
+import com.aumofinance.app.reports.ledger.LedgerResult
 import kotlinx.coroutines.launch
 
 // Akun Temporary (Laba Rugi): OperatingIncome, OperatingExpenses, OtherIncome,
-// OtherExpenses. isTemporary=true.
+// OtherExpenses.
 class GeneralLedgerTemporaryViewModel : ViewModel() {
     private val api = LedgerApi()
 
     var report: LedgerResponse? by mutableStateOf(null)
         private set
 
+    var isLoading: Boolean by mutableStateOf(false)
+        private set
+
+    var errorMessage: String? by mutableStateOf(null)
+        private set
+
     fun load() {
+        if (isLoading) return
         viewModelScope.launch {
-            report =
-                try {
-                    api.getLedger(isTemporary = true).body<LedgerResponse>()
-                } catch (t: Throwable) {
-                    null
+            isLoading = true
+            when (val result = api.load(isTemporary = true)) {
+                is LedgerResult.Success -> {
+                    report = result.report
+                    errorMessage = null
                 }
+                is LedgerResult.Failure -> errorMessage = result.message
+            }
+            isLoading = false
         }
     }
 }

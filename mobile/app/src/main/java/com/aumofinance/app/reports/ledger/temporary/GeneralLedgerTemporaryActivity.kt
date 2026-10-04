@@ -15,7 +15,11 @@ class GeneralLedgerTemporaryActivity : ComponentActivity() {
 
         setContent {
             AumoTheme {
-                LedgerScreen(report = viewModel.report)
+                LedgerScreen(
+                    report = viewModel.report,
+                    isLoading = viewModel.isLoading,
+                    errorMessage = viewModel.errorMessage,
+                )
             }
         }
 

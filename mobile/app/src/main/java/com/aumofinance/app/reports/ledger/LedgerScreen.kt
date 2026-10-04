@@ -18,26 +18,65 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.theme.AumoColors
-import java.text.SimpleDateFormat
-import java.util.Locale
 import com.aumofinance.app.ui.theme.AumoDimens
 
-// Buku Besar per akun. Dipakai bareng oleh halaman Permanent & Temporary (satu-satunya beda: parameter isTemporary saat load()).
+// Buku Besar per akun. Dipakai bareng oleh halaman Permanent & Temporary.
 @Composable
-fun LedgerScreen(report: LedgerResponse?) {
+fun LedgerScreen(
+    report: LedgerResponse?,
+    isLoading: Boolean = false,
+    errorMessage: String? = null,
+) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AumoDimens.SpacingLarge)) {
             Text(
-                text = report?.selectedPeriodName ?: "Belum ada periode dipilih",
+                text = headerText(report, isLoading),
                 color = AumoColors.TextMuted,
                 fontSize = MaterialTheme.typography.labelMedium.fontSize,
             )
+            if (report?.isTemporary == true && report.netIncomeBeforeClosing != null) {
+                Text(
+                    text = "Laba/Rugi Sebelum Penutupan: ${CurrencyFormatter.format(report.netIncomeBeforeClosing)}",
+                    color = if (report.netIncomeBeforeClosing >= 0) AumoColors.Good else AumoColors.Bad,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
+                )
+            }
+            if (errorMessage != null) {
+                Text(
+                    text = errorMessage,
+                    color = AumoColors.Bad,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
+                )
+            }
+            val accounts = report?.ledgers ?: emptyList()
+            if (report != null && report.hasPeriodSelected && accounts.isEmpty() && !isLoading) {
+                Text(
+                    text = "Belum ada transaksi pada periode ini.",
+                    color = AumoColors.TextMuted,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    modifier = Modifier.padding(top = AumoDimens.SpacingLarge),
+                )
+            }
             LazyColumn(modifier = Modifier.fillMaxSize().padding(top = AumoDimens.SpacingSmall)) {
-                items(report?.ledgers ?: emptyList()) { account -> LedgerAccountCard(account) }
+                items(accounts, key = { it.accountId }) { account -> LedgerAccountCard(account) }
             }
         }
     }
 }
+
+private fun headerText(
+    report: LedgerResponse?,
+    isLoading: Boolean,
+): String =
+    when {
+        report == null && isLoading -> "Memuat buku besar..."
+        report == null -> "Buku besar belum dimuat"
+        !report.hasPeriodSelected -> "Belum ada periode dipilih"
+        else -> report.selectedPeriodName ?: "Periode terpilih"
+    }
 
 @Composable
 private fun LedgerAccountCard(account: LedgerAccount) {
@@ -55,6 +94,7 @@ private fun LedgerAccountCard(account: LedgerAccount) {
             fontWeight = FontWeight.Bold,
             fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         )
+        LedgerHeaderRow()
         account.lines.forEach { line -> LedgerLineRow(line) }
         Text(
             text = "Saldo Akhir: ${CurrencyFormatter.format(account.endingBalance)}",
@@ -66,15 +106,27 @@ private fun LedgerAccountCard(account: LedgerAccount) {
     }
 }
 
-private val inputDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
-private val displayDateFormat = SimpleDateFormat("dd/MM", Locale("in", "ID"))
-
+// Backend mengirim EntryDate ISO ("2026-09-15T00:00:00" atau dengan pecahan
+// detik); cukup 10 karakter pertama (yyyy-MM-dd) lalu diubah ke dd/MM.
 private fun formatDate(iso: String): String =
-    try {
-        displayDateFormat.format(inputDateFormat.parse(iso)!!)
-    } catch (e: Exception) {
+    if (iso.length >= 10 && iso[4] == '-' && iso[7] == '-') {
+        "${iso.substring(8, 10)}/${iso.substring(5, 7)}"
+    } else {
         iso
     }
+
+private fun amountOrDash(value: Double): String = if (value > 0) CurrencyFormatter.formatBare(value) else "-"
+
+@Composable
+private fun LedgerHeaderRow() {
+    Row(modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall)) {
+        Text("Tgl", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(0.7f))
+        Text("Keterangan", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(2f))
+        Text("Debit", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(1.3f))
+        Text("Kredit", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(1.3f))
+        Text("Saldo", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(1.4f))
+    }
+}
 
 @Composable
 private fun LedgerLineRow(line: LedgerLine) {
@@ -83,25 +135,31 @@ private fun LedgerLineRow(line: LedgerLine) {
             text = formatDate(line.entryDate),
             color = AumoColors.TextMuted,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            modifier = Modifier.padding(end = AumoDimens.SpacingSmall),
+            modifier = Modifier.weight(0.7f),
         )
         Text(
-            text = line.description ?: "",
+            text = line.description?.takeIf { it.isNotBlank() } ?: line.transactionNumber.orEmpty(),
             color = AumoColors.TextPrimary,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(2f),
         )
-        val amount = if (line.debit > 0) line.debit else -line.credit
         Text(
-            text = CurrencyFormatter.format(amount),
+            text = amountOrDash(line.debit),
             color = AumoColors.TextPrimary,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
-            modifier = Modifier.padding(end = AumoDimens.SpacingSmall),
+            modifier = Modifier.weight(1.3f),
         )
         Text(
-            text = CurrencyFormatter.format(line.runningBalance),
+            text = amountOrDash(line.credit),
+            color = AumoColors.TextPrimary,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.weight(1.3f),
+        )
+        Text(
+            text = CurrencyFormatter.formatBare(line.runningBalance),
             color = AumoColors.TextMuted,
             fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.weight(1.4f),
         )
     }
 }
