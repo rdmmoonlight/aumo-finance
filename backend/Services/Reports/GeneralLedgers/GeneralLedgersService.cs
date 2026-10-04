@@ -8,9 +8,9 @@ using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace AumoBackend.Services.GeneralLedgers;
+namespace AumoBackend.Services.Reports.GeneralLedgers;
 
-public class GeneralLedgerService : IGeneralLedgerService
+public class GeneralLedgersService : IGeneralLedgersService
 {
     private readonly AppDbContext _db;
 
