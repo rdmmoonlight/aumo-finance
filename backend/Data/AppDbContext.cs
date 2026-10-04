@@ -38,6 +38,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
 
     public DbSet<Period> Periods => Set<Period>();
 
+    // General Ledger Readonly Staging Tables
+    public DbSet<PermanentAccountGeneralLedger> PermanentAccountGeneralLedgers => Set<PermanentAccountGeneralLedger>();
+
+    public DbSet<TemporaryAccountGeneralLedger> TemporaryAccountGeneralLedgers => Set<TemporaryAccountGeneralLedger>();
+
     // Economic Document Repository
     public DbSet<EconomicDocument> EconomicDocuments => Set<EconomicDocument>();
 
@@ -94,6 +99,48 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .WithMany()
                 .HasForeignKey(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Permanent Account General Ledger Configuration
+        builder.Entity<PermanentAccountGeneralLedger>(entity =>
+        {
+            entity.HasIndex(x => new { x.UserId, x.PeriodId, x.AccountId });
+
+            entity.HasOne(x => x.Period)
+                .WithMany()
+                .HasForeignKey(x => x.PeriodId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Account)
+                .WithMany()
+                .HasForeignKey(x => x.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.JournalEntryLine)
+                .WithMany()
+                .HasForeignKey(x => x.JournalEntryLineId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Temporary Account General Ledger Configuration
+        builder.Entity<TemporaryAccountGeneralLedger>(entity =>
+        {
+            entity.HasIndex(x => new { x.UserId, x.PeriodId, x.AccountId });
+
+            entity.HasOne(x => x.Period)
+                .WithMany()
+                .HasForeignKey(x => x.PeriodId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(x => x.Account)
+                .WithMany()
+                .HasForeignKey(x => x.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.JournalEntryLine)
+                .WithMany()
+                .HasForeignKey(x => x.JournalEntryLineId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Document Repository Indexing
