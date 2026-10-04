@@ -1,10 +1,31 @@
 name: Auto Generate RTK Query API
 
+# Generate ulang client RTK Query dari OpenAPI backend (Render), lalu commit hasilnya.
+# Vercel TIDAK lagi generate saat build; ia memakai file hasil commit ini.
 on:
   push:
+    branches: [main]
     paths:
-      - 'frontend/openapi-config.cjs'
+      - "backend/Controllers/**"
+      - "backend/DTOs/**"
+      - "frontend/openapi-config.cjs"
+      - ".github/workflows/rtk-query.yml"
   workflow_dispatch:
+    inputs:
+      wait_minutes:
+        description: "Tunggu deploy backend (menit) sebelum generate"
+        required: false
+        default: "0"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: rtk-query-generate
+  cancel-in-progress: true
+
+env:
+  SPEC_URL: https://aumonext-api.onrender.com/openapi/v1.json
 
 jobs:
   generate-api:
@@ -17,19 +38,53 @@ jobs:
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      # Perubahan backend butuh waktu deploy di Render. Push: tunggu 8 menit.
+      - name: Wait for backend deploy
+        run: |
+          WAIT="${{ github.event_name == 'push' && '8' || github.event.inputs.wait_minutes }}"
+          echo "Menunggu ${WAIT:-0} menit..."
+          sleep $(( ${WAIT:-0} * 60 ))
+
+      # Render (free tier) bisa cold start; tunggu sampai spec OpenAPI dapat diakses.
+      - name: Wait for OpenAPI spec
+        run: |
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /tmp/spec.json -w '%{http_code}' --max-time 60 "$SPEC_URL" || true)
+            if [ "$code" = "200" ] && python3 -c "import json; json.load(open('/tmp/spec.json'))['paths']"; then
+              echo "Spec tersedia (percobaan $i)"; exit 0
+            fi
+            echo "Spec belum tersedia (HTTP $code), percobaan $i/20"; sleep 30
+          done
+          echo "Spec OpenAPI tidak dapat diakses"; exit 1
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+          package_json_file: frontend/package.json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --no-frozen-lockfile
 
       - name: Generate API
-        run: npx @rtk-query/codegen-openapi openapi-config.cjs
+        run: pnpm run generate:api
+
+      - name: Format generated files
+        run: pnpm exec prettier --write "src/lib/store/**/*.ts"
+
+      # Jangan commit hasil generate yang merusak build
+      - name: Type check
+        run: pnpm run typecheck
 
       - name: Commit & Push Changes
         uses: stefanzweifel/git-auto-commit-action@v5
