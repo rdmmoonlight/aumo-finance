@@ -243,6 +243,9 @@ fun OpenPeriodDialog(
     var retainedCode by remember { mutableStateOf("") }
     var retainedName by remember { mutableStateOf("") }
 
+    // Pesan validasi lokal — sebelumnya tombol "Open" diam saja bila ada field kosong.
+    var errorText by remember { mutableStateOf<String?>(null) }
+
     AlertDialog(
         onDismissRequest = onDismiss,
         containerColor = AumoColors.Surface,
@@ -341,18 +344,42 @@ fun OpenPeriodDialog(
                         retainedCode = it.filter(Char::isDigit)
                     }, retainedName, { retainedName = it }, null, null)
                 }
+
+                errorText?.let {
+                    Text(
+                        text = it,
+                        color = AumoColors.Bad,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    )
+                }
             }
         },
         confirmButton = {
             TextButton(onClick = {
-                val monthInt = month.toIntOrNull() ?: return@TextButton
-                val yearInt = year.toIntOrNull() ?: return@TextButton
+                val monthInt = month.toIntOrNull()
+                val yearInt = year.toIntOrNull()
+                if (monthInt == null || monthInt !in 1..12) {
+                    errorText = "Month must be between 1 and 12."
+                    return@TextButton
+                }
+                if (yearInt == null || yearInt !in 2000..2100) {
+                    errorText = "Year must be between 2000 and 2100."
+                    return@TextButton
+                }
 
                 val request =
                     if (hasExisting) {
-                        val cashId = selectedCashAccount?.id ?: return@TextButton
-                        val bankId = selectedBankAccount?.id ?: return@TextButton
-                        val retainedId = selectedRetainedAccount?.id ?: return@TextButton
+                        val cashId = selectedCashAccount?.id
+                        val bankId = selectedBankAccount?.id
+                        val retainedId = selectedRetainedAccount?.id
+                        if (cashId == null || bankId == null || retainedId == null) {
+                            errorText = "Select the Cash, Bank, and Retained Earnings accounts."
+                            return@TextButton
+                        }
+                        if (cashId == bankId) {
+                            errorText = "Cash Account and Bank Account cannot be the same."
+                            return@TextButton
+                        }
                         CreatePeriodRequest(
                             month = monthInt,
                             year = yearInt,
@@ -362,20 +389,32 @@ fun OpenPeriodDialog(
                             retainedEarningsAccountId = retainedId,
                         )
                     } else {
+                        if (cashCode.isBlank() || cashName.isBlank() ||
+                            bankCode.isBlank() || bankName.isBlank() ||
+                            retainedCode.isBlank() || retainedName.isBlank()
+                        ) {
+                            errorText = "Complete all account fields (code and name)."
+                            return@TextButton
+                        }
+                        if (setOf(cashCode, bankCode, retainedCode).size < 3) {
+                            errorText = "Account codes must be different from each other."
+                            return@TextButton
+                        }
                         CreatePeriodRequest(
                             month = monthInt,
                             year = yearInt,
                             setupMode = CreatePeriodRequest.MODE_CREATE_NEW,
                             cashAccountCode = cashCode,
-                            cashAccountName = cashName,
+                            cashAccountName = cashName.trim(),
                             cashBalance = cashBalance.toDoubleOrNull(),
                             bankAccountCode = bankCode,
-                            bankAccountName = bankName,
+                            bankAccountName = bankName.trim(),
                             bankBalance = bankBalance.toDoubleOrNull(),
                             retainedEarningsAccountCode = retainedCode,
-                            retainedEarningsAccountName = retainedName,
+                            retainedEarningsAccountName = retainedName.trim(),
                         )
                     }
+                errorText = null
                 onSubmit(request)
             }) {
                 Text("Open", color = AumoColors.Good, fontWeight = FontWeight.Bold)

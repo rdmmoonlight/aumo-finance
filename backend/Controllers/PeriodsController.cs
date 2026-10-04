@@ -26,12 +26,12 @@ namespace AumoBackend.Controllers;
 public class PeriodsController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly ITransactionNumberService _txNumberService;
+    private readonly IPeriodsService _periodsService;
 
-    public PeriodsController(AppDbContext db, ITransactionNumberService txNumberService)
+    public PeriodsController(AppDbContext db, IPeriodsService periodsService)
     {
         _db = db;
-        _txNumberService = txNumberService;
+        _periodsService = periodsService;
     }
 
     // ==========================================
@@ -136,138 +136,15 @@ public class PeriodsController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        // Catatan: Validasi skema (Month, Year, Field Kebutuhan Mode, Format Numeric) 
-        // sudah secara otomatis dieksekusi oleh FluentValidation sebelum masuk ke baris ini.
+        // Validasi skema (Month, Year, field per mode, format numerik) sudah dijalankan
+        // FluentValidation sebelum masuk ke sini. Logika bisnis + transaksi ada di PeriodsService.
+        var result = await _periodsService.CreatePeriodAsync(userId, request);
 
-        var startDate = DateTime.SpecifyKind(new DateTime(request.Year, request.Month, 1), DateTimeKind.Utc);
-        var endDate = startDate.AddMonths(1).AddDays(-1);
-        var periodName = startDate.ToString("MMMM yyyy");
+        if (result.Success)
+            return Ok(new { success = true, message = result.Message, periodId = result.PeriodId });
 
-        // Cek keberadaan periode di Database
-        var periodExists = await _db.Periods.AnyAsync(p => p.UserId == userId && p.StartDate == startDate);
-        if (periodExists)
-            return BadRequest(new { success = false, message = $"Period {periodName} already exists." });
-
-        var isLoadExisting = request.SetupMode == CreatePeriodRequest.ModeLoadExisting;
-
-        using var transaction = await _db.Database.BeginTransactionAsync();
-        try
-        {
-            if (isLoadExisting)
-            {
-                var cashAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.CashAccountId && a.UserId == userId);
-                var bankAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.BankAccountId && a.UserId == userId);
-                var retainedAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.RetainedEarningsAccountId && a.UserId == userId);
-
-                if (cashAccount == null || bankAccount == null || retainedAccount == null)
-                {
-                    await transaction.RollbackAsync();
-                    return BadRequest(new { success = false, message = "One or more selected accounts could not be found." });
-                }
-
-                var newPeriod = new Period
-                {
-                    UserId = userId,
-                    PeriodName = periodName,
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    IsClosed = false,
-                    IsSelected = false
-                };
-                _db.Periods.Add(newPeriod);
-                await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return Ok(new
-                {
-                    success = true,
-                    message = $"Period {newPeriod.PeriodName} has been opened successfully. Balances carry forward from the ledger.",
-                    periodId = newPeriod.Id
-                });
-            }
-            else
-            {
-                var cashCode = int.Parse(request.CashAccountCode!);
-                var bankCode = int.Parse(request.BankAccountCode!);
-                var retainedCode = int.Parse(request.RetainedEarningsAccountCode!);
-
-                var existingCodes = await _db.ChartOfAccounts
-                    .Where(a => a.UserId == userId
-                             && (a.ReferenceNumber == cashCode || a.ReferenceNumber == bankCode || a.ReferenceNumber == retainedCode))
-                    .Select(a => a.ReferenceNumber)
-                    .ToListAsync();
-
-                if (existingCodes.Any())
-                {
-                    await transaction.RollbackAsync();
-                    return BadRequest(new { success = false, message = "One or more account reference numbers are already in use in your Chart of Accounts." });
-                }
-
-                var cashAccount = new ChartOfAccount { UserId = userId, ReferenceNumber = cashCode, AccountName = request.CashAccountName!.Trim(), Type = "Assets", Role = "CashAndEquivalents", IsActive = true };
-                var bankAccount = new ChartOfAccount { UserId = userId, ReferenceNumber = bankCode, AccountName = request.BankAccountName!.Trim(), Type = "Assets", Role = "CashAndEquivalents", IsActive = true };
-                var retainedAccount = new ChartOfAccount { UserId = userId, ReferenceNumber = retainedCode, AccountName = request.RetainedEarningsAccountName!.Trim(), Type = "Equity", Role = "RetainedEarnings", IsActive = true };
-
-                _db.ChartOfAccounts.AddRange(cashAccount, bankAccount, retainedAccount);
-                await _db.SaveChangesAsync();
-
-                var newPeriod = new Period
-                {
-                    UserId = userId,
-                    PeriodName = periodName,
-                    StartDate = startDate,
-                    EndDate = endDate,
-                    IsClosed = false,
-                    IsSelected = false
-                };
-                _db.Periods.Add(newPeriod);
-                await _db.SaveChangesAsync();
-
-                var cashBalance = request.CashBalance ?? 0;
-                var bankBalance = request.BankBalance ?? 0;
-                var totalOpeningBalance = cashBalance + bankBalance;
-
-                if (totalOpeningBalance != 0)
-                {
-                    var transactionNumber = await _txNumberService.GenerateAsync(userId, "General", startDate);
-
-                    var journalEntry = new JournalEntry
-                    {
-                        UserId = userId,
-                        TransactionNumber = transactionNumber,
-                        JournalType = "General",
-                        EntryDate = startDate,
-                        CreatedAt = DateTime.UtcNow
-                    };
-                    _db.JournalEntries.Add(journalEntry);
-                    await _db.SaveChangesAsync();
-
-                    var lines = new List<JournalEntryLine>();
-                    int order = 0;
-                    if (cashBalance != 0)
-                        lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = cashAccount.Id, Debit = cashBalance, Credit = 0, LineDescription = "Opening balance", LineOrder = order++ });
-                    if (bankBalance != 0)
-                        lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = bankAccount.Id, Debit = bankBalance, Credit = 0, LineDescription = "Opening balance", LineOrder = order++ });
-                    lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = retainedAccount.Id, Debit = 0, Credit = totalOpeningBalance, LineDescription = "Opening balance", LineOrder = order++ });
-
-                    _db.JournalEntryLines.AddRange(lines);
-                    await _db.SaveChangesAsync();
-                }
-
-                await transaction.CommitAsync();
-
-                return Ok(new
-                {
-                    success = true,
-                    message = $"Period {newPeriod.PeriodName} has been opened successfully.",
-                    periodId = newPeriod.Id
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            return StatusCode(500, new { success = false, message = $"Transaction failed: {ex.InnerException?.Message ?? ex.Message}" });
-        }
+        var body = new { success = false, message = result.Message };
+        return result.IsServerError ? StatusCode(500, body) : BadRequest(body);
     }
 
     // ==========================================
