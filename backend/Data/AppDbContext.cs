@@ -1,20 +1,15 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Reports.GeneralLedgers;
-using AumoBackend.Data;
-using AumoBackend.DTOs;
+using AumoBackend.Models;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-using AumoBackend.Models;
 
 namespace AumoBackend.Data;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
+public class AppDbContext
+    : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>,
+      IDataProtectionKeyContext
 {
     public AppDbContext(
         DbContextOptions<AppDbContext> options)
@@ -22,48 +17,96 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     {
     }
 
-    // Data Protection Keys Table
+    // ============================================================
+    // Data Protection
+    // ============================================================
+
     public DbSet<DataProtectionKey> DataProtectionKeys { get; set; } = null!;
 
+
+    // ============================================================
     // Notifications
+    // ============================================================
+
     public DbSet<Notification> Notifications => Set<Notification>();
 
+
+    // ============================================================
     // Accounting Core
-    public DbSet<ChartOfAccount> ChartOfAccounts => Set<ChartOfAccount>();
+    // ============================================================
 
-    public DbSet<JournalEntry> JournalEntries => Set<JournalEntry>();
+    public DbSet<ChartOfAccount> ChartOfAccounts
+        => Set<ChartOfAccount>();
 
-    public DbSet<JournalEntryLine> JournalEntryLines => Set<JournalEntryLine>();
+    public DbSet<JournalEntry> JournalEntries
+        => Set<JournalEntry>();
 
-    public DbSet<TransactionCounter> TransactionCounters => Set<TransactionCounter>();
+    public DbSet<JournalEntryLine> JournalEntryLines
+        => Set<JournalEntryLine>();
 
-    public DbSet<Period> Periods => Set<Period>();
+    public DbSet<TransactionCounter> TransactionCounters
+        => Set<TransactionCounter>();
 
-    // General Ledger Readonly Staging Tables (Pluralized Class Names)
-    public DbSet<PermanentAccountGeneralLedger> PermanentAccountsGeneralLedger => Set<PermanentAccountGeneralLedger>();
+    public DbSet<Period> Periods
+        => Set<Period>();
 
-    public DbSet<TemporaryAccountGeneralLedger> TemporaryAccountsGeneralLedger => Set<TemporaryAccountGeneralLedger>();
 
+    // ============================================================
+    // General Ledger
+    // ============================================================
+
+    public DbSet<PermanentAccountsGeneralLedger>
+        PermanentAccountsGeneralLedger
+        => Set<PermanentAccountsGeneralLedger>();
+
+    public DbSet<TemporaryAccountsGeneralLedger>
+        TemporaryAccountsGeneralLedger
+        => Set<TemporaryAccountsGeneralLedger>();
+
+
+    // ============================================================
     // Economic Document Repository
-    public DbSet<EconomicDocument> EconomicDocuments => Set<EconomicDocument>();
+    // ============================================================
 
-    // Struktur folder untuk Document Repository
-    public DbSet<Folder> Folders => Set<Folder>();
+    public DbSet<EconomicDocument> EconomicDocuments
+        => Set<EconomicDocument>();
 
+    public DbSet<Folder> Folders
+        => Set<Folder>();
+
+
+    // ============================================================
     // Guardian
-    public DbSet<UserSession> UserSessions => Set<UserSession>();
+    // ============================================================
 
-    public DbSet<LoginActivity> LoginActivities => Set<LoginActivity>();
+    public DbSet<UserSession> UserSessions
+        => Set<UserSession>();
+
+    public DbSet<LoginActivity> LoginActivities
+        => Set<LoginActivity>();
+
+
+    // ============================================================
+    // Entity Configuration
+    // ============================================================
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
 
-        // Notifications Configuration
+
+        // ========================================================
+        // Notifications
+        // ========================================================
+
         builder.Entity<Notification>(entity =>
         {
-            // Composite Index untuk query cepat per user berdasarkan status baca & urutan waktu
-            entity.HasIndex(x => new { x.UserId, x.IsRead, x.CreatedAt });
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.IsRead,
+                x.CreatedAt
+            });
 
             entity.HasOne<ApplicationUser>()
                 .WithMany()
@@ -71,11 +114,25 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+
+        // ========================================================
+        // Chart of Accounts
+        // ========================================================
+
         builder.Entity<ChartOfAccount>(entity =>
         {
-            entity.HasIndex(x => new { x.UserId, x.ReferenceNumber })
-                .IsUnique();
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.ReferenceNumber
+            })
+            .IsUnique();
         });
+
+
+        // ========================================================
+        // Journal Entry
+        // ========================================================
 
         builder.Entity<JournalEntry>(entity =>
         {
@@ -84,15 +141,33 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .HasForeignKey(x => x.JournalEntryId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasIndex(x => new { x.UserId, x.TransactionNumber })
-                .IsUnique();
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.TransactionNumber
+            })
+            .IsUnique();
         });
+
+
+        // ========================================================
+        // Transaction Counter
+        // ========================================================
 
         builder.Entity<TransactionCounter>(entity =>
         {
-            entity.HasIndex(x => new { x.UserId, x.CounterKey })
-                .IsUnique();
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.CounterKey
+            })
+            .IsUnique();
         });
+
+
+        // ========================================================
+        // Journal Entry Line
+        // ========================================================
 
         builder.Entity<JournalEntryLine>(entity =>
         {
@@ -102,10 +177,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Permanent Accounts General Ledger Configuration
+
+        // ========================================================
+        // Permanent Accounts General Ledger
+        // ========================================================
+
         builder.Entity<PermanentAccountsGeneralLedger>(entity =>
         {
-            entity.HasIndex(x => new { x.UserId, x.PeriodId, x.AccountId });
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.PeriodId,
+                x.AccountId
+            });
 
             entity.HasOne(x => x.Period)
                 .WithMany()
@@ -128,10 +212,19 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Temporary Accounts General Ledger Configuration
+
+        // ========================================================
+        // Temporary Accounts General Ledger
+        // ========================================================
+
         builder.Entity<TemporaryAccountsGeneralLedger>(entity =>
         {
-            entity.HasIndex(x => new { x.UserId, x.PeriodId, x.AccountId });
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.PeriodId,
+                x.AccountId
+            });
 
             entity.HasOne(x => x.Period)
                 .WithMany()
@@ -154,7 +247,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Document Repository Indexing
+
+        // ========================================================
+        // Economic Document Repository
+        // ========================================================
+
         builder.Entity<EconomicDocument>(entity =>
         {
             entity.HasIndex(x => x.Category);
@@ -168,7 +265,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Folder (struktur direktori Document Repository)
+
+        // ========================================================
+        // Folder
+        // ========================================================
+
         builder.Entity<Folder>(entity =>
         {
             entity.HasIndex(x => x.UserId);
@@ -180,7 +281,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+
+        // ========================================================
         // Guardian Session
+        // ========================================================
+
         builder.Entity<UserSession>(entity =>
         {
             entity.HasIndex(x => new
@@ -195,7 +300,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+
+        // ========================================================
         // Guardian Activity
+        // ========================================================
+
         builder.Entity<LoginActivity>(entity =>
         {
             entity.HasIndex(x => new
@@ -212,16 +321,21 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     }
 }
 
+
 /// <summary>
-/// Factory khusus untuk EF Core Tooling pada Design-Time (CLI Migrations)
+/// Factory khusus untuk EF Core Tooling pada Design-Time
+/// (CLI Migrations).
 /// </summary>
-public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
+public class AppDbContextFactory
+    : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        var optionsBuilder =
+            new DbContextOptionsBuilder<AppDbContext>();
 
-        var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
+        var connectionString =
+            Environment.GetEnvironmentVariable("DATABASE_URL")
             ?? "Host=localhost;Database=aumo_db;Username=postgres;Password=postgres";
 
         optionsBuilder.UseNpgsql(connectionString);
