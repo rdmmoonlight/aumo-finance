@@ -71,6 +71,14 @@ jobs:
       - name: Generate API
         run: pnpm run generate:api
 
+      - name: List Added or Updated Files
+        run: |
+          echo "=== Status Perubahan File RTK Query ==="
+          git status --porcelain src/lib/store
+          echo "---------------------------------------"
+          echo "Detail file yang ditambah/diubah:"
+          git status --porcelain src/lib/store | awk '{print $2}'
+
       - name: Commit & Push Changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
