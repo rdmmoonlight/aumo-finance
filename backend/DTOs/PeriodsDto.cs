@@ -78,6 +78,9 @@ public class CreatePeriodResult
     public bool Success { get; set; }
     public string Message { get; set; } = string.Empty;
     public int? PeriodId { get; set; }
+
+    // true bila kegagalan berasal dari server (bukan kesalahan input pengguna) -> HTTP 500.
+    public bool IsServerError { get; set; }
 }
 
 public class SelectPeriodResult

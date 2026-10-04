@@ -6,7 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aumofinance.app.data.DbConnectionManager
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
@@ -64,25 +68,46 @@ class PeriodsViewModel : ViewModel() {
         openPeriodInfo = null
     }
 
+    // Mencegah double-tap pada tombol "Open" yang memicu dua POST sekaligus.
+    var isSubmitting: Boolean by mutableStateOf(false)
+        private set
+
     fun open(request: CreatePeriodRequest) {
+        if (isSubmitting) return
+        isSubmitting = true
         viewModelScope.launch {
             try {
                 val response = api.open(request)
-                val body =
-                    try {
-                        response.body<SimpleApiResponse>()
-                    } catch (parseError: Throwable) {
-                        SimpleApiResponse(success = false, message = "Failed to open period (HTTP ${response.status.value}).")
-                    }
-                snackbarMessage = body.message
-                if (body.success) {
+                val (success, message) = parseOpenResult(response)
+                snackbarMessage = message
+                if (success) {
                     openPeriodInfo = null
                     load()
                 }
             } catch (t: Throwable) {
                 snackbarMessage = t.message ?: "Network error."
+            } finally {
+                isSubmitting = false
             }
         }
+    }
+
+    // Backend membalas dua bentuk: {success,message} (hasil service) atau ProblemDetails
+    // FluentValidation {title, errors:{Field:[msg]}} untuk HTTP 400 — keduanya dibaca di sini.
+    private suspend fun parseOpenResult(response: HttpResponse): Pair<Boolean, String> {
+        val raw = runCatching { response.bodyAsText() }.getOrDefault("")
+        val json: JsonObject? = runCatching { JsonParser.parseString(raw).asJsonObject }.getOrNull()
+        val ok = response.status.isSuccess() && json?.get("success")?.asBoolean != false
+        val message =
+            json?.get("message")?.takeIf { !it.isJsonNull }?.asString
+                ?: json?.getAsJsonObject("errors")
+                    ?.entrySet()
+                    ?.firstOrNull()
+                    ?.value?.asJsonArray
+                    ?.firstOrNull()?.asString
+                ?: json?.get("title")?.takeIf { !it.isJsonNull }?.asString
+        return ok to (message?.takeIf { it.isNotBlank() }
+            ?: if (ok) "Period opened." else "Failed to open period (HTTP ${response.status.value}).")
     }
 
     // Menandai periode ini sebagai yang sedang di-VIEW (ikon mata di halaman
