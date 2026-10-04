@@ -23,7 +23,7 @@ public class PeriodsService : IPeriodsService
     private readonly IGeneralLedgersService _glService;
 
     public PeriodsService(
-        AppDbContext db, 
+        AppDbContext db,
         ITransactionNumberService txNumberService,
         IGeneralLedgersService glService)
     {
