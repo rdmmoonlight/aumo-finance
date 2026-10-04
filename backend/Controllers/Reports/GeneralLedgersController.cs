@@ -2,7 +2,7 @@ using AumoBackend.Controllers.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
-using AumoBackend.Services.GeneralLedgers;
+using AumoBackend.Services.Reports.GeneralLedgers;
 using AumoBackend.Models;
 using AumoBackend.Data;
 using System;
