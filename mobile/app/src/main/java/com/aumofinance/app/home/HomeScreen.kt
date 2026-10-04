@@ -141,7 +141,7 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
                 )
                 Spacer(Modifier.width(AumoDimens.SpacingSmall))
                 Text(
-                    text = if (isDbConnected) "Live • Connected" else "Waking up server...",
+                    text = if (isDbConnected) "Connected" else "Waking up server...",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                     color = if (isDbConnected) Color(0xFF15803D) else Color(0xFF8D6E00)
                 )
