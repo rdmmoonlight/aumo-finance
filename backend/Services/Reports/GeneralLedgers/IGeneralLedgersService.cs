@@ -2,9 +2,9 @@ using System;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
 
-namespace AumoBackend.Services.GeneralLedgers;
+namespace AumoBackend.Services.Reports.GeneralLedgers;
 
-public interface IGeneralLedgerService
+public interface IGeneralLedgersService
 {
     /// <summary>
     /// Memperbarui/meregenerasi data pada tabel Permanent & Temporary General Ledgers
