@@ -24,7 +24,10 @@ const KNOWN_TAGS = [
 ];
 
 const config = {
-  schemaFile: "https://aumonext-api.onrender.com/openapi/v1.json",
+  // OPENAPI_SCHEMA_FILE (opsional) untuk generate dari file/URL lain, mis. saat uji lokal
+  schemaFile:
+    process.env.OPENAPI_SCHEMA_FILE ||
+    "https://aumonext-api.onrender.com/openapi/v1.json",
   apiFile: "./src/lib/apiClient.ts",
   apiImport: "baseApi",
   hooks: true,
