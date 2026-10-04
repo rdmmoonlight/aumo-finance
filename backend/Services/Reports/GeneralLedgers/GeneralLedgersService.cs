@@ -213,11 +213,11 @@ public class GeneralLedgersService : IGeneralLedgersService
 
     private async Task ClearLedgerDataForPeriodAsync(Guid userId, int periodId)
     {
-        await _db.PermanentAccountGeneralLedgers
+        await _db.PermanentAccountsGeneralLedgers
             .Where(x => x.UserId == userId && x.PeriodId == periodId)
             .ExecuteDeleteAsync();
 
-        await _db.TemporaryAccountGeneralLedgers
+        await _db.TemporaryAccountsGeneralLedgers
             .Where(x => x.UserId == userId && x.PeriodId == periodId)
             .ExecuteDeleteAsync();
     }
