@@ -3,6 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AumoBackend.Models;
 
+/// <summary>
+/// General ledger records for permanent accounts.
+/// Permanent accounts are carried forward from one accounting period
+/// to the next, such as assets, liabilities, and equity.
+/// </summary>
 [Table("permanent_accounts_general_ledger")]
 public class PermanentAccountsGeneralLedger
 {
@@ -44,6 +49,7 @@ public class PermanentAccountsGeneralLedger
     public decimal RunningBalance { get; set; }
 
     // Navigation Properties
+
     [ForeignKey(nameof(PeriodId))]
     public virtual Period? Period { get; set; }
 
@@ -57,6 +63,11 @@ public class PermanentAccountsGeneralLedger
     public virtual JournalEntryLine? JournalEntryLine { get; set; }
 }
 
+/// <summary>
+/// General ledger records for temporary accounts.
+/// Temporary accounts are closed at the end of an accounting period,
+/// such as revenue and expense accounts.
+/// </summary>
 [Table("temporary_accounts_general_ledger")]
 public class TemporaryAccountsGeneralLedger
 {
@@ -98,6 +109,7 @@ public class TemporaryAccountsGeneralLedger
     public decimal RunningBalance { get; set; }
 
     // Navigation Properties
+
     [ForeignKey(nameof(PeriodId))]
     public virtual Period? Period { get; set; }
 
