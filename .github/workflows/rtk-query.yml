@@ -6,8 +6,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "backend/Controllers/**"
-      - "backend/DTOs/**"
+      - "backend/**"
       - "frontend/openapi-config.cjs"
       - ".github/workflows/rtk-query.yml"
   workflow_dispatch:
