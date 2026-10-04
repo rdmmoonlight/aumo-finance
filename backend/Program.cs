@@ -5,6 +5,7 @@ using AumoBackend.Services.Auth;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Data;
 using AumoBackend.Services.Periods;
+using AumoBackend.Services.Reports.GeneralLedgers;
 using System;
 using System.Collections.Generic;
 using System.IO;
