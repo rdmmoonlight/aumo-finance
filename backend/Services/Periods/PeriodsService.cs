@@ -12,7 +12,7 @@ using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using AumoBackend.Services.JournalEntries;
-using AumoBackend.Services.GeneralLedgers;
+using AumoBackend.Services.Reports.GeneralLedgers;
 
 namespace AumoBackend.Services.Periods;
 
