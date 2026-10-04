@@ -368,7 +368,7 @@ namespace AumoBackend
                 builder.Services.AddScoped<AumoBackend.Services.Notifications.INotificationsService, AumoBackend.Services.Notifications.NotificationsService>();
                 builder.Services.AddScoped<AumoBackend.Services.Periods.IPeriodsService, AumoBackend.Services.Periods.PeriodsService>();
                 builder.Services.AddScoped<AumoBackend.Services.IFinancialReportService, AumoBackend.Services.FinancialReportService>();
-                builder.Services.AddScoped<AumoBackend.Services.IGeneralLedgerService, AumoBackend.Services.GeneralLedgerService>();
+                builder.Services.AddScoped<AumoBackend.Services.IGeneralLedgersService, AumoBackend.Services.GeneralLedgersService>();
                 builder.Services.AddScoped<AumoBackend.Services.IJournalService, AumoBackend.Services.JournalService>();
                 builder.Services.AddScoped<AumoBackend.Services.ITrialBalanceService, AumoBackend.Services.TrialBalanceService>();
                 builder.Services.AddScoped<AumoBackend.Services.IWorksheetService, AumoBackend.Services.WorksheetService>();
