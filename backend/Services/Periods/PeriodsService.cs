@@ -4,6 +4,7 @@ using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Periods;
+using AumoBackend.Services.GeneralLedgers;
 using AumoBackend.Models;
 using AumoBackend.Data;
 using System;
@@ -11,9 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
-
 using Microsoft.EntityFrameworkCore;
-
 using System.ComponentModel.DataAnnotations;
 
 namespace AumoBackend.Services.Periods;
@@ -22,11 +21,16 @@ public class PeriodsService : IPeriodsService
 {
     private readonly AppDbContext _db;
     private readonly ITransactionNumberService _txNumberService;
+    private readonly IGeneralLedgerService _glService;
 
-    public PeriodsService(AppDbContext db, ITransactionNumberService txNumberService)
+    public PeriodsService(
+        AppDbContext db, 
+        ITransactionNumberService txNumberService,
+        IGeneralLedgerService glService)
     {
         _db = db;
         _txNumberService = txNumberService;
+        _glService = glService;
     }
 
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)
@@ -132,16 +136,12 @@ public class PeriodsService : IPeriodsService
         var periodName = startDate.ToString("MMMM yyyy");
         var isLoadExisting = request.SetupMode == CreatePeriodRequest.ModeLoadExisting;
 
-        // Program.cs memakai EnableRetryOnFailure (NpgsqlRetryingExecutionStrategy), sehingga
-        // transaksi manual WAJIB dibungkus execution strategy sebagai satu unit yang bisa diulang.
-        // Tanpa ini EF melempar InvalidOperationException dan endpoint menjawab HTTP 500.
         var strategy = _db.Database.CreateExecutionStrategy();
 
         try
         {
             return await strategy.ExecuteAsync(async () =>
             {
-                // Bersihkan entity sisa percobaan sebelumnya agar retry dimulai dari kondisi bersih.
                 _db.ChangeTracker.Clear();
 
                 await using var transaction = await _db.Database.BeginTransactionAsync();
@@ -180,8 +180,6 @@ public class PeriodsService : IPeriodsService
                     _db.Periods.Add(newPeriod);
                     await _db.SaveChangesAsync();
 
-                    // Saldo akhir akun permanen periode sebelumnya dijurnal ke periode baru
-                    // sebagai General Journal "Saldo Awal" (laporan dihitung per periode).
                     var opening = await AddOpeningBalanceJournalAsync(userId, startDate, retainedAccount);
                     if (opening.Error != null)
                     {
@@ -284,7 +282,6 @@ public class PeriodsService : IPeriodsService
         }
         catch (Exception ex)
         {
-            // Transaksi otomatis di-rollback saat scope `await using` berakhir tanpa commit.
             return new CreatePeriodResult
             {
                 Success = false,
@@ -301,12 +298,6 @@ public class PeriodsService : IPeriodsService
 
     private sealed record OpeningResult(int AccountCount, string? Error);
 
-    /// <summary>
-    /// Membuat General Journal "Saldo Awal" pada tanggal awal periode baru dari saldo akhir
-    /// akun permanen (Assets, Liabilities, Equity) periode sebelumnya (General + Adjusting).
-    /// Laba/rugi bersih periode sebelumnya (akun temporer) digabung ke akun Retained Earnings
-    /// agar jurnal seimbang. Dipanggil di dalam transaksi pembuat periode.
-    /// </summary>
     private async Task<OpeningResult> AddOpeningBalanceJournalAsync(Guid userId, DateTime startDate, ChartOfAccount retainedAccount)
     {
         var previous = await _db.Periods
@@ -330,7 +321,6 @@ public class PeriodsService : IPeriodsService
             .Where(a => a.UserId == userId && a.IsActive)
             .ToListAsync();
 
-        // Pastikan akun RE terpilih ikut dihitung walau sudah nonaktif, agar laba bersih tidak hilang.
         if (accounts.All(a => a.Id != retainedAccount.Id)) accounts.Add(retainedAccount);
 
         var totals = await _db.JournalEntryLines
@@ -343,11 +333,9 @@ public class PeriodsService : IPeriodsService
             .Select(g => new { AccountId = g.Key, Debit = g.Sum(x => x.Debit), Credit = g.Sum(x => x.Credit) })
             .ToDictionaryAsync(x => x.AccountId);
 
-        // Saldo bertanda: positif = debit, negatif = kredit.
         decimal Signed(ChartOfAccount a) =>
             totals.TryGetValue(a.Id, out var t) ? t.Debit - t.Credit : 0m;
 
-        // Laba bersih periode sebelumnya = total (kredit - debit) akun temporer.
         decimal netIncome = accounts
             .Where(a => TemporaryTypes.Contains(a.Type))
             .Sum(a => -Signed(a));
@@ -358,7 +346,6 @@ public class PeriodsService : IPeriodsService
             var balance = Signed(account);
             if (account.Id == retainedAccount.Id)
             {
-                // Saldo akhir RE (kredit) = saldo awal RE + laba bersih -> bertanda: dikurangi laba.
                 balance -= netIncome;
             }
 
@@ -421,6 +408,9 @@ public class PeriodsService : IPeriodsService
 
         await SelectedPeriodHelper.SelectPeriodAsync(_db, userId, entity.Id);
 
+        // Regenerasikan data staging General Ledgers untuk periode terpilih
+        await _glService.RefreshGeneralLedgersAsync(userId);
+
         return new SelectPeriodResult
         {
             Success = true,
@@ -431,6 +421,9 @@ public class PeriodsService : IPeriodsService
 
     public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
     {
+        // Bersihkan staging table sebelum menghilangkan penanda pilihan
+        await _glService.ClearSelectedPeriodLedgersAsync(userId);
+
         await _db.Periods
             .Where(p => p.UserId == userId && p.IsSelected)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
