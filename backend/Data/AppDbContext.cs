@@ -39,9 +39,9 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
     public DbSet<Period> Periods => Set<Period>();
 
     // General Ledger Readonly Staging Tables (Pluralized Class Names)
-    public DbSet<PermanentAccountsGeneralLedger> PermanentAccountGeneralLedgers => Set<PermanentAccountsGeneralLedger>();
+    public DbSet<PermanentAccountGeneralLedger> PermanentAccountsGeneralLedger => Set<PermanentAccountGeneralLedger>();
 
-    public DbSet<TemporaryAccountsGeneralLedger> TemporaryAccountGeneralLedgers => Set<TemporaryAccountsGeneralLedger>();
+    public DbSet<TemporaryAccountGeneralLedger> TemporaryAccountsGeneralLedger => Set<TemporaryAccountGeneralLedger>();
 
     // Economic Document Repository
     public DbSet<EconomicDocument> EconomicDocuments => Set<EconomicDocument>();
