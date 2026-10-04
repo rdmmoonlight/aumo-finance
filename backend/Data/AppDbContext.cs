@@ -55,13 +55,13 @@ public class AppDbContext
     // General Ledger
     // ============================================================
 
-    public DbSet<PermanentAccountsGeneralLedger>
-        PermanentAccountsGeneralLedger
-        => Set<PermanentAccountsGeneralLedger>();
+    public DbSet<GeneralLedgerPermanentAccounts>
+        GeneralLedgerPermanentAccounts
+        => Set<GeneralLedgerPermanentAccounts>();
 
-    public DbSet<TemporaryAccountsGeneralLedger>
-        TemporaryAccountsGeneralLedger
-        => Set<TemporaryAccountsGeneralLedger>();
+    public DbSet<GeneralLedgerTemporaryAccounts>
+        GeneralLedgerTemporaryAccounts
+        => Set<GeneralLedgerTemporaryAccounts>();
 
 
     // ============================================================
@@ -179,10 +179,10 @@ public class AppDbContext
 
 
         // ========================================================
-        // Permanent Accounts General Ledger
+        // General Ledger (Permanent Accounts)
         // ========================================================
 
-        builder.Entity<PermanentAccountsGeneralLedger>(entity =>
+        builder.Entity<GeneralLedgerPermanentAccounts>(entity =>
         {
             entity.HasIndex(x => new
             {
@@ -214,10 +214,10 @@ public class AppDbContext
 
 
         // ========================================================
-        // Temporary Accounts General Ledger
+        // General Ledger (Temporary Accounts)
         // ========================================================
 
-        builder.Entity<TemporaryAccountsGeneralLedger>(entity =>
+        builder.Entity<GeneralLedgerTemporaryAccounts>(entity =>
         {
             entity.HasIndex(x => new
             {

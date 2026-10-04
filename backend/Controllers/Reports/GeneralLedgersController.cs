@@ -52,8 +52,7 @@ public class GeneralLedgersController : ControllerBase
             });
         }
 
-        // PERBAIKAN: Diubah ke versi plural 'PermanentAccountsGeneralLedgers'
-        var ledgers = await _db.PermanentAccountsGeneralLedger
+        var ledgers = await _db.GeneralLedgerPermanentAccounts
             .AsNoTracking()
             .Include(x => x.Account)
             .Where(x => x.UserId == userId && x.PeriodId == period.Id)
@@ -108,8 +107,7 @@ public class GeneralLedgersController : ControllerBase
             });
         }
 
-        // PERBAIKAN: Diubah ke versi plural 'TemporaryAccountsGeneralLedger'
-        var ledgers = await _db.TemporaryAccountsGeneralLedger
+        var ledgers = await _db.GeneralLedgerTemporaryAccounts
             .AsNoTracking()
             .Include(x => x.Account)
             .Where(x => x.UserId == userId && x.PeriodId == period.Id)

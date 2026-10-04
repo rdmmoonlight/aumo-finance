@@ -8,8 +8,8 @@ namespace AumoBackend.Models;
 /// Permanent accounts are carried forward from one accounting period
 /// to the next, such as assets, liabilities, and equity.
 /// </summary>
-[Table("PermanentAccountsGeneralLedger")]
-public class PermanentAccountsGeneralLedger
+[Table("GeneralLedgerPermanentAccounts")]
+public class GeneralLedgerPermanentAccounts
 {
     [Key]
     public int Id { get; set; }
@@ -59,8 +59,8 @@ public class PermanentAccountsGeneralLedger
 /// Temporary accounts are closed at the end of an accounting period,
 /// such as revenue and expense accounts.
 /// </summary>
-[Table("TemporaryAccountsGeneralLedger")]
-public class TemporaryAccountsGeneralLedger
+[Table("GeneralLedgerTemporaryAccounts")]
+public class GeneralLedgerTemporaryAccounts
 {
     [Key]
     public int Id { get; set; }

@@ -125,10 +125,10 @@ public class GeneralLedgersService : IGeneralLedgersService
                 // 4. Calculate running balances and separate
                 //    permanent accounts from temporary accounts
                 var permanentLedgers =
-                    new List<PermanentAccountsGeneralLedger>();
+                    new List<GeneralLedgerPermanentAccounts>();
 
                 var temporaryLedgers =
-                    new List<TemporaryAccountsGeneralLedger>();
+                    new List<GeneralLedgerTemporaryAccounts>();
 
                 var groupedLines =
                     journalLines.GroupBy(l => l.AccountId);
@@ -175,7 +175,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                         if (isPermanent)
                         {
                             permanentLedgers.Add(
-                                new PermanentAccountsGeneralLedger
+                                new GeneralLedgerPermanentAccounts
                                 {
                                     UserId = userId,
                                     PeriodId = periodId,
@@ -196,7 +196,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                         else if (isTemporary)
                         {
                             temporaryLedgers.Add(
-                                new TemporaryAccountsGeneralLedger
+                                new GeneralLedgerTemporaryAccounts
                                 {
                                     UserId = userId,
                                     PeriodId = periodId,
@@ -220,13 +220,13 @@ public class GeneralLedgersService : IGeneralLedgersService
                 // 5. Bulk insert refreshed staging ledger data
                 if (permanentLedgers.Any())
                 {
-                    _db.PermanentAccountsGeneralLedger
+                    _db.GeneralLedgerPermanentAccounts
                         .AddRange(permanentLedgers);
                 }
 
                 if (temporaryLedgers.Any())
                 {
-                    _db.TemporaryAccountsGeneralLedger
+                    _db.GeneralLedgerTemporaryAccounts
                         .AddRange(temporaryLedgers);
                 }
 
@@ -291,13 +291,13 @@ public class GeneralLedgersService : IGeneralLedgersService
         Guid userId,
         int periodId)
     {
-        await _db.PermanentAccountsGeneralLedger
+        await _db.GeneralLedgerPermanentAccounts
             .Where(x =>
                 x.UserId == userId &&
                 x.PeriodId == periodId)
             .ExecuteDeleteAsync();
 
-        await _db.TemporaryAccountsGeneralLedger
+        await _db.GeneralLedgerTemporaryAccounts
             .Where(x =>
                 x.UserId == userId &&
                 x.PeriodId == periodId)
