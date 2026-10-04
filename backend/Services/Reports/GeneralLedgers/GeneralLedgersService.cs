@@ -17,7 +17,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     private static readonly string[] PermanentTypes = { "Assets", "Liabilities", "Equity" };
     private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "OperatingExpenses", "OtherExpenses" };
 
-    public GeneralLedgerService(AppDbContext db)
+    public GeneralLedgersService(AppDbContext db)
     {
         _db = db;
     }
@@ -91,8 +91,8 @@ public class GeneralLedgersService : IGeneralLedgersService
                 }
 
                 // 4. Proses kalkulasi Running Balance & pisahkan Permanent vs Temporary
-                var permanentLedgers = new List<PermanentAccountGeneralLedger>();
-                var temporaryLedgers = new List<TemporaryAccountGeneralLedger>();
+                var permanentLedgers = new List<PermanentAccountsGeneralLedger>();
+                var temporaryLedgers = new List<TemporaryAccountsGeneralLedger>();
 
                 var groupedLines = journalLines.GroupBy(l => l.AccountId);
 
@@ -121,7 +121,7 @@ public class GeneralLedgersService : IGeneralLedgersService
 
                         if (isPermanent)
                         {
-                            permanentLedgers.Add(new PermanentAccountGeneralLedger
+                            permanentLedgers.Add(new PermanentAccountsGeneralLedger
                             {
                                 UserId = userId,
                                 PeriodId = periodId,
@@ -138,7 +138,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                         }
                         else if (isTemporary)
                         {
-                            temporaryLedgers.Add(new TemporaryAccountGeneralLedger
+                            temporaryLedgers.Add(new TemporaryAccountsGeneralLedger
                             {
                                 UserId = userId,
                                 PeriodId = periodId,
