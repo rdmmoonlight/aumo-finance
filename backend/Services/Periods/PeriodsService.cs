@@ -163,6 +163,11 @@ public class PeriodsService : IPeriodsService
                         return Fail("One or more selected accounts could not be found.");
                     }
 
+                    if (retainedAccount.Role != "RetainedEarnings")
+                    {
+                        return Fail("The selected Retained Earnings account is not a Retained Earnings account.");
+                    }
+
                     var newPeriod = new Period
                     {
                         UserId = userId,
@@ -174,12 +179,25 @@ public class PeriodsService : IPeriodsService
                     };
                     _db.Periods.Add(newPeriod);
                     await _db.SaveChangesAsync();
+
+                    // Saldo akhir akun permanen periode sebelumnya dijurnal ke periode baru
+                    // sebagai General Journal "Saldo Awal" (laporan dihitung per periode).
+                    var opening = await AddOpeningBalanceJournalAsync(userId, startDate, retainedAccount);
+                    if (opening.Error != null)
+                    {
+                        return Fail(opening.Error);
+                    }
+
                     await transaction.CommitAsync();
+
+                    var carryInfo = opening.AccountCount > 0
+                        ? $" Saldo Awal journal created for {opening.AccountCount} permanent accounts."
+                        : " No previous period balances to carry forward.";
 
                     return new CreatePeriodResult
                     {
                         Success = true,
-                        Message = $"Period {newPeriod.PeriodName} has been opened successfully. Balances carry forward from the ledger.",
+                        Message = $"Period {newPeriod.PeriodName} has been opened successfully.{carryInfo}",
                         PeriodId = newPeriod.Id
                     };
                 }
@@ -244,10 +262,10 @@ public class PeriodsService : IPeriodsService
                         var lines = new List<JournalEntryLine>();
                         int order = 0;
                         if (cashBalance != 0)
-                            lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = cashAccount.Id, Debit = cashBalance, Credit = 0, LineDescription = "Opening balance", LineOrder = order++ });
+                            lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = cashAccount.Id, Debit = cashBalance, Credit = 0, LineDescription = "Saldo Awal", LineOrder = order++ });
                         if (bankBalance != 0)
-                            lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = bankAccount.Id, Debit = bankBalance, Credit = 0, LineDescription = "Opening balance", LineOrder = order++ });
-                        lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = retainedAccount.Id, Debit = 0, Credit = totalOpeningBalance, LineDescription = "Opening balance", LineOrder = order++ });
+                            lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = bankAccount.Id, Debit = bankBalance, Credit = 0, LineDescription = "Saldo Awal", LineOrder = order++ });
+                        lines.Add(new JournalEntryLine { JournalEntryId = journalEntry.Id, AccountId = retainedAccount.Id, Debit = 0, Credit = totalOpeningBalance, LineDescription = "Saldo Awal", LineOrder = order++ });
 
                         _db.JournalEntryLines.AddRange(lines);
                         await _db.SaveChangesAsync();
@@ -276,6 +294,116 @@ public class PeriodsService : IPeriodsService
         }
 
         static CreatePeriodResult Fail(string message) => new() { Success = false, Message = message };
+    }
+
+    private static readonly string[] PermanentTypes = { "Assets", "Liabilities", "Equity" };
+    private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "OperatingExpenses", "OtherExpenses" };
+
+    private sealed record OpeningResult(int AccountCount, string? Error);
+
+    /// <summary>
+    /// Membuat General Journal "Saldo Awal" pada tanggal awal periode baru dari saldo akhir
+    /// akun permanen (Assets, Liabilities, Equity) periode sebelumnya (General + Adjusting).
+    /// Laba/rugi bersih periode sebelumnya (akun temporer) digabung ke akun Retained Earnings
+    /// agar jurnal seimbang. Dipanggil di dalam transaksi pembuat periode.
+    /// </summary>
+    private async Task<OpeningResult> AddOpeningBalanceJournalAsync(Guid userId, DateTime startDate, ChartOfAccount retainedAccount)
+    {
+        var previous = await _db.Periods
+            .AsNoTracking()
+            .Where(p => p.UserId == userId && p.StartDate < startDate)
+            .OrderByDescending(p => p.StartDate)
+            .FirstOrDefaultAsync();
+
+        if (previous == null) return new OpeningResult(0, null);
+
+        var prevStart = previous.StartDate.Date;
+        var prevEnd = previous.EndDate.Date.AddDays(1).AddTicks(-1);
+
+        if (!PermanentTypes.Contains(retainedAccount.Type))
+        {
+            return new OpeningResult(0, "The selected Retained Earnings account must be an Equity account.");
+        }
+
+        var accounts = await _db.ChartOfAccounts
+            .AsNoTracking()
+            .Where(a => a.UserId == userId && a.IsActive)
+            .ToListAsync();
+
+        // Pastikan akun RE terpilih ikut dihitung walau sudah nonaktif, agar laba bersih tidak hilang.
+        if (accounts.All(a => a.Id != retainedAccount.Id)) accounts.Add(retainedAccount);
+
+        var totals = await _db.JournalEntryLines
+            .AsNoTracking()
+            .Where(l => l.JournalEntry!.UserId == userId
+                     && (l.JournalEntry.JournalType == "General" || l.JournalEntry.JournalType == "Adjusting")
+                     && l.JournalEntry.EntryDate >= prevStart
+                     && l.JournalEntry.EntryDate <= prevEnd)
+            .GroupBy(l => l.AccountId)
+            .Select(g => new { AccountId = g.Key, Debit = g.Sum(x => x.Debit), Credit = g.Sum(x => x.Credit) })
+            .ToDictionaryAsync(x => x.AccountId);
+
+        // Saldo bertanda: positif = debit, negatif = kredit.
+        decimal Signed(ChartOfAccount a) =>
+            totals.TryGetValue(a.Id, out var t) ? t.Debit - t.Credit : 0m;
+
+        // Laba bersih periode sebelumnya = total (kredit - debit) akun temporer.
+        decimal netIncome = accounts
+            .Where(a => TemporaryTypes.Contains(a.Type))
+            .Sum(a => -Signed(a));
+
+        var balances = new List<(ChartOfAccount Account, decimal Signed)>();
+        foreach (var account in accounts.Where(a => PermanentTypes.Contains(a.Type)).OrderBy(a => a.ReferenceNumber))
+        {
+            var balance = Signed(account);
+            if (account.Id == retainedAccount.Id)
+            {
+                // Saldo akhir RE (kredit) = saldo awal RE + laba bersih -> bertanda: dikurangi laba.
+                balance -= netIncome;
+            }
+
+            balance = Math.Round(balance, 2);
+            if (balance != 0m) balances.Add((account, balance));
+        }
+
+        if (balances.Count == 0) return new OpeningResult(0, null);
+
+        var totalDebit = balances.Where(b => b.Signed > 0).Sum(b => b.Signed);
+        var totalCredit = balances.Where(b => b.Signed < 0).Sum(b => -b.Signed);
+        if (Math.Round(totalDebit - totalCredit, 2) != 0m)
+        {
+            return new OpeningResult(0,
+                $"Saldo Awal is not balanced (debit {totalDebit:N2} vs credit {totalCredit:N2}). Check the journals of {previous.PeriodName}.");
+        }
+
+        var transactionNumber = await _txNumberService.GenerateAsync(userId, "General", startDate);
+
+        var journalEntry = new JournalEntry
+        {
+            UserId = userId,
+            TransactionNumber = transactionNumber,
+            JournalType = "General",
+            EntryDate = startDate,
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.JournalEntries.Add(journalEntry);
+        await _db.SaveChangesAsync();
+
+        int order = 0;
+        var lines = balances.Select(b => new JournalEntryLine
+        {
+            JournalEntryId = journalEntry.Id,
+            AccountId = b.Account.Id,
+            Debit = b.Signed > 0 ? b.Signed : 0m,
+            Credit = b.Signed < 0 ? -b.Signed : 0m,
+            LineDescription = "Saldo Awal",
+            LineOrder = order++
+        }).ToList();
+
+        _db.JournalEntryLines.AddRange(lines);
+        await _db.SaveChangesAsync();
+
+        return new OpeningResult(balances.Count, null);
     }
 
     public async Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId)
