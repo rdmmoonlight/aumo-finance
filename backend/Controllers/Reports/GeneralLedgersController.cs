@@ -20,12 +20,12 @@ namespace AumoBackend.Controllers.Reports;
 [ApiController]
 [Route("/api/v1/reports/general-ledgers")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-public class GeneralLedgerController : ControllerBase
+public class GeneralLedgersController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IGeneralLedgersService _glService;
 
-    public GeneralLedgerController(AppDbContext db, IGeneralLedgersService glService)
+    public GeneralLedgersController(AppDbContext db, IGeneralLedgersService glService)
     {
         _db = db;
         _glService = glService;
@@ -52,7 +52,7 @@ public class GeneralLedgerController : ControllerBase
             });
         }
 
-        // Ambil data langsung dari DbSet PermanentAccountsGeneralLedger
+        // PERBAIKAN: Diubah ke versi plural 'PermanentAccountsGeneralLedgers'
         var ledgers = await _db.PermanentAccountsGeneralLedger
             .AsNoTracking()
             .Include(x => x.Account)
@@ -108,7 +108,7 @@ public class GeneralLedgerController : ControllerBase
             });
         }
 
-        // Ambil data langsung dari DbSet TemporaryAccountsGeneralLedger
+        // PERBAIKAN: Diubah ke versi plural 'TemporaryAccountsGeneralLedger'
         var ledgers = await _db.TemporaryAccountsGeneralLedger
             .AsNoTracking()
             .Include(x => x.Account)
