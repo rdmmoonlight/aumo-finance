@@ -12,7 +12,7 @@ using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using AumoBackend.Services.JournalEntries;
-using AumoBackend.Services.Reports.GeneralLedgers;
+using AumoBackend.Services.GeneralLedgers;
 
 namespace AumoBackend.Services.Periods;
 
@@ -20,12 +20,12 @@ public class PeriodsService : IPeriodsService
 {
     private readonly AppDbContext _db;
     private readonly ITransactionNumberService _txNumberService;
-    private readonly IGeneralLedgerService _glService;
+    private readonly IGeneralLedgersService _glService;
 
     public PeriodsService(
         AppDbContext db, 
         ITransactionNumberService txNumberService,
-        IGeneralLedgerService glService)
+        IGeneralLedgersService glService)
     {
         _db = db;
         _txNumberService = txNumberService;
