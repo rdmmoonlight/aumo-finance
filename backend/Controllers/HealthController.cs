@@ -41,6 +41,7 @@ public class HealthController : ControllerBase
                 {
                     status = "online",
                     database = "connected",
+                    commit = Environment.GetEnvironmentVariable("RENDER_GIT_COMMIT"),
                     timestamp = DateTime.UtcNow
                 });
             }

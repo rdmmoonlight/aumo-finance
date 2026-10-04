@@ -58,6 +58,11 @@ jobs:
         run: npm install
         working-directory: frontend
 
+      # Typecheck tidak menulis tsbuildinfo agar tidak ikut ter-commit
+      - name: Typecheck (Frontend)
+        run: npx tsc --noEmit --incremental false
+        working-directory: frontend
+
       - name: Run Prettier Check/Write (Frontend)
         run: npx prettier --write .
         working-directory: frontend
