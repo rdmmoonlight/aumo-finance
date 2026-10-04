@@ -38,10 +38,10 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
 
     public DbSet<Period> Periods => Set<Period>();
 
-    // General Ledger Readonly Staging Tables
-    public DbSet<PermanentAccountGeneralLedger> PermanentAccountGeneralLedgers => Set<PermanentAccountGeneralLedger>();
+    // General Ledger Readonly Staging Tables (Pluralized Class Names)
+    public DbSet<PermanentAccountsGeneralLedger> PermanentAccountGeneralLedgers => Set<PermanentAccountsGeneralLedger>();
 
-    public DbSet<TemporaryAccountGeneralLedger> TemporaryAccountGeneralLedgers => Set<TemporaryAccountGeneralLedger>();
+    public DbSet<TemporaryAccountsGeneralLedger> TemporaryAccountGeneralLedgers => Set<TemporaryAccountsGeneralLedger>();
 
     // Economic Document Repository
     public DbSet<EconomicDocument> EconomicDocuments => Set<EconomicDocument>();
@@ -101,8 +101,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        // Permanent Account General Ledger Configuration
-        builder.Entity<PermanentAccountGeneralLedger>(entity =>
+        // Permanent Accounts General Ledger Configuration
+        builder.Entity<PermanentAccountsGeneralLedger>(entity =>
         {
             entity.HasIndex(x => new { x.UserId, x.PeriodId, x.AccountId });
 
@@ -115,6 +115,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .WithMany()
                 .HasForeignKey(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.JournalEntry)
+                .WithMany()
+                .HasForeignKey(x => x.JournalEntryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.JournalEntryLine)
                 .WithMany()
@@ -122,8 +127,8 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Temporary Account General Ledger Configuration
-        builder.Entity<TemporaryAccountGeneralLedger>(entity =>
+        // Temporary Accounts General Ledger Configuration
+        builder.Entity<TemporaryAccountsGeneralLedger>(entity =>
         {
             entity.HasIndex(x => new { x.UserId, x.PeriodId, x.AccountId });
 
@@ -136,6 +141,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid
                 .WithMany()
                 .HasForeignKey(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(x => x.JournalEntry)
+                .WithMany()
+                .HasForeignKey(x => x.JournalEntryId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(x => x.JournalEntryLine)
                 .WithMany()
@@ -210,11 +220,9 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
 
-        // Ambil DATABASE_URL dari environment variable lokal atau gunakan fallback connection string
         var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL")
             ?? "Host=localhost;Database=aumo_db;Username=postgres;Password=postgres";
 
-        // Ganti UseNpgsql dengan UseSqlServer / provider lain jika kamu tidak pakai PostgreSQL
         optionsBuilder.UseNpgsql(connectionString);
 
         return new AppDbContext(optionsBuilder.Options);
