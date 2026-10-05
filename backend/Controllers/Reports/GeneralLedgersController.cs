@@ -5,18 +5,38 @@ using AumoBackend.Services.Auth;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using AumoBackend.Models;
 using AumoBackend.Data;
-using AumoBackend.DTOs.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.DTOs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Controllers.Reports;
+
+// DTO Helper untuk internal controller
+public class PermanentLedgerDto
+{
+    public int Id { get; set; }
+    public int AccountId { get; set; }
+    public string AccountName { get; set; } = string.Empty;
+    public int AccountReferenceNumber { get; set; }
+    public int JournalEntryId { get; set; }
+    public int JournalEntryLineId { get; set; }
+    public DateTime EntryDate { get; set; }
+    public string TransactionNumber { get; set; } = string.Empty;
+    public string LineDescription { get; set; } = string.Empty;
+    public decimal Debit { get; set; }
+    public decimal Credit { get; set; }
+    public decimal RunningBalance { get; set; }
+}
+
+public class TemporaryLedgerDto : PermanentLedgerDto
+{
+    public string AccountType { get; set; } = string.Empty;
+}
 
 [ApiController]
 [Route("/api/v1/reports/general-ledgers")]
@@ -54,7 +74,7 @@ public class GeneralLedgersController : ControllerBase
         }
 
         // Cek data di staging table
-        var ledgers = await FetchPermanentLedgersAsync(userId, period.Id);
+        List<PermanentLedgerDto> ledgers = await FetchPermanentLedgersAsync(userId, period.Id);
 
         // JIKA KOSONG: Trigger auto-regenerate dari JournalEntries & JournalEntryLines
         if (!ledgers.Any())
@@ -99,7 +119,7 @@ public class GeneralLedgersController : ControllerBase
         }
 
         // Cek data di staging table
-        var ledgers = await FetchTemporaryLedgersAsync(userId, period.Id);
+        List<TemporaryLedgerDto> ledgers = await FetchTemporaryLedgersAsync(userId, period.Id);
 
         // JIKA KOSONG: Trigger auto-regenerate
         if (!ledgers.Any())
@@ -169,8 +189,8 @@ public class GeneralLedgersController : ControllerBase
                 JournalEntryId = x.JournalEntryId,
                 JournalEntryLineId = x.JournalEntryLineId,
                 EntryDate = x.EntryDate,
-                TransactionNumber = x.TransactionNumber,
-                LineDescription = x.LineDescription,
+                TransactionNumber = x.TransactionNumber ?? string.Empty,
+                LineDescription = x.LineDescription ?? string.Empty,
                 Debit = x.Debit,
                 Credit = x.Credit,
                 RunningBalance = x.RunningBalance
@@ -178,7 +198,7 @@ public class GeneralLedgersController : ControllerBase
             .ToListAsync();
     }
 
-    private Task<TemporaryLedgerDto> FetchTemporaryLedgersAsync(Guid userId, int periodId)
+    private Task<List<TemporaryLedgerDto>> FetchTemporaryLedgersAsync(Guid userId, int periodId)
     {
         return _db.GeneralLedgerTemporaryAccounts
             .AsNoTracking()
@@ -193,12 +213,12 @@ public class GeneralLedgersController : ControllerBase
                 AccountId = x.AccountId,
                 AccountName = x.Account != null ? x.Account.AccountName : string.Empty,
                 AccountReferenceNumber = x.Account != null ? x.Account.ReferenceNumber : 0,
-                AccountType = x.Account != null ? x.Account.Type : string.Empty,
+                AccountType = x.Account != null ? (x.Account.Type ?? string.Empty) : string.Empty,
                 JournalEntryId = x.JournalEntryId,
                 JournalEntryLineId = x.JournalEntryLineId,
                 EntryDate = x.EntryDate,
-                TransactionNumber = x.TransactionNumber,
-                LineDescription = x.LineDescription,
+                TransactionNumber = x.TransactionNumber ?? string.Empty,
+                LineDescription = x.LineDescription ?? string.Empty,
                 Debit = x.Debit,
                 Credit = x.Credit,
                 RunningBalance = x.RunningBalance
