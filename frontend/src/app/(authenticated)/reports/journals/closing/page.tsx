@@ -27,7 +27,7 @@ export default function ClosingJournalReportPage() {
 
       try {
         const result = await store.dispatch(
-          reportsApi.endpoints.getJournalsClosing.initiate()
+          reportsApi.endpoints.getJournalsClosing.initiate(),
         );
 
         if (isMounted) {
@@ -88,7 +88,7 @@ export default function ClosingJournalReportPage() {
         totalDebit: g.lines.reduce((s, l) => s + (l.debit || 0), 0),
         totalCredit: g.lines.reduce((s, l) => s + (l.credit || 0), 0),
       })),
-    [vm]
+    [vm],
   );
 
   if (isLoading) {

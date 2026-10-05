@@ -23,7 +23,7 @@ export default function GeneralLedgerPermanentPage() {
       setIsError(false);
 
       const result = await store.dispatch(
-        reportsApi.endpoints.getGeneralLedgerPermanent.initiate()
+        reportsApi.endpoints.getGeneralLedgerPermanent.initiate(),
       );
 
       if (!isMounted) return;
@@ -33,7 +33,9 @@ export default function GeneralLedgerPermanentPage() {
       } else if ("error" in result) {
         setIsError(true);
         const err = result.error as any;
-        setErrorMessage(err?.data?.message || "Failed to load permanent ledger.");
+        setErrorMessage(
+          err?.data?.message || "Failed to load permanent ledger.",
+        );
       }
 
       setIsLoading(false);
@@ -49,7 +51,8 @@ export default function GeneralLedgerPermanentPage() {
   if (isLoading) {
     return (
       <div className="py-16 text-center text-xs text-muted-foreground flex justify-center items-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Loading Permanent Ledger...
+        <Loader2 className="animate-spin" size={16} /> Loading Permanent
+        Ledger...
       </div>
     );
   }

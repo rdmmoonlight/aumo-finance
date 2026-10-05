@@ -1,19 +1,19 @@
 "use client";
 
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import {
-    createColumnHelper,
-    flexRender,
-    getCoreRowModel,
-    useReactTable,
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
 
@@ -35,7 +35,7 @@ export const formatNumber = (amount: number) => {
   const formatted = new Intl.NumberFormat("id-ID", {
     maximumFractionDigits: 0,
   }).format(Math.abs(amount));
-  return isNeg? `(${formatted})` : formatted;
+  return isNeg ? `(${formatted})` : formatted;
 };
 
 const expenseColumnHelper = createColumnHelper<AccountBalanceItem>();
@@ -69,14 +69,45 @@ export function ExpenseTable({ data }: { data: AccountBalanceItem[] }) {
     ],
     [],
   );
-  const table = useReactTable({ data: data || [], columns, getCoreRowModel: getCoreRowModel() });
+  const table = useReactTable({
+    data: data || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
-  if (!data?.length) return <div className="py-8 text-center text-caption text-muted-foreground">No expenses recorded for this period.</div>;
+  if (!data?.length)
+    return (
+      <div className="py-8 text-center text-caption text-muted-foreground">
+        No expenses recorded for this period.
+      </div>
+    );
 
   return (
     <Table>
-      <TableHeader>{table.getHeaderGroups().map((hg) => (<TableRow key={hg.id}>{hg.headers.map((h) => (<TableHead key={h.id} className="text-caption h-8">{h.isPlaceholder? null : flexRender(h.column.columnDef.header, h.getContext())}</TableHead>))}</TableRow>))}</TableHeader>
-      <TableBody>{table.getRowModel().rows.map((row) => (<TableRow key={row.id}>{row.getVisibleCells().map((cell) => (<TableCell key={cell.id} className="py-2">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>))}</TableRow>))}</TableBody>
+      <TableHeader>
+        {table.getHeaderGroups().map((hg) => (
+          <TableRow key={hg.id}>
+            {hg.headers.map((h) => (
+              <TableHead key={h.id} className="text-caption h-8">
+                {h.isPlaceholder
+                  ? null
+                  : flexRender(h.column.columnDef.header, h.getContext())}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id} className="py-2">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
     </Table>
   );
 }
@@ -84,19 +115,84 @@ export function ExpenseTable({ data }: { data: AccountBalanceItem[] }) {
 export function TrendTable({ data }: { data: TrendItem[] }) {
   const columns = useMemo(
     () => [
-      trendColumnHelper.accessor("label", { header: "Period", cell: (i) => <span className="font-semibold text-caption">{i.getValue()}</span> }),
-      trendColumnHelper.accessor("revenue", { header: () => <div className="text-right">Revenue</div>, cell: (i) => <div className="text-right font-mono text-caption text-emerald-500">{formatNumber(i.getValue())}</div> }),
-      trendColumnHelper.accessor("expense", { header: () => <div className="text-right">Expenses</div>, cell: (i) => <div className="text-right font-mono text-caption text-red-500">{formatNumber(i.getValue())}</div> }),
-      trendColumnHelper.accessor("net", { header: () => <div className="text-right">Net Income</div>, cell: (i) => { const v = i.getValue(); return <div className={cn("text-right font-mono text-caption font-semibold", v >= 0? "text-emerald-600" : "text-red-600")}>{formatNumber(v)}</div>; } }),
+      trendColumnHelper.accessor("label", {
+        header: "Period",
+        cell: (i) => (
+          <span className="font-semibold text-caption">{i.getValue()}</span>
+        ),
+      }),
+      trendColumnHelper.accessor("revenue", {
+        header: () => <div className="text-right">Revenue</div>,
+        cell: (i) => (
+          <div className="text-right font-mono text-caption text-emerald-500">
+            {formatNumber(i.getValue())}
+          </div>
+        ),
+      }),
+      trendColumnHelper.accessor("expense", {
+        header: () => <div className="text-right">Expenses</div>,
+        cell: (i) => (
+          <div className="text-right font-mono text-caption text-red-500">
+            {formatNumber(i.getValue())}
+          </div>
+        ),
+      }),
+      trendColumnHelper.accessor("net", {
+        header: () => <div className="text-right">Net Income</div>,
+        cell: (i) => {
+          const v = i.getValue();
+          return (
+            <div
+              className={cn(
+                "text-right font-mono text-caption font-semibold",
+                v >= 0 ? "text-emerald-600" : "text-red-600",
+              )}
+            >
+              {formatNumber(v)}
+            </div>
+          );
+        },
+      }),
     ],
     [],
   );
-  const table = useReactTable({ data: data || [], columns, getCoreRowModel: getCoreRowModel() });
-  if (!data?.length) return <div className="py-8 text-center text-caption text-muted-foreground">No trend data available.</div>;
+  const table = useReactTable({
+    data: data || [],
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+  if (!data?.length)
+    return (
+      <div className="py-8 text-center text-caption text-muted-foreground">
+        No trend data available.
+      </div>
+    );
   return (
     <Table>
-      <TableHeader>{table.getHeaderGroups().map((hg) => (<TableRow key={hg.id}>{hg.headers.map((h) => (<TableHead key={h.id} className="text-caption h-8">{h.isPlaceholder? null : flexRender(h.column.columnDef.header, h.getContext())}</TableHead>))}</TableRow>))}</TableHeader>
-      <TableBody>{table.getRowModel().rows.map((row) => (<TableRow key={row.id}>{row.getVisibleCells().map((cell) => (<TableCell key={cell.id} className="py-2">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>))}</TableRow>))}</TableBody>
+      <TableHeader>
+        {table.getHeaderGroups().map((hg) => (
+          <TableRow key={hg.id}>
+            {hg.headers.map((h) => (
+              <TableHead key={h.id} className="text-caption h-8">
+                {h.isPlaceholder
+                  ? null
+                  : flexRender(h.column.columnDef.header, h.getContext())}
+              </TableHead>
+            ))}
+          </TableRow>
+        ))}
+      </TableHeader>
+      <TableBody>
+        {table.getRowModel().rows.map((row) => (
+          <TableRow key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <TableCell key={cell.id} className="py-2">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </TableCell>
+            ))}
+          </TableRow>
+        ))}
+      </TableBody>
     </Table>
   );
 }

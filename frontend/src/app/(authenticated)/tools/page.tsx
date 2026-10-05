@@ -2,22 +2,50 @@
 
 import { store } from "@/lib/store";
 import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
-import { AccountMappingDetailDto, toolsApi } from "@/lib/store/(authenticated)/tools/toolsApi";
+import {
+  AccountMappingDetailDto,
+  toolsApi,
+} from "@/lib/store/(authenticated)/tools/toolsApi";
 import { useEffect, useState } from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-import { AlertTriangle, Calendar, Check, Download, Eye, FileSpreadsheet, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  Calendar,
+  Check,
+  Download,
+  Eye,
+  FileSpreadsheet,
+  Upload,
+} from "lucide-react";
 import { MONTHS } from "./constants";
 import { MappingStatusTable } from "./mapping-status-table";
 import { PreviewTransactionLinesTable } from "./preview-transaction-lines-table";
-import { AccountMappingDetail, JournalImportResult, JournalLineImport, JournalTransactionImport } from "./types";
+import {
+  AccountMappingDetail,
+  JournalImportResult,
+  JournalLineImport,
+  JournalTransactionImport,
+} from "./types";
 
 export default function ToolsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -29,8 +57,12 @@ export default function ToolsPage() {
   const [targetMonth, setTargetMonth] = useState(new Date().getMonth() + 1);
   const [targetYear, setTargetYear] = useState(new Date().getFullYear());
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [parseResult, setParseResult] = useState<JournalImportResult | null>(null);
-  const [accountMappings, setAccountMappings] = useState<AccountMappingDetail[]>([]);
+  const [parseResult, setParseResult] = useState<JournalImportResult | null>(
+    null,
+  );
+  const [accountMappings, setAccountMappings] = useState<
+    AccountMappingDetail[]
+  >([]);
   const [dbAccounts, setDbAccounts] = useState<any[]>([]);
 
   const isBusy = isParsing || isImporting;
@@ -42,7 +74,7 @@ export default function ToolsPage() {
       setIsLoadingCoa(true);
       try {
         const result = await store.dispatch(
-          chartOfAccountsApi.endpoints.getChartOfAccounts.initiate()
+          chartOfAccountsApi.endpoints.getChartOfAccounts.initiate(),
         );
         if (isMounted && result.data) {
           const raw = result.data;
@@ -74,7 +106,8 @@ export default function ToolsPage() {
       if (!(window as any).XLSX) {
         await new Promise((res, rej) => {
           const s = document.createElement("script");
-          s.src = "https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js";
+          s.src =
+            "https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js";
           s.onload = res as any;
           s.onerror = rej as any;
           document.head.appendChild(s);
@@ -90,14 +123,19 @@ export default function ToolsPage() {
       ["GJ", "AJ"].forEach((sheetName) => {
         const ws = wb.Sheets[sheetName];
         if (!ws) return;
-        const rows: any[] = XLSX.utils.sheet_to_json(ws, { raw: true, defval: "" });
+        const rows: any[] = XLSX.utils.sheet_to_json(ws, {
+          raw: true,
+          defval: "",
+        });
         let curDate = "";
         const grouped: Record<string, JournalLineImport[]> = {};
 
         rows.forEach((row, i) => {
           const rawDate = row["Date"] ?? "";
           let day = 1;
-          if (/^\d{1,2}$/.test(String(rawDate).trim())) {             day = parseInt(String(rawDate), 10);           } else if (/^\d{4}-\d{2}-\d{2}$/.test(String(rawDate))) {
+          if (/^\d{1,2}$/.test(String(rawDate).trim())) {
+            day = parseInt(String(rawDate), 10);
+          } else if (/^\d{4}-\d{2}-\d{2}$/.test(String(rawDate))) {
             day = parseInt(String(rawDate).split("-")[2], 10);
           }
 
@@ -127,8 +165,14 @@ export default function ToolsPage() {
             refNumber: refVal,
             accountName,
             description,
-            debit: row["Debit"] !== "" && !isNaN(Number(row["Debit"])) ? Number(row["Debit"]) : null,
-            credit: row["Credit"] !== "" && !isNaN(Number(row["Credit"])) ? Number(row["Credit"]) : null,
+            debit:
+              row["Debit"] !== "" && !isNaN(Number(row["Debit"]))
+                ? Number(row["Debit"])
+                : null,
+            credit:
+              row["Credit"] !== "" && !isNaN(Number(row["Credit"]))
+                ? Number(row["Credit"])
+                : null,
           };
 
           if (!grouped[curDate]) grouped[curDate] = [];
@@ -141,7 +185,7 @@ export default function ToolsPage() {
             date: d,
             journalType: sheetName === "GJ" ? "General" : "Adjusting",
             lines: grouped[d],
-          })
+          }),
         );
       });
 
@@ -159,8 +203,14 @@ export default function ToolsPage() {
     }
   };
 
-  const handleMappingChange = (excelRef: number, excelName: string, targetRef: number) => {
-    const opt = dbAccounts.find((o: any) => Number(o.referenceNumber || o.code) === Number(targetRef));
+  const handleMappingChange = (
+    excelRef: number,
+    excelName: string,
+    targetRef: number,
+  ) => {
+    const opt = dbAccounts.find(
+      (o: any) => Number(o.referenceNumber || o.code) === Number(targetRef),
+    );
     setAccountMappings((prev) =>
       prev.map((m) =>
         m.excelRef === excelRef && m.excelAccountName === excelName
@@ -170,8 +220,8 @@ export default function ToolsPage() {
               mappedAccountName: opt?.accountName || opt?.name || "",
               status: targetRef ? "REALLOCATED" : "UNMAPPED",
             }
-          : m
-      )
+          : m,
+      ),
     );
   };
 
@@ -183,8 +233,10 @@ export default function ToolsPage() {
     setIsImporting(true);
 
     try {
-      const customMappingsDto: AccountMappingDetailDto[] = accountMappings.map((m) => ({ ...m }));
-      
+      const customMappingsDto: AccountMappingDetailDto[] = accountMappings.map(
+        (m) => ({ ...m }),
+      );
+
       const payload = {
         journalImportRequestDto: {
           targetMonth,
@@ -205,17 +257,25 @@ export default function ToolsPage() {
       };
 
       const result = await store.dispatch(
-        toolsApi.endpoints.importJournalEntries.initiate(payload.journalImportRequestDto)
+        toolsApi.endpoints.importJournalEntries.initiate(
+          payload.journalImportRequestDto,
+        ),
       );
 
       if ("data" in result) {
-        setSuccessMessage(`Imported ${parseResult.totalTransactionsRead} entries for ${targetMonth}/${targetYear}`);
+        setSuccessMessage(
+          `Imported ${parseResult.totalTransactionsRead} entries for ${targetMonth}/${targetYear}`,
+        );
         setParseResult(null);
         setSelectedFile(null);
         setAccountMappings([]);
       } else if ("error" in result) {
         const err = result.error as any;
-        setErrorMessage(err?.data?.message || err?.message || "Gagal melakukan import jurnal.");
+        setErrorMessage(
+          err?.data?.message ||
+            err?.message ||
+            "Gagal melakukan import jurnal.",
+        );
       }
     } catch (err: any) {
       setErrorMessage(err?.message || "Gagal melakukan import jurnal.");
@@ -258,7 +318,10 @@ export default function ToolsPage() {
                   Target Period
                 </Label>
                 <div className="grid grid-cols-2 gap-2">
-                  <Select value={String(targetMonth)} onValueChange={(v) => setTargetMonth(Number(v))}>
+                  <Select
+                    value={String(targetMonth)}
+                    onValueChange={(v) => setTargetMonth(Number(v))}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -270,7 +333,10 @@ export default function ToolsPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Select value={String(targetYear)} onValueChange={(v) => setTargetYear(Number(v))}>
+                  <Select
+                    value={String(targetYear)}
+                    onValueChange={(v) => setTargetYear(Number(v))}
+                  >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -300,7 +366,12 @@ export default function ToolsPage() {
                   variant="link"
                   size="sm"
                   className="h-auto p-0 gap-1"
-                  onClick={() => window.open("/api/v1/tools/download-journal-template", "_blank")}
+                  onClick={() =>
+                    window.open(
+                      "/api/v1/tools/download-journal-template",
+                      "_blank",
+                    )
+                  }
                 >
                   <Download size={12} />
                   Download Template
@@ -308,7 +379,11 @@ export default function ToolsPage() {
               </div>
 
               <div className="grid gap-2">
-                <Button disabled={!selectedFile || isBusy} onClick={handlePreview} className="gap-2">
+                <Button
+                  disabled={!selectedFile || isBusy}
+                  onClick={handlePreview}
+                  className="gap-2"
+                >
                   <Eye size={14} />
                   {isBusy ? "Processing..." : "Preview Entries"}
                 </Button>
@@ -368,10 +443,15 @@ export default function ToolsPage() {
                         {tx.date}
                       </Badge>
                     </div>
-                    <span className="text-caption text-muted-foreground">{tx.lines.length} lines</span>
+                    <span className="text-caption text-muted-foreground">
+                      {tx.lines.length} lines
+                    </span>
                   </CardHeader>
                   <CardContent className="p-0">
-                    <PreviewTransactionLinesTable lines={tx.lines} accountMappings={accountMappings} />
+                    <PreviewTransactionLinesTable
+                      lines={tx.lines}
+                      accountMappings={accountMappings}
+                    />
                   </CardContent>
                 </Card>
               ))}
@@ -381,7 +461,9 @@ export default function ToolsPage() {
               <CardContent className="text-center text-muted-foreground">
                 <Upload size={32} className="mx-auto mb-2 opacity-50" />
                 <p className="font-medium">No Preview Yet</p>
-                <p className="text-caption">Select Excel on left and click Preview</p>
+                <p className="text-caption">
+                  Select Excel on left and click Preview
+                </p>
               </CardContent>
             </Card>
           )}

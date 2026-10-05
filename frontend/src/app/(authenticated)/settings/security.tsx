@@ -54,7 +54,7 @@ export function SecuritySection() {
     const result = await store.dispatch(
       settingsApi.endpoints.getGuardianDashboard.initiate(undefined, {
         forceRefetch: true,
-      })
+      }),
     );
 
     if (result.isSuccess) {
@@ -77,7 +77,7 @@ export function SecuritySection() {
   ).slice(0, 5);
   const sessions: SessionItem[] = (dashboardData?.activeSessions || []).slice(
     0,
-    5
+    5,
   );
   const isHealthy = security?.statusLevel === "Good";
 
@@ -99,7 +99,7 @@ export function SecuritySection() {
       const result = await store.dispatch(
         settingsApi.endpoints.revokeSessionById.initiate({
           sessionId: id,
-        })
+        }),
       );
 
       if ("data" in result) {
@@ -121,7 +121,7 @@ export function SecuritySection() {
     setIsRevokingAll(true);
     try {
       const result = await store.dispatch(
-        settingsApi.endpoints.revokeAllSessions.initiate()
+        settingsApi.endpoints.revokeAllSessions.initiate(),
       );
 
       if ("data" in result) {
@@ -143,7 +143,9 @@ export function SecuritySection() {
       {success && (
         <Alert className="py-2 bg-emerald-500/10 border-emerald-500/20 text-emerald-600 text-ui">
           <CheckCircle2 size={14} />
-          <AlertDescription className="text-caption">{success}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {success}
+          </AlertDescription>
         </Alert>
       )}
       {(error || isError) && (
@@ -163,7 +165,7 @@ export function SecuritySection() {
             "gap-1.5 h-6 text-caption",
             isHealthy
               ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-600"
-              : "border-amber-500/20 bg-amber-500/10 text-amber-600"
+              : "border-amber-500/20 bg-amber-500/10 text-amber-600",
           )}
         >
           <HeartPulse size={12} /> {security?.statusLevel || "Loading"}
@@ -183,7 +185,10 @@ export function SecuritySection() {
             </TabsTrigger>
             <TabsTrigger value="sessions" className="text-caption h-5 gap-1">
               <Laptop size={12} /> Sessions{" "}
-              <Badge variant="secondary" className="ml-1 h-4 px-1 text-label-small">
+              <Badge
+                variant="secondary"
+                className="ml-1 h-4 px-1 text-label-small"
+              >
                 {sessions.length}
               </Badge>
             </TabsTrigger>
@@ -196,7 +201,9 @@ export function SecuritySection() {
               <Card className="py-3 px-3 flex items-center justify-between">
                 <div>
                   <p className="text-caption font-medium">Failed 24h</p>
-                  <p className="text-caption text-muted-foreground">Kegagalan login</p>
+                  <p className="text-caption text-muted-foreground">
+                    Kegagalan login
+                  </p>
                 </div>
                 {security?.failedAttemptsLast24Hours === 0 ? (
                   <Badge className="bg-emerald-500/15 text-emerald-600 text-label-small h-5">
@@ -222,7 +229,9 @@ export function SecuritySection() {
           <TabsContent value="sessions" className="mt-3">
             <Card className="overflow-hidden">
               <div className="flex items-center justify-between py-2 px-3 border-b bg-muted/30">
-                <span className="text-caption font-semibold">Active Sessions</span>
+                <span className="text-caption font-semibold">
+                  Active Sessions
+                </span>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -245,7 +254,9 @@ export function SecuritySection() {
           <TabsContent value="logs" className="mt-3">
             <Card className="overflow-hidden">
               <div className="py-2 px-3 border-b bg-muted/30">
-                <span className="text-caption font-semibold">Login History</span>
+                <span className="text-caption font-semibold">
+                  Login History
+                </span>
               </div>
               <ScrollArea className="h-64">
                 <ActivityLogsTable activities={activities} />

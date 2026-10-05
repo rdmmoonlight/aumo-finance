@@ -3,7 +3,13 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -11,7 +17,15 @@ import { Textarea } from "@/components/ui/textarea";
 import type { AppDispatch } from "@/lib/store";
 import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-import { AlertTriangle, CheckCircle2, Key, Loader2, ShieldCheck, Trash2, Upload } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Key,
+  Loader2,
+  ShieldCheck,
+  Trash2,
+  Upload,
+} from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { AccountDetailsTable, UserProfileField } from "./account-table";
@@ -41,7 +55,9 @@ export default function AccountSettings() {
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await dispatch(authApi.endpoints.getProfile.initiate()).unwrap();
+      const res = await dispatch(
+        authApi.endpoints.getProfile.initiate(),
+      ).unwrap();
       const userData = res?.data || res;
       setUser(userData);
       if (userData) {
@@ -62,12 +78,19 @@ export default function AccountSettings() {
     fetchProfile();
   }, [fetchProfile]);
 
-  const profileSummaryData = useMemo<UserProfileField[]>(() => [
-    { label: "Full Name", value: user?.fullName || "", status: "Editable" },
-    { label: "Username", value: user?.userName || "", status: "Editable" },
-    { label: "Email Address", value: user?.email || "", status: "Verified" },
-    { label: "Phone Number", value: user?.phoneNumber || "", status: "Editable" },
-  ], [user]);
+  const profileSummaryData = useMemo<UserProfileField[]>(
+    () => [
+      { label: "Full Name", value: user?.fullName || "", status: "Editable" },
+      { label: "Username", value: user?.userName || "", status: "Editable" },
+      { label: "Email Address", value: user?.email || "", status: "Verified" },
+      {
+        label: "Phone Number",
+        value: user?.phoneNumber || "",
+        status: "Editable",
+      },
+    ],
+    [user],
+  );
 
   const notify = (m: string, e = false) => {
     if (e) {
@@ -90,7 +113,7 @@ export default function AccountSettings() {
           userName,
           phoneNumber,
           bio,
-        })
+        }),
       ).unwrap();
       notify("Profile updated!");
       fetchProfile();
@@ -115,7 +138,7 @@ export default function AccountSettings() {
     setUploading(true);
     try {
       const res: any = await dispatch(
-        settingsApi.endpoints.uploadAvatar.initiate(fd)
+        settingsApi.endpoints.uploadAvatar.initiate(fd),
       ).unwrap();
       const newUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
       if (newUrl) setAvatarPreview(newUrl);
@@ -124,7 +147,7 @@ export default function AccountSettings() {
     } catch (err: any) {
       notify(
         err?.data?.message || err?.data?.errors?.file?.[0] || "Gagal upload",
-        true
+        true,
       );
       setAvatarPreview(user?.avatarUrl || null);
     } finally {
@@ -141,7 +164,7 @@ export default function AccountSettings() {
         settingsApi.endpoints.changePassword.initiate({
           currentPassword,
           newPassword,
-        })
+        }),
       ).unwrap();
       notify("Password updated!");
       setCurrentPassword("");
@@ -179,7 +202,9 @@ export default function AccountSettings() {
       {success && (
         <Alert className="py-2 bg-emerald-500/10 text-emerald-600 text-ui">
           <CheckCircle2 size={14} />
-          <AlertDescription className="text-caption">{success}</AlertDescription>
+          <AlertDescription className="text-caption">
+            {success}
+          </AlertDescription>
         </Alert>
       )}
       {error && (
@@ -193,7 +218,8 @@ export default function AccountSettings() {
         <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
           <div>
             <CardTitle className="text-ui flex items-center gap-2">
-              <ShieldCheck size={16} className="text-primary" /> Ringkasan Status Akun
+              <ShieldCheck size={16} className="text-primary" /> Ringkasan
+              Status Akun
             </CardTitle>
             <CardDescription className="text-caption">
               Status kredensial pengguna aktif dari `/api/v1/auth/me`
@@ -246,7 +272,10 @@ export default function AccountSettings() {
             </div>
           </div>
           <Separator />
-          <form onSubmit={handleProfile} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <form
+            onSubmit={handleProfile}
+            className="grid grid-cols-1 md:grid-cols-2 gap-3"
+          >
             <div className="space-y-1">
               <Label className="text-caption">Full Name</Label>
               <Input
@@ -320,7 +349,12 @@ export default function AccountSettings() {
               onChange={(e) => setNewPassword(e.target.value)}
               className="h-8 text-caption"
             />
-            <Button size="sm" variant="outline" className="h-8 text-caption" disabled={changing}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-caption"
+              disabled={changing}
+            >
               {changing && <Loader2 size={13} className="animate-spin mr-1" />}
               Update
             </Button>

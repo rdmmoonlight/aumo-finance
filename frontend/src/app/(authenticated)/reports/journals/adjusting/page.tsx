@@ -32,7 +32,7 @@ export default function AdjustingJournalPage() {
     setIsLoading(true);
     try {
       const result = await store.dispatch(
-        reportsApi.endpoints.getJournalsAdjusting.initiate()
+        reportsApi.endpoints.getJournalsAdjusting.initiate(),
       );
 
       if ("data" in result) {
@@ -56,7 +56,7 @@ export default function AdjustingJournalPage() {
     setIsDeleting(true);
     try {
       const result = await store.dispatch(
-        journalEntryApi.endpoints.deleteJournalEntry.initiate(entryToDelete.id)
+        journalEntryApi.endpoints.deleteJournalEntry.initiate(entryToDelete.id),
       );
 
       if ("data" in result || !("error" in result)) {
@@ -71,7 +71,8 @@ export default function AdjustingJournalPage() {
   };
 
   const d = data as any;
-  const hasPeriodSelected = d?.hasPeriodSelected ?? Boolean(d?.selectedPeriodName);
+  const hasPeriodSelected =
+    d?.hasPeriodSelected ?? Boolean(d?.selectedPeriodName);
   const entries: JournalEntry[] = d?.entries || [];
 
   const flatData = useMemo(() => {
@@ -98,7 +99,8 @@ export default function AdjustingJournalPage() {
           credit: line.credit,
           lineDescription: line.lineDescription,
           accountName: line.accountName || line.account?.accountName || "-",
-          referenceNumber: line.referenceNumber || line.account?.referenceNumber || "-",
+          referenceNumber:
+            line.referenceNumber || line.account?.referenceNumber || "-",
           isFirstLine: idx === 0,
           showHeader: idx === 0 && showHeader,
           formattedDate: cur,
@@ -111,7 +113,8 @@ export default function AdjustingJournalPage() {
   if (isLoading) {
     return (
       <div className="py-10 text-center text-xs flex justify-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Loading adjusting entries...
+        <Loader2 className="animate-spin" size={16} /> Loading adjusting
+        entries...
       </div>
     );
   }
@@ -124,7 +127,8 @@ export default function AdjustingJournalPage() {
             <FilePen className="text-purple-500" /> Adjusting Journal
           </h1>
           <p className="text-sm text-muted-foreground">
-            Adjusting entries {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} • IDR
+            Adjusting entries{" "}
+            {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} • IDR
           </p>
         </div>
         <div className="flex gap-2">
@@ -153,9 +157,7 @@ export default function AdjustingJournalPage() {
               onPromptDelete={setEntryToDelete}
             />
           ) : (
-            <JournalEmptyState
-              selectedPeriodName={d?.selectedPeriodName}
-            />
+            <JournalEmptyState selectedPeriodName={d?.selectedPeriodName} />
           )}
         </CardContent>
       </Card>
@@ -164,7 +166,9 @@ export default function AdjustingJournalPage() {
         open={!!entryToDelete}
         transactionNumber={(entryToDelete as any)?.transactionNumber}
         isDeleting={isDeleting}
-        onOpenChange={(o) => { if (!o) setEntryToDelete(null); }}
+        onOpenChange={(o) => {
+          if (!o) setEntryToDelete(null);
+        }}
         onConfirm={handleDeleteConfirm}
       />
     </div>

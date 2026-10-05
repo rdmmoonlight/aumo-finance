@@ -34,7 +34,7 @@ export default function LandingPage(): React.JSX.Element {
       try {
         setCheckingAuth(true);
         const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate()
+          authApi.endpoints.getProfile.initiate(),
         );
 
         if (result.isSuccess && result.data?.success) {

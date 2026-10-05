@@ -10,7 +10,10 @@ export function NoPeriodState() {
       <p className="text-sm font-medium">No Period Selected</p>
       <p className="text-xs">
         Go to{" "}
-        <Link href="/periods" className="text-primary underline underline-offset-4">
+        <Link
+          href="/periods"
+          className="text-primary underline underline-offset-4"
+        >
           Periods
         </Link>{" "}
         to select a period.

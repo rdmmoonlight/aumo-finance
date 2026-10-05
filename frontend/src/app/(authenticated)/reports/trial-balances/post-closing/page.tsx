@@ -28,7 +28,7 @@ export default function PostClosingTrialBalancePage() {
       const result = await store.dispatch(
         reportsApi.endpoints.getStatementOfFinancialPosition.initiate({
           isPostClosing: true,
-        })
+        }),
       );
 
       if (!isMounted) return;
@@ -51,8 +51,10 @@ export default function PostClosingTrialBalancePage() {
   }, []);
 
   const noPeriod = useMemo(
-    () => (error as any)?.status === 404 || (data as any)?.hasPeriodSelected === false,
-    [data, error]
+    () =>
+      (error as any)?.status === 404 ||
+      (data as any)?.hasPeriodSelected === false,
+    [data, error],
   );
 
   const rows = useMemo<TrialRow[]>(() => {
@@ -60,10 +62,17 @@ export default function PostClosingTrialBalancePage() {
     const raw = data as any;
     const assets = raw?.assetAccounts || raw?.assets || [];
     const liabs = raw?.liabilityAccounts || raw?.liabilities || [];
-    const rawEquity = raw?.equityAccounts || raw?.equityExcludingRetainedEarnings || [];
-    const reItem = rawEquity.find((e: any) => e.accountName === "Retained Earnings");
-    const reEnding = reItem ? Number(reItem.amount) : Number(raw?.retainedEarningsEnding) || 0;
-    const equityEx = rawEquity.filter((e: any) => e.accountName !== "Retained Earnings");
+    const rawEquity =
+      raw?.equityAccounts || raw?.equityExcludingRetainedEarnings || [];
+    const reItem = rawEquity.find(
+      (e: any) => e.accountName === "Retained Earnings",
+    );
+    const reEnding = reItem
+      ? Number(reItem.amount)
+      : Number(raw?.retainedEarningsEnding) || 0;
+    const equityEx = rawEquity.filter(
+      (e: any) => e.accountName !== "Retained Earnings",
+    );
     return [
       ...assets.map((a: any) => ({
         accountId: a.accountId || a.referenceNumber,
@@ -104,8 +113,14 @@ export default function PostClosingTrialBalancePage() {
     ];
   }, [data, noPeriod]);
 
-  const totalDebit = useMemo(() => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0), [rows]);
-  const totalCredit = useMemo(() => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0), [rows]);
+  const totalDebit = useMemo(
+    () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
+    [rows],
+  );
+  const totalCredit = useMemo(
+    () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
+    [rows],
+  );
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
 
   if (isLoading) {
@@ -120,7 +135,8 @@ export default function PostClosingTrialBalancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-h3 font-bold flex items-center gap-2">
-          <ShieldCheck className="text-emerald-500" size={22} /> Post-Closing Trial Balance
+          <ShieldCheck className="text-emerald-500" size={22} /> Post-Closing
+          Trial Balance
         </h1>
         <p className="text-ui text-muted-foreground mt-1">
           After closing entries • Only permanent accounts • IDR
@@ -130,7 +146,8 @@ export default function PostClosingTrialBalancePage() {
         <Alert variant="destructive">
           <AlertTriangle size={16} />
           <AlertDescription>
-            {(error as any)?.data?.message || "Failed to load post-closing trial balance."}
+            {(error as any)?.data?.message ||
+              "Failed to load post-closing trial balance."}
           </AlertDescription>
         </Alert>
       )}
@@ -138,7 +155,11 @@ export default function PostClosingTrialBalancePage() {
         <NoPeriodCard message="Select a period to view post-closing balance." />
       ) : (
         <>
-          <TrialTable rows={rows} totalDebit={totalDebit} totalCredit={totalCredit} />
+          <TrialTable
+            rows={rows}
+            totalDebit={totalDebit}
+            totalCredit={totalCredit}
+          />
           <BalanceAlert
             isBalanced={isBalanced}
             balancedText="Post-closing TB is balanced - ready for next period"

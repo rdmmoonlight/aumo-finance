@@ -1,10 +1,19 @@
 "use client";
 
 import { DashboardCharts } from "@/app/(authenticated)/dashboard/dashboard-charts";
-import { ExpenseTable, formatNumber, TrendTable } from "@/app/(authenticated)/dashboard/dashboard-tables";
+import {
+  ExpenseTable,
+  formatNumber,
+  TrendTable,
+} from "@/app/(authenticated)/dashboard/dashboard-tables";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { store } from "@/lib/store";
 import { dashboardApi } from "@/lib/store/(authenticated)/dashboard/dashboardApi";
@@ -33,7 +42,9 @@ export default function DashboardContent() {
   const searchParams = useSearchParams();
 
   const [periodType, setPeriodType] = useState<"monthly" | "annual">(() =>
-    searchParams.get("period")?.toLowerCase() === "annual" ? "annual" : "monthly"
+    searchParams.get("period")?.toLowerCase() === "annual"
+      ? "annual"
+      : "monthly",
   );
   const [dismissError, setDismissError] = useState(false);
 
@@ -44,31 +55,34 @@ export default function DashboardContent() {
   const [error, setError] = useState<any>(null);
 
   // Fungsi pengambil data langsung menembak Controller ASP.NET via endpoint initiate
-  const fetchDashboardData = useCallback(async (period: "monthly" | "annual", initial = false) => {
-    if (initial) {
-      setIsLoading(true);
-    } else {
-      setIsFetching(true);
-    }
-    setError(null);
-
-    try {
-      const result = await store.dispatch(
-        dashboardApi.endpoints.getDashboard.initiate({ period })
-      );
-
-      if ("data" in result && result.data) {
-        setResData(result.data);
-      } else if ("error" in result) {
-        setError(result.error);
+  const fetchDashboardData = useCallback(
+    async (period: "monthly" | "annual", initial = false) => {
+      if (initial) {
+        setIsLoading(true);
+      } else {
+        setIsFetching(true);
       }
-    } catch (err) {
-      setError({ message: "Terjadi kesalahan jaringan." });
-    } finally {
-      setIsLoading(false);
-      setIsFetching(false);
-    }
-  }, []);
+      setError(null);
+
+      try {
+        const result = await store.dispatch(
+          dashboardApi.endpoints.getDashboard.initiate({ period }),
+        );
+
+        if ("data" in result && result.data) {
+          setResData(result.data);
+        } else if ("error" in result) {
+          setError(result.error);
+        }
+      } catch (err) {
+        setError({ message: "Terjadi kesalahan jaringan." });
+      } finally {
+        setIsLoading(false);
+        setIsFetching(false);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     fetchDashboardData(periodType, true);
@@ -100,7 +114,8 @@ export default function DashboardContent() {
     const get = (base: string) => {
       const direct = resData[`${base}${suffix}`];
       if (direct !== undefined && direct !== null) return Number(direct) || 0;
-      if (resData[periodType]?.[base] !== undefined) return Number(resData[periodType][base]) || 0;
+      if (resData[periodType]?.[base] !== undefined)
+        return Number(resData[periodType][base]) || 0;
       return Number(resData[base]) || 0;
     };
     return {
@@ -113,7 +128,11 @@ export default function DashboardContent() {
 
   const errorMessage = useMemo(() => {
     if (!error || dismissError) return null;
-    if ("data" in error) return (error.data as any)?.message || "Gagal memuat data dashboard dari server.";
+    if ("data" in error)
+      return (
+        (error.data as any)?.message ||
+        "Gagal memuat data dashboard dari server."
+      );
     return error.message || "Terjadi kesalahan jaringan.";
   }, [error, dismissError]);
 
@@ -132,7 +151,9 @@ export default function DashboardContent() {
         <CardContent className="space-y-3">
           <EyeOff size={40} className="mx-auto text-muted-foreground" />
           <h3 className="font-semibold text-ui">No Period Selected</h3>
-          <p className="text-ui text-muted-foreground">Go to Periods to select active accounting period.</p>
+          <p className="text-ui text-muted-foreground">
+            Go to Periods to select active accounting period.
+          </p>
           <Button asChild>
             <Link href="/periods">
               <Calendar size={16} /> Go to Periods
@@ -143,17 +164,26 @@ export default function DashboardContent() {
     );
   }
 
-  const { cash: totalCashOnHand, bank: totalBankBalance, assets: totalAssets, liabilities: totalLiabilities } = periodTotals;
+  const {
+    cash: totalCashOnHand,
+    bank: totalBankBalance,
+    assets: totalAssets,
+    liabilities: totalLiabilities,
+  } = periodTotals;
   const totalRevenue = Number(resData?.totalRevenue) || 0;
   const totalExpenses = Number(resData?.totalExpenses) || 0;
   const netIncome = Number(resData?.netIncome) || 0;
   const periodLabel = periodType === "monthly" ? "Monthly" : "Annual";
-  const periodLabelReal = periodType === "monthly" ? "Monthly Real" : "Annual Real";
+  const periodLabelReal =
+    periodType === "monthly" ? "Monthly Real" : "Annual Real";
 
   return (
     <div className="space-y-6 p-4 md:p-6">
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center text-ui">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center text-ui"
+        >
           <AlertDescription className="flex gap-2 items-center">
             <AlertTriangle size={16} />
             {errorMessage}
@@ -166,10 +196,18 @@ export default function DashboardContent() {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-h2 font-bold tracking-tight">Financial Overview</h1>
+          <h1 className="text-h2 font-bold tracking-tight">
+            Financial Overview
+          </h1>
           <p className="text-ui text-muted-foreground mt-1">
-            Active Period: <span className="font-semibold text-foreground">{resData.selectedPeriodName || "Current Period"}</span> • In IDR{" "}
-            {isFetching && <span className="animate-pulse ml-2">• Refreshing...</span>}
+            Active Period:{" "}
+            <span className="font-semibold text-foreground">
+              {resData.selectedPeriodName || "Current Period"}
+            </span>{" "}
+            • In IDR{" "}
+            {isFetching && (
+              <span className="animate-pulse ml-2">• Refreshing...</span>
+            )}
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -181,7 +219,9 @@ export default function DashboardContent() {
               onClick={() => handlePeriodSwitch("monthly")}
               className={cn(
                 "h-7 text-caption px-4",
-                periodType === "monthly" ? "bg-white text-black shadow-sm dark:bg-white dark:text-black" : "bg-transparent text-muted-foreground"
+                periodType === "monthly"
+                  ? "bg-white text-black shadow-sm dark:bg-white dark:text-black"
+                  : "bg-transparent text-muted-foreground",
               )}
             >
               Monthly
@@ -193,7 +233,9 @@ export default function DashboardContent() {
               onClick={() => handlePeriodSwitch("annual")}
               className={cn(
                 "h-7 text-caption px-4",
-                periodType === "annual" ? "bg-white text-black shadow-sm dark:bg-white dark:text-black" : "bg-transparent text-muted-foreground"
+                periodType === "annual"
+                  ? "bg-white text-black shadow-sm dark:bg-white dark:text-black"
+                  : "bg-transparent text-muted-foreground",
               )}
             >
               Annual
@@ -204,7 +246,12 @@ export default function DashboardContent() {
               <Plus size={14} /> New Entry
             </Link>
           </Button>
-          <Button asChild variant="outline" size="sm" className="h-8 gap-1 text-caption">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1 text-caption"
+          >
             <Link href="/reports/income-statement">
               <FileText size={14} /> Report
             </Link>
@@ -215,7 +262,9 @@ export default function DashboardContent() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-caption">Financial Health Index</CardDescription>
+            <CardDescription className="text-caption">
+              Financial Health Index
+            </CardDescription>
             <Activity size={18} className="text-primary" />
           </CardHeader>
           <CardContent className="flex items-center gap-4">
@@ -223,27 +272,52 @@ export default function DashboardContent() {
               {healthScore}
             </div>
             <div>
-              <p className={cn("text-ui font-semibold", healthScore >= 80 ? "text-emerald-500" : healthScore >= 60 ? "text-sky-500" : "text-amber-500")}>
-                {healthScore >= 80 ? "Excellent" : healthScore >= 60 ? "Stable" : "Attention"}
+              <p
+                className={cn(
+                  "text-ui font-semibold",
+                  healthScore >= 80
+                    ? "text-emerald-500"
+                    : healthScore >= 60
+                      ? "text-sky-500"
+                      : "text-amber-500",
+                )}
+              >
+                {healthScore >= 80
+                  ? "Excellent"
+                  : healthScore >= 60
+                    ? "Stable"
+                    : "Attention"}
               </p>
-              <p className="text-caption text-muted-foreground">Based on net profit margin</p>
+              <p className="text-caption text-muted-foreground">
+                Based on net profit margin
+              </p>
             </div>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
-            <CardDescription className="text-caption">Total Cash & Bank ({periodLabelReal})</CardDescription>
+            <CardDescription className="text-caption">
+              Total Cash & Bank ({periodLabelReal})
+            </CardDescription>
             <Wallet size={18} className="text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-h2 font-bold font-mono">{formatNumber(totalAssets)}</div>
+            <div className="text-h2 font-bold font-mono">
+              {formatNumber(totalAssets)}
+            </div>
             <div className="text-caption text-muted-foreground flex gap-4 mt-1">
               <span>
-                Cash: <b className="text-foreground">{formatNumber(totalCashOnHand)}</b>
+                Cash:{" "}
+                <b className="text-foreground">
+                  {formatNumber(totalCashOnHand)}
+                </b>
               </span>
               <span>
-                Bank: <b className="text-foreground">{formatNumber(totalBankBalance)}</b>
+                Bank:{" "}
+                <b className="text-foreground">
+                  {formatNumber(totalBankBalance)}
+                </b>
               </span>
             </div>
           </CardContent>
@@ -253,51 +327,73 @@ export default function DashboardContent() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-caption">Revenue ({periodLabel})</CardDescription>
+            <CardDescription className="text-caption">
+              Revenue ({periodLabel})
+            </CardDescription>
             <div className="w-7 h-7 rounded-full bg-emerald-500/10 text-emerald-500 grid place-items-center">
               <TrendingUp size={16} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-h3 font-bold font-mono">{formatNumber(totalRevenue)}</div>
+            <div className="text-h3 font-bold font-mono">
+              {formatNumber(totalRevenue)}
+            </div>
             <p className="text-caption text-muted-foreground">Period Revenue</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-caption">Expenses ({periodLabel})</CardDescription>
+            <CardDescription className="text-caption">
+              Expenses ({periodLabel})
+            </CardDescription>
             <div className="w-7 h-7 rounded-full bg-red-500/10 text-red-500 grid place-items-center">
               <TrendingDown size={16} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-h3 font-bold font-mono">{formatNumber(totalExpenses)}</div>
-            <p className="text-caption text-muted-foreground">Period Expenses</p>
+            <div className="text-h3 font-bold font-mono">
+              {formatNumber(totalExpenses)}
+            </div>
+            <p className="text-caption text-muted-foreground">
+              Period Expenses
+            </p>
           </CardContent>
         </Card>
 
         <Card className="bg-primary text-primary-foreground">
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-primary-foreground/70 text-caption">Net Income ({periodLabel})</CardDescription>
+            <CardDescription className="text-primary-foreground/70 text-caption">
+              Net Income ({periodLabel})
+            </CardDescription>
             <ShieldCheck size={18} />
           </CardHeader>
           <CardContent>
-            <div className="text-h3 font-bold font-mono">{formatNumber(netIncome)}</div>
-            <p className="text-caption text-primary-foreground/70">{netIncome >= 0 ? "Profit" : "Loss"} for Period</p>
+            <div className="text-h3 font-bold font-mono">
+              {formatNumber(netIncome)}
+            </div>
+            <p className="text-caption text-primary-foreground/70">
+              {netIncome >= 0 ? "Profit" : "Loss"} for Period
+            </p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex-row items-center justify-between space-y-0 pb-1">
-            <CardDescription className="text-caption">Liabilities ({periodLabel})</CardDescription>
+            <CardDescription className="text-caption">
+              Liabilities ({periodLabel})
+            </CardDescription>
             <div className="w-7 h-7 rounded-full bg-amber-500/10 text-amber-500 grid place-items-center">
               <CreditCard size={16} />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-h3 font-bold font-mono">{formatNumber(totalLiabilities)}</div>
-            <p className="text-caption text-muted-foreground">Hutang {periodLabel}</p>
+            <div className="text-h3 font-bold font-mono">
+              {formatNumber(totalLiabilities)}
+            </div>
+            <p className="text-caption text-muted-foreground">
+              Hutang {periodLabel}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -315,9 +411,12 @@ export default function DashboardContent() {
           <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
             <div>
               <CardDescription className="text-ui flex items-center gap-2 font-semibold text-foreground">
-                <TableIcon size={16} className="text-primary" /> Expense Account Breakdown
+                <TableIcon size={16} className="text-primary" /> Expense Account
+                Breakdown
               </CardDescription>
-              <CardDescription className="text-caption mt-0.5">Itemized operating costs ({periodLabel})</CardDescription>
+              <CardDescription className="text-caption mt-0.5">
+                Itemized operating costs ({periodLabel})
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="p-0">
@@ -329,9 +428,12 @@ export default function DashboardContent() {
           <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
             <div>
               <CardDescription className="text-ui flex items-center gap-2 font-semibold text-foreground">
-                <TableIcon size={16} className="text-primary" /> Trend Financial Log
+                <TableIcon size={16} className="text-primary" /> Trend Financial
+                Log
               </CardDescription>
-              <CardDescription className="text-caption mt-0.5">Tabular overview of revenue & expenses</CardDescription>
+              <CardDescription className="text-caption mt-0.5">
+                Tabular overview of revenue & expenses
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="p-0">

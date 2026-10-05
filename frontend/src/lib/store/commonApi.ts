@@ -65,7 +65,10 @@ export const commonApi = baseApi.injectEndpoints({
     }),
 
     // GET /api/v1/notifications
-    getNotifications: builder.query<NotificationItem[], GetNotificationsArg | void>({
+    getNotifications: builder.query<
+      NotificationItem[],
+      GetNotificationsArg | void
+    >({
       query: (arg) => ({
         url: "/api/v1/notifications",
         params: arg?.limit ? { limit: arg.limit } : undefined,
@@ -74,7 +77,10 @@ export const commonApi = baseApi.injectEndpoints({
     }),
 
     // PUT /api/v1/notifications/{id}/read
-    markNotificationAsRead: builder.mutation<CommonActionResponse, MarkNotificationReadArg>({
+    markNotificationAsRead: builder.mutation<
+      CommonActionResponse,
+      MarkNotificationReadArg
+    >({
       query: ({ id }) => ({
         url: `/api/v1/notifications/${id}/read`,
         method: "PUT",

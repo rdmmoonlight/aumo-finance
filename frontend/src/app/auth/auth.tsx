@@ -147,7 +147,7 @@ function AuthFormInner({
     async function checkAuthProfile() {
       try {
         const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate()
+          authApi.endpoints.getProfile.initiate(),
         );
 
         if (isMounted && "data" in result && result.data?.success) {
@@ -211,7 +211,7 @@ function AuthFormInner({
           password: values.password,
           rememberMe: values.keepMe ?? false,
           isMobileClient: false,
-        })
+        }),
       );
 
       if ("error" in result) {
@@ -256,7 +256,7 @@ function AuthFormInner({
         authApi.endpoints.googleLogin.initiate({
           idToken,
           isMobileClient: false,
-        })
+        }),
       );
 
       if ("error" in result) {

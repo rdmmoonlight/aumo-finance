@@ -31,7 +31,7 @@ export default function StatementOfCashFlowPage() {
 
       try {
         const result = await store.dispatch(
-          reportsApi.endpoints.getStatementOfCashFlow.initiate()
+          reportsApi.endpoints.getStatementOfCashFlow.initiate(),
         );
 
         if (!isMounted) return;
@@ -42,7 +42,7 @@ export default function StatementOfCashFlowPage() {
           setIsError(true);
           const errData = result.error as any;
           setErrorMessage(
-            errData?.data?.message || "Gagal memuat Laporan Arus Kas."
+            errData?.data?.message || "Gagal memuat Laporan Arus Kas.",
           );
         }
       } catch (err: any) {
@@ -73,15 +73,15 @@ export default function StatementOfCashFlowPage() {
 
   const netOperating = useMemo(
     () => operating.reduce((s, i) => s + Number(i.amount || 0), 0),
-    [operating]
+    [operating],
   );
   const netInvesting = useMemo(
     () => investing.reduce((s, i) => s + Number(i.amount || 0), 0),
-    [investing]
+    [investing],
   );
   const netFinancing = useMemo(
     () => financing.reduce((s, i) => s + Number(i.amount || 0), 0),
-    [financing]
+    [financing],
   );
   const netChange = netOperating + netInvesting + netFinancing;
   const endingCash = beginningCash + netChange;

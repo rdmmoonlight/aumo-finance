@@ -7,6 +7,10 @@ export const formatNumber = (n: number) => {
 };
 
 export const formatDateDisplay = (s?: string) =>
-  !s ? "" : new Intl.DateTimeFormat("id-ID", {
-    day: "2-digit", month: "short", year: "numeric",
-  }).format(new Date(s));
+  !s
+    ? ""
+    : new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }).format(new Date(s));

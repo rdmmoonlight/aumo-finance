@@ -9,7 +9,11 @@ export function NoPeriodState() {
       <CardContent className="space-y-3">
         <EyeOff size={36} className="mx-auto text-muted-foreground" />
         <h3 className="text-sm font-semibold">No Period Selected</h3>
-        <Button asChild size="sm" className="text-sm"><Link href="/periods" className="gap-1.5"><Calendar size={14}/> Go to Periods</Link></Button>
+        <Button asChild size="sm" className="text-sm">
+          <Link href="/periods" className="gap-1.5">
+            <Calendar size={14} /> Go to Periods
+          </Link>
+        </Button>
       </CardContent>
     </Card>
   );

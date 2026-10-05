@@ -26,7 +26,7 @@ export default function GeneralLedgerTemporaryPage() {
       setErrorMessage(null);
 
       const result = await store.dispatch(
-        reportsApi.endpoints.getGeneralLedgerTemporary.initiate()
+        reportsApi.endpoints.getGeneralLedgerTemporary.initiate(),
       );
 
       if (!isMounted) return;
@@ -36,7 +36,9 @@ export default function GeneralLedgerTemporaryPage() {
       } else if ("error" in result && result.error) {
         const err = result.error as any;
         setErrorMessage(
-          err?.data?.message || err?.message || "Failed to load temporary ledger."
+          err?.data?.message ||
+            err?.message ||
+            "Failed to load temporary ledger.",
         );
       }
 
@@ -53,7 +55,8 @@ export default function GeneralLedgerTemporaryPage() {
   if (isLoading) {
     return (
       <div className="py-16 text-center text-xs text-muted-foreground flex justify-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Loading Temporary Ledger...
+        <Loader2 className="animate-spin" size={16} /> Loading Temporary
+        Ledger...
       </div>
     );
   }
@@ -69,7 +72,9 @@ export default function GeneralLedgerTemporaryPage() {
       {errorMessage && (
         <Alert variant="destructive">
           <AlertTriangle size={16} />
-          <AlertDescription className="text-xs">{errorMessage}</AlertDescription>
+          <AlertDescription className="text-xs">
+            {errorMessage}
+          </AlertDescription>
         </Alert>
       )}
 

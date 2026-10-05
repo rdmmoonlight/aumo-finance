@@ -23,7 +23,7 @@ export default function UnadjustedTrialBalancePage() {
 
     // Memanggil endpoint via store.dispatch (Direct hit tanpa Hook)
     const result = await store.dispatch(
-      reportsApi.endpoints.getTrialBalance.initiate({ type: "unadjusted" })
+      reportsApi.endpoints.getTrialBalance.initiate({ type: "unadjusted" }),
     );
 
     if (result.isSuccess) {
@@ -44,7 +44,7 @@ export default function UnadjustedTrialBalancePage() {
     () =>
       data?.hasPeriodSelected === false ||
       (isError && (error as any)?.status === 404),
-    [data, isError, error]
+    [data, isError, error],
   );
 
   const rows = useMemo(() => {
@@ -57,12 +57,12 @@ export default function UnadjustedTrialBalancePage() {
 
   const totalDebit = useMemo(
     () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
-    [rows]
+    [rows],
   );
-  
+
   const totalCredit = useMemo(
     () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
-    [rows]
+    [rows],
   );
 
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
@@ -70,7 +70,8 @@ export default function UnadjustedTrialBalancePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-16 text-caption text-muted-foreground">
-        <Loader2 className="animate-spin" size={16} /> Loading unadjusted trial balance...
+        <Loader2 className="animate-spin" size={16} /> Loading unadjusted trial
+        balance...
       </div>
     );
   }
@@ -90,7 +91,8 @@ export default function UnadjustedTrialBalancePage() {
         <Alert variant="destructive">
           <AlertTriangle size={16} />
           <AlertDescription>
-            {(error as any)?.data?.message || "Gagal memuat laporan trial balance."}
+            {(error as any)?.data?.message ||
+              "Gagal memuat laporan trial balance."}
           </AlertDescription>
         </Alert>
       )}
@@ -99,7 +101,11 @@ export default function UnadjustedTrialBalancePage() {
         <NoPeriodCard />
       ) : (
         <>
-          <TrialTable rows={rows} totalDebit={totalDebit} totalCredit={totalCredit} />
+          <TrialTable
+            rows={rows}
+            totalDebit={totalDebit}
+            totalCredit={totalCredit}
+          />
           <BalanceAlert
             isBalanced={isBalanced}
             balancedText="Balanced: Debit = Credit"
