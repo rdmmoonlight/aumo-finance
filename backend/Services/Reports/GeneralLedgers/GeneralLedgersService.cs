@@ -1,9 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,231 +11,206 @@ public class GeneralLedgersService : IGeneralLedgersService
 {
     private readonly AppDbContext _db;
 
-    // Perbanyak variasi string tipe akun agar tidak miss akibat beda penamaan (singular/plural)
-    private static readonly string[] PermanentTypes =
-    {
-        "Assets", "Asset",
-        "Liabilities", "Liability",
-        "Equity"
-    };
+    private static readonly string[] PermanentTypes = { "Assets", "Asset", "Liabilities", "Liability", "Equity" };
+    private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "Income", "Revenue", "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
+    private static readonly string[] RevenueTypes = { "OperatingIncome", "OtherIncome", "Revenue", "Income" };
+    private static readonly string[] ExpenseTypes = { "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
 
-    private static readonly string[] TemporaryTypes =
-    {
-        "OperatingIncome", "OtherIncome", "Income", "Revenue",
-        "OperatingExpenses", "OtherExpenses", "Expense", "Expenses"
-    };
+    public GeneralLedgersService(AppDbContext db) => _db = db;
 
-    public GeneralLedgersService(AppDbContext db)
+    public async Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId)
     {
-        _db = db;
+        var period = await ResolveSelectedPeriodAsync(userId);
+        if (period == null)
+            return new BaseServiceResult<PermanentLedgerGroupedResponse> { Success = false, Message = "No accounting period selected." };
+
+        var flat = await FetchPermanentDtosAsync(userId, period.Id);
+        if (!flat.Any())
+        {
+            var r = await RefreshGeneralLedgersAsync(userId);
+            if (r.Success) flat = await FetchPermanentDtosAsync(userId, period.Id);
+        }
+
+        var grouped = MapToGrouped(flat);
+        return new BaseServiceResult<PermanentLedgerGroupedResponse>
+        {
+            Success = true,
+            Data = new PermanentLedgerGroupedResponse { SelectedPeriodName = period.PeriodName, Accounts = grouped }
+        };
+    }
+
+    public async Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId)
+    {
+        var period = await ResolveSelectedPeriodAsync(userId);
+        if (period == null)
+            return new BaseServiceResult<TemporaryLedgerGroupedResponse> { Success = false, Message = "No accounting period selected." };
+
+        var flat = await FetchTemporaryDtosAsync(userId, period.Id);
+        if (!flat.Any())
+        {
+            var r = await RefreshGeneralLedgersAsync(userId);
+            if (r.Success) flat = await FetchTemporaryDtosAsync(userId, period.Id);
+        }
+
+        var grouped = MapToGrouped(flat);
+
+        decimal totalRev = flat.Where(x => RevenueTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Credit - x.Debit);
+        decimal totalExp = flat.Where(x => ExpenseTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Debit - x.Credit);
+
+        return new BaseServiceResult<TemporaryLedgerGroupedResponse>
+        {
+            Success = true,
+            Data = new TemporaryLedgerGroupedResponse
+            {
+                SelectedPeriodName = period.PeriodName,
+                NetIncomeBeforeClosing = totalRev - totalExp,
+                Accounts = grouped
+            }
+        };
     }
 
     public async Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId)
     {
-        // 1. Get current selected period
-        var selectedPeriod = await _db.Periods
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.UserId == userId && p.IsSelected);
-
+        var selectedPeriod = await ResolveSelectedPeriodAsync(userId);
         if (selectedPeriod == null)
-        {
-            var periodFromHelper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
-            if (periodFromHelper != null)
-            {
-                selectedPeriod = await _db.Periods
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(p => p.Id == periodFromHelper.Id && p.UserId == userId);
-            }
-        }
-
-        if (selectedPeriod == null)
-        {
-            return new BaseServiceResult
-            {
-                Success = false,
-                Message = "No period is currently selected."
-            };
-        }
+            return new BaseServiceResult { Success = false, Message = "No period is currently selected." };
 
         var strategy = _db.Database.CreateExecutionStrategy();
-
         return await strategy.ExecuteAsync(async () =>
         {
             _db.ChangeTracker.Clear();
-            await using var transaction = await _db.Database.BeginTransactionAsync();
-
+            await using var tx = await _db.Database.BeginTransactionAsync();
             try
             {
-                int periodId = selectedPeriod.Id;
+                await ClearLedgerDataForPeriodAsync(userId, selectedPeriod.Id);
 
-                // 2. Clear existing staging ledger data
-                await ClearLedgerDataForPeriodAsync(userId, periodId);
+                var start = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
+                var end = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
-                // 3. Set Range Tanggal dengan Explicit UTC Kind
-                var startDate = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
-                var endDate = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
+                var lines = await _db.JournalEntryLines.AsNoTracking()
+                   .Include(l => l.JournalEntry).Include(l => l.Account)
+                   .Where(l => l.JournalEntry!= null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end)
+                   .OrderBy(l => l.AccountId).ThenBy(l => l.JournalEntry!.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
+                   .ToListAsync();
 
-                var journalLines = await _db.JournalEntryLines
-                    .AsNoTracking()
-                    .Include(l => l.JournalEntry)
-                    .Include(l => l.Account)
-                    .Where(l =>
-                        l.JournalEntry != null &&
-                        l.JournalEntry.UserId == userId &&
-                        l.JournalEntry.EntryDate >= startDate &&
-                        l.JournalEntry.EntryDate <= endDate)
-                    .OrderBy(l => l.AccountId)
-                    .ThenBy(l => l.JournalEntry!.EntryDate)
-                    .ThenBy(l => l.JournalEntryId)
-                    .ThenBy(l => l.LineOrder)
-                    .ToListAsync();
-
-                if (!journalLines.Any())
+                if (!lines.Any())
                 {
-                    await transaction.CommitAsync();
-                    return new BaseServiceResult
-                    {
-                        Success = true,
-                        Message = $"General Ledger refreshed for period {selectedPeriod.PeriodName} (0 transactions found)."
-                    };
+                    await tx.CommitAsync();
+                    return new BaseServiceResult { Success = true, Message = $"General Ledger refreshed for period {selectedPeriod.PeriodName} (0 transactions found)." };
                 }
 
-                // 4. Grouping & Kalkulasi Running Balance
-                var permanentLedgers = new List<GeneralLedgerPermanentAccounts>();
-                var temporaryLedgers = new List<GeneralLedgerTemporaryAccounts>();
+                var permanents = new List<GeneralLedgerPermanentAccounts>();
+                var temporaries = new List<GeneralLedgerTemporaryAccounts>();
 
-                var groupedLines = journalLines.GroupBy(l => l.AccountId);
-
-                foreach (var group in groupedLines)
+                foreach (var g in lines.GroupBy(l => l.AccountId))
                 {
-                    var account = group.First().Account;
-                    if (account == null) continue;
+                    var acc = g.First().Account;
+                    if (acc == null) continue;
+                    decimal running = 0;
+                    bool isPermanent = PermanentTypes.Contains(acc.Type?? "", StringComparer.OrdinalIgnoreCase);
+                    bool isTemporary = TemporaryTypes.Contains(acc.Type?? "", StringComparer.OrdinalIgnoreCase);
+                    bool isDebitNormal = IsDebitNormal(acc.Type);
 
-                    decimal runningBalance = 0m;
-
-                    bool isPermanent = PermanentTypes.Any(t => t.Equals(account.Type, StringComparison.OrdinalIgnoreCase));
-                    bool isTemporary = TemporaryTypes.Any(t => t.Equals(account.Type, StringComparison.OrdinalIgnoreCase));
-
-                    foreach (var line in group)
+                    foreach (var line in g)
                     {
-                        var accType = account.Type ?? string.Empty;
-
-                        // Tentukan Debit Normal vs Credit Normal
-                        if (accType.Equals("Assets", StringComparison.OrdinalIgnoreCase) ||
-                            accType.Equals("Asset", StringComparison.OrdinalIgnoreCase) ||
-                            accType.Equals("OperatingExpenses", StringComparison.OrdinalIgnoreCase) ||
-                            accType.Equals("OtherExpenses", StringComparison.OrdinalIgnoreCase) ||
-                            accType.Equals("Expense", StringComparison.OrdinalIgnoreCase) ||
-                            accType.Equals("Expenses", StringComparison.OrdinalIgnoreCase))
-                        {
-                            runningBalance += (line.Debit - line.Credit);
-                        }
-                        else
-                        {
-                            runningBalance += (line.Credit - line.Debit);
-                        }
-
+                        running += isDebitNormal? (line.Debit - line.Credit) : (line.Credit - line.Debit);
                         if (isPermanent)
-                        {
-                            permanentLedgers.Add(new GeneralLedgerPermanentAccounts
-                            {
-                                UserId = userId,
-                                PeriodId = periodId,
-                                AccountId = line.AccountId,
-                                JournalEntryId = line.JournalEntryId,
-                                JournalEntryLineId = line.Id,
-                                EntryDate = line.JournalEntry!.EntryDate,
-                                TransactionNumber = line.JournalEntry.TransactionNumber,
-                                LineDescription = line.LineDescription,
-                                Debit = line.Debit,
-                                Credit = line.Credit,
-                                RunningBalance = runningBalance
-                            });
-                        }
+                            permanents.Add(new GeneralLedgerPermanentAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.Id, EntryDate = line.JournalEntry!.EntryDate, TransactionNumber = line.JournalEntry.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                         else if (isTemporary)
-                        {
-                            temporaryLedgers.Add(new GeneralLedgerTemporaryAccounts
-                            {
-                                UserId = userId,
-                                PeriodId = periodId,
-                                AccountId = line.AccountId,
-                                JournalEntryId = line.JournalEntryId,
-                                JournalEntryLineId = line.Id,
-                                EntryDate = line.JournalEntry!.EntryDate,
-                                TransactionNumber = line.JournalEntry.TransactionNumber,
-                                LineDescription = line.LineDescription,
-                                Debit = line.Debit,
-                                Credit = line.Credit,
-                                RunningBalance = runningBalance
-                            });
-                        }
+                            temporaries.Add(new GeneralLedgerTemporaryAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.Id, EntryDate = line.JournalEntry!.EntryDate, TransactionNumber = line.JournalEntry.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                     }
                 }
 
-                // 5. Bulk insert data baru
-                if (permanentLedgers.Any())
-                {
-                    _db.GeneralLedgerPermanentAccounts.AddRange(permanentLedgers);
-                }
-
-                if (temporaryLedgers.Any())
-                {
-                    _db.GeneralLedgerTemporaryAccounts.AddRange(temporaryLedgers);
-                }
-
+                if (permanents.Any()) _db.GeneralLedgerPermanentAccounts.AddRange(permanents);
+                if (temporaries.Any()) _db.GeneralLedgerTemporaryAccounts.AddRange(temporaries);
                 await _db.SaveChangesAsync();
-                await transaction.CommitAsync();
-
-                return new BaseServiceResult
-                {
-                    Success = true,
-                    Message = $"General Ledger refreshed successfully for period {selectedPeriod.PeriodName}."
-                };
+                await tx.CommitAsync();
+                return new BaseServiceResult { Success = true, Message = $"General Ledger refreshed for period {selectedPeriod.PeriodName}." };
             }
             catch (Exception ex)
             {
-                await transaction.RollbackAsync();
-                return new BaseServiceResult
-                {
-                    Success = false,
-                    Message = $"Failed to refresh General Ledger: {ex.InnerException?.Message ?? ex.Message}"
-                };
+                await tx.RollbackAsync();
+                return new BaseServiceResult { Success = false, Message = $"Failed to refresh: {ex.InnerException?.Message?? ex.Message}" };
             }
         });
     }
 
     public async Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId)
     {
-        var selectedPeriod = await _db.Periods
-            .AsNoTracking()
-            .FirstOrDefaultAsync(p => p.UserId == userId && p.IsSelected);
-
-        if (selectedPeriod == null)
-        {
-            return new BaseServiceResult
-            {
-                Success = true,
-                Message = "No period selected. Staging ledger clear skipped."
-            };
-        }
-
-        await ClearLedgerDataForPeriodAsync(userId, selectedPeriod.Id);
-
-        return new BaseServiceResult
-        {
-            Success = true,
-            Message = $"Cleared General Ledger staging tables for period {selectedPeriod.PeriodName}."
-        };
+        var period = await ResolveSelectedPeriodAsync(userId);
+        if (period == null) return new BaseServiceResult { Success = true, Message = "No period selected. Clear skipped." };
+        await ClearLedgerDataForPeriodAsync(userId, period.Id);
+        return new BaseServiceResult { Success = true, Message = $"Cleared staging for period {period.PeriodName}." };
     }
 
-    private async Task ClearLedgerDataForPeriodAsync(Guid userId, int periodId)
+    // --- PRIVATE HELPERS ---
+    private async Task<Models.Period?> ResolveSelectedPeriodAsync(Guid userId)
     {
-        await _db.GeneralLedgerPermanentAccounts
-            .Where(x => x.UserId == userId && x.PeriodId == periodId)
-            .ExecuteDeleteAsync();
-
-        await _db.GeneralLedgerTemporaryAccounts
-            .Where(x => x.UserId == userId && x.PeriodId == periodId)
-            .ExecuteDeleteAsync();
+        var p = await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId && x.IsSelected);
+        if (p!= null) return p;
+        var helper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        if (helper == null) return null;
+        return await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == helper.Id && x.UserId == userId);
     }
+
+    private Task<List<PermanentLedgerDto>> FetchPermanentDtosAsync(Guid userId, int periodId) =>
+        _db.GeneralLedgerPermanentAccounts.AsNoTracking().Include(x => x.Account)
+           .Where(x => x.UserId == userId && x.PeriodId == periodId)
+           .OrderBy(x => x.AccountId).ThenBy(x => x.EntryDate).ThenBy(x => x.Id)
+           .Select(x => new PermanentLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber?? "", LineDescription = x.LineDescription?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
+           .ToListAsync();
+
+    private Task<List<TemporaryLedgerDto>> FetchTemporaryDtosAsync(Guid userId, int periodId) =>
+        _db.GeneralLedgerTemporaryAccounts.AsNoTracking().Include(x => x.Account)
+           .Where(x => x.UserId == userId && x.PeriodId == periodId)
+           .OrderBy(x => x.AccountId).ThenBy(x => x.EntryDate).ThenBy(x => x.Id)
+           .Select(x => new TemporaryLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber?? "", LineDescription = x.LineDescription?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
+           .ToListAsync();
+
+    private List<LedgerAccountResponse> MapToGrouped(List<PermanentLedgerDto> flat)
+    {
+        return flat.GroupBy(x => x.AccountId).Select(g =>
+        {
+            var first = g.First();
+            bool isDebitNormal = IsDebitNormal(first.AccountType);
+            var ordered = g.OrderBy(x => x.EntryDate).ThenBy(x => x.Id).ToList();
+            decimal beginning = 0;
+            if (ordered.Any())
+            {
+                var f = ordered.First();
+                var effect = isDebitNormal? (f.Debit - f.Credit) : (f.Credit - f.Debit);
+                beginning = f.RunningBalance - effect;
+            }
+            return new LedgerAccountResponse
+            {
+                AccountId = first.AccountId,
+                ReferenceNumber = first.AccountReferenceNumber,
+                AccountName = first.AccountName,
+                AccountType = first.AccountType,
+                Type = first.AccountType,
+                NormalBalanceIsDebit = isDebitNormal,
+                BeginningBalance = beginning,
+                EndingBalance = ordered.LastOrDefault()?.RunningBalance?? beginning,
+                Lines = ordered.Select(x => new LedgerLineResponse
+                {
+                    JournalEntryId = x.JournalEntryId,
+                    TransactionNumber = x.TransactionNumber,
+                    EntryDate = x.EntryDate.ToString("yyyy-MM-dd"),
+                    Description = x.LineDescription,
+                    Debit = x.Debit,
+                    Credit = x.Credit,
+                    RunningBalance = x.RunningBalance
+                }).ToList()
+            };
+        }).OrderBy(x => x.ReferenceNumber).ToList();
+    }
+
+    private static bool IsDebitNormal(string? type) =>
+        type!= null && (type.Equals("Assets", StringComparison.OrdinalIgnoreCase) || type.Equals("Asset", StringComparison.OrdinalIgnoreCase) || ExpenseTypes.Contains(type, StringComparer.OrdinalIgnoreCase));
+
+    private Task ClearLedgerDataForPeriodAsync(Guid userId, int periodId) =>
+        Task.WhenAll(
+            _db.GeneralLedgerPermanentAccounts.Where(x => x.UserId == userId && x.PeriodId == periodId).ExecuteDeleteAsync(),
+            _db.GeneralLedgerTemporaryAccounts.Where(x => x.UserId == userId && x.PeriodId == periodId).ExecuteDeleteAsync()
+        );
 }
