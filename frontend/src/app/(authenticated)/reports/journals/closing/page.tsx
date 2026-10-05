@@ -27,7 +27,7 @@ export default function ClosingJournalReportPage() {
 
       try {
         const result = await store.dispatch(
-          reportsApi.endpoints.getClosingJournal.initiate()
+          reportsApi.endpoints.getJournalsClosing.initiate()
         );
 
         if (isMounted) {

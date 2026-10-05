@@ -97,7 +97,7 @@ export function SecuritySection() {
     setIsRevoking(true);
     try {
       const result = await store.dispatch(
-        settingsApi.endpoints.revokeSessionBySessionId.initiate({
+        settingsApi.endpoints.revokeSessionById.initiate({
           sessionId: id,
         })
       );

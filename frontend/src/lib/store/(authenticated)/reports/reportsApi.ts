@@ -118,6 +118,18 @@ export const reportsApi = baseApi
         providesTags: ["Journal"],
       }),
 
+      // GET /api/v1/reports/trial-balance?type=unadjusted|adjusted|post-closing
+      getTrialBalance: build.query<
+        GetTrialBalanceApiResponse,
+        GetTrialBalanceApiArg
+      >({
+        query: (queryArg) => ({
+          url: "/api/v1/reports/trial-balance",
+          params: { type: queryArg?.type ?? "unadjusted" },
+        }),
+        providesTags: ["FinancialStatements"],
+      }),
+
       // GET /api/v1/reports/worksheet
       getWorksheet: build.query<
         GetWorksheetApiResponse,
@@ -131,42 +143,51 @@ export const reportsApi = baseApi
   });
 
 // --- Types DTO & Response ---
-export type GetSummaryApiResponse = unknown;
+export type GetSummaryApiResponse = any;
 export type GetSummaryApiArg = void;
 
-export type GetIncomeStatementApiResponse = unknown;
+export type GetIncomeStatementApiResponse = any;
 export type GetIncomeStatementApiArg = void;
 
-export type GetRetainedEarningsApiResponse = unknown;
+export type GetRetainedEarningsApiResponse = any;
 export type GetRetainedEarningsApiArg = void;
 
-export type GetStatementOfCashFlowApiResponse = unknown;
+export type GetStatementOfCashFlowApiResponse = any;
 export type GetStatementOfCashFlowApiArg = void;
 
-export type GetStatementOfFinancialPositionApiResponse = unknown;
+export type GetStatementOfFinancialPositionApiResponse = any;
 export type GetStatementOfFinancialPositionApiArg = {
   isPostClosing?: boolean;
 };
 
-export type GetGeneralLedgerPermanentApiResponse = unknown;
+export type GetGeneralLedgerPermanentApiResponse = any;
 export type GetGeneralLedgerPermanentApiArg = void;
 
-export type GetGeneralLedgerTemporaryApiResponse = unknown;
+export type GetGeneralLedgerTemporaryApiResponse = any;
 export type GetGeneralLedgerTemporaryApiArg = void;
 
-export type GetJournalsGeneralApiResponse = unknown;
+export type GetJournalsGeneralApiResponse = any;
 export type GetJournalsGeneralApiArg = void;
 
-export type GetJournalsAdjustingApiResponse = unknown;
+export type GetJournalsAdjustingApiResponse = any;
 export type GetJournalsAdjustingApiArg = void;
 
-export type DeleteJournalsAdjustingByIdApiResponse = unknown;
+export type DeleteJournalsAdjustingByIdApiResponse = any;
 export type DeleteJournalsAdjustingByIdApiArg = {
   id: number | string;
 };
 
-export type GetJournalsClosingApiResponse = unknown;
+export type GetJournalsClosingApiResponse = any;
 export type GetJournalsClosingApiArg = void;
 
-export type GetWorksheetApiResponse = unknown;
+export type GetTrialBalanceApiResponse = any;
+export type GetTrialBalanceApiArg = {
+  type?: "unadjusted" | "adjusted" | "post-closing";
+} | void;
+
+// Alias nama lama yang masih diimpor halaman
+export type SummaryResponse = GetSummaryApiResponse;
+export type GeneralLedgerTemporaryResponse = GetGeneralLedgerTemporaryApiResponse;
+
+export type GetWorksheetApiResponse = any;
 export type GetWorksheetApiArg = void;

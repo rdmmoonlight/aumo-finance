@@ -18,6 +18,7 @@ export interface CreateJournalEntryRequest {
 }
 
 export interface UpdateJournalEntryRequest {
+  transactionNumber?: string;
   journalType?: string;
   entryDate?: string;
   updatedAt?: string;
@@ -46,7 +47,7 @@ export interface NextTransactionNumberArg {
 export const journalEntryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET /api/v1/journal-entry/{id}
-    getJournalEntryById: builder.query<unknown, GetJournalEntryByIdArg>({
+    getJournalEntryById: builder.query<any, GetJournalEntryByIdArg>({
       query: ({ id }) => ({
         url: `/api/v1/journal-entry/${id}`,
       }),
@@ -54,7 +55,7 @@ export const journalEntryApi = baseApi.injectEndpoints({
     }),
 
     // POST /api/v1/journal-entry/create
-    createJournalEntry: builder.mutation<unknown, CreateJournalEntryRequest>({
+    createJournalEntry: builder.mutation<any, CreateJournalEntryRequest>({
       query: (body) => ({
         url: `/api/v1/journal-entry/create`,
         method: "POST",
@@ -64,7 +65,7 @@ export const journalEntryApi = baseApi.injectEndpoints({
     }),
 
     // PUT /api/v1/journal-entry/edit/{id}
-    editJournalEntry: builder.mutation<unknown, EditJournalEntryArg>({
+    editJournalEntry: builder.mutation<any, EditJournalEntryArg>({
       query: ({ id, body }) => ({
         url: `/api/v1/journal-entry/edit/${id}`,
         method: "PUT",
@@ -74,7 +75,7 @@ export const journalEntryApi = baseApi.injectEndpoints({
     }),
 
     // DELETE /api/v1/journal-entry/delete/{id}
-    deleteJournalEntry: builder.mutation<unknown, number>({
+    deleteJournalEntry: builder.mutation<any, number>({
       query: (id) => ({
         url: `/api/v1/journal-entry/delete/${id}`,
         method: "DELETE",
@@ -83,7 +84,7 @@ export const journalEntryApi = baseApi.injectEndpoints({
     }),
 
     // GET /api/v1/journal-entry/search-descriptions
-    searchDescriptions: builder.query<unknown, SearchDescriptionsArg>({
+    searchDescriptions: builder.query<any, SearchDescriptionsArg>({
       query: (params) => ({
         url: `/api/v1/journal-entry/search-descriptions`,
         params,
@@ -92,7 +93,7 @@ export const journalEntryApi = baseApi.injectEndpoints({
     }),
 
     // GET /api/v1/journal-entry/next-transaction-number
-    getNextTransactionNumber: builder.query<unknown, NextTransactionNumberArg>({
+    getNextTransactionNumber: builder.query<any, NextTransactionNumberArg>({
       query: (params) => ({
         url: `/api/v1/journal-entry/next-transaction-number`,
         params,

@@ -52,7 +52,7 @@ export default function AuthenticatedLayout({
       // 2. Jika auth berhasil, muat data periode
       setIsPeriodsLoading(true);
       await dispatch(
-        periodsApi.endpoints.getOpenInfo.initiate(undefined, { forceRefetch: false })
+        periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, { forceRefetch: false })
       );
     } catch {
       setIsAuthError(true);

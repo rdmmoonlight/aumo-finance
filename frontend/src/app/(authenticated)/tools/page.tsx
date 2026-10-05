@@ -42,7 +42,7 @@ export default function ToolsPage() {
       setIsLoadingCoa(true);
       try {
         const result = await store.dispatch(
-          chartOfAccountsApi.endpoints.getCoaList.initiate()
+          chartOfAccountsApi.endpoints.getChartOfAccounts.initiate()
         );
         if (isMounted && result.data) {
           const raw = result.data;
@@ -205,7 +205,7 @@ export default function ToolsPage() {
       };
 
       const result = await store.dispatch(
-        toolsApi.endpoints.importJournalEntries.initiate(payload)
+        toolsApi.endpoints.importJournalEntries.initiate(payload.journalImportRequestDto)
       );
 
       if ("data" in result) {

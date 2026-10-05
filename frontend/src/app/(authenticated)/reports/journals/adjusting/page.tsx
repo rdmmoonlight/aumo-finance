@@ -32,7 +32,7 @@ export default function AdjustingJournalPage() {
     setIsLoading(true);
     try {
       const result = await store.dispatch(
-        reportsApi.endpoints.getAdjustingJournals.initiate()
+        reportsApi.endpoints.getJournalsAdjusting.initiate()
       );
 
       if ("data" in result) {
@@ -56,7 +56,7 @@ export default function AdjustingJournalPage() {
     setIsDeleting(true);
     try {
       const result = await store.dispatch(
-        journalEntryApi.endpoints.deleteJournalEntry.initiate({ id: entryToDelete.id })
+        journalEntryApi.endpoints.deleteJournalEntry.initiate(entryToDelete.id)
       );
 
       if ("data" in result || !("error" in result)) {
@@ -154,18 +154,17 @@ export default function AdjustingJournalPage() {
             />
           ) : (
             <JournalEmptyState
-              hasPeriodSelected={hasPeriodSelected}
-              periodName={d?.selectedPeriodName}
-              type="adjusting"
+              selectedPeriodName={d?.selectedPeriodName}
             />
           )}
         </CardContent>
       </Card>
 
       <DeleteEntryDialog
-        entry={entryToDelete}
+        open={!!entryToDelete}
+        transactionNumber={(entryToDelete as any)?.transactionNumber}
         isDeleting={isDeleting}
-        onClose={() => setEntryToDelete(null)}
+        onOpenChange={(o) => { if (!o) setEntryToDelete(null); }}
         onConfirm={handleDeleteConfirm}
       />
     </div>

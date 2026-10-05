@@ -29,7 +29,7 @@ export default function StatementOfFinancialPositionPage() {
     try {
       // Memanggil endpoint langsung dari RTK Query tanpa Hook generator
       const result = await store.dispatch(
-        reportsApi.endpoints.getStatementOfFinancialPosition.initiate()
+        reportsApi.endpoints.getStatementOfFinancialPosition.initiate({})
       );
 
       if (result.isSuccess) {
