@@ -4,7 +4,7 @@ export const addTagTypes = [
   "Summary",
   "FinancialStatements",
   "GeneralLedgers",
-  "Journal",
+  "Journals",
   "Worksheet",
 ] as const;
 
@@ -61,22 +61,34 @@ export const reportsApi = baseApi
         providesTags: ["FinancialStatements"],
       }),
 
-      // GET /api/v1/reports/general-ledger/permanent
+      // GET /api/v1/reports/general-ledgers/permanent (Diubah dari general-ledger -> general-ledgers)
       getGeneralLedgerPermanent: build.query<
         GetGeneralLedgerPermanentApiResponse,
         GetGeneralLedgerPermanentApiArg
       >({
-        query: () => "/api/v1/reports/general-ledger/permanent",
+        query: () => "/api/v1/reports/general-ledgers/permanent",
         providesTags: ["GeneralLedgers"],
       }),
 
-      // GET /api/v1/reports/general-ledger/temporary
+      // GET /api/v1/reports/general-ledgers/temporary (Diubah dari general-ledger -> general-ledgers)
       getGeneralLedgerTemporary: build.query<
         GetGeneralLedgerTemporaryApiResponse,
         GetGeneralLedgerTemporaryApiArg
       >({
-        query: () => "/api/v1/reports/general-ledger/temporary",
+        query: () => "/api/v1/reports/general-ledgers/temporary",
         providesTags: ["GeneralLedgers"],
+      }),
+
+      // POST /api/v1/reports/general-ledgers/refresh (Ditambahkan)
+      refreshGeneralLedger: build.mutation<
+        RefreshGeneralLedgerApiResponse,
+        RefreshGeneralLedgerApiArg
+      >({
+        query: () => ({
+          url: "/api/v1/reports/general-ledgers/refresh",
+          method: "POST",
+        }),
+        invalidatesTags: ["GeneralLedgers"],
       }),
 
       // GET /api/v1/reports/journals/general
@@ -139,6 +151,24 @@ export const reportsApi = baseApi
     overrideExisting: false,
   });
 
+// --- Export Hooks ---
+export const {
+  useGetSummaryQuery,
+  useGetIncomeStatementQuery,
+  useGetRetainedEarningsQuery,
+  useGetStatementOfCashFlowQuery,
+  useGetStatementOfFinancialPositionQuery,
+  useGetGeneralLedgerPermanentQuery,
+  useGetGeneralLedgerTemporaryQuery,
+  useRefreshGeneralLedgerMutation,
+  useGetJournalsGeneralQuery,
+  useGetJournalsAdjustingQuery,
+  useDeleteJournalsAdjustingByIdMutation,
+  useGetJournalsClosingQuery,
+  useGetTrialBalanceQuery,
+  useGetWorksheetQuery,
+} = reportsApi;
+
 // --- Types DTO & Response ---
 export type GetSummaryApiResponse = any;
 export type GetSummaryApiArg = void;
@@ -157,11 +187,60 @@ export type GetStatementOfFinancialPositionApiArg = {
   isPostClosing?: boolean;
 };
 
-export type GetGeneralLedgerPermanentApiResponse = any;
+export type GetGeneralLedgerPermanentApiResponse = {
+  success: boolean;
+  hasPeriodSelected: boolean;
+  selectedPeriodName?: string;
+  isTemporary: boolean;
+  message?: string;
+  ledgers: Array<{
+    id: number;
+    accountId: number;
+    accountName: string;
+    accountReferenceNumber: number;
+    journalEntryId: number;
+    journalEntryLineId: number;
+    entryDate: string;
+    transactionNumber: string;
+    lineDescription: string;
+    debit: number;
+    credit: number;
+    runningBalance: number;
+  }>;
+};
 export type GetGeneralLedgerPermanentApiArg = void;
 
-export type GetGeneralLedgerTemporaryApiResponse = any;
+export type GetGeneralLedgerTemporaryApiResponse = {
+  success: boolean;
+  hasPeriodSelected: boolean;
+  selectedPeriodName?: string;
+  isTemporary: boolean;
+  netIncomeBeforeClosing?: number;
+  message?: string;
+  ledgers: Array<{
+    id: number;
+    accountId: number;
+    accountName: string;
+    accountReferenceNumber: number;
+    accountType: string;
+    journalEntryId: number;
+    journalEntryLineId: number;
+    entryDate: string;
+    transactionNumber: string;
+    lineDescription: string;
+    debit: number;
+    credit: number;
+    runningBalance: number;
+  }>;
+};
 export type GetGeneralLedgerTemporaryApiArg = void;
+
+export type RefreshGeneralLedgerApiResponse = {
+  success: boolean;
+  message?: string;
+  [key: string]: any;
+};
+export type RefreshGeneralLedgerApiArg = void;
 
 export type GetJournalsGeneralApiResponse = any;
 export type GetJournalsGeneralApiArg = void;
@@ -178,11 +257,13 @@ export type GetJournalsClosingApiResponse = any;
 export type GetJournalsClosingApiArg = void;
 
 export type GetTrialBalanceApiResponse = any;
-export type GetTrialBalanceApiArg = {
-  type?: "unadjusted" | "adjusted" | "post-closing";
-} | void;
+export type GetTrialBalanceApiArg =
+  | {
+      type?: "unadjusted" | "adjusted" | "post-closing";
+    }
+  | void;
 
-// Alias nama lama yang masih diimpor halaman
+// Alias nama lama
 export type SummaryResponse = GetSummaryApiResponse;
 export type GeneralLedgerTemporaryResponse =
   GetGeneralLedgerTemporaryApiResponse;
