@@ -140,7 +140,7 @@ export function AppTopBar() {
         commonApi.endpoints.getNotifications.initiate({ limit: 20 })
       );
       if ("data" in result && Array.isArray(result.data)) {
-        setNotifications(result.data);
+        setNotifications(result.data as NotificationItem[]);
       }
     } catch {
       setNotifications([]);
@@ -176,7 +176,7 @@ export function AppTopBar() {
     setIsMarkingAllRead(true);
     try {
       const result = await store.dispatch(
-        commonApi.endpoints.readAllNotifications.initiate()
+        commonApi.endpoints.markAllNotificationsAsRead.initiate()
       );
       if ("data" in result) {
         fetchNotifications();
@@ -192,7 +192,7 @@ export function AppTopBar() {
     if (isRead || !id) return;
     try {
       const result = await store.dispatch(
-        commonApi.endpoints.readNotificationById.initiate({ id })
+        commonApi.endpoints.markNotificationAsRead.initiate({ id })
       );
       if ("data" in result) {
         fetchNotifications();

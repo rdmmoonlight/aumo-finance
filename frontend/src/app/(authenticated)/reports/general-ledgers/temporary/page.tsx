@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { store } from "@/lib/store";
 import {
   reportsApi,
-  type GeneralLedgerTemporaryResponse,
+  type GetGeneralLedgerTemporaryApiResponse as GeneralLedgerTemporaryResponse,
 } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";

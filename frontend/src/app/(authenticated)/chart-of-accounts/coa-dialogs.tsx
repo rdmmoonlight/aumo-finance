@@ -92,7 +92,7 @@ export function AddAccountDialog({
     try {
       // Direct call ke endpoint RTK Query tanpa hook
       const result = await store.dispatch(
-        chartOfAccountsApi.endpoints.createAccount.initiate({
+        chartOfAccountsApi.endpoints.createChartOfAccount.initiate({
           referenceNumber: Number(values.referenceNumber),
           accountName: values.accountName,
           type: values.type,
@@ -260,9 +260,9 @@ export function EditAccountDialog({
     try {
       // Direct call ke endpoint RTK Query tanpa hook
       const result = await store.dispatch(
-        chartOfAccountsApi.endpoints.updateAccount.initiate({
+        chartOfAccountsApi.endpoints.updateChartOfAccount.initiate({
           id: values.id,
-          data: {
+          updateAccountRequest: {
             referenceNumber: Number(values.referenceNumber),
             accountName: values.accountName,
             type: values.type,
@@ -347,7 +347,7 @@ export function DeleteAccountAlertDialog({
     try {
       // Direct call ke endpoint RTK Query tanpa hook
       const result = await store.dispatch(
-        chartOfAccountsApi.endpoints.deleteAccount.initiate({ id: Number(account.id) })
+        chartOfAccountsApi.endpoints.deleteChartOfAccount.initiate({ id: Number(account.id) })
       );
 
       if ("error" in result) {

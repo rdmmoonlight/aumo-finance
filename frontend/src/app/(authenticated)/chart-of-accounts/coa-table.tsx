@@ -75,7 +75,7 @@ export function ChartOfAccountsTable() {
 
     try {
       const result = await store.dispatch(
-        chartOfAccountsApi.endpoints.getAccounts.initiate({
+        chartOfAccountsApi.endpoints.getChartOfAccounts.initiate({
           search: searchText || undefined,
           category: categoryFilter || undefined,
         })

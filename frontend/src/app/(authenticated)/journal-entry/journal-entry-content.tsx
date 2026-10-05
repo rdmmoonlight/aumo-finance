@@ -67,7 +67,7 @@ export default function JournalEntryContent() {
       setIsAccountsLoading(true);
       try {
         const result: any = await store.dispatch(
-          chartOfAccountsApi.endpoints.getAccounts.initiate()
+          chartOfAccountsApi.endpoints.getChartOfAccounts.initiate()
         );
         if (isMounted && result.data) {
           let list: any[] = [];
@@ -208,7 +208,7 @@ export default function JournalEntryContent() {
     try {
       if (isEdit) {
         const result: any = await store.dispatch(
-          journalEntryApi.endpoints.updateJournalEntry.initiate({
+          journalEntryApi.endpoints.editJournalEntry.initiate({
             id: entryId,
             body: {
               entryDate: data.entryDate,

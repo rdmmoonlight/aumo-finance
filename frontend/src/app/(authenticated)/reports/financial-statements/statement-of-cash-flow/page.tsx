@@ -31,7 +31,7 @@ export default function StatementOfCashFlowPage() {
 
       try {
         const result = await store.dispatch(
-          reportsApi.endpoints.getCashFlowStatement.initiate()
+          reportsApi.endpoints.getStatementOfCashFlow.initiate()
         );
 
         if (!isMounted) return;

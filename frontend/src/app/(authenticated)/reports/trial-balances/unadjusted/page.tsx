@@ -23,7 +23,7 @@ export default function UnadjustedTrialBalancePage() {
 
     // Memanggil endpoint via store.dispatch (Direct hit tanpa Hook)
     const result = await store.dispatch(
-      reportsApi.endpoints.getGeneralJournalReport.initiate()
+      reportsApi.endpoints.getTrialBalance.initiate({ type: "unadjusted" })
     );
 
     if (result.isSuccess) {
