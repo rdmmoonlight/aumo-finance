@@ -1,21 +1,20 @@
 using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 
 namespace AumoBackend.Services.Reports.GeneralLedgers;
 
 public interface IGeneralLedgersService
 {
-    /// <summary>
-    /// Memperbarui atau meregenerasi data pada staging table GeneralLedgerPermanentAccounts 
-    /// dan GeneralLedgerTemporaryAccounts berdasarkan periode yang sedang dipilih (IsSelected == true).
-    /// </summary>
-    /// <param name="userId">ID unik pengguna.</param>
-    /// <returns>Objek <see cref="BaseServiceResult"/> yang mengindikasikan status keberhasilan proses regenerasi.</returns>
     Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId);
-
-    /// <summary>
-    /// Menghapus seluruh data staging General Ledger (Permanent & Temporary) milik user untuk periode aktif.
-    /// </summary>
-    /// <param name="userId">ID unik pengguna.</param>
-    /// <returns>Objek <see cref="BaseServiceResult"/> yang mengindikasikan status keberhasilan proses penghapusan.</returns>
     Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId);
+
+    // Baru - semua bisnis GET pindah kesini
+    Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId);
+    Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId);
+}
+
+// Kalau BaseServiceResult kamu belum generic, tambahkan ini:
+public class BaseServiceResult<T> : BaseServiceResult
+{
+    public T? Data { get; set; }
 }
