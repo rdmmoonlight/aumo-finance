@@ -1,38 +1,58 @@
-import { baseApi as api } from "../../../apiClient";
-export const addTagTypes = ["MarketData"] as const;
-const injectedRtkApi = api
-  .enhanceEndpoints({
-    addTagTypes,
-  })
-  .injectEndpoints({
-    endpoints: (build) => ({
-      getApiV1Kurs: build.query<GetApiV1KursApiResponse, GetApiV1KursApiArg>({
-        query: (queryArg) => ({
-          url: `/api/v1/kurs`,
-          params: {
-            baseCurrency: queryArg.baseCurrency,
-            targetCurrency: queryArg.targetCurrency,
-          },
-        }),
-        providesTags: ["MarketData"],
-      }),
-      getApiV1HomeMarketIndicators: build.query<
-        GetApiV1HomeMarketIndicatorsApiResponse,
-        GetApiV1HomeMarketIndicatorsApiArg
-      >({
-        query: () => ({ url: `/api/v1/home/market-indicators` }),
-        providesTags: ["MarketData"],
-      }),
-    }),
-    overrideExisting: false,
-  });
-export { injectedRtkApi as enhancedApi };
-export type GetApiV1KursApiResponse = unknown;
-export type GetApiV1KursApiArg = {
+import { baseApi } from "@/lib/apiClient";
+
+// --- Types Request & Response ---
+export interface KursParams {
   baseCurrency?: string;
   targetCurrency?: string;
-};
-export type GetApiV1HomeMarketIndicatorsApiResponse = unknown;
-export type GetApiV1HomeMarketIndicatorsApiArg = void;
-export const { useGetApiV1KursQuery, useGetApiV1HomeMarketIndicatorsQuery } =
-  injectedRtkApi;
+}
+
+export interface KursResponse {
+  success?: boolean;
+  baseCurrency?: string;
+  targetCurrency?: string;
+  rate?: number;
+  lastUpdated?: string;
+  [key: string]: unknown;
+}
+
+export interface MarketIndicatorItem {
+  id?: string;
+  name?: string;
+  symbol?: string;
+  value?: number;
+  changePercent?: number;
+  [key: string]: unknown;
+}
+
+export interface MarketIndicatorsResponse {
+  success?: boolean;
+  indicators?: MarketIndicatorItem[];
+  [key: string]: unknown;
+}
+
+// --- Inject Endpoints ke baseApi ---
+export const homeApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    // 1. GET /api/v1/kurs
+    getKurs: builder.query<KursResponse, KursParams | void>({
+      query: (params) => ({
+        url: "/api/v1/kurs", // Wajib diawali slash '/'
+        params: params
+          ? {
+              baseCurrency: params.baseCurrency,
+              targetCurrency: params.targetCurrency,
+            }
+          : undefined,
+      }),
+      providesTags: ["MarketData"],
+    }),
+
+    // 2. GET /api/v1/home/market-indicators
+    getMarketIndicators: builder.query<MarketIndicatorsResponse, void>({
+      query: () => ({
+        url: "/api/v1/home/market-indicators", // Wajib diawali slash '/'
+      }),
+      providesTags: ["MarketData"],
+    }),
+  }),
+});

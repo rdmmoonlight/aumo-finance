@@ -1,84 +1,13 @@
-import { baseApi as api } from "../../../apiClient";
-export const addTagTypes = ["ChartOfAccounts"] as const;
-const injectedRtkApi = api
-  .enhanceEndpoints({
-    addTagTypes,
-  })
-  .injectEndpoints({
-    endpoints: (build) => ({
-      getApiV1ChartOfAccounts: build.query<
-        GetApiV1ChartOfAccountsApiResponse,
-        GetApiV1ChartOfAccountsApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/chart-of-accounts`,
-          params: {
-            search: queryArg.search,
-            category: queryArg.category,
-          },
-        }),
-        providesTags: ["ChartOfAccounts"],
-      }),
-      postApiV1ChartOfAccounts: build.mutation<
-        PostApiV1ChartOfAccountsApiResponse,
-        PostApiV1ChartOfAccountsApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/chart-of-accounts`,
-          method: "POST",
-          body: queryArg.createAccountRequest,
-        }),
-        invalidatesTags: ["ChartOfAccounts"],
-      }),
-      putApiV1ChartOfAccountsById: build.mutation<
-        PutApiV1ChartOfAccountsByIdApiResponse,
-        PutApiV1ChartOfAccountsByIdApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/chart-of-accounts/${queryArg.id}`,
-          method: "PUT",
-          body: queryArg.updateAccountRequest,
-        }),
-        invalidatesTags: ["ChartOfAccounts"],
-      }),
-      deleteApiV1ChartOfAccountsById: build.mutation<
-        DeleteApiV1ChartOfAccountsByIdApiResponse,
-        DeleteApiV1ChartOfAccountsByIdApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/chart-of-accounts/${queryArg.id}`,
-          method: "DELETE",
-        }),
-        invalidatesTags: ["ChartOfAccounts"],
-      }),
-    }),
-    overrideExisting: false,
-  });
-export { injectedRtkApi as enhancedApi };
-export type GetApiV1ChartOfAccountsApiResponse = unknown;
-export type GetApiV1ChartOfAccountsApiArg = {
-  search?: string;
-  category?: string;
-};
-export type PostApiV1ChartOfAccountsApiResponse = unknown;
-export type PostApiV1ChartOfAccountsApiArg = {
-  createAccountRequest: CreateAccountRequest;
-};
-export type PutApiV1ChartOfAccountsByIdApiResponse = unknown;
-export type PutApiV1ChartOfAccountsByIdApiArg = {
-  id: number;
-  updateAccountRequest: UpdateAccountRequest;
-};
-export type DeleteApiV1ChartOfAccountsByIdApiResponse = unknown;
-export type DeleteApiV1ChartOfAccountsByIdApiArg = {
-  id: number;
-};
+import { baseApi } from "@/lib/apiClient";
+
+// --- Types Request & Response ---
 export type CreateAccountRequest = {
   referenceNumber?: number | string;
   accountName?: string;
   type?: string;
   role?: string;
 };
+
 export type UpdateAccountRequest = {
   referenceNumber?: number | string;
   accountName?: string;
@@ -86,9 +15,65 @@ export type UpdateAccountRequest = {
   role?: string;
   isActive?: boolean;
 };
-export const {
-  useGetApiV1ChartOfAccountsQuery,
-  usePostApiV1ChartOfAccountsMutation,
-  usePutApiV1ChartOfAccountsByIdMutation,
-  useDeleteApiV1ChartOfAccountsByIdMutation,
-} = injectedRtkApi;
+
+export type GetChartOfAccountsArg = {
+  search?: string;
+  category?: string;
+};
+
+export type PutChartOfAccountsByIdArg = {
+  id: number | string;
+  updateAccountRequest: UpdateAccountRequest;
+};
+
+export type DeleteChartOfAccountsByIdArg = {
+  id: number | string;
+};
+
+// --- Inject Endpoints ---
+export const chartOfAccountsApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    // GET /api/v1/chart-of-accounts
+    getChartOfAccounts: builder.query<unknown, GetChartOfAccountsArg | void>({
+      query: (arg) => ({
+        url: "/api/v1/chart-of-accounts",
+        params: arg
+          ? {
+              search: arg.search,
+              category: arg.category,
+            }
+          : undefined,
+      }),
+      providesTags: ["ChartOfAccounts"],
+    }),
+
+    // POST /api/v1/chart-of-accounts
+    createChartOfAccount: builder.mutation<unknown, CreateAccountRequest>({
+      query: (body) => ({
+        url: "/api/v1/chart-of-accounts",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ChartOfAccounts"],
+    }),
+
+    // PUT /api/v1/chart-of-accounts/{id}
+    updateChartOfAccount: builder.mutation<unknown, PutChartOfAccountsByIdArg>({
+      query: ({ id, updateAccountRequest }) => ({
+        url: `/api/v1/chart-of-accounts/${id}`,
+        method: "PUT",
+        body: updateAccountRequest,
+      }),
+      invalidatesTags: ["ChartOfAccounts"],
+    }),
+
+    // DELETE /api/v1/chart-of-accounts/{id}
+    deleteChartOfAccount: builder.mutation<unknown, DeleteChartOfAccountsByIdArg>({
+      query: ({ id }) => ({
+        url: `/api/v1/chart-of-accounts/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["ChartOfAccounts"],
+    }),
+  }),
+});

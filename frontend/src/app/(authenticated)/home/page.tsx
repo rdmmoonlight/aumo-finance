@@ -1,20 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import {
-  LayoutDashboard,
-  Notebook,
-  LineChart,
-  TrendingUp,
-  TrendingDown,
-  RotateCw,
-  Clock,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useGetApiV1HomeMarketIndicatorsQuery } from "@/lib/store/(authenticated)/home/homeApi";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { AppDispatch, RootState } from "@/lib/store";
+import { homeApi } from "@/lib/store/(authenticated)/home/homeApi";
+import {
+  Clock,
+  LayoutDashboard,
+  LineChart,
+  Notebook,
+  RotateCw,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 interface MarketItem {
   symbol: string;
@@ -25,29 +27,52 @@ interface MarketItem {
 }
 
 export default function HomePage() {
-  const {
-    data: rawResponse,
-    isLoading,
-    isFetching,
-    isError,
-    fulfilledTimeStamp,
-    refetch,
-  } = useGetApiV1HomeMarketIndicatorsQuery();
+  const dispatch = useDispatch<AppDispatch>();
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [isError, setIsError] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
-  // Update timestamp saat data berhasil dimuat/di-refresh
-  useEffect(() => {
-    if (fulfilledTimeStamp) {
-      setLastUpdated(
-        new Date(fulfilledTimeStamp).toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-        }),
+  // Mengambil state query langsung dari Redux store tanpa React Hook generator
+  const rawResponse = useSelector((state: RootState) =>
+    homeApi.endpoints.getMarketIndicators.select()(state)?.data
+  );
+
+  // Function untuk mereload data dari controller ASP.NET
+  const fetchMarketData = useCallback(async () => {
+    setIsFetching(true);
+    try {
+      const result = await dispatch(
+        homeApi.endpoints.getMarketIndicators.initiate(undefined, {
+          subscribe: false,
+          forceRefetch: true,
+        })
       );
+
+      if ("error" in result) {
+        setIsError(true);
+      } else {
+        setIsError(false);
+        setLastUpdated(
+          new Date().toLocaleTimeString("id-ID", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+          })
+        );
+      }
+    } catch {
+      setIsError(true);
+    } finally {
+      setIsLoading(false);
+      setIsFetching(false);
     }
-  }, [fulfilledTimeStamp]);
+  }, [dispatch]);
+
+  useEffect(() => {
+    fetchMarketData();
+  }, [fetchMarketData]);
 
   // Ekstraksi data secara fleksibel (menangani array langsung maupun wrapped object)
   const extractRawItems = (res: unknown): Record<string, unknown>[] => {
@@ -59,26 +84,24 @@ export default function HomePage() {
       if (Array.isArray(obj.items)) return obj.items;
       if (Array.isArray(obj.result)) return obj.result;
       if (Array.isArray(obj.rates)) return obj.rates;
-      // Jika berupa objek tunggal, bungkus dalam array
       return [obj];
     }
     return [];
   };
 
-  // Normalisasi field dari Backend (mendukung PascalCase & camelCase)
+  // Normalisasi field dari Backend
   const rawList = extractRawItems(rawResponse);
   const marketData: MarketItem[] = rawList.map((item) => {
     const symbol = String(
-      item.symbol ?? item.Symbol ?? item.code ?? item.currency ?? "N/A",
+      item.symbol ?? item.Symbol ?? item.code ?? item.currency ?? "N/A"
     );
     const name = String(
-      item.name ?? item.Name ?? item.description ?? item.pair ?? "",
+      item.name ?? item.Name ?? item.description ?? item.pair ?? ""
     );
     const rawPrice = item.price ?? item.Price ?? item.value ?? item.rate ?? 0;
     const rawChange = item.change ?? item.Change ?? item.changePercent ?? 0;
     const isUp = Boolean(item.isUp ?? item.IsUp ?? Number(rawChange) >= 0);
 
-    // Format harga: kurs dalam Rupiah, indeks saham tanpa simbol mata uang
     const numericPrice = Number(rawPrice);
     const isCurrency = symbol.includes("/IDR");
     const formattedPrice = Number.isFinite(numericPrice)
@@ -90,7 +113,6 @@ export default function HomePage() {
           })
       : String(rawPrice);
 
-    // Format persen perubahan
     const numericChange = Number(rawChange);
     const formattedChange = Number.isFinite(numericChange)
       ? `${numericChange >= 0 ? "+" : ""}${numericChange.toFixed(2)}%`
@@ -127,7 +149,7 @@ export default function HomePage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => refetch()}
+                  onClick={fetchMarketData}
                   disabled={isFetching}
                   className="h-7 w-7 rounded-lg text-white/70 hover:bg-white/10 hover:text-white"
                   title="Refresh Indikator Pasar"

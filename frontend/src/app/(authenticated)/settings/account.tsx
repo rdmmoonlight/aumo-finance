@@ -1,147 +1,30 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper,
-} from "@tanstack/react-table";
-import { useGetApiV1AuthMeQuery } from "@/lib/store/auth/authApi";
-import {
-  usePutApiV1SettingsProfileMutation,
-  usePostApiV1SettingsAvatarMutation,
-  usePostApiV1SettingsChangePasswordMutation,
-  useDeleteApiV1SettingsDeleteAccountMutation,
-} from "@/lib/store/(authenticated)/settings/settingsApi";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import {
-  Upload,
-  Loader2,
-  CheckCircle2,
-  AlertTriangle,
-  Trash2,
-  Key,
-  ShieldCheck,
-} from "lucide-react";
-
-interface UserProfileField {
-  label: string;
-  value: string;
-  status: "Verified" | "Editable" | "Readonly";
-}
-
-const columnHelper = createColumnHelper<UserProfileField>();
-
-function AccountDetailsTable({ data }: { data: UserProfileField[] }) {
-  const columns = useMemo(
-    () => [
-      columnHelper.accessor("label", {
-        header: "Atribut Profil",
-        cell: (info) => (
-          <span className="font-medium text-xs text-muted-foreground">
-            {info.getValue()}
-          </span>
-        ),
-      }),
-      columnHelper.accessor("value", {
-        header: "Nilai Terdaftar",
-        cell: (info) => (
-          <span className="font-semibold text-xs text-foreground">
-            {info.getValue() || "---"}
-          </span>
-        ),
-      }),
-      columnHelper.accessor("status", {
-        header: "Akses / Status",
-        cell: (info) => {
-          const val = info.getValue();
-          return (
-            <Badge
-              variant={val === "Verified" ? "default" : "outline"}
-              className="text-[10px] py-0 px-1.5"
-            >
-              {val}
-            </Badge>
-          );
-        },
-      }),
-    ],
-    [],
-  );
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
-  return (
-    <Table>
-      <TableHeader>
-        {table.getHeaderGroups().map((headerGroup) => (
-          <TableRow key={headerGroup.id} className="text-xs">
-            {headerGroup.headers.map((header) => (
-              <TableHead key={header.id} className="h-8">
-                {header.isPlaceholder
-                  ? null
-                  : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
-      </TableHeader>
-      <TableBody>
-        {table.getRowModel().rows.map((row) => (
-          <TableRow key={row.id}>
-            {row.getVisibleCells().map((cell) => (
-              <TableCell key={cell.id} className="py-2">
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </TableBody>
-    </Table>
-  );
-}
+import { Textarea } from "@/components/ui/textarea";
+import type { AppDispatch } from "@/lib/store";
+import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
+import { authApi } from "@/lib/store/auth/authApi";
+import { AlertTriangle, CheckCircle2, Key, Loader2, ShieldCheck, Trash2, Upload } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { AccountDetailsTable, UserProfileField } from "./account-table";
 
 export default function AccountSettings() {
-  const { data: me, isLoading, refetch } = useGetApiV1AuthMeQuery();
-  const user = (me as any)?.data || (me as any);
-  const [updateProfile, { isLoading: saving }] =
-    usePutApiV1SettingsProfileMutation();
-  const [uploadAvatar, { isLoading: uploading }] =
-    usePostApiV1SettingsAvatarMutation();
-  const [changePassword, { isLoading: changing }] =
-    usePostApiV1SettingsChangePasswordMutation();
-  const [deleteAccount, { isLoading: deleting }] =
-    useDeleteApiV1SettingsDeleteAccountMutation();
+  const dispatch = useDispatch<AppDispatch>();
+
+  const [user, setUser] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [changing, setChanging] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
@@ -154,41 +37,37 @@ export default function AccountSettings() {
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    if (user) {
-      setFullName(user.fullName || "");
-      setUserName(user.userName || "");
-      setPhoneNumber(user.phoneNumber || "");
-      setBio(user.bio || "");
-      setAvatarPreview(user.avatarUrl || null);
+  // Load Profil Pengguna via RTK Query Dispatch
+  const fetchProfile = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const res = await dispatch(authApi.endpoints.getProfile.initiate()).unwrap();
+      const userData = res?.data || res;
+      setUser(userData);
+      if (userData) {
+        setFullName(userData.fullName || "");
+        setUserName(userData.userName || "");
+        setPhoneNumber(userData.phoneNumber || "");
+        setBio(userData.bio || "");
+        setAvatarPreview(userData.avatarUrl || null);
+      }
+    } catch (err: any) {
+      notify(err?.data?.message || "Gagal memuat profil pengguna", true);
+    } finally {
+      setIsLoading(false);
     }
-  }, [user]);
+  }, [dispatch]);
 
-  const profileSummaryData = useMemo<UserProfileField[]>(
-    () => [
-      {
-        label: "Full Name",
-        value: user?.fullName || "",
-        status: "Editable",
-      },
-      {
-        label: "Username",
-        value: user?.userName || "",
-        status: "Editable",
-      },
-      {
-        label: "Email Address",
-        value: user?.email || "",
-        status: "Verified",
-      },
-      {
-        label: "Phone Number",
-        value: user?.phoneNumber || "",
-        status: "Editable",
-      },
-    ],
-    [user],
-  );
+  useEffect(() => {
+    fetchProfile();
+  }, [fetchProfile]);
+
+  const profileSummaryData = useMemo<UserProfileField[]>(() => [
+    { label: "Full Name", value: user?.fullName || "", status: "Editable" },
+    { label: "Username", value: user?.userName || "", status: "Editable" },
+    { label: "Email Address", value: user?.email || "", status: "Verified" },
+    { label: "Phone Number", value: user?.phoneNumber || "", status: "Editable" },
+  ], [user]);
 
   const notify = (m: string, e = false) => {
     if (e) {
@@ -203,14 +82,22 @@ export default function AccountSettings() {
 
   const handleProfile = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSaving(true);
     try {
-      await updateProfile({
-        updateProfileRequest: { fullName, userName, phoneNumber, bio },
-      } as any).unwrap();
+      await dispatch(
+        settingsApi.endpoints.updateProfile.initiate({
+          fullName,
+          userName,
+          phoneNumber,
+          bio,
+        })
+      ).unwrap();
       notify("Profile updated!");
-      refetch();
+      fetchProfile();
     } catch (err: any) {
-      notify(err?.data?.message || "Gagal update", true);
+      notify(err?.data?.message || "Gagal update profile", true);
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -218,69 +105,81 @@ export default function AccountSettings() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) return notify("Max 2MB", true);
+
     const blobUrl = URL.createObjectURL(file);
     setAvatarPreview(blobUrl);
 
     const fd = new FormData();
     fd.append("file", file);
 
+    setUploading(true);
     try {
-      const res: any = await uploadAvatar(fd as any).unwrap();
+      const res: any = await dispatch(
+        settingsApi.endpoints.uploadAvatar.initiate(fd)
+      ).unwrap();
       const newUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
       if (newUrl) setAvatarPreview(newUrl);
       notify("Avatar uploaded ke Supabase!");
-      refetch();
+      fetchProfile();
     } catch (err: any) {
-      console.error("Upload error detail:", err?.data);
       notify(
         err?.data?.message || err?.data?.errors?.file?.[0] || "Gagal upload",
-        true,
+        true
       );
       setAvatarPreview(user?.avatarUrl || null);
     } finally {
+      setUploading(false);
       e.target.value = "";
     }
   };
 
   const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setChanging(true);
     try {
-      await changePassword({
-        changePasswordRequest: { currentPassword, newPassword },
-      } as any).unwrap();
+      await dispatch(
+        settingsApi.endpoints.changePassword.initiate({
+          currentPassword,
+          newPassword,
+        })
+      ).unwrap();
       notify("Password updated!");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err: any) {
-      notify(err?.data?.message, true);
+      notify(err?.data?.message || "Gagal mengubah password", true);
+    } finally {
+      setChanging(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Hapus permanen?")) return;
+    if (!confirm("Hapus permanen akun Anda?")) return;
+    setDeleting(true);
     try {
-      await deleteAccount().unwrap();
-      window.location.href = "/login";
+      await dispatch(settingsApi.endpoints.deleteAccount.initiate()).unwrap();
+      window.location.href = "/auth";
     } catch (err: any) {
-      notify(err?.data?.message, true);
+      notify(err?.data?.message || "Gagal menghapus akun", true);
+    } finally {
+      setDeleting(false);
     }
   };
 
-  if (isLoading)
+  if (isLoading) {
     return (
       <div className="text-caption py-10 flex items-center gap-2">
         <Loader2 className="animate-spin" size={16} /> Loading...
       </div>
     );
+  }
 
   return (
     <div className="space-y-4">
       {success && (
         <Alert className="py-2 bg-emerald-500/10 text-emerald-600 text-ui">
           <CheckCircle2 size={14} />
-          <AlertDescription className="text-caption">
-            {success}
-          </AlertDescription>
+          <AlertDescription className="text-caption">{success}</AlertDescription>
         </Alert>
       )}
       {error && (
@@ -290,13 +189,11 @@ export default function AccountSettings() {
         </Alert>
       )}
 
-      {/* ACCOUNT SUMMARY TABLE */}
       <Card>
         <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
           <div>
             <CardTitle className="text-ui flex items-center gap-2">
-              <ShieldCheck size={16} className="text-primary" /> Ringkasan
-              Status Akun
+              <ShieldCheck size={16} className="text-primary" /> Ringkasan Status Akun
             </CardTitle>
             <CardDescription className="text-caption">
               Status kredensial pengguna aktif dari `/api/v1/auth/me`
@@ -343,16 +240,13 @@ export default function AccountSettings() {
                   <Loader2 size={13} className="animate-spin mr-1" />
                 ) : (
                   <Upload size={13} className="mr-1" />
-                )}{" "}
+                )}
                 Change Avatar
               </Button>
             </div>
           </div>
           <Separator />
-          <form
-            onSubmit={handleProfile}
-            className="grid grid-cols-1 md:grid-cols-2 gap-3"
-          >
+          <form onSubmit={handleProfile} className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label className="text-caption">Full Name</Label>
               <Input
@@ -396,6 +290,7 @@ export default function AccountSettings() {
             </div>
             <div className="md:col-span-2 flex justify-end">
               <Button size="sm" className="h-8 text-caption" disabled={saving}>
+                {saving && <Loader2 size={13} className="animate-spin mr-1" />}
                 Save
               </Button>
             </div>
@@ -425,12 +320,8 @@ export default function AccountSettings() {
               onChange={(e) => setNewPassword(e.target.value)}
               className="h-8 text-caption"
             />
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 text-caption"
-              disabled={changing}
-            >
+            <Button size="sm" variant="outline" className="h-8 text-caption" disabled={changing}>
+              {changing && <Loader2 size={13} className="animate-spin mr-1" />}
               Update
             </Button>
           </form>
@@ -451,6 +342,7 @@ export default function AccountSettings() {
             onClick={handleDelete}
             disabled={deleting}
           >
+            {deleting && <Loader2 size={13} className="animate-spin mr-1" />}
             Delete
           </Button>
         </CardContent>

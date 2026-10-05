@@ -1,143 +1,88 @@
-import { baseApi as api } from "../../../apiClient";
-export const addTagTypes = ["Settings"] as const;
-const injectedRtkApi = api
-  .enhanceEndpoints({
-    addTagTypes,
-  })
-  .injectEndpoints({
-    endpoints: (build) => ({
-      putApiV1SettingsProfile: build.mutation<
-        PutApiV1SettingsProfileApiResponse,
-        PutApiV1SettingsProfileApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/settings/profile`,
-          method: "PUT",
-          body: queryArg.updateProfileRequest,
-        }),
-        invalidatesTags: ["Settings"],
-      }),
-      postApiV1SettingsAvatar: build.mutation<
-        PostApiV1SettingsAvatarApiResponse,
-        PostApiV1SettingsAvatarApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/settings/avatar`,
-          method: "POST",
-          body: queryArg.body,
-        }),
-        invalidatesTags: ["Settings"],
-      }),
-      postApiV1SettingsChangePassword: build.mutation<
-        PostApiV1SettingsChangePasswordApiResponse,
-        PostApiV1SettingsChangePasswordApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/settings/change-password`,
-          method: "POST",
-          body: queryArg.changePasswordRequest,
-        }),
-        invalidatesTags: ["Settings"],
-      }),
-      deleteApiV1SettingsDeleteAccount: build.mutation<
-        DeleteApiV1SettingsDeleteAccountApiResponse,
-        DeleteApiV1SettingsDeleteAccountApiArg
-      >({
-        query: () => ({
-          url: `/api/v1/settings/delete-account`,
-          method: "DELETE",
-        }),
-        invalidatesTags: ["Settings"],
-      }),
-      getApiV1SettingsGuardianDashboard: build.query<
-        GetApiV1SettingsGuardianDashboardApiResponse,
-        GetApiV1SettingsGuardianDashboardApiArg
-      >({
-        query: () => ({ url: `/api/v1/settings/guardian/dashboard` }),
-        providesTags: ["Settings"],
-      }),
-      postApiV1SettingsGuardianRevokeSessionBySessionId: build.mutation<
-        PostApiV1SettingsGuardianRevokeSessionBySessionIdApiResponse,
-        PostApiV1SettingsGuardianRevokeSessionBySessionIdApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/settings/guardian/revoke-session/${queryArg.sessionId}`,
-          method: "POST",
-        }),
-        invalidatesTags: ["Settings"],
-      }),
-      postApiV1SettingsGuardianRevokeAllSessions: build.mutation<
-        PostApiV1SettingsGuardianRevokeAllSessionsApiResponse,
-        PostApiV1SettingsGuardianRevokeAllSessionsApiArg
-      >({
-        query: () => ({
-          url: `/api/v1/settings/guardian/revoke-all-sessions`,
-          method: "POST",
-        }),
-        invalidatesTags: ["Settings"],
-      }),
-    }),
-    overrideExisting: false,
-  });
-export { injectedRtkApi as enhancedApi };
-export type PutApiV1SettingsProfileApiResponse = unknown;
-export type PutApiV1SettingsProfileApiArg = {
-  updateProfileRequest: UpdateProfileRequest;
-};
-export type PostApiV1SettingsAvatarApiResponse = unknown;
-export type PostApiV1SettingsAvatarApiArg = {
-  body: {
-    ContentType?: string;
-    ContentDisposition?: string;
-    Headers?: {
-      [key: string]: string[];
-    };
-    Length?: number | string;
-    Name?: string;
-    FileName?: string;
-  } & {
-    ContentType?: string;
-    ContentDisposition?: string;
-    Headers?: {
-      [key: string]: string[];
-    };
-    Length?: number | string;
-    Name?: string;
-    FileName?: string;
-  };
-};
-export type PostApiV1SettingsChangePasswordApiResponse = unknown;
-export type PostApiV1SettingsChangePasswordApiArg = {
-  changePasswordRequest: ChangePasswordRequest;
-};
-export type DeleteApiV1SettingsDeleteAccountApiResponse = unknown;
-export type DeleteApiV1SettingsDeleteAccountApiArg = void;
-export type GetApiV1SettingsGuardianDashboardApiResponse = unknown;
-export type GetApiV1SettingsGuardianDashboardApiArg = void;
-export type PostApiV1SettingsGuardianRevokeSessionBySessionIdApiResponse =
-  unknown;
-export type PostApiV1SettingsGuardianRevokeSessionBySessionIdApiArg = {
-  sessionId: string;
-};
-export type PostApiV1SettingsGuardianRevokeAllSessionsApiResponse = unknown;
-export type PostApiV1SettingsGuardianRevokeAllSessionsApiArg = void;
-export type UpdateProfileRequest = {
-  fullName?: null | string;
-  userName?: null | string;
-  phoneNumber?: null | string;
-  bio?: null | string;
-  avatarUrl?: null | string;
-};
-export type ChangePasswordRequest = {
+import { baseApi } from "@/lib/apiClient";
+
+// --- DTO Types ---
+export interface UpdateProfileRequest {
+  fullName?: string | null;
+  userName?: string | null;
+  phoneNumber?: string | null;
+  bio?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface ChangePasswordRequest {
   currentPassword?: string;
   newPassword?: string;
-};
-export const {
-  usePutApiV1SettingsProfileMutation,
-  usePostApiV1SettingsAvatarMutation,
-  usePostApiV1SettingsChangePasswordMutation,
-  useDeleteApiV1SettingsDeleteAccountMutation,
-  useGetApiV1SettingsGuardianDashboardQuery,
-  usePostApiV1SettingsGuardianRevokeSessionBySessionIdMutation,
-  usePostApiV1SettingsGuardianRevokeAllSessionsMutation,
-} = injectedRtkApi;
+}
+
+export interface RevokeSessionArg {
+  sessionId: string;
+}
+
+// --- Slice Definition ---
+export const settingsApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    // PUT /api/v1/settings/profile
+    updateProfile: builder.mutation<unknown, UpdateProfileRequest>({
+      query: (body) => ({
+        url: "/api/v1/settings/profile",
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Settings"],
+    }),
+
+    // POST /api/v1/settings/avatar
+    uploadAvatar: builder.mutation<unknown, FormData>({
+      query: (formData) => ({
+        url: "/api/v1/settings/avatar",
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Settings"],
+    }),
+
+    // POST /api/v1/settings/change-password
+    changePassword: builder.mutation<unknown, ChangePasswordRequest>({
+      query: (body) => ({
+        url: "/api/v1/settings/change-password",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Settings"],
+    }),
+
+    // DELETE /api/v1/settings/delete-account
+    deleteAccount: builder.mutation<unknown, void>({
+      query: () => ({
+        url: "/api/v1/settings/delete-account",
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Settings"],
+    }),
+
+    // GET /api/v1/settings/guardian/dashboard
+    getGuardianDashboard: builder.query<unknown, void>({
+      query: () => "/api/v1/settings/guardian/dashboard",
+      providesTags: ["Settings"],
+    }),
+
+    // POST /api/v1/settings/guardian/revoke-session/{sessionId}
+    revokeSessionById: builder.mutation<unknown, RevokeSessionArg>({
+      query: ({ sessionId }) => ({
+        url: `/api/v1/settings/guardian/revoke-session/${sessionId}`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Settings"],
+    }),
+
+    // POST /api/v1/settings/guardian/revoke-all-sessions
+    revokeAllSessions: builder.mutation<unknown, void>({
+      query: () => ({
+        url: "/api/v1/settings/guardian/revoke-all-sessions",
+        method: "POST",
+      }),
+      invalidatesTags: ["Settings"],
+    }),
+  }),
+  overrideExisting: false,
+});

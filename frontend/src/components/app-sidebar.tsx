@@ -1,11 +1,13 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import Image from "next/image";
-import { usePathname } from "next/navigation";
-import { useDispatch } from "react-redux";
-import { baseApi } from "@/lib/apiClient";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -20,34 +22,29 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { baseApi } from "@/lib/apiClient";
+import { store } from "@/lib/store";
+import { authApi, UserProfileData } from "@/lib/store/auth/authApi";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import {
-  LayoutDashboard,
-  Home,
-  Bot,
   BookOpen,
-  FileBarChart,
+  Bot,
   Calendar,
+  ChevronsUpDown,
+  FileBarChart,
   FileSpreadsheet,
-  Wrench,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  PanelLeft,
+  PanelLeftClose,
   Settings,
   User,
-  LogOut,
-  ChevronsUpDown,
-  PanelLeftClose,
-  PanelLeft,
+  Wrench,
 } from "lucide-react";
-import {
-  useGetApiV1AuthMeQuery,
-  usePostApiV1AuthLogoutMutation,
-} from "@/lib/store/auth/authApi";
+import Image from "next/image";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
 
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();
@@ -82,26 +79,43 @@ const navigation = [
 
 export function AppSidebar() {
   const pathname = usePathname();
-  const dispatch = useDispatch();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
-  React.useEffect(() => setIsMounted(true), []);
+  const [user, setUser] = React.useState<UserProfileData | null>(null);
+  const [isUserLoading, setIsUserLoading] = React.useState(true);
 
-  const { data: me, isLoading: isUserLoading } = useGetApiV1AuthMeQuery(
-    undefined,
-    { skip: !isMounted },
-  );
-  const user = (me as any)?.data || (me as any);
-  const [logoutApi] = usePostApiV1AuthLogoutMutation();
+  React.useEffect(() => {
+    setIsMounted(true);
+
+    async function fetchUser() {
+      try {
+        setIsUserLoading(true);
+        const result = await store.dispatch(
+          authApi.endpoints.getProfile.initiate()
+        );
+
+        if (result.isSuccess && result.data) {
+          const profileData = (result.data as any).data || result.data;
+          setUser(profileData);
+        }
+      } catch (error) {
+        console.error("Gagal mengambil data profil:", error);
+      } finally {
+        setIsUserLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
 
   const handleSignOut = async () => {
     try {
-      await logoutApi().unwrap();
+      await store.dispatch(authApi.endpoints.logout.initiate());
     } catch (e) {
       console.error(e);
     } finally {
-      dispatch(baseApi.util.resetApiState());
+      store.dispatch(baseApi.util.resetApiState());
       document.cookie =
         "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       window.location.replace("/");
@@ -148,7 +162,7 @@ export function AppSidebar() {
 
       <SidebarContent className="p-2.5 flex-1 overflow-y-auto">
         <SidebarGroup>
-          <SidebarGroupLabel className="text- uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
+          <SidebarGroupLabel className="uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden">
             Navigation
           </SidebarGroupLabel>
           <SidebarGroupContent>

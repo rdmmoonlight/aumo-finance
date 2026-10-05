@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
-import { useRouter } from "next/navigation";
-import { GoogleOAuthProvider } from "@react-oauth/google";
-import { GOOGLE_CLIENT_ID, AuthFormSkeleton } from "@/app/auth/auth";
+import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "@/app/auth/auth";
 import LoginPage from "@/app/auth/login";
 import RegisterPage from "@/app/auth/register";
-import { useGetApiV1AuthMeQuery } from "@/lib/store/auth/authApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -14,24 +10,48 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Lock, ArrowRight, UserPlus, Loader2 } from "lucide-react";
+import { store } from "@/lib/store";
+import { authApi } from "@/lib/store/auth/authApi";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { ArrowRight, Loader2, Lock, UserPlus } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 export default function LandingPage(): React.JSX.Element {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
-  const {
-    data: user,
-    isLoading: checkingAuth,
-    isSuccess,
-  } = useGetApiV1AuthMeQuery();
-  const isAuthenticated = isSuccess && Boolean(user);
+  // State pengganti RTK Query Hook
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";
-    if (isAuthenticated) router.replace("/home");
-  }, [isAuthenticated, router]);
+
+    // Cek auth status secara langsung menembak /api/v1/auth/me via store.dispatch
+    async function checkAuthStatus() {
+      try {
+        setCheckingAuth(true);
+        const result = await store.dispatch(
+          authApi.endpoints.getProfile.initiate()
+        );
+
+        if (result.isSuccess && result.data?.success) {
+          setIsAuthenticated(true);
+          router.replace("/home");
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch {
+        setIsAuthenticated(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    }
+
+    checkAuthStatus();
+  }, [router]);
 
   const handleOpenModal = (mode: "login" | "register"): void => {
     setAuthMode(mode);
@@ -141,7 +161,6 @@ export default function LandingPage(): React.JSX.Element {
               </DialogTitle>
             </DialogHeader>
             <div className="p-6 pt-4">
-              {/* Provider cukup sekali di sini */}
               <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
                 <Suspense fallback={<AuthFormSkeleton />}>
                   {authMode === "login" ? (
