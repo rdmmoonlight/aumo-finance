@@ -51,7 +51,7 @@ type ReportItem = {
 const REPORTS: ReportItem[] = [
   // --- JOURNALS & LEDGERS ---
   {
-    href: "/journals/general",
+    href: "/reports/journals/general",
     title: "General Journal",
     desc: "Buku harian semua transaksi",
     category: "Journals & Ledgers",
@@ -59,7 +59,7 @@ const REPORTS: ReportItem[] = [
     icon: Receipt,
   },
   {
-    href: "/general-ledgers/permanent",
+    href: "/reports/general-ledgers/permanent",
     title: "General Ledger - Permanent",
     desc: "Buku besar akun riil",
     category: "Journals & Ledgers",
@@ -67,7 +67,7 @@ const REPORTS: ReportItem[] = [
     icon: Library,
   },
   {
-    href: "/general-ledgers/temporary",
+    href: "/reports/general-ledgers/temporary",
     title: "General Ledger - Temporary",
     desc: "Buku besar akun nominal",
     category: "Journals & Ledgers",
@@ -77,7 +77,7 @@ const REPORTS: ReportItem[] = [
 
   // --- TRIAL BALANCE CYCLE ---
   {
-    href: "/trial-balances/unadjusted",
+    href: "/reports/trial-balances/unadjusted",
     title: "Unadjusted Trial Balance",
     desc: "Neraca saldo awal sebelum penyesuaian",
     category: "Trial Balance Cycle",
@@ -85,7 +85,7 @@ const REPORTS: ReportItem[] = [
     icon: ClipboardList,
   },
   {
-    href: "/worksheet",
+    href: "/reports/worksheet",
     title: "Worksheet",
     desc: "10-column worksheet & kertas kerja",
     category: "Trial Balance Cycle",
@@ -93,7 +93,7 @@ const REPORTS: ReportItem[] = [
     icon: TableIcon,
   },
   {
-    href: "/journals/adjusting",
+    href: "/reports/journals/adjusting",
     title: "Adjusting Journal",
     desc: "Jurnal penyesuaian akhir periode",
     category: "Trial Balance Cycle",
@@ -101,7 +101,7 @@ const REPORTS: ReportItem[] = [
     icon: BookOpen,
   },
   {
-    href: "/trial-balances/adjusted",
+    href: "/reports/trial-balances/adjusted",
     title: "Adjusted Trial Balance",
     desc: "Neraca saldo setelah penyesuaian",
     category: "Trial Balance Cycle",
@@ -145,7 +145,7 @@ const REPORTS: ReportItem[] = [
 
   // --- CLOSING CYCLE ---
   {
-    href: "/journals/closing",
+    href: "/reports/journals/closing",
     title: "Closing Journal",
     desc: "Jurnal penutup akun nominal",
     category: "Closing Cycle",
@@ -153,7 +153,7 @@ const REPORTS: ReportItem[] = [
     icon: BookOpen,
   },
   {
-    href: "/trial-balances/post-closing",
+    href: "/reports/trial-balances/post-closing",
     title: "Post-Closing Trial Balance",
     desc: "Neraca saldo setelah penutupan",
     category: "Closing Cycle",
