@@ -75,7 +75,7 @@ const baseQueryWithReauth: BaseQueryFn<
   // --- EKSPLISIT VALIDASI: Wajib diawali dengan slash `/` ---
   if (!requestUrl || !requestUrl.startsWith("/")) {
     throw new Error(
-      `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'. Mohon perbaiki penulisan endpoint pada slice API tempat permintaan ini dipanggil.`
+      `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'. Mohon perbaiki penulisan endpoint pada slice API tempat permintaan ini dipanggil.`,
     );
   }
 
@@ -127,7 +127,7 @@ const baseQueryWithReauth: BaseQueryFn<
     ) {
       isRedirecting = true;
       window.location.replace(
-        `/auth?redirectTo=${encodeURIComponent(currentPath)}`
+        `/auth?redirectTo=${encodeURIComponent(currentPath)}`,
       );
     }
   }

@@ -257,11 +257,9 @@ export type GetJournalsClosingApiResponse = any;
 export type GetJournalsClosingApiArg = void;
 
 export type GetTrialBalanceApiResponse = any;
-export type GetTrialBalanceApiArg =
-  | {
-      type?: "unadjusted" | "adjusted" | "post-closing";
-    }
-  | void;
+export type GetTrialBalanceApiArg = {
+  type?: "unadjusted" | "adjusted" | "post-closing";
+} | void;
 
 // Alias nama lama
 export type SummaryResponse = GetSummaryApiResponse;
