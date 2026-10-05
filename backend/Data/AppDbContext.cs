@@ -65,17 +65,6 @@ public class AppDbContext
 
 
     // ============================================================
-    // Economic Document Repository
-    // ============================================================
-
-    public DbSet<EconomicDocument> EconomicDocuments
-        => Set<EconomicDocument>();
-
-    public DbSet<Folder> Folders
-        => Set<Folder>();
-
-
-    // ============================================================
     // Guardian
     // ============================================================
 
@@ -244,40 +233,6 @@ public class AppDbContext
             entity.HasOne(x => x.JournalEntryLine)
                 .WithMany()
                 .HasForeignKey(x => x.JournalEntryLineId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-
-        // ========================================================
-        // Economic Document Repository
-        // ========================================================
-
-        builder.Entity<EconomicDocument>(entity =>
-        {
-            entity.HasIndex(x => x.Category);
-            entity.HasIndex(x => x.ReferenceNumber);
-            entity.HasIndex(x => x.UserId);
-            entity.HasIndex(x => x.FolderId);
-
-            entity.HasOne(x => x.Folder)
-                .WithMany()
-                .HasForeignKey(x => x.FolderId)
-                .OnDelete(DeleteBehavior.Cascade);
-        });
-
-
-        // ========================================================
-        // Folder
-        // ========================================================
-
-        builder.Entity<Folder>(entity =>
-        {
-            entity.HasIndex(x => x.UserId);
-            entity.HasIndex(x => x.ParentFolderId);
-
-            entity.HasOne(x => x.ParentFolder)
-                .WithMany()
-                .HasForeignKey(x => x.ParentFolderId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
