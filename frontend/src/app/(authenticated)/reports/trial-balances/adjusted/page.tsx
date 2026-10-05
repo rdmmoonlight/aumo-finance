@@ -24,7 +24,7 @@ export default function AdjustedTrialBalancePage() {
       setIsError(false);
 
       const result = await store.dispatch(
-        reportsApi.endpoints.getWorksheet.initiate()
+        reportsApi.endpoints.getWorksheet.initiate(),
       );
 
       if (!isMounted) return;
@@ -47,7 +47,8 @@ export default function AdjustedTrialBalancePage() {
   }, []);
 
   const noPeriod =
-    (data as any)?.hasPeriodSelected === false || (error as any)?.status === 404;
+    (data as any)?.hasPeriodSelected === false ||
+    (error as any)?.status === 404;
 
   const rows = useMemo(() => {
     if (!data || noPeriod) return [];
@@ -59,18 +60,19 @@ export default function AdjustedTrialBalancePage() {
 
   const totalDebit = useMemo(
     () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
-    [rows]
+    [rows],
   );
   const totalCredit = useMemo(
     () => rows.reduce((s, r) => s + (Number(r.credit) || 0), 0),
-    [rows]
+    [rows],
   );
   const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-16 text-caption text-muted-foreground">
-        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial balance...
+        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial
+        balance...
       </div>
     );
   }
@@ -79,7 +81,8 @@ export default function AdjustedTrialBalancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="flex items-center gap-2 text-h3 font-bold">
-          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial Balance
+          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial
+          Balance
         </h1>
         <p className="mt-1 text-ui text-muted-foreground">
           After adjusting entries • IDR
@@ -90,7 +93,8 @@ export default function AdjustedTrialBalancePage() {
         <Alert variant="destructive">
           <AlertTriangle size={16} />
           <AlertDescription>
-            {(error as any)?.data?.message || "Gagal memuat data adjusted trial balance."}
+            {(error as any)?.data?.message ||
+              "Gagal memuat data adjusted trial balance."}
           </AlertDescription>
         </Alert>
       )}
@@ -99,7 +103,11 @@ export default function AdjustedTrialBalancePage() {
         <NoPeriodCard />
       ) : (
         <>
-          <TrialTable rows={rows} totalDebit={totalDebit} totalCredit={totalCredit} />
+          <TrialTable
+            rows={rows}
+            totalDebit={totalDebit}
+            totalCredit={totalCredit}
+          />
           <BalanceAlert
             isBalanced={isBalanced}
             balancedText="Adjusted TB is balanced"

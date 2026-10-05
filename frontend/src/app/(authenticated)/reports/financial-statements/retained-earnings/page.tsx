@@ -34,7 +34,7 @@ export default function RetainedEarningsPage() {
 
       // Tembak langsung endpoint RTK Query tanpa Hook
       const result = await store.dispatch(
-        reportsApi.endpoints.getRetainedEarnings.initiate()
+        reportsApi.endpoints.getRetainedEarnings.initiate(),
       );
 
       if (!isMounted) return;
@@ -44,7 +44,7 @@ export default function RetainedEarningsPage() {
       } else if ("error" in result) {
         const err = result.error as any;
         setErrorMessage(
-          err?.data?.message || err?.message || "Gagal memuat laporan."
+          err?.data?.message || err?.message || "Gagal memuat laporan.",
         );
       }
 
@@ -68,13 +68,12 @@ export default function RetainedEarningsPage() {
       endDate: rawData?.endDate || "",
       beginningBalance:
         Number(
-          rawData?.beginningRetainedEarnings ?? rawData?.beginningBalance
+          rawData?.beginningRetainedEarnings ?? rawData?.beginningBalance,
         ) || 0,
       netIncome: Number(rawData?.netIncome) || 0,
-      dividends:
-        Number(rawData?.dividendsOrDraws ?? rawData?.dividends) || 0,
+      dividends: Number(rawData?.dividendsOrDraws ?? rawData?.dividends) || 0,
     }),
-    [rawData]
+    [rawData],
   );
 
   const endingBalance = vm.beginningBalance + vm.netIncome - vm.dividends;

@@ -13,8 +13,16 @@ export interface PeriodItem {
 
 export interface PeriodsOpenInfo {
   hasExistingPermanentAccounts: boolean;
-  availableCashAndBankAccounts?: Array<{ id: number; name: string; code: string }>;
-  availableRetainedEarningsAccounts?: Array<{ id: number; name: string; code: string }>;
+  availableCashAndBankAccounts?: Array<{
+    id: number;
+    name: string;
+    code: string;
+  }>;
+  availableRetainedEarningsAccounts?: Array<{
+    id: number;
+    name: string;
+    code: string;
+  }>;
 }
 
 export interface CreatePeriodRequest {
@@ -49,7 +57,10 @@ export const periodsApi = baseApi.injectEndpoints({
     }),
 
     // POST /api/v1/periods
-    createPeriod: builder.mutation<void, { createPeriodRequest: CreatePeriodRequest }>({
+    createPeriod: builder.mutation<
+      void,
+      { createPeriodRequest: CreatePeriodRequest }
+    >({
       query: ({ createPeriodRequest }) => ({
         url: "/api/v1/periods",
         method: "POST",

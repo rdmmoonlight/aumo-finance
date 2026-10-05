@@ -97,12 +97,14 @@ export function AddAccountDialog({
           accountName: values.accountName,
           type: values.type,
           role: values.role ?? "Default",
-        })
+        }),
       );
 
       if ("error" in result) {
         const err = result.error as any;
-        throw new Error(err?.data?.message || err?.message || "Failed to create account");
+        throw new Error(
+          err?.data?.message || err?.message || "Failed to create account",
+        );
       }
 
       onSuccess(`Account '${values.accountName}' created`);
@@ -195,10 +197,19 @@ export function AddAccountDialog({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" className="text-sm" onClick={() => onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm"
+              onClick={() => onOpenChange(false)}
+            >
               Cancel
             </Button>
-            <Button type="submit" disabled={isCreating} className="text-sm font-medium">
+            <Button
+              type="submit"
+              disabled={isCreating}
+              className="text-sm font-medium"
+            >
               {isCreating ? "Saving..." : "Save Account"}
             </Button>
           </DialogFooter>
@@ -269,12 +280,14 @@ export function EditAccountDialog({
             role: values.role ?? "Default",
             isActive: values.isActive ?? true,
           },
-        })
+        }),
       );
 
       if ("error" in result) {
         const err = result.error as any;
-        throw new Error(err?.data?.message || err?.message || "Failed to update account");
+        throw new Error(
+          err?.data?.message || err?.message || "Failed to update account",
+        );
       }
 
       onSuccess(`Account '${values.accountName}' updated`);
@@ -302,19 +315,38 @@ export function EditAccountDialog({
             <Label className="text-sm">Name</Label>
             <Input {...register("accountName")} className="text-sm" />
             {errors.accountName && (
-              <p className="text-xs text-red-500 font-medium">{errors.accountName.message as string}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.accountName.message as string}
+              </p>
             )}
           </div>
           <div className="space-y-2">
             <Label className="text-sm">Ref Number</Label>
-            <Input type="number" {...register("referenceNumber", { valueAsNumber: true })} className="text-sm" />
+            <Input
+              type="number"
+              {...register("referenceNumber", { valueAsNumber: true })}
+              className="text-sm"
+            />
             {errors.referenceNumber && (
-              <p className="text-xs text-red-500 font-medium">{errors.referenceNumber.message as string}</p>
+              <p className="text-xs text-red-500 font-medium">
+                {errors.referenceNumber.message as string}
+              </p>
             )}
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" className="text-sm" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" disabled={isUpdating} className="text-sm font-medium">
+            <Button
+              type="button"
+              variant="ghost"
+              className="text-sm"
+              onClick={() => onOpenChange(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isUpdating}
+              className="text-sm font-medium"
+            >
               {isUpdating ? "Updating..." : "Update"}
             </Button>
           </DialogFooter>
@@ -347,12 +379,16 @@ export function DeleteAccountAlertDialog({
     try {
       // Direct call ke endpoint RTK Query tanpa hook
       const result = await store.dispatch(
-        chartOfAccountsApi.endpoints.deleteChartOfAccount.initiate({ id: Number(account.id) })
+        chartOfAccountsApi.endpoints.deleteChartOfAccount.initiate({
+          id: Number(account.id),
+        }),
       );
 
       if ("error" in result) {
         const err = result.error as any;
-        throw new Error(err?.data?.message || err?.message || "Failed to delete account");
+        throw new Error(
+          err?.data?.message || err?.message || "Failed to delete account",
+        );
       }
 
       onSuccess(`Deleted '${account.accountName}'`);
@@ -369,13 +405,18 @@ export function DeleteAccountAlertDialog({
     <AlertDialog open={!!account} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="text-xl font-bold">Delete Account</AlertDialogTitle>
+          <AlertDialogTitle className="text-xl font-bold">
+            Delete Account
+          </AlertDialogTitle>
           <AlertDialogDescription className="text-xs text-muted-foreground">
-            Are you sure you want to delete &quot;{account?.accountName}&quot;? This action cannot be undone.
+            Are you sure you want to delete &quot;{account?.accountName}&quot;?
+            This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting} className="text-sm">Cancel</AlertDialogCancel>
+          <AlertDialogCancel disabled={isDeleting} className="text-sm">
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isDeleting}

@@ -5,7 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { store } from "@/lib/store";
-import { reportsApi, SummaryResponse } from "@/lib/store/(authenticated)/reports/reportsApi";
+import {
+  reportsApi,
+  SummaryResponse,
+} from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
   createColumnHelper,
   flexRender,
@@ -196,10 +199,10 @@ export default function ReportsPage() {
       try {
         setSummaryLoading(true);
         setIsError(false);
-        
+
         // Memanggil endpoint RTK Query secara eksplisit lewat store dispatch
         const result = await store.dispatch(
-          reportsApi.endpoints.getSummary.initiate()
+          reportsApi.endpoints.getSummary.initiate(),
         );
 
         if (isMounted) {

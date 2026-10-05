@@ -26,18 +26,19 @@ export default function AuthenticatedLayout({
   const [isPeriodsLoading, setIsPeriodsLoading] = useState(false);
 
   // Ambil data cache langsung dari Redux Store jika ada
-  const authState = useSelector(
-    (state: RootState) =>
-      authApi.endpoints.getProfile.select()(state)
+  const authState = useSelector((state: RootState) =>
+    authApi.endpoints.getProfile.select()(state),
   );
 
   const verifySessionAndLoadData = useCallback(async () => {
     try {
       setIsAuthLoading(true);
-      
+
       // 1. Eksekusi request GET /api/v1/auth/me langsung via initiate
       const authResult = await dispatch(
-        authApi.endpoints.getProfile.initiate(undefined, { forceRefetch: false })
+        authApi.endpoints.getProfile.initiate(undefined, {
+          forceRefetch: false,
+        }),
       );
 
       if (authResult.isError || !authResult.data) {
@@ -52,7 +53,9 @@ export default function AuthenticatedLayout({
       // 2. Jika auth berhasil, muat data periode
       setIsPeriodsLoading(true);
       await dispatch(
-        periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, { forceRefetch: false })
+        periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, {
+          forceRefetch: false,
+        }),
       );
     } catch {
       setIsAuthError(true);

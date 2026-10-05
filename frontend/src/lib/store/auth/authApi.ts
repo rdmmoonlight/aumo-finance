@@ -54,7 +54,7 @@ export const authApi = baseApi.injectEndpoints({
         url: "/api/v1/auth/login", // Wajib pakai '/' di awal
         method: "POST",
         body,
-      })
+      }),
     }),
 
     // 2. POST /api/v1/auth/google-login
@@ -63,12 +63,12 @@ export const authApi = baseApi.injectEndpoints({
         url: "/api/v1/auth/google-login",
         method: "POST",
         body,
-      })
+      }),
     }),
 
     // 3. GET /api/v1/auth/me
     getProfile: builder.query<ProfileResponse, void>({
-      query: () => "/api/v1/auth/me"
+      query: () => "/api/v1/auth/me",
     }),
 
     // 4. POST /api/v1/auth/logout
@@ -76,7 +76,7 @@ export const authApi = baseApi.injectEndpoints({
       query: () => ({
         url: "/api/v1/auth/logout",
         method: "POST",
-      })
+      }),
     }),
   }),
 });

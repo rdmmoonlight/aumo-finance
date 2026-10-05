@@ -2,7 +2,11 @@
 
 import { CreatePeriodForm } from "@/app/(authenticated)/periods/open-new-period-form";
 import { getPeriodColumns } from "@/app/(authenticated)/periods/period-columns";
-import type { ApiError, CreatePeriodValues, PeriodItem } from "@/app/(authenticated)/periods/types";
+import type {
+  ApiError,
+  CreatePeriodValues,
+  PeriodItem,
+} from "@/app/(authenticated)/periods/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -55,7 +59,7 @@ export default function PeriodsPage() {
   const [month, setMonth] = useState(1);
   const [year, setYear] = useState(2026);
   const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">(
-    "LoadExisting"
+    "LoadExisting",
   );
   const [cashAccountId, setCashAccountId] = useState("");
   const [bankAccountId, setBankAccountId] = useState("");
@@ -74,7 +78,9 @@ export default function PeriodsPage() {
     setIsLoading(true);
     try {
       const result = await store.dispatch(
-        periodsApi.endpoints.getPeriods.initiate(undefined, { forceRefetch: true })
+        periodsApi.endpoints.getPeriods.initiate(undefined, {
+          forceRefetch: true,
+        }),
       );
       if ("data" in result && result.data) {
         const rawData = result.data;
@@ -82,7 +88,9 @@ export default function PeriodsPage() {
           setPeriods(rawData as PeriodItem[]);
         } else {
           setPeriods(
-            ((rawData as any)?.items || (rawData as any)?.periods || []) as PeriodItem[]
+            ((rawData as any)?.items ||
+              (rawData as any)?.periods ||
+              []) as PeriodItem[],
           );
         }
       }
@@ -98,7 +106,9 @@ export default function PeriodsPage() {
     setIsLoadingOpenInfo(true);
     try {
       const result = await store.dispatch(
-        periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, { forceRefetch: true })
+        periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, {
+          forceRefetch: true,
+        }),
       );
       if ("data" in result && result.data) {
         setOpenInfo(result.data);
@@ -125,15 +135,15 @@ export default function PeriodsPage() {
       setSetupMode(exists ? "LoadExisting" : "CreateNew");
       if (exists) {
         setCashAccountId(
-          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() || "",
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
             openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            ""
+            "",
         );
         setRetainedId(
-          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || ""
+          openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
         );
       }
     }
@@ -141,7 +151,7 @@ export default function PeriodsPage() {
 
   const selectedPeriod = useMemo(
     () => periods.find((p) => p.isSelected) || null,
-    [periods]
+    [periods],
   );
 
   const handleSelectPeriod = async (p: PeriodItem) => {
@@ -149,7 +159,7 @@ export default function PeriodsPage() {
     setSelectingId(p.id);
     try {
       const result = await store.dispatch(
-        periodsApi.endpoints.selectPeriod.initiate({ id: p.id })
+        periodsApi.endpoints.selectPeriod.initiate({ id: p.id }),
       );
       if ("error" in result) {
         throw result.error;
@@ -169,7 +179,7 @@ export default function PeriodsPage() {
     setIsClearing(true);
     try {
       const result = await store.dispatch(
-        periodsApi.endpoints.clearSelection.initiate()
+        periodsApi.endpoints.clearSelection.initiate(),
       );
       if ("error" in result) {
         throw result.error;
@@ -178,7 +188,9 @@ export default function PeriodsPage() {
       await fetchPeriods();
     } catch (err) {
       const error = err as ApiError;
-      setErrorMessage(error?.data?.message || "Gagal menghapus pilihan periode.");
+      setErrorMessage(
+        error?.data?.message || "Gagal menghapus pilihan periode.",
+      );
     } finally {
       setIsClearing(false);
     }
@@ -190,7 +202,7 @@ export default function PeriodsPage() {
     setClosingId(p.id);
     try {
       const result = await store.dispatch(
-        periodsApi.endpoints.closePeriod.initiate({ id: p.id })
+        periodsApi.endpoints.closePeriod.initiate({ id: p.id }),
       );
       if ("error" in result) {
         throw result.error;
@@ -282,7 +294,7 @@ export default function PeriodsPage() {
                 ? (values?.retainedName ?? retainedName)
                 : undefined,
           },
-        })
+        }),
       );
 
       if ("error" in result) {
@@ -309,7 +321,7 @@ export default function PeriodsPage() {
         onSelectPeriod: handleSelectPeriod,
         onClosePeriod: handleClosePeriod,
       }),
-    [selectedPeriod, selectingId, closingId]
+    [selectedPeriod, selectingId, closingId],
   );
 
   const table = useReactTable({
@@ -321,19 +333,34 @@ export default function PeriodsPage() {
   return (
     <div className="space-y-6 max-w-5xl">
       {errorMessage && (
-        <Alert variant="destructive" className="flex justify-between items-center py-2 bg-red-950/50 border-red-900/50 text-red-200">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center py-2 bg-red-950/50 border-red-900/50 text-red-200"
+        >
           <AlertDescription className="flex items-center gap-2 text-xs">
             <AlertTriangle size={16} /> {errorMessage}
           </AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 text-red-200 hover:bg-red-900/30" onClick={() => setErrorMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-red-200 hover:bg-red-900/30"
+            onClick={() => setErrorMessage(null)}
+          >
             <X size={14} />
           </Button>
         </Alert>
       )}
       {successMessage && (
         <Alert className="bg-white/[0.06] border-white/10 text-white flex justify-between items-center py-2">
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-white/10 text-white" onClick={() => setSuccessMessage(null)}>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-white/10 text-white"
+            onClick={() => setSuccessMessage(null)}
+          >
             <X size={14} />
           </Button>
         </Alert>
@@ -352,11 +379,26 @@ export default function PeriodsPage() {
             </div>
             <div className="flex items-center gap-2">
               {selectedPeriod && (
-                <Button variant="outline" size="sm" onClick={handleClearSelection} disabled={isClearing} className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10 hover:text-white">
-                  {isClearing ? <Loader2 size={14} className="animate-spin" /> : <EyeOff size={14} />} Clear Selection
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearSelection}
+                  disabled={isClearing}
+                  className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10 hover:text-white"
+                >
+                  {isClearing ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <EyeOff size={14} />
+                  )}{" "}
+                  Clear Selection
                 </Button>
               )}
-              <Button size="sm" onClick={() => setViewMode("create")} className="gap-1.5 bg-white text-black text-xs font-semibold hover:bg-zinc-200">
+              <Button
+                size="sm"
+                onClick={() => setViewMode("create")}
+                className="gap-1.5 bg-white text-black text-xs font-semibold hover:bg-zinc-200"
+              >
                 <Plus size={14} /> Open Period
               </Button>
             </div>
@@ -366,10 +408,18 @@ export default function PeriodsPage() {
               <Table>
                 <TableHeader className="bg-[#0e0e10]">
                   {table.getHeaderGroups().map((headerGroup) => (
-                    <TableRow key={headerGroup.id} className="border-b border-white/[0.07] hover:bg-transparent">
+                    <TableRow
+                      key={headerGroup.id}
+                      className="border-b border-white/[0.07] hover:bg-transparent"
+                    >
                       {headerGroup.headers.map((header) => (
                         <TableHead key={header.id} className="h-10 text-xs">
-                          {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
                         </TableHead>
                       ))}
                     </TableRow>
@@ -378,23 +428,39 @@ export default function PeriodsPage() {
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={columns.length} className="h-24 text-center text-xs text-zinc-500">
-                        <Loader2 className="animate-spin inline mr-1" size={16} /> Loading periods...
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center text-xs text-zinc-500"
+                      >
+                        <Loader2
+                          className="animate-spin inline mr-1"
+                          size={16}
+                        />{" "}
+                        Loading periods...
                       </TableCell>
                     </TableRow>
                   ) : table.getRowModel().rows.length > 0 ? (
                     table.getRowModel().rows.map((row) => (
-                      <TableRow key={row.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
+                      <TableRow
+                        key={row.id}
+                        className="border-b border-white/[0.05] hover:bg-white/[0.02]"
+                      >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="py-3 text-xs">
-                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
                           </TableCell>
                         ))}
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={columns.length} className="h-24 text-center text-xs text-zinc-500">
+                      <TableCell
+                        colSpan={columns.length}
+                        className="h-24 text-center text-xs text-zinc-500"
+                      >
                         No financial periods found.
                       </TableCell>
                     </TableRow>
@@ -406,7 +472,22 @@ export default function PeriodsPage() {
         </Card>
       ) : (
         <CreatePeriodForm
-          initialValues={{ month, year, setupMode, cashAccountId, bankAccountId, retainedId, cashAccountCode, cashAccountName, cashBalance, bankAccountCode, bankAccountName, bankBalance, retainedCode, retainedName }}
+          initialValues={{
+            month,
+            year,
+            setupMode,
+            cashAccountId,
+            bankAccountId,
+            retainedId,
+            cashAccountCode,
+            cashAccountName,
+            cashBalance,
+            bankAccountCode,
+            bankAccountName,
+            bankBalance,
+            retainedCode,
+            retainedName,
+          }}
           openInfo={openInfo}
           isLoadingOpenInfo={isLoadingOpenInfo}
           isCreating={isCreating}

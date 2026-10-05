@@ -1,6 +1,6 @@
 import type {
-    CreatePeriodFormValues,
-    CreatePeriodOutputValues,
+  CreatePeriodFormValues,
+  CreatePeriodOutputValues,
 } from "@/lib/validations/period";
 
 export interface ApiError {
@@ -81,6 +81,16 @@ export interface GetPeriodColumnsProps {
 }
 
 export const MONTH_NAMES = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];

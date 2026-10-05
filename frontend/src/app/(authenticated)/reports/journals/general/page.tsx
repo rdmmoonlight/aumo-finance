@@ -33,7 +33,7 @@ export default function GeneralJournalPage() {
 
     try {
       const result = await store.dispatch(
-        reportsApi.endpoints.getJournalsGeneral.initiate()
+        reportsApi.endpoints.getJournalsGeneral.initiate(),
       );
 
       if ("data" in result) {
@@ -59,7 +59,7 @@ export default function GeneralJournalPage() {
     setIsDeleting(true);
     try {
       const result = await store.dispatch(
-        journalEntryApi.endpoints.deleteJournalEntry.initiate(entryToDelete.id)
+        journalEntryApi.endpoints.deleteJournalEntry.initiate(entryToDelete.id),
       );
 
       if ("data" in result || !("error" in result)) {
@@ -74,7 +74,8 @@ export default function GeneralJournalPage() {
   };
 
   const d = data;
-  const hasPeriodSelected = d?.hasPeriodSelected ?? Boolean(d?.selectedPeriodName);
+  const hasPeriodSelected =
+    d?.hasPeriodSelected ?? Boolean(d?.selectedPeriodName);
   const entries: JournalEntry[] = d?.entries || [];
 
   const flatData = useMemo(() => {
@@ -100,8 +101,7 @@ export default function GeneralJournalPage() {
           debit: line.debit,
           credit: line.credit,
           lineDescription: line.lineDescription,
-          accountName:
-            line.accountName || line.account?.accountName || "-",
+          accountName: line.accountName || line.account?.accountName || "-",
           referenceNumber:
             line.referenceNumber || line.account?.referenceNumber || "-",
           isFirstLine: idx === 0,
@@ -116,7 +116,8 @@ export default function GeneralJournalPage() {
   if (isLoading) {
     return (
       <div className="py-10 text-center text-xs flex justify-center gap-2">
-        <Loader2 className="animate-spin" size={16} /> Loading general entries...
+        <Loader2 className="animate-spin" size={16} /> Loading general
+        entries...
       </div>
     );
   }
@@ -129,7 +130,8 @@ export default function GeneralJournalPage() {
             <FilePen className="text-purple-500" /> General Journal
           </h1>
           <p className="text-sm text-muted-foreground">
-            General entries {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} • IDR
+            General entries{" "}
+            {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} • IDR
           </p>
         </div>
         <div className="flex gap-2">
@@ -158,9 +160,7 @@ export default function GeneralJournalPage() {
               onPromptDelete={setEntryToDelete}
             />
           ) : (
-            <JournalEmptyState
-              selectedPeriodName={d?.selectedPeriodName}
-            />
+            <JournalEmptyState selectedPeriodName={d?.selectedPeriodName} />
           )}
         </CardContent>
       </Card>
@@ -169,7 +169,9 @@ export default function GeneralJournalPage() {
         open={!!entryToDelete}
         transactionNumber={(entryToDelete as any)?.transactionNumber}
         isDeleting={isDeleting}
-        onOpenChange={(o) => { if (!o) setEntryToDelete(null); }}
+        onOpenChange={(o) => {
+          if (!o) setEntryToDelete(null);
+        }}
         onConfirm={handleDeleteConfirm}
       />
     </div>

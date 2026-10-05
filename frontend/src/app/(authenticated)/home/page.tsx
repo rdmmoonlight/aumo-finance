@@ -35,8 +35,9 @@ export default function HomePage() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
   // Mengambil state query langsung dari Redux store tanpa React Hook generator
-  const rawResponse = useSelector((state: RootState) =>
-    homeApi.endpoints.getMarketIndicators.select()(state)?.data
+  const rawResponse = useSelector(
+    (state: RootState) =>
+      homeApi.endpoints.getMarketIndicators.select()(state)?.data,
   );
 
   // Function untuk mereload data dari controller ASP.NET
@@ -47,7 +48,7 @@ export default function HomePage() {
         homeApi.endpoints.getMarketIndicators.initiate(undefined, {
           subscribe: false,
           forceRefetch: true,
-        })
+        }),
       );
 
       if ("error" in result) {
@@ -59,7 +60,7 @@ export default function HomePage() {
             hour: "2-digit",
             minute: "2-digit",
             second: "2-digit",
-          })
+          }),
         );
       }
     } catch {
@@ -93,10 +94,10 @@ export default function HomePage() {
   const rawList = extractRawItems(rawResponse);
   const marketData: MarketItem[] = rawList.map((item) => {
     const symbol = String(
-      item.symbol ?? item.Symbol ?? item.code ?? item.currency ?? "N/A"
+      item.symbol ?? item.Symbol ?? item.code ?? item.currency ?? "N/A",
     );
     const name = String(
-      item.name ?? item.Name ?? item.description ?? item.pair ?? ""
+      item.name ?? item.Name ?? item.description ?? item.pair ?? "",
     );
     const rawPrice = item.price ?? item.Price ?? item.value ?? item.rate ?? 0;
     const rawChange = item.change ?? item.Change ?? item.changePercent ?? 0;

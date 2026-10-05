@@ -5,7 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
-import { AlertTriangle, Calendar, EyeOff, Grid, Info, Loader2, TrendingUp } from "lucide-react";
+import {
+  AlertTriangle,
+  Calendar,
+  EyeOff,
+  Grid,
+  Info,
+  Loader2,
+  TrendingUp,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { WorksheetRow, WorksheetTotals, WorksheetViewModel } from "./types";
@@ -27,7 +35,7 @@ export default function WorksheetPage() {
       try {
         // Tembak endpoint /api/v1/reports/worksheet langsung via store dispatch
         const result = await store.dispatch(
-          reportsApi.endpoints.getWorksheet.initiate()
+          reportsApi.endpoints.getWorksheet.initiate(),
         );
 
         if (!isMounted) return;
@@ -36,9 +44,7 @@ export default function WorksheetPage() {
           setData(result.data);
         } else if (result.isError && result.error) {
           const err = result.error as any;
-          setErrorMessage(
-            err?.data?.message || "Gagal memuat data worksheet."
-          );
+          setErrorMessage(err?.data?.message || "Gagal memuat data worksheet.");
         }
       } catch (err: any) {
         if (isMounted) {
@@ -112,9 +118,9 @@ export default function WorksheetPage() {
           isCredit: 0,
           bsDebit: 0,
           bsCredit: 0,
-        }
+        },
       ),
-    [vm.rows]
+    [vm.rows],
   );
 
   if (isLoading) {
@@ -154,7 +160,8 @@ export default function WorksheetPage() {
                 <Grid className="text-sky-500" size={22} /> 10-Column Worksheet
               </h1>
               <p className="text-ui text-muted-foreground mt-1">
-                Trial Balance → Adjustments → Adjusted TB → Income Statement → Balance Sheet • IDR
+                Trial Balance → Adjustments → Adjusted TB → Income Statement →
+                Balance Sheet • IDR
               </p>
             </div>
             <Button asChild variant="outline" size="sm" className="gap-1.5">
@@ -166,14 +173,19 @@ export default function WorksheetPage() {
 
           <Card className="overflow-hidden">
             <CardContent className="p-0 overflow-auto">
-              <WorksheetTable rows={vm.rows} totals={totals} netIncome={vm.netIncome} />
+              <WorksheetTable
+                rows={vm.rows}
+                totals={totals}
+                netIncome={vm.netIncome}
+              />
             </CardContent>
           </Card>
 
           <Alert className="bg-sky-500/10 border-sky-500/20">
             <Info size={16} />
             <AlertDescription>
-              Net Income: <strong>{formatNumber(vm.netIncome)}</strong> — plugged from Income Statement to Balance Sheet.
+              Net Income: <strong>{formatNumber(vm.netIncome)}</strong> —
+              plugged from Income Statement to Balance Sheet.
             </AlertDescription>
           </Alert>
         </>

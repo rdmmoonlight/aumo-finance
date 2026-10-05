@@ -29,7 +29,7 @@ export default function StatementOfFinancialPositionPage() {
     try {
       // Memanggil endpoint langsung dari RTK Query tanpa Hook generator
       const result = await store.dispatch(
-        reportsApi.endpoints.getStatementOfFinancialPosition.initiate({})
+        reportsApi.endpoints.getStatementOfFinancialPosition.initiate({}),
       );
 
       if (result.isSuccess) {
@@ -53,30 +53,33 @@ export default function StatementOfFinancialPositionPage() {
 
   const noPeriod = raw?.hasPeriodSelected === false;
 
-  const { assets, liabilities, equityExcludingRE, retainedEarningsEnding, asOfDate } =
-    useMemo(() => {
-      const assetsList: FinancialPositionLine[] =
-        raw?.assetAccounts || raw?.assets || [];
-      const liabList: FinancialPositionLine[] =
-        raw?.liabilityAccounts || raw?.liabilities || [];
-      const rawEquity: FinancialPositionLine[] = raw?.equityAccounts || [];
-      const equityExcludingRE = rawEquity.filter(
-        (e) => e.accountName !== "Retained Earnings"
-      );
-      const reItem = rawEquity.find(
-        (e) => e.accountName === "Retained Earnings"
-      );
+  const {
+    assets,
+    liabilities,
+    equityExcludingRE,
+    retainedEarningsEnding,
+    asOfDate,
+  } = useMemo(() => {
+    const assetsList: FinancialPositionLine[] =
+      raw?.assetAccounts || raw?.assets || [];
+    const liabList: FinancialPositionLine[] =
+      raw?.liabilityAccounts || raw?.liabilities || [];
+    const rawEquity: FinancialPositionLine[] = raw?.equityAccounts || [];
+    const equityExcludingRE = rawEquity.filter(
+      (e) => e.accountName !== "Retained Earnings",
+    );
+    const reItem = rawEquity.find((e) => e.accountName === "Retained Earnings");
 
-      return {
-        assets: assetsList,
-        liabilities: liabList,
-        equityExcludingRE,
-        retainedEarningsEnding: reItem
-          ? Number(reItem.amount)
-          : Number(raw?.retainedEarningsEnding) || 0,
-        asOfDate: raw?.asOfDate || "",
-      };
-    }, [raw]);
+    return {
+      assets: assetsList,
+      liabilities: liabList,
+      equityExcludingRE,
+      retainedEarningsEnding: reItem
+        ? Number(reItem.amount)
+        : Number(raw?.retainedEarningsEnding) || 0,
+      asOfDate: raw?.asOfDate || "",
+    };
+  }, [raw]);
 
   const equityLines = useMemo(
     () => [
@@ -86,22 +89,22 @@ export default function StatementOfFinancialPositionPage() {
         amount: retainedEarningsEnding,
       },
     ],
-    [equityExcludingRE, retainedEarningsEnding, asOfDate]
+    [equityExcludingRE, retainedEarningsEnding, asOfDate],
   );
 
   const totalAssets = useMemo(
     () => assets.reduce((s, i) => s + Number(i.amount || 0), 0),
-    [assets]
+    [assets],
   );
   const totalLiabilities = useMemo(
     () => liabilities.reduce((s, i) => s + Number(i.amount || 0), 0),
-    [liabilities]
+    [liabilities],
   );
   const totalEquity = useMemo(
     () =>
       equityExcludingRE.reduce((s, i) => s + Number(i.amount || 0), 0) +
       retainedEarningsEnding,
-    [equityExcludingRE, retainedEarningsEnding]
+    [equityExcludingRE, retainedEarningsEnding],
   );
 
   const totalLiabEquity = totalLiabilities + totalEquity;

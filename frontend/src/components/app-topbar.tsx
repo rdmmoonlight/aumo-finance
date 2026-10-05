@@ -66,8 +66,11 @@ export function AppTopBar() {
   const [isHealthFetching, setIsHealthFetching] = React.useState(false);
   const [isHealthError, setIsHealthError] = React.useState(false);
 
-  const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
-  const [isNotificationsLoading, setIsNotificationsLoading] = React.useState(false);
+  const [notifications, setNotifications] = React.useState<NotificationItem[]>(
+    [],
+  );
+  const [isNotificationsLoading, setIsNotificationsLoading] =
+    React.useState(false);
   const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
 
   const isAuthenticated = !isProfileLoading && !!userProfile;
@@ -77,7 +80,7 @@ export function AppTopBar() {
     setIsProfileLoading(true);
     try {
       const result = await store.dispatch(
-        authApi.endpoints.getProfile.initiate()
+        authApi.endpoints.getProfile.initiate(),
       );
       if ("data" in result && result.data) {
         setUserProfile(result.data);
@@ -97,7 +100,7 @@ export function AppTopBar() {
     setIsPeriodLoading(true);
     try {
       const result = await store.dispatch(
-        periodsApi.endpoints.getPeriods.initiate()
+        periodsApi.endpoints.getPeriods.initiate(),
       );
       if ("data" in result) {
         setRawPeriodsData(result.data);
@@ -115,7 +118,7 @@ export function AppTopBar() {
     setIsHealthFetching(true);
     try {
       const result = await store.dispatch(
-        commonApi.endpoints.getHealth.initiate()
+        commonApi.endpoints.getHealth.initiate(),
       );
       if ("data" in result && result.data) {
         setHealthData(result.data);
@@ -137,7 +140,7 @@ export function AppTopBar() {
     setIsNotificationsLoading(true);
     try {
       const result = await store.dispatch(
-        commonApi.endpoints.getNotifications.initiate({ limit: 20 })
+        commonApi.endpoints.getNotifications.initiate({ limit: 20 }),
       );
       if ("data" in result && Array.isArray(result.data)) {
         setNotifications(result.data as NotificationItem[]);
@@ -176,7 +179,7 @@ export function AppTopBar() {
     setIsMarkingAllRead(true);
     try {
       const result = await store.dispatch(
-        commonApi.endpoints.markAllNotificationsAsRead.initiate()
+        commonApi.endpoints.markAllNotificationsAsRead.initiate(),
       );
       if ("data" in result) {
         fetchNotifications();
@@ -192,7 +195,7 @@ export function AppTopBar() {
     if (isRead || !id) return;
     try {
       const result = await store.dispatch(
-        commonApi.endpoints.markNotificationAsRead.initiate({ id })
+        commonApi.endpoints.markNotificationAsRead.initiate({ id }),
       );
       if ("data" in result) {
         fetchNotifications();

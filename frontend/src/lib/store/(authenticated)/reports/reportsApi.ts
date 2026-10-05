@@ -131,10 +131,7 @@ export const reportsApi = baseApi
       }),
 
       // GET /api/v1/reports/worksheet
-      getWorksheet: build.query<
-        GetWorksheetApiResponse,
-        GetWorksheetApiArg
-      >({
+      getWorksheet: build.query<GetWorksheetApiResponse, GetWorksheetApiArg>({
         query: () => "/api/v1/reports/worksheet",
         providesTags: ["Worksheet"],
       }),
@@ -187,7 +184,8 @@ export type GetTrialBalanceApiArg = {
 
 // Alias nama lama yang masih diimpor halaman
 export type SummaryResponse = GetSummaryApiResponse;
-export type GeneralLedgerTemporaryResponse = GetGeneralLedgerTemporaryApiResponse;
+export type GeneralLedgerTemporaryResponse =
+  GetGeneralLedgerTemporaryApiResponse;
 
 export type GetWorksheetApiResponse = any;
 export type GetWorksheetApiArg = void;
