@@ -20,7 +20,6 @@ namespace AumoBackend.Controllers.Reports;
 [ApiController]
 [Route("/api/v1/reports/general-ledgers")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class GeneralLedgersController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -53,29 +52,19 @@ public class GeneralLedgersController : ControllerBase
             });
         }
 
-        var ledgers = await _db.GeneralLedgerPermanentAccounts
-            .AsNoTracking()
-            .Include(x => x.Account)
-            .Where(x => x.UserId == userId && x.PeriodId == period.Id)
-            .OrderBy(x => x.AccountId)
-            .ThenBy(x => x.EntryDate)
-            .ThenBy(x => x.Id)
-            .Select(x => new
+        // Cek data di staging table
+        var ledgers = await FetchPermanentLedgersAsync(userId, period.Id);
+
+        // JIKA KOSONG: Trigger auto-regenerate dari JournalEntries & JournalEntryLines
+        if (!ledgers.Any())
+        {
+            var refreshResult = await _glService.RefreshGeneralLedgersAsync(userId);
+            if (refreshResult.Success)
             {
-                x.Id,
-                x.AccountId,
-                AccountName = x.Account != null ? x.Account.AccountName : string.Empty,
-                AccountReferenceNumber = x.Account != null ? x.Account.ReferenceNumber : 0,
-                x.JournalEntryId,
-                x.JournalEntryLineId,
-                x.EntryDate,
-                x.TransactionNumber,
-                x.LineDescription,
-                x.Debit,
-                x.Credit,
-                x.RunningBalance
-            })
-            .ToListAsync();
+                // Fetch ulang setelah berhasil di-regenerate
+                ledgers = await FetchPermanentLedgersAsync(userId, period.Id);
+            }
+        }
 
         return Ok(new
         {
@@ -108,34 +97,29 @@ public class GeneralLedgersController : ControllerBase
             });
         }
 
-        var ledgers = await _db.GeneralLedgerTemporaryAccounts
-            .AsNoTracking()
-            .Include(x => x.Account)
-            .Where(x => x.UserId == userId && x.PeriodId == period.Id)
-            .OrderBy(x => x.AccountId)
-            .ThenBy(x => x.EntryDate)
-            .ThenBy(x => x.Id)
-            .Select(x => new
+        // Cek data di staging table
+        var ledgers = await FetchTemporaryLedgersAsync(userId, period.Id);
+
+        // JIKA KOSONG: Trigger auto-regenerate
+        if (!ledgers.Any())
+        {
+            var refreshResult = await _glService.RefreshGeneralLedgersAsync(userId);
+            if (refreshResult.Success)
             {
-                x.Id,
-                x.AccountId,
-                AccountName = x.Account != null ? x.Account.AccountName : string.Empty,
-                AccountReferenceNumber = x.Account != null ? x.Account.ReferenceNumber : 0,
-                AccountType = x.Account != null ? x.Account.Type : string.Empty,
-                x.JournalEntryId,
-                x.JournalEntryLineId,
-                x.EntryDate,
-                x.TransactionNumber,
-                x.LineDescription,
-                x.Debit,
-                x.Credit,
-                x.RunningBalance
-            })
-            .ToListAsync();
+                // Fetch ulang setelah berhasil di-regenerate
+                ledgers = await FetchTemporaryLedgersAsync(userId, period.Id);
+            }
+        }
 
         // Hitung total Laba/Rugi sebelum penutupan (Revenue - Expenses)
-        decimal totalRevenue = ledgers.Where(x => x.AccountType == "OperatingIncome" || x.AccountType == "OtherIncome").Sum(x => x.Credit - x.Debit);
-        decimal totalExpense = ledgers.Where(x => x.AccountType == "OperatingExpenses" || x.AccountType == "OtherExpenses").Sum(x => x.Debit - x.Credit);
+        decimal totalRevenue = ledgers
+            .Where(x => x.AccountType == "OperatingIncome" || x.AccountType == "OtherIncome" || x.AccountType == "Revenue" || x.AccountType == "Income")
+            .Sum(x => x.Credit - x.Debit);
+
+        decimal totalExpense = ledgers
+            .Where(x => x.AccountType == "OperatingExpenses" || x.AccountType == "OtherExpenses" || x.AccountType == "Expense" || x.AccountType == "Expenses")
+            .Sum(x => x.Debit - x.Credit);
+
         decimal netTotal = totalRevenue - totalExpense;
 
         return Ok(new
@@ -164,6 +148,61 @@ public class GeneralLedgersController : ControllerBase
             return BadRequest(result);
 
         return Ok(result);
+    }
+
+    private Task<List<PermanentLedgerDto>> FetchPermanentLedgersAsync(Guid userId, int periodId)
+    {
+        return _db.GeneralLedgerPermanentAccounts
+            .AsNoTracking()
+            .Include(x => x.Account)
+            .Where(x => x.UserId == userId && x.PeriodId == periodId)
+            .OrderBy(x => x.AccountId)
+            .ThenBy(x => x.EntryDate)
+            .ThenBy(x => x.Id)
+            .Select(x => new PermanentLedgerDto
+            {
+                Id = x.Id,
+                AccountId = x.AccountId,
+                AccountName = x.Account != null ? x.Account.AccountName : string.Empty,
+                AccountReferenceNumber = x.Account != null ? x.Account.ReferenceNumber : 0,
+                JournalEntryId = x.JournalEntryId,
+                JournalEntryLineId = x.JournalEntryLineId,
+                EntryDate = x.EntryDate,
+                TransactionNumber = x.TransactionNumber,
+                LineDescription = x.LineDescription,
+                Debit = x.Debit,
+                Credit = x.Credit,
+                RunningBalance = x.RunningBalance
+            })
+            .ToListAsync();
+    }
+
+    private Task<TemporaryLedgerDto> FetchTemporaryLedgersAsync(Guid userId, int periodId)
+    {
+        return _db.GeneralLedgerTemporaryAccounts
+            .AsNoTracking()
+            .Include(x => x.Account)
+            .Where(x => x.UserId == userId && x.PeriodId == periodId)
+            .OrderBy(x => x.AccountId)
+            .ThenBy(x => x.EntryDate)
+            .ThenBy(x => x.Id)
+            .Select(x => new TemporaryLedgerDto
+            {
+                Id = x.Id,
+                AccountId = x.AccountId,
+                AccountName = x.Account != null ? x.Account.AccountName : string.Empty,
+                AccountReferenceNumber = x.Account != null ? x.Account.ReferenceNumber : 0,
+                AccountType = x.Account != null ? x.Account.Type : string.Empty,
+                JournalEntryId = x.JournalEntryId,
+                JournalEntryLineId = x.JournalEntryLineId,
+                EntryDate = x.EntryDate,
+                TransactionNumber = x.TransactionNumber,
+                LineDescription = x.LineDescription,
+                Debit = x.Debit,
+                Credit = x.Credit,
+                RunningBalance = x.RunningBalance
+            })
+            .ToListAsync();
     }
 
     private Guid GetCurrentUserId()
