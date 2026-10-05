@@ -1,24 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
-import { useDispatch } from "react-redux";
-import { useSearchParams } from "next/navigation";
-import { useForm, SubmitHandler } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useGoogleLogin } from "@react-oauth/google";
-import {
-  usePostApiV1AuthLoginMutation,
-  usePostApiV1AuthGoogleLoginMutation,
-  useGetApiV1AuthMeQuery,
-  enhancedApi as generatedApi,
-} from "@/lib/store/auth/authApi";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import { baseApi } from "@/lib/apiClient";
+import { store } from "@/lib/store";
+import { authApi } from "@/lib/store/auth/authApi";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useGoogleLogin } from "@react-oauth/google";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 
-// ===== TYPES - INI YANG ILANG TADI =====
+// ===== TYPES =====
 export type AuthFormData = {
   email: string;
   password: string;
@@ -82,6 +79,7 @@ export function GoogleAuthButtonInner({
     },
     onError: () => onError("Autentikasi Google dibatalkan."),
   });
+
   return (
     <Button
       type="button"
@@ -115,17 +113,13 @@ function AuthFormInner({
 }: AuthPageProps): React.JSX.Element {
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
+
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
-
-  const { data: profile, isLoading: isProfileLoading } =
-    useGetApiV1AuthMeQuery();
-  const [loginMutation, { isLoading: isLoggingIn }] =
-    usePostApiV1AuthLoginMutation();
-  const [googleLoginMutation, { isLoading: isGoogleLoggingIn }] =
-    usePostApiV1AuthGoogleLoginMutation();
+  const [isPending, setIsPending] = useState(false);
+  const [isProfileLoading, setIsProfileLoading] = useState(true);
 
   const {
     register,
@@ -145,18 +139,43 @@ function AuthFormInner({
   });
 
   const keepMeValue = watch("keepMe");
+
+  // Cek profil user saat pertama kali dimuat (Gantikan useGetApiV1AuthMeQuery)
+  useEffect(() => {
+    let isMounted = true;
+
+    async function checkAuthProfile() {
+      try {
+        const result = await store.dispatch(
+          authApi.endpoints.getProfile.initiate()
+        );
+
+        if (isMounted && "data" in result && result.data?.success) {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            const target = searchParams.get("redirectTo") || "/home";
+            window.location.replace(target);
+          }
+        }
+      } catch {
+        // Mengabaikan error jika belum terautentikasi
+      } finally {
+        if (isMounted) setIsProfileLoading(false);
+      }
+    }
+
+    checkAuthProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [searchParams, onSuccess]);
+
   useEffect(() => {
     setMode(initialMode);
   }, [initialMode]);
-  useEffect(() => {
-    if (!isProfileLoading && profile) {
-      if (onSuccess) onSuccess();
-      else {
-        const target = searchParams.get("redirectTo") || "/home";
-        window.location.replace(target);
-      }
-    }
-  }, [profile, isProfileLoading, searchParams, onSuccess]);
+
   useEffect(() => {
     const saved = localStorage.getItem("aumo_saved_email");
     if (saved && mode === "login") {
@@ -179,53 +198,87 @@ function AuthFormInner({
 
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
+    setIsPending(true);
+
     try {
-      dispatch(generatedApi.util.resetApiState());
-      await loginMutation({
-        loginRequest: {
+      // Reset cache RTK Query
+      dispatch(baseApi.util.resetApiState());
+
+      // Panggil endpoint /api/v1/auth/login via initiate
+      const result = await store.dispatch(
+        authApi.endpoints.login.initiate({
           email: values.email,
           password: values.password,
           rememberMe: values.keepMe ?? false,
           isMobileClient: false,
-        },
-      }).unwrap();
-      if (values.keepMe) localStorage.setItem("aumo_saved_email", values.email);
-      else localStorage.removeItem("aumo_saved_email");
-      if (onSuccess) onSuccess();
-      else {
+        })
+      );
+
+      if ("error" in result) {
+        const errorData = result.error as any;
+        const msg =
+          errorData?.data?.message ||
+          errorData?.data?.title ||
+          (errorData?.status === "FETCH_ERROR"
+            ? "Gagal terhubung ke server backend."
+            : "Email atau password salah.");
+        setApiErr(msg);
+        return;
+      }
+
+      if (values.keepMe) {
+        localStorage.setItem("aumo_saved_email", values.email);
+      } else {
+        localStorage.removeItem("aumo_saved_email");
+      }
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
     } catch (e: any) {
-      const msg =
-        e?.data?.message ||
-        e?.data?.title ||
-        (e?.status === "FETCH_ERROR"
-          ? "Gagal terhubung ke server backend."
-          : "Email atau password salah.");
-      setApiErr(msg);
+      setApiErr("Terjadi kesalahan sistem saat mencoba masuk.");
+    } finally {
+      setIsPending(false);
     }
   };
 
   const handleGoogleSuccess = async (idToken: string): Promise<void> => {
     setApiErr("");
+    setIsPending(true);
+
     try {
-      dispatch(generatedApi.util.resetApiState());
-      await googleLoginMutation({
-        googleLoginRequest: { idToken, isMobileClient: false },
-      }).unwrap();
-      if (onSuccess) onSuccess();
-      else {
+      dispatch(baseApi.util.resetApiState());
+
+      const result = await store.dispatch(
+        authApi.endpoints.googleLogin.initiate({
+          idToken,
+          isMobileClient: false,
+        })
+      );
+
+      if ("error" in result) {
+        const errorData = result.error as any;
+        setApiErr(errorData?.data?.message || "Gagal verifikasi Google.");
+        return;
+      }
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
     } catch (e: any) {
-      setApiErr(e?.data?.message || "Gagal verifikasi Google.");
+      setApiErr("Gagal verifikasi Google.");
+    } finally {
+      setIsPending(false);
     }
   };
 
   if (isProfileLoading) return <AuthFormSkeleton />;
-  const isPending = isLoggingIn || isGoogleLoggingIn;
 
   return (
     <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200">
@@ -239,6 +292,7 @@ function AuthFormInner({
             : "Daftar untuk membuat workspace baru."}
         </p>
       </div>
+
       <div className="space-y-4">
         <GoogleAuthButtonInner
           isPending={isPending}
@@ -247,14 +301,15 @@ function AuthFormInner({
         />
         <div className="relative flex items-center justify-center">
           <div className="border-t border-zinc-200 w-full" />
-          <span className="bg-white px-2 text- uppercase font-mono text-zinc-400 absolute">
+          <span className="bg-white px-2 text-[10px] uppercase font-mono text-zinc-400 absolute">
             OR
           </span>
         </div>
       </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
         <div className="space-y-1.5">
-          <Label className="text- uppercase font-semibold">Email</Label>
+          <Label className="text-xs uppercase font-semibold">Email</Label>
           <Input
             {...register("email")}
             placeholder="nama@email.com"
@@ -264,9 +319,10 @@ function AuthFormInner({
             <p className="text-xs text-red-600">{errors.email.message}</p>
           )}
         </div>
+
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <Label className="text- uppercase font-semibold">Password</Label>
+            <Label className="text-xs uppercase font-semibold">Password</Label>
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
@@ -285,10 +341,11 @@ function AuthFormInner({
             <p className="text-xs text-red-600">{errors.password.message}</p>
           )}
         </div>
+
         {mode === "register" && (
           <div className="space-y-1.5">
             <div className="flex justify-between">
-              <Label className="text- uppercase font-semibold">
+              <Label className="text-xs uppercase font-semibold">
                 Confirm Password
               </Label>
               <button
@@ -312,6 +369,7 @@ function AuthFormInner({
             )}
           </div>
         )}
+
         {mode === "login" && (
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center space-x-2">
@@ -326,11 +384,13 @@ function AuthFormInner({
             </a>
           </div>
         )}
+
         {apiErr && (
           <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl">
             {apiErr}
           </div>
         )}
+
         <Button
           type="submit"
           disabled={isPending}
@@ -343,6 +403,7 @@ function AuthFormInner({
               : "Create Account"}
         </Button>
       </form>
+
       <div className="mt-5 text-center text-xs text-zinc-600">
         {mode === "login" ? (
           <>

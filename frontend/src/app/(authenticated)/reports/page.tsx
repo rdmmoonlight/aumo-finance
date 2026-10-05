@@ -1,39 +1,40 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
-import {
-  useReactTable,
-  getCoreRowModel,
-  getFilteredRowModel,
-  createColumnHelper,
-  flexRender,
-} from "@tanstack/react-table";
-import {
-  BarChart2,
-  ClipboardList,
-  Table as TableIcon,
-  BookOpen,
-  Receipt,
-  Book,
-  Library,
-  BarChart3,
-  Coins,
-  Building2,
-  Banknote,
-  FileSpreadsheet,
-  Search,
-  ArrowRight,
-  FileCheck,
-  Layers,
-  CalendarCheck2,
-  Activity,
-} from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useGetApiV1SummaryQuery } from "@/lib/store/(authenticated)/reports/reportsApi";
+import { store } from "@/lib/store";
+import { reportsApi, SummaryResponse } from "@/lib/store/(authenticated)/reports/reportsApi";
+import {
+  createColumnHelper,
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
+import {
+  Activity,
+  ArrowRight,
+  Banknote,
+  BarChart2,
+  BarChart3,
+  Book,
+  BookOpen,
+  Building2,
+  CalendarCheck2,
+  ClipboardList,
+  Coins,
+  FileCheck,
+  FileSpreadsheet,
+  Layers,
+  Library,
+  Receipt,
+  Search,
+  Table as TableIcon,
+} from "lucide-react";
+import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
 
 type ReportItem = {
   slug: string;
@@ -185,14 +186,48 @@ const columnHelper = createColumnHelper<ReportItem>();
 
 export default function ReportsPage() {
   const [globalFilter, setGlobalFilter] = useState("");
+  const [summaryData, setSummaryData] = useState<SummaryResponse | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
-  const {
-    data: summaryRes,
-    isLoading: summaryLoading,
-    isError,
-  } = useGetApiV1SummaryQuery();
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchSummary() {
+      try {
+        setSummaryLoading(true);
+        setIsError(false);
+        
+        // Memanggil endpoint RTK Query secara eksplisit lewat store dispatch
+        const result = await store.dispatch(
+          reportsApi.endpoints.getSummary.initiate()
+        );
 
-  const summary = (summaryRes as any)?.data ?? summaryRes;
+        if (isMounted) {
+          if ("data" in result && result.data) {
+            setSummaryData(result.data);
+          } else {
+            setIsError(true);
+          }
+        }
+      } catch {
+        if (isMounted) {
+          setIsError(true);
+        }
+      } finally {
+        if (isMounted) {
+          setSummaryLoading(false);
+        }
+      }
+    }
+
+    fetchSummary();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const summary = (summaryData as any)?.data ?? summaryData;
 
   const columns = useMemo(
     () => [
@@ -277,7 +312,7 @@ export default function ReportsPage() {
             </Badge>
           </div>
 
-          {/* SUMMARY DARI /api/v1/Summary VIA RTK */}
+          {/* SUMMARY DARI CONTROLLER VIA STORE DISPATCH */}
           <div className="relative mt-6 overflow-hidden rounded-2xl border border-white/10">
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/30 via-transparent to-violet-500/20 opacity-60" />
             <div className="relative grid grid-cols-1 divide-y divide-white/10 bg-[#0B1226]/90 backdrop-blur md:grid-cols-3 md:divide-x md:divide-y-0">

@@ -1,29 +1,24 @@
-import { baseApi as api } from "../../../apiClient";
-export const addTagTypes = ["Dashboard"] as const;
-const injectedRtkApi = api
-  .enhanceEndpoints({
-    addTagTypes,
-  })
-  .injectEndpoints({
-    endpoints: (build) => ({
-      getApiV1Dashboard: build.query<
-        GetApiV1DashboardApiResponse,
-        GetApiV1DashboardApiArg
-      >({
-        query: (queryArg) => ({
-          url: `/api/v1/dashboard`,
-          params: {
-            period: queryArg.period,
-          },
-        }),
-        providesTags: ["Dashboard"],
-      }),
-    }),
-    overrideExisting: false,
-  });
-export { injectedRtkApi as enhancedApi };
-export type GetApiV1DashboardApiResponse = unknown;
-export type GetApiV1DashboardApiArg = {
+// src/lib/store/(authenticated)/dashboard/dashboardApi.ts
+import { baseApi } from "@/lib/apiClient";
+
+// --- Types ---
+export type GetDashboardApiArg = {
   period?: string;
 };
-export const { useGetApiV1DashboardQuery } = injectedRtkApi;
+
+export type GetDashboardApiResponse = unknown; // Sesuaikan dengan DTO/Model dari Controller ASP.NET jika ada
+
+// --- API Slice ---
+export const dashboardApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    getDashboard: builder.query<GetDashboardApiResponse, GetDashboardApiArg>({
+      query: (arg) => ({
+        url: "/api/v1/dashboard", // Wajib diawali dengan '/'
+        params: {
+          period: arg?.period,
+        },
+      }),
+      providesTags: ["Dashboard"],
+    }),
+  }),
+});

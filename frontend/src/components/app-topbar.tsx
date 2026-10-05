@@ -1,7 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { usePathname } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -10,33 +9,30 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import {
-  Search,
+  AlertTriangle,
   Bell,
   Database,
-  RefreshCw,
   Info,
-  AlertTriangle,
   Loader2,
+  RefreshCw,
+  Search,
 } from "lucide-react";
-import { useGetApiV1AuthMeQuery } from "@/lib/store/auth/authApi";
-import { useGetApiV1PeriodsQuery } from "@/lib/store/(authenticated)/periods/periodsApi";
-import {
-  useGetApiV1HealthQuery,
-  useGetApiV1NotificationsQuery,
-  usePutApiV1NotificationsByIdReadMutation,
-  usePutApiV1NotificationsReadAllMutation,
-  GetApiV1NotificationsApiResponse,
-} from "@/lib/store/commonApi";
+import { usePathname } from "next/navigation";
+import * as React from "react";
+
+import { store } from "@/lib/store";
+import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
+import { authApi } from "@/lib/store/auth/authApi";
+import { commonApi } from "@/lib/store/commonApi";
 
 interface PeriodItem {
   id: number;
@@ -46,73 +42,167 @@ interface PeriodItem {
   isSelected?: boolean;
 }
 
-// Ambil tipe per-item langsung dari tipe Response API
-type NotificationItem =
-  GetApiV1NotificationsApiResponse extends Array<infer T> ? T : any;
+interface NotificationItem {
+  id: string;
+  title: string;
+  message: string;
+  type?: "info" | "warning" | string;
+  isRead: boolean;
+  createdAt?: string;
+}
 
 export function AppTopBar() {
   const pathname = usePathname();
 
-  // 1. Cek status autentikasi user via RTK Query (/api/v1/auth/me)
-  const { data: userProfile, isLoading: isProfileLoading } =
-    useGetApiV1AuthMeQuery();
+  // State internal pengganti Auto-Generated Hooks
+  const [userProfile, setUserProfile] = React.useState<any>(null);
+  const [isProfileLoading, setIsProfileLoading] = React.useState(true);
+
+  const [rawPeriodsData, setRawPeriodsData] = React.useState<any>(null);
+  const [isPeriodLoading, setIsPeriodLoading] = React.useState(false);
+
+  const [healthData, setHealthData] = React.useState<any>(null);
+  const [isHealthLoading, setIsHealthLoading] = React.useState(false);
+  const [isHealthFetching, setIsHealthFetching] = React.useState(false);
+  const [isHealthError, setIsHealthError] = React.useState(false);
+
+  const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
+  const [isNotificationsLoading, setIsNotificationsLoading] = React.useState(false);
+  const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
+
   const isAuthenticated = !isProfileLoading && !!userProfile;
 
-  // 2. Fetch seluruh periode
-  const { data: rawPeriodsData, isLoading: isPeriodLoading } =
-    useGetApiV1PeriodsQuery(undefined, {
-      skip: !isAuthenticated,
-    });
-
-  // 3. Hook Database Health Check
-  const {
-    data: healthData,
-    isLoading: isHealthLoading,
-    isFetching: isHealthFetching,
-    isError: isHealthError,
-    refetch: checkDb,
-  } = useGetApiV1HealthQuery(undefined, {
-    skip: !isAuthenticated,
-    pollingInterval: isAuthenticated ? 30000 : 0,
-    refetchOnFocus: false,
-  });
-
-  // 4. RTK Query Hooks Notifikasi
-  const { data: notificationsData, isLoading: isNotificationsLoading } =
-    useGetApiV1NotificationsQuery(
-      { limit: 20 },
-      {
-        skip: !isAuthenticated,
-        pollingInterval: isAuthenticated ? 15000 : 0, // Auto-refetch tiap 15 detik
-      },
-    );
-
-  const [markAllAsRead, { isLoading: isMarkingAllRead }] =
-    usePutApiV1NotificationsReadAllMutation();
-  const [markByIdRead] = usePutApiV1NotificationsByIdReadMutation();
-
-  const notifications: NotificationItem[] = Array.isArray(notificationsData)
-    ? notificationsData
-    : [];
-
-  const unreadCount = notifications.filter((n: any) => !n.isRead).length;
-
-  const handleMarkAllAsRead = async () => {
+  // 1. Fetch Profil User (/api/v1/auth/me)
+  const fetchUserProfile = React.useCallback(async () => {
+    setIsProfileLoading(true);
     try {
-      await markAllAsRead().unwrap();
+      const result = await store.dispatch(
+        authApi.endpoints.getProfile.initiate()
+      );
+      if ("data" in result && result.data) {
+        setUserProfile(result.data);
+      } else {
+        setUserProfile(null);
+      }
+    } catch {
+      setUserProfile(null);
+    } finally {
+      setIsProfileLoading(false);
+    }
+  }, []);
+
+  // 2. Fetch Periods
+  const fetchPeriods = React.useCallback(async () => {
+    if (!isAuthenticated) return;
+    setIsPeriodLoading(true);
+    try {
+      const result = await store.dispatch(
+        periodsApi.endpoints.getPeriods.initiate()
+      );
+      if ("data" in result) {
+        setRawPeriodsData(result.data);
+      }
+    } catch {
+      setRawPeriodsData(null);
+    } finally {
+      setIsPeriodLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  // 3. Database Health Check
+  const checkDb = React.useCallback(async () => {
+    if (!isAuthenticated) return;
+    setIsHealthFetching(true);
+    try {
+      const result = await store.dispatch(
+        commonApi.endpoints.getHealth.initiate()
+      );
+      if ("data" in result && result.data) {
+        setHealthData(result.data);
+        setIsHealthError(false);
+      } else {
+        setIsHealthError(true);
+      }
+    } catch {
+      setIsHealthError(true);
+    } finally {
+      setIsHealthLoading(false);
+      setIsHealthFetching(false);
+    }
+  }, [isAuthenticated]);
+
+  // 4. Fetch Notifikasi
+  const fetchNotifications = React.useCallback(async () => {
+    if (!isAuthenticated) return;
+    setIsNotificationsLoading(true);
+    try {
+      const result = await store.dispatch(
+        commonApi.endpoints.getNotifications.initiate({ limit: 20 })
+      );
+      if ("data" in result && Array.isArray(result.data)) {
+        setNotifications(result.data);
+      }
+    } catch {
+      setNotifications([]);
+    } finally {
+      setIsNotificationsLoading(false);
+    }
+  }, [isAuthenticated]);
+
+  // Initial Load & Polling setup
+  React.useEffect(() => {
+    fetchUserProfile();
+  }, [fetchUserProfile]);
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      fetchPeriods();
+      checkDb();
+      fetchNotifications();
+
+      // Setup Polling Interval Manual
+      const healthInterval = setInterval(checkDb, 30000);
+      const notifInterval = setInterval(fetchNotifications, 15000);
+
+      return () => {
+        clearInterval(healthInterval);
+        clearInterval(notifInterval);
+      };
+    }
+  }, [isAuthenticated, fetchPeriods, checkDb, fetchNotifications]);
+
+  // Handlers untuk Notifikasi
+  const handleMarkAllAsRead = async () => {
+    setIsMarkingAllRead(true);
+    try {
+      const result = await store.dispatch(
+        commonApi.endpoints.readAllNotifications.initiate()
+      );
+      if ("data" in result) {
+        fetchNotifications();
+      }
     } catch (error) {
       console.error("Gagal menandai semua dibaca:", error);
+    } finally {
+      setIsMarkingAllRead(false);
     }
   };
 
   const handleMarkAsRead = async (id: string, isRead?: boolean) => {
     if (isRead || !id) return;
     try {
-      await markByIdRead({ id }).unwrap();
+      const result = await store.dispatch(
+        commonApi.endpoints.readNotificationById.initiate({ id })
+      );
+      if ("data" in result) {
+        fetchNotifications();
+      }
     } catch (error) {
       console.error("Gagal menandai dibaca:", error);
     }
   };
+
+  const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   // Penentuan status database
   const dbStatus = isHealthError
@@ -206,7 +296,7 @@ export function AppTopBar() {
                     Tidak ada notifikasi saat ini.
                   </div>
                 ) : (
-                  notifications.map((item: any) => (
+                  notifications.map((item) => (
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
