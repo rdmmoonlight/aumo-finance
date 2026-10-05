@@ -5,6 +5,7 @@ using AumoBackend.Services.Auth;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using AumoBackend.Models;
 using AumoBackend.Data;
+using AumoBackend.DTOs.Reports;
 using System;
 using System.Collections.Generic;
 using System.Linq;
