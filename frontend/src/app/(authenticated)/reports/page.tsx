@@ -40,7 +40,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type ReportItem = {
-  slug: string;
+  href: string;
   title: string;
   desc: string;
   category: string;
@@ -51,7 +51,7 @@ type ReportItem = {
 const REPORTS: ReportItem[] = [
   // --- JOURNALS & LEDGERS ---
   {
-    slug: "general-journal",
+    href: "/journals/general",
     title: "General Journal",
     desc: "Buku harian semua transaksi",
     category: "Journals & Ledgers",
@@ -59,7 +59,7 @@ const REPORTS: ReportItem[] = [
     icon: Receipt,
   },
   {
-    slug: "general-ledger-permanent",
+    href: "/general-ledgers/permanent",
     title: "General Ledger - Permanent",
     desc: "Buku besar akun riil",
     category: "Journals & Ledgers",
@@ -67,7 +67,7 @@ const REPORTS: ReportItem[] = [
     icon: Library,
   },
   {
-    slug: "general-ledger-temporary",
+    href: "/general-ledgers/temporary",
     title: "General Ledger - Temporary",
     desc: "Buku besar akun nominal",
     category: "Journals & Ledgers",
@@ -77,7 +77,7 @@ const REPORTS: ReportItem[] = [
 
   // --- TRIAL BALANCE CYCLE ---
   {
-    slug: "unadjusted-trial-balance",
+    href: "/trial-balances/unadjusted",
     title: "Unadjusted Trial Balance",
     desc: "Neraca saldo awal sebelum penyesuaian",
     category: "Trial Balance Cycle",
@@ -85,7 +85,7 @@ const REPORTS: ReportItem[] = [
     icon: ClipboardList,
   },
   {
-    slug: "worksheet",
+    href: "/worksheet",
     title: "Worksheet",
     desc: "10-column worksheet & kertas kerja",
     category: "Trial Balance Cycle",
@@ -93,7 +93,7 @@ const REPORTS: ReportItem[] = [
     icon: TableIcon,
   },
   {
-    slug: "adjusting-journal",
+    href: "/journals/adjusting",
     title: "Adjusting Journal",
     desc: "Jurnal penyesuaian akhir periode",
     category: "Trial Balance Cycle",
@@ -101,7 +101,7 @@ const REPORTS: ReportItem[] = [
     icon: BookOpen,
   },
   {
-    slug: "adjusted-trial-balance",
+    href: "/trial-balances/adjusted",
     title: "Adjusted Trial Balance",
     desc: "Neraca saldo setelah penyesuaian",
     category: "Trial Balance Cycle",
@@ -111,7 +111,7 @@ const REPORTS: ReportItem[] = [
 
   // --- FINANCIAL STATEMENTS ---
   {
-    slug: "income-statement",
+    href: "/reports/financial-statements/income-statement",
     title: "Income Statement",
     desc: "Laporan laba rugi periode berjalan",
     category: "Financial Statements",
@@ -119,7 +119,7 @@ const REPORTS: ReportItem[] = [
     icon: BarChart3,
   },
   {
-    slug: "retained-earnings",
+    href: "/reports/financial-statements/retained-earnings",
     title: "Retained Earnings",
     desc: "Laporan perubahan modal & laba ditahan",
     category: "Financial Statements",
@@ -127,7 +127,7 @@ const REPORTS: ReportItem[] = [
     icon: Coins,
   },
   {
-    slug: "statement-of-financial-position",
+    href: "/reports/financial-statements/statement-of-financial-position",
     title: "Financial Position",
     desc: "Neraca / Statement of Financial Position",
     category: "Financial Statements",
@@ -135,7 +135,7 @@ const REPORTS: ReportItem[] = [
     icon: Building2,
   },
   {
-    slug: "statement-of-cash-flow",
+    href: "/reports/financial-statements/statement-of-cash-flow",
     title: "Cash Flow Statement",
     desc: "Arus kas operasi, investasi, pendanaan",
     category: "Financial Statements",
@@ -145,7 +145,7 @@ const REPORTS: ReportItem[] = [
 
   // --- CLOSING CYCLE ---
   {
-    slug: "closing-journal",
+    href: "/journals/closing",
     title: "Closing Journal",
     desc: "Jurnal penutup akun nominal",
     category: "Closing Cycle",
@@ -153,7 +153,7 @@ const REPORTS: ReportItem[] = [
     icon: BookOpen,
   },
   {
-    slug: "post-closing-trial-balance",
+    href: "/trial-balances/post-closing",
     title: "Post-Closing Trial Balance",
     desc: "Neraca saldo setelah penutupan",
     category: "Closing Cycle",
@@ -200,7 +200,6 @@ export default function ReportsPage() {
         setSummaryLoading(true);
         setIsError(false);
 
-        // Memanggil endpoint RTK Query secara eksplisit lewat store dispatch
         const result = await store.dispatch(
           reportsApi.endpoints.getSummary.initiate(),
         );
@@ -241,7 +240,7 @@ export default function ReportsPage() {
           const Icon = report.icon;
           return (
             <Link
-              href={`/reports/${report.slug}`}
+              href={report.href}
               className="group relative flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-slate-900/80 text-white/80 group-hover:border-indigo-400/30 group-hover:text-white">
@@ -260,7 +259,7 @@ export default function ReportsPage() {
                   {report.desc}
                 </p>
                 <div className="mt-2 flex items-center gap-1 text-xs text-white/30 group-hover:text-indigo-300">
-                  <span>/reports/{report.slug}</span>
+                  <span>{report.href}</span>
                   <ArrowRight className="h-3 w-3 opacity-0 transition-all group-hover:translate-x-0.5 group-hover:opacity-100" />
                 </div>
               </div>
@@ -281,8 +280,8 @@ export default function ReportsPage() {
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, _, filterValue) => {
       const search = filterValue.toLowerCase();
-      const { title, desc, slug } = row.original;
-      return `${title} ${desc} ${slug}`.toLowerCase().includes(search);
+      const { title, desc, href } = row.original;
+      return `${title} ${desc} ${href}`.toLowerCase().includes(search);
     },
   });
 
