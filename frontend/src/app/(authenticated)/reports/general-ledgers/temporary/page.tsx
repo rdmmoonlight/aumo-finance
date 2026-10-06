@@ -26,14 +26,16 @@ export default function GeneralLedgerTemporaryPage() {
       setErrorMessage(null);
 
       const result = await store.dispatch(
-        reportsApi.endpoints.getGeneralLedgerTemporary.initiate(),
+        reportsApi.endpoints.getGeneralLedgerTemporary.initiate(undefined, {
+          forceRefetch: true,
+        }),
       );
 
       if (!isMounted) return;
 
-      if ("data" in result && result.data) {
+      if (result.data) {
         setData(result.data);
-      } else if ("error" in result && result.error) {
+      } else if (result.error) {
         const err = result.error as any;
         setErrorMessage(
           err?.data?.message ||
@@ -65,9 +67,7 @@ export default function GeneralLedgerTemporaryPage() {
     return <NoPeriodState />;
   }
 
-  const ledgers =
-    (data as (GeneralLedgerTemporaryResponse & { ledgers?: any[] }) | null)
-      ?.ledgers ?? [];
+  const ledgers = data?.accounts ?? [];
 
   return (
     <div className="space-y-6">
@@ -83,7 +83,7 @@ export default function GeneralLedgerTemporaryPage() {
       <PageHeader
         title="Temporary Ledger"
         subtitle={`Revenue & Expense • ${ledgers.length} accounts • IDR`}
-        switchHref="/reports/general-ledger/permanent"
+        switchHref="/reports/general-ledgers/permanent"
         switchLabel="View Permanent"
       />
 
