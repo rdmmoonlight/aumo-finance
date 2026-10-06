@@ -1,8 +1,9 @@
 import http, { IncomingMessage, ServerResponse } from 'node:http';
 
-const PORT = 5000;
+// Gunakan port dari environment Render, fallback ke 5000 untuk lokal
+const PORT = Number(process.env.PORT) || 5000;
 
-// Helper kecil untuk membaca JSON body dari Stream request
+// Helper membaca JSON body dari stream
 const parseJsonBody = <T>(req: IncomingMessage): Promise<T> => {
   return new Promise((resolve, reject) => {
     let body = '';
@@ -20,20 +21,17 @@ const parseJsonBody = <T>(req: IncomingMessage): Promise<T> => {
   });
 };
 
-// Buat HTTP Server
+// Server HTTP native
 const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
   const method = req.method;
   const url = req.url;
 
-  // Set default Header JSON
   res.setHeader('Content-Type', 'application/json');
-
-  // --- ROUTER MANUAL ---
 
   // Route: GET /
   if (method === 'GET' && url === '/') {
     res.writeHead(200);
-    res.end(JSON.stringify({ message: 'Server Native TypeScript Berhasil Jalan!' }));
+    res.end(JSON.stringify({ message: 'Server Native TypeScript siap di Render!' }));
     return;
   }
 
@@ -64,13 +62,12 @@ const server = http.createServer(async (req: IncomingMessage, res: ServerRespons
     return;
   }
 
-  // Fallback: 404 Not Found
+  // 404 Not Found
   res.writeHead(404);
   res.end(JSON.stringify({ error: 'Route tidak ditemukan' }));
 });
 
-// Jalankan Server
-server.listen(PORT, () => {
-  console.log(`🚀 Server berjalan murni tanpa framework di http://localhost:${PORT}`);
+// Dengarkan pada '0.0.0.0' wajib untuk Web Service di Render
+server.listen(PORT, '0.0.0.0', () => {
+  console.log(`🚀 Server berjalan di http://0.0.0.0:${PORT}`);
 });
-      
