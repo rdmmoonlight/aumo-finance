@@ -66,8 +66,8 @@ export default function GeneralLedgerTemporaryPage() {
   }
 
   const ledgers =
-  (data as (GeneralLedgerTemporaryResponse & { ledgers?: any[] }) | null)
-  ?.ledgers ?? [];
+    (data as (GeneralLedgerTemporaryResponse & { ledgers?: any[] }) | null)
+      ?.ledgers ?? [];
 
   return (
     <div className="space-y-6">

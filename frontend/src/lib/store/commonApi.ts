@@ -49,7 +49,6 @@ export const commonApi = baseApi.injectEndpoints({
       invalidatesTags: ["AumoBackend"],
     }),
 
-
     // GET /api/v1/health
     getHealth: builder.query<HealthCheckResponse, void>({
       query: () => "/api/v1/health",

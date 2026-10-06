@@ -43,9 +43,9 @@ export const homeApi = baseApi.injectEndpoints({
         url: "/api/v1/kurs", // Wajib diawali slash '/'
         params: params
           ? {
-            baseCurrency: params.baseCurrency,
-            targetCurrency: params.targetCurrency,
-          }
+              baseCurrency: params.baseCurrency,
+              targetCurrency: params.targetCurrency,
+            }
           : undefined,
       }),
       providesTags: ["MarketData"],
