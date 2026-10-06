@@ -61,7 +61,7 @@ public class GeneralLedgersController : ControllerBase
 
     private Guid GetCurrentUserId()
     {
-        var id = User.FindFirstValue(ClaimTypes.NameIdentifier)?? User.FindFirstValue("sub");
-        return Guid.TryParse(id, out var guid)? guid : Guid.Empty;
+        var id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
+        return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
     }
 }

@@ -46,13 +46,13 @@ namespace AumoBackend.Models
     {
         public static bool NormalBalanceIsDebit(this AccountClassification classification)
         {
-            return classification == AccountClassification.Asset 
+            return classification == AccountClassification.Asset
                 || classification == AccountClassification.Expense;
         }
 
         public static bool IsTemporary(this AccountClassification classification)
         {
-            return classification == AccountClassification.Revenue 
+            return classification == AccountClassification.Revenue
                 || classification == AccountClassification.Expense;
         }
 
@@ -64,7 +64,7 @@ namespace AumoBackend.Models
 
     public static class AccountClassificationHelper
     {
-        public static bool NormalBalanceIsDebit(AccountClassification classification) 
+        public static bool NormalBalanceIsDebit(AccountClassification classification)
             => classification.NormalBalanceIsDebit();
 
         // Saldo Normal:
@@ -80,10 +80,10 @@ namespace AumoBackend.Models
             };
         }
 
-        public static bool IsTemporary(AccountClassification classification) 
+        public static bool IsTemporary(AccountClassification classification)
             => classification.IsTemporary();
 
-        public static bool IsPermanent(AccountClassification classification) 
+        public static bool IsPermanent(AccountClassification classification)
             => classification.IsPermanent();
 
         public static bool ValidateReferenceNumber(string? refNum)

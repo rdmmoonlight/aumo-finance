@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace AumoBackend.Models.Reports;
+
 public class TransactionCounter
 {
     [Key]
