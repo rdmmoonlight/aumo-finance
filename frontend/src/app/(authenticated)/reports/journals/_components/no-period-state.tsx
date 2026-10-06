@@ -1,7 +1,7 @@
 "use client";
 
 import { EyeOff } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export function NoPeriodState() {
   return (
@@ -11,7 +11,7 @@ export function NoPeriodState() {
       <p className="text-xs">
         Go to{" "}
         <Link
-          href="/periods"
+          to="/periods"
           className="text-primary underline underline-offset-4"
         >
           Periods

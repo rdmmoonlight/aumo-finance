@@ -14,8 +14,8 @@ import {
   Loader2,
   TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { WorksheetRow, WorksheetTotals, WorksheetViewModel } from "./types";
 import { formatNumber } from "./utils";
 import { WorksheetTable } from "./worksheet-table";
@@ -146,7 +146,7 @@ export default function WorksheetPage() {
             <EyeOff size={36} className="mx-auto text-muted-foreground" />
             <h3 className="font-semibold">No Period Selected</h3>
             <Button asChild size="sm">
-              <Link href="/periods" className="gap-1.5">
+              <Link to="/periods" className="gap-1.5">
                 <Calendar size={14} /> Go to Periods
               </Link>
             </Button>
@@ -165,7 +165,7 @@ export default function WorksheetPage() {
               </p>
             </div>
             <Button asChild variant="outline" size="sm" className="gap-1.5">
-              <Link href="/reports/income-statement">
+              <Link to="/reports/income-statement">
                 <TrendingUp size={14} /> Income Statement
               </Link>
             </Button>

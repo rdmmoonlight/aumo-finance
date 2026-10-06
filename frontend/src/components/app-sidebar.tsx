@@ -41,10 +41,9 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useLocation } from "react-router-dom";
 import * as React from "react";
+import { Link } from "react-router-dom";
 
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();
@@ -78,7 +77,7 @@ const navigation = [
 ];
 
 export function AppSidebar() {
-  const pathname = usePathname();
+  const { pathname: pathname } = useLocation();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
@@ -136,15 +135,14 @@ export function AppSidebar() {
       }
     >
       <SidebarHeader
-        className={`border-b shrink-0 flex items-center gap-2 ${
-          isCollapsed
-            ? "flex-col justify-center p-2.5 gap-3"
-            : "flex-row justify-between p-3.5"
-        }`}
+        className={`border-b shrink-0 flex items-center gap-2 ${isCollapsed
+          ? "flex-col justify-center p-2.5 gap-3"
+          : "flex-row justify-between p-3.5"
+          }`}
       >
         {isCollapsed ? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
-            <Image
+            <img
               src="/favicon.ico"
               alt="Aumo"
               width={28}
@@ -182,7 +180,7 @@ export function AppSidebar() {
                       className="text-sm h-8 font-normal px-2"
                     >
                       <Link
-                        href={item.url}
+                        to={item.url}
                         className="flex items-center gap-2.5"
                       >
                         <Icon className={ICON_CLASS} />
@@ -200,9 +198,8 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter
-        className={`border-t shrink-0 ${
-          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
-        }`}
+        className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+          }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
@@ -267,7 +264,7 @@ export function AppSidebar() {
                 className="w-56"
               >
                 <DropdownMenuItem asChild className="text-sm">
-                  <Link href="/settings">
+                  <Link to="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>

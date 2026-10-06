@@ -10,7 +10,7 @@ import { authApi } from "@/lib/store/auth/authApi";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "react-router-dom";
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -29,7 +29,7 @@ export interface AuthPageProps {
 }
 
 export const GOOGLE_CLIENT_ID: string =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "";
+  process.env.VITE_GOOGLE_CLIENT_ID || "";
 
 export function GoogleIcon(
   props: React.ComponentProps<"svg">,
@@ -87,7 +87,7 @@ export function GoogleAuthButtonInner({
       disabled={isPending}
       onClick={() => {
         if (!GOOGLE_CLIENT_ID) {
-          onError("NEXT_PUBLIC_GOOGLE_CLIENT_ID belum diset");
+          onError("VITE_GOOGLE_CLIENT_ID belum diset");
           return;
         }
         googleLogin();
@@ -111,7 +111,7 @@ function AuthFormInner({
   initialMode = "login",
   onSuccess,
 }: AuthPageProps): React.JSX.Element {
-  const searchParams = useSearchParams();
+  const [searchParams] = useSearchParams();
   const dispatch = useDispatch();
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);

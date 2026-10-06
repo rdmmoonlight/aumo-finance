@@ -23,8 +23,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { Calendar, Clock, Pencil, Trash2 } from "lucide-react";
-import Link from "next/link";
 import { Fragment, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { formatDateTimeDisplay, formatNumber } from "../_lib/format";
 import { FlatJournalRow } from "../_lib/types";
 
@@ -74,7 +74,7 @@ export function GeneralJournalTable({
                     size="icon"
                     className="h-6 w-6"
                   >
-                    <Link href={`/journal-entry?id=${item.entryId}`}>
+                    <Link to={`/journal-entry?id=${item.entryId}`}>
                       <Pencil className="h-3 w-3" />
                     </Link>
                   </Button>

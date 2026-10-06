@@ -1,20 +1,25 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+// Migrasi dari Next.js NextResponse Proxy ke Vite Client Fetch Helper
+// File lama di-backup ke src/proxy.ts.bak
 
-export function proxy(request: NextRequest) {
-  try {
-    // Serahkan seluruh validasi sesi & proteksi ke RTK Query (Client-Side)
-    // agar Edge Proxy tidak terkecoh oleh cookie cross-domain yang expired
-    return NextResponse.next();
-  } catch (error) {
-    console.error("[MIDDLEWARE ERROR]", error);
-    return NextResponse.next();
+export async function proxyRequest(url: string, options: RequestInit = {}) {
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("token="))
+    ?.split("=")[1];
+
+  const headers = new Headers(options.headers || {});
+  if (token) {
+    headers.set("Authorization", `Bearer ${token}`);
   }
-}
 
-// Config Matcher
-export const config = {
-  matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
-  ],
-};
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}

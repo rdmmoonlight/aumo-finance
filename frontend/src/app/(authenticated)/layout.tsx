@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { AppDispatch, RootState } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -17,7 +17,7 @@ export default function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   // State lokal untuk melacak status fetching tanpa tergantung hook RTK Query generator
@@ -71,10 +71,10 @@ export default function AuthenticatedLayout({
 
   useEffect(() => {
     if (isAuthError) {
-      const t = setTimeout(() => router.replace("/auth"), 800);
+      const t = setTimeout(() => navigate("/auth", { replace: true }), 800);
       return () => clearTimeout(t);
     }
-  }, [isAuthError, router]);
+  }, [isAuthError, navigate]);
 
   // Render kondisi loading HANYA saat verifikasi awal
   if (isAuthLoading) {

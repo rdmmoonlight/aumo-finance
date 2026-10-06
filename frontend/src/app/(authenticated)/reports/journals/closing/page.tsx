@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Info, Loader2, Lock } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { ClosingGroupTable } from "../_components/closing-group-table";
 import { NoPeriodState } from "../_components/no-period-state";
 import { formatNumberWithParen } from "../_lib/format";
@@ -118,7 +118,7 @@ export default function ClosingJournalReportPage() {
           </h1>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link href="/reports/post-closing-trial-balance">
+          <Link to="/reports/post-closing-trial-balance">
             <ArrowRight size={14} /> Post-Closing
           </Link>
         </Button>

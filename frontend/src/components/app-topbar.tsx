@@ -26,8 +26,8 @@ import {
   RefreshCw,
   Search,
 } from "lucide-react";
-import { usePathname } from "next/navigation";
 import * as React from "react";
+import { useLocation } from "react-router-dom";
 
 import { store } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
@@ -52,7 +52,7 @@ interface NotificationItem {
 }
 
 export function AppTopBar() {
-  const pathname = usePathname();
+  const { pathname: pathname } = useLocation();
 
   // State internal pengganti Auto-Generated Hooks
   const [userProfile, setUserProfile] = React.useState<any>(null);
@@ -303,9 +303,8 @@ export function AppTopBar() {
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
-                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
-                        !item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
-                      }`}
+                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${!item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
+                        }`}
                     >
                       <div className="mt-0.5">
                         {item.type === "warning" ? (
@@ -322,9 +321,9 @@ export function AppTopBar() {
                           <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
-                                  [],
-                                  { hour: "2-digit", minute: "2-digit" },
-                                )
+                                [],
+                                { hour: "2-digit", minute: "2-digit" },
+                              )
                               : ""}
                           </span>
                         </div>
@@ -353,7 +352,7 @@ export function AppTopBar() {
                 Home
               </BreadcrumbLink>
             </BreadcrumbItem>
-            {pathSegments.map((segment, index) => {
+            {pathSegments.map((segment: string, index: number) => {
               if (segment === "home" && index === 0) return null;
 
               const url = `/${pathSegments.slice(0, index + 1).join("/")}`;
@@ -387,18 +386,16 @@ export function AppTopBar() {
           {selectedPeriod ? (
             <Badge
               variant="outline"
-              className={`gap-1.5 font-medium text-xs ${
-                selectedPeriod.isClosed
+              className={`gap-1.5 font-medium text-xs ${selectedPeriod.isClosed
                   ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
                   : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-              }`}
+                }`}
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  selectedPeriod.isClosed
+                className={`h-1.5 w-1.5 rounded-full ${selectedPeriod.isClosed
                     ? "bg-amber-500"
                     : "bg-emerald-500 animate-pulse"
-                }`}
+                  }`}
               />
               Periode: {selectedPeriod.periodName || selectedPeriod.name}
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}

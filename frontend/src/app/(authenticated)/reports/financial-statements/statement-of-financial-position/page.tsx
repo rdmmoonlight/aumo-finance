@@ -6,8 +6,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertCircle, ArrowRight, CheckCircle2, Landmark } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { ErrorAlert } from "../_components/common/ErrorAlert";
 import { LoadingState } from "../_components/common/LoadingState";
 import { NoPeriodCard } from "../_components/common/NoPeriodCard";
@@ -134,7 +134,7 @@ export default function StatementOfFinancialPositionPage() {
                 Refresh
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/financial-statements/income-statement">
+                <Link to="/financial-statements/income-statement">
                   <ArrowRight size={14} /> Income Statement
                 </Link>
               </Button>

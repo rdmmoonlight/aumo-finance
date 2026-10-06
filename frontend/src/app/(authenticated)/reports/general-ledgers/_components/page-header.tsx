@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export function PageHeader({
   title,
@@ -22,7 +22,7 @@ export function PageHeader({
         <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>
       <Button asChild variant="outline" size="sm" className="text-sm">
-        <Link href={switchHref}>{switchLabel}</Link>
+        <Link to={switchHref}>{switchLabel}</Link>
       </Button>
     </div>
   );

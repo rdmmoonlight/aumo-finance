@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, EyeOff } from "lucide-react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 
 export function NoPeriodCard({
   message = "Select a period to view trial balance.",
@@ -16,7 +16,7 @@ export function NoPeriodCard({
         <h3 className="font-semibold text-ui">No Period Selected</h3>
         <p className="text-ui text-muted-foreground">{message}</p>
         <Button asChild size="sm">
-          <Link href="/periods" className="gap-1.5 text-caption">
+          <Link to="/periods" className="gap-1.5 text-caption">
             <Calendar size={14} /> Go to Periods
           </Link>
         </Button>
