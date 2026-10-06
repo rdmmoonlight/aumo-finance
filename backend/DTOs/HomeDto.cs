@@ -1,5 +1,32 @@
-namespace AumoBackend.DTOs
+using System.Text.Json.Serialization;
+
+namespace AumoBackend.DTOs.Home
 {
+
+    public class ApiIndonesiaKursResponse
+    {
+        [JsonPropertyName("success")]
+        public bool Success { get; set; }
+
+        [JsonPropertyName("data")]
+        public KursData? Data { get; set; }
+    }
+
+    public class KursData
+    {
+        [JsonPropertyName("base")]
+        public string Base { get; set; } = string.Empty;
+
+        [JsonPropertyName("target")]
+        public string Target { get; set; } = string.Empty;
+
+        [JsonPropertyName("rate")]
+        public decimal Rate { get; set; }
+
+        [JsonPropertyName("change")]
+        public decimal Change { get; set; }
+    }
+
     /// <summary>
     /// DTO untuk indikator data pasar (IHSG, Saham, Kurs, Emas, dll)
     /// </summary>
@@ -50,15 +77,6 @@ namespace AumoBackend.DTOs
             }
             set => _isUp = value;
         }
-    }
-
-    /// <summary>
-    /// Response model dari APIIndonesia Kurs (Menyelesaikan error CS0246 di MarketDataService)
-    /// </summary>
-    public class ApiIndonesiaKursResponse
-    {
-        public bool Success { get; set; }
-        public KursDataDto? Data { get; set; }
     }
 
     public class KursDataDto

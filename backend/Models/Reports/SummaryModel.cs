@@ -1,15 +1,9 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace AumoBackend.Core.Models;
-
+namespace AumoBackend.Models.Reports;
 public class TransactionCounter
 {
+    [Key]
     public int Id { get; set; }
 
     public Guid UserId { get; set; }
@@ -20,3 +14,4 @@ public class TransactionCounter
 
     public int LastSequence { get; set; }
 }
+

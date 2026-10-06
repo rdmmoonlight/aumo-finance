@@ -1,16 +1,6 @@
 using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Services;

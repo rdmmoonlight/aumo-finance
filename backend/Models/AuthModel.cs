@@ -10,8 +10,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace AumoBackend.Models;
 
-
-
 public class UserSession
 {
     [Key]
@@ -84,4 +82,11 @@ public class LoginActivity
     public bool IsSuccess { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class ApplicationUser : IdentityUser<Guid>
+{
+    public string? FullName { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? Bio { get; set; }
 }

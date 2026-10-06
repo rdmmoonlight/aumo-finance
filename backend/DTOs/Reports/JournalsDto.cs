@@ -5,6 +5,7 @@ using AumoBackend.Services.Auth;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
+
 namespace AumoBackend.DTOs.Reports;
 
 public class ClosingJournalEntryGroupApiResponse

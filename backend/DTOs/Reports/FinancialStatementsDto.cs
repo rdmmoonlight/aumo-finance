@@ -5,6 +5,7 @@ using AumoBackend.Services.Auth;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.DTOs;
+
 namespace AumoBackend.DTOs.Reports;
 
 public class IncomeStatementApiResponse
@@ -77,3 +78,22 @@ public class FinancialPositionLineApiResponse
     public string AccountName { get; set; } = string.Empty;
     public decimal Amount { get; set; }
 }
+
+    public class CashFlowLine
+    {
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+    }
+
+    public class IncomeStatementLine
+    {
+        public string AccountName { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+    }
+
+    public class FinancialPositionLine
+    {
+        public string AccountName { get; set; } = string.Empty;
+        public decimal Balance { get; set; }
+        public decimal Amount { get; set; }
+    }
