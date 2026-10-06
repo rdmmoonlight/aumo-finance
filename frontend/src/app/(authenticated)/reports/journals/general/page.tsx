@@ -6,9 +6,9 @@ import { store } from "@/lib/store";
 import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { DeleteEntryDialog } from "../_components/delete-entry-dialog";
 import { GeneralJournalTable } from "../_components/general-journal-table";
 import { JournalEmptyState } from "../_components/journal-empty-state";
@@ -16,7 +16,7 @@ import { formatDateDisplay } from "../_lib/format";
 import { JournalEntry } from "../_lib/types";
 
 export default function GeneralJournalPage() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
@@ -136,7 +136,7 @@ export default function GeneralJournalPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild size="sm">
-            <Link href="/journal-entry?type=general">
+            <Link to="/journal-entry?type=general">
               <Plus className="h-3.5 w-3.5" /> Add General
             </Link>
           </Button>

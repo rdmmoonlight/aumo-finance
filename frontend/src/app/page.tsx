@@ -14,11 +14,11 @@ import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ArrowRight, Loader2, Lock, UserPlus } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useNavigate } from "react-router-dom";
 import { Suspense, useEffect, useState } from "react";
 
 export default function LandingPage(): React.JSX.Element {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
@@ -39,7 +39,7 @@ export default function LandingPage(): React.JSX.Element {
 
         if (result.isSuccess && result.data?.success) {
           setIsAuthenticated(true);
-          router.replace("/home");
+          navigate("/home", { replace: true });
         } else {
           setIsAuthenticated(false);
         }
@@ -51,7 +51,7 @@ export default function LandingPage(): React.JSX.Element {
     }
 
     checkAuthStatus();
-  }, [router]);
+  }, [navigate]);
 
   const handleOpenModal = (mode: "login" | "register"): void => {
     setAuthMode(mode);
@@ -60,7 +60,7 @@ export default function LandingPage(): React.JSX.Element {
 
   const handleSuccess = (): void => {
     setOpen(false);
-    router.replace("/home");
+    navigate("/home", { replace: true });
   };
 
   if (isAuthenticated) {

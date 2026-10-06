@@ -1,7 +1,7 @@
 "use client";
-import React, { Suspense } from "react";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import AuthForm, { GOOGLE_CLIENT_ID, AuthFormSkeleton } from "./auth";
+import React, { Suspense } from "react";
+import AuthForm, { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "./auth";
 
 export default function Page(): React.JSX.Element {
   return (

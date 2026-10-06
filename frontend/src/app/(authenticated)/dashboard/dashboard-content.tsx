@@ -33,13 +33,13 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 export default function DashboardContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [periodType, setPeriodType] = useState<"monthly" | "annual">(() =>
     searchParams.get("period")?.toLowerCase() === "annual"
@@ -92,7 +92,7 @@ export default function DashboardContent() {
     if (periodType === type || isFetching) return;
     setDismissError(false);
     setPeriodType(type);
-    router.push(`/dashboard?period=${type}`);
+    navigate(`/dashboard?period=${type}`);
   };
 
   const healthScore = useMemo(() => {
@@ -155,7 +155,7 @@ export default function DashboardContent() {
             Go to Periods to select active accounting period.
           </p>
           <Button asChild>
-            <Link href="/periods">
+            <Link to="/periods">
               <Calendar size={16} /> Go to Periods
             </Link>
           </Button>
@@ -242,7 +242,7 @@ export default function DashboardContent() {
             </Button>
           </div>
           <Button asChild size="sm" className="h-8 gap-1 text-caption">
-            <Link href="/journal-entry">
+            <Link to="/journal-entry">
               <Plus size={14} /> New Entry
             </Link>
           </Button>
@@ -252,7 +252,7 @@ export default function DashboardContent() {
             size="sm"
             className="h-8 gap-1 text-caption"
           >
-            <Link href="/reports/income-statement">
+            <Link to="/reports/income-statement">
               <FileText size={14} /> Report
             </Link>
           </Button>

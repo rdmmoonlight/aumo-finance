@@ -37,15 +37,15 @@ import {
   Lock,
   Save,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 
 export default function JournalEntryContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const entryIdParam = searchParams.get("id");
   const isEdit = Boolean(entryIdParam);
   const entryId = entryIdParam ? parseInt(entryIdParam, 10) : 0;
@@ -152,9 +152,9 @@ export default function JournalEntryContent() {
             typeof raw === "string"
               ? raw
               : raw.transactionNumber ||
-                raw.nextTransactionNumber ||
-                raw.data ||
-                "";
+              raw.nextTransactionNumber ||
+              raw.data ||
+              "";
           setNextTxNumber(txNo);
         }
       } catch (err) {
@@ -343,13 +343,13 @@ export default function JournalEntryContent() {
           setSuccessMessage(
             `Updated ${res?.transactionNumber || displayedTxNumber}`,
           );
-          setTimeout(() => router.push("/reports/general-journal"), 1200);
+          setTimeout(() => navigate("/reports/general-journal"), 1200);
         } else if ("error" in result) {
           const err: any = result.error;
           setApiError(
             err?.data?.message ||
-              err?.message ||
-              "Failed to update journal entry",
+            err?.message ||
+            "Failed to update journal entry",
           );
         }
       } else {
@@ -371,8 +371,8 @@ export default function JournalEntryContent() {
           const err: any = result.error;
           setApiError(
             err?.data?.message ||
-              err?.message ||
-              "Failed to post journal entry",
+            err?.message ||
+            "Failed to post journal entry",
           );
         }
       }
@@ -414,7 +414,7 @@ export default function JournalEntryContent() {
           </p>
         </div>
         <Button variant="outline" size="sm" asChild className="text-sm">
-          <Link href="/reports/general-journal" className="gap-1.5">
+          <Link to="/reports/general-journal" className="gap-1.5">
             <ArrowLeft size={14} /> Back to Journal
           </Link>
         </Button>
@@ -448,7 +448,7 @@ export default function JournalEntryContent() {
           <Lock size={16} />
           <AlertDescription className="text-xs">
             Journal {displayedTxNumber} is in closed period.{" "}
-            <Link href="/reports/general-journal" className="underline">
+            <Link to="/reports/general-journal" className="underline">
               Back
             </Link>
           </AlertDescription>

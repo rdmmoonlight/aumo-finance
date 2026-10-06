@@ -14,9 +14,9 @@ import {
   TrendingDown,
   TrendingUp,
 } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 interface MarketItem {
   symbol: string;
@@ -105,9 +105,9 @@ export default function HomeContent() {
       ? isCurrency
         ? `Rp ${Math.round(numericPrice).toLocaleString("id-ID")}`
         : numericPrice.toLocaleString("id-ID", {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-          })
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        })
       : String(rawPrice);
 
     const numericChange = Number(rawChange);
@@ -185,11 +185,10 @@ export default function HomeContent() {
                         {item.symbol}
                       </span>
                       <Badge
-                        className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${
-                          item.isUp
-                            ? "bg-emerald-500/15 text-emerald-400"
-                            : "bg-red-500/15 text-red-400"
-                        }`}
+                        className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${item.isUp
+                          ? "bg-emerald-500/15 text-emerald-400"
+                          : "bg-red-500/15 text-red-400"
+                          }`}
                       >
                         {item.isUp ? (
                           <TrendingUp size={12} className="mr-0.5" />
@@ -224,7 +223,7 @@ export default function HomeContent() {
                 asChild
                 className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-sm text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
               >
-                <Link href="/dashboard">
+                <Link to="/dashboard">
                   <LayoutDashboard size={16} /> Dashboard
                 </Link>
               </Button>
@@ -233,7 +232,7 @@ export default function HomeContent() {
                 variant="secondary"
                 className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-sm text-white hover:bg-white/15"
               >
-                <Link href="/journal-entry">
+                <Link to="/journal-entry">
                   <Notebook size={16} /> Journal Entry
                 </Link>
               </Button>

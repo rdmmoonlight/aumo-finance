@@ -1,3 +1,13 @@
+
+// Helper Cookie Client-side (Pengganti next/headers)
+function getCookie(name: string): string | undefined {
+  if (typeof document === "undefined") return undefined;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(';').shift();
+  return undefined;
+}
+
 // src/lib/apiClient.ts
 import type {
   BaseQueryFn,
@@ -9,7 +19,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Ambil URL murni dari environment variable tanpa auto-correct/manipulasi string
 function getBackendTarget(): string {
   return (
-    process.env.NEXT_PUBLIC_WEB_API_URL ||
+    process.env.VITE_WEB_API_URL ||
     process.env.WEB_API_URL ||
     "http://localhost:5000"
   );
@@ -27,9 +37,7 @@ const rawBaseQuery = fetchBaseQuery({
     // SSR: forward cookies dari server secara dinamis (Hanya di server context)
     if (typeof window === "undefined") {
       try {
-        const { cookies } = await import("next/headers");
-        const cookieStore = await cookies();
-        const cookieHeader = cookieStore.toString();
+        const cookieHeader = document.cookie;
         if (cookieHeader) {
           headers.set("Cookie", cookieHeader);
         }

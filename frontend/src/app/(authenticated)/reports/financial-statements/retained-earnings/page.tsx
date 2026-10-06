@@ -11,8 +11,8 @@ import {
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, PiggyBank } from "lucide-react";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { ErrorAlert } from "../_components/common/ErrorAlert";
 import { LoadingState } from "../_components/common/LoadingState";
 import { NoPeriodCard } from "../_components/common/NoPeriodCard";
@@ -133,7 +133,7 @@ export default function RetainedEarningsPage() {
               </p>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link href="/reports/statement-of-financial-position">
+              <Link to="/reports/statement-of-financial-position">
                 <ArrowRight size={14} /> Balance Sheet
               </Link>
             </Button>
