@@ -1,0 +1,15 @@
+src/
+├── routes/          # Menangani HTTP (Request & Response) -> Mirip Controller
+│   ├── index.ts     # Central router / Dispatcher utama
+│   ├── user.route.ts
+│   └── auth.route.ts
+├── services/        # Logika bisnis utama (Pure TypeScript, tidak tahu HTTP)
+│   ├── user.service.ts
+│   └── auth.service.ts
+├── lib/             # Klien eksternal / Utilitas inti (Database, Logger, Helpers)
+│   ├── db.ts        # Koneksi Database (pg / Drizzle / Prisma)
+│   ├── http.ts      # Helper parser JSON, Error Handler, Response Wrapper
+│   └── env.ts       # Validasi environment variables
+├── types/           # Type definitions & Interface
+│   └── user.type.ts
+└── index.ts         # Entry point (Inisialisasi HTTP Server)
