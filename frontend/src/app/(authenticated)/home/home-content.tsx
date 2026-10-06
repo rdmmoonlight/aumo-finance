@@ -105,9 +105,9 @@ export default function HomeContent() {
       ? isCurrency
         ? `Rp ${Math.round(numericPrice).toLocaleString("id-ID")}`
         : numericPrice.toLocaleString("id-ID", {
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2,
-        })
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })
       : String(rawPrice);
 
     const numericChange = Number(rawChange);
@@ -185,10 +185,11 @@ export default function HomeContent() {
                         {item.symbol}
                       </span>
                       <Badge
-                        className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${item.isUp
-                          ? "bg-emerald-500/15 text-emerald-400"
-                          : "bg-red-500/15 text-red-400"
-                          }`}
+                        className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${
+                          item.isUp
+                            ? "bg-emerald-500/15 text-emerald-400"
+                            : "bg-red-500/15 text-red-400"
+                        }`}
                       >
                         {item.isUp ? (
                           <TrendingUp size={12} className="mr-0.5" />

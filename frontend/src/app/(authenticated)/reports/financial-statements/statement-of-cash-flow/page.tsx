@@ -144,8 +144,9 @@ export default function StatementOfCashFlowPage() {
                 <div className="flex justify-between font-bold text-body px-4">
                   <span>Net Increase (Decrease) in Cash</span>
                   <span
-                    className={`font-mono ${netChange < 0 ? "text-red-500" : "text-emerald-500"
-                      }`}
+                    className={`font-mono ${
+                      netChange < 0 ? "text-red-500" : "text-emerald-500"
+                    }`}
                   >
                     {formatNumber(netChange)}
                   </span>
