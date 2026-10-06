@@ -9,7 +9,7 @@ export default async function RootLayout({
 }>) {
   "use cache";
   return (
-    <html lang="en" suppressHydrationWarning >
+    <html lang="en" suppressHydrationWarning>
       <body
         className={` min-h-screen bg-background text-foreground text-sm antialiased selection:bg-primary selection:text-primary-foreground`}
       >

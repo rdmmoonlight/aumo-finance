@@ -237,7 +237,7 @@ export function ChartOfAccountsTable() {
               className={cn(
                 "text-xs",
                 isActive &&
-                "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
+                  "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
               )}
             >
               {isActive ? "Active" : "Inactive"}
@@ -429,9 +429,9 @@ export function ChartOfAccountsTable() {
                         {header.isPlaceholder
                           ? null
                           : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
                       </TableHead>
                     );
                   })}
