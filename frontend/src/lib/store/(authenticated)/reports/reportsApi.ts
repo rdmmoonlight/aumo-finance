@@ -5,6 +5,7 @@ export const addTagTypes = [
   "FinancialStatements",
   "GeneralLedgers",
   "Journals",
+  "TrialBalances",
   "Worksheet",
 ] as const;
 
@@ -14,9 +15,9 @@ export const reportsApi = baseApi
   })
   .injectEndpoints({
     endpoints: (build) => ({
-      // GET /api/v1/Summary
+      // GET /api/v1/summary
       getSummary: build.query<GetSummaryApiResponse, GetSummaryApiArg>({
-        query: () => "/api/v1/Summary",
+        query: () => "/api/v1/summary",
         providesTags: ["Summary"],
       }),
 
@@ -61,7 +62,7 @@ export const reportsApi = baseApi
         providesTags: ["FinancialStatements"],
       }),
 
-      // GET /api/v1/reports/general-ledgers/permanent (Diubah dari general-ledger -> general-ledgers)
+      // GET /api/v1/reports/general-ledgers/permanent
       getGeneralLedgerPermanent: build.query<
         GetGeneralLedgerPermanentApiResponse,
         GetGeneralLedgerPermanentApiArg
@@ -70,7 +71,7 @@ export const reportsApi = baseApi
         providesTags: ["GeneralLedgers"],
       }),
 
-      // GET /api/v1/reports/general-ledgers/temporary (Diubah dari general-ledger -> general-ledgers)
+      // GET /api/v1/reports/general-ledgers/temporary
       getGeneralLedgerTemporary: build.query<
         GetGeneralLedgerTemporaryApiResponse,
         GetGeneralLedgerTemporaryApiArg
@@ -79,7 +80,7 @@ export const reportsApi = baseApi
         providesTags: ["GeneralLedgers"],
       }),
 
-      // POST /api/v1/reports/general-ledgers/refresh (Ditambahkan)
+      // POST /api/v1/reports/general-ledgers/refresh
       refreshGeneralLedger: build.mutation<
         RefreshGeneralLedgerApiResponse,
         RefreshGeneralLedgerApiArg
@@ -97,7 +98,7 @@ export const reportsApi = baseApi
         GetJournalsGeneralApiArg
       >({
         query: () => "/api/v1/reports/journals/general",
-        providesTags: ["Journal"],
+        providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
       // GET /api/v1/reports/journals/adjusting
@@ -106,7 +107,7 @@ export const reportsApi = baseApi
         GetJournalsAdjustingApiArg
       >({
         query: () => "/api/v1/reports/journals/adjusting",
-        providesTags: ["Journal"],
+        providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
       // DELETE /api/v1/reports/journals/adjusting/{id}
@@ -118,7 +119,7 @@ export const reportsApi = baseApi
           url: `/api/v1/reports/journals/adjusting/${queryArg.id}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["Journal"],
+        invalidatesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
       // GET /api/v1/reports/journals/closing
@@ -127,19 +128,19 @@ export const reportsApi = baseApi
         GetJournalsClosingApiArg
       >({
         query: () => "/api/v1/reports/journals/closing",
-        providesTags: ["Journal"],
+        providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
-      // GET /api/v1/reports/trial-balance?type=unadjusted|adjusted|post-closing
+      // GET /api/v1/reports/trial-balances?type=unadjusted|adjusted|post-closing
       getTrialBalance: build.query<
         GetTrialBalanceApiResponse,
         GetTrialBalanceApiArg
       >({
         query: (queryArg) => ({
-          url: "/api/v1/reports/trial-balance",
+          url: "/api/v1/reports/trial-balances",
           params: { type: queryArg?.type ?? "unadjusted" },
         }),
-        providesTags: ["FinancialStatements"],
+        providesTags: ["TrialBalances"],
       }),
 
       // GET /api/v1/reports/worksheet
@@ -187,29 +188,18 @@ export type GetStatementOfFinancialPositionApiArg = {
   isPostClosing?: boolean;
 };
 
+// Disesuaikan: ledgers -> accounts (sesuai C# Controller JSON output)
 export type GetGeneralLedgerPermanentApiResponse = {
   success: boolean;
   hasPeriodSelected: boolean;
   selectedPeriodName?: string;
   isTemporary: boolean;
   message?: string;
-  ledgers: Array<{
-    id: number;
-    accountId: number;
-    accountName: string;
-    accountReferenceNumber: number;
-    journalEntryId: number;
-    journalEntryLineId: number;
-    entryDate: string;
-    transactionNumber: string;
-    lineDescription: string;
-    debit: number;
-    credit: number;
-    runningBalance: number;
-  }>;
+  accounts?: Array<any>; // Sesuai C# JSON output property 'accounts'
 };
 export type GetGeneralLedgerPermanentApiArg = void;
 
+// Disesuaikan: ledgers -> accounts (sesuai C# Controller JSON output)
 export type GetGeneralLedgerTemporaryApiResponse = {
   success: boolean;
   hasPeriodSelected: boolean;
@@ -217,21 +207,7 @@ export type GetGeneralLedgerTemporaryApiResponse = {
   isTemporary: boolean;
   netIncomeBeforeClosing?: number;
   message?: string;
-  ledgers: Array<{
-    id: number;
-    accountId: number;
-    accountName: string;
-    accountReferenceNumber: number;
-    accountType: string;
-    journalEntryId: number;
-    journalEntryLineId: number;
-    entryDate: string;
-    transactionNumber: string;
-    lineDescription: string;
-    debit: number;
-    credit: number;
-    runningBalance: number;
-  }>;
+  accounts?: Array<any>; // Sesuai C# JSON output property 'accounts'
 };
 export type GetGeneralLedgerTemporaryApiArg = void;
 
@@ -257,9 +233,11 @@ export type GetJournalsClosingApiResponse = any;
 export type GetJournalsClosingApiArg = void;
 
 export type GetTrialBalanceApiResponse = any;
-export type GetTrialBalanceApiArg = {
-  type?: "unadjusted" | "adjusted" | "post-closing";
-} | void;
+export type GetTrialBalanceApiArg =
+  | {
+    type?: "unadjusted" | "adjusted" | "post-closing";
+  }
+  | void;
 
 // Alias nama lama
 export type SummaryResponse = GetSummaryApiResponse;

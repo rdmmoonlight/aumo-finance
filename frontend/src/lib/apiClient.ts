@@ -6,23 +6,13 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
+// Ambil URL murni dari environment variable tanpa auto-correct/manipulasi string
 function getBackendTarget(): string {
-  let target =
+  return (
     process.env.NEXT_PUBLIC_WEB_API_URL ||
     process.env.WEB_API_URL ||
-    "http://localhost:5000";
-
-  // Paksa HTTPS jika menembak server remote (Production / Render)
-  if (
-    !target.includes("localhost") &&
-    !target.includes("127.0.0.1") &&
-    target.startsWith("http://")
-  ) {
-    target = target.replace("http://", "https://");
-  }
-
-  // Hapus trailing slash di akhir agar tidak bentrok dengan endpoint yang diawali '/'
-  return target.replace(/\/+$/, "");
+    "http://localhost:5000"
+  );
 }
 
 const BASE_URL = getBackendTarget();
@@ -71,9 +61,16 @@ const baseQueryWithReauth: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const requestUrl = typeof args === "string" ? args : args.url;
+  const requestMethod = typeof args === "string" ? "GET" : (args.method || "GET");
 
-  // --- EKSPLISIT VALIDASI: Wajib diawali dengan slash `/` ---
+  // --- LOGGING & VALIDASI RUTE MURNI ---
+  // Cetak gabungan akhir URL murni ke console agar mudah di-debug mana rute yang typo/double slash
+  const fullTargetUrl = `${BASE_URL}${requestUrl}`;
+
   if (!requestUrl || !requestUrl.startsWith("/")) {
+    console.error(
+      `❌ [RTK Query Route Error]: Route "${requestUrl}" tidak diawali slash '/'. Full Target URL: "${fullTargetUrl}"`
+    );
     throw new Error(
       `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'. Mohon perbaiki penulisan endpoint pada slice API tempat permintaan ini dipanggil.`,
     );
@@ -112,6 +109,14 @@ const baseQueryWithReauth: BaseQueryFn<
   }
 
   const result = await rawBaseQuery(adjustedArgs, api, extraOptions);
+
+  // Jika dapat error status (404, 500, dll), print log murni rute mana yang gagal
+  if (result.error) {
+    console.warn(
+      `⚠️ [RTK Query Fetch Error ${result.error.status}]: ${requestMethod} ${fullTargetUrl}`,
+      result.error
+    );
+  }
 
   // Penanganan Unauthenticated (401) di sisi client
   if (

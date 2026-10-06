@@ -49,14 +49,6 @@ export const commonApi = baseApi.injectEndpoints({
       invalidatesTags: ["AumoBackend"],
     }),
 
-    // POST /api/v1/auth/logout (Disesuaikan ke route v1 auth ASP.NET Core)
-    logout: builder.mutation<CommonActionResponse, void>({
-      query: () => ({
-        url: "/api/v1/auth/logout",
-        method: "POST",
-      }),
-      invalidatesTags: ["Auth", "AumoBackend"],
-    }),
 
     // GET /api/v1/health
     getHealth: builder.query<HealthCheckResponse, void>({
