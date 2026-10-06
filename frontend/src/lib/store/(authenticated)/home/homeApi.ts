@@ -32,6 +32,10 @@ export interface MarketIndicatorsResponse {
 
 // --- Inject Endpoints ke baseApi ---
 export const homeApi = baseApi.injectEndpoints({
+  // Mencegah error 'called injectEndpoints to override already-existing endpointName'
+  // saat Fast Refresh / HMR di Next.js & Turbopack
+  overrideExisting: process.env.NODE_ENV !== "production",
+
   endpoints: (builder) => ({
     // 1. GET /api/v1/kurs
     getKurs: builder.query<KursResponse, KursParams | void>({
@@ -39,9 +43,9 @@ export const homeApi = baseApi.injectEndpoints({
         url: "/api/v1/kurs", // Wajib diawali slash '/'
         params: params
           ? {
-              baseCurrency: params.baseCurrency,
-              targetCurrency: params.targetCurrency,
-            }
+            baseCurrency: params.baseCurrency,
+            targetCurrency: params.targetCurrency,
+          }
           : undefined,
       }),
       providesTags: ["MarketData"],

@@ -45,16 +45,24 @@ export interface ProfileResponse {
   message?: string;
 }
 
+export interface CommonActionResponse {
+  success: boolean;
+  message: string;
+}
+
 // --- Inject Endpoints ke baseApi ---
 export const authApi = baseApi.injectEndpoints({
+  // Mencegah error 'overrideExisting' saat Next.js Turbopack HMR / Fast Refresh
+  overrideExisting: process.env.NODE_ENV !== "production",
   endpoints: (builder) => ({
     // 1. POST /api/v1/auth/login
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({
-        url: "/api/v1/auth/login", // Wajib pakai '/' di awal
+        url: "/api/v1/auth/login",
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Auth"],
     }),
 
     // 2. POST /api/v1/auth/google-login
@@ -64,19 +72,30 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Auth"],
     }),
 
     // 3. GET /api/v1/auth/me
     getProfile: builder.query<ProfileResponse, void>({
       query: () => "/api/v1/auth/me",
+      providesTags: ["Auth"],
     }),
 
-    // 4. POST /api/v1/auth/logout
-    logout: builder.mutation<{ success: boolean; message: string }, void>({
+    // 4. POST /api/v1/auth/logout (Digabung & disederhanakan)
+    logout: builder.mutation<CommonActionResponse, void>({
       query: () => ({
         url: "/api/v1/auth/logout",
         method: "POST",
       }),
+      invalidatesTags: ["Auth"],
     }),
   }),
 });
+
+// Export hooks otomatis dari RTK Query
+export const {
+  useLoginMutation,
+  useGoogleLoginMutation,
+  useGetProfileQuery,
+  useLogoutMutation,
+} = authApi;
