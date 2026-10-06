@@ -94,7 +94,7 @@ public class GeneralLedgersService : IGeneralLedgersService
 
                 var lines = await _db.JournalEntryLines.AsNoTracking()
                    .Include(l => l.JournalEntry).Include(l => l.Account)
-                   .Where(l => l.JournalEntry!= null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end)
+                   .Where(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end)
                    .OrderBy(l => l.AccountId).ThenBy(l => l.JournalEntry!.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
                    .ToListAsync();
 
@@ -112,13 +112,13 @@ public class GeneralLedgersService : IGeneralLedgersService
                     var acc = g.First().Account;
                     if (acc == null) continue;
                     decimal running = 0;
-                    bool isPermanent = PermanentTypes.Contains(acc.Type?? "", StringComparer.OrdinalIgnoreCase);
-                    bool isTemporary = TemporaryTypes.Contains(acc.Type?? "", StringComparer.OrdinalIgnoreCase);
+                    bool isPermanent = PermanentTypes.Contains(acc.Type ?? "", StringComparer.OrdinalIgnoreCase);
+                    bool isTemporary = TemporaryTypes.Contains(acc.Type ?? "", StringComparer.OrdinalIgnoreCase);
                     bool isDebitNormal = IsDebitNormal(acc.Type);
 
                     foreach (var line in g)
                     {
-                        running += isDebitNormal? (line.Debit - line.Credit) : (line.Credit - line.Debit);
+                        running += isDebitNormal ? (line.Debit - line.Credit) : (line.Credit - line.Debit);
                         if (isPermanent)
                             permanents.Add(new GeneralLedgerPermanentAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.Id, EntryDate = line.JournalEntry!.EntryDate, TransactionNumber = line.JournalEntry.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                         else if (isTemporary)
@@ -135,7 +135,7 @@ public class GeneralLedgersService : IGeneralLedgersService
             catch (Exception ex)
             {
                 await tx.RollbackAsync();
-                return new BaseServiceResult { Success = false, Message = $"Failed to refresh: {ex.InnerException?.Message?? ex.Message}" };
+                return new BaseServiceResult { Success = false, Message = $"Failed to refresh: {ex.InnerException?.Message ?? ex.Message}" };
             }
         });
     }
@@ -152,7 +152,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     private async Task<Models.Period?> ResolveSelectedPeriodAsync(Guid userId)
     {
         var p = await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId && x.IsSelected);
-        if (p!= null) return p;
+        if (p != null) return p;
         var helper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
         if (helper == null) return null;
         return await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == helper.Id && x.UserId == userId);
@@ -162,14 +162,14 @@ public class GeneralLedgersService : IGeneralLedgersService
         _db.GeneralLedgerPermanentAccounts.AsNoTracking().Include(x => x.Account)
            .Where(x => x.UserId == userId && x.PeriodId == periodId)
            .OrderBy(x => x.AccountId).ThenBy(x => x.EntryDate).ThenBy(x => x.Id)
-           .Select(x => new PermanentLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber?? "", LineDescription = x.LineDescription?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
+           .Select(x => new PermanentLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? "", LineDescription = x.LineDescription ?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
            .ToListAsync();
 
     private Task<List<TemporaryLedgerDto>> FetchTemporaryDtosAsync(Guid userId, int periodId) =>
         _db.GeneralLedgerTemporaryAccounts.AsNoTracking().Include(x => x.Account)
            .Where(x => x.UserId == userId && x.PeriodId == periodId)
            .OrderBy(x => x.AccountId).ThenBy(x => x.EntryDate).ThenBy(x => x.Id)
-           .Select(x => new TemporaryLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber?? "", LineDescription = x.LineDescription?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
+           .Select(x => new TemporaryLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? "", LineDescription = x.LineDescription ?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
            .ToListAsync();
 
     private List<LedgerAccountResponse> MapToGrouped(List<PermanentLedgerDto> flat)
@@ -183,7 +183,7 @@ public class GeneralLedgersService : IGeneralLedgersService
             if (ordered.Any())
             {
                 var f = ordered.First();
-                var effect = isDebitNormal? (f.Debit - f.Credit) : (f.Credit - f.Debit);
+                var effect = isDebitNormal ? (f.Debit - f.Credit) : (f.Credit - f.Debit);
                 beginning = f.RunningBalance - effect;
             }
             return new LedgerAccountResponse
@@ -195,7 +195,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                 Type = first.AccountType,
                 NormalBalanceIsDebit = isDebitNormal,
                 BeginningBalance = beginning,
-                EndingBalance = ordered.LastOrDefault()?.RunningBalance?? beginning,
+                EndingBalance = ordered.LastOrDefault()?.RunningBalance ?? beginning,
                 Lines = ordered.Select(x => new LedgerLineResponse
                 {
                     JournalEntryId = x.JournalEntryId,
@@ -211,7 +211,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     }
 
     private static bool IsDebitNormal(string? type) =>
-        type!= null && (type.Equals("Assets", StringComparison.OrdinalIgnoreCase) || type.Equals("Asset", StringComparison.OrdinalIgnoreCase) || ExpenseTypes.Contains(type, StringComparer.OrdinalIgnoreCase));
+        type != null && (type.Equals("Assets", StringComparison.OrdinalIgnoreCase) || type.Equals("Asset", StringComparison.OrdinalIgnoreCase) || ExpenseTypes.Contains(type, StringComparer.OrdinalIgnoreCase));
 
     private Task ClearLedgerDataForPeriodAsync(Guid userId, int periodId) =>
         Task.WhenAll(

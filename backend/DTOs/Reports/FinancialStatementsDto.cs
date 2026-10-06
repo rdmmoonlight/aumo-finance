@@ -79,21 +79,21 @@ public class FinancialPositionLineApiResponse
     public decimal Amount { get; set; }
 }
 
-    public class CashFlowLine
-    {
-        public string Description { get; set; } = string.Empty;
-        public decimal Amount { get; set; }
-    }
+public class CashFlowLine
+{
+    public string Description { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
 
-    public class IncomeStatementLine
-    {
-        public string AccountName { get; set; } = string.Empty;
-        public decimal Amount { get; set; }
-    }
+public class IncomeStatementLine
+{
+    public string AccountName { get; set; } = string.Empty;
+    public decimal Amount { get; set; }
+}
 
-    public class FinancialPositionLine
-    {
-        public string AccountName { get; set; } = string.Empty;
-        public decimal Balance { get; set; }
-        public decimal Amount { get; set; }
-    }
+public class FinancialPositionLine
+{
+    public string AccountName { get; set; } = string.Empty;
+    public decimal Balance { get; set; }
+    public decimal Amount { get; set; }
+}
