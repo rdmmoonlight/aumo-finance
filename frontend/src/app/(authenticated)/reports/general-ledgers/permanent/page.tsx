@@ -23,14 +23,16 @@ export default function GeneralLedgerPermanentPage() {
       setIsError(false);
 
       const result = await store.dispatch(
-        reportsApi.endpoints.getGeneralLedgerPermanent.initiate(),
+        reportsApi.endpoints.getGeneralLedgerPermanent.initiate(undefined, {
+          forceRefetch: true,
+        }),
       );
 
       if (!isMounted) return;
 
-      if ("data" in result) {
+      if (result.data) {
         setData(result.data);
-      } else if ("error" in result) {
+      } else if (result.error) {
         setIsError(true);
         const err = result.error as any;
         setErrorMessage(
@@ -61,7 +63,7 @@ export default function GeneralLedgerPermanentPage() {
     return <NoPeriodState />;
   }
 
-  const ledgers = data?.ledgers || (Array.isArray(data) ? data : []);
+  const ledgers = data?.accounts ?? [];
 
   return (
     <div className="space-y-6">
@@ -77,7 +79,7 @@ export default function GeneralLedgerPermanentPage() {
       <PageHeader
         title="Permanent Ledger"
         subtitle={`Assets, Liabilities, Equity • ${ledgers.length} accounts • IDR`}
-        switchHref="/reports/general-ledger/temporary"
+        switchHref="/reports/general-ledgers/temporary"
         switchLabel="View Temporary"
       />
 
