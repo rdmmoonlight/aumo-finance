@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 
 namespace AumoBackend.Services.ChartOfAccounts;
 
@@ -81,9 +82,17 @@ public class ChartOfAccountsService : IChartOfAccountsService
             {
                 if (accountBalances.TryGetValue(account.Id, out var balance))
                 {
-                    account.Balance = AccountClassificationHelper.NormalBalanceIsDebit(account.Type)
-                        ? balance.TotalDebit - balance.TotalCredit
-                        : balance.TotalCredit - balance.TotalDebit;
+                    // Lakukan TryParse string 'account.Type' ke enum 'AccountClassification'
+                    if (Enum.TryParse<AccountClassification>(account.Type, true, out var classification))
+                    {
+                        account.Balance = AccountClassificationHelper.NormalBalanceIsDebit(classification)
+                            ? balance.TotalDebit - balance.TotalCredit
+                            : balance.TotalCredit - balance.TotalDebit;
+                    }
+                    else
+                    {
+                        account.Balance = balance.TotalDebit - balance.TotalCredit;
+                    }
                 }
                 else
                 {
@@ -119,8 +128,17 @@ public class ChartOfAccountsService : IChartOfAccountsService
         if (string.IsNullOrWhiteSpace(request.Type))
             return Fail("Account category type is required.", 400);
 
-        if (!AccountClassificationHelper.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
+        // Convert string category/type ke enum AccountClassification
+        if (!Enum.TryParse<AccountClassification>(request.Type, true, out var classification))
+        {
+            return Fail($"Invalid account classification category '{request.Type}'.", 400);
+        }
+
+        // Panggil ValidateReferenceNumber dengan tipe enum AccountClassification (1 argument)
+        if (!AccountClassificationHelper.ValidateReferenceNumber(classification))
+        {
             return Fail($"Invalid reference number {request.ReferenceNumber} for category {request.Type}.", 400);
+        }
 
         bool isCodeTaken = await _db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber);
@@ -169,8 +187,17 @@ public class ChartOfAccountsService : IChartOfAccountsService
         if (string.IsNullOrWhiteSpace(request.AccountName))
             return Fail("Account name is required.", 400);
 
-        if (!AccountClassificationHelper.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
+        // Convert string category/type ke enum AccountClassification
+        if (!Enum.TryParse<AccountClassification>(request.Type, true, out var classification))
+        {
+            return Fail($"Invalid account classification category '{request.Type}'.", 400);
+        }
+
+        // Panggil ValidateReferenceNumber dengan tipe enum AccountClassification (1 argument)
+        if (!AccountClassificationHelper.ValidateReferenceNumber(classification))
+        {
             return Fail($"Invalid reference number {request.ReferenceNumber} for category {request.Type}.", 400);
+        }
 
         bool isCodeTaken = await _db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber && a.Id != accountId);

@@ -1,7 +1,4 @@
-using AumoBackend.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
+using AumoBackend.DTOs.Home;
 
 namespace AumoBackend.Services
 {

@@ -69,6 +69,11 @@ public class GeneralLedgersService : IGeneralLedgersService
         };
     }
 
+    private List<LedgerAccountResponse> MapToGrouped(List<TemporaryLedgerDto> flat)
+    {
+        throw new NotImplementedException();
+    }
+
     public async Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId)
     {
         var selectedPeriod = await ResolveSelectedPeriodAsync(userId);
