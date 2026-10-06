@@ -61,7 +61,7 @@ const baseQueryWithReauth: BaseQueryFn<
   FetchBaseQueryError
 > = async (args, api, extraOptions) => {
   const requestUrl = typeof args === "string" ? args : args.url;
-  const requestMethod = typeof args === "string" ? "GET" : (args.method || "GET");
+  const requestMethod = typeof args === "string" ? "GET" : args.method || "GET";
 
   // --- LOGGING & VALIDASI RUTE MURNI ---
   // Cetak gabungan akhir URL murni ke console agar mudah di-debug mana rute yang typo/double slash
@@ -69,7 +69,7 @@ const baseQueryWithReauth: BaseQueryFn<
 
   if (!requestUrl || !requestUrl.startsWith("/")) {
     console.error(
-      `❌ [RTK Query Route Error]: Route "${requestUrl}" tidak diawali slash '/'. Full Target URL: "${fullTargetUrl}"`
+      `❌ [RTK Query Route Error]: Route "${requestUrl}" tidak diawali slash '/'. Full Target URL: "${fullTargetUrl}"`,
     );
     throw new Error(
       `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'. Mohon perbaiki penulisan endpoint pada slice API tempat permintaan ini dipanggil.`,
@@ -114,7 +114,7 @@ const baseQueryWithReauth: BaseQueryFn<
   if (result.error) {
     console.warn(
       `⚠️ [RTK Query Fetch Error ${result.error.status}]: ${requestMethod} ${fullTargetUrl}`,
-      result.error
+      result.error,
     );
   }
 
