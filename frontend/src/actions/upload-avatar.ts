@@ -1,6 +1,4 @@
 // actions/upload-avatar.ts
-"use server";
-
 import { supabase } from "@/lib/supabase";
 
 export async function uploadAvatarAction(formData: FormData) {

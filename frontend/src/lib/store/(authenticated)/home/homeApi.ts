@@ -34,7 +34,7 @@ export interface MarketIndicatorsResponse {
 export const homeApi = baseApi.injectEndpoints({
   // Mencegah error 'called injectEndpoints to override already-existing endpointName'
   // saat Fast Refresh / HMR di Next.js & Turbopack
-  overrideExisting: process.env.NODE_ENV !== "production",
+  overrideExisting: !import.meta.env.PROD,
 
   endpoints: (builder) => ({
     // 1. GET /api/v1/kurs

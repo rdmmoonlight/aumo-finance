@@ -1,7 +1,13 @@
 // lib/supabase.ts
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as
+  | string
+  | undefined;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Fallback agar aplikasi tidak crash (layar putih) saat env belum diisi.
+export const supabase = createClient(
+  supabaseUrl || "http://localhost",
+  supabaseAnonKey || "missing-anon-key",
+);

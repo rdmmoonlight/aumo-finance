@@ -28,7 +28,7 @@ export interface AuthPageProps {
   onSuccess?: () => void;
 }
 
-export const GOOGLE_CLIENT_ID: string = process.env.VITE_GOOGLE_CLIENT_ID || "";
+export const GOOGLE_CLIENT_ID: string = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
 export function GoogleIcon(
   props: React.ComponentProps<"svg">,
