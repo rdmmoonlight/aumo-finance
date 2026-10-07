@@ -24,14 +24,20 @@ public class GeneralLedgersService : IGeneralLedgersService
         if (period == null)
             return new BaseServiceResult<PermanentLedgerGroupedResponse> { Success = false, Message = "No accounting period selected." };
 
-        var flat = await FetchPermanentDtosAsync(userId, period.Id);
-        if (!flat.Any())
+        // 1. Cek apakah data staging perlu di-refresh (jika kosong ATAU ada data jurnal terbaru)
+        bool needsRefresh = !await HasStagingDataAsync(userId, period.Id, isPermanent: true) 
+                           || await IsLedgerStaleAsync(userId, period);
+
+        if (needsRefresh)
         {
             var r = await RefreshGeneralLedgersAsync(userId);
-            if (r.Success) flat = await FetchPermanentDtosAsync(userId, period.Id);
+            if (!r.Success)
+                return new BaseServiceResult<PermanentLedgerGroupedResponse> { Success = false, Message = r.Message };
         }
 
+        var flat = await FetchPermanentDtosAsync(userId, period.Id);
         var grouped = MapToGrouped(flat);
+
         return new BaseServiceResult<PermanentLedgerGroupedResponse>
         {
             Success = true,
@@ -45,13 +51,18 @@ public class GeneralLedgersService : IGeneralLedgersService
         if (period == null)
             return new BaseServiceResult<TemporaryLedgerGroupedResponse> { Success = false, Message = "No accounting period selected." };
 
-        var flat = await FetchTemporaryDtosAsync(userId, period.Id);
-        if (!flat.Any())
+        // 1. Cek apakah data staging perlu di-refresh (jika kosong ATAU ada data jurnal terbaru)
+        bool needsRefresh = !await HasStagingDataAsync(userId, period.Id, isPermanent: false) 
+                           || await IsLedgerStaleAsync(userId, period);
+
+        if (needsRefresh)
         {
             var r = await RefreshGeneralLedgersAsync(userId);
-            if (r.Success) flat = await FetchTemporaryDtosAsync(userId, period.Id);
+            if (!r.Success)
+                return new BaseServiceResult<TemporaryLedgerGroupedResponse> { Success = false, Message = r.Message };
         }
 
+        var flat = await FetchTemporaryDtosAsync(userId, period.Id);
         var grouped = MapToGrouped(flat);
 
         decimal totalRev = flat.Where(x => RevenueTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Credit - x.Debit);
@@ -67,11 +78,6 @@ public class GeneralLedgersService : IGeneralLedgersService
                 Accounts = grouped
             }
         };
-    }
-
-    private List<LedgerAccountResponse> MapToGrouped(List<TemporaryLedgerDto> flat)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId)
@@ -93,10 +99,10 @@ public class GeneralLedgersService : IGeneralLedgersService
                 var end = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
                 var lines = await _db.JournalEntryLines.AsNoTracking()
-                   .Include(l => l.JournalEntry).Include(l => l.Account)
-                   .Where(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end)
-                   .OrderBy(l => l.AccountId).ThenBy(l => l.JournalEntry!.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
-                   .ToListAsync();
+                    .Include(l => l.JournalEntry).Include(l => l.Account)
+                    .Where(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end)
+                    .OrderBy(l => l.AccountId).ThenBy(l => l.JournalEntry!.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
+                    .ToListAsync();
 
                 if (!lines.Any())
                 {
@@ -149,6 +155,38 @@ public class GeneralLedgersService : IGeneralLedgersService
     }
 
     // --- PRIVATE HELPERS ---
+
+    /// <summary>
+    /// Memeriksa apakah data staging general ledger tertinggal/outdated dibanding tabel JournalEntryLines.
+    /// </summary>
+    private async Task<bool> IsLedgerStaleAsync(Guid userId, Models.Period period)
+    {
+        var start = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);
+        var end = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
+
+        // Hitung total baris jurnal transaksi yang ada di periode ini
+        int totalJournalLines = await _db.JournalEntryLines.AsNoTracking()
+            .CountAsync(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end);
+
+        // Hitung total baris di staging ledger
+        int permanentCount = await _db.GeneralLedgerPermanentAccounts.AsNoTracking().CountAsync(x => x.UserId == userId && x.PeriodId == period.Id);
+        int temporaryCount = await _db.GeneralLedgerTemporaryAccounts.AsNoTracking().CountAsync(x => x.UserId == userId && x.PeriodId == period.Id);
+
+        // Jika jumlah total record tidak sama, berarti data berubah / ada transaksi baru / terhapus
+        if (totalJournalLines != (permanentCount + temporaryCount))
+            return true;
+
+        return false;
+    }
+
+    private Task<bool> HasStagingDataAsync(Guid userId, int periodId, bool isPermanent)
+    {
+        if (isPermanent)
+            return _db.GeneralLedgerPermanentAccounts.AsNoTracking().AnyAsync(x => x.UserId == userId && x.PeriodId == periodId);
+        
+        return _db.GeneralLedgerTemporaryAccounts.AsNoTracking().AnyAsync(x => x.UserId == userId && x.PeriodId == periodId);
+    }
+
     private async Task<Models.Period?> ResolveSelectedPeriodAsync(Guid userId)
     {
         var p = await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId && x.IsSelected);
@@ -173,6 +211,44 @@ public class GeneralLedgersService : IGeneralLedgersService
            .ToListAsync();
 
     private List<LedgerAccountResponse> MapToGrouped(List<PermanentLedgerDto> flat)
+    {
+        return flat.GroupBy(x => x.AccountId).Select(g =>
+        {
+            var first = g.First();
+            bool isDebitNormal = IsDebitNormal(first.AccountType);
+            var ordered = g.OrderBy(x => x.EntryDate).ThenBy(x => x.Id).ToList();
+            decimal beginning = 0;
+            if (ordered.Any())
+            {
+                var f = ordered.First();
+                var effect = isDebitNormal ? (f.Debit - f.Credit) : (f.Credit - f.Debit);
+                beginning = f.RunningBalance - effect;
+            }
+            return new LedgerAccountResponse
+            {
+                AccountId = first.AccountId,
+                ReferenceNumber = first.AccountReferenceNumber,
+                AccountName = first.AccountName,
+                AccountType = first.AccountType,
+                Type = first.AccountType,
+                NormalBalanceIsDebit = isDebitNormal,
+                BeginningBalance = beginning,
+                EndingBalance = ordered.LastOrDefault()?.RunningBalance ?? beginning,
+                Lines = ordered.Select(x => new LedgerLineResponse
+                {
+                    JournalEntryId = x.JournalEntryId,
+                    TransactionNumber = x.TransactionNumber,
+                    EntryDate = x.EntryDate.ToString("yyyy-MM-dd"),
+                    Description = x.LineDescription,
+                    Debit = x.Debit,
+                    Credit = x.Credit,
+                    RunningBalance = x.RunningBalance
+                }).ToList()
+            };
+        }).OrderBy(x => x.ReferenceNumber).ToList();
+    }
+
+    private List<LedgerAccountResponse> MapToGrouped(List<TemporaryLedgerDto> flat)
     {
         return flat.GroupBy(x => x.AccountId).Select(g =>
         {
