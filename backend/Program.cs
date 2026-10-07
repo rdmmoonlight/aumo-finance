@@ -40,7 +40,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using Serilog;
-using Supabase;
 
 namespace AumoBackend
 {
@@ -101,32 +100,10 @@ namespace AumoBackend
                 builder.Services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
                 // ===================================== 
-                // 2. SUPABASE CONFIGURATION (Storage / Avatar Bucket) 
+                // 2. NEON BUCKET (S3-compatible) - Avatar Storage 
                 // ===================================== 
-                var supabaseUrl = builder.Configuration["SUPABASE_URL"]
-                    ?? Environment.GetEnvironmentVariable("SUPABASE_URL");
-
-                var supabaseKey = builder.Configuration["SUPABASE_KEY"]
-                    ?? Environment.GetEnvironmentVariable("SUPABASE_KEY");
-
-                if (!string.IsNullOrWhiteSpace(supabaseUrl) && !string.IsNullOrWhiteSpace(supabaseKey))
-                {
-                    builder.Services.AddScoped<Supabase.Client>(provider =>
-                    {
-                        var options = new SupabaseOptions
-                        {
-                            AutoRefreshToken = true,
-                            AutoConnectRealtime = false
-                        };
-                        return new Supabase.Client(supabaseUrl, supabaseKey, options);
-                    });
-                }
-                else
-                {
-                    using var loggerFactory = LoggerFactory.Create(logging => logging.AddConsole());
-                    var startupLogger = loggerFactory.CreateLogger<Program>();
-                    startupLogger.LogWarning("Peringatan: 'SUPABASE_URL' atau 'SUPABASE_KEY' belum dikonfigurasi.");
-                }
+                builder.Services.AddHttpContextAccessor();
+                builder.Services.AddSingleton<AumoBackend.Services.Storage.IAvatarStorage, AumoBackend.Services.Storage.NeonBucketStorage>();
 
                 // ===================================== 
                 // 3. DATA PROTECTION & PERSISTENCE 

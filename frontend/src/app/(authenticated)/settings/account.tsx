@@ -142,7 +142,7 @@ export default function AccountSettings() {
       ).unwrap();
       const newUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
       if (newUrl) setAvatarPreview(newUrl);
-      notify("Avatar uploaded ke Supabase!");
+      notify("Avatar berhasil diunggah!");
       fetchProfile();
     } catch (err: any) {
       notify(

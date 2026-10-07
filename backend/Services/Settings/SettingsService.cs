@@ -12,7 +12,7 @@ using AumoBackend.DTOs;
 using AumoBackend.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Supabase;
+using AumoBackend.Services.Storage;
 
 namespace AumoBackend.Services.Settings
 {
@@ -22,19 +22,18 @@ namespace AumoBackend.Services.Settings
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IGuardianService _guardianService;
-        private readonly Client? _supabaseClient;
-        private const string BucketName = "aumo-storage";
+        private readonly IAvatarStorage _avatarStorage;
 
         public SettingsService(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IGuardianService guardianService,
-            Client? supabaseClient = null)
+            IAvatarStorage avatarStorage)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _guardianService = guardianService;
-            _supabaseClient = supabaseClient;
+            _avatarStorage = avatarStorage;
         }
 
         public async Task<ServiceResult> UpdateProfileAsync(ClaimsPrincipal userPrincipal, UpdateProfileRequest request)
@@ -103,9 +102,9 @@ namespace AumoBackend.Services.Settings
                 return ServiceResult.BadRequest("Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.");
             }
 
-            if (_supabaseClient == null)
+            if (!_avatarStorage.IsConfigured)
             {
-                return ServiceResult.InternalServerError("Supabase Client is not configured on the server.");
+                return ServiceResult.InternalServerError("Neon bucket belum dikonfigurasi di server.");
             }
 
             try
@@ -114,25 +113,18 @@ namespace AumoBackend.Services.Settings
 
                 using var memoryStream = new MemoryStream();
                 await uploadFile.CopyToAsync(memoryStream);
-                var fileBytes = memoryStream.ToArray();
+                memoryStream.Position = 0;
 
-                var storage = _supabaseClient.Storage.From(BucketName);
-                await storage.Upload(fileBytes, fileName, new Supabase.Storage.FileOptions
-                {
-                    ContentType = uploadFile.ContentType,
-                    Upsert = true
-                });
-
-                var publicUrl = storage.GetPublicUrl(fileName);
+                var publicUrl = await _avatarStorage.UploadAvatarAsync(fileName, memoryStream);
 
                 user.AvatarUrl = publicUrl;
                 await _userManager.UpdateAsync(user);
 
-                return ServiceResult.Ok("Avatar uploaded successfully to Supabase.", new { avatarUrl = publicUrl });
+                return ServiceResult.Ok("Avatar uploaded successfully.", new { avatarUrl = publicUrl });
             }
             catch (Exception ex)
             {
-                return ServiceResult.InternalServerError($"Supabase upload error: {ex.Message}");
+                return ServiceResult.InternalServerError($"Avatar upload error: {ex.Message}");
             }
         }
 
