@@ -1,28 +1,41 @@
-import { IncomingMessage, ServerResponse } from 'node:http';
-import { z } from 'zod';
-import { ValidationError } from './errors.js';
+import { IncomingMessage, ServerResponse } from "node:http";
+import { z } from "zod";
+import { ValidationError } from "./errors.js";
 
-export const sendJson = (res: ServerResponse, statusCode: number, data: unknown) => {
-    res.writeHead(statusCode, { 'Content-Type': 'application/json' });
+/**
+ * Kirim response format JSON beserta status code dan kustom headers
+ */
+export const sendJson = (
+    res: ServerResponse,
+    statusCode: number,
+    data: unknown,
+    headers: Record<string, string | string[]> = {}
+): void => {
+    res.writeHead(statusCode, {
+        "Content-Type": "application/json",
+        ...headers,
+    });
     res.end(JSON.stringify(data));
 };
 
+/**
+ * Parse JSON body dari request stream dan validasi menggunakan Zod schema (opsional)
+ */
 export const parseJsonBody = <T>(
     req: IncomingMessage,
     schema?: z.ZodType<T>
 ): Promise<T> => {
     return new Promise((resolve, reject) => {
-        let body = '';
+        let body = "";
 
-        req.on('data', (chunk: Buffer | string) => {
+        req.on("data", (chunk: Buffer | string) => {
             body += chunk.toString();
         });
 
-        req.on('end', async () => {
+        req.on("end", async () => {
             try {
                 const parsedJson = body ? JSON.parse(body) : {};
 
-                // Jika schema disediakan, validasi menggunakan Zod
                 if (schema) {
                     const result = await schema.safeParseAsync(parsedJson);
                     if (!result.success) {
@@ -36,11 +49,30 @@ export const parseJsonBody = <T>(
                 if (err instanceof ValidationError) {
                     reject(err);
                 } else {
-                    reject(new Error('Format JSON tidak valid'));
+                    reject(new Error("Format JSON tidak valid"));
                 }
             }
         });
 
-        req.on('error', (err: Error) => reject(err));
+        req.on("error", (err: Error) => reject(err));
     });
+};
+
+/**
+ * Helper untuk membaca Cookie dari header request
+ */
+export const parseCookies = (req: IncomingMessage): Record<string, string> => {
+    const list: Record<string, string> = {};
+    const cookieHeader = req.headers.cookie;
+
+    if (!cookieHeader) return list;
+
+    cookieHeader.split(";").forEach((cookie) => {
+        const [name, ...rest] = cookie.split("=");
+        if (name) {
+            list[name.trim()] = decodeURIComponent(rest.join("=").trim());
+        }
+    });
+
+    return list;
 };

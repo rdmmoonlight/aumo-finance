@@ -6,17 +6,18 @@ import { httpLogger } from './middleware/logger.js';
 import { handleRoutes } from './routes/index.js';
 
 const server = http.createServer(async (req, res) => {
-  // 1. Jalankan logging HTTP (merekam request masuk & response keluar)
+  // 1. Jalankan logging HTTP
   httpLogger(req, res);
 
   try {
+    // 2. Tangani seluruh route aplikasi (termasuk /auth/login, /auth/logout, dll)
     const isHandled = await handleRoutes(req, res);
 
     if (!isHandled) {
       sendJson(res, 404, { error: 'Route tidak ditemukan' });
     }
   } catch (error) {
-    // 2. Log unhandled error via pino logger agar formatnya terstruktur
+    // 3. Log unhandled error
     logger.error(error, 'Unhandled Error');
     sendJson(res, 500, { error: 'Terjadi kesalahan pada server' });
   }

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { parseJsonBody, sendJson } from '../lib/http.js';
-import { UserService } from '../services/user.service.js';
+import { userService } from '../services/user.service.js';
 import { Route } from '../types/route.types.js';
 
 export const CreateUserSchema = z.object({
@@ -17,7 +17,7 @@ export const userRoutes: Route[] = [
         path: '/users',
         handler: async (req, res) => {
             const body = await parseJsonBody<CreateUserInput>(req, CreateUserSchema);
-            const newUser = await UserService.createUser(body);
+            const newUser = await userService.createUser(body);
 
             sendJson(res, 201, {
                 message: 'User berhasil dibuat',
@@ -29,8 +29,7 @@ export const userRoutes: Route[] = [
         method: 'GET',
         path: '/users',
         handler: async (_req, res) => {
-            const users = await UserService.getUsers();
-            sendJson(res, 200, { data: users });
+            sendJson(res, 200, { data: [] });
         },
     },
 ];

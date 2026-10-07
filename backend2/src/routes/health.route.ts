@@ -1,4 +1,4 @@
-import { Route } from '../types/route.types.js';
+import { Route } from '../types/route.types';
 
 export const healthRoutes: Route[] = [
     {

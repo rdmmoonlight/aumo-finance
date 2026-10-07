@@ -1,12 +1,14 @@
 import { IncomingMessage, ServerResponse } from 'node:http';
-import { Route } from '../types/route.types.js';
-import { healthRoutes } from './health.route.js';
-import { userRoutes } from './user.route.js';
+import { Route } from '../types/route.types';
+import { authRoutes } from './auth.route';
+import { healthRoutes } from './health.route';
+import { userRoutes } from './user.route';
 
 // Gabungkan semua route dari berbagai modul
 const routes: Route[] = [
     ...healthRoutes,
     ...userRoutes,
+    ...authRoutes,
 ];
 
 // Buat skema OpenAPI dinamis berdasarkan daftar routes
@@ -43,7 +45,7 @@ export async function handleRoutes(
 ): Promise<boolean> {
     const { method, url } = req;
 
-    // Normalisasi URL (mengabaikan query params misal /api/users?page=1)
+    // Normalisasi URL (mengabaikan query params misal /auth/google/callback?code=xxx)
     const parsedUrl = new URL(url || '/', `http://${req.headers.host || 'localhost'}`);
     const pathname = parsedUrl.pathname;
 
