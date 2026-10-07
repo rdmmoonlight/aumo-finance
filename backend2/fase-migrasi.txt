@@ -1,0 +1,60 @@
+Bisa banget! `Program.cs` milikmu menunjukkan arsitektur aplikasi finansial yang sangat kaya (*Enterprise-grade*: Npgsql/Neon, Identity, JWT + Google OAuth, Hangfire background jobs, Redis caching, Supabase storage, FluentValidation, Rate Limiting, dll).
+
+Migrasi dari C#/ASP.NET Core ke **TypeScript Backend Murni (*Vanilla*)** seperti yang sedang kita buat memerlukan pemetaan modul (*module mapping*) dari ekosistem .NET ke ekosistem Node.js/TypeScript.
+
+---
+
+### Pemetaan Ekosistem ASP.NET Core $\rightarrow$ TypeScript Native
+
+| Fitur di `Program.cs` ASP.NET Core | Padanan di Custom TypeScript Backend |
+| --- | --- |
+| **EF Core + Npgsql (Neon DB)** | **Drizzle ORM** / **Prisma** + `pg` (Node Postgres driver) dengan *connection pooling*. |
+| **ASP.NET Core Identity & JWT** | **jsonwebtoken** (JWT) + **argon2** / **bcrypt** (Hashing Password). |
+| **Google OAuth** | **google-auth-library** atau HTTP request manual ke `[https://oauth2.googleapis.com/token](https://oauth2.googleapis.com/token)`. |
+| **Hangfire (Background Jobs)** | **BullMQ** / **Agenda** (berbasis Redis) atau **pg-boss** (berbasis PostgreSQL). |
+| **Upstash Redis Cache** | **ioredis** (Client Redis untuk Node.js) atau `@upstash/redis`. |
+| **Supabase Client** | **`@supabase/supabase-js`** (Official SDK untuk Node.js). |
+| **FluentValidation** | **Zod** (Langsung divalidasi saat parsing request body/query). |
+| **Serilog** | **Pino** atau **Winston** (Logger cepat berbasis JSON). |
+| **Rate Limiting** | Custom In-Memory / Redis Leaky Bucket Middleware. |
+
+---
+
+### Fase-Fase Migrasi Terstruktur
+
+Agar migrasi tidak brutal dan tetap stabil, lakukan secara bertahap dalam 5 fase berikut:
+
+#### Fase 1: Fondasi Core & Environment
+
+1. Buat utilitas **`lib/env.ts`** memakai Zod untuk memvalidasi semua *Environment Variables* (`DATABASE_URL`, `JWT_SIGNING_KEY`, `REDIS_URL`, `SUPABASE_URL`, dll).
+2. Buat **`lib/logger.ts`** (pakai `pino` atau `console` terstruktur) untuk menggantikan Serilog.
+3. Siapkan **`lib/db.ts`** menggunakan **Drizzle ORM** (karena kompatibel 100% dengan skema PostgreSQL Neon yang sudah dibuat EF Core tanpa merusak tabel yang ada).
+
+#### Fase 2: Autentikasi & Identity (`/auth`)
+
+1. Implementasikan hashing password yang identik dengan ASP.NET Identity (atau migrasikan token ke JWT).
+2. Buat fungsi pembuat JWT token (`sign`) dan middleware verifikasi JWT (`verify`) di `lib/auth.ts`.
+3. Buat handler route `/auth/login`, `/auth/logout`, dan Google OAuth callback handler.
+
+#### Fase 3: Layanan Finansial & Core Domain
+
+Migrasikan Service Layer satu per satu dari C# ke TypeScript:
+
+* `JournalEntryService` & `GeneralLedgersService`
+* `ChartOfAccountsService` & `PeriodsService`
+* `FinancialReportService`, `TrialBalanceService`, `WorksheetService`
+
+#### Fase 4: Infrastruktur Background Jobs & Cache
+
+1. Integrasikan `ioredis` untuk caching pengganti `AddStackExchangeRedisCache`.
+2. Ganti **Hangfire** dengan **BullMQ** atau **pg-boss** untuk menangani *background tasks* (seperti laporan berkala atau sinkronisasi data).
+3. Integrasikan `@supabase/supabase-js` untuk manajemen berkas/avatar storage.
+
+#### Fase 5: Middleware, Rate Limit & Deployment
+
+1. Buat Rate Limiter helper (In-Memory atau Redis-based).
+2. Pasang CORS header (`AllowFrontend` Vercel).
+3. Buat OpenAPI / Swagger JSON spec jika membutuhkan dokumentasi API otomatis.
+4. Deploy ke **Render.com** menggantikan instance C#.
+
+---

@@ -1,67 +1,27 @@
-import http, { IncomingMessage, ServerResponse } from 'node:http';
+import http from 'node:http';
+import { env } from './lib/env.js';
+import { sendJson } from './lib/http.js';
+import { logger } from './lib/logger.js';
+import { httpLogger } from './middleware/logger.js';
+import { handleRoutes } from './routes/index.js';
 
-const PORT = Number(process.env.PORT) || 5000;
+const server = http.createServer(async (req, res) => {
+  // 1. Jalankan logging HTTP (merekam request masuk & response keluar)
+  httpLogger(req, res);
 
-const parseJsonBody = <T>(req: IncomingMessage): Promise<T> => {
-  return new Promise((resolve, reject) => {
-    let body = '';
-    // Tambahkan tipe eksplisit untuk chunk
-    req.on('data', (chunk: Buffer | string) => {
-      body += chunk.toString();
-    });
-    req.on('end', () => {
-      try {
-        resolve(body ? JSON.parse(body) : {});
-      } catch (err) {
-        reject(err);
-      }
-    });
-    // Tambahkan tipe eksplisit untuk err
-    req.on('error', (err: Error) => reject(err));
-  });
-};
+  try {
+    const isHandled = await handleRoutes(req, res);
 
-const server = http.createServer(async (req: IncomingMessage, res: ServerResponse) => {
-  const method = req.method;
-  const url = req.url;
-
-  res.setHeader('Content-Type', 'application/json');
-
-  if (method === 'GET' && url === '/') {
-    res.writeHead(200);
-    res.end(JSON.stringify({ message: 'Server Native TypeScript siap di Render!' }));
-    return;
-  }
-
-  if (method === 'GET' && url === '/users') {
-    res.writeHead(200);
-    res.end(JSON.stringify({ users: [{ id: 1, name: 'Ghofur' }] }));
-    return;
-  }
-
-  if (method === 'POST' && url === '/users') {
-    try {
-      const body = await parseJsonBody<{ name: string }>(req);
-
-      if (!body.name) {
-        res.writeHead(400);
-        res.end(JSON.stringify({ error: 'Nama wajib diisi' }));
-        return;
-      }
-
-      res.writeHead(201);
-      res.end(JSON.stringify({ message: 'User berhasil dibuat', data: body }));
-    } catch (error) {
-      res.writeHead(400);
-      res.end(JSON.stringify({ error: 'Format JSON tidak valid' }));
+    if (!isHandled) {
+      sendJson(res, 404, { error: 'Route tidak ditemukan' });
     }
-    return;
+  } catch (error) {
+    // 2. Log unhandled error via pino logger agar formatnya terstruktur
+    logger.error(error, 'Unhandled Error');
+    sendJson(res, 500, { error: 'Terjadi kesalahan pada server' });
   }
-
-  res.writeHead(404);
-  res.end(JSON.stringify({ error: 'Route tidak ditemukan' }));
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server berjalan di http://0.0.0.0:${PORT}`);
+server.listen(env.PORT, '0.0.0.0', () => {
+  logger.info(`🚀 Server berjalan di http://0.0.0.0:${env.PORT}`);
 });
