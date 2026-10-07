@@ -25,7 +25,7 @@ public class GeneralLedgersService : IGeneralLedgersService
             return new BaseServiceResult<PermanentLedgerGroupedResponse> { Success = false, Message = "No accounting period selected." };
 
         // 1. Cek apakah data staging perlu di-refresh (jika kosong ATAU ada data jurnal terbaru)
-        bool needsRefresh = !await HasStagingDataAsync(userId, period.Id, isPermanent: true) 
+        bool needsRefresh = !await HasStagingDataAsync(userId, period.Id, isPermanent: true)
                            || await IsLedgerStaleAsync(userId, period);
 
         if (needsRefresh)
@@ -52,7 +52,7 @@ public class GeneralLedgersService : IGeneralLedgersService
             return new BaseServiceResult<TemporaryLedgerGroupedResponse> { Success = false, Message = "No accounting period selected." };
 
         // 1. Cek apakah data staging perlu di-refresh (jika kosong ATAU ada data jurnal terbaru)
-        bool needsRefresh = !await HasStagingDataAsync(userId, period.Id, isPermanent: false) 
+        bool needsRefresh = !await HasStagingDataAsync(userId, period.Id, isPermanent: false)
                            || await IsLedgerStaleAsync(userId, period);
 
         if (needsRefresh)
@@ -183,7 +183,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     {
         if (isPermanent)
             return _db.GeneralLedgerPermanentAccounts.AsNoTracking().AnyAsync(x => x.UserId == userId && x.PeriodId == periodId);
-        
+
         return _db.GeneralLedgerTemporaryAccounts.AsNoTracking().AnyAsync(x => x.UserId == userId && x.PeriodId == periodId);
     }
 
