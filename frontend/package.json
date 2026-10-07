@@ -12,9 +12,7 @@
   "scripts": {
     "start": "vite",
     "clean": "rimraf dist node_modules/.cache",
-    "predev": "pnpm run clean",
     "dev": "vite",
-    "prebuild": "pnpm run clean",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 3000",
     "typecheck": "tsc --noEmit",
