@@ -78,3 +78,98 @@ export function validateReferenceNumber(
     // Ganti ke strict jika butuh:
     return true;
 }
+
+// Update dari file sebelumnya - tambah IsPermanent & IsTemporary
+// Pengganti AumoBackend.Helpers.AccountClassificationHelper
+
+export enum AccountClassification {
+    Asset = 'Asset',
+    Assets = 'Assets',
+    Liability = 'Liability',
+    Liabilities = 'Liabilities',
+    Equity = 'Equity',
+    Revenue = 'Revenue',
+    OperatingIncome = 'OperatingIncome',
+    OtherIncome = 'OtherIncome',
+    Expense = 'Expense',
+    OperatingExpenses = 'OperatingExpenses',
+    OtherExpenses = 'OtherExpenses',
+    Income = 'Income',
+}
+
+const PERMANENT_TYPES = ['Asset', 'Assets', 'Liability', 'Liabilities', 'Equity'];
+const TEMPORARY_TYPES = [
+    'OperatingIncome', 'OtherIncome', 'OperatingExpenses', 'OtherExpenses',
+    'Revenue', 'Income', 'Expense', 'Expenses'
+];
+
+const DEBIT_NORMAL_TYPES = ['Asset', 'Assets', 'Expense', 'Expenses', 'OperatingExpenses', 'OtherExpenses'];
+
+// Normal balance: Asset & Expense = Debit, lainnya Credit
+export function normalBalanceIsDebit(classification: string | AccountClassification): boolean {
+    if (!classification) return false;
+    const type = String(classification);
+    const lower = type.toLowerCase();
+    if (DEBIT_NORMAL_TYPES.some(t => lower.includes(t.toLowerCase()))) return true;
+    if (lower.includes('asset')) return true;
+    if (lower.includes('expense') && !lower.includes('income')) return true;
+    return false;
+}
+
+export function isPermanent(type: string): boolean {
+    if (!type) return false;
+    const lower = type.toLowerCase();
+    return PERMANENT_TYPES.some(t => lower.includes(t.toLowerCase())) ||
+        ['asset', 'liability', 'equity'].some(k => lower.includes(k) && !lower.includes('income') && !lower.includes('expense'));
+}
+
+export function isTemporary(type: string): boolean {
+    if (!type) return false;
+    const lower = type.toLowerCase();
+    if (isPermanent(type) && !lower.includes('income') && !lower.includes('expense') && !lower.includes('revenue')) return false;
+    return TEMPORARY_TYPES.some(t => lower.includes(t.toLowerCase())) ||
+        lower.includes('income') || lower.includes('revenue') || lower.includes('expense');
+}
+
+export function isAccountPermanent(account: { type: string }): boolean {
+    return isPermanent(account.type);
+}
+
+export function isAccountNormalBalanceDebit(account: { type: string }): boolean {
+    return normalBalanceIsDebit(account.type);
+}
+
+export function parseClassification(type: string): AccountClassification | null {
+    if (!type) return null;
+    const normalized = type.trim().toLowerCase();
+    const map: Record<string, AccountClassification> = {
+        'asset': AccountClassification.Asset,
+        'assets': AccountClassification.Assets,
+        'liability': AccountClassification.Liability,
+        'liabilities': AccountClassification.Liabilities,
+        'equity': AccountClassification.Equity,
+        'revenue': AccountClassification.Revenue,
+        'operatingincome': AccountClassification.OperatingIncome,
+        'otherincome': AccountClassification.OtherIncome,
+        'expense': AccountClassification.Expense,
+        'operatingexpenses': AccountClassification.OperatingExpenses,
+        'otherexpenses': AccountClassification.OtherExpenses,
+        'income': AccountClassification.Income,
+    };
+    return map[normalized] || null;
+}
+
+export function validateReferenceNumber(classification: AccountClassification, referenceNumber?: number): boolean {
+    if (referenceNumber === undefined || referenceNumber === null) {
+        return Object.values(AccountClassification).includes(classification);
+    }
+    return true;
+}
+
+export const AccountClassificationHelper = {
+    NormalBalanceIsDebit: normalBalanceIsDebit,
+    IsPermanent: isPermanent,
+    IsTemporary: isTemporary,
+    IsAccountPermanent: isAccountPermanent,
+    IsAccountNormalBalanceDebit: isAccountNormalBalanceDebit,
+};
