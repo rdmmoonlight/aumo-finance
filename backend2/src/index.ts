@@ -14,6 +14,12 @@ export function createApp(): Hono<AppEnv> {
   registerMiddleware(app);
   registerRoutes(app);
 
+  // Fallback Error Handler global Hono
+  app.onError((err, c) => {
+    logger.error({ err, url: c.req.url }, 'Unhandled route error');
+    return c.json({ message: 'Internal Server Error' }, 500);
+  });
+
   return app;
 }
 
@@ -25,16 +31,15 @@ const server = serve({ fetch: app.fetch, port: env.PORT, hostname: '0.0.0.0' }, 
   logger.info(`🚀 Server berjalan di http://0.0.0.0:${info.port}`);
 });
 
-// Graceful shutdown (Render mengirim SIGTERM saat deploy ulang)
+// Graceful shutdown
 const shutdown = async (signal: string) => {
   logger.info(`${signal} diterima, menutup server...`);
 
-  // 2. Tutup koneksi Redis dengan aman sebelum proses exit
   try {
     await redis.quit();
     logger.info('Koneksi Redis berhasil ditutup.');
   } catch (err) {
-    logger.error('Gagal menutup koneksi Redis:', err);
+    logger.error({ err }, 'Gagal menutup koneksi Redis');
   }
 
   server.close(() => process.exit(0));
@@ -43,3 +48,13 @@ const shutdown = async (signal: string) => {
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
+
+// Tangkap crash yang tidak terduga
+process.on('uncaughtException', (err) => {
+  logger.fatal({ err }, 'Uncaught Exception terdeteksi');
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason) => {
+  logger.error({ reason }, 'Unhandled Rejection terdeteksi');
+});
