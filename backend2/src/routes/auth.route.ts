@@ -1,196 +1,121 @@
-import { z } from "zod";
-import { signJwt, verifyPasswordAspNet } from "../lib/auth";
-import { parseJsonBody, sendJson } from "../lib/http";
-import { userService } from "../services/user.service";
-import type { Route } from "../types/route.types";
+import { Hono, type Context } from 'hono';
+import { deleteCookie, setCookie } from 'hono/cookie';
+import { z } from 'zod';
+import { signJwt, verifyPasswordAspNet } from '../lib/auth.js';
+import { env } from '../lib/env.js';
+import { parseBody } from '../lib/http.js';
+import { rateLimit } from '../middleware/rate-limit.js';
+import { userService } from '../services/user.service.js';
+import type { AppEnv } from '../types/app.types.js';
 
 const registerSchema = z.object({
-    email: z.string().email("Format email tidak valid"),
-    password: z.string().min(6, "Password minimal 6 karakter"),
-    name: z.string().optional(),
-    clientType: z.enum(["web", "mobile"]).optional().default("web"),
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(6, 'Password minimal 6 karakter'),
+  name: z.string().optional(),
+  clientType: z.enum(['web', 'mobile']).optional().default('web'),
 });
 
 const loginSchema = z.object({
-    email: z.string().email("Format email tidak valid"),
-    password: z.string().min(1, "Password wajib diisi"),
-    clientType: z.enum(["web", "mobile"]).optional().default("web"),
+  email: z.string().email('Format email tidak valid'),
+  password: z.string().min(1, 'Password wajib diisi'),
+  clientType: z.enum(['web', 'mobile']).optional().default('web'),
 });
 
-export const authRoutes: Route[] = [
-    // -------------------------------------------------------------------
-    // POST /auth/register
-    // -------------------------------------------------------------------
-    {
-        method: "POST",
-        path: "/auth/register",
-        openapi: {
-            summary: "User Register",
-            description: "Mendaftarkan user baru menggunakan email & password.",
-            tags: ["Auth"],
-            responses: {
-                "201": { description: "Registrasi berhasil" },
-                "400": { description: "Validasi input gagal atau email sudah terdaftar" },
-            },
-        },
-        handler: async (req, res) => {
-            const body = await parseJsonBody(req, registerSchema);
+const AUTH_COOKIE = 'access_token';
+const AUTH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 hari (detik)
+const isProd = () => env.NODE_ENV === 'production';
 
-            // Cek apakah email sudah terdaftar
-            const existingUser = await userService.findByEmail(body.email);
-            if (existingUser) {
-                return sendJson(res, 400, { message: "Email sudah terdaftar" });
-            }
+function setAuthCookie(c: Context<AppEnv>, token: string): void {
+  setCookie(c, AUTH_COOKIE, token, {
+    httpOnly: true,
+    path: '/',
+    maxAge: AUTH_COOKIE_MAX_AGE,
+    sameSite: 'Lax',
+    secure: isProd(),
+  });
+}
 
-            // Buat user baru
-            const user = await userService.createUser({
-                email: body.email,
-                password: body.password,
-                clientType: body.clientType,
-                name: body.name,
-            });
+export const authRoutes = new Hono<AppEnv>();
 
-            // Generate Token & Auto-login setelah registrasi
-            const tokenPayload = { userId: user.id, email: user.email, role: user.role };
-            const token = signJwt(tokenPayload);
+// Pembatas request lebih ketat untuk seluruh endpoint /auth (anti brute-force)
+authRoutes.use(
+  '*',
+  rateLimit({ scope: 'auth', max: env.AUTH_RATE_LIMIT_MAX, windowMs: env.RATE_LIMIT_WINDOW_MS })
+);
 
-            if (body.clientType === "mobile") {
-                return sendJson(res, 201, {
-                    message: "Registrasi berhasil",
-                    token,
-                    user,
-                });
-            }
+// POST /auth/register
+authRoutes.post('/register', async (c) => {
+  const body = await parseBody(c, registerSchema);
 
-            const isProd = process.env.NODE_ENV === "production";
-            const cookieHeader = `access_token=${token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax${isProd ? "; Secure" : ""}`;
+  const existingUser = await userService.findByEmail(body.email);
+  if (existingUser) {
+    return c.json({ message: 'Email sudah terdaftar' }, 400);
+  }
 
-            return sendJson(
-                res,
-                201,
-                { message: "Registrasi berhasil", user },
-                { "Set-Cookie": cookieHeader }
-            );
-        },
-    },
+  const user = await userService.createUser({
+    email: body.email,
+    password: body.password,
+    clientType: body.clientType,
+    name: body.name,
+  });
 
-    // -------------------------------------------------------------------
-    // POST /auth/login
-    // -------------------------------------------------------------------
-    {
-        method: "POST",
-        path: "/auth/login",
-        openapi: {
-            summary: "User Login",
-            description: "Login menggunakan email & password.",
-            tags: ["Auth"],
-            responses: {
-                "200": { description: "Login berhasil" },
-                "400": { description: "Validasi input gagal" },
-                "401": { description: "Email atau password salah" },
-            },
-        },
-        handler: async (req, res) => {
-            const body = await parseJsonBody(req, loginSchema);
+  const token = signJwt({ userId: user.id, email: user.email, role: user.role });
 
-            const user = await userService.findByEmail(body.email);
-            if (!user || !verifyPasswordAspNet(body.password, user.passwordHash)) {
-                return sendJson(res, 401, { message: "Email atau password salah" });
-            }
+  if (body.clientType === 'mobile') {
+    return c.json({ message: 'Registrasi berhasil', token, user }, 201);
+  }
 
-            const tokenPayload = { userId: user.id, email: user.email, role: user.role };
-            const token = signJwt(tokenPayload);
+  setAuthCookie(c, token);
+  return c.json({ message: 'Registrasi berhasil', user }, 201);
+});
 
-            if (body.clientType === "mobile") {
-                return sendJson(res, 200, {
-                    message: "Login berhasil",
-                    token,
-                    user: tokenPayload,
-                });
-            }
+// POST /auth/login
+authRoutes.post('/login', async (c) => {
+  const body = await parseBody(c, loginSchema);
 
-            const isProd = process.env.NODE_ENV === "production";
-            const cookieHeader = `access_token=${token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax${isProd ? "; Secure" : ""}`;
+  const user = await userService.findByEmail(body.email);
+  if (!user || !verifyPasswordAspNet(body.password, user.passwordHash)) {
+    return c.json({ message: 'Email atau password salah' }, 401);
+  }
 
-            return sendJson(
-                res,
-                200,
-                { message: "Login berhasil", user: tokenPayload },
-                { "Set-Cookie": cookieHeader }
-            );
-        },
-    },
+  const tokenPayload = { userId: user.id, email: user.email, role: user.role };
+  const token = signJwt(tokenPayload);
 
-    // -------------------------------------------------------------------
-    // POST /auth/logout
-    // -------------------------------------------------------------------
-    {
-        method: "POST",
-        path: "/auth/logout",
-        openapi: {
-            summary: "User Logout",
-            description: "Menghapus cookie autentikasi web.",
-            tags: ["Auth"],
-            responses: {
-                "200": { description: "Logout berhasil" },
-            },
-        },
-        handler: async (_req, res) => {
-            const clearCookie = "access_token=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax";
-            return sendJson(
-                res,
-                200,
-                { message: "Logout berhasil" },
-                { "Set-Cookie": clearCookie }
-            );
-        },
-    },
+  if (body.clientType === 'mobile') {
+    return c.json({ message: 'Login berhasil', token, user: tokenPayload });
+  }
 
-    // -------------------------------------------------------------------
-    // GET /auth/google/callback
-    // -------------------------------------------------------------------
-    {
-        method: "GET",
-        path: "/auth/google/callback",
-        openapi: {
-            summary: "Google OAuth Callback",
-            description: "Callback handler setelah autentikasi Google.",
-            tags: ["Auth"],
-            responses: {
-                "302": { description: "Redirect ke frontend" },
-                "400": { description: "Authorization code missing" },
-            },
-        },
-        handler: async (req, res) => {
-            try {
-                const host = req.headers.host || "localhost";
-                const url = new URL(req.url || "", `http://${host}`);
-                const code = url.searchParams.get("code");
+  setAuthCookie(c, token);
+  return c.json({ message: 'Login berhasil', user: tokenPayload });
+});
 
-                if (!code) {
-                    return sendJson(res, 400, { message: "Authorization code tidak ditemukan" });
-                }
+// POST /auth/logout
+authRoutes.post('/logout', (c) => {
+  deleteCookie(c, AUTH_COOKIE, { path: '/', httpOnly: true, sameSite: 'Lax' });
+  return c.json({ message: 'Logout berhasil' });
+});
 
-                const user = await userService.findOrCreateGoogleUser({
-                    email: "user@gmail.com",
-                    name: "Google User",
-                    googleId: "123456789",
-                });
+// GET /auth/google/callback
+authRoutes.get('/google/callback', async (c) => {
+  try {
+    const code = c.req.query('code');
 
-                const token = signJwt({ userId: user.id, email: user.email, role: user.role });
+    if (!code) {
+      return c.json({ message: 'Authorization code tidak ditemukan' }, 400);
+    }
 
-                const isProd = process.env.NODE_ENV === "production";
-                const cookieHeader = `access_token=${token}; HttpOnly; Path=/; Max-Age=${7 * 24 * 60 * 60}; SameSite=Lax${isProd ? "; Secure" : ""}`;
+    const user = await userService.findOrCreateGoogleUser({
+      email: 'user@gmail.com',
+      name: 'Google User',
+      googleId: '123456789',
+    });
 
-                const frontendUrl = process.env.FRONTEND_URL || "http://localhost:3000";
-                res.writeHead(302, {
-                    Location: `${frontendUrl}/dashboard?token=${token}`,
-                    "Set-Cookie": cookieHeader,
-                });
-                return res.end();
-            } catch {
-                return sendJson(res, 500, { message: "Gagal autentikasi Google OAuth" });
-            }
-        },
-    },
-];
+    const token = signJwt({ userId: user.id, email: user.email, role: user.role });
+    setAuthCookie(c, token);
+
+    const frontendUrl = env.FRONTEND_URL ?? 'http://localhost:3000';
+    return c.redirect(`${frontendUrl}/dashboard?token=${token}`, 302);
+  } catch {
+    return c.json({ message: 'Gagal autentikasi Google OAuth' }, 500);
+  }
+});

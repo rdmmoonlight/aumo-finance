@@ -1,1 +1,2 @@
-Route: [] kustom
+Framework: Hono (@hono/node-server)
+Middleware: request-id, secure-headers, CORS, pino logger, body-limit, rate-limit, auth (JWT)
