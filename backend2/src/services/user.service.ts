@@ -1,12 +1,13 @@
 import { eq } from "drizzle-orm";
-import { hashPasswordAspNet, verifyPasswordAspNet } from "../lib/auth.js";
-import { db, users } from "../lib/db.js";
+import { users } from "../db/schema";
+import { hashPasswordAspNet, verifyPasswordAspNet } from "../lib/auth";
+import { db } from "../lib/db";
 import type {
     GoogleAuthUserDTO,
     RegisterDTO,
     SafeUser,
     User,
-} from "../types/user.type.js";
+} from "../types/user.type";
 
 /**
  * Helper untuk menghapus passwordHash dari objek User sebelum dikembalikan ke client

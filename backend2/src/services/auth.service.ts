@@ -14,6 +14,20 @@ import type { AuthResponseDto, GoogleLoginRequest, LoginRequest, UserProfile } f
 
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
+// Cookie Helper
+const AUTH_COOKIE = 'access_token';
+const AUTH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 hari
+
+function setAuthCookie(c: Context<AppEnv>, token: string): void {
+    setCookie(c, AUTH_COOKIE, token, {
+        httpOnly: true,
+        path: '/',
+        maxAge: AUTH_COOKIE_MAX_AGE,
+        sameSite: 'Lax',
+        secure: env.NODE_ENV === 'production',
+    });
+}
+
 export class AuthService {
     // Equivalent C#: IValidator<LoginRequest> -> kita pakai Zod di route layer
     // Jadi ValidateLoginAsync tidak perlu di service, tapi kita sediakan helper
