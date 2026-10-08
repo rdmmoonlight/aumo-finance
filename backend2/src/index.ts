@@ -1,6 +1,5 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { z } from 'zod';
 import { env } from './lib/env.js';
 import { logger } from './lib/logger.js';
 import { redis } from './lib/redis.js';
