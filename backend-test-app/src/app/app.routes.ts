@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, inject } from '@angular/core';
-import { Routes } from '@angular/router';
+import { Component, OnInit, inject } from '@angular/core';
+import { ActivatedRoute, Routes } from '@angular/router';
 import { MainLayoutComponent } from './core/layouts/main-layout/main-layout.component';
 import { HealthCheckerService, HealthResponse } from './core/services/health-checker.service';
 
-// 1. Generic Page Component (Langsung di-render inline tanpa butuh file per page)
+// 1. Generic Page Component
 @Component({
   standalone: true,
   imports: [CommonModule],
@@ -45,16 +45,24 @@ import { HealthCheckerService, HealthResponse } from './core/services/health-che
   `
 })
 export class GenericHealthPageComponent implements OnInit {
-  @Input() pageTitle: string = 'Endpoint Tester';
-  @Input() endpoint: string = '/';
-  @Input() method: string = 'GET';
+  pageTitle = 'Endpoint Tester';
+  endpoint = '/';
+  method = 'GET';
 
   private healthService = inject(HealthCheckerService);
+  private route = inject(ActivatedRoute);
+
   loading = false;
   result: HealthResponse | null = null;
 
   ngOnInit() {
-    this.check();
+    // Membaca data yang dilepaskan dari route
+    this.route.data.subscribe((data) => {
+      this.pageTitle = data['pageTitle'] || this.pageTitle;
+      this.endpoint = data['endpoint'] || this.endpoint;
+      this.method = data['method'] || this.method;
+      this.check();
+    });
   }
 
   check() {
