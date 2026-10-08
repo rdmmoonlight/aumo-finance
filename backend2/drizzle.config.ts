@@ -6,7 +6,7 @@ export default defineConfig({
     dialect: "postgresql",
 
     // Lokasi tempat Anda menyimpan skema Drizzle (misal: src/db/schema/auth.ts)
-    schema: "./src/db/schema/**/*.ts",
+    schema: "./src/db/schema/index.ts",
 
     // Folder tempat menyimpan output migrasi SQL yang dihasilkan
     out: "./drizzle",

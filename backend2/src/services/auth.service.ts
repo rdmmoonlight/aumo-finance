@@ -1,43 +1,24 @@
-import bcrypt from 'bcrypt';
 import { and, eq, or } from 'drizzle-orm';
 import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
+import crypto from 'node:crypto';
+import { GoogleLoginRequest, LoginRequest } from '../db/auth.schema.js';
 import * as schema from '../db/schema.js';
+import { signJwt, verifyPassword } from '../lib/auth.js';
 import { db } from '../lib/db.js';
 import { env } from '../lib/env.js';
 import { AppError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
+import type { AuthResponseDto, JwtPayload, UserProfile } from '../types/auth.types.js';
 import { guardianService } from './guardian.service.js';
-
-// Types - sesuaikan dengan src/types/auth.type.ts
-import type { AuthResponseDto, GoogleLoginRequest, LoginRequest, UserProfile } from '../types/auth.type.js';
 
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
-// Cookie Helper
-const AUTH_COOKIE = 'access_token';
-const AUTH_COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 hari
-
-function setAuthCookie(c: Context<AppEnv>, token: string): void {
-    setCookie(c, AUTH_COOKIE, token, {
-        httpOnly: true,
-        path: '/',
-        maxAge: AUTH_COOKIE_MAX_AGE,
-        sameSite: 'Lax',
-        secure: env.NODE_ENV === 'production',
-    });
-}
-
 export class AuthService {
-    // Equivalent C#: IValidator<LoginRequest> -> kita pakai Zod di route layer
-    // Jadi ValidateLoginAsync tidak perlu di service, tapi kita sediakan helper
-
     async validateLoginPayload(request: LoginRequest) {
-        // Validasi ringan, yang berat pakai zod di route
-        if (!request.email || !request.password) {
+        if (!request.email?.trim() || !request.password) {
             return { isValid: false, errors: ['Email dan password wajib'] };
         }
-        return { isValid: true };
+        return { isValid: true, errors: [] as string[] };
     }
 
     async processLogin(
@@ -45,50 +26,34 @@ export class AuthService {
         ipAddress: string,
         headerUserAgent: string
     ): Promise<AuthResponseDto | null> {
-        // C# : _userManager.FindByEmailAsync || FindByNameAsync
         const identifier = request.email.toLowerCase().trim();
 
         const user = await db.query.users.findFirst({
-            where: or(
-                eq(schema.users.email, identifier),
-                eq(schema.users.userName, identifier)
-            ),
-            with: {
-                roles: { with: { role: true } },
-                claims: true
-            }
+            where: or(eq(schema.users.email, identifier), eq(schema.users.userName, identifier)),
+            with: { roles: { with: { role: true } }, claims: true },
         });
 
         if (!user) return null;
 
-        const safeUserAgent = request.userAgent?.trim()
-            || headerUserAgent?.trim()
-            || 'Aumo Client';
+        if (user.lockoutEnd && new Date(user.lockoutEnd) > new Date()) {
+            return { success: false, message: 'LOCKED_OUT' };
+        }
 
+        const safeUserAgent = request.userAgent?.trim() || headerUserAgent?.trim() || 'Aumo Client';
         const isMobile = request.isMobileClient ?? false;
         const deviceCategory = isMobile ? 'Mobile' : 'Web';
         const osValue = request.operatingSystem?.trim() || deviceCategory;
 
-        // C# : IsLockedOutAsync
-        if (user.lockoutEnd && new Date(user.lockoutEnd) > new Date()) {
-            return {
-                success: false,
-                message: 'LOCKED_OUT',
-            };
-        }
-
-        // C# : CheckPasswordSignInAsync
-        const isPasswordValid = await bcrypt.compare(request.password, user.passwordHash);
+        const isPasswordValid = await verifyPassword(request.password, user.passwordHash);
 
         if (!isPasswordValid) {
-            // Increment failed count - C# lockoutOnFailure: true
             const newFailedCount = (user.accessFailedCount || 0) + 1;
             const shouldLockout = newFailedCount >= 5;
 
             await db.update(schema.users).set({
                 accessFailedCount: newFailedCount,
-                lockoutEnd: shouldLockout ? new Date(Date.now() + 15 * 60 * 1000) : null, // 15 menit
-                updatedAt: new Date()
+                lockoutEnd: shouldLockout ? new Date(Date.now() + 15 * 60 * 1000) : null,
+                updatedAt: new Date(),
             }).where(eq(schema.users.id, user.id));
 
             await guardianService.createLoginActivity({
@@ -100,32 +65,21 @@ export class AuthService {
                 country: 'ID',
                 success: false,
                 os: osValue,
-                userAgent: safeUserAgent
+                userAgent: safeUserAgent,
             });
 
-            if (shouldLockout) {
-                return { success: false, message: 'LOCKED_OUT' };
-            }
-
-            return null;
+            return shouldLockout ? { success: false, message: 'LOCKED_OUT' } : null;
         }
 
-        // Sukses - reset failed count
         await db.update(schema.users).set({
             accessFailedCount: 0,
             lockoutEnd: null,
-            lastLoginAt: new Date()
+            lastLoginAt: new Date(),
+            updatedAt: new Date(),
         }).where(eq(schema.users.id, user.id));
 
-        let jwtToken: string | undefined;
+        const jwtToken = isMobile ? this.generateJwtToken(user) : undefined;
 
-        // C# : isMobile ? GenerateJwt : SignInAsync (cookie)
-        // Di custom framework, cookie di-set di route layer
-        if (isMobile) {
-            jwtToken = await this.generateJwtToken(user);
-        }
-
-        // C# : _guardianService.CreateSessionAsync
         await guardianService.createSession({
             userId: user.id,
             deviceName: deviceCategory,
@@ -134,7 +88,7 @@ export class AuthService {
             ipAddress,
             country: 'ID',
             sessionType: isMobile ? 'JWT_BEARER' : 'COOKIE_SESSION',
-            userAgent: safeUserAgent
+            userAgent: safeUserAgent,
         });
 
         await guardianService.createLoginActivity({
@@ -146,7 +100,7 @@ export class AuthService {
             country: 'ID',
             success: true,
             os: osValue,
-            userAgent: safeUserAgent
+            userAgent: safeUserAgent,
         });
 
         logger.info({ userId: user.id, deviceCategory }, 'Login success');
@@ -157,7 +111,7 @@ export class AuthService {
             userId: user.id,
             fullName: user.fullName || user.userName || 'User',
             avatarUrl: user.avatarUrl || null,
-            token: jwtToken
+            token: jwtToken,
         };
     }
 
@@ -168,10 +122,10 @@ export class AuthService {
         try {
             const ticket = await googleClient.verifyIdToken({
                 idToken: request.idToken,
-                audience: env.GOOGLE_CLIENT_ID
+                audience: env.GOOGLE_CLIENT_ID,
             });
             payload = ticket.getPayload();
-            if (!payload) return null;
+            if (!payload || !payload.email_verified) return null;
         } catch (err) {
             logger.warn({ err }, 'Google ID token invalid');
             return null;
@@ -179,161 +133,119 @@ export class AuthService {
 
         const provider = 'Google';
         const providerKey = payload.sub;
+        const email = payload.email.toLowerCase();
 
-        // C# : FindByLoginAsync
         const existingLogin = await db.query.userLogins.findFirst({
-            where: and(
-                eq(schema.userLogins.loginProvider, provider),
-                eq(schema.userLogins.providerKey, providerKey)
-            ),
-            with: { user: { with: { roles: { with: { role: true } } } } }
+            where: and(eq(schema.userLogins.loginProvider, provider), eq(schema.userLogins.providerKey, providerKey)),
+            with: { user: { with: { roles: { with: { role: true } }, claims: true } } },
         });
 
         let user = existingLogin?.user;
 
         if (!user) {
-            // C# : FindByEmailAsync
             user = await db.query.users.findFirst({
-                where: eq(schema.users.email, payload.email.toLowerCase()),
-                with: { roles: { with: { role: true } } }
+                where: eq(schema.users.email, email),
+                with: { roles: { with: { role: true } }, claims: true },
             });
 
             if (!user) {
-                // C# : CreateAsync new ApplicationUser
+                const newUserId = crypto.randomUUID();
                 const [newUser] = await db.insert(schema.users).values({
-                    id: crypto.randomUUID(),
-                    userName: payload.email,
-                    email: payload.email.toLowerCase(),
+                    id: newUserId,
+                    userName: email,
+                    email,
                     emailConfirmed: true,
-                    fullName: payload.name,
-                    avatarUrl: payload.picture,
-                    passwordHash: '', // Google user no password
+                    fullName: payload.name || email,
+                    avatarUrl: payload.picture || null,
+                    passwordHash: crypto.randomUUID(), // no password, random placeholder
                 }).returning();
 
-                // Add to role User
-                const userRole = await db.query.roles.findFirst({
-                    where: eq(schema.roles.name, 'User')
-                });
+                const userRole = await db.query.roles.findFirst({ where: eq(schema.roles.name, 'User') });
                 if (userRole) {
-                    await db.insert(schema.userRoles).values({
-                        userId: newUser.id,
-                        roleId: userRole.id
-                    });
+                    await db.insert(schema.userRoles).values({ userId: newUser.id, roleId: userRole.id });
                 }
-
-                user = newUser as any;
+                user = { ...newUser, roles: userRole ? [{ role: userRole }] : [], claims: [] } as any;
             }
 
-            // C# : AddLoginAsync
             await db.insert(schema.userLogins).values({
                 userId: user.id,
                 loginProvider: provider,
-                providerKey: providerKey,
-                providerDisplayName: 'Google'
-            });
+                providerKey,
+                providerDisplayName: 'Google',
+            }).onConflictDoNothing();
         }
 
-        if (!request.isMobileClient) {
-            // Cookie session akan di-handle di route
-            return {
-                success: true,
-                message: 'Google login successful (Cookie session established).',
-                userId: user.id,
-                fullName: user.fullName || user.userName || 'User',
-                avatarUrl: user.avatarUrl || null
-            };
-        }
+        const token = request.isMobileClient ? this.generateJwtToken(user) : undefined;
 
-        const token = await this.generateJwtToken(user);
         return {
             success: true,
-            message: 'Google login successful.',
+            message: request.isMobileClient ? 'Google login successful.' : 'Google login successful (Cookie session).',
             userId: user.id,
             fullName: user.fullName || user.userName || 'User',
             avatarUrl: user.avatarUrl || null,
-            token
+            token,
         };
     }
 
     configureGoogleRedirect(redirectUrl: string) {
-        // C# : ConfigureExternalAuthenticationProperties
-        // Di TS custom framework, kita return config untuk redirect
+        // Basic allowlist check
+        const allowed = (env.ALLOWED_REDIRECT_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean);
+        if (allowed.length > 0) {
+            const url = new URL(redirectUrl);
+            if (!allowed.includes(url.origin)) throw new AppError('Redirect URL not allowed', 400);
+        }
+
         const state = Buffer.from(JSON.stringify({ redirectUrl, ts: Date.now() })).toString('base64url');
-        const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        const googleAuthUrl =
+            `https://accounts.google.com/o/oauth2/v2/auth?` +
             `client_id=${env.GOOGLE_CLIENT_ID}&` +
             `redirect_uri=${encodeURIComponent(redirectUrl)}&` +
             `response_type=code&scope=openid email profile&state=${state}`;
 
-        return {
-            url: googleAuthUrl,
-            state,
-            properties: { redirectUrl }
-        };
+        return { url: googleAuthUrl, state, properties: { redirectUrl } };
     }
 
     async processGoogleCallback(principal: any, loginProvider: string, providerKey: string): Promise<string | null> {
-        // principal dari google callback = decoded profile
-        // C# : ExternalLoginSignInAsync
-        const existingLogin = await db.query.userLogins.findFirst({
-            where: and(
-                eq(schema.userLogins.loginProvider, loginProvider),
-                eq(schema.userLogins.providerKey, providerKey)
-            )
+        const existing = await db.query.userLogins.findFirst({
+            where: and(eq(schema.userLogins.loginProvider, loginProvider), eq(schema.userLogins.providerKey, providerKey)),
         });
-
-        if (existingLogin) return null; // Sudah login, sukses
+        if (existing) return null;
 
         const email = principal.email?.toLowerCase();
         if (!email) return 'Email claim not received from Google.';
 
-        let user = await db.query.users.findFirst({
-            where: eq(schema.users.email, email)
-        });
+        let user = await db.query.users.findFirst({ where: eq(schema.users.email, email) });
 
         if (!user) {
             const [newUser] = await db.insert(schema.users).values({
                 id: crypto.randomUUID(),
                 userName: email,
-                email: email,
+                email,
                 emailConfirmed: true,
                 fullName: principal.name || email,
                 avatarUrl: principal.picture || null,
-                passwordHash: ''
+                passwordHash: crypto.randomUUID(),
             }).returning();
-
-            const userRole = await db.query.roles.findFirst({
-                where: eq(schema.roles.name, 'User')
-            });
-            if (userRole) {
-                await db.insert(schema.userRoles).values({
-                    userId: newUser.id,
-                    roleId: userRole.id
-                });
-            }
-            user = newUser as any;
+            const userRole = await db.query.roles.findFirst({ where: eq(schema.roles.name, 'User') });
+            if (userRole) await db.insert(schema.userRoles).values({ userId: newUser.id, roleId: userRole.id });
+            user = newUser;
         }
 
         await db.insert(schema.userLogins).values({
             userId: user.id,
             loginProvider,
             providerKey,
-            providerDisplayName: loginProvider
+            providerDisplayName: loginProvider,
         }).onConflictDoNothing();
 
         return null;
     }
 
     async getUserProfile(userId: string): Promise<UserProfile | null> {
-        // C# : _userManager.GetUserAsync + GetRolesAsync + GetClaimsAsync
-        // Di TS, userId didapat dari JWT / session di middleware, bukan ClaimsPrincipal
         const user = await db.query.users.findFirst({
             where: eq(schema.users.id, userId),
-            with: {
-                roles: { with: { role: true } },
-                claims: true
-            }
+            with: { roles: { with: { role: true } }, claims: true },
         });
-
         if (!user) return null;
 
         return {
@@ -346,45 +258,31 @@ export class AuthService {
             avatarUrl: user.avatarUrl,
             bio: user.bio,
             roles: user.roles.map((ur: any) => ur.role.name),
-            customClaims: user.claims.map((c: any) => ({ type: c.claimType, value: c.claimValue }))
+            customClaims: user.claims.map((c: any) => ({ type: c.claimType, value: c.claimValue })),
         };
     }
 
-    async logout(userId?: string, sessionId?: string) {
-        // C# : _signInManager.SignOutAsync
-        // Di custom framework: hapus session dari DB + clear cookie di route
+    async logout(_userId?: string, sessionId?: string) {
         if (sessionId) {
             await db.delete(schema.sessions).where(eq(schema.sessions.id, sessionId));
         }
-        logger.info({ userId }, 'User logged out');
+        logger.info({ _userId, sessionId }, 'User logged out');
     }
 
-    private async generateJwtToken(user: any): Promise<string> {
-        // C# : GenerateJwtTokenAsync - sama persis logicnya
-        const signingKey = env.JWT_SIGNING_KEY;
-        const issuer = env.JWT_ISSUER || 'AumoFinanceApp';
-
-        if (!signingKey) throw new AppError('JWT_SIGNING_KEY is missing', 500);
-
-        const roles = user.roles?.map((r: any) => r.role?.name || r.name) || [];
+    public generateJwtToken(user: any): string {
+        const roles = user.roles?.map((r: any) => r.role?.name || r.name).filter(Boolean) || [];
         const claims = user.claims || [];
 
-        const payload = {
+        const payload: Omit<JwtPayload, 'iat' | 'exp' | 'iss' | 'aud'> = {
             sub: user.id,
             name: user.fullName || user.userName || '',
             email: user.email || '',
             jti: crypto.randomUUID(),
             roles,
-            // custom claims dari DB
-            ...Object.fromEntries(claims.map((c: any) => [c.claimType, c.claimValue]))
+            ...Object.fromEntries(claims.map((c: any) => [c.claimType, c.claimValue])),
         };
 
-        return jwt.sign(payload, signingKey, {
-            issuer,
-            audience: issuer,
-            expiresIn: '30d',
-            algorithm: 'HS256'
-        });
+        return signJwt(payload, '30d');
     }
 }
 

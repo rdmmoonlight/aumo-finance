@@ -8,7 +8,8 @@
     "skipLibCheck": true,
     "strict": true,
     "ignoreDeprecations": "6.0",
-    "baseUrl": ".",
+    "declaration": true,
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "src/*"

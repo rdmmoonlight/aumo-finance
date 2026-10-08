@@ -1,56 +1,99 @@
-import { Hono } from 'hono';
-import { deleteCookie } from 'hono/cookie';
-import { env } from '../lib/env.js';
-import { parseBody } from '../lib/http.js';
-import { rateLimit } from '../middleware/rate-limit.js';
+import { zValidator } from '@hono/zod-validator';
+import { Hono, type Context } from 'hono';
+import { googleLoginRequestSchema, loginRequestSchema } from '../db/auth.schema.js';
+import { clearAuthCookie, setAuthCookie } from '../lib/cookies.js';
+import { requireAuth } from '../middleware/auth.middleware.js';
 import { authService } from '../services/auth.service.js';
 import type { AppEnv } from '../types/app.types.js';
 
-export const authRoutes = new Hono<AppEnv>();
+export const authRoute = new Hono<AppEnv>();
 
-authRoutes.use(
-  '*',
-  rateLimit({ scope: 'auth', max: env.AUTH_RATE_LIMIT_MAX, windowMs: env.RATE_LIMIT_WINDOW_MS })
-);
-
-// POST /auth/register
-authRoutes.post('/register', async (c) => {
-  const body = await parseBody(c, registerSchema);
-  const { user, token } = await authService.register(body);
-
-  if (body.clientType === 'mobile') {
-    return c.json({ message: 'Registrasi berhasil', token, user }, 201);
-  }
-
-  setAuthCookie(c, token);
-  return c.json({ message: 'Registrasi berhasil', user }, 201);
-});
+function getClientInfo(c: Context<AppEnv>) {
+  const ip =
+    c.req.header('x-forwarded-for')?.split(',')[0]?.trim() ??
+    c.req.header('x-real-ip') ??
+    '0.0.0.0';
+  const ua = c.req.header('user-agent') ?? 'Unknown';
+  return { ip, ua };
+}
 
 // POST /auth/login
-authRoutes.post('/login', async (c) => {
-  const body = await parseBody(c, loginSchema);
-  const { tokenPayload, token } = await authService.login(body);
+authRoute.post('/login', zValidator('json', loginRequestSchema), async (c) => {
+  const body = c.req.valid('json');
+  const { ip, ua } = getClientInfo(c);
 
-  if (body.clientType === 'mobile') {
-    return c.json({ message: 'Login berhasil', token, user: tokenPayload });
+  const result = await authService.processLogin(body, ip, ua);
+  if (!result?.success) {
+    const isLocked = result?.message === 'LOCKED_OUT';
+    return c.json(
+      { success: false, message: isLocked ? 'Akun terkunci 15 menit' : 'Email atau password salah' },
+      isLocked ? 423 : 401
+    );
   }
 
-  setAuthCookie(c, token);
-  return c.json({ message: 'Login berhasil', user: tokenPayload });
+  if (!body.isMobileClient) {
+    const profile = await authService.getUserProfile(result.userId!);
+    if (!profile) return c.json({ success: false, message: 'User not found' }, 404);
+
+    const { id: _pid, roles: _r, ...restProfile } = profile;
+    const tokenPayload = {
+      ...restProfile,
+      id: result.userId!,
+      roles: profile.roles.map((r: string) => ({ role: { name: r } })),
+    } as Parameters<typeof authService.generateJwtToken>[0];
+
+    const token = authService.generateJwtToken(tokenPayload);
+    setAuthCookie(c, token);
+    return c.json({ ...result, token: undefined });
+  }
+
+  return c.json(result);
 });
 
-// POST /auth/logout
-authRoutes.post('/logout', (c) => {
-  deleteCookie(c, AUTH_COOKIE, { path: '/', httpOnly: true, sameSite: 'Lax' });
-  return c.json({ message: 'Logout berhasil' });
+// POST /auth/google
+authRoute.post('/google', zValidator('json', googleLoginRequestSchema), async (c) => {
+  const body = c.req.valid('json');
+  const result = await authService.processGoogleLogin(body);
+  if (!result) return c.json({ success: false, message: 'Google login gagal' }, 401);
+
+  if (!body.isMobileClient && result.userId) {
+    const fallbackUser = {
+      id: result.userId,
+      fullName: result.fullName,
+      email: '',
+      roles: [],
+    } as Parameters<typeof authService.generateJwtToken>[0];
+
+    const token = result.token ?? authService.generateJwtToken(fallbackUser);
+    if (token) setAuthCookie(c, token);
+    return c.json({ ...result, token: undefined });
+  }
+
+  return c.json(result);
 });
 
-// GET /auth/google/callback
-authRoutes.get('/google/callback', async (c) => {
-  const code = c.req.query('code');
-  const { token } = await authService.handleGoogleCallback(code);
+authRoute.get('/google/url', (c) => {
+  const redirectUrl = c.req.query('redirectUrl') || `${c.req.url.split('/auth')[0]}/auth/google/callback`;
+  try {
+    const data = authService.configureGoogleRedirect(redirectUrl);
+    return c.json({ success: true, url: data.url });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Invalid redirectUrl';
+    return c.json({ success: false, message }, 400);
+  }
+});
 
-  setAuthCookie(c, token);
-  const frontendUrl = env.FRONTEND_URL ?? 'http://localhost:3000';
-  return c.redirect(`${frontendUrl}/dashboard?token=${token}`, 302);
+authRoute.get('/me', requireAuth(), async (c) => {
+  const user = c.get('user');
+  const profile = await authService.getUserProfile(user.sub);
+  if (!profile) return c.json({ success: false, message: 'User not found' }, 404);
+  return c.json({ success: true, data: profile });
+});
+
+authRoute.post('/logout', async (c) => {
+  const user = c.get('user');
+  const sessionId = c.get('sessionId');
+  clearAuthCookie(c);
+  await authService.logout(user?.sub, sessionId);
+  return c.json({ success: true, message: 'Logged out' });
 });

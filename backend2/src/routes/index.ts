@@ -1,17 +1,32 @@
-import type { Hono } from 'hono';
+// src/routes/index.ts
+import { OpenAPIHono } from '@hono/zod-openapi';
+import { Scalar } from '@scalar/hono-api-reference';
 import type { AppEnv } from '../types/app.types.js';
-import { authRoutes } from './auth.route.js';
-import { healthRoutes } from './health.route.js';
-import { buildOpenApiSpec, docsHtml } from './openapi.js';
-import { userRoutes } from './user.route.js';
 
-/** Pasang semua route aplikasi ke instance Hono. */
-export function registerRoutes(app: Hono<AppEnv>): void {
-  app.route('/', healthRoutes);
-  app.route('/users', userRoutes);
-  app.route('/auth', authRoutes);
+import { authRoute } from './auth.route.js';
+import { healthRoute } from './health.route.js';
+import { periodsRoute } from './periods.route.js';
 
-  // Dokumentasi: spesifikasi dibangun dari route yang terdaftar saat request masuk
-  app.get('/openapi.json', (c) => c.json(buildOpenApiSpec(app.routes)));
-  app.get('/docs', (c) => c.html(docsHtml));
+const apiV1 = new OpenAPIHono<AppEnv>();
+apiV1.route('/health', healthRoute);
+apiV1.route('/auth', authRoute);
+apiV1.route('/periods', periodsRoute);
+
+export function registerRoutes(app: OpenAPIHono<AppEnv>): void {
+  app.route('/api/v1', apiV1);
+
+  // udah, ini gantiin buildOpenApiSpec(app) lu yang error kemarin
+  app.doc('/openapi.json', {
+    openapi: '3.1.0',
+    info: {
+      title: 'Aumo Backend API',
+      version: '3.2.0',
+      description: 'Dokumentasi API Aumo Backend'
+    },
+  });
+
+  app.get('/docs', Scalar({ url: '/openapi.json' }));
 }
+
+export { apiV1 };
+

@@ -1,4 +1,4 @@
-import { logger } from '../lib/logger.js';
+import { logger } from '../../lib/logger.js';
 
 // Stub pengganti IGeneralLedgersService
 // Di C# ini service untuk refresh staging table general ledgers per selected period
