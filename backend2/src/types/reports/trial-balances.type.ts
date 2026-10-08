@@ -1,22 +1,33 @@
 import { z } from 'zod';
 
-export interface TrialBalancesRow {
-    id: number;
-    accountId?: number;
-    referenceNumber: string;
-    accountName: string;
-    type: string;
-    role: string | null;
-    normalBalanceIsDebit?: boolean;
-    netBalance: number;
-    debit: number;
-    credit: number;
-}
+// 1. Report type - jangan duplikat string literal
+export const reportTypeValues = ['unadjusted', 'adjusted', 'post-closing'] as const;
+export const reportTypeSchema = z.enum(reportTypeValues);
+export type ReportType = z.infer<typeof reportTypeSchema>;
 
-export type ReportType = 'unadjusted' | 'adjusted' | 'post-closing';
-
-export const trialBalancesQuerySchema = z.object({
-    periodId: z.number().int(),
-    includeAdjusting: z.boolean().optional().default(false),
-    reportType: z.enum(['unadjusted', 'adjusted', 'post-closing']).optional().default('unadjusted')
+// 2. Row - gabungan C# (AccountId) + FE (id untuk key table)
+export const trialBalanceRowSchema = z.object({
+    id: z.number().int().optional(), // FE only, optional biar kompatibel sama C#
+    accountId: z.number().int(),
+    referenceNumber: z.string(),
+    accountName: z.string(),
+    type: z.string(),
+    role: z.string().nullable().optional(),
+    normalBalanceIsDebit: z.boolean().optional().default(true),
+    netBalance: z.number(),
+    debit: z.number(),
+    credit: z.number(),
 });
+
+export type TrialBalanceRow = z.infer<typeof trialBalanceRowSchema>;
+// alias biar kode lama yang pakai plural tidak error
+export type TrialBalancesRow = TrialBalanceRow;
+
+// 3. Query
+export const trialBalancesQuerySchema = z.object({
+    periodId: z.number().int().positive(),
+    includeAdjusting: z.boolean().optional().default(false),
+    reportType: reportTypeSchema.optional().default('unadjusted'),
+});
+
+export type TrialBalancesQuery = z.infer<typeof trialBalancesQuerySchema>;

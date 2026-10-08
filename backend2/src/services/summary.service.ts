@@ -2,7 +2,7 @@ import { and, count, eq, gte, lte } from 'drizzle-orm';
 import * as schema from '../db/schema.js';
 import { db } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
-import type { Summary } from '../types/summary.type.js';
+import type { Summary } from '../types/reports/summary.type.js';
 
 // Pengganti ISummaryService / SummaryService C#
 

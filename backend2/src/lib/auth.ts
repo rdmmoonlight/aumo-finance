@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import crypto from 'node:crypto';
-import type { JwtPayload } from '../types/auth.types.js';
+import type { JwtPayload } from '../types/auth.type.js';
 import { env } from './env.js';
 
 const SALT_ROUNDS = 12;

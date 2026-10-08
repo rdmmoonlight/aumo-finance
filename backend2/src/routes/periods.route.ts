@@ -1,6 +1,6 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { createPeriodSchema } from '../db/accounting.schema.js'; // Disesuaikan dengan relative import
+import { createPeriodSchema } from '../db/reports/accounting.schema.js'; // Disesuaikan dengan relative import
 import { requireAuth } from '../middleware/auth.middleware.js';
 import { periodsService } from '../services/periods.service.js';
 import type { AppEnv } from '../types/app.types.js'; // Definisikan atau sesuaikan lokasi AppEnv Anda
