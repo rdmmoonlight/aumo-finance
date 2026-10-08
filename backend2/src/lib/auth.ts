@@ -1,8 +1,6 @@
 import jwt from "jsonwebtoken";
 import crypto from "node:crypto";
-import type { IncomingMessage, ServerResponse } from "node:http";
 import { env } from "./env.js";
-import { parseCookies, sendJson } from "./http.js";
 
 export interface TokenPayload {
     userId: string;
@@ -68,37 +66,4 @@ export function verifyJwt(token: string): TokenPayload | null {
     } catch {
         return null;
     }
-}
-
-/**
- * Verification Guard for Native Node HTTP
- */
-export interface AuthenticatedRequest extends IncomingMessage {
-    user?: TokenPayload;
-}
-
-export function verifyAuth(req: AuthenticatedRequest, res: ServerResponse): TokenPayload | null {
-    let token: string | undefined;
-
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-        token = authHeader.split(" ")[1];
-    } else {
-        const cookies = parseCookies(req);
-        token = cookies["access_token"];
-    }
-
-    if (!token) {
-        sendJson(res, 401, { message: "Unauthorized" });
-        return null;
-    }
-
-    const payload = verifyJwt(token);
-    if (!payload) {
-        sendJson(res, 401, { message: "Invalid or expired token" });
-        return null;
-    }
-
-    req.user = payload;
-    return payload;
 }

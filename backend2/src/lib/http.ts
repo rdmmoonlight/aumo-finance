@@ -1,78 +1,29 @@
-import { IncomingMessage, ServerResponse } from "node:http";
-import { z } from "zod";
-import { ValidationError } from "./errors.js";
+import type { Context } from 'hono';
+import { HTTPException } from 'hono/http-exception';
+import type { z } from 'zod';
+import { ValidationError } from './errors.js';
 
 /**
- * Kirim response format JSON beserta status code dan kustom headers
+ * Baca JSON body dari request dan validasi dengan Zod schema.
+ * - Body kosong dianggap {}
+ * - JSON rusak -> 400
+ * - Validasi gagal -> ValidationError (ditangani errorHandler menjadi 400)
  */
-export const sendJson = (
-    res: ServerResponse,
-    statusCode: number,
-    data: unknown,
-    headers: Record<string, string | string[]> = {}
-): void => {
-    res.writeHead(statusCode, {
-        "Content-Type": "application/json",
-        ...headers,
-    });
-    res.end(JSON.stringify(data));
-};
+export async function parseBody<T>(c: Context, schema: z.ZodType<T>): Promise<T> {
+  const raw = await c.req.text();
 
-/**
- * Parse JSON body dari request stream dan validasi menggunakan Zod schema (opsional)
- */
-export const parseJsonBody = <T>(
-    req: IncomingMessage,
-    schema?: z.ZodType<T>
-): Promise<T> => {
-    return new Promise((resolve, reject) => {
-        let body = "";
+  let json: unknown = {};
+  if (raw) {
+    try {
+      json = JSON.parse(raw);
+    } catch {
+      throw new HTTPException(400, { message: 'Format JSON tidak valid' });
+    }
+  }
 
-        req.on("data", (chunk: Buffer | string) => {
-            body += chunk.toString();
-        });
-
-        req.on("end", async () => {
-            try {
-                const parsedJson = body ? JSON.parse(body) : {};
-
-                if (schema) {
-                    const result = await schema.safeParseAsync(parsedJson);
-                    if (!result.success) {
-                        return reject(new ValidationError(result.error));
-                    }
-                    return resolve(result.data);
-                }
-
-                resolve(parsedJson as T);
-            } catch (err) {
-                if (err instanceof ValidationError) {
-                    reject(err);
-                } else {
-                    reject(new Error("Format JSON tidak valid"));
-                }
-            }
-        });
-
-        req.on("error", (err: Error) => reject(err));
-    });
-};
-
-/**
- * Helper untuk membaca Cookie dari header request
- */
-export const parseCookies = (req: IncomingMessage): Record<string, string> => {
-    const list: Record<string, string> = {};
-    const cookieHeader = req.headers.cookie;
-
-    if (!cookieHeader) return list;
-
-    cookieHeader.split(";").forEach((cookie) => {
-        const [name, ...rest] = cookie.split("=");
-        if (name) {
-            list[name.trim()] = decodeURIComponent(rest.join("=").trim());
-        }
-    });
-
-    return list;
-};
+  const result = await schema.safeParseAsync(json);
+  if (!result.success) {
+    throw new ValidationError(result.error);
+  }
+  return result.data;
+}
