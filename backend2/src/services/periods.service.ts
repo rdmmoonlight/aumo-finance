@@ -1,3 +1,4 @@
+import { generalLedgersService } from '@/services/reports/general-ledgers.service.js';
 import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import * as schema from '../db/schema.js';
 import { db } from '../lib/db.js';
@@ -13,7 +14,6 @@ import type {
     PeriodDto,
     SelectPeriodResult
 } from '../types/periods.type.js';
-import { generalLedgersService } from './general-ledgers.service.js';
 import { transactionNumberService } from './transaction-number.service.js';
 
 const PERMANENT_TYPES = ['Assets', 'Asset', 'Liabilities', 'Liability', 'Equity'];

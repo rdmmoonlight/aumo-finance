@@ -8,5 +8,6 @@ export type AppEnv = {
   Variables: {
     requestId: string;
     user?: TokenPayload;
+    sessionId: string;
   };
 };
