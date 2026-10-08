@@ -104,7 +104,7 @@ Aplikasi dapat diakses di http://localhost:3000.
 pnpm run build
 
 
-Hasil kompilasi static SPA akan dihasilkan di folder dist/backend-test-app/browser.
+Hasil kompilasi static SPA akan dihasilkan di folder dist/angular/browser.
 
 ☁️ Deployment ke Vercel
 

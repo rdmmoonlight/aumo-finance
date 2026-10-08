@@ -19,7 +19,7 @@ const envSchema = z.object({
     JWT_SIGNING_KEY: z
         .string()
         .min(32, 'JWT_SIGNING_KEY minimal 32 karakter demi keamanan'),
-    JWT_ISSUER: z.string().min(2, 'JWT_ISSUER minimal 2 karakter').default('backend2'),
+    JWT_ISSUER: z.string().min(2, 'JWT_ISSUER minimal 2 karakter').default('hono'),
 
     // Third Party Services
     SUPABASE_URL: z.string().url('SUPABASE_URL harus berupa URL yang valid').optional(),
