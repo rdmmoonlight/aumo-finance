@@ -2,14 +2,25 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { environment } from '../../../environments/environment'; // Import environment
+import { environment } from '../../../environments/environment';
+
+// PASTIKAN ADA KATA 'export' DI SINI
+export interface HealthResponse {
+    endpoint: string;
+    method: string;
+    status: number;
+    statusText: string;
+    responseTimeMs: number;
+    body: any;
+    ok: boolean;
+}
 
 @Injectable({ providedIn: 'root' })
 export class HealthCheckerService {
     private http = inject(HttpClient);
-    private baseUrl = environment.apiUrl; // Gunakan variabel dari environment
+    private baseUrl = environment.apiUrl || 'http://localhost:8080';
 
-    testEndpoint(path: string, method: string = 'GET'): Observable<any> {
+    testEndpoint(path: string, method: string = 'GET'): Observable<HealthResponse> {
         const fullUrl = `${this.baseUrl}${path}`;
         const startTime = performance.now();
 
