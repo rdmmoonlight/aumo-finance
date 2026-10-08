@@ -2,7 +2,7 @@ import type { MiddlewareHandler } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { verifyJwt } from '../lib/auth.js';
 import { AUTH_COOKIE } from '../lib/cookies.js';
-import type { AppEnv, JwtPayload } from '../types/auth.types.js';
+import type { AppEnv, JwtPayload } from '../types/auth.type.js';
 
 function extractToken(authHeader: string | undefined, cookieToken: string | undefined) {
   if (authHeader?.startsWith('Bearer ')) return authHeader.slice(7).trim();

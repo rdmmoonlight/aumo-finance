@@ -8,7 +8,7 @@ import { db } from '../lib/db.js';
 import { env } from '../lib/env.js';
 import { AppError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
-import type { AuthResponseDto, JwtPayload, UserProfile } from '../types/auth.types.js';
+import type { AuthResponseDto, JwtPayload, UserProfile } from '../types/auth.type.js';
 import { guardianService } from './guardian.service.js';
 
 const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);

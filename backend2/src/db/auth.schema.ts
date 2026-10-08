@@ -1,24 +1,6 @@
 import { boolean, integer, pgTable, primaryKey, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-import { z } from 'zod';
 
-// --- Zod ---
-export const loginRequestSchema = z.object({
-    email: z.string().min(1).email('Format email tidak valid'),
-    password: z.string().min(1, 'Password wajib diisi'),
-    rememberMe: z.boolean().optional().default(false),
-    isMobileClient: z.boolean().optional().default(false),
-    userAgent: z.string().optional(),
-    operatingSystem: z.string().optional(),
-});
-export type LoginRequest = z.infer<typeof loginRequestSchema>;
-
-export const googleLoginRequestSchema = z.object({
-    idToken: z.string().min(1),
-    isMobileClient: z.boolean().optional().default(false),
-});
-export type GoogleLoginRequest = z.infer<typeof googleLoginRequestSchema>;
-
-// --- Tables ---
+// --- Users (dari file lamamu, dipertahankan) ---
 export const users = pgTable('users', {
     id: uuid('id').primaryKey().defaultRandom(),
     userName: varchar('user_name', { length: 256 }).notNull().unique(),
@@ -44,15 +26,21 @@ export const roles = pgTable('roles', {
 export const userRoles = pgTable(
     'user_roles',
     {
-        userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
-        roleId: uuid('role_id').references(() => roles.id, { onDelete: 'cascade' }).notNull(),
+        userId: uuid('user_id')
+            .references(() => users.id, { onDelete: 'cascade' })
+            .notNull(),
+        roleId: uuid('role_id')
+            .references(() => roles.id, { onDelete: 'cascade' })
+            .notNull(),
     },
     (t) => ({ pk: primaryKey({ columns: [t.userId, t.roleId] }) })
 );
 
 export const userClaims = pgTable('user_claims', {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    userId: uuid('user_id')
+        .references(() => users.id, { onDelete: 'cascade' })
+        .notNull(),
     claimType: varchar('claim_type', { length: 256 }).notNull(),
     claimValue: text('claim_value').notNull(),
 });
@@ -60,7 +48,9 @@ export const userClaims = pgTable('user_claims', {
 export const userLogins = pgTable(
     'user_logins',
     {
-        userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+        userId: uuid('user_id')
+            .references(() => users.id, { onDelete: 'cascade' })
+            .notNull(),
         loginProvider: varchar('login_provider', { length: 100 }).notNull(),
         providerKey: varchar('provider_key', { length: 256 }).notNull(),
         providerDisplayName: varchar('provider_display_name', { length: 100 }),
@@ -68,9 +58,52 @@ export const userLogins = pgTable(
     (t) => ({ pk: primaryKey({ columns: [t.loginProvider, t.providerKey] }) })
 );
 
-// Wajib ada karena dipakai di auth.service logout
-export const sessions = pgTable('sessions', {
+// --- REVISI UTAMA: dari C# UserSession & LoginActivity ---
+
+export const userSessions = pgTable('user_sessions', {
     id: uuid('id').primaryKey().defaultRandom(),
-    userId: uuid('user_id').references(() => users.id, { onDelete: 'cascade' }).notNull(),
+    userId: uuid('user_id')
+        .references(() => users.id, { onDelete: 'cascade' })
+        .notNull(),
+    deviceName: varchar('device_name', { length: 256 }).notNull(),
+    operatingSystem: varchar('operating_system', { length: 128 }).notNull(),
+    browser: varchar('browser', { length: 128 }).notNull(),
+    userAgent: text('user_agent').notNull(),
+    ipAddress: varchar('ip_address', { length: 45 }).notNull(),
+    country: varchar('country', { length: 2 }).notNull().default('ID'),
+    refreshTokenHash: text('refresh_token_hash').notNull(),
+    isActive: boolean('is_active').notNull().default(true),
+    isCurrent: boolean('is_current').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    lastActivityAt: timestamp('last_activity_at', { withTimezone: true }).defaultNow().notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+});
+
+export const loginActivities = pgTable('login_activities', {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+        .references(() => users.id, { onDelete: 'cascade' })
+        .notNull(),
+    activityType: varchar('activity_type', { length: 50 }).notNull(), // LOGIN, LOGOUT, FAILED_LOGIN, GOOGLE_LOGIN
+    device: varchar('device', { length: 256 }).notNull(),
+    operatingSystem: varchar('operating_system', { length: 128 }).notNull(),
+    userAgent: text('user_agent').notNull(),
+    browser: varchar('browser', { length: 128 }).notNull(),
+    ipAddress: varchar('ip_address', { length: 45 }).notNull(),
+    country: varchar('country', { length: 2 }).notNull().default('ID'),
+    isSuccess: boolean('is_success').notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
 });
+
+// --- Backward compatibility untuk auth.service.ts yang masih import { sessions } ---
+export const sessions = userSessions;
+
+// --- Infer types untuk Drizzle ---
+export type UserRow = typeof users.$inferSelect;
+export type NewUserRow = typeof users.$inferInsert;
+
+export type UserSessionRow = typeof userSessions.$inferSelect;
+export type NewUserSessionRow = typeof userSessions.$inferInsert;
+
+export type LoginActivityRow = typeof loginActivities.$inferSelect;
+export type NewLoginActivityRow = typeof loginActivities.$inferInsert;
