@@ -22,6 +22,7 @@ class IncomeStatementViewModel : ViewModel() {
                 try {
                     api.getIncomeStatement().body<IncomeStatementReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("IncomeStatementViewModel", "Error tertangkap", t)
                     null
                 }
         }

@@ -21,6 +21,7 @@ class DashboardViewModel : ViewModel() {
                 try {
                     api.getSummary().body<DashboardSummary>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("DashboardViewModel", "Error tertangkap", t)
                     null
                 }
         }

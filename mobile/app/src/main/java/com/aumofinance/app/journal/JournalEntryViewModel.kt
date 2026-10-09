@@ -114,6 +114,7 @@ class JournalEntryViewModel : ViewModel() {
             try {
                 accounts = coaApi.list().body<AccountsResponse>().accounts.filter { it.isActive }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 // kegagalan diabaikan (tidak ada pesan ke pengguna)
             }
         }
@@ -126,6 +127,7 @@ class JournalEntryViewModel : ViewModel() {
                 val body = api.nextTransactionNumber(_journalType, entryDateIso).body<NextTransactionNumberResponse>()
                 transactionNumber = body.transactionNumber
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 // kegagalan diabaikan (tidak ada pesan ke pengguna)
             }
         }
@@ -136,6 +138,7 @@ class JournalEntryViewModel : ViewModel() {
             try {
                 api.getById(id).body<JournalEntryDetailResponse>().entry?.let { bindExistingEntry(it) }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 // kegagalan diabaikan (tidak ada pesan ke pengguna)
             }
         }
@@ -196,6 +199,7 @@ class JournalEntryViewModel : ViewModel() {
                     errorMessage = body.message.ifBlank { "Gagal menyimpan entri (${response.status.value})" }
                 }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 errorMessage = t.message ?: "Koneksi gagal"
             }
         }
@@ -215,6 +219,7 @@ class JournalEntryViewModel : ViewModel() {
                     errorMessage = body.message.ifBlank { "Gagal memperbarui entri (${response.status.value})" }
                 }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 errorMessage = t.message ?: "Koneksi gagal"
             }
         }

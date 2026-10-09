@@ -22,6 +22,7 @@ class RetainedEarningsViewModel : ViewModel() {
                 try {
                     api.getRetainedEarnings().body<RetainedEarningsReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("RetainedEarningsViewModel", "Error tertangkap", t)
                     null
                 }
         }

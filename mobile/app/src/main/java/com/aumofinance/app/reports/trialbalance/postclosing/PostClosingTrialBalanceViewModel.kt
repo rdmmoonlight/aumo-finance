@@ -25,6 +25,7 @@ class PostClosingTrialBalanceViewModel : ViewModel() {
                 try {
                     api.getTrialBalance("post-closing").body<TrialBalanceReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("PostClosingTrialBalanceViewModel", "Error tertangkap", t)
                     null
                 }
         }

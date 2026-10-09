@@ -12,6 +12,7 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.aumofinance.app.BuildConfig
+import com.aumofinance.app.crashlog.AppLogger
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -51,7 +52,7 @@ object AppUpdateService {
 
                 httpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        Log.w(TAG, "Cek update gagal: HTTP ${response.code}")
+                        AppLogger.warn(TAG, "Cek update gagal: HTTP ${response.code}")
                         return@use
                     }
                     val body = response.body?.string() ?: return@use
@@ -78,7 +79,7 @@ object AppUpdateService {
                     }
                 }
             } catch (e: Exception) {
-                Log.e(TAG, "Cek update gagal: ${e.message}")
+                AppLogger.error(TAG, "Cek update gagal", e)
             }
         }
     }
@@ -153,7 +154,7 @@ object AppUpdateService {
                 ContextCompat.RECEIVER_EXPORTED,
             )
         } catch (e: Exception) {
-            Log.e(TAG, "Download/install gagal: ${e.message}")
+            AppLogger.error(TAG, "Download/install gagal", e)
         }
     }
 

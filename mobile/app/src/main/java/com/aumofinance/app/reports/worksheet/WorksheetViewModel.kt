@@ -20,6 +20,7 @@ class WorksheetViewModel : ViewModel() {
                 try {
                     api.getWorksheet().body<WorksheetReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("WorksheetViewModel", "Error tertangkap", t)
                     null
                 }
         }
