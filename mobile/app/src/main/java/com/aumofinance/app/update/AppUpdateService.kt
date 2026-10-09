@@ -21,7 +21,7 @@ import java.util.concurrent.Executors
 object AppUpdateService {
     private const val TAG = "AppUpdateService"
     private const val GITHUB_USER = "rdmmoonlight"
-    private const val GITHUB_REPO = "aumo-finance-android"
+    private const val GITHUB_REPO = "aumo-finance"
 
     const val PREFS_NAME = "aumo_update_prefs"
     const val KEY_AUTO_UPDATE_ENABLED = "auto_update_enabled"
@@ -50,7 +50,10 @@ object AppUpdateService {
                         .build()
 
                 httpClient.newCall(request).execute().use { response ->
-                    if (!response.isSuccessful) return@use
+                    if (!response.isSuccessful) {
+                        Log.w(TAG, "Cek update gagal: HTTP ${response.code}")
+                        return@use
+                    }
                     val body = response.body?.string() ?: return@use
                     val json = JSONObject(body)
 
@@ -102,6 +105,16 @@ object AppUpdateService {
     ) {
         try {
             val fileName = "AumoFinance_v$version.apk"
+
+            // Izin "pasang aplikasi tidak dikenal" diminta sebelum mengunduh,
+            // supaya update tidak berhenti di tengah jalan.
+            if (!context.packageManager.canRequestPackageInstalls()) {
+                triggerInstall(context, fileName)
+                return
+            }
+
+            // Hapus berkas lama bernama sama; DownloadManager gagal bila berkas sudah ada.
+            File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName).delete()
             val request =
                 DownloadManager.Request(Uri.parse(apkUrl)).apply {
                     setTitle("Memperbarui AumoFinance")
