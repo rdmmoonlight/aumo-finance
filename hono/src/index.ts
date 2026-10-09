@@ -2,6 +2,7 @@ import { serve } from '@hono/node-server';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { env } from './lib/env.js';
 import { logger } from './lib/logger.js';
+import { closeQueue, initQueueWorkers } from './lib/queue.js';
 import { redis } from './lib/redis.js';
 import { registerMiddleware } from './middlewares/index.js';
 import { registerRoutes } from './routes/index.js';
@@ -23,6 +24,9 @@ export function createApp(): OpenAPIHono<AppEnv> {
   return app;
 }
 
+// Jalankan Worker Queue
+initQueueWorkers();
+
 // Inisialisasi aplikasi Hono
 const app = createApp();
 
@@ -36,10 +40,14 @@ const shutdown = async (signal: string) => {
   logger.info(`${signal} diterima, menutup server...`);
 
   try {
+    // Tutup BullMQ Worker & Queue terlebih dahulu
+    await closeQueue();
+
+    // Tutup koneksi Redis utama
     await redis.quit();
     logger.info('Koneksi Redis berhasil ditutup.');
   } catch (err) {
-    logger.error({ err }, 'Gagal menutup koneksi Redis');
+    logger.error({ err }, 'Gagal menutup koneksi Redis/Queue');
   }
 
   server.close(() => process.exit(0));
@@ -58,4 +66,3 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
   logger.error({ reason }, 'Unhandled Rejection terdeteksi');
 });
-

@@ -1,9 +1,10 @@
-import { createPeriodSchema } from '../types/periods.type';
-import { requireAuth } from '../middlewares/auth.middleware';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import { z } from 'zod';
+import { requireAuth } from '../middlewares/auth';
 import { periodsService } from '../services/periods.service';
 import type { AppEnv } from '../types/app.types'; // Definisikan atau sesuaikan lokasi AppEnv Anda
+import { createPeriodSchema } from '../types/periods.type';
 
 // passing AppEnv ke instance Hono agar context `user` terdeteksi dengan tepat
 export const periodsRoute = new Hono<AppEnv>();
@@ -98,5 +99,4 @@ periodsRoute.post('/:id/close', async (c) => {
 
     return c.json(result);
 });
-import { z } from 'zod';
 export const createPeriodSchema = z.object({});
