@@ -1,10 +1,7 @@
-
-// Temporary mock schema for runtime execution
-const schema = {} as any;
 import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
-// ISOLATED TOTAL: import * as schema from "../db/schema";
+import * as schema from "../db/schema";
 
 const { Pool } = pg;
 

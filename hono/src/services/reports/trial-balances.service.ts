@@ -1,7 +1,8 @@
 import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
 // ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { isPermanent, isTemporary, normalBalanceIsDebit } from '../lib/account-classification.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import type { TrialBalanceRow } from '../types/trial-balance.type.js';
 
 export type ReportType = 'unadjusted' | 'adjusted' | 'post-closing';

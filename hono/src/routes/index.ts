@@ -1,4 +1,3 @@
-// src/routes/index.ts
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
 import type { AppEnv } from '../types/app.types.js';
@@ -15,19 +14,33 @@ apiV1.route('/periods', periodsRoute);
 apiV1.get('/avatars/:fileName', getAvatarHandler);
 
 export function registerRoutes(app: OpenAPIHono<AppEnv>): void {
+  // Root health check / info endpoint
+  app.get('/', (c) =>
+    c.json({
+      success: true,
+      message: 'Aumo Backend API Running 🚀',
+      version: '3.2.0',
+      docs: '/docs',
+    })
+  );
+
   app.route('/api/v1', apiV1);
 
-  // udah, ini gantiin buildOpenApiSpec(app) lu yang error kemarin
   app.doc?.('/openapi.json', {
     openapi: '3.1.0',
     info: {
       title: 'Aumo Backend API',
       version: '3.2.0',
-      description: 'Dokumentasi API Aumo Backend'
+      description: 'Dokumentasi API Aumo Backend',
     },
   });
 
   app.get('/docs', Scalar({ url: '/openapi.json' }));
+
+  // Handler jika route tidak ditemukan
+  app.notFound((c) =>
+    c.json({ success: false, message: 'Route tidak ditemukan' }, 404)
+  );
 }
 
 export { apiV1 };

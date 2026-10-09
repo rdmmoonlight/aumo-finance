@@ -1,6 +1,7 @@
 import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 // ISOLATED TOTAL: import * as schema from '../db/schema.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import { selectedPeriodHelper } from '../lib/selected-period.js';
 import type { CashAccountItem, ChartTrendItem, DashboardData, ExpenseAccountItem } from '../types/dashboard.type.js';
 

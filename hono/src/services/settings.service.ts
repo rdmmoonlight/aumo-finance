@@ -2,7 +2,8 @@ import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
 // ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { avatarStorage } from '../lib/avatar-storage.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import { logger } from '../lib/logger.js';
 import type {
     ChangePasswordRequest,

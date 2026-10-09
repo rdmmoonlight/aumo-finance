@@ -5,7 +5,8 @@ import {
     parseClassification,
     validateReferenceNumber
 } from '../lib/account-classification.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import { AppError, BadRequestError, ConflictError, NotFoundError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import type {

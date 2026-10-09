@@ -1,15 +1,15 @@
-import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
+import { OpenAPIHono } from '@hono/zod-openapi';
 import { env } from './lib/env.js';
 import { logger } from './lib/logger.js';
 import { redis } from './lib/redis.js';
-import { registerMiddleware } from './middleware/index.js';
+import { registerMiddleware } from './middlewares/index.js';
 import { registerRoutes } from './routes/index.js';
 import type { AppEnv } from './types/app.types.js';
 
 /** Factory aplikasi Hono */
-export function createApp(): Hono<AppEnv> {
-  const app = new Hono<AppEnv>();
+export function createApp(): OpenAPIHono<AppEnv> {
+  const app = new OpenAPIHono<AppEnv>();
 
   registerMiddleware(app);
   registerRoutes(app);
@@ -58,3 +58,4 @@ process.on('uncaughtException', (err) => {
 process.on('unhandledRejection', (reason) => {
   logger.error({ reason }, 'Unhandled Rejection terdeteksi');
 });
+

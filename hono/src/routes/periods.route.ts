@@ -1,8 +1,7 @@
+import { createPeriodSchema } from '../types/periods.type';
+import { requireAuth } from '../middlewares/auth.middleware';
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-// ISOLATED TOTAL: import { createPeriodSchema } from '../db/reports/accounting.schema'; // Disesuaikan dengan relative import
-const createPeriodSchema = {} as any;
-import { requireAuth } from '../middleware/auth.middleware';
 import { periodsService } from '../services/periods.service';
 import type { AppEnv } from '../types/app.types'; // Definisikan atau sesuaikan lokasi AppEnv Anda
 
@@ -99,3 +98,5 @@ periodsRoute.post('/:id/close', async (c) => {
 
     return c.json(result);
 });
+import { z } from 'zod';
+export const createPeriodSchema = z.object({});

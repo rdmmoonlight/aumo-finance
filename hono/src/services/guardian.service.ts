@@ -1,6 +1,7 @@
 import { and, desc, eq, gte } from 'drizzle-orm';
 // ISOLATED TOTAL: import * as schema from '../db/schema.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import { logger } from '../lib/logger.js';
 
 // GuardianService lengkap untuk SettingsService

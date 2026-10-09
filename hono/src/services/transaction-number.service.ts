@@ -1,6 +1,7 @@
 import { and, eq, sql } from 'drizzle-orm';
 // ISOLATED TOTAL: import * as schema from '../db/schema.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import { AppError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 

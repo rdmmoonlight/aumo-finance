@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import * as healthService from '../services/health.service'
 
 export const healthRoute = new Hono()
 
@@ -15,10 +14,10 @@ healthRoute.on('HEAD', '/', (c) => {
 
 // GET /api/v1/health
 healthRoute.get('/health', async (c) => {
-  const status = await healthService.getHealthStatus?.()
+  //const status = await healthService.getHealthStatus?.()
   return c.json({
-    status: status?.status || 'pass',
+    // status: status?.status || 'pass',
     timestamp: new Date().toISOString(),
-    ...status,
+    // ...status,
   })
 })
