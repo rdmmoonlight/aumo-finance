@@ -38,14 +38,18 @@ export const googleLoginRequestSchema = z.object({
 });
 export type GoogleLoginRequest = z.infer<typeof googleLoginRequestSchema>;
 
+// Aturan password bersama (register & ganti password)
+export const passwordRule = z
+    .string()
+    .min(6, 'Password minimal 6 karakter')
+    .max(128, 'Password maksimal 128 karakter')
+    .regex(/[A-Z]/, 'Password harus mengandung minimal 1 huruf besar')
+    .regex(/[a-z]/, 'Password harus mengandung minimal 1 huruf kecil')
+    .regex(/[0-9]/, 'Password harus mengandung minimal 1 angka');
+
 export const registerSchema = z.object({
     email: z.string().trim().email('Format email tidak valid'),
-    password: z
-        .string()
-        .min(6, 'Password minimal 6 karakter')
-        .regex(/[A-Z]/, 'Password harus mengandung minimal 1 huruf besar')
-        .regex(/[a-z]/, 'Password harus mengandung minimal 1 huruf kecil')
-        .regex(/[0-9]/, 'Password harus mengandung minimal 1 angka'),
+    password: passwordRule,
     name: z.string().trim().min(2, 'Nama minimal 2 karakter').optional().or(z.literal('')),
     clientType: z.enum(['web', 'mobile']).optional().default('web'),
 });
@@ -181,4 +185,42 @@ export interface LoginActivityDto {
     country: string;
     isSuccess: boolean;
     createdAt: string; // ISO
+}
+
+
+// ==========================================
+// 6. Auth (Better Auth) - sesuai tabel user/session/account
+// ==========================================
+
+export const checkEmailQuerySchema = z.object({
+    email: z.string().trim().email('Format email tidak valid'),
+});
+export type CheckEmailQuery = z.infer<typeof checkEmailQuerySchema>;
+
+export const changePasswordSchema = z.object({
+    currentPassword: z.string().min(1, 'Password saat ini wajib diisi'),
+    newPassword: passwordRule,
+    revokeOtherSessions: z.boolean().optional().default(true),
+});
+export type ChangePasswordRequest = z.infer<typeof changePasswordSchema>;
+
+/** Kolom tabel "user" yang aman dikirim ke client */
+export interface AuthUserDto {
+    id: string;
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image: string | null;
+    createdAt: string | Date;
+    updatedAt: string | Date;
+}
+
+/** Kolom tabel "session" (tanpa token) untuk daftar perangkat aktif */
+export interface AuthSessionDto {
+    id: string;
+    ipAddress: string | null;
+    userAgent: string | null;
+    createdAt: string | Date;
+    expiresAt: string | Date;
+    isCurrent: boolean;
 }
