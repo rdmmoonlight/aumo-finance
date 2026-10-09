@@ -1,4 +1,7 @@
 import { foreignKey, index, integer, numeric, pgTable, serial, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
+import { chartOfAccounts } from "../chart-of-accounts";
+import { periods } from "../periods";
+import { journalEntries, journalEntryLines } from "../journal-entries";
 
 export const generalLedgerPermanentAccounts = pgTable("GeneralLedgerPermanentAccounts", {
     id: serial("Id").primaryKey().notNull(),

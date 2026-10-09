@@ -1,7 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'node:crypto';
-import * as schema from '../';
+import * as schema from '../db/schema/index.js';
 import { db } from '../lib/db.js';
 import { env } from '../lib/env.js';
 import { AppError } from '../lib/errors.js';

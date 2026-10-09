@@ -2,7 +2,7 @@ import { pgTable, serial, date, varchar, numeric, timestamp, index, uniqueIndex,
 import { sql } from "drizzle-orm"
 
 export const periods = pgTable("Periods", {
-    id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: ""Periods_Id_seq"", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),
+    id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: "Periods_Id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),
     periodName: varchar("PeriodName", { length: 50 }).notNull(),
     startDate: timestamp("StartDate", { withTimezone: true, mode: 'string' }).notNull(),
     endDate: timestamp("EndDate", { withTimezone: true, mode: 'string' }).notNull(),
