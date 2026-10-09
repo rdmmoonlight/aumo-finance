@@ -14,19 +14,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.aumofinance.app.ui.components.ConfirmDialog
 import com.aumofinance.app.ui.components.SnackbarMessageHost
+import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoTheme
-import java.io.File
 
 class CrashLogActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val logFile = File(filesDir, "crash_log.txt")
-        val content = if (logFile.exists()) logFile.readText() else "Belum ada crash log."
-
         setContent {
+            var content by remember { mutableStateOf(AppLogger.read()) }
             var snackbarMessage by remember { mutableStateOf<String?>(null) }
+            var showClearConfirm by remember { mutableStateOf(false) }
 
             AumoTheme {
                 Box(modifier = Modifier.fillMaxSize()) {
@@ -34,15 +34,38 @@ class CrashLogActivity : ComponentActivity() {
                         content = content,
                         onCopyClick = {
                             snackbarMessage =
-                                if (content.isNotEmpty() && content != "Belum ada crash log.") {
+                                if (content != AppLogger.EMPTY_MESSAGE) {
                                     val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                    clipboard.setPrimaryClip(ClipData.newPlainText("Crash Log", content))
-                                    "Crash log berhasil disalin!"
+                                    clipboard.setPrimaryClip(ClipData.newPlainText("Log", content))
+                                    "Log berhasil disalin!"
                                 } else {
                                     "Tidak ada log untuk disalin."
                                 }
                         },
+                        onClearClick = {
+                            if (content == AppLogger.EMPTY_MESSAGE) {
+                                snackbarMessage = "Log sudah kosong."
+                            } else {
+                                showClearConfirm = true
+                            }
+                        },
                     )
+                    if (showClearConfirm) {
+                        ConfirmDialog(
+                            title = "Hapus Log",
+                            message = "Seluruh log akan dihapus permanen.",
+                            confirmText = "Hapus",
+                            dismissText = "Batal",
+                            confirmColor = AumoColors.Bad,
+                            onConfirm = {
+                                AppLogger.clear()
+                                content = AppLogger.read()
+                                showClearConfirm = false
+                                snackbarMessage = "Log berhasil dihapus."
+                            },
+                            onDismiss = { showClearConfirm = false },
+                        )
+                    }
                     SnackbarMessageHost(
                         message = snackbarMessage,
                         onConsumed = { snackbarMessage = null },

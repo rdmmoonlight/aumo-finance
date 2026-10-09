@@ -29,6 +29,7 @@ class CoaViewModel : ViewModel() {
                 try {
                     api.list(search, category).body<AccountsResponse>().accounts
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("CoaViewModel", "Error tertangkap", t)
                     emptyList()
                 }
         }
@@ -65,6 +66,7 @@ class CoaViewModel : ViewModel() {
                 errorMessage = body.message.ifBlank { "Gagal memproses permintaan (${response.status.value})" }
             }
         } catch (t: Throwable) {
+            com.aumofinance.app.crashlog.AppLogger.error("CoaViewModel", "Error tertangkap", t)
             errorMessage = t.message ?: "Koneksi gagal"
         }
     }

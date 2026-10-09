@@ -46,6 +46,7 @@ class PeriodsViewModel : ViewModel() {
                 // tanpa harus menunggu ping Home selesai sendiri.
                 DbConnectionManager.markConnected()
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 periods = emptyList()
             }
         }
@@ -59,6 +60,7 @@ class PeriodsViewModel : ViewModel() {
             try {
                 openPeriodInfo = api.openInfo().body<OpenPeriodInfoResponse>()
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             }
         }
@@ -85,6 +87,7 @@ class PeriodsViewModel : ViewModel() {
                     load()
                 }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             } finally {
                 isSubmitting = false
@@ -124,6 +127,7 @@ class PeriodsViewModel : ViewModel() {
                     snackbarMessage = body.message.ifBlank { "Failed to switch period (HTTP ${response.status.value})." }
                 }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             }
         }
@@ -136,6 +140,7 @@ class PeriodsViewModel : ViewModel() {
                 snackbarMessage = response.body<SimpleApiResponse>().message
                 load()
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             }
         }

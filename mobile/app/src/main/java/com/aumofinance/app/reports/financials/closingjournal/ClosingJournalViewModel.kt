@@ -22,6 +22,7 @@ class ClosingJournalViewModel : ViewModel() {
                 try {
                     api.getClosingJournal().body<ClosingJournalReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("ClosingJournalViewModel", "Error tertangkap", t)
                     null
                 }
         }

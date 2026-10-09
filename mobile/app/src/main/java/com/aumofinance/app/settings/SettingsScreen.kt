@@ -65,7 +65,7 @@ fun SettingsScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = AumoColors.Surface),
                     modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingLarge).heightIn(min = AumoDimens.ButtonHeight),
                 ) {
-                    Text("Lihat Crash Log", color = AumoColors.TextPrimary)
+                    Text("Lihat Log", color = AumoColors.TextPrimary)
                 }
 
                 Button(

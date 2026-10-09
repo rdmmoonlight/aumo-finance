@@ -54,6 +54,7 @@ class LoginViewModel : ViewModel() {
                     state = LoginState.Error(body.message.ifBlank { "Login gagal (${response.status.value})" })
                 }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("LoginViewModel", "Error tertangkap", t)
                 state = LoginState.Error(t.message ?: "Koneksi gagal")
             }
         }

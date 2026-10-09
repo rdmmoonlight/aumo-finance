@@ -49,6 +49,7 @@ class JournalReportViewModel : ViewModel() {
                 entries = body.entries
                 selectedPeriodName = body.selectedPeriodName
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalReportViewModel", "Error tertangkap", t)
                 entries = emptyList()
             }
         }
@@ -73,6 +74,7 @@ class JournalReportViewModel : ViewModel() {
                     snackbarMessage = body.message.ifBlank { "Failed to delete entry." }
                 }
             } catch (t: Throwable) {
+                com.aumofinance.app.crashlog.AppLogger.error("JournalReportViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Connection failed."
             }
         }

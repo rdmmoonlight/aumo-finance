@@ -1,13 +1,16 @@
 package com.aumofinance.app.network
 
 import io.ktor.client.HttpClient
+import com.aumofinance.app.crashlog.AppLogger
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.url
 import io.ktor.http.HttpHeaders
 import io.ktor.serialization.gson.gson
@@ -73,6 +76,19 @@ object ApiClient {
             }
             defaultRequest {
                 url(BASE_URL)
+            }
+        }.also { httpClient ->
+            // expectSuccess = false membuat status 4xx/5xx tidak melempar exception,
+            // jadi tanpa ini kegagalan HTTP tidak pernah tercatat. Hanya method, path,
+            // dan status yang dicatat (tanpa query/body/token).
+            httpClient.plugin(HttpSend).intercept { request ->
+                val call = execute(request)
+                val status = call.response.status.value
+                if (status >= 400) {
+                    val message = "${request.method.value} ${request.url.encodedPath} -> $status"
+                    if (status >= 500) AppLogger.error("HTTP", message) else AppLogger.warn("HTTP", message)
+                }
+                call
             }
         }
     }

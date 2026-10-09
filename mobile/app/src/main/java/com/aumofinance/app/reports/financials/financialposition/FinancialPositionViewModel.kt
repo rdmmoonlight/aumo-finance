@@ -22,6 +22,7 @@ class FinancialPositionViewModel : ViewModel() {
                 try {
                     api.getFinancialPosition(isPostClosing).body<FinancialPositionReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("FinancialPositionViewModel", "Error tertangkap", t)
                     null
                 }
         }

@@ -1,6 +1,7 @@
 package com.aumofinance.app.core
 
 import android.app.Application
+import com.aumofinance.app.crashlog.AppLogger
 import com.aumofinance.app.crashlog.CrashLogHandler
 import com.aumofinance.app.network.SessionStore
 
@@ -10,7 +11,8 @@ import com.aumofinance.app.network.SessionStore
 class AumoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        Thread.setDefaultUncaughtExceptionHandler(CrashLogHandler(this))
+        AppLogger.init(this)
+        Thread.setDefaultUncaughtExceptionHandler(CrashLogHandler())
         SessionStore.init(this)
     }
 }

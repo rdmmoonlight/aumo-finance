@@ -23,6 +23,7 @@ class TrialBalanceViewModel : ViewModel() {
                 try {
                     api.getTrialBalance("unadjusted").body<TrialBalanceReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("TrialBalanceViewModel", "Error tertangkap", t)
                     null
                 }
         }

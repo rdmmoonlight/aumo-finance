@@ -22,6 +22,7 @@ class CashFlowViewModel : ViewModel() {
                 try {
                     api.getCashFlow().body<CashFlowReport>()
                 } catch (t: Throwable) {
+                    com.aumofinance.app.crashlog.AppLogger.error("CashFlowViewModel", "Error tertangkap", t)
                     null
                 }
         }

@@ -69,6 +69,7 @@ class LedgerApi(private val client: HttpClient = ApiClient.client) {
                 else -> LedgerResult.Success(body)
             }
         } catch (t: Throwable) {
+            com.aumofinance.app.crashlog.AppLogger.error("LedgerApi", "Error tertangkap", t)
             LedgerResult.Failure("Tidak dapat terhubung ke server.")
         }
 }
