@@ -2,7 +2,7 @@ import { pgTable, serial, date, varchar, numeric, timestamp, index, uniqueIndex,
 import { sql } from "drizzle-orm"
 
 export const chartOfAccounts = pgTable("ChartOfAccounts", {
-    id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: ""ChartOfAccounts_Id_seq"", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),
+    id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: "ChartOfAccounts_Id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),
     referenceNumber: integer("ReferenceNumber").notNull(),
     accountName: varchar("AccountName", { length: 100 }).notNull(),
     type: text("Type").notNull(),
