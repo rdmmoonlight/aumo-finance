@@ -1,23 +1,26 @@
+import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
-import { env } from "./src/lib/env";
+
+if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL belum diisi di file .env");
+}
 
 export default defineConfig({
-    // Dialek basis data
     dialect: "postgresql",
 
-    // Menunjuk ke file orchestrator utama (schema.ts)
-    // Drizzle akan otomatis membaca seluruh skema dan relasi yang di-export di sana
-    schema: "./src/db/schema",
+    // Daftar file eksplisit: menghindari masalah resolusi import ESM saat drizzle-kit memuat folder
+    schema: [
+        "./src/db/schema/auth-schema.ts",
+        "./src/db/schema/chart-of-accounts.schema.ts",
+        "./src/db/schema/reports/general-journal.schema.ts",
+    ],
 
-    // Folder penyimpanan file migrasi SQL
     out: "./drizzle",
 
-    // Konfigurasi koneksi ke Neon Postgres
     dbCredentials: {
-        url: env.DATABASE_URL,
+        url: process.env.DATABASE_URL,
     },
 
-    // Logika tambahan untuk migrasi aman
     strict: true,
     verbose: true,
 });
