@@ -85,7 +85,7 @@ object ApiClient {
                 val call = execute(request)
                 val status = call.response.status.value
                 if (status >= 400) {
-                    val message = "${request.method.value} ${request.url.encodedPath} -> $status"
+                    val message = "${call.request.method.value} ${call.request.url.encodedPath} -> $status"
                     if (status >= 500) AppLogger.error("HTTP", message) else AppLogger.warn("HTTP", message)
                 }
                 call
