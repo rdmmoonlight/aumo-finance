@@ -1,2 +1,3 @@
-export * from "./auth-schema";
-// export * from "./tabel-lain"; (jika ada tabel lain)
+// src/db/schema.ts
+export * from "./auth-schema.js";
+
