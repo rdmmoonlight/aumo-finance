@@ -1,6 +1,4 @@
 import { boolean, integer, pgTable, serial, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-// ISOLATED TOTAL: import { users } from './auth.schema';
-const users = {} as any;
 
 // ==========================================
 // 1. Table: chart_of_accounts
@@ -11,9 +9,8 @@ const users = {} as any;
 export const chartOfAccounts = pgTable('chart_of_accounts', {
     id: serial('id').primaryKey(), // C# int Id
     referenceNumber: integer('reference_number').notNull(), // [Required]
-    userId: uuid('user_id')
-        .references(() => users.id, { onDelete: 'cascade' })
-        .notNull(),
+    // Tanpa FK: tabel `user` (better-auth) memakai id bertipe text, sedangkan kolom ini uuid warisan .NET.
+    userId: uuid('user_id').notNull(),
     accountName: varchar('account_name', { length: 100 }).notNull(),
     type: varchar('type', { length: 50 }).notNull(), // Assets, Liabilities, Equity, OperatingIncome, etc.
     role: varchar('role', { length: 100 }).notNull(), // System role
