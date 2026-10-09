@@ -1,5 +1,5 @@
 import { and, asc, desc, eq, gte, ilike, inArray, lte, or, sql } from 'drizzle-orm';
-import * as schema from '../db/schema.js';
+// ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import {
     normalBalanceIsDebit,
     parseClassification,

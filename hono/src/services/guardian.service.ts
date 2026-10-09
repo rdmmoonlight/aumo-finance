@@ -1,5 +1,5 @@
 import { and, desc, eq, gte } from 'drizzle-orm';
-import * as schema from '../db/schema.js';
+// ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { db } from '../lib/db.js';
 import { logger } from '../lib/logger.js';
 

@@ -2,13 +2,14 @@ import { defineConfig } from "drizzle-kit";
 import { env } from "./src/lib/env";
 
 export default defineConfig({
-    // Tentukan dialek basis data
+    // Dialek basis data
     dialect: "postgresql",
 
-    // Lokasi tempat Anda menyimpan skema Drizzle (misal: src/db/schema/auth.ts)
-    schema: "./src/db/schema/index.ts",
+    // Menunjuk ke file orchestrator utama (schema.ts)
+    // Drizzle akan otomatis membaca seluruh skema dan relasi yang di-export di sana
+    schema: "./src/db/schema.ts",
 
-    // Folder tempat menyimpan output migrasi SQL yang dihasilkan
+    // Folder penyimpanan file migrasi SQL
     out: "./drizzle",
 
     // Konfigurasi koneksi ke Neon Postgres

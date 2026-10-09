@@ -1,9 +1,10 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { createPeriodSchema } from '../db/reports/accounting.schema.js'; // Disesuaikan dengan relative import
-import { requireAuth } from '../middleware/auth.middleware.js';
-import { periodsService } from '../services/periods.service.js';
-import type { AppEnv } from '../types/app.types.js'; // Definisikan atau sesuaikan lokasi AppEnv Anda
+// ISOLATED TOTAL: import { createPeriodSchema } from '../db/reports/accounting.schema'; // Disesuaikan dengan relative import
+const createPeriodSchema = {} as any;
+import { requireAuth } from '../middleware/auth.middleware';
+import { periodsService } from '../services/periods.service';
+import type { AppEnv } from '../types/app.types'; // Definisikan atau sesuaikan lokasi AppEnv Anda
 
 // passing AppEnv ke instance Hono agar context `user` terdeteksi dengan tepat
 export const periodsRoute = new Hono<AppEnv>();

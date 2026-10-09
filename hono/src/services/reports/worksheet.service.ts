@@ -1,5 +1,5 @@
 import { and, asc, eq } from 'drizzle-orm';
-import * as schema from '../db/schema.js';
+// ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { isTemporary, normalBalanceIsDebit } from '../lib/account-classification.js';
 import { db } from '../lib/db.js';
 import type { WorksheetRow } from '../types/worksheet.type.js';

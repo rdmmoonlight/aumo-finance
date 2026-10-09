@@ -1,6 +1,5 @@
-// Updated - TrialBalanceService versi lengkap 1:1 sama C#
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import * as schema from '../db/schema.js';
+import { and, asc, eq, gte, lte, sql } from 'drizzle-orm';
+// ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { isPermanent, isTemporary, normalBalanceIsDebit } from '../lib/account-classification.js';
 import { db } from '../lib/db.js';
 import type { TrialBalanceRow } from '../types/trial-balance.type.js';
@@ -9,18 +8,15 @@ export type ReportType = 'unadjusted' | 'adjusted' | 'post-closing';
 
 export class TrialBalanceService {
     /**
-     * BuildTrialBalanceRowsAsync - 1:1 sama C#
-     * @param userId 
-     * @param period 
-     * @param includeAdjusting - include journal type Adjusting
-     * @param reportType - unadjusted | adjusted | post-closing
+     * BuildTrialBalanceRows - Membaca langsung dari GL Permanent & Temporary
      */
     async buildTrialBalanceRows(
         userId: string,
-        period: { startDate: Date; endDate: Date },
+        period: { startDate: Date; endDate: Date; periodId?: number },
         includeAdjusting: boolean = false,
         reportType: ReportType = 'unadjusted'
     ): Promise<TrialBalanceRow[]> {
+        // 1. Ambil seluruh akun aktif milik user
         const accounts = await db.query.chartOfAccounts.findMany({
             where: and(
                 eq(schema.chartOfAccounts.userId, userId),
@@ -29,72 +25,88 @@ export class TrialBalanceService {
             orderBy: [asc(schema.chartOfAccounts.referenceNumber)]
         });
 
-        const accountIds = accounts.map(a => a.id);
-        if (accountIds.length === 0) return [];
+        if (accounts.length === 0) return [];
 
         const startUtc = new Date(period.startDate);
         startUtc.setHours(0, 0, 0, 0);
         const endUtc = new Date(period.endDate);
         endUtc.setHours(23, 59, 59, 999);
 
-        const includeAdjustingLines = includeAdjusting || reportType === 'adjusted' || reportType === 'post-closing';
-
-        const journalTypes = includeAdjustingLines
-            ? ['General', 'Adjusting']
-            : ['General'];
-
-        // Query lines seperti di C#: linesQuery.Where(...)
-        const lines = await db
+        // 2. Query dari GL Permanent (Akun Riil)
+        const permLines = await db
             .select({
-                accountId: schema.journalEntryLines.accountId,
-                debit: sql<number>`${schema.journalEntryLines.debit}::float`.as('debit'),
-                credit: sql<number>`${schema.journalEntryLines.credit}::float`.as('credit'),
-                journalType: schema.journalEntries.journalType
+                accountId: schema.generalLedgerPermanentAccounts.accountId,
+                debit: sql<number>`COALESCE(${schema.generalLedgerPermanentAccounts.debit}, 0)::float`,
+                credit: sql<number>`COALESCE(${schema.generalLedgerPermanentAccounts.credit}, 0)::float`,
             })
-            .from(schema.journalEntryLines)
-            .innerJoin(
-                schema.journalEntries,
-                eq(schema.journalEntryLines.journalEntryId, schema.journalEntries.id)
-            )
+            .from(schema.generalLedgerPermanentAccounts)
             .where(
                 and(
-                    inArray(schema.journalEntryLines.accountId, accountIds),
-                    eq(schema.journalEntries.userId, userId),
-                    sql`${schema.journalEntries.entryDate} >= ${startUtc} AND ${schema.journalEntries.entryDate} <= ${endUtc}`,
-                    inArray(schema.journalEntries.journalType, journalTypes as any)
+                    eq(schema.generalLedgerPermanentAccounts.userId, userId),
+                    gte(schema.generalLedgerPermanentAccounts.entryDate, startUtc),
+                    lte(schema.generalLedgerPermanentAccounts.entryDate, endUtc)
                 )
             );
 
+        // 3. Query dari GL Temporary (Akun Nominal) - Omit jika Post-Closing
+        let tempLines: typeof permLines = [];
+        if (reportType !== 'post-closing') {
+            tempLines = await db
+                .select({
+                    accountId: schema.generalLedgerTemporaryAccounts.accountId,
+                    debit: sql<number>`COALESCE(${schema.generalLedgerTemporaryAccounts.debit}, 0)::float`,
+                    credit: sql<number>`COALESCE(${schema.generalLedgerTemporaryAccounts.credit}, 0)::float`,
+                })
+                .from(schema.generalLedgerTemporaryAccounts)
+                .where(
+                    and(
+                        eq(schema.generalLedgerTemporaryAccounts.userId, userId),
+                        gte(schema.generalLedgerTemporaryAccounts.entryDate, startUtc),
+                        lte(schema.generalLedgerTemporaryAccounts.entryDate, endUtc)
+                    )
+                );
+        }
+
+        // Gabungkan mutasi dari kedua GL
+        const allLines = [...permLines, ...tempLines];
+
+        // Grouping total Debit & Credit per AccountId
+        const accountTotals = new Map<number, { debit: number; credit: number }>();
+        for (const line of allLines) {
+            const current = accountTotals.get(line.accountId) || { debit: 0, credit: 0 };
+            accountTotals.set(line.accountId, {
+                debit: current.debit + line.debit,
+                credit: current.credit + line.credit,
+            });
+        }
+
         const rows: TrialBalanceRow[] = [];
 
+        // 4. Kalkulasi per Akun
         for (const account of accounts) {
             const isPermanentAccount = isPermanent(account.type);
 
-            // C#: if reportType == "post-closing" && !isPermanent -> continue
+            // Jika Post-Closing, lewati akun temporer
             if (reportType === 'post-closing' && !isPermanentAccount) {
                 continue;
             }
 
-            const accountLines = lines.filter(l => l.accountId === account.id);
-            if (accountLines.length === 0) continue;
-
+            const totals = accountTotals.get(account.id) || { debit: 0, credit: 0 };
             const normalDebit = normalBalanceIsDebit(account.type);
 
-            const totalDebitLines = accountLines.reduce((sum, l) => sum + (l.debit || 0), 0);
-            const totalCreditLines = accountLines.reduce((sum, l) => sum + (l.credit || 0), 0);
-
-            const netBalance = normalDebit
-                ? totalDebitLines - totalCreditLines
-                : totalCreditLines - totalDebitLines;
+            const netDebitCredit = totals.debit - totals.credit;
 
             let debit = 0;
             let credit = 0;
 
-            if (totalDebitLines >= totalCreditLines) {
-                debit = totalDebitLines - totalCreditLines;
-            } else {
-                credit = totalCreditLines - totalDebitLines;
+            if (netDebitCredit > 0) {
+                debit = netDebitCredit;
+            } else if (netDebitCredit < 0) {
+                credit = Math.abs(netDebitCredit);
             }
+
+            // Net balance berdasarkan saldo normal akun
+            const netBalance = normalDebit ? (debit - credit) : (credit - debit);
 
             rows.push({
                 id: account.id,
@@ -105,7 +117,7 @@ export class TrialBalanceService {
                 normalBalanceIsDebit: normalDebit,
                 netBalance: Math.round(netBalance * 100) / 100,
                 debit: Math.round(debit * 100) / 100,
-                credit: Math.round(credit * 100) / 100
+                credit: Math.round(credit * 100) / 100,
             } as any);
         }
 
@@ -113,19 +125,18 @@ export class TrialBalanceService {
     }
 
     /**
-     * Backward compat untuk financial-report.service.ts yang pakai buildRows(userId, period, includeClosing)
+     * Backward compatibility
      */
     async buildRows(
         userId: string,
         period: { startDate: Date; endDate: Date },
         includeClosing: boolean = false
     ): Promise<TrialBalanceRow[]> {
-        // includeClosing true = adjusted (include Adjusting)
         return this.buildTrialBalanceRows(userId, period, includeClosing, includeClosing ? 'adjusted' : 'unadjusted');
     }
 
     /**
-     * ComputeRetainedEarningsEndingAsync - 1:1 sama C#
+     * ComputeRetainedEarningsEndingAsync
      */
     async computeRetainedEarningsEnding(
         userId: string,
@@ -133,18 +144,20 @@ export class TrialBalanceService {
     ): Promise<number> {
         const rows = await this.buildTrialBalanceRows(userId, period, true, 'adjusted');
 
+        // Total Pendapatan (Akun Temporer Kredit)
         const totalRevenue = rows
-            .filter(r => !(r as any).normalBalanceIsDebit && isTemporary(r.type))
-            .reduce((sum, r) => sum + r.netBalance, 0);
+            .filter(r => isTemporary(r.type) && !r.normalBalanceIsDebit)
+            .reduce((sum, r) => sum + (r.credit - r.debit), 0);
 
+        // Total Beban (Akun Temporer Debit)
         const totalExpense = rows
-            .filter(r => (r as any).normalBalanceIsDebit && isTemporary(r.type))
-            .reduce((sum, r) => sum + r.netBalance, 0);
+            .filter(r => isTemporary(r.type) && r.normalBalanceIsDebit)
+            .reduce((sum, r) => sum + (r.debit - r.credit), 0);
 
         const netIncome = totalRevenue - totalExpense;
 
         const reRow = rows.find(r => r.role?.toLowerCase() === 'retainedearnings');
-        const initialRE = reRow?.netBalance ?? 0;
+        const initialRE = reRow ? (reRow.normalBalanceIsDebit ? reRow.debit - reRow.credit : reRow.credit - reRow.debit) : 0;
 
         return Math.round((initialRE + netIncome) * 100) / 100;
     }
