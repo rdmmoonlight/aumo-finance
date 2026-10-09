@@ -12,7 +12,7 @@ const googleClient = new OAuth2Client(env.GOOGLE_CLIENT_ID);
 
 export class AuthService {
     configureGoogleRedirect(redirectUrl: string) {
-        const allowed = (env.ALLOWED_REDIRECT_ORIGINS || '')
+        const allowed = (env.CORS_ORIGINS || '')
             .split(',')
             .map((s) => s.trim())
             .filter(Boolean);

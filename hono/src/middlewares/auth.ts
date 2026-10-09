@@ -1,4 +1,3 @@
-import { requireAuth } from './auth.middleware';
 import type { MiddlewareHandler } from 'hono';
 import { getCookie } from 'hono/cookie';
 import { AUTH_COOKIE } from '../lib/cookies.js';

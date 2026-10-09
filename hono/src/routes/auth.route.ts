@@ -3,7 +3,7 @@ import { clearAuthCookie } from '../lib/cookies';
 import type { AppEnv } from '../types/app.types';
 
 // Import authService & requireAuth middleware
-import { requireAuth } from '../middlewares/auth.middleware';
+import { requireAuth } from '../middlewares/auth';
 import { authService } from '../services/auth.service';
 
 export const authRoute = new Hono<AppEnv>();

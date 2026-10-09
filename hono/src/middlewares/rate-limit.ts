@@ -1,9 +1,10 @@
-import type { MiddlewareHandler } from 'hono';
 import { getConnInfo } from '@hono/node-server/conninfo';
+import type { MiddlewareHandler } from 'hono';
+import { redis } from '../lib/redis.js';
 import type { AppEnv } from '../types/app.types.js';
 
 interface RateLimitOptions {
-  /** Nama scope; tiap scope punya counter sendiri. */
+  /** Nama scope; tiap scope punya counter sendiri di Redis. */
   scope: string;
   /** Jumlah request maksimum per jendela waktu. */
   max: number;
@@ -11,26 +12,14 @@ interface RateLimitOptions {
   windowMs: number;
 }
 
-interface Bucket {
-  count: number;
-  resetAt: number;
-}
-
-const buckets = new Map<string, Bucket>();
-
-// Bersihkan bucket kedaluwarsa agar memori tidak membengkak.
-const cleanup = setInterval(() => {
-  const now = Date.now();
-  for (const [key, bucket] of buckets) {
-    if (bucket.resetAt <= now) buckets.delete(key);
-  }
-}, 60_000);
-cleanup.unref();
-
 function getClientIp(c: Parameters<MiddlewareHandler>[0]): string {
-  // Di balik proxy (Render, dll) IP asli ada di X-Forwarded-For.
+  // Di balik reverse proxy (Cloudflare, Render, dll)
+  const cfIp = c.req.header('cf-connecting-ip');
+  if (cfIp) return cfIp;
+
   const forwarded = c.req.header('x-forwarded-for')?.split(',')[0]?.trim();
   if (forwarded) return forwarded;
+
   try {
     return getConnInfo(c).remote.address ?? 'unknown';
   } catch {
@@ -39,34 +28,54 @@ function getClientIp(c: Parameters<MiddlewareHandler>[0]): string {
 }
 
 /**
- * Rate limiter fixed-window in-memory per IP.
- * Catatan: counter tersimpan per proses; jika di-scale ke banyak instance,
- * ganti store dengan Redis.
+ * Rate limiter fixed-window menggunakan Redis.
+ * Aman untuk multi-instance deployment.
  */
 export const rateLimit =
   ({ scope, max, windowMs }: RateLimitOptions): MiddlewareHandler<AppEnv> =>
-  async (c, next) => {
-    const key = `${scope}:${getClientIp(c)}`;
-    const now = Date.now();
+    async (c, next) => {
+      const ip = getClientIp(c);
+      const key = `ratelimit:${scope}:${ip}`;
 
-    let bucket = buckets.get(key);
-    if (!bucket || bucket.resetAt <= now) {
-      bucket = { count: 0, resetAt: now + windowMs };
-      buckets.set(key, bucket);
-    }
-    bucket.count += 1;
+      try {
+        // Jalankan pipeline atomic di Redis
+        const pipeline = redis.pipeline();
+        pipeline.incr(key);
+        pipeline.pttl(key);
 
-    const remaining = Math.max(0, max - bucket.count);
-    const resetSeconds = Math.ceil((bucket.resetAt - now) / 1000);
+        const results = await pipeline.exec();
 
-    c.header('RateLimit-Limit', String(max));
-    c.header('RateLimit-Remaining', String(remaining));
-    c.header('RateLimit-Reset', String(resetSeconds));
+        if (!results) {
+          throw new Error('Redis pipeline failed');
+        }
 
-    if (bucket.count > max) {
-      c.header('Retry-After', String(resetSeconds));
-      return c.json({ message: 'Terlalu banyak request, coba lagi nanti' }, 429);
-    }
+        const count = results[0][1] as number;
+        let ttl = results[1][1] as number;
 
-    await next();
-  };
+        // Jika key baru dibuat (TTL belum ada atau -1), set waktu kadaluarsa (PEXPIRE dalam ms)
+        if (ttl < 0) {
+          await redis.pexpire(key, windowMs);
+          ttl = windowMs;
+        }
+
+        const remaining = Math.max(0, max - count);
+        const resetSeconds = Math.ceil(ttl / 1000);
+
+        c.header('RateLimit-Limit', String(max));
+        c.header('RateLimit-Remaining', String(remaining));
+        c.header('RateLimit-Reset', String(resetSeconds));
+
+        if (count > max) {
+          c.header('Retry-After', String(resetSeconds));
+          return c.json(
+            { message: 'Terlalu banyak request, coba lagi nanti' },
+            429
+          );
+        }
+      } catch (err) {
+        // Fallback grace strategy jika Redis mengalami gangguan, request tetap diloloskan
+        c.var.logger?.error({ err }, 'Rate limiter Redis error, bypassing limit check');
+      }
+
+      await next();
+    };

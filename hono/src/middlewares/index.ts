@@ -1,4 +1,3 @@
-import { requireAuth } from './auth.middleware';
 import type { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
 import { requestId } from 'hono/request-id';
