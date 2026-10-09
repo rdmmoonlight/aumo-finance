@@ -1,0 +1,2169 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.Worksheet": {
+      "name": "Worksheet",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "PeriodDate": {
+          "name": "PeriodDate",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "AccountNumber": {
+          "name": "AccountNumber",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountName": {
+          "name": "AccountName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "TrialBalanceDebit": {
+          "name": "TrialBalanceDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "TrialBalanceCredit": {
+          "name": "TrialBalanceCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "AdjustingJournalDebit": {
+          "name": "AdjustingJournalDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "AdjustingJournalCredit": {
+          "name": "AdjustingJournalCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "TrialBalanceAdjustedDebit": {
+          "name": "TrialBalanceAdjustedDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "TrialBalanceAdjustedCredit": {
+          "name": "TrialBalanceAdjustedCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "IncomeStatementDebit": {
+          "name": "IncomeStatementDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "IncomeStatementCredit": {
+          "name": "IncomeStatementCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "FinancialPositionDebit": {
+          "name": "FinancialPositionDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "FinancialPositionCredit": {
+          "name": "FinancialPositionCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "'0'"
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.__EFMigrationsHistory": {
+      "name": "__EFMigrationsHistory",
+      "schema": "",
+      "columns": {
+        "MigrationId": {
+          "name": "MigrationId",
+          "type": "varchar(150)",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "ProductVersion": {
+          "name": "ProductVersion",
+          "type": "varchar(32)",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.ChartOfAccounts": {
+      "name": "ChartOfAccounts",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"ChartOfAccounts_Id_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "ReferenceNumber": {
+          "name": "ReferenceNumber",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountName": {
+          "name": "AccountName",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Type": {
+          "name": "Type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Role": {
+          "name": "Role",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsActive": {
+          "name": "IsActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_ChartOfAccounts_UserId": {
+          "name": "IX_ChartOfAccounts_UserId",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "IX_ChartOfAccounts_UserId_ReferenceNumber": {
+          "name": "IX_ChartOfAccounts_UserId_ReferenceNumber",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "ReferenceNumber",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.JournalEntries": {
+      "name": "JournalEntries",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"JournalEntries_Id_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "JournalType": {
+          "name": "JournalType",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EntryDate": {
+          "name": "EntryDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "TransactionNumber": {
+          "name": "TransactionNumber",
+          "type": "varchar(30)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Description": {
+          "name": "Description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Status": {
+          "name": "Status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "0"
+        }
+      },
+      "indexes": {
+        "IX_JournalEntries_UserId": {
+          "name": "IX_JournalEntries_UserId",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "IX_JournalEntries_UserId_TransactionNumber": {
+          "name": "IX_JournalEntries_UserId_TransactionNumber",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "TransactionNumber",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Notifications": {
+      "name": "Notifications",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Title": {
+          "name": "Title",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Message": {
+          "name": "Message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Type": {
+          "name": "Type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsRead": {
+          "name": "IsRead",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "TargetUrl": {
+          "name": "TargetUrl",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_Notifications_UserId_IsRead_CreatedAt": {
+          "name": "IX_Notifications_UserId_IsRead_CreatedAt",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "timestamptz_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "IsRead",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "CreatedAt",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.JournalEntryLines": {
+      "name": "JournalEntryLines",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"JournalEntryLines_Id_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "JournalEntryId": {
+          "name": "JournalEntryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LineDescription": {
+          "name": "LineDescription",
+          "type": "varchar(250)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Debit": {
+          "name": "Debit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Credit": {
+          "name": "Credit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LineOrder": {
+          "name": "LineOrder",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_JournalEntryLines_AccountId": {
+          "name": "IX_JournalEntryLines_AccountId",
+          "columns": [
+            {
+              "expression": "AccountId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "IX_JournalEntryLines_JournalEntryId": {
+          "name": "IX_JournalEntryLines_JournalEntryId",
+          "columns": [
+            {
+              "expression": "JournalEntryId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "FK_JournalEntryLines_ChartOfAccounts_AccountId": {
+          "name": "FK_JournalEntryLines_ChartOfAccounts_AccountId",
+          "tableFrom": "JournalEntryLines",
+          "tableTo": "ChartOfAccounts",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "AccountId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "FK_JournalEntryLines_JournalEntries_JournalEntryId": {
+          "name": "FK_JournalEntryLines_JournalEntries_JournalEntryId",
+          "tableFrom": "JournalEntryLines",
+          "tableTo": "JournalEntries",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "JournalEntryId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.DataProtectionKeys": {
+      "name": "DataProtectionKeys",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"DataProtectionKeys_Id_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "FriendlyName": {
+          "name": "FriendlyName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Xml": {
+          "name": "Xml",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.RecoveryCodes": {
+      "name": "RecoveryCodes",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "CodeHash": {
+          "name": "CodeHash",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Used": {
+          "name": "Used",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "UsedAt": {
+          "name": "UsedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "IX_RecoveryCodes_UserId": {
+          "name": "IX_RecoveryCodes_UserId",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.SecuritySettings": {
+      "name": "SecuritySettings",
+      "schema": "",
+      "columns": {
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "EmailVerified": {
+          "name": "EmailVerified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "TwoFactorEnabled": {
+          "name": "TwoFactorEnabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "LoginNotificationEnabled": {
+          "name": "LoginNotificationEnabled",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "SessionTimeoutMinutes": {
+          "name": "SessionTimeoutMinutes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 30
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.UserSessions": {
+      "name": "UserSessions",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "DeviceName": {
+          "name": "DeviceName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Browser": {
+          "name": "Browser",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "OperatingSystem": {
+          "name": "OperatingSystem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IpAddress": {
+          "name": "IpAddress",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Country": {
+          "name": "Country",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "UserAgent": {
+          "name": "UserAgent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "RefreshTokenHash": {
+          "name": "RefreshTokenHash",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsActive": {
+          "name": "IsActive",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsCurrent": {
+          "name": "IsCurrent",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LastActivityAt": {
+          "name": "LastActivityAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "RevokedAt": {
+          "name": "RevokedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "IX_UserSessions_UserId_IsActive": {
+          "name": "IX_UserSessions_UserId_IsActive",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "bool_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "IsActive",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "bool_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.LoginActivities": {
+      "name": "LoginActivities",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ActivityType": {
+          "name": "ActivityType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsSuccess": {
+          "name": "IsSuccess",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Device": {
+          "name": "Device",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Browser": {
+          "name": "Browser",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "OperatingSystem": {
+          "name": "OperatingSystem",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IpAddress": {
+          "name": "IpAddress",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Country": {
+          "name": "Country",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "UserAgent": {
+          "name": "UserAgent",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_LoginActivities_UserId_CreatedAt": {
+          "name": "IX_LoginActivities_UserId_CreatedAt",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "timestamptz_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "CreatedAt",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "timestamptz_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.TrustedDevices": {
+      "name": "TrustedDevices",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "DeviceName": {
+          "name": "DeviceName",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "DeviceIdentifier": {
+          "name": "DeviceIdentifier",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "Browser": {
+          "name": "Browser",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "OperatingSystem": {
+          "name": "OperatingSystem",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsTrusted": {
+          "name": "IsTrusted",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LastUsedAt": {
+          "name": "LastUsedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_TrustedDevices_UserId": {
+          "name": "IX_TrustedDevices_UserId",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "TrustedDevices_DeviceIdentifier_key": {
+          "columns": [
+            "DeviceIdentifier"
+          ],
+          "nullsNotDistinct": false,
+          "name": "TrustedDevices_DeviceIdentifier_key"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.GeneralLedgerPermanentAccounts": {
+      "name": "GeneralLedgerPermanentAccounts",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "PeriodId": {
+          "name": "PeriodId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "JournalEntryId": {
+          "name": "JournalEntryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "JournalEntryLineId": {
+          "name": "JournalEntryLineId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EntryDate": {
+          "name": "EntryDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "TransactionNumber": {
+          "name": "TransactionNumber",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LineDescription": {
+          "name": "LineDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Debit": {
+          "name": "Debit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        },
+        "Credit": {
+          "name": "Credit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        },
+        "RunningBalance": {
+          "name": "RunningBalance",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        }
+      },
+      "indexes": {
+        "idx_pagl_user_period_account": {
+          "name": "idx_pagl_user_period_account",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "PeriodId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "AccountId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_pagl_period": {
+          "name": "fk_pagl_period",
+          "tableFrom": "GeneralLedgerPermanentAccounts",
+          "tableTo": "Periods",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "PeriodId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_pagl_account": {
+          "name": "fk_pagl_account",
+          "tableFrom": "GeneralLedgerPermanentAccounts",
+          "tableTo": "ChartOfAccounts",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "AccountId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_pagl_journal_entry": {
+          "name": "fk_pagl_journal_entry",
+          "tableFrom": "GeneralLedgerPermanentAccounts",
+          "tableTo": "JournalEntries",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "JournalEntryId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_pagl_journal_entry_line": {
+          "name": "fk_pagl_journal_entry_line",
+          "tableFrom": "GeneralLedgerPermanentAccounts",
+          "tableTo": "JournalEntryLines",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "JournalEntryLineId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.Periods": {
+      "name": "Periods",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"Periods_Id_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "PeriodName": {
+          "name": "PeriodName",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "StartDate": {
+          "name": "StartDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EndDate": {
+          "name": "EndDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "IsClosed": {
+          "name": "IsClosed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "IsSelected": {
+          "name": "IsSelected",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_Periods_IsSelected_Unique": {
+          "name": "IX_Periods_IsSelected_Unique",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "where": "(\"IsSelected\" = true)",
+          "with": {}
+        },
+        "IX_Periods_UserId": {
+          "name": "IX_Periods_UserId",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.GeneralLedgerTemporaryAccounts": {
+      "name": "GeneralLedgerTemporaryAccounts",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "PeriodId": {
+          "name": "PeriodId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "JournalEntryId": {
+          "name": "JournalEntryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "JournalEntryLineId": {
+          "name": "JournalEntryLineId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EntryDate": {
+          "name": "EntryDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "TransactionNumber": {
+          "name": "TransactionNumber",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LineDescription": {
+          "name": "LineDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Debit": {
+          "name": "Debit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        },
+        "Credit": {
+          "name": "Credit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        },
+        "RunningBalance": {
+          "name": "RunningBalance",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0.00'"
+        }
+      },
+      "indexes": {
+        "idx_tagl_user_period_account": {
+          "name": "idx_tagl_user_period_account",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "PeriodId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "int4_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "AccountId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "uuid_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "fk_tagl_journal_entry_line": {
+          "name": "fk_tagl_journal_entry_line",
+          "tableFrom": "GeneralLedgerTemporaryAccounts",
+          "tableTo": "JournalEntryLines",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "JournalEntryLineId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_tagl_period": {
+          "name": "fk_tagl_period",
+          "tableFrom": "GeneralLedgerTemporaryAccounts",
+          "tableTo": "Periods",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "PeriodId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "fk_tagl_account": {
+          "name": "fk_tagl_account",
+          "tableFrom": "GeneralLedgerTemporaryAccounts",
+          "tableTo": "ChartOfAccounts",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "AccountId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "restrict",
+          "onUpdate": "no action"
+        },
+        "fk_tagl_journal_entry": {
+          "name": "fk_tagl_journal_entry",
+          "tableFrom": "GeneralLedgerTemporaryAccounts",
+          "tableTo": "JournalEntries",
+          "schemaTo": "public",
+          "columnsFrom": [
+            "JournalEntryId"
+          ],
+          "columnsTo": [
+            "Id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.TransactionCounters": {
+      "name": "TransactionCounters",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "byDefault",
+            "name": "\"TransactionCounters_Id_seq\"",
+            "increment": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "startWith": "1",
+            "cycle": false,
+            "schema": "public"
+          }
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "CounterKey": {
+          "name": "CounterKey",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "LastSequence": {
+          "name": "LastSequence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "IX_TransactionCounters_UserId_CounterKey": {
+          "name": "IX_TransactionCounters_UserId_CounterKey",
+          "columns": [
+            {
+              "expression": "UserId",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_ops",
+              "isExpression": false
+            },
+            {
+              "expression": "CounterKey",
+              "asc": true,
+              "nulls": "last",
+              "opclass": "text_ops",
+              "isExpression": false
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.GeneralJournal": {
+      "name": "GeneralJournal",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "JournalEntryId": {
+          "name": "JournalEntryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "TransactionNumber": {
+          "name": "TransactionNumber",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "EntryDate": {
+          "name": "EntryDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "JournalType": {
+          "name": "JournalType",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "HeaderDescription": {
+          "name": "HeaderDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Status": {
+          "name": "Status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineId": {
+          "name": "LineId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineDescription": {
+          "name": "LineDescription",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Debit": {
+          "name": "Debit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Credit": {
+          "name": "Credit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineOrder": {
+          "name": "LineOrder",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.AdjustingJournal": {
+      "name": "AdjustingJournal",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "JournalEntryId": {
+          "name": "JournalEntryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "TransactionNumber": {
+          "name": "TransactionNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "EntryDate": {
+          "name": "EntryDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "JournalType": {
+          "name": "JournalType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "HeaderDescription": {
+          "name": "HeaderDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Status": {
+          "name": "Status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineId": {
+          "name": "LineId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineDescription": {
+          "name": "LineDescription",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Debit": {
+          "name": "Debit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Credit": {
+          "name": "Credit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineOrder": {
+          "name": "LineOrder",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.ClosingJournal": {
+      "name": "ClosingJournal",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "JournalEntryId": {
+          "name": "JournalEntryId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "TransactionNumber": {
+          "name": "TransactionNumber",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "EntryDate": {
+          "name": "EntryDate",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "JournalType": {
+          "name": "JournalType",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "HeaderDescription": {
+          "name": "HeaderDescription",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Status": {
+          "name": "Status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineId": {
+          "name": "LineId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineDescription": {
+          "name": "LineDescription",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Debit": {
+          "name": "Debit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "Credit": {
+          "name": "Credit",
+          "type": "numeric",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "LineOrder": {
+          "name": "LineOrder",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.TrialBalanceAdjusted": {
+      "name": "TrialBalanceAdjusted",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "PeriodId": {
+          "name": "PeriodId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EndingDebit": {
+          "name": "EndingDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "EndingCredit": {
+          "name": "EndingCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "UQ_TB_Adjusted_User_Period_Account": {
+          "columns": [
+            "UserId",
+            "PeriodId",
+            "AccountId"
+          ],
+          "nullsNotDistinct": false,
+          "name": "UQ_TB_Adjusted_User_Period_Account"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.TrialBalancePostClosing": {
+      "name": "TrialBalancePostClosing",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "PeriodId": {
+          "name": "PeriodId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EndingDebit": {
+          "name": "EndingDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "EndingCredit": {
+          "name": "EndingCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "UQ_TB_PostClosing_User_Period_Account": {
+          "columns": [
+            "UserId",
+            "PeriodId",
+            "AccountId"
+          ],
+          "nullsNotDistinct": false,
+          "name": "UQ_TB_PostClosing_User_Period_Account"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    },
+    "public.TrialBalance": {
+      "name": "TrialBalance",
+      "schema": "",
+      "columns": {
+        "Id": {
+          "name": "Id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "UserId": {
+          "name": "UserId",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "PeriodId": {
+          "name": "PeriodId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "AccountId": {
+          "name": "AccountId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "EndingDebit": {
+          "name": "EndingDebit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "EndingCredit": {
+          "name": "EndingCredit",
+          "type": "numeric(18, 2)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'0'"
+        },
+        "CreatedAt": {
+          "name": "CreatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        },
+        "UpdatedAt": {
+          "name": "UpdatedAt",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "CURRENT_TIMESTAMP"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "UQ_TB_Unadjusted_User_Period_Account": {
+          "columns": [
+            "UserId",
+            "PeriodId",
+            "AccountId"
+          ],
+          "nullsNotDistinct": false,
+          "name": "UQ_TB_Unadjusted_User_Period_Account"
+        }
+      },
+      "checkConstraints": {},
+      "policies": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {}
+  }
+}
