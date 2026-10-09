@@ -21,6 +21,10 @@ const envSchema = z.object({
         .min(32, 'JWT_SIGNING_KEY minimal 32 karakter demi keamanan'),
     JWT_ISSUER: z.string().min(2, 'JWT_ISSUER minimal 2 karakter').default('hono'),
 
+    // Better Auth (secret default: JWT_SIGNING_KEY; URL = alamat publik backend ini)
+    BETTER_AUTH_SECRET: z.string().min(32, 'BETTER_AUTH_SECRET minimal 32 karakter').optional(),
+    BETTER_AUTH_URL: z.string().url('BETTER_AUTH_URL harus berupa URL yang valid').optional(),
+
     // Third Party Services
     SUPABASE_URL: z.string().url('SUPABASE_URL harus berupa URL yang valid').optional(),
     SUPABASE_ANON_KEY: z.string().min(1, 'SUPABASE_ANON_KEY wajib diisi').optional(),
