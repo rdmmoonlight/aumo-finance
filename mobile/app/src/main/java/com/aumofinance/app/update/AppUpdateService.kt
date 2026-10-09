@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.net.Uri
 import android.os.Environment
 import android.provider.Settings
-import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.aumofinance.app.BuildConfig
@@ -18,6 +17,7 @@ import okhttp3.Request
 import org.json.JSONObject
 import java.io.File
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicBoolean
 
 object AppUpdateService {
     private const val TAG = "AppUpdateService"
@@ -30,17 +30,22 @@ object AppUpdateService {
     private val httpClient = OkHttpClient.Builder().build()
     private val executor = Executors.newSingleThreadExecutor()
 
+    // Cegah cek ganda dalam satu proses (mis. Splash dibuat ulang saat rotasi layar).
+    private val isChecking = AtomicBoolean(false)
+
     fun checkForUpdateSilently(context: Context) {
         if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Lewati cek update: build debug.")
+            AppLogger.info(TAG, "Lewati cek update: build debug.")
             return
         }
 
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         if (!prefs.getBoolean(KEY_AUTO_UPDATE_ENABLED, true)) {
-            Log.d(TAG, "Lewati cek update: sakelar Auto-Update dimatikan user.")
+            AppLogger.info(TAG, "Lewati cek update: sakelar Auto-Update dimatikan user.")
             return
         }
+
+        if (!isChecking.compareAndSet(false, true)) return
 
         executor.execute {
             try {
@@ -62,6 +67,8 @@ object AppUpdateService {
                     val latestVersion = if (rawTag.startsWith("v", ignoreCase = true)) rawTag.substring(1) else rawTag
                     val currentVersion = BuildConfig.VERSION_NAME
 
+                    AppLogger.info(TAG, "Cek update: terpasang v$currentVersion, terbaru v$latestVersion")
+
                     if (compareVersions(latestVersion, currentVersion) > 0) {
                         val assets = json.optJSONArray("assets") ?: return@use
                         var apkUrl: String? = null
@@ -75,11 +82,15 @@ object AppUpdateService {
                         }
                         if (!apkUrl.isNullOrBlank()) {
                             downloadAndInstallApk(context, apkUrl, latestVersion)
+                        } else {
+                            AppLogger.warn(TAG, "Rilis v$latestVersion tidak punya berkas .apk.")
                         }
                     }
                 }
             } catch (e: Exception) {
                 AppLogger.error(TAG, "Cek update gagal", e)
+            } finally {
+                isChecking.set(false)
             }
         }
     }

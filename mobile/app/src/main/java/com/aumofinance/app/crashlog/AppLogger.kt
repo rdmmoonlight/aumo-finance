@@ -23,6 +23,14 @@ object AppLogger {
         logFile = File(context.applicationContext.filesDir, FILE_NAME)
     }
 
+    fun info(
+        tag: String,
+        message: String,
+    ) {
+        Log.i(tag, message)
+        write("INFO", tag, message, null)
+    }
+
     fun warn(
         tag: String,
         message: String,
