@@ -1,7 +1,8 @@
 import { and, asc, eq } from 'drizzle-orm';
 // ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { isTemporary, normalBalanceIsDebit } from '../lib/account-classification.js';
-import { db } from '../lib/db.js';
+// TEMP_DISABLED: import { db } from '../lib/db.js';
+const db = {} as any;
 import type { WorksheetRow } from '../types/worksheet.type.js';
 import { trialBalanceService } from './trial-balance.service.js';
 

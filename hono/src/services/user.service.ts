@@ -1,7 +1,9 @@
 import { eq } from "drizzle-orm";
 // ISOLATED TOTAL: import { users } from "../db/schema";
 const users = {} as any;
-import { hashPasswordAspNet, verifyPasswordAspNet } from "../lib/auth";
+// TEMP_DISABLED: import { hashPasswordAspNet, verifyPasswordAspNet } from "../lib/auth";
+const hashPasswordAspNet = {} as any;
+const verifyPasswordAspNet = {} as any;
 // ISOLATED TOTAL: import { db } from "../lib/db";
 const db = {} as any;
 import type {

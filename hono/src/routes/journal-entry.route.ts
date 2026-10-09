@@ -1,5 +1,4 @@
 import { Hono } from 'hono'
-import { authMiddleware } from '../middleware/auth.middleware'
 import * as journalEntryService from '../services/journal-entry.service'
 
 const journalEntryRoute = new Hono()

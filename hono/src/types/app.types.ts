@@ -1,4 +1,4 @@
-import type { TokenPayload } from '../lib/auth.js';
+// TEMP_DISABLED: import type { TokenPayload } from '../lib/auth.js';
 
 /**
  * Tipe environment Hono: variabel yang diisi oleh middleware pipeline

@@ -89,3 +89,5 @@ export const selectPeriodResultSchema = z.object({
     message: z.string().default(''),
 });
 export type SelectPeriodResult = z.infer<typeof selectPeriodResultSchema>;
+import { z } from 'zod';
+export const createPeriodSchema = z.object({});

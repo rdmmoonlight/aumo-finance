@@ -7,7 +7,7 @@ export default defineConfig({
 
     // Menunjuk ke file orchestrator utama (schema.ts)
     // Drizzle akan otomatis membaca seluruh skema dan relasi yang di-export di sana
-    schema: "./src/db/schema.ts",
+    schema: "./src/db/schema",
 
     // Folder penyimpanan file migrasi SQL
     out: "./drizzle",
