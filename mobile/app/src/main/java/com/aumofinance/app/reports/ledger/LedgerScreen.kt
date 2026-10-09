@@ -51,7 +51,7 @@ fun LedgerScreen(
                     modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
                 )
             }
-            val accounts = report?.ledgers ?: emptyList()
+            val accounts = report?.accounts ?: emptyList()
             if (report != null && report.hasPeriodSelected && accounts.isEmpty() && !isLoading) {
                 Text(
                     text = "Belum ada transaksi pada periode ini.",
@@ -89,13 +89,19 @@ private fun LedgerAccountCard(account: LedgerAccount) {
                 .padding(AumoDimens.SpacingLarge),
     ) {
         Text(
-            text = "${account.referenceNumber} - ${account.accountName}",
+            text = "${account.referenceNumber} - ${account.accountName.orEmpty()}",
             color = AumoColors.TextPrimary,
             fontWeight = FontWeight.Bold,
             fontSize = MaterialTheme.typography.bodyMedium.fontSize,
         )
+        Text(
+            text = "Saldo Awal: ${CurrencyFormatter.format(account.beginningBalance)}",
+            color = AumoColors.TextMuted,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.padding(top = AumoDimens.SpacingSmall),
+        )
         LedgerHeaderRow()
-        account.lines.forEach { line -> LedgerLineRow(line) }
+        (account.lines ?: emptyList()).forEach { line -> LedgerLineRow(line) }
         Text(
             text = "Saldo Akhir: ${CurrencyFormatter.format(account.endingBalance)}",
             color = AumoColors.TextPrimary,
