@@ -1,40 +1,85 @@
-import { Hono } from 'hono';
-import { clearAuthCookie } from '../lib/cookies';
-import type { AppEnv } from '../types/app.types';
+import { OpenAPIHono, createRoute, z } from "@hono/zod-openapi";
+import { auth } from "../lib/auth.js";
+import type { AppEnv } from "../types/app.types.js";
 
-// Import authService & requireAuth middleware
-import { requireAuth } from '../middlewares/auth';
-import { authService } from '../services/auth.service';
+export const authRoute = new OpenAPIHono<AppEnv>();
 
-export const authRoute = new Hono<AppEnv>();
+// 1. Skema / Schema OpenAPI untuk Session Check
+const SessionResponseSchema = z.object({
+  user: z
+    .object({
+      id: z.string(),
+      email: z.string().email(),
+      name: z.string(),
+      image: z.string().nullable().optional(),
+      createdAt: z.string().or(z.date()),
+      updatedAt: z.string().or(z.date()),
+    })
+    .nullable(),
+  session: z
+    .object({
+      id: z.string(),
+      userId: z.string(),
+      expiresAt: z.string().or(z.date()),
+      token: z.string(),
+    })
+    .nullable(),
+});
 
-// GET /auth/google/url
-authRoute.get('/google/url', (c) => {
-  const redirectUrl =
-    c.req.query('redirectUrl') ||
-    `${c.req.url.split('/auth')[0]}/auth/google/callback`;
-  try {
-    const data = authService.configureGoogleRedirect(redirectUrl);
-    return c.json({ success: true, url: data.url });
-  } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Invalid redirectUrl';
-    return c.json({ success: false, message }, 400);
+// 2. Definisi Route OpenAPI
+const getMeRoute = createRoute({
+  method: "get",
+  path: "/me",
+  summary: "Get Active Session / User Profile",
+  description: "Mengambil data user dan session aktif dari Better Auth",
+  tags: ["Auth"],
+  responses: {
+    200: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            data: SessionResponseSchema,
+          }),
+        },
+      },
+      description: "Data session pengguna berhasil didapatkan",
+    },
+    401: {
+      content: {
+        "application/json": {
+          schema: z.object({
+            success: z.boolean(),
+            message: z.string(),
+          }),
+        },
+      },
+      description: "Unauthorized / Belum Login",
+    },
+  },
+});
+
+// 3. Implementation Handler
+authRoute.openapi(getMeRoute, async (c) => {
+  const sessionData = await auth.api.getSession({
+    headers: c.req.raw.headers,
+  });
+
+  if (!sessionData) {
+    return c.json(
+      {
+        success: false,
+        message: "Unauthorized: Silakan login terlebih dahulu",
+      },
+      401
+    );
   }
-});
 
-// GET /auth/me
-authRoute.get('/me', requireAuth(), async (c) => {
-  const user = c.get('user');
-  const profile = await authService.getUserProfile(user.sub);
-  if (!profile) return c.json({ success: false, message: 'User not found' }, 404);
-  return c.json({ success: true, data: profile });
-});
-
-// POST /auth/logout
-authRoute.post('/logout', async (c) => {
-  const user = c.get('user');
-  const sessionId = c.get('sessionId');
-  clearAuthCookie(c);
-  await authService.logout(user?.sub, sessionId);
-  return c.json({ success: true, message: 'Logged out' });
+  return c.json(
+    {
+      success: true,
+      data: sessionData,
+    },
+    200
+  );
 });

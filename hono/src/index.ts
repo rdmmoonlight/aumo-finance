@@ -1,5 +1,7 @@
 import { serve } from '@hono/node-server';
 import { OpenAPIHono } from '@hono/zod-openapi';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 import { env } from './lib/env.js';
 import { logger } from './lib/logger.js';
 import { closeQueue, initQueueWorkers } from './lib/queue.js';
@@ -7,6 +9,9 @@ import { redis } from './lib/redis.js';
 import { registerMiddleware } from './middlewares/index.js';
 import { registerRoutes } from './routes/index.js';
 import type { AppEnv } from './types/app.types.js';
+
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle({ client: sql });
 
 /** Factory aplikasi Hono */
 export function createApp(): OpenAPIHono<AppEnv> {
