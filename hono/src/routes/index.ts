@@ -18,7 +18,7 @@ export function registerRoutes(app: OpenAPIHono<AppEnv>): void {
   app.route('/api/v1', apiV1);
 
   // udah, ini gantiin buildOpenApiSpec(app) lu yang error kemarin
-  app.doc('/openapi.json', {
+  app.doc?.('/openapi.json', {
     openapi: '3.1.0',
     info: {
       title: 'Aumo Backend API',

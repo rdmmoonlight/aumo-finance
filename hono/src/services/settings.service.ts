@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import { eq } from 'drizzle-orm';
-import * as schema from '../db/schema.js';
+// ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { avatarStorage } from '../lib/avatar-storage.js';
 import { db } from '../lib/db.js';
 import { logger } from '../lib/logger.js';

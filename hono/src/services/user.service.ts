@@ -1,7 +1,9 @@
 import { eq } from "drizzle-orm";
-import { users } from "../db/schema";
+// ISOLATED TOTAL: import { users } from "../db/schema";
+const users = {} as any;
 import { hashPasswordAspNet, verifyPasswordAspNet } from "../lib/auth";
-import { db } from "../lib/db";
+// ISOLATED TOTAL: import { db } from "../lib/db";
+const db = {} as any;
 import type {
     GoogleAuthUserDTO,
     RegisterDTO,

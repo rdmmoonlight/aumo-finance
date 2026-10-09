@@ -1,5 +1,6 @@
 import { boolean, integer, pgTable, serial, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
-import { users } from './auth.schema';
+// ISOLATED TOTAL: import { users } from './auth.schema';
+const users = {} as any;
 
 // ==========================================
 // 1. Table: chart_of_accounts

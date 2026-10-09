@@ -1,8 +1,10 @@
 import { and, eq, or } from 'drizzle-orm';
 import { OAuth2Client } from 'google-auth-library';
 import crypto from 'node:crypto';
-import { GoogleLoginRequest, LoginRequest } from '../db/auth.schema.js';
-import * as schema from '../db/schema.js';
+// ISOLATED TOTAL: import { GoogleLoginRequest, LoginRequest } from '../db/auth.schema.js';
+const GoogleLoginRequest = {} as any;
+const LoginRequest = {} as any;
+// ISOLATED TOTAL: import * as schema from '../db/schema.js';
 import { signJwt, verifyPassword } from '../lib/auth.js';
 import { db } from '../lib/db.js';
 import { env } from '../lib/env.js';
