@@ -71,7 +71,9 @@ Object.entries(modules).forEach(([file, loader]) => {
         if (!document.getElementById("main-content")) {
           appElement.innerHTML = renderLayout();
         }
-        const mainContent = document.getElementById("main-content") as HTMLElement;
+        const mainContent = document.getElementById(
+          "main-content",
+        ) as HTMLElement;
         mainContent.innerHTML = "";
         await renderPage(mainContent);
       } else {
