@@ -8,7 +8,8 @@ const __dirname = path.dirname(__filename);
 
 const getBackendTarget = (env: Record<string, string>) => {
   let t = env.VITE_WEB_API_URL || env.WEB_API_URL || "http://localhost:5000";
-  if (!t.includes("localhost") && t.startsWith("http://")) t = t.replace("http://", "https://");
+  if (!t.includes("localhost") && t.startsWith("http://"))
+    t = t.replace("http://", "https://");
   return t;
 };
 
