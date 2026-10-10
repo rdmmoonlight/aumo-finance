@@ -1,3 +1,4 @@
+export function initLanding() {
 // CONFIG - ganti ini
 const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
 const API_BASE = ""; // isi http://localhost:xxxx kalau beda origin
@@ -130,4 +131,5 @@ function initGoogle() {
     });
     window.google.accounts.id.renderButton(els.googleContainer, { theme:"filled_black", size:"large", width:360, shape:"pill" });
   }, 200);
+}
 }
