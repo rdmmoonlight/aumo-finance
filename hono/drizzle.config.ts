@@ -1,16 +1,13 @@
 import "dotenv/config";
 import { defineConfig } from "drizzle-kit";
 
-if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL belum diisi di file .env");
-}
-
 export default defineConfig({
     dialect: "postgresql",
 
     // Daftar file eksplisit: menghindari masalah resolusi import ESM saat drizzle-kit memuat folder
     schema: [
-        "./src/db/schema/auth-schema.ts",
+        "./src/db/schema/*",
+        "./src/db/schema/auth.ts",
         "./src/db/schema/chart-of-accounts.ts",
         "./src/db/schema/journal-entries.ts",
         "./src/db/schema/notifications.ts",

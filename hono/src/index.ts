@@ -10,8 +10,9 @@ import { registerMiddleware } from './middlewares/index.js';
 import { registerRoutes } from './routes/index.js';
 import type { AppEnv } from './types/app.types.js';
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle({ client: sql });
+// Inisialisasi koneksi Neon Client & Drizzle ORM
+export const sql = neon(env.DATABASE_URL);
+export const db = drizzle({ client: sql });
 
 /** Factory aplikasi Hono */
 export function createApp(): OpenAPIHono<AppEnv> {
@@ -33,30 +34,46 @@ export function createApp(): OpenAPIHono<AppEnv> {
 initQueueWorkers();
 
 // Inisialisasi aplikasi Hono
-const app = createApp();
+export const app = createApp();
 
 // Menjalankan HTTP server Node.js
-const server = serve({ fetch: app.fetch, port: env.PORT, hostname: '0.0.0.0' }, (info) => {
-  logger.info(`🚀 Server berjalan di http://0.0.0.0:${info.port}`);
-});
+const server = serve(
+  { fetch: app.fetch, port: env.PORT, hostname: '0.0.0.0' },
+  (info) => {
+    logger.info(`🚀 Server berjalan di http://0.0.0.0:${info.port}`);
+  }
+);
 
 // Graceful shutdown
 const shutdown = async (signal: string) => {
   logger.info(`${signal} diterima, menutup server...`);
 
+  // Force exit timeout
+  const forceExit = setTimeout(() => {
+    logger.error('Penutupan paksa karena batas waktu graceful shutdown terlampaui.');
+    process.exit(1);
+  }, 10_000);
+  forceExit.unref();
+
   try {
-    // Tutup BullMQ Worker & Queue terlebih dahulu
+    // 1. Tutup HTTP Server terlebih dahulu
+    await new Promise<void>((resolve, reject) => {
+      server.close((err) => (err ? reject(err) : resolve()));
+    });
+    logger.info('Server HTTP berhasil ditutup.');
+
+    // 2. Tutup BullMQ Worker & Queue
     await closeQueue();
 
-    // Tutup koneksi Redis utama
+    // 3. Tutup koneksi Redis
     await redis.quit();
     logger.info('Koneksi Redis berhasil ditutup.');
-  } catch (err) {
-    logger.error({ err }, 'Gagal menutup koneksi Redis/Queue');
-  }
 
-  server.close(() => process.exit(0));
-  setTimeout(() => process.exit(1), 10_000).unref();
+    process.exit(0);
+  } catch (err) {
+    logger.error({ err }, 'Gagal menutup koneksi server/Redis/Queue');
+    process.exit(1);
+  }
 };
 
 process.on('SIGTERM', () => shutdown('SIGTERM'));

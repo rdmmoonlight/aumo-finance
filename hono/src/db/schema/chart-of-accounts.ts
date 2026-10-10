@@ -1,5 +1,4 @@
-import { pgTable, serial, date, varchar, numeric, timestamp, index, uniqueIndex, integer, text, boolean, uuid, foreignKey, unique } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
+import { boolean, index, integer, pgTable, text, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const chartOfAccounts = pgTable("ChartOfAccounts", {
     id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: "ChartOfAccounts_Id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),

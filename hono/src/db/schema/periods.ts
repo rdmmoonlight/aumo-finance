@@ -1,5 +1,5 @@
-import { pgTable, serial, date, varchar, numeric, timestamp, index, uniqueIndex, integer, text, boolean, uuid, foreignKey, unique } from "drizzle-orm/pg-core"
-import { sql } from "drizzle-orm"
+import { sql } from "drizzle-orm";
+import { boolean, index, integer, pgTable, timestamp, uniqueIndex, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const periods = pgTable("Periods", {
     id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: "Periods_Id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),

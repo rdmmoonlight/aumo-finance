@@ -1,0 +1,6093 @@
+{
+  "dialect": "postgres",
+  "id": "9c19f595-f560-454f-8d0e-3eec91a991b6",
+  "prevIds": [
+    "00000000-0000-0000-0000-000000000000"
+  ],
+  "version": "8",
+  "ddl": [
+    {
+      "name": "hangfire",
+      "entityType": "schemas"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "aggregatedcounter",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "counter",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "hash",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "job",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "jobparameter",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "jobqueue",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "list",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "lock",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "schema",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "server",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "set",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "state",
+      "entityType": "tables",
+      "schema": "hangfire"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "__EFMigrationsHistory",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AdjustingJournal",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetRoleClaims",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetRoles",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetUserClaims",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetUserLogins",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetUserRoles",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetUsers",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "AspNetUserTokens",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "ChartOfAccounts",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "ClosingJournal",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "DataProtectionKeys",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "GeneralJournal",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "GeneralLedgerPermanentAccounts",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "GeneralLedgerTemporaryAccounts",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "JournalEntries",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "JournalEntryLines",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "LoginActivities",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "Notifications",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "Periods",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "RecoveryCodes",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "SecuritySettings",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "TransactionCounters",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "TrialBalance",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "TrialBalanceAdjusted",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "TrialBalancePostClosing",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "TrustedDevices",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "UserSessions",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "isRlsEnabled": false,
+      "name": "Worksheet",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "ChartOfAccounts_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "Periods_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "DataProtectionKeys_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "DataProtectionKeys"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "JournalEntries_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "resource",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "lock"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "AspNetRoleClaims_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "version",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "schema"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "JournalEntryLines_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserTokens"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "AspNetUserClaims_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserRoles"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LoginProvider",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "type": "varchar(150)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "MigrationId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "__EFMigrationsHistory"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoles"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": {
+        "type": "byDefault",
+        "name": "TransactionCounters_Id_seq",
+        "increment": "1",
+        "minValue": "1",
+        "maxValue": "2147483647",
+        "startWith": "1",
+        "cycle": false,
+        "cache": 1
+      },
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TransactionCounters"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "aggregatedcounter"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "server"
+    },
+    {
+      "type": "bigserial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TransactionCounters"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "FriendlyName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "DataProtectionKeys"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "aggregatedcounter"
+    },
+    {
+      "type": "varchar(32)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ProductVersion",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "__EFMigrationsHistory"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoles"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "FullName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jobid",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "stateid",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ReferenceNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "date",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "lock"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "RoleId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ProviderKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "RoleId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserRoles"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LoginProvider",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserTokens"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jobid",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "data",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "server"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "jobid",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "EmailVerified",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "key",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "type": "double precision",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "score",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "type": "varchar",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TransactionNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "DeviceName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Title",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "TwoFactorEnabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "lastheartbeat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "server"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "field",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "acquired",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "lock"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "NormalizedName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoles"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "DeviceName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Xml",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "DataProtectionKeys"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "statename",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "queue",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "type": "varchar(10)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CounterKey",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TransactionCounters"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ProviderDisplayName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ClaimType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "aggregatedcounter"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "bigint",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Name",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserTokens"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CodeHash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ClaimType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "type": "varchar",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TransactionNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "name",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ActivityType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "varchar(50)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TransactionNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "StartDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PeriodId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expireat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "aggregatedcounter"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ConcurrencyStamp",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoles"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "NormalizedUserName",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EntryDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ClaimValue",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ClaimValue",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Value",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUserTokens"
+    },
+    {
+      "type": "varchar(250)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EndDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Message",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "DeviceIdentifier",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "Used",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "name": "LoginNotificationEnabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IsSuccess",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Browser",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LastSequence",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TransactionCounters"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expireat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "invocationdata",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "reason",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EntryDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "fetchedat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expireat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "value",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EntryDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "server"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EntryDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expireat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "arguments",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "30",
+      "generated": null,
+      "identity": null,
+      "name": "SessionTimeoutMinutes",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "EndingDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Role",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "varchar",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "TrialBalanceDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Debit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expireat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "IsClosed",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Type",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "OperatingSystem",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Email",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "EndingDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Browser",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "EndingDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "varchar",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalType",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Device",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IsRead",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "EndingCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryLineId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "false",
+      "generated": null,
+      "identity": null,
+      "name": "IsSelected",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Browser",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "createdat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "data",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UsedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "TrialBalanceCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "HeaderDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "JournalEntryLineId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "HeaderDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "EndingCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IpAddress",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "varchar(100)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "OperatingSystem",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "varchar(256)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "NormalizedEmail",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "EndingCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Credit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IsActive",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "HeaderDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EntryDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "varchar(30)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TransactionNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineOrder",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "true",
+      "generated": null,
+      "identity": null,
+      "name": "IsTrusted",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EntryDate",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "EmailConfirmed",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TargetUrl",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "OperatingSystem",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Country",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "expireat",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "AdjustingJournalDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IpAddress",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "updatecount",
+      "entityType": "columns",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserAgent",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TransactionNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "AdjustingJournalCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TransactionNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PasswordHash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "TrialBalanceAdjustedDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Country",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LastUsedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "SecurityStamp",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "RefreshTokenHash",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserAgent",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccountId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "ConcurrencyStamp",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0.00'",
+      "generated": null,
+      "identity": null,
+      "name": "Debit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0.00'",
+      "generated": null,
+      "identity": null,
+      "name": "Debit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IsActive",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "TrialBalanceAdjustedCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "IncomeStatementDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "varchar",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "varchar",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineDescription",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0.00'",
+      "generated": null,
+      "identity": null,
+      "name": "Credit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "IsCurrent",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0.00'",
+      "generated": null,
+      "identity": null,
+      "name": "Credit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UserId",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PhoneNumber",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "numeric",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Debit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "numeric",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Debit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "numeric",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Debit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0.00'",
+      "generated": null,
+      "identity": null,
+      "name": "RunningBalance",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'0.00'",
+      "generated": null,
+      "identity": null,
+      "name": "RunningBalance",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "PhoneNumberConfirmed",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "IncomeStatementCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "FinancialPositionDebit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "numeric",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Credit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "TwoFactorEnabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "numeric",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Credit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LastActivityAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "numeric",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Credit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Description",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LockoutEnd",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "RevokedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineOrder",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineOrder",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "0",
+      "generated": null,
+      "identity": null,
+      "name": "Status",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LineOrder",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "numeric(18,2)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "'0'",
+      "generated": null,
+      "identity": null,
+      "name": "FinancialPositionCredit",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "CreatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "boolean",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "LockoutEnabled",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "type": "timestamp with time zone",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": "CURRENT_TIMESTAMP",
+      "generated": null,
+      "identity": null,
+      "name": "UpdatedAt",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "type": "integer",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AccessFailedCount",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "AvatarUrl",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "Bio",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "expireat"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_counter_expireat",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "key"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_counter_key",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "expireat"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_hash_expireat",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "expireat"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_job_expireat",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "statename"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_job_statename",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "statename"
+        }
+      ],
+      "isUnique": false,
+      "where": "(statename IS NOT NULL)",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_job_statename_is_not_null",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "jobid"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "name"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_jobparameter_jobidandname",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": true,
+          "opclass": null,
+          "isExpression": false,
+          "value": "fetchedat"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "queue"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "jobid"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_jobqueue_fetchedat_queue_jobid",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "jobid"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "queue"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_jobqueue_jobidandqueue",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "queue"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "fetchedat"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_jobqueue_queueandfetchedat",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "expireat"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_list_expireat",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "expireat"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_set_expireat",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "key"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "score"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_set_key_score",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "jobid"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "ix_hangfire_state_jobid",
+      "entityType": "indexes",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "NormalizedEmail"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "EmailIndex",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "PeriodId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "AccountId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_pagl_user_period_account",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "PeriodId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "AccountId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "idx_tagl_user_period_account",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "RoleId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_AspNetRoleClaims_RoleId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_AspNetUserClaims_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_AspNetUserLogins_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "RoleId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_AspNetUserRoles_RoleId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetUserRoles"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_ChartOfAccounts_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "ReferenceNumber"
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_ChartOfAccounts_UserId_ReferenceNumber",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_JournalEntries_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "TransactionNumber"
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_JournalEntries_UserId_TransactionNumber",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "AccountId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_JournalEntryLines_AccountId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "JournalEntryId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_JournalEntryLines_JournalEntryId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "CreatedAt"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_LoginActivities_UserId_CreatedAt",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "IsRead"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "CreatedAt"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_Notifications_UserId_IsRead_CreatedAt",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": true,
+      "where": "(\"IsSelected\" = true)",
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_Periods_IsSelected_Unique",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_Periods_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_RecoveryCodes_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "CounterKey"
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_TransactionCounters_UserId_CounterKey",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "TransactionCounters"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_TrustedDevices_UserId",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "UserId"
+        },
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "IsActive"
+        }
+      ],
+      "isUnique": false,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "IX_UserSessions_UserId_IsActive",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "NormalizedName"
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "RoleNameIndex",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetRoles"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null,
+          "isExpression": false,
+          "value": "NormalizedUserName"
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "UserNameIndex",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_JournalEntries_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "RoleId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetRoles",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_AspNetRoleClaims_AspNetRoles_RoleId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_AspNetUserClaims_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_AspNetUserLogins_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "RoleId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetRoles",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_AspNetUserRoles_AspNetRoles_RoleId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "AspNetUserRoles"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_AspNetUserRoles_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "AspNetUserRoles"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_AspNetUserTokens_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "AspNetUserTokens"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "AccountId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "ChartOfAccounts",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "FK_JournalEntryLines_ChartOfAccounts_AccountId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "JournalEntryId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "JournalEntries",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_JournalEntryLines_JournalEntries_JournalEntryId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_TrustedDevices_AspNetUsers",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_RecoveryCodes_AspNetUsers",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_SecuritySettings_AspNetUsers",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_LoginActivities_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_UserSessions_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "jobid"
+      ],
+      "schemaTo": "hangfire",
+      "tableTo": "job",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "CASCADE",
+      "name": "state_jobid_fkey",
+      "entityType": "fks",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "jobid"
+      ],
+      "schemaTo": "hangfire",
+      "tableTo": "job",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "CASCADE",
+      "onDelete": "CASCADE",
+      "name": "jobparameter_jobid_fkey",
+      "entityType": "fks",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "AspNetUsers",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "FK_Notifications_AspNetUsers_UserId",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "AccountId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "ChartOfAccounts",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "fk_pagl_account",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "JournalEntryId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "JournalEntries",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fk_pagl_journal_entry",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "JournalEntryLineId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "JournalEntryLines",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fk_pagl_journal_entry_line",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "PeriodId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "Periods",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fk_pagl_period",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "AccountId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "ChartOfAccounts",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "RESTRICT",
+      "name": "fk_tagl_account",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "JournalEntryId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "JournalEntries",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fk_tagl_journal_entry",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "JournalEntryLineId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "JournalEntryLines",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fk_tagl_journal_entry_line",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "PeriodId"
+      ],
+      "schemaTo": "public",
+      "tableTo": "Periods",
+      "columnsTo": [
+        "Id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "name": "fk_tagl_period",
+      "entityType": "fks",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "columns": [
+        "MigrationId"
+      ],
+      "nameExplicit": true,
+      "name": "PK___EFMigrationsHistory",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "__EFMigrationsHistory"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetRoles",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetRoles"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetUsers",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetUsers"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_ChartOfAccounts",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "ChartOfAccounts"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_JournalEntries",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "JournalEntries"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetRoleClaims",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetRoleClaims"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetUserClaims",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetUserClaims"
+    },
+    {
+      "columns": [
+        "LoginProvider",
+        "ProviderKey"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetUserLogins",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetUserLogins"
+    },
+    {
+      "columns": [
+        "UserId",
+        "RoleId"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetUserRoles",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetUserRoles"
+    },
+    {
+      "columns": [
+        "UserId",
+        "LoginProvider",
+        "Name"
+      ],
+      "nameExplicit": true,
+      "name": "PK_AspNetUserTokens",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AspNetUserTokens"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_JournalEntryLines",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "JournalEntryLines"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_Periods",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "Periods"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "TrustedDevices_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "RecoveryCodes_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "RecoveryCodes"
+    },
+    {
+      "columns": [
+        "UserId"
+      ],
+      "nameExplicit": true,
+      "name": "SecuritySettings_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "SecuritySettings"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_LoginActivities",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "LoginActivities"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_UserSessions",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "UserSessions"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_DataProtectionKeys",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "DataProtectionKeys"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "TransactionCounters_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "TransactionCounters"
+    },
+    {
+      "columns": [
+        "version"
+      ],
+      "nameExplicit": true,
+      "name": "schema_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "schema"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "counter_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "counter"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "hash_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "job_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "job"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "state_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "state"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "jobqueue_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "jobqueue"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "list_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "list"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "server_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "server"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "set_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "jobparameter_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "jobparameter"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": true,
+      "name": "aggregatedcounter_pkey",
+      "entityType": "pks",
+      "schema": "hangfire",
+      "table": "aggregatedcounter"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "PK_Notifications",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "Notifications"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "permanent_account_general_ledgers_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "GeneralLedgerPermanentAccounts"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "temporary_account_general_ledgers_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "GeneralLedgerTemporaryAccounts"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "GeneralJournal_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "GeneralJournal"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "TrialBalanceUnadjusted_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "TrialBalanceAdjusted_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "TrialBalancePostClosing_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "AdjustingJournal_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "AdjustingJournal"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "ClosingJournal_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "ClosingJournal"
+    },
+    {
+      "columns": [
+        "Id"
+      ],
+      "nameExplicit": true,
+      "name": "Worksheet_pkey",
+      "entityType": "pks",
+      "schema": "public",
+      "table": "Worksheet"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "DeviceIdentifier"
+      ],
+      "nullsNotDistinct": false,
+      "name": "TrustedDevices_DeviceIdentifier_key",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "TrustedDevices"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "key",
+        "field"
+      ],
+      "nullsNotDistinct": false,
+      "name": "hash_key_field_key",
+      "entityType": "uniques",
+      "schema": "hangfire",
+      "table": "hash"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "key",
+        "value"
+      ],
+      "nullsNotDistinct": false,
+      "name": "set_key_value_key",
+      "entityType": "uniques",
+      "schema": "hangfire",
+      "table": "set"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "resource"
+      ],
+      "nullsNotDistinct": false,
+      "name": "lock_resource_key",
+      "entityType": "uniques",
+      "schema": "hangfire",
+      "table": "lock"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "key"
+      ],
+      "nullsNotDistinct": false,
+      "name": "aggregatedcounter_key_key",
+      "entityType": "uniques",
+      "schema": "hangfire",
+      "table": "aggregatedcounter"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId",
+        "PeriodId",
+        "AccountId"
+      ],
+      "nullsNotDistinct": false,
+      "name": "UQ_TB_Unadjusted_User_Period_Account",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "TrialBalance"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId",
+        "PeriodId",
+        "AccountId"
+      ],
+      "nullsNotDistinct": false,
+      "name": "UQ_TB_Adjusted_User_Period_Account",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "TrialBalanceAdjusted"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        "UserId",
+        "PeriodId",
+        "AccountId"
+      ],
+      "nullsNotDistinct": false,
+      "name": "UQ_TB_PostClosing_User_Period_Account",
+      "entityType": "uniques",
+      "schema": "public",
+      "table": "TrialBalancePostClosing"
+    }
+  ],
+  "renames": []
+}

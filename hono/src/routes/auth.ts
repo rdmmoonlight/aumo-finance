@@ -10,7 +10,7 @@ import {
   checkEmailQuerySchema,
   loginRequestSchema,
   registerSchema,
-} from "../types/auth.type.js";
+} from "../types/auth.js";
 
 // Format error validasi seragam: { success:false, message, errors }
 export const authRoute = new OpenAPIHono<AppEnv>({
