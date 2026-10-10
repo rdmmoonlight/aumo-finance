@@ -3,24 +3,17 @@
 # ==========================================
 FROM node:22-alpine AS builder
 
-# Aktifkan Corepack untuk pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-# Copy manifest dependensi
 COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 
-# Set ENV agar pnpm v10 mengizinkan build script unrs-resolver
-ENV NPM_CONFIG_ONLY_BUILT_DEPENDENCIES="unrs-resolver"
-
-# Install dependensi
 RUN pnpm install --frozen-lockfile || pnpm install
 
-# Copy seluruh source code project
 COPY . .
 
-# Build project
+# Pass VITE_ENV variables jika diperlukan saat build
 RUN pnpm build
 
 # ==========================================
@@ -30,6 +23,7 @@ FROM nginx:alpine AS runner
 
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Tambahkan proxy pass jika backend berbeda server/domain
 RUN echo 'server { \
     listen 80; \
     location / { \
