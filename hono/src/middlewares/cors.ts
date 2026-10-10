@@ -3,19 +3,25 @@ import { env } from '../lib/env.js';
 
 function resolveAllowedOrigins(): string[] {
   const raw = env.CORS_ORIGINS ?? env.FRONTEND_URL ?? 'http://localhost:3000';
+  
   const origins = raw
     .split(',')
     .map((origin) => origin.trim().replace(/\/$/, ''))
     .filter(Boolean);
 
-  // Pastikan localhost selalu masuk allowlist untuk kebutuhan dev/testing
+  // Pastikan SEMUA URL di sini bersih dari trailing slash
   const defaultLocalOrigins = [
     'http://localhost:3000',
-    'https://aumo-finance-web.vercel.app/',
+    'http://localhost:5173',
+    'https://aumo-finance-web.vercel.app', // Hapus trailing slash '/'
     'https://aumoweb.onrender.com',
   ];
 
-  return Array.from(new Set([...origins, ...defaultLocalOrigins]));
+  const combined = [...origins, ...defaultLocalOrigins].map((o) =>
+    o.trim().replace(/\/$/, '')
+  );
+
+  return Array.from(new Set(combined));
 }
 
 const allowedOrigins = resolveAllowedOrigins();
@@ -23,18 +29,21 @@ const allowedOrigins = resolveAllowedOrigins();
 export const corsMiddleware = () =>
   cors({
     origin: (origin) => {
-      // 1. Jika request dari same-origin / browser address bar (origin undefined)
+      // 1. Jika request dari same-origin / non-browser client (misal: Postman/cURL)
       if (!origin) return '*';
 
-      // 2. Izinkan jika origin terdaftar di allowlist
-      if (allowedOrigins.includes(origin)) return origin;
+      // Clean origin dari browser just in case
+      const cleanOrigin = origin.replace(/\/$/, '');
 
-      // 3. Mode development: Izinkan semua origin localhost/127.0.0.1 dinamik
+      // 2. Izinkan jika origin terdaftar di allowlist
+      if (allowedOrigins.includes(cleanOrigin)) return cleanOrigin;
+
+      // 3. Mode development: Izinkan semua origin localhost/127.0.0.1
       if (
         env.NODE_ENV !== 'production' &&
-        (origin.includes('localhost') || origin.includes('127.0.0.1'))
+        (cleanOrigin.includes('localhost') || cleanOrigin.includes('127.0.0.1'))
       ) {
-        return origin;
+        return cleanOrigin;
       }
 
       return null;
