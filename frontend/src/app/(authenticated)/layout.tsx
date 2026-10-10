@@ -5,10 +5,10 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useNavigate } from "@/lib/router";
 import type { AppDispatch, RootState } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-import { useNavigate } from "@/lib/router";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -34,7 +34,7 @@ export default function AuthenticatedLayout({
     try {
       setIsAuthLoading(true);
 
-      // 1. Eksekusi request GET /api/v1/auth/me langsung via initiate
+      // 1. Eksekusi request GET /auth/me langsung via initiate
       const authResult = await dispatch(
         authApi.endpoints.getProfile.initiate(undefined, {
           forceRefetch: false,

@@ -44,53 +44,53 @@ export interface CreatePeriodRequest {
 
 export const periodsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // GET /api/v1/periods
+    // GET /periods
     getPeriods: builder.query<PeriodItem[] | { items: PeriodItem[] }, void>({
-      query: () => "/api/v1/periods",
+      query: () => "/periods",
       providesTags: ["Periods"],
     }),
 
-    // GET /api/v1/periods/open-info
+    // GET /periods/open-info
     getPeriodsOpenInfo: builder.query<PeriodsOpenInfo, void>({
-      query: () => "/api/v1/periods/open-info",
+      query: () => "/periods/open-info",
       providesTags: ["Periods"],
     }),
 
-    // POST /api/v1/periods
+    // POST /periods
     createPeriod: builder.mutation<
       void,
       { createPeriodRequest: CreatePeriodRequest }
     >({
       query: ({ createPeriodRequest }) => ({
-        url: "/api/v1/periods",
+        url: "/periods",
         method: "POST",
         body: createPeriodRequest,
       }),
       invalidatesTags: ["Periods"],
     }),
 
-    // POST /api/v1/periods/{id}/select
+    // POST /periods/{id}/select
     selectPeriod: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
-        url: `/api/v1/periods/${id}/select`,
+        url: `/periods/${id}/select`,
         method: "POST",
       }),
       invalidatesTags: ["Periods"],
     }),
 
-    // POST /api/v1/periods/clear-selection
+    // POST /periods/clear-selection
     clearSelection: builder.mutation<void, void>({
       query: () => ({
-        url: "/api/v1/periods/clear-selection",
+        url: "/periods/clear-selection",
         method: "POST",
       }),
       invalidatesTags: ["Periods"],
     }),
 
-    // POST /api/v1/periods/{id}/close
+    // POST /periods/{id}/close
     closePeriod: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
-        url: `/api/v1/periods/${id}/close`,
+        url: `/periods/${id}/close`,
         method: "POST",
       }),
       invalidatesTags: ["Periods"],

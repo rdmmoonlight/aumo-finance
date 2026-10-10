@@ -5,12 +5,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { baseApi } from "@/lib/apiClient";
+import { useSearchParams } from "@/lib/router";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useSearchParams } from "@/lib/router";
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -204,7 +204,7 @@ function AuthFormInner({
       // Reset cache RTK Query
       dispatch(baseApi.util.resetApiState());
 
-      // Panggil endpoint /api/v1/auth/login via initiate
+      // Panggil endpoint /auth/login via initiate
       const result = await store.dispatch(
         authApi.endpoints.login.initiate({
           email: values.email,

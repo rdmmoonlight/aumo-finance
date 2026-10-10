@@ -70,9 +70,17 @@ export function registerRoutes(app: OpenAPIHono<AppEnv>): void {
     })
   );
 
-  // 6. Not Found Handler
+  // 6. Coming Soon / Fallback Handler
   app.notFound((c) =>
-    c.json({ success: false, message: 'Route tidak ditemukan' }, 404)
+    c.json(
+      {
+        success: false,
+        message: '🚧 ⚠️ Fitur ini sedang dalam tahap pembangunan (Coming Soon)! ⚠️ 🚧',
+        code: 'FEATURE_UNDER_CONSTRUCTION',
+        path: c.req.path,
+      },
+      404
+    )
   );
 }
 

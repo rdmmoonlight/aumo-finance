@@ -13,7 +13,7 @@ export const dashboardApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getDashboard: builder.query<GetDashboardApiResponse, GetDashboardApiArg>({
       query: (arg) => ({
-        url: "/api/v1/dashboard", // Wajib diawali dengan '/'
+        url: "/dashboard", // Wajib diawali dengan '/'
         params: {
           period: arg?.period,
         },
