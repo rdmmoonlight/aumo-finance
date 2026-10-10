@@ -3,7 +3,7 @@
 # ==========================================
 FROM node:22-alpine AS builder
 
-# Aktifkan Corepack & pnpm
+# Aktifkan Corepack untuk pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
@@ -11,11 +11,7 @@ WORKDIR /app
 # Copy manifest dependensi
 COPY package.json pnpm-lock.yaml* ./
 
-# Buat .npmrc sementara agar pnpm mengizinkan build scripts (unrs-resolver) dan abaikan proteksi build v10
-RUN echo "only-built-dependencies[]=unrs-resolver" > .npmrc && \
-    echo "ignore-scripts=false" >> .npmrc
-
-# Install dependensi
+# Install dependensi (pnpm akan membaca onlyBuiltDependencies dari package.json)
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # Copy seluruh source code project
