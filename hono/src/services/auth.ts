@@ -1,7 +1,8 @@
 import { APIError } from "better-auth/api";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { db, session as sessionTable, user as userTable } from "../db/index.js";
+import { session as sessionTable, user as userTable } from "../db/schema/index.js";
+import { db } from "../index.js";
 import { auth } from "../lib/auth.js";
 import { AppError } from "../lib/errors.js";
 import { logger } from "../lib/logger.js";
@@ -11,7 +12,7 @@ import type {
     ChangePasswordRequest,
     LoginRequest,
     RegisterDTO,
-} from "../types/auth.type.js";
+} from "../types/auth.js";
 
 /** Hasil operasi auth: data + header Set-Cookie dari Better Auth (untuk web). */
 export interface AuthResult {
