@@ -11,10 +11,10 @@ WORKDIR /app
 # Copy manifest dependensi
 COPY package.json pnpm-lock.yaml* ./
 
-# Izinkan build script untuk dependensi yang dikonfigurasi di package.json
-RUN pnpm config set side-effects-cache false && \
-    pnpm install --frozen-lockfile --ignore-scripts=false || \
-    pnpm install --ignore-scripts=false
+# Set konfigurasi agar pnpm tidak memblokir build script & setujui unrs-resolver
+RUN pnpm config set config-approve-builds true && \
+    pnpm approve-builds --all && \
+    pnpm install --frozen-lockfile || pnpm install
 
 # Copy seluruh source code project
 COPY . .
@@ -32,11 +32,11 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 RUN echo 'server { \
     listen 80; \
     location / { \
-    root /usr/share/nginx/html; \
-    index index.html index.htm; \
-    try_files $uri $uri/ /index.html; \
+        root /usr/share/nginx/html; \
+        index index.html index.htm; \
+        try_files $uri $uri/ /index.html; \
     } \
-    }' > /etc/nginx/conf.d/default.conf
+}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
