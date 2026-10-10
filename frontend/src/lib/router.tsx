@@ -2,7 +2,10 @@
  * Integrasi Navigo + React.
  *
  * - Navigo mengatur URL & pencocokan rute (satu instance, dibuat di level modul)
- * - Halaman diambil otomatis dari src/app/**\/page.tsx (route group "(x)" dibuang dari URL)
+ * - Halaman diambil otomatis dari src/app/**\/page.* (route group "(x)" dibuang dari URL):
+ *     page.tsx        -> halaman React (komponen default export)
+ *     page.ts/.js     -> halaman Vanilla JS (fungsi mount default export, lihat VanillaPage)
+ *   Keduanya bisa dicampur, termasuk di dalam layout "(authenticated)".
  * - React hanya di-mount SATU kali; pergantian halaman lewat state, bukan unmount root
  * - Menyediakan Link, useNavigate, useLocation, useSearchParams dengan bentuk yang sama
  *   seperti react-router-dom, sehingga halaman lama cukup mengganti sumber import.
@@ -13,7 +16,9 @@ import {
   forwardRef,
   lazy,
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   useSyncExternalStore,
   type AnchorHTMLAttributes,
   type ComponentType,
@@ -25,12 +30,30 @@ import {
 // ==========================================
 type PageModule = { default: ComponentType };
 
-const pageModules = import.meta.glob<PageModule>("../app/**/page.tsx");
+/** Konteks yang diberikan ke halaman Vanilla JS saat dipasang. */
+export type VanillaContext = {
+  path: string;
+  query: URLSearchParams;
+  navigate: typeof navigate;
+};
+
+/**
+ * Kontrak halaman Vanilla JS: export default sebuah fungsi yang mengisi `container`.
+ * Boleh mengembalikan fungsi cleanup (dipanggil saat pindah halaman).
+ */
+export type VanillaPage = (
+  container: HTMLElement,
+  ctx: VanillaContext,
+) => void | (() => void) | Promise<void | (() => void)>;
+type VanillaModule = { default: VanillaPage };
+
+const reactModules = import.meta.glob<PageModule>("../app/**/page.tsx");
+const vanillaModules = import.meta.glob<VanillaModule>("../app/**/page.{ts,js}");
 
 function toPath(file: string): string {
   const path = file
     .replace("../app", "")
-    .replace(/\/page\.tsx$/, "")
+    .replace(/\/page\.(tsx|ts|js)$/, "")
     .replace(/\/\([^)]+\)/g, ""); // buang route group, mis. (authenticated)
   return path === "" ? "/" : path;
 }
@@ -38,16 +61,114 @@ function toPath(file: string): string {
 type RouteEntry = {
   path: string;
   authenticated: boolean;
+  kind: "react" | "vanilla";
   Page: ComponentType;
 };
 
-const routes: RouteEntry[] = Object.entries(pageModules).map(
-  ([file, loader]) => ({
-    path: toPath(file),
-    authenticated: file.includes("/(authenticated)/"),
-    Page: lazy(loader),
-  }),
-);
+function buildRoutes(): RouteEntry[] {
+  const map = new Map<string, RouteEntry>();
+
+  for (const [file, load] of Object.entries(vanillaModules)) {
+    const path = toPath(file);
+    map.set(path, {
+      path,
+      authenticated: file.includes("/(authenticated)/"),
+      kind: "vanilla",
+      Page: () => <VanillaHost load={load} path={path} />,
+    });
+  }
+
+  // React menang jika satu path punya dua jenis halaman
+  for (const [file, load] of Object.entries(reactModules)) {
+    const path = toPath(file);
+    if (map.has(path)) {
+      console.warn(`[router] ${path} punya page React & Vanilla; memakai React.`);
+    }
+    map.set(path, {
+      path,
+      authenticated: file.includes("/(authenticated)/"),
+      kind: "react",
+      Page: lazy(load),
+    });
+  }
+
+  return [...map.values()];
+}
+
+/** Memasang halaman Vanilla JS ke dalam elemen div, lengkap dengan cleanup & link internal. */
+function VanillaHost({
+  load,
+  path,
+}: {
+  load: () => Promise<VanillaModule>;
+  path: string;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { search } = useLocation();
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    let disposed = false;
+    let cleanup: void | (() => void);
+
+    // <a href="/rute"> di halaman vanilla ikut navigasi SPA (tanpa reload)
+    const onClick = (e: globalThis.MouseEvent) => {
+      const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      const href = a?.getAttribute("href");
+      if (!a || !href || !href.startsWith("/") || href.startsWith("//")) return;
+      if (
+        e.defaultPrevented ||
+        e.button !== 0 ||
+        (a.target && a.target !== "_self") ||
+        e.metaKey ||
+        e.ctrlKey ||
+        e.shiftKey ||
+        e.altKey
+      ) {
+        return;
+      }
+      e.preventDefault();
+      navigate(href);
+    };
+    el.addEventListener("click", onClick);
+
+    load()
+      .then(async (mod) => {
+        if (disposed) return;
+        el.innerHTML = "";
+        const result = await mod.default(el, {
+          path,
+          query: new URLSearchParams(search),
+          navigate,
+        });
+        if (disposed) {
+          if (typeof result === "function") result();
+        } else {
+          cleanup = result;
+        }
+      })
+      .catch((err) => {
+        console.error(`[router] Gagal memuat halaman vanilla ${path}:`, err);
+        if (!disposed) {
+          el.innerHTML =
+            '<div class="p-6 text-sm text-destructive">Gagal memuat halaman.</div>';
+        }
+      });
+
+    return () => {
+      disposed = true;
+      el.removeEventListener("click", onClick);
+      if (typeof cleanup === "function") cleanup();
+      el.innerHTML = "";
+    };
+  }, [load, path, search]);
+
+  return <div ref={ref} data-vanilla-page={path} />;
+}
+
+const routes: RouteEntry[] = buildRoutes();
 
 const AuthenticatedLayout = lazy(() => import("../app/(authenticated)/layout"));
 
