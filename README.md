@@ -7,7 +7,9 @@ An integrated, precision-driven financial and accounting information system.
 
 /frontend
 - deploy pertama di Vercel tanggal 9 September 2026.
+- 10 oktober 2026. Deploya pertama dg Dockerfile dan di Reder.com
 
+- 
 /mobile
 - Android native (Kotlin), bukan React Native/Flutter/MAUI. Konsumen REST API `/backend` di repo yang sama, auth pakai JWT Bearer.
 
