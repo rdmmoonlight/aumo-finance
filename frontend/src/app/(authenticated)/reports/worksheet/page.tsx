@@ -3,6 +3,7 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@/lib/router";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import {
@@ -15,7 +16,6 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@/lib/router";
 import { WorksheetRow, WorksheetTotals, WorksheetViewModel } from "./types";
 import { formatNumber } from "./utils";
 import { WorksheetTable } from "./worksheet-table";
@@ -33,7 +33,7 @@ export default function WorksheetPage() {
       setErrorMessage(null);
 
       try {
-        // Tembak endpoint /api/v1/reports/worksheet langsung via store dispatch
+        // Tembak endpoint /reports/worksheet langsung via store dispatch
         const result = await store.dispatch(
           reportsApi.endpoints.getWorksheet.initiate(),
         );

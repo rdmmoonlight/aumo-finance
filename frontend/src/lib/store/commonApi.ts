@@ -49,40 +49,40 @@ export const commonApi = baseApi.injectEndpoints({
       invalidatesTags: ["AumoBackend"],
     }),
 
-    // GET /api/v1/health
+    // GET /health
     getHealth: builder.query<HealthCheckResponse, void>({
-      query: () => "/api/v1/health",
+      query: () => "/health",
       providesTags: ["Health"],
     }),
 
-    // GET /api/v1/notifications
+    // GET /notifications
     getNotifications: builder.query<
       NotificationItem[],
       GetNotificationsArg | void
     >({
       query: (arg) => ({
-        url: "/api/v1/notifications",
+        url: "/notifications",
         params: arg?.limit ? { limit: arg.limit } : undefined,
       }),
       providesTags: ["Notifications"],
     }),
 
-    // PUT /api/v1/notifications/{id}/read
+    // PUT /notifications/{id}/read
     markNotificationAsRead: builder.mutation<
       CommonActionResponse,
       MarkNotificationReadArg
     >({
       query: ({ id }) => ({
-        url: `/api/v1/notifications/${id}/read`,
+        url: `/notifications/${id}/read`,
         method: "PUT",
       }),
       invalidatesTags: ["Notifications"],
     }),
 
-    // PUT /api/v1/notifications/read-all
+    // PUT /notifications/read-all
     markAllNotificationsAsRead: builder.mutation<CommonActionResponse, void>({
       query: () => ({
-        url: "/api/v1/notifications/read-all",
+        url: "/notifications/read-all",
         method: "PUT",
       }),
       invalidatesTags: ["Notifications"],

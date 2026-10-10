@@ -55,36 +55,36 @@ export const authApi = baseApi.injectEndpoints({
   // Mencegah error 'overrideExisting' saat Next.js Turbopack HMR / Fast Refresh
   overrideExisting: !import.meta.env.PROD,
   endpoints: (builder) => ({
-    // 1. POST /api/v1/auth/login
+    // 1. POST /auth/login
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({
-        url: "/api/v1/auth/login",
+        url: "/auth/login",
         method: "POST",
         body,
       }),
       invalidatesTags: ["Auth"],
     }),
 
-    // 2. POST /api/v1/auth/google-login
+    // 2. POST /auth/google-login
     googleLogin: builder.mutation<AuthResponse, GoogleLoginRequest>({
       query: (body) => ({
-        url: "/api/v1/auth/google-login",
+        url: "/auth/google-login",
         method: "POST",
         body,
       }),
       invalidatesTags: ["Auth"],
     }),
 
-    // 3. GET /api/v1/auth/me
+    // 3. GET /auth/me
     getProfile: builder.query<ProfileResponse, void>({
-      query: () => "/api/v1/auth/me",
+      query: () => "/auth/me",
       providesTags: ["Auth"],
     }),
 
-    // 4. POST /api/v1/auth/logout (Digabung & disederhanakan)
+    // 4. POST /auth/logout (Digabung & disederhanakan)
     logout: builder.mutation<CommonActionResponse, void>({
       query: () => ({
-        url: "/api/v1/auth/logout",
+        url: "/auth/logout",
         method: "POST",
       }),
       invalidatesTags: ["Auth"],
