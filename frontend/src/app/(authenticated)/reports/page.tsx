@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "@/lib/router";
 import { store } from "@/lib/store";
 import {
   reportsApi,
@@ -37,7 +38,6 @@ import {
   Table as TableIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@/lib/router";
 
 type ReportItem = {
   href: string;
@@ -377,18 +377,16 @@ export default function ReportsPage() {
                     {!summaryLoading && (
                       <>
                         <span
-                          className={`h-2 w-2 rounded-full ${
-                            summary?.isPeriodOpen
+                          className={`h-2 w-2 rounded-full ${summary?.isPeriodOpen
                               ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"
                               : "bg-amber-400"
-                          }`}
+                            }`}
                         />
                         <span
-                          className={`text-xs ${
-                            summary?.isPeriodOpen
+                          className={`text-xs ${summary?.isPeriodOpen
                               ? "text-emerald-300"
                               : "text-amber-300/80"
-                          }`}
+                            }`}
                         >
                           {summary?.isPeriodOpen ? "Open" : "Closed"}
                         </span>
