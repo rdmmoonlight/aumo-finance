@@ -9,9 +9,12 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 WORKDIR /app
 
 # Copy manifest dependensi
-COPY package.json pnpm-lock.yaml* ./
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 
-# Install dependensi (pnpm akan membaca onlyBuiltDependencies dari package.json)
+# Set ENV agar pnpm v10 mengizinkan build script unrs-resolver
+ENV NPM_CONFIG_ONLY_BUILT_DEPENDENCIES="unrs-resolver"
+
+# Install dependensi
 RUN pnpm install --frozen-lockfile || pnpm install
 
 # Copy seluruh source code project
