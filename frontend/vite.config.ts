@@ -3,7 +3,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig, loadEnv } from "vite";
 
-// Mengakomodasi __dirname jika import.meta.dirname belum tersedia di versi Node.js tertentu
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -18,17 +17,29 @@ const getBackendTarget = (env: Record<string, string>): string => {
   if (!target.includes("localhost") && target.startsWith("http://")) {
     target = target.replace("http://", "https://");
   }
-
   return target;
 };
 
 export default defineConfig(({ mode }) => {
-  // Argumentasi ketiga `""` memuat semua env (termasuk tanpa awalan VITE_)
   const env = loadEnv(mode, process.cwd(), "");
   const backendTarget = getBackendTarget(env);
 
   return {
-    plugins: [react()],
+    appType: "mpa", // biar Vite bisa baca .html sebagai entry
+    plugins: [
+      react(), // biarin aja kalau masih ada page React lain
+      {
+        name: "rewrite-root-to-landing",
+        configureServer(server) {
+          server.middlewares.use((req, _res, next) => {
+            if (req.url === "/" || req.url === "") {
+              req.url = "/index.html"; // <-- "/" akan serve file ini
+            }
+            next();
+          });
+        },
+      },
+    ],
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
@@ -37,10 +48,14 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       proxy: {
-        "/api": {
-          target: backendTarget,
-          changeOrigin: true,
-          secure: false,
+        "/api": { target: backendTarget, changeOrigin: true, secure: false },
+        "/auth": { target: backendTarget, changeOrigin: true, secure: false },
+      },
+    },
+    build: {
+      rollupOptions: {
+        input: {
+          main: path.resolve(__dirname, "index.html"), // entry "/"
         },
       },
     },
