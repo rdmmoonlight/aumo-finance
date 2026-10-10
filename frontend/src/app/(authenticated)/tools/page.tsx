@@ -215,11 +215,11 @@ export default function ToolsPage() {
       prev.map((m) =>
         m.excelRef === excelRef && m.excelAccountName === excelName
           ? {
-            ...m,
-            mappedRef: targetRef,
-            mappedAccountName: opt?.accountName || opt?.name || "",
-            status: targetRef ? "REALLOCATED" : "UNMAPPED",
-          }
+              ...m,
+              mappedRef: targetRef,
+              mappedAccountName: opt?.accountName || opt?.name || "",
+              status: targetRef ? "REALLOCATED" : "UNMAPPED",
+            }
           : m,
       ),
     );
@@ -273,8 +273,8 @@ export default function ToolsPage() {
         const err = result.error as any;
         setErrorMessage(
           err?.data?.message ||
-          err?.message ||
-          "Gagal melakukan import jurnal.",
+            err?.message ||
+            "Gagal melakukan import jurnal.",
         );
       }
     } catch (err: any) {
@@ -367,10 +367,7 @@ export default function ToolsPage() {
                   size="sm"
                   className="h-auto p-0 gap-1"
                   onClick={() =>
-                    window.open(
-                      "/tools/download-journal-template",
-                      "_blank",
-                    )
+                    window.open("/tools/download-journal-template", "_blank")
                   }
                 >
                   <Download size={12} />
