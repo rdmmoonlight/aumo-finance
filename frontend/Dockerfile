@@ -11,10 +11,12 @@ WORKDIR /app
 # Copy manifest dependensi
 COPY package.json pnpm-lock.yaml* ./
 
-# Set konfigurasi agar pnpm tidak memblokir build script & setujui unrs-resolver
-RUN pnpm config set config-approve-builds true && \
-    pnpm approve-builds --all && \
-    pnpm install --frozen-lockfile || pnpm install
+# Buat .npmrc sementara agar pnpm mengizinkan build scripts (unrs-resolver) dan abaikan proteksi build v10
+RUN echo "only-built-dependencies[]=unrs-resolver" > .npmrc && \
+    echo "ignore-scripts=false" >> .npmrc
+
+# Install dependensi
+RUN pnpm install --frozen-lockfile || pnpm install
 
 # Copy seluruh source code project
 COPY . .
