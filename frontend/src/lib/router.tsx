@@ -48,7 +48,9 @@ export type VanillaPage = (
 type VanillaModule = { default: VanillaPage };
 
 const reactModules = import.meta.glob<PageModule>("../app/**/page.tsx");
-const vanillaModules = import.meta.glob<VanillaModule>("../app/**/page.{ts,js}");
+const vanillaModules = import.meta.glob<VanillaModule>(
+  "../app/**/page.{ts,js}",
+);
 
 function toPath(file: string): string {
   const path = file
@@ -82,7 +84,9 @@ function buildRoutes(): RouteEntry[] {
   for (const [file, load] of Object.entries(reactModules)) {
     const path = toPath(file);
     if (map.has(path)) {
-      console.warn(`[router] ${path} punya page React & Vanilla; memakai React.`);
+      console.warn(
+        `[router] ${path} punya page React & Vanilla; memakai React.`,
+      );
     }
     map.set(path, {
       path,
@@ -115,7 +119,9 @@ function VanillaHost({
 
     // <a href="/rute"> di halaman vanilla ikut navigasi SPA (tanpa reload)
     const onClick = (e: globalThis.MouseEvent) => {
-      const a = (e.target as Element | null)?.closest?.("a[href]") as HTMLAnchorElement | null;
+      const a = (e.target as Element | null)?.closest?.(
+        "a[href]",
+      ) as HTMLAnchorElement | null;
       const href = a?.getAttribute("href");
       if (!a || !href || !href.startsWith("/") || href.startsWith("//")) return;
       if (

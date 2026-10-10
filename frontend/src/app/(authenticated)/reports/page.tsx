@@ -377,16 +377,18 @@ export default function ReportsPage() {
                     {!summaryLoading && (
                       <>
                         <span
-                          className={`h-2 w-2 rounded-full ${summary?.isPeriodOpen
+                          className={`h-2 w-2 rounded-full ${
+                            summary?.isPeriodOpen
                               ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] animate-pulse"
                               : "bg-amber-400"
-                            }`}
+                          }`}
                         />
                         <span
-                          className={`text-xs ${summary?.isPeriodOpen
+                          className={`text-xs ${
+                            summary?.isPeriodOpen
                               ? "text-emerald-300"
                               : "text-amber-300/80"
-                            }`}
+                          }`}
                         >
                           {summary?.isPeriodOpen ? "Open" : "Closed"}
                         </span>
