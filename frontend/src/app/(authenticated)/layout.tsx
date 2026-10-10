@@ -8,7 +8,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { AppDispatch, RootState } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 

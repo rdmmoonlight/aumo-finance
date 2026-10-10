@@ -49,9 +49,9 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 
 export function ChartOfAccountsTable() {
   const [searchParams] = useSearchParams();

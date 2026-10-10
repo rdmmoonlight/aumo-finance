@@ -15,7 +15,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 import { WorksheetRow, WorksheetTotals, WorksheetViewModel } from "./types";
 import { formatNumber } from "./utils";
 import { WorksheetTable } from "./worksheet-table";

@@ -33,9 +33,9 @@ import {
   Wallet,
   X,
 } from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "@/lib/router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 
 export default function DashboardContent() {
   const navigate = useNavigate();

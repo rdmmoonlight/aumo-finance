@@ -37,7 +37,7 @@ import {
   Table as TableIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 
 type ReportItem = {
   href: string;

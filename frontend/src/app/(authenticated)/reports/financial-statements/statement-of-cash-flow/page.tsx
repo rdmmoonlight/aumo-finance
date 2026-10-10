@@ -7,7 +7,7 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Banknote, Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 import { CashFlowSectionTable } from "../_components/cash-flow/CashFlowSectionTable";
 import { ErrorAlert } from "../_components/common/ErrorAlert";
 import { LoadingState } from "../_components/common/LoadingState";

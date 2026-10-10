@@ -7,7 +7,7 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertCircle, ArrowRight, CheckCircle2, Landmark } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 import { ErrorAlert } from "../_components/common/ErrorAlert";
 import { LoadingState } from "../_components/common/LoadingState";
 import { NoPeriodCard } from "../_components/common/NoPeriodCard";
