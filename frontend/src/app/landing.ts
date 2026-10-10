@@ -23,7 +23,8 @@ let authMode: AuthMode = "login";
 function setCheckingAuth(val: boolean): void {
   if (els.btnLogin) els.btnLogin.disabled = val;
   if (els.btnRegister) els.btnRegister.disabled = val;
-  if (els.loginText) els.loginText.textContent = val ? "Checking..." : "Sign In";
+  if (els.loginText)
+    els.loginText.textContent = val ? "Checking..." : "Sign In";
 }
 
 // FIX UTAMA: anti "Unexpected end of JSON input"
@@ -54,8 +55,10 @@ async function checkAuthStatus(): Promise<void> {
 }
 
 function setupEvents(): void {
-  if (els.btnLogin) els.btnLogin.addEventListener("click", () => openModal("login"));
-  if (els.btnRegister) els.btnRegister.addEventListener("click", () => openModal("register"));
+  if (els.btnLogin)
+    els.btnLogin.addEventListener("click", () => openModal("login"));
+  if (els.btnRegister)
+    els.btnRegister.addEventListener("click", () => openModal("register"));
   if (els.modalClose) els.modalClose.addEventListener("click", closeModal);
   if (els.overlay) {
     els.overlay.addEventListener("click", (ev) => {
@@ -66,7 +69,9 @@ function setupEvents(): void {
 
 function openModal(mode: AuthMode): void {
   authMode = mode;
-  if (els.modalTitle) els.modalTitle.textContent = mode === "login" ? "Sign In to Aumo" : "Create an Account";
+  if (els.modalTitle)
+    els.modalTitle.textContent =
+      mode === "login" ? "Sign In to Aumo" : "Create an Account";
   if (els.overlay) els.overlay.classList.add("active");
   renderForm();
 }
@@ -94,7 +99,8 @@ function renderForm(): void {
     const form = document.getElementById("login-form");
     const switchBtn = document.getElementById("switch-reg");
     if (form) form.addEventListener("submit", handleLogin);
-    if (switchBtn) switchBtn.addEventListener("click", () => openModal("register"));
+    if (switchBtn)
+      switchBtn.addEventListener("click", () => openModal("register"));
   } else {
     els.formContainer.innerHTML = `
       <form id="register-form" class="form">
@@ -107,7 +113,8 @@ function renderForm(): void {
     const form = document.getElementById("register-form");
     const switchBtn = document.getElementById("switch-login");
     if (form) form.addEventListener("submit", handleRegister);
-    if (switchBtn) switchBtn.addEventListener("click", () => openModal("login"));
+    if (switchBtn)
+      switchBtn.addEventListener("click", () => openModal("login"));
   }
 }
 
