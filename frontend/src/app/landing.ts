@@ -18,38 +18,44 @@ const els = {
   googleContainer: $("google-btn-container"),
 };
 
-let checkingAuth = true;
 let authMode: AuthMode = "login";
 
 function setCheckingAuth(val: boolean): void {
-  checkingAuth = val;
   if (els.btnLogin) els.btnLogin.disabled = val;
   if (els.btnRegister) els.btnRegister.disabled = val;
-  if (els.loginText)
-    els.loginText.textContent = val ? "Checking..." : "Sign In";
+  if (els.loginText) els.loginText.textContent = val ? "Checking..." : "Sign In";
+}
+
+// FIX UTAMA: anti "Unexpected end of JSON input"
+async function safeJson(res: Response): Promise<any> {
+  const text = await res.text();
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
 }
 
 async function checkAuthStatus(): Promise<void> {
   try {
     setCheckingAuth(true);
     const res = await fetch(`${API_BASE}/auth/me`, { credentials: "include" });
-    const data = await res.json().catch(() => ({}) as any);
+    const data = await safeJson(res);
     if (res.ok && (data as any).success) {
       if (els.redirecting) els.redirecting.classList.add("active");
       window.location.replace("/home");
     }
   } catch {
-    // ignore
+    // belum login, biarin
   } finally {
     setCheckingAuth(false);
   }
 }
 
 function setupEvents(): void {
-  if (els.btnLogin)
-    els.btnLogin.addEventListener("click", () => openModal("login"));
-  if (els.btnRegister)
-    els.btnRegister.addEventListener("click", () => openModal("register"));
+  if (els.btnLogin) els.btnLogin.addEventListener("click", () => openModal("login"));
+  if (els.btnRegister) els.btnRegister.addEventListener("click", () => openModal("register"));
   if (els.modalClose) els.modalClose.addEventListener("click", closeModal);
   if (els.overlay) {
     els.overlay.addEventListener("click", (ev) => {
@@ -60,9 +66,7 @@ function setupEvents(): void {
 
 function openModal(mode: AuthMode): void {
   authMode = mode;
-  if (els.modalTitle)
-    els.modalTitle.textContent =
-      mode === "login" ? "Sign In to Aumo" : "Create an Account";
+  if (els.modalTitle) els.modalTitle.textContent = mode === "login" ? "Sign In to Aumo" : "Create an Account";
   if (els.overlay) els.overlay.classList.add("active");
   renderForm();
 }
@@ -90,8 +94,7 @@ function renderForm(): void {
     const form = document.getElementById("login-form");
     const switchBtn = document.getElementById("switch-reg");
     if (form) form.addEventListener("submit", handleLogin);
-    if (switchBtn)
-      switchBtn.addEventListener("click", () => openModal("register"));
+    if (switchBtn) switchBtn.addEventListener("click", () => openModal("register"));
   } else {
     els.formContainer.innerHTML = `
       <form id="register-form" class="form">
@@ -104,8 +107,7 @@ function renderForm(): void {
     const form = document.getElementById("register-form");
     const switchBtn = document.getElementById("switch-login");
     if (form) form.addEventListener("submit", handleRegister);
-    if (switchBtn)
-      switchBtn.addEventListener("click", () => openModal("login"));
+    if (switchBtn) switchBtn.addEventListener("click", () => openModal("login"));
   }
 }
 
@@ -120,12 +122,11 @@ async function handleLogin(e: Event): Promise<void> {
       credentials: "include",
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await safeJson(res);
     if (!res.ok) throw new Error((data as any).message || "Login gagal");
     handleSuccess();
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    alert(msg);
+    alert(err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -140,12 +141,11 @@ async function handleRegister(e: Event): Promise<void> {
       credentials: "include",
       body: JSON.stringify(payload),
     });
-    const data = await res.json();
+    const data = await safeJson(res);
     if (!res.ok) throw new Error((data as any).message || "Register gagal");
     handleSuccess();
   } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : String(err);
-    alert(msg);
+    alert(err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -170,11 +170,11 @@ function initGoogle(): void {
             credentials: "include",
             body: JSON.stringify({ credential: resp.credential }),
           });
-          if (res.ok) handleSuccess();
-          else alert("Google auth gagal");
+          const data = await safeJson(res);
+          if (res.ok && (data as any).success !== false) handleSuccess();
+          else alert((data as any).message || "Google auth gagal");
         } catch (err: unknown) {
-          const msg = err instanceof Error ? err.message : String(err);
-          alert(msg);
+          alert(err instanceof Error ? err.message : String(err));
         }
       },
     });
