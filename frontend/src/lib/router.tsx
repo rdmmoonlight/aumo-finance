@@ -41,11 +41,13 @@ type RouteEntry = {
   Page: ComponentType;
 };
 
-const routes: RouteEntry[] = Object.entries(pageModules).map(([file, loader]) => ({
-  path: toPath(file),
-  authenticated: file.includes("/(authenticated)/"),
-  Page: lazy(loader),
-}));
+const routes: RouteEntry[] = Object.entries(pageModules).map(
+  ([file, loader]) => ({
+    path: toPath(file),
+    authenticated: file.includes("/(authenticated)/"),
+    Page: lazy(loader),
+  }),
+);
 
 const AuthenticatedLayout = lazy(() => import("../app/(authenticated)/layout"));
 
@@ -129,19 +131,28 @@ export function useNavigate() {
 }
 
 export function useLocation() {
-  const { pathname, search, hash } = useSyncExternalStore(subscribe, getSnapshot);
+  const { pathname, search, hash } = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+  );
   return { pathname, search, hash };
 }
 
 export function useSearchParams(): [
   URLSearchParams,
-  (next: URLSearchParams | Record<string, string>, options?: NavigateOptions) => void,
+  (
+    next: URLSearchParams | Record<string, string>,
+    options?: NavigateOptions,
+  ) => void,
 ] {
   const { search } = useLocation();
   const params = useMemo(() => new URLSearchParams(search), [search]);
 
   const setParams = useCallback(
-    (next: URLSearchParams | Record<string, string>, options?: NavigateOptions) => {
+    (
+      next: URLSearchParams | Record<string, string>,
+      options?: NavigateOptions,
+    ) => {
       const qs = new URLSearchParams(next).toString();
       navigate(`${window.location.pathname}${qs ? `?${qs}` : ""}`, options);
     },
@@ -178,7 +189,9 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
     navigate(to, { replace });
   };
 
-  return <a ref={ref} href={to} target={target} onClick={handleClick} {...rest} />;
+  return (
+    <a ref={ref} href={to} target={target} onClick={handleClick} {...rest} />
+  );
 });
 
 // ==========================================
