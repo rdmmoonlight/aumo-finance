@@ -16,13 +16,27 @@ const getBackendTarget = (env: Record<string, string>) => {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
   const backendTarget = getBackendTarget(env);
+
   return {
+    // Tentukan root direktori ke folder src
+    root: path.resolve(__dirname, "src"),
     plugins: [react()],
-    resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
+    resolve: {
+      alias: {
+        "@": path.resolve(__dirname, "./src"),
+      },
+    },
     build: {
+      // Karena root pindah ke /src, kembalikan lokasi outDir build ke level root proyek
+      outDir: path.resolve(__dirname, "dist"),
+      emptyOutDir: true,
       rollupOptions: {
-        input: { main: path.resolve(__dirname, "index.html") },
+        input: {
+          // Arahkan entry point HTML ke src/index.html
+          main: path.resolve(__dirname, "src/index.html"),
+        },
       },
     },
   };
 });
+    
