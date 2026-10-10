@@ -30,43 +30,43 @@ export const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
 
   // Auth Endpoints
-  { path: 'auth/login', ...createHealthRoute('Login Endpoint', '/api/v1/auth/login', 'POST') },
-  { path: 'auth/register', ...createHealthRoute('Register Endpoint', '/api/v1/auth/register', 'POST') },
+  { path: 'auth/login', ...createHealthRoute('Login Endpoint', '/auth/login', 'POST') },
+  { path: 'auth/register', ...createHealthRoute('Register Endpoint', '/auth/register', 'POST') },
 
   {
     path: '',
     component: MainLayoutComponent,
     children: [
       // Core Accounting Endpoints
-      { path: 'dashboard', ...createHealthRoute('Dashboard Summary', '/api/v1/dashboard/summary') },
-      { path: 'home', ...createHealthRoute('Home Overview', '/api/v1/home') },
-      { path: 'ai-assistant', ...createHealthRoute('AI Assistant Status', '/api/v1/ai/status') },
-      { path: 'chart-of-accounts', ...createHealthRoute('Chart of Accounts', '/api/v1/accounts') },
-      { path: 'journal-entry', ...createHealthRoute('Journal Entry Metadata', '/api/v1/journal-entries/meta') },
-      { path: 'periods', ...createHealthRoute('Accounting Periods', '/api/v1/accounting-periods') },
-      { path: 'worksheet', ...createHealthRoute('Worksheet Data', '/api/v1/worksheet') },
-      { path: 'settings', ...createHealthRoute('System Settings', '/api/v1/settings') },
-      { path: 'tools', ...createHealthRoute('System Tools', '/api/v1/tools/status') },
+      { path: 'dashboard', ...createHealthRoute('Dashboard Summary', '/dashboard/summary') },
+      { path: 'home', ...createHealthRoute('Home Overview', '/home') },
+      { path: 'ai-assistant', ...createHealthRoute('AI Assistant Status', '/ai/status') },
+      { path: 'chart-of-accounts', ...createHealthRoute('Chart of Accounts', '/accounts') },
+      { path: 'journal-entry', ...createHealthRoute('Journal Entry Metadata', '/journal-entries/meta') },
+      { path: 'periods', ...createHealthRoute('Accounting Periods', '/accounting-periods') },
+      { path: 'worksheet', ...createHealthRoute('Worksheet Data', '/worksheet') },
+      { path: 'settings', ...createHealthRoute('System Settings', '/settings') },
+      { path: 'tools', ...createHealthRoute('System Tools', '/tools/status') },
 
       // Reports Endpoints
-      { path: 'reports/financial-statements/income-statement', ...createHealthRoute('Income Statement Report', '/api/v1/reports/income-statement') },
-      { path: 'reports/financial-statements/retained-earnings', ...createHealthRoute('Retained Earnings Report', '/api/v1/reports/retained-earnings') },
-      { path: 'reports/financial-statements/statement-of-cash-flow', ...createHealthRoute('Statement of Cash Flow', '/api/v1/reports/cash-flow') },
-      { path: 'reports/financial-statements/statement-of-financial-position', ...createHealthRoute('Financial Position Report', '/api/v1/reports/financial-position') },
+      { path: 'reports/financial-statements/income-statement', ...createHealthRoute('Income Statement Report', '/reports/income-statement') },
+      { path: 'reports/financial-statements/retained-earnings', ...createHealthRoute('Retained Earnings Report', '/reports/retained-earnings') },
+      { path: 'reports/financial-statements/statement-of-cash-flow', ...createHealthRoute('Statement of Cash Flow', '/reports/cash-flow') },
+      { path: 'reports/financial-statements/statement-of-financial-position', ...createHealthRoute('Financial Position Report', '/reports/financial-position') },
 
       // Journals Endpoints
-      { path: 'journals/general', ...createHealthRoute('General Journal', '/api/v1/journals/general') },
-      { path: 'journals/adjusting', ...createHealthRoute('Adjusting Journal', '/api/v1/journals/adjusting') },
-      { path: 'journals/closing', ...createHealthRoute('Closing Journal', '/api/v1/journals/closing') },
+      { path: 'journals/general', ...createHealthRoute('General Journal', '/journals/general') },
+      { path: 'journals/adjusting', ...createHealthRoute('Adjusting Journal', '/journals/adjusting') },
+      { path: 'journals/closing', ...createHealthRoute('Closing Journal', '/journals/closing') },
 
       // General Ledgers Endpoints
-      { path: 'general-ledgers/permanent', ...createHealthRoute('Permanent General Ledger', '/api/v1/ledgers/permanent') },
-      { path: 'general-ledgers/temporary', ...createHealthRoute('Temporary General Ledger', '/api/v1/ledgers/temporary') },
+      { path: 'general-ledgers/permanent', ...createHealthRoute('Permanent General Ledger', '/ledgers/permanent') },
+      { path: 'general-ledgers/temporary', ...createHealthRoute('Temporary General Ledger', '/ledgers/temporary') },
 
       // Trial Balances Endpoints
-      { path: 'trial-balances/unadjusted', ...createHealthRoute('Unadjusted Trial Balance', '/api/v1/trial-balance/unadjusted') },
-      { path: 'trial-balances/adjusted', ...createHealthRoute('Adjusted Trial Balance', '/api/v1/trial-balance/adjusted') },
-      { path: 'trial-balances/post-closing', ...createHealthRoute('Post-Closing Trial Balance', '/api/v1/trial-balance/post-closing') },
+      { path: 'trial-balances/unadjusted', ...createHealthRoute('Unadjusted Trial Balance', '/trial-balance/unadjusted') },
+      { path: 'trial-balances/adjusted', ...createHealthRoute('Adjusted Trial Balance', '/trial-balance/adjusted') },
+      { path: 'trial-balances/post-closing', ...createHealthRoute('Post-Closing Trial Balance', '/trial-balance/post-closing') },
     ]
   },
   { path: '**', redirectTo: 'dashboard' }
