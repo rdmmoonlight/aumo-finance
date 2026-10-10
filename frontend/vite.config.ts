@@ -1,4 +1,4 @@
-import react from "@vitejs/plugin-react";
+eimport react from "@vitejs/plugin-react";
 import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig, loadEnv } from "vite";
@@ -18,13 +18,6 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     resolve: { alias: { "@": path.resolve(__dirname, "./src") } },
-    server: {
-      port: 3000,
-      proxy: {
-        "/api": { target: backendTarget, changeOrigin: true, secure: false },
-        "/auth": { target: backendTarget, changeOrigin: true, secure: false },
-      },
-    },
     build: {
       rollupOptions: {
         input: { main: path.resolve(__dirname, "index.html") },
