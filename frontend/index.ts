@@ -1,4 +1,3 @@
-// src/app/landing.ts
 const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com";
 const API_BASE = "";
 
