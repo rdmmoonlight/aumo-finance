@@ -24,9 +24,10 @@ const getHtmlEntries = () => {
   return Object.fromEntries(
     htmlFiles.map((file) => {
       // Membuat key nama entry berdasarkan path file (misal: "about/index" atau "main")
-      const entryName = file === "index.html" ? "main" : file.replace(/\.html$/, "");
+      const entryName =
+        file === "index.html" ? "main" : file.replace(/\.html$/, "");
       return [entryName, path.resolve(__dirname, file)];
-    })
+    }),
   );
 };
 
