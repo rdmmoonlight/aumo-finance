@@ -3,22 +3,23 @@
 # ==========================================
 FROM node:22-alpine AS builder
 
-# Aktifkan Corepack untuk mengaktifkan pnpm bawaan Node.js
+# Aktifkan Corepack & pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Tentukan folder kerja di dalam container
 WORKDIR /app
 
-# Copy manifest dependensi terlebih dahulu untuk optimasi Docker layer caching
+# Copy manifest dependensi
 COPY package.json pnpm-lock.yaml* ./
 
-# Install seluruh dependensi
-RUN pnpm install --frozen-lockfile || pnpm install
+# Izinkan build script untuk dependensi yang dikonfigurasi di package.json
+RUN pnpm config set side-effects-cache false && \
+    pnpm install --frozen-lockfile --ignore-scripts=false || \
+    pnpm install --ignore-scripts=false
 
-# Copy seluruh source code project ke dalam container
+# Copy seluruh source code project
 COPY . .
 
-# Jalankan build script ("tsc --noEmit && vite build")
+# Build project
 RUN pnpm build
 
 # ==========================================
@@ -26,10 +27,8 @@ RUN pnpm build
 # ==========================================
 FROM nginx:alpine AS runner
 
-# Copy hasil build dari stage builder (folder /app/dist) ke folder static Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Atur konfigurasi routing Nginx agar SPA (Vite React) dapat di-refresh tanpa error 404
 RUN echo 'server { \
     listen 80; \
     location / { \
