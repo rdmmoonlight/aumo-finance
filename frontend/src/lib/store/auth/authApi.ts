@@ -2,10 +2,12 @@
 import { baseApi } from "@/lib/apiClient";
 
 // --- Types Request & Response ---
+
+// Diselaraskan dengan OpenAPI Register Schema
 export interface RegisterRequest {
-  name: string;
   email: string;
   password: string;
+  name?: string;
   clientType?: "web" | "mobile";
 }
 
@@ -23,15 +25,27 @@ export interface GoogleLoginRequest {
   isMobileClient?: boolean;
 }
 
+export interface UserSchema {
+  id: string;
+  name: string;
+  email: string;
+  emailVerified: boolean;
+  image: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Diselaraskan dengan 201 Response OpenAPI Registrasi & Login
 export interface AuthResponse {
   success: boolean;
   message: string;
-  userId?: string;
-  fullName?: string;
-  avatarUrl?: string;
+  userId: string;
+  fullName: string;
+  avatarUrl: string | null;
+  user?: UserSchema;
   token?: string;
   lockoutEnd?: string;
-  errors?: string[];
+  errors?: Record<string, string[]>;
 }
 
 export interface UserProfileData {
