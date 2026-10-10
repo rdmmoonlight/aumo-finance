@@ -7,13 +7,12 @@ export const router = new Navigo('/', { hash: false });
 
 let currentReactRoot: Root | null = null;
 
-/**
- * Membersihkan DOM & unmount React instance sebelumnya
- * untuk mencegah memory leak saat berpindah halaman.
- */
 function prepareContainer(): HTMLElement {
-    const container = document.getElementById('app');
-    if (!container) throw new Error('Elemen #app tidak ditemukan di HTML');
+    // PAKAI #root SESUAI INDEX.HTML VITE
+    const container = document.getElementById('root');
+    if (!container) {
+        throw new Error('Elemen #root tidak ditemukan di index.html');
+    }
 
     if (currentReactRoot) {
         currentReactRoot.unmount();
@@ -24,9 +23,6 @@ function prepareContainer(): HTMLElement {
     return container;
 }
 
-/**
- * Render untuk modul yang SUDAH dikonversi ke Vanilla JS / TS
- */
 export function renderVanilla(content: HTMLElement | string) {
     const container = prepareContainer();
     if (typeof content === 'string') {
@@ -36,21 +32,14 @@ export function renderVanilla(content: HTMLElement | string) {
     }
 }
 
-/**
- * Render untuk modul yang MASIH menggunakan React (peralihan)
- */
 export function renderReact(Component: React.ComponentType) {
     const container = prepareContainer();
     currentReactRoot = createRoot(container);
     currentReactRoot.render(React.createElement(Component));
 }
 
-/**
- * Inisialisasi daftar Route
- */
 export function initRouter() {
     router
-        // Auth Routes
         .on('/auth/login', () => {
             renderVanilla('<div class="p-6"><h1>Login Page (Vanilla)</h1></div>');
         })
@@ -60,7 +49,6 @@ export function initRouter() {
 
         // Authenticated Routes
         .on('/dashboard', () => {
-            // Contoh jika modul ini masih React: renderReact(DashboardPage)
             renderVanilla('<div class="p-6"><h1>Dashboard Page (Vanilla)</h1></div>');
         })
         .on('/chart-of-accounts', () => {
