@@ -2,9 +2,18 @@ import { Routes } from '@angular/router';
 import { ComingSoonComponent } from './core/components/coming-soon';
 import { createHealthRoute } from './core/components/health-tester';
 import { MainLayoutComponent } from './core/layouts/main-layout';
+import { LandingComponent } from './pages/landing/landing'; // sesuaikan, kalau file kamu namanya landing.ts ganti jadi './pages/landing/landing'
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'health', pathMatch: 'full' },
+  // 1. LANDING PAGE - jadi root / tanpa MainLayout
+  {
+    path: '',
+    component: LandingComponent,
+    pathMatch: 'full',
+    title: 'Aumo Finance - Finance at speed of ambition'
+  },
+
+  // 2. SEMUA ROUTE APP LAIN - tetap pakai MainLayout
   {
     path: '',
     component: MainLayoutComponent,
@@ -14,7 +23,7 @@ export const routes: Routes = [
       { path: 'health/head', ...createHealthRoute('Health: Ping (HEAD)', '/', 'HEAD') },
       { path: 'health/status', ...createHealthRoute('Health: Database', '/health') },
 
-      // Auth (Lengkap sesuai OpenAPI Hono)
+      // Auth
       {
         path: 'auth/register',
         ...createHealthRoute('Auth: Register', '/auth/register', 'POST', {
@@ -72,5 +81,7 @@ export const routes: Routes = [
       { path: 'docs/openapi', ...createHealthRoute('OpenAPI Spec', '/openapi.json') },
     ]
   },
-  { path: '**', redirectTo: 'health' }
+
+  // 3. WILDCARD - arahkan ke landing, bukan ke health lagi biar UX lebih enak
+  { path: '**', redirectTo: '' }
 ];
