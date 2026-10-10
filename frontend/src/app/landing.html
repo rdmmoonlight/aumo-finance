@@ -1,52 +1,81 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Aumo Finance | Operations, neatly organized.</title>
-  <link rel="stylesheet" href="./src/app/landing.css" />
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-</head>
-<body>
-  <div id="redirecting" class="redirecting">
-    <div class="redirecting-box"><div class="spinner"></div><span>Redirecting to dashboard...</span></div>
-  </div>
-
-  <div class="landing">
-    <aside class="panel-left">
-      <div class="brand"><div class="brand-logo">A</div><span>AUMO FINANCE</span></div>
-      <div class="hero">
-        <h1>Operations,<br/> neatly<br/> organized.</h1>
-        <p>Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan pameran.</p>
-        <div class="features">
-          <div class="feature-row"><span>01</span><span>Revenues & Expenses</span></div>
-          <div class="feature-row"><span>02</span><span>Tracking</span></div>
-          <div class="feature-row"><span>03</span><span>Finance & Costings</span></div>
-        </div>
-      </div>
-      <div class="footer-left"><span>© rdmmoonlight 2026</span><span>COOKIE AUTH • AUMO SYSTEM</span></div>
-    </aside>
-
-    <main class="panel-right">
-      <div class="welcome"><h2>Selamat Datang</h2><p>Silakan masuk atau buat akun baru untuk mengakses dashboard.</p></div>
-      <div class="actions">
-        <button id="btn-login" class="btn btn-primary"><span>🔒</span><span id="login-text">Sign In</span><span>→</span></button>
-        <button id="btn-register" class="btn btn-secondary"><span>⊕</span><span>Register</span></button>
-      </div>
-    </main>
-  </div>
-
-  <div id="modal-overlay" class="overlay">
-    <div class="modal">
-      <div class="modal-head"><h3 id="modal-title">Sign In to Aumo</h3><button id="modal-close" class="close-btn">✕</button></div>
-      <div class="modal-body">
-        <div id="google-btn-container"></div>
-        <div class="divider"><span>or</span></div>
-        <div id="auth-form-container"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aumo Finance | Operations, neatly organized.</title>
+    <link rel="stylesheet" href="./src/app/landing.css" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+  </head>
+  <body>
+    <div id="redirecting" class="redirecting">
+      <div class="redirecting-box">
+        <div class="spinner"></div>
+        <span>Redirecting to dashboard...</span>
       </div>
     </div>
-  </div>
 
-  <script type="module" src="./src/app/landing.ts"></script>
-</body>
+    <div class="landing">
+      <aside class="panel-left">
+        <div class="brand">
+          <div class="brand-logo">A</div>
+          <span>AUMO FINANCE</span>
+        </div>
+        <div class="hero">
+          <h1>
+            Operations,<br />
+            neatly<br />
+            organized.
+          </h1>
+          <p>
+            Matte, tenang, tanpa distraksi. Dibuat untuk produksi, bukan
+            pameran.
+          </p>
+          <div class="features">
+            <div class="feature-row">
+              <span>01</span><span>Revenues & Expenses</span>
+            </div>
+            <div class="feature-row"><span>02</span><span>Tracking</span></div>
+            <div class="feature-row">
+              <span>03</span><span>Finance & Costings</span>
+            </div>
+          </div>
+        </div>
+        <div class="footer-left">
+          <span>© rdmmoonlight 2026</span><span>COOKIE AUTH • AUMO SYSTEM</span>
+        </div>
+      </aside>
+
+      <main class="panel-right">
+        <div class="welcome">
+          <h2>Selamat Datang</h2>
+          <p>Silakan masuk atau buat akun baru untuk mengakses dashboard.</p>
+        </div>
+        <div class="actions">
+          <button id="btn-login" class="btn btn-primary">
+            <span>🔒</span><span id="login-text">Sign In</span><span>→</span>
+          </button>
+          <button id="btn-register" class="btn btn-secondary">
+            <span>⊕</span><span>Register</span>
+          </button>
+        </div>
+      </main>
+    </div>
+
+    <div id="modal-overlay" class="overlay">
+      <div class="modal">
+        <div class="modal-head">
+          <h3 id="modal-title">Sign In to Aumo</h3>
+          <button id="modal-close" class="close-btn">✕</button>
+        </div>
+        <div class="modal-body">
+          <div id="google-btn-container"></div>
+          <div class="divider"><span>or</span></div>
+          <div id="auth-form-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./src/app/landing.ts"></script>
+  </body>
 </html>
