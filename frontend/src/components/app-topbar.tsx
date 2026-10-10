@@ -27,7 +27,7 @@ import {
   Search,
 } from "lucide-react";
 import * as React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation } from "@/lib/router";
 
 import { store } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";

@@ -24,7 +24,7 @@ import {
 } from "@tanstack/react-table";
 import { Calendar, Clock, Pencil, Trash2 } from "lucide-react";
 import { Fragment, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 import { formatDateTimeDisplay, formatNumber } from "../_lib/format";
 import { FlatJournalRow } from "../_lib/types";
 

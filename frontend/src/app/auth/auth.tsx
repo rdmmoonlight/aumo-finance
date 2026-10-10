@@ -10,7 +10,7 @@ import { authApi } from "@/lib/store/auth/authApi";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "@/lib/router";
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";

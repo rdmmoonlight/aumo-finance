@@ -14,7 +14,7 @@ import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ArrowRight, Loader2, Lock, UserPlus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router";
 import { Suspense, useEffect, useState } from "react";
 
 export default function LandingPage(): React.JSX.Element {

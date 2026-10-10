@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, EyeOff } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link } from "@/lib/router";
 export function NoPeriodState() {
   return (
     <Card className="py-16 text-center border-dashed">
