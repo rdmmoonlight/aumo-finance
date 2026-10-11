@@ -361,7 +361,9 @@ export function mountAuthForm(container, options = {}) {
         }
         handleSuccess();
       } catch {
-        setApiError("Terjadi kesalahan sistem saat mencoba memproses permintaan.");
+        setApiError(
+          "Terjadi kesalahan sistem saat mencoba memproses permintaan.",
+        );
       } finally {
         setPending(false);
       }
