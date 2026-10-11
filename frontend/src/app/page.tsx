@@ -1,6 +1,5 @@
-import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "@/app/auth/auth";
-import LoginPage from "@/app/auth/login";
-import RegisterPage from "@/app/auth/register";
+import mountLogin from "@/app/auth/login";
+import mountRegister from "@/app/auth/register";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -8,12 +7,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { VanillaMount } from "@/components/vanilla-mount";
 import { useNavigate } from "@/lib/router";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ArrowRight, Loader2, Lock, UserPlus } from "lucide-react";
-import { Suspense, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function LandingPage(): React.JSX.Element {
   const navigate = useNavigate();
@@ -172,18 +171,14 @@ export default function LandingPage(): React.JSX.Element {
               </DialogTitle>
             </DialogHeader>
             <div className="p-6 pt-4">
-              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                <Suspense fallback={<AuthFormSkeleton />}>
-                  {authMode === "login" ? (
-                    <LoginPage initialMode="login" onSuccess={handleSuccess} />
-                  ) : (
-                    <RegisterPage
-                      initialMode="register"
-                      onSuccess={handleSuccess}
-                    />
-                  )}
-                </Suspense>
-              </GoogleOAuthProvider>
+              <VanillaMount
+                key={authMode}
+                mount={(el) =>
+                  authMode === "login"
+                    ? mountLogin(el, { onSuccess: handleSuccess })
+                    : mountRegister(el, { onSuccess: handleSuccess })
+                }
+              />
             </div>
           </DialogContent>
         </Dialog>

@@ -15,11 +15,11 @@ const getBackendTarget = (env: Record<string, string>) => {
   return t;
 };
 
-// Pindai semua file .html di root proyek dan subfoldernya (mengabaikan node_modules & dist)
+// Pindai semua file .html di root proyek dan subfoldernya (mengabaikan node_modules, dist & src — template .html di src bukan entry halaman)
 const getHtmlEntries = () => {
   const htmlFiles = glob.sync("**/*.html", {
     cwd: __dirname,
-    ignore: ["node_modules/**", "dist/**"],
+    ignore: ["node_modules/**", "dist/**", "src/**"],
   });
 
   return Object.fromEntries(
