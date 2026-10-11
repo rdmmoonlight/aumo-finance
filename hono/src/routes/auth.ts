@@ -1,6 +1,4 @@
 import { OpenAPIHono, createRoute } from "@hono/zod-openapi";
-import { createSelectSchema } from "drizzle-zod";
-import { user as userTable, session as sessionTable } from "../db/schema/index.js";
 import type { AppEnv } from "../types/app.types.js";
 import {
   changePasswordSchema,
@@ -10,14 +8,6 @@ import {
 } from "../types/auth.js";
 
 export const authRoute = new OpenAPIHono<AppEnv>();
-
-// ==========================================
-// Skema Respons dari Database Schema Drizzle
-// ==========================================
-export const UserSchema = createSelectSchema(userTable);
-
-export const SessionSchema = createSelectSchema(sessionTable);
-
 // ==========================================
 // Definitions & Route Mapping
 // ==========================================
