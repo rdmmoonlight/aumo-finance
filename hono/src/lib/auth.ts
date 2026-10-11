@@ -1,8 +1,12 @@
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
+import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "../db/schema/index.js";
 import { env } from "./env.js";
+
+const db = drizzle({ client: neon(env.DATABASE_URL), schema });
 
 const isProduction = env.NODE_ENV === "production";
 
