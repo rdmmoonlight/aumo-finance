@@ -1,0 +1,5 @@
+services:
+  - type: web
+    name: aumohono # Harus sama persis dengan nama di dashboard Render
+    runtime: docker          # Ini yang mengubah Node ke Docker
+    repo: https://github.com/rdmmoonlight/aumo-finance/new/main/hono # URL repositori Anda
