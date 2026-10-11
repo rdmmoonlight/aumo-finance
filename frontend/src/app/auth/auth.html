@@ -1,5 +1,3 @@
-<!-- Template statis untuk form auth (vanilla). Di-import lewat `./auth.html?raw` oleh auth.js. -->
-
 <template id="auth-skeleton">
   <div
     class="flex h-80 w-full max-w-sm animate-pulse items-center justify-center rounded-2xl border bg-white p-6"
@@ -60,6 +58,23 @@
     </div>
 
     <form data-ref="form" novalidate class="mt-4 space-y-4">
+      <!-- Name: hanya tampil di mode register -->
+      <div data-mode="register" class="space-y-1.5">
+        <label
+          data-for="name"
+          class="flex items-center gap-2 text-xs leading-none font-semibold uppercase select-none"
+          >Name</label
+        >
+        <input
+          data-ref="name"
+          name="name"
+          autocomplete="name"
+          placeholder="Nama lengkap"
+          class="h-11 w-full min-w-0 rounded-xl border border-input bg-zinc-50 px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30"
+        />
+        <p data-ref="nameError" hidden class="text-xs text-red-600"></p>
+      </div>
+
       <div class="space-y-1.5">
         <label
           data-for="email"
