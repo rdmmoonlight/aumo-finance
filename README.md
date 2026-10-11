@@ -4,10 +4,11 @@ An integrated, precision-driven financial and accounting information system.
 
 /backend
 - ada 2 jenis auth. cookie untuk web dan JWT barier untuk mobile.
+- 11 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
 
 /frontend
 - deploy pertama di Vercel tanggal 9 September 2026.
-- 10 oktober 2026. Deploya pertama dg Dockerfile dan di Reder.com
+- 10 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
 
 - 
 /mobile
