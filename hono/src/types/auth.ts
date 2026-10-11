@@ -1,5 +1,3 @@
-import { z } from 'zod';
-
 // ==========================================
 // 1. Roles & Enums
 // ==========================================
@@ -14,65 +12,59 @@ export const ActivityType = {
 } as const;
 
 // ==========================================
-// 2. Zod Schemas (Single Source of Truth)
+// 2. Request & DTO Types
 // ==========================================
 
-export const loginRequestSchema = z.object({
-    email: z.string().trim().min(1, 'Email wajib diisi').email('Format email tidak valid'),
-    password: z.string().min(1, 'Password wajib diisi'),
-    rememberMe: z.boolean().optional().default(false),
-    isMobileClient: z.boolean().optional().default(false),
-    userAgent: z.string().optional(),
-    operatingSystem: z.string().optional(),
-    clientType: z.enum(['web', 'mobile']).optional().default('web'),
-});
-export type LoginRequest = z.infer<typeof loginRequestSchema>;
+export interface LoginRequest {
+    email: string;
+    password: string;
+    rememberMe?: boolean;
+    isMobileClient?: boolean;
+    userAgent?: string;
+    operatingSystem?: string;
+    clientType?: 'web' | 'mobile';
+}
 
-// Untuk backward compat dengan nama lama loginSchema
-export const loginSchema = loginRequestSchema;
+// Untuk backward compat dengan nama lama
 export type LoginDTO = LoginRequest;
 
-export const googleLoginRequestSchema = z.object({
-    idToken: z.string().min(1, 'idToken wajib diisi'),
-    isMobileClient: z.boolean().optional().default(false),
-});
-export type GoogleLoginRequest = z.infer<typeof googleLoginRequestSchema>;
+export interface GoogleLoginRequest {
+    idToken: string;
+    isMobileClient?: boolean;
+}
 
-// Aturan password bersama (register & ganti password)
-export const passwordRule = z
-    .string()
-    .min(6, 'Password minimal 6 karakter')
-    .max(128, 'Password maksimal 128 karakter')
-    .regex(/[A-Z]/, 'Password harus mengandung minimal 1 huruf besar')
-    .regex(/[a-z]/, 'Password harus mengandung minimal 1 huruf kecil')
-    .regex(/[0-9]/, 'Password harus mengandung minimal 1 angka');
+export interface RegisterDTO {
+    email: string;
+    password: string;
+    name?: string;
+    clientType?: 'web' | 'mobile';
+}
 
-export const registerSchema = z.object({
-    email: z.string().trim().email('Format email tidak valid'),
-    password: passwordRule,
-    name: z.string().trim().min(2, 'Nama minimal 2 karakter').optional().or(z.literal('')),
-    clientType: z.enum(['web', 'mobile']).optional().default('web'),
-});
-export type RegisterDTO = z.infer<typeof registerSchema>;
+export interface ResendRequest {
+    email: string;
+}
 
-export const resendRequestSchema = z.object({
-    email: z.string().trim().email('Format email tidak valid'),
-});
-export type ResendRequest = z.infer<typeof resendRequestSchema>;
+export interface GoogleAuthUserDTO {
+    email: string;
+    name?: string | null;
+    googleId: string;
+    avatarUrl?: string | null;
+}
 
-export const googleAuthUserSchema = z.object({
-    email: z.string().trim().email('Format email tidak valid'),
-    name: z.string().optional().nullable(),
-    googleId: z.string().min(1, 'Google ID wajib diisi'),
-    avatarUrl: z.string().url('Format URL avatar tidak valid').optional().nullable(),
-});
-export type GoogleAuthUserDTO = z.infer<typeof googleAuthUserSchema>;
+export interface MobileLoginRequest {
+    email: string;
+    password: string;
+}
 
-export const mobileLoginRequestSchema = z.object({
-    email: z.string().trim().email('Format email tidak valid'),
-    password: z.string().min(1, 'Password wajib diisi'),
-});
-export type MobileLoginRequest = z.infer<typeof mobileLoginRequestSchema>;
+export interface CheckEmailQuery {
+    email: string;
+}
+
+export interface ChangePasswordRequest {
+    currentPassword: string;
+    newPassword: string;
+    revokeOtherSessions?: boolean;
+}
 
 // ==========================================
 // 3. DB Entity & Safe Types
@@ -187,22 +179,19 @@ export interface LoginActivityDto {
     createdAt: string; // ISO
 }
 
-
 // ==========================================
 // 6. Auth (Better Auth) - sesuai tabel user/session/account
 // ==========================================
 
-export const checkEmailQuerySchema = z.object({
-    email: z.string().trim().email('Format email tidak valid'),
-});
-export type CheckEmailQuery = z.infer<typeof checkEmailQuerySchema>;
-
-export const changePasswordSchema = z.object({
-    currentPassword: z.string().min(1, 'Password saat ini wajib diisi'),
-    newPassword: passwordRule,
-    revokeOtherSessions: z.boolean().optional().default(true),
-});
-export type ChangePasswordRequest = z.infer<typeof changePasswordSchema>;
+export type RawUser = {
+    id: string;
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image?: string | null;
+    createdAt: Date | string;
+    updatedAt: Date | string;
+};
 
 /** Kolom tabel "user" yang aman dikirim ke client */
 export interface AuthUserDto {
@@ -223,4 +212,12 @@ export interface AuthSessionDto {
     createdAt: string | Date;
     expiresAt: string | Date;
     isCurrent: boolean;
+}
+
+/** Hasil operasi auth: data + header Set-Cookie dari Better Auth (untuk web). */
+export interface AuthResult {
+    user: AuthUserDto;
+    /** Token sesi (hanya diteruskan ke client mobile). */
+    token: string | null;
+    setCookies: string[];
 }
