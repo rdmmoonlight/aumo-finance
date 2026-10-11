@@ -1,8 +1,5 @@
 import { APIError } from "better-auth/api";
-import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
-import { session as sessionTable, user as userTable } from "../db/schema/index.js";
-import { db } from "../lib/db.js";
 import { auth } from "../lib/auth.js";
 import { AppError } from "../lib/errors.js";
 import { logger } from "../lib/logger.js";
@@ -79,27 +76,30 @@ export class AuthService {
         return auth.api.getSession({ headers: c.req.raw.headers });
     }
 
-    /** Cek apakah email sudah dipakai (tabel "user"). */
-    static async isEmailRegistered(email: string): Promise<boolean> {
-        const rows = await db
-            .select({ id: userTable.id })
-            .from(userTable)
-            .where(eq(userTable.email, normalizeEmail(email)))
-            .limit(1);
-        return rows.length > 0;
+    /** Cek apakah email sudah dipakai lewat Better Auth API (tanpa instance db manual). */
+    static async isEmailRegistered(email: string, headers?: Headers): Promise<boolean> {
+        try {
+            const user = await auth.api.getUserByEmail({
+                query: { email: normalizeEmail(email) },
+                headers,
+            });
+            return !!user;
+        } catch {
+            return false;
+        }
     }
 
     /**
      * Registrasi pengguna baru (Email & Password).
-     * - Email dinormalisasi (lowercase) dan dicek duplikat lebih dulu
+     * - Email dinormalisasi (lowercase)
      * - Nama kosong -> memakai bagian lokal email
-     * - Password di-hash oleh Better Auth (tabel "account", providerId "credential")
-     * - Sesi langsung dibuat (autoSignIn) sehingga user tidak perlu login ulang
+     * - Sesi langsung dibuat (autoSignIn)
      */
     static async register(data: RegisterDTO, headers: Headers): Promise<AuthResult> {
         const email = normalizeEmail(data.email);
 
-        if (await this.isEmailRegistered(email)) {
+        const isRegistered = await this.isEmailRegistered(email, headers);
+        if (isRegistered) {
             throw new AppError("Email sudah terdaftar", 409);
         }
 
@@ -184,7 +184,7 @@ export class AuthService {
         }
     }
 
-    /** Daftar sesi aktif milik user (tanpa token). */
+    /** Daftar sesi aktif milik user. */
     static async listSessions(headers: Headers): Promise<AuthSessionDto[]> {
         try {
             const current = await auth.api.getSession({ headers });
@@ -204,18 +204,10 @@ export class AuthService {
         }
     }
 
-    /** Cabut satu sesi berdasarkan id (hanya sesi milik user yang sedang login). */
+    /** Cabut satu sesi berdasarkan id (menggunakan auth.api.revokeSession langsung). */
     static async revokeSession(userId: string, sessionId: string, headers: Headers): Promise<void> {
-        const rows = await db
-            .select({ token: sessionTable.token })
-            .from(sessionTable)
-            .where(and(eq(sessionTable.id, sessionId), eq(sessionTable.userId, userId)))
-            .limit(1);
-
-        if (rows.length === 0) throw new AppError("Sesi tidak ditemukan", 400);
-
         try {
-            await auth.api.revokeSession({ body: { token: rows[0].token }, headers });
+            await auth.api.revokeSession({ body: { id: sessionId }, headers });
         } catch (err) {
             throw mapAuthError(err, "Gagal mencabut sesi");
         }
