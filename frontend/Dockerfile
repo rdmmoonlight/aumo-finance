@@ -13,7 +13,10 @@ RUN pnpm install --frozen-lockfile || pnpm install
 
 COPY . .
 
-# Pass VITE_ENV variables jika diperlukan saat build
+# Terima VITE_ variables dari Build Arguments Render
+ARG VITE_WEB_API_URL
+ENV VITE_WEB_API_URL=$VITE_WEB_API_URL
+
 RUN pnpm build
 
 # ==========================================
@@ -21,17 +24,8 @@ RUN pnpm build
 # ==========================================
 FROM nginx:alpine AS runner
 
+# Salin hasil build Vite ke direktori default Nginx
 COPY --from=builder /app/dist /usr/share/nginx/html
-
-# Tambahkan proxy pass jika backend berbeda server/domain
-RUN echo 'server { \
-    listen 80; \
-    location / { \
-        root /usr/share/nginx/html; \
-        index index.html index.htm; \
-        try_files $uri $uri/ /index.html; \
-    } \
-}' > /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
