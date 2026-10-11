@@ -1,33 +1,18 @@
+import { z } from "zod";
 import { APIError } from "better-auth/api";
 import type { Context } from "hono";
 import { auth } from "../lib/auth.js";
 import { AppError } from "../lib/errors.js";
 import { logger } from "../lib/logger.js";
 import type {
+    AuthResult,
     AuthSessionDto,
     AuthUserDto,
     ChangePasswordRequest,
     LoginRequest,
+    RawUser,
     RegisterDTO,
 } from "../types/auth.js";
-
-/** Hasil operasi auth: data + header Set-Cookie dari Better Auth (untuk web). */
-export interface AuthResult {
-    user: AuthUserDto;
-    /** Token sesi (hanya diteruskan ke client mobile). */
-    token: string | null;
-    setCookies: string[];
-}
-
-type RawUser = {
-    id: string;
-    name: string;
-    email: string;
-    emailVerified: boolean;
-    image?: string | null;
-    createdAt: Date | string;
-    updatedAt: Date | string;
-};
 
 const toUserDto = (u: RawUser): AuthUserDto => ({
     id: u.id,
