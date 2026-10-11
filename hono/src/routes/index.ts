@@ -1,6 +1,5 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
-import { cors } from 'hono/cors';
 import { auth } from '../lib/auth.js';
 import type { AppEnv } from '../types/app.types.js';
 
@@ -29,16 +28,9 @@ appApi.doc('/openapi.json', {
 });
 
 export function registerRoutes(app: OpenAPIHono<AppEnv>): void {
-  // 1. CORS Middleware
-  app.use(
-    '*',
-    cors({
-      origin: '*',
-      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowHeaders: ['Content-Type', 'Authorization', 'Cookie'],
-      credentials: true,
-    })
-  );
+  // 1. CORS sudah ditangani oleh registerMiddleware (allowlist origin + credentials).
+  //    Jangan pasang cors() kedua di sini: ia menimpa Access-Control-Allow-Origin
+  //    menjadi '*', sehingga browser menolak respons request ber-credentials (cookie).
 
   // 2. Direct Better Auth Handler Catch-All
   // Menangani seluruh bawaan Better Auth (/api/auth/sign-in/email, /api/auth/get-session, dll.)
