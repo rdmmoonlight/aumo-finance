@@ -2,7 +2,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import * as schema from "../db/schema/index.js";
-import { db } from "../index.js";
+import { db } from "./db.js";
 import { env } from "./env.js";
 
 const isProduction = env.NODE_ENV === "production";
