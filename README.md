@@ -10,7 +10,10 @@ An integrated, precision-driven financial and accounting information system.
 - deploy pertama di Vercel tanggal 9 September 2026.
 - 10 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
 
-- 
+/mobile-capacitor
+- dibuat tgl 12 oktober 2026. jam 06.34.
+
+  
 /mobile
 - Android native (Kotlin), bukan React Native/Flutter/MAUI. Konsumen REST API `/backend` di repo yang sama, auth pakai JWT Bearer.
 
