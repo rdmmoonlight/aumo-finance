@@ -2,7 +2,7 @@ import { APIError } from "better-auth/api";
 import { and, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { session as sessionTable, user as userTable } from "../db/schema/index.js";
-import { db } from "../index.js";
+import { db } from "../lib/db.js";
 import { auth } from "../lib/auth.js";
 import { AppError } from "../lib/errors.js";
 import { logger } from "../lib/logger.js";
