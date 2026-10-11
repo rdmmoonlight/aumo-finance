@@ -28,8 +28,7 @@ export type DatabaseHealthErrorResponse = {
 };
 
 export type HealthCheckResponse =
-  | DatabaseHealthSuccessResponse
-  | DatabaseHealthErrorResponse;
+  DatabaseHealthSuccessResponse | DatabaseHealthErrorResponse;
 
 export type NotificationItem = {
   id: string;
