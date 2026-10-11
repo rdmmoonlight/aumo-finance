@@ -1,9 +1,3 @@
-/**
- * Integrasi Navigo + React dengan Logging Lengkap.
- *
- * - Navigo mengatur URL & pencocokan rute
- * - Halaman diambil otomatis dari src/app/**/page.*
- */
 import Navigo from "navigo";
 import {
   Suspense,
