@@ -201,6 +201,9 @@ export function mountAuthForm(container, options = {}) {
     const subtitle = ref("subtitle");
     const form = /** @type {HTMLFormElement} */ (ref("form"));
     const google = /** @type {HTMLButtonElement} */ (ref("google"));
+    const nameInput = /** @type {HTMLInputElement | null} */ (
+      root.querySelector('[data-ref="name"]')
+    );
     const email = /** @type {HTMLInputElement} */ (ref("email"));
     const password = /** @type {HTMLInputElement} */ (ref("password"));
     const confirmPassword = /** @type {HTMLInputElement | null} */ (
@@ -265,6 +268,7 @@ export function mountAuthForm(container, options = {}) {
 
     // ----- Validasi (zod) -----
     const readValues = () => ({
+      name: nameInput?.value ?? "",
       email: email.value,
       password: password.value,
       confirmPassword: confirmPassword?.value ?? "",
@@ -286,7 +290,7 @@ export function mountAuthForm(container, options = {}) {
     };
 
     const showErrors = (/** @type {Record<string, string>} */ errors) => {
-      for (const field of ["email", "password", "confirmPassword"]) {
+      for (const field of ["name", "email", "password", "confirmPassword"]) {
         const el = root.querySelector(`[data-ref="${field}Error"]`);
         if (!el) continue;
         const message = errors[field] ?? "";
@@ -310,7 +314,9 @@ export function mountAuthForm(container, options = {}) {
         data?.title ||
         (result?.error?.status === "FETCH_ERROR"
           ? "Gagal terhubung ke server backend."
-          : "Email atau password salah.")
+          : isLogin
+            ? "Email atau password salah."
+            : "Gagal mendaftar akun baru.")
       );
     };
 
@@ -325,14 +331,29 @@ export function mountAuthForm(container, options = {}) {
       setPending(true);
       try {
         store.dispatch(baseApi.util.resetApiState());
-        const result = await store.dispatch(
-          authApi.endpoints.login.initiate({
-            email: email.value,
-            password: password.value,
-            rememberMe: keepMe,
-            isMobileClient: false,
-          }),
-        );
+
+        let result;
+        if (isLogin) {
+          result = await store.dispatch(
+            authApi.endpoints.login.initiate({
+              email: email.value,
+              password: password.value,
+              rememberMe: keepMe,
+              clientType: "web",
+              isMobileClient: false,
+            }),
+          );
+        } else {
+          result = await store.dispatch(
+            authApi.endpoints.register.initiate({
+              name: nameInput?.value || "",
+              email: email.value,
+              password: password.value,
+              clientType: "web",
+              isMobileClient: false,
+            }),
+          );
+        }
 
         if ("error" in result) {
           setApiError(errorMessage(result));
@@ -340,7 +361,7 @@ export function mountAuthForm(container, options = {}) {
         }
         handleSuccess();
       } catch {
-        setApiError("Terjadi kesalahan sistem saat mencoba masuk.");
+        setApiError("Terjadi kesalahan sistem saat mencoba memproses permintaan.");
       } finally {
         setPending(false);
       }
@@ -354,6 +375,7 @@ export function mountAuthForm(container, options = {}) {
         const result = await store.dispatch(
           authApi.endpoints.googleLogin.initiate({
             idToken,
+            clientType: "web",
             isMobileClient: false,
           }),
         );
