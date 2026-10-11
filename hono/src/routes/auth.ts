@@ -5,7 +5,7 @@ import {
   checkEmailQuerySchema,
   loginRequestSchema,
   registerSchema,
-} from "../types/auth.js";
+} from "../db/schema/auth.validation.js";
 
 export const authRoute = new OpenAPIHono<AppEnv>();
 // ==========================================
