@@ -61,7 +61,7 @@ export class AuthService {
         return auth.api.getSession({ headers: c.req.raw.headers });
     }
 
-    /** Cek apakah email sudah dipakai lewat Better Auth API (tanpa instance db manual). */
+    /** Cek apakah email sudah dipakai lewat Better Auth API. */
     static async isEmailRegistered(email: string, headers?: Headers): Promise<boolean> {
         try {
             const user = await auth.api.getUserByEmail({
@@ -82,12 +82,6 @@ export class AuthService {
      */
     static async register(data: RegisterDTO, headers: Headers): Promise<AuthResult> {
         const email = normalizeEmail(data.email);
-
-        const isRegistered = await this.isEmailRegistered(email, headers);
-        if (isRegistered) {
-            throw new AppError("Email sudah terdaftar", 409);
-        }
-
         const name = data.name?.trim() || email.split("@")[0];
 
         try {
@@ -189,7 +183,7 @@ export class AuthService {
         }
     }
 
-    /** Cabut satu sesi berdasarkan id (menggunakan auth.api.revokeSession langsung). */
+    /** Cabut satu sesi berdasarkan id. */
     static async revokeSession(userId: string, sessionId: string, headers: Headers): Promise<void> {
         try {
             await auth.api.revokeSession({ body: { id: sessionId }, headers });
