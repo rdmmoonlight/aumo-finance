@@ -1,33 +1,33 @@
-# Base stage
-FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+# ==========================================
+# Stage 1: Build Stage
+# ==========================================
+FROM node:22-alpine AS builder
 
-# Build stage
-FROM base AS builder
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
-# Copy manifest & install dependensi
-COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+COPY package.json pnpm-lock.yaml* pnpm-workspace.yaml* ./
 
-# Copy seluruh source code & build proyek (tsup / esbuild)
+RUN pnpm install --frozen-lockfile || pnpm install
+
 COPY . .
-RUN pnpm run build
 
-# Prune node_modules untuk hanya menyisakan prod dependencies
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm prune --prod
+RUN pnpm build
 
-# Production stage
-FROM base AS runner
+# ==========================================
+# Stage 2: Production Stage (Node.js Runtime)
+# ==========================================
+FROM node:22-alpine AS runner
+
 WORKDIR /app
+
 ENV NODE_ENV=production
 
-# Jalankan app sebagai non-root user demi keamanan
+# Menjalankan sebagai non-root user demi keamanan
 USER node
 
-# Copy hasil build dan node_modules yang sudah di-prune
+# Copy hasil build dan manifest
 COPY --chown=node:node --from=builder /app/dist ./dist
 COPY --chown=node:node --from=builder /app/node_modules ./node_modules
 COPY --chown=node:node --from=builder /app/package.json ./package.json
@@ -35,4 +35,3 @@ COPY --chown=node:node --from=builder /app/package.json ./package.json
 EXPOSE 3000
 
 CMD ["node", "dist/index.js"]
-
