@@ -1,5 +1,3 @@
-"use client";
-
 import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "@/app/auth/auth";
 import LoginPage from "@/app/auth/login";
 import RegisterPage from "@/app/auth/register";
@@ -22,20 +20,21 @@ export default function LandingPage(): React.JSX.Element {
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
-  // State pengganti RTK Query Hook
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";
 
-    // Cek auth status secara langsung menembak /auth/me via store.dispatch
+    let active = true;
+    const promise = store.dispatch(authApi.endpoints.getProfile.initiate());
+
     async function checkAuthStatus() {
       try {
         setCheckingAuth(true);
-        const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate(),
-        );
+        const result = await promise;
+
+        if (!active) return;
 
         if (result.isSuccess && result.data?.success) {
           setIsAuthenticated(true);
@@ -44,14 +43,20 @@ export default function LandingPage(): React.JSX.Element {
           setIsAuthenticated(false);
         }
       } catch {
-        setIsAuthenticated(false);
+        if (active) setIsAuthenticated(false);
       } finally {
-        setCheckingAuth(false);
+        if (active) setCheckingAuth(false);
       }
     }
 
     checkAuthStatus();
-  }, [navigate]);
+
+    return () => {
+      active = false;
+      // Batalkan/unsubscribe request jika komponen unmount sebelum selesai
+      promise.unsubscribe();
+    };
+  }, []); // Kosongkan dependency agar pengecekan auth hanya berjalan 1x saat mount
 
   const handleOpenModal = (mode: "login" | "register"): void => {
     setAuthMode(mode);
@@ -63,11 +68,23 @@ export default function LandingPage(): React.JSX.Element {
     navigate("/home", { replace: true });
   };
 
+  // Tampilkan splash loader sementara saat pengecekan awal agar tidak ada UI flash
+  if (checkingAuth) {
+    return (
+      <div className="flex min-h-screen w-full items-center justify-center bg-black text-white">
+        <div className="flex items-center gap-3 text-sm text-zinc-400">
+          <Loader2 className="h-5 w-5 animate-spin text-white" />
+          <span>Memeriksa sesi...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (isAuthenticated) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-black text-white">
         <div className="flex items-center gap-3 text-sm text-zinc-400">
-          <Loader2 className="h-4 w-4 animate-spin" />
+          <Loader2 className="h-5 w-5 animate-spin text-white" />
           <span>Redirecting to dashboard...</span>
         </div>
       </div>
@@ -76,7 +93,7 @@ export default function LandingPage(): React.JSX.Element {
 
   return (
     <div className="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]">
-      {/* LEFT */}
+      {/* LEFT PANEL */}
       <div className="flex flex-col justify-between border-r border-zinc-800 bg-zinc-950 p-8 lg:p-12">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded bg-white font-bold text-black">
@@ -117,7 +134,7 @@ export default function LandingPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* RIGHT */}
+      {/* RIGHT PANEL */}
       <div className="flex flex-col items-center justify-center gap-6 bg-black p-6 lg:p-12">
         <div className="max-w-sm text-center">
           <h2 className="text-2xl font-semibold tracking-tight">
@@ -130,23 +147,17 @@ export default function LandingPage(): React.JSX.Element {
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
           <Button
-            disabled={checkingAuth}
             onClick={() => handleOpenModal("login")}
-            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50"
+            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200"
           >
-            {checkingAuth ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Lock className="w-4 h-4" />
-            )}
-            <span>{checkingAuth ? "Checking..." : "Sign In"}</span>
-            {!checkingAuth && <ArrowRight className="w-4 h-4" />}
+            <Lock className="w-4 h-4" />
+            <span>Sign In</span>
+            <ArrowRight className="w-4 h-4" />
           </Button>
           <Button
-            disabled={checkingAuth}
             onClick={() => handleOpenModal("register")}
             variant="outline"
-            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50"
+            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white"
           >
             <UserPlus className="w-4 h-4" />
             <span>Register</span>
