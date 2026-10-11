@@ -2,7 +2,7 @@ import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { betterAuth } from "better-auth";
 import { bearer } from "better-auth/plugins";
 import * as schema from "../db/schema/index.js";
-import { db } from "./db.js";
+import { db } from "../db/db.js";
 import { env } from "./env.js";
 
 const isProduction = env.NODE_ENV === "production";
@@ -18,7 +18,7 @@ const trustedOrigins = Array.from(
 export const auth = betterAuth({
     secret: env.BETTER_AUTH_SECRET ?? env.JWT_SIGNING_KEY,
     baseURL: env.BETTER_AUTH_URL,
-    basePath: "/api/auth",
+    basePath: "/auth",
     trustedOrigins,
 
     database: drizzleAdapter(db, {
