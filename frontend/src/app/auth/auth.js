@@ -1,6 +1,3 @@
-// Form auth versi vanilla JS (tanpa React/TSX).
-// Markup ada di ./auth.html, logika ada di file ini.
-
 import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
