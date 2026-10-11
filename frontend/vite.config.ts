@@ -1,3 +1,4 @@
+import "dotenv/config";
 import react from "@vitejs/plugin-react";
 import { glob } from "glob";
 import path from "path";
