@@ -82,7 +82,9 @@ function buildRoutes(): RouteEntry[] {
     }
 
     const LazyComponent = lazy(async () => {
-      console.log(`[router] Memuat modul (lazy) untuk path "${path}" dari: ${file}`);
+      console.log(
+        `[router] Memuat modul (lazy) untuk path "${path}" dari: ${file}`,
+      );
       try {
         const mod = await load();
         if (!mod.default) {
@@ -107,7 +109,10 @@ function buildRoutes(): RouteEntry[] {
   }
 
   const result = [...map.values()];
-  console.log(`[router] Total ${result.length} rute berhasil dibangun:`, result);
+  console.log(
+    `[router] Total ${result.length} rute berhasil dibangun:`,
+    result,
+  );
   return result;
 }
 
@@ -131,7 +136,9 @@ function VanillaHost({
     let disposed = false;
     let cleanup: void | (() => void);
 
-    console.log(`[router] Memasang (mount) Vanilla Page: "${path}" (${filePath})`);
+    console.log(
+      `[router] Memasang (mount) Vanilla Page: "${path}" (${filePath})`,
+    );
 
     const onClick = (e: globalThis.MouseEvent) => {
       const a = (e.target as Element | null)?.closest?.(
@@ -160,7 +167,9 @@ function VanillaHost({
       .then(async (mod) => {
         if (disposed) return;
         el.innerHTML = "";
-        console.log(`[router] Eksekusi fungsi default export vanilla untuk: ${path}`);
+        console.log(
+          `[router] Eksekusi fungsi default export vanilla untuk: ${path}`,
+        );
         const result = await mod.default(el, {
           path,
           query: new URLSearchParams(search),
@@ -173,7 +182,10 @@ function VanillaHost({
         }
       })
       .catch((err) => {
-        console.error(`[router] Gagal mengeksekusi halaman vanilla ${path}:`, err);
+        console.error(
+          `[router] Gagal mengeksekusi halaman vanilla ${path}:`,
+          err,
+        );
         if (!disposed) {
           el.innerHTML =
             '<div class="p-6 text-sm text-destructive">Gagal memuat halaman.</div>';
@@ -266,7 +278,9 @@ let started = false;
 
 export function startRouter() {
   if (started) {
-    console.warn("[router] startRouter() dipanggil lebih dari satu kali. Dibatalkan.");
+    console.warn(
+      "[router] startRouter() dipanggil lebih dari satu kali. Dibatalkan.",
+    );
     return;
   }
   started = true;
@@ -280,7 +294,9 @@ export function startRouter() {
   }
 
   router.notFound(() => {
-    console.warn(`[router] Navigo memicu notFound untuk URL: ${window.location.pathname}`);
+    console.warn(
+      `[router] Navigo memicu notFound untuk URL: ${window.location.pathname}`,
+    );
     commit(null);
   });
 
@@ -407,12 +423,16 @@ export function AppRoutes() {
   }
 
   if (!route) {
-    console.log("[router] Rendering <NotFound /> (URL tidak cocok rute mana pun)");
+    console.log(
+      "[router] Rendering <NotFound /> (URL tidak cocok rute mana pun)",
+    );
     return <NotFound />;
   }
 
   const { Page, authenticated, path, filePath } = route;
-  console.log(`[router] Rendering komponen halaman untuk: "${path}" (${filePath})`);
+  console.log(
+    `[router] Rendering komponen halaman untuk: "${path}" (${filePath})`,
+  );
 
   return (
     <Suspense fallback={<Splash />}>
