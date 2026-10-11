@@ -1,12 +1,35 @@
 // src/lib/commonApi.ts
 import { baseApi } from "@/lib/apiClient";
 
-// --- Types Request & Response ---
-export type HealthCheckResponse = {
-  status?: string;
-  timestamp?: string;
-  [key: string]: unknown;
+// --- Types Request & Response (Sesuai Hono OpenAPI Schema) ---
+export type RootResponse = {
+  status: string;
+  message: string;
 };
+
+export type DatabaseHealthSuccessResponse = {
+  status: "pass";
+  timestamp: string;
+  database: {
+    status: "up";
+    latency: string;
+    name: string;
+    serverTime: unknown | null;
+  };
+};
+
+export type DatabaseHealthErrorResponse = {
+  status: "fail";
+  timestamp: string;
+  database: {
+    status: "down";
+    error: string;
+  };
+};
+
+export type HealthCheckResponse =
+  | DatabaseHealthSuccessResponse
+  | DatabaseHealthErrorResponse;
 
 export type NotificationItem = {
   id: string;
@@ -34,22 +57,23 @@ export type CommonActionResponse = {
 // --- Inject Endpoints Manual ---
 export const commonApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // GET /
-    getRoot: builder.query<unknown, void>({
+    // GET / (Server Status)
+    getRoot: builder.query<RootResponse, void>({
       query: () => "/",
       providesTags: ["AumoBackend"],
     }),
 
-    // HEAD /
-    checkRootHead: builder.mutation<unknown, void>({
+    // HEAD / (Ping API Server)
+    // Diubah ke builder.query karena HEAD hanya membaca status tanpa mengubah/mengubah data (idempotent)
+    checkRootHead: builder.query<void, void>({
       query: () => ({
         url: "/",
         method: "HEAD",
       }),
-      invalidatesTags: ["AumoBackend"],
+      providesTags: ["AumoBackend"],
     }),
 
-    // GET /health
+    // GET /health (Database Health Check)
     getHealth: builder.query<HealthCheckResponse, void>({
       query: () => "/health",
       providesTags: ["Health"],
@@ -89,3 +113,12 @@ export const commonApi = baseApi.injectEndpoints({
     }),
   }),
 });
+
+export const {
+  useGetRootQuery,
+  useCheckRootHeadQuery,
+  useGetHealthQuery,
+  useGetNotificationsQuery,
+  useMarkNotificationAsReadMutation,
+  useMarkAllNotificationsAsReadMutation,
+} = commonApi;
