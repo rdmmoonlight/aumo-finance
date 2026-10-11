@@ -1,14 +1,8 @@
 /**
- * Integrasi Navigo + React.
+ * Integrasi Navigo + React dengan Logging Lengkap.
  *
- * - Navigo mengatur URL & pencocokan rute (satu instance, dibuat di level modul)
- * - Halaman diambil otomatis dari src/app/**\/page.* (route group "(x)" dibuang dari URL):
- *     page.tsx        -> halaman React (komponen default export)
- *     page.ts/.js     -> halaman Vanilla JS (fungsi mount default export, lihat VanillaPage)
- *   Keduanya bisa dicampur, termasuk di dalam layout "(authenticated)".
- * - React hanya di-mount SATU kali; pergantian halaman lewat state, bukan unmount root
- * - Menyediakan Link, useNavigate, useLocation, useSearchParams dengan bentuk yang sama
- *   seperti react-router-dom, sehingga halaman lama cukup mengganti sumber import.
+ * - Navigo mengatur URL & pencocokan rute
+ * - Halaman diambil otomatis dari src/app/**/page.*
  */
 import Navigo from "navigo";
 import {
@@ -30,17 +24,12 @@ import {
 // ==========================================
 type PageModule = { default: ComponentType };
 
-/** Konteks yang diberikan ke halaman Vanilla JS saat dipasang. */
 export type VanillaContext = {
   path: string;
   query: URLSearchParams;
   navigate: typeof navigate;
 };
 
-/**
- * Kontrak halaman Vanilla JS: export default sebuah fungsi yang mengisi `container`.
- * Boleh mengembalikan fungsi cleanup (dipanggil saat pindah halaman).
- */
 export type VanillaPage = (
   container: HTMLElement,
   ctx: VanillaContext,
@@ -53,11 +42,13 @@ const vanillaModules = import.meta.glob<VanillaModule>(
 );
 
 function toPath(file: string): string {
-  const path = file
+  let path = file
     .replace("../app", "")
     .replace(/\/page\.(tsx|ts|js)$/, "")
-    .replace(/\/\([^)]+\)/g, ""); // buang route group, mis. (authenticated)
-  return path === "" ? "/" : path;
+    .replace(/\/\([^)]+\)/g, "");
+
+  if (path === "" || path === "/") return "/";
+  return path.endsWith("/") ? path.slice(0, -1) : path;
 }
 
 type RouteEntry = {
@@ -65,47 +56,76 @@ type RouteEntry = {
   authenticated: boolean;
   kind: "react" | "vanilla";
   Page: ComponentType;
+  filePath: string;
 };
 
 function buildRoutes(): RouteEntry[] {
+  console.log("[router] Memulai pemindaian file modul...");
   const map = new Map<string, RouteEntry>();
 
+  // Parse Vanilla JS Modules
   for (const [file, load] of Object.entries(vanillaModules)) {
     const path = toPath(file);
+    console.log(`[router] File Vanilla terdeteksi: ${file} -> Path: "${path}"`);
     map.set(path, {
       path,
       authenticated: file.includes("/(authenticated)/"),
       kind: "vanilla",
-      Page: () => <VanillaHost load={load} path={path} />,
+      Page: () => <VanillaHost load={load} path={path} filePath={file} />,
+      filePath: file,
     });
   }
 
-  // React menang jika satu path punya dua jenis halaman
+  // Parse React Modules
   for (const [file, load] of Object.entries(reactModules)) {
     const path = toPath(file);
     if (map.has(path)) {
       console.warn(
-        `[router] ${path} punya page React & Vanilla; memakai React.`,
+        `[router] Bentrok pada path "${path}": Memiliki halaman React & Vanilla. Mengutamakan React (${file}).`,
       );
+    } else {
+      console.log(`[router] File React terdeteksi: ${file} -> Path: "${path}"`);
     }
+
+    const LazyComponent = lazy(async () => {
+      console.log(`[router] Memuat modul (lazy) untuk path "${path}" dari: ${file}`);
+      try {
+        const mod = await load();
+        if (!mod.default) {
+          console.error(
+            `[router] ERROR: File ${file} tidak memiliki "export default"! Halaman akan blank/error.`,
+          );
+        }
+        return { default: mod.default };
+      } catch (err) {
+        console.error(`[router] Gagal mengimpor modul React ${file}:`, err);
+        throw err;
+      }
+    });
+
     map.set(path, {
       path,
       authenticated: file.includes("/(authenticated)/"),
       kind: "react",
-      Page: lazy(load),
+      Page: LazyComponent,
+      filePath: file,
     });
   }
 
-  return [...map.values()];
+  const result = [...map.values()];
+  console.log(`[router] Total ${result.length} rute berhasil dibangun:`, result);
+  return result;
 }
 
-/** Memasang halaman Vanilla JS ke dalam elemen div, lengkap dengan cleanup & link internal. */
+/** Host untuk merender Vanilla JS ke dalam kontainer React */
 function VanillaHost({
   load,
   path,
+  filePath,
 }: {
   load: () => Promise<VanillaModule>;
   path: string;
+  filePath: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { search } = useLocation();
@@ -117,7 +137,8 @@ function VanillaHost({
     let disposed = false;
     let cleanup: void | (() => void);
 
-    // <a href="/rute"> di halaman vanilla ikut navigasi SPA (tanpa reload)
+    console.log(`[router] Memasang (mount) Vanilla Page: "${path}" (${filePath})`);
+
     const onClick = (e: globalThis.MouseEvent) => {
       const a = (e.target as Element | null)?.closest?.(
         "a[href]",
@@ -136,6 +157,7 @@ function VanillaHost({
         return;
       }
       e.preventDefault();
+      console.log(`[router] Intersepsi klik link vanilla ke: ${href}`);
       navigate(href);
     };
     el.addEventListener("click", onClick);
@@ -144,6 +166,7 @@ function VanillaHost({
       .then(async (mod) => {
         if (disposed) return;
         el.innerHTML = "";
+        console.log(`[router] Eksekusi fungsi default export vanilla untuk: ${path}`);
         const result = await mod.default(el, {
           path,
           query: new URLSearchParams(search),
@@ -156,7 +179,7 @@ function VanillaHost({
         }
       })
       .catch((err) => {
-        console.error(`[router] Gagal memuat halaman vanilla ${path}:`, err);
+        console.error(`[router] Gagal mengeksekusi halaman vanilla ${path}:`, err);
         if (!disposed) {
           el.innerHTML =
             '<div class="p-6 text-sm text-destructive">Gagal memuat halaman.</div>';
@@ -164,29 +187,43 @@ function VanillaHost({
       });
 
     return () => {
+      console.log(`[router] Melepas (unmount) Vanilla Page: "${path}"`);
       disposed = true;
       el.removeEventListener("click", onClick);
       if (typeof cleanup === "function") cleanup();
       el.innerHTML = "";
     };
-  }, [load, path, search]);
+  }, [load, path, search, filePath]);
 
   return <div ref={ref} data-vanilla-page={path} />;
 }
 
 const routes: RouteEntry[] = buildRoutes();
 
-const AuthenticatedLayout = lazy(() => import("../app/(authenticated)/layout"));
+const AuthenticatedLayout = lazy(async () => {
+  console.log("[router] Memuat AuthenticatedLayout...");
+  try {
+    const mod = await import("../app/(authenticated)/layout");
+    return { default: mod.default };
+  } catch (err) {
+    console.warn(
+      "[router] AuthenticatedLayout tidak ditemukan. Menggunakan fallback React.Fragment.",
+      err,
+    );
+    return {
+      default: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    };
+  }
+});
 
 // ==========================================
-// 2. Store lokasi + rute aktif (dibaca React lewat useSyncExternalStore)
+// 2. Store lokasi + rute aktif
 // ==========================================
 type Snapshot = {
   pathname: string;
   search: string;
   hash: string;
   route: RouteEntry | null;
-  /** true setelah Navigo selesai mencocokkan URL pertama kali */
   resolved: boolean;
 };
 
@@ -200,6 +237,16 @@ let snapshot: Snapshot = {
 const listeners = new Set<() => void>();
 
 function commit(route: RouteEntry | null) {
+  if (route) {
+    console.log(
+      `[router] Rute cocok: "${route.path}" | Authenticated: ${route.authenticated} | Jenis: ${route.kind} | File: ${route.filePath}`,
+    );
+  } else {
+    console.warn(
+      `[router] Rute TIDAK DITEMUKAN (404) untuk URL: "${window.location.pathname}"`,
+    );
+  }
+
   snapshot = {
     pathname: window.location.pathname,
     search: window.location.search,
@@ -217,30 +264,43 @@ const subscribe = (l: () => void) => {
 const getSnapshot = () => snapshot;
 
 // ==========================================
-// 3. Instance Navigo (sekali, di level modul)
+// 3. Instance Navigo
 // ==========================================
 export const router = new Navigo("/", { hash: false });
 
 let started = false;
 
-/** Daftarkan seluruh rute lalu resolve URL saat ini. Panggil sekali dari main.tsx. */
 export function startRouter() {
-  if (started) return;
+  if (started) {
+    console.warn("[router] startRouter() dipanggil lebih dari satu kali. Dibatalkan.");
+    return;
+  }
   started = true;
+  console.log("[router] Memulai registrasi rute ke Navigo...");
 
   for (const route of routes) {
-    router.on(route.path, () => commit(route));
+    router.on(route.path, () => {
+      console.log(`[router] Navigo memicu rute: "${route.path}"`);
+      commit(route);
+    });
   }
-  router.notFound(() => commit(null));
+
+  router.notFound(() => {
+    console.warn(`[router] Navigo memicu notFound untuk URL: ${window.location.pathname}`);
+    commit(null);
+  });
+
+  console.log(`[router] Resolving URL awal: "${window.location.pathname}"`);
   router.resolve();
 }
 
 // ==========================================
-// 4. API navigasi (kompatibel react-router-dom)
+// 4. API Navigasi
 // ==========================================
 type NavigateOptions = { replace?: boolean };
 
 export function navigate(to: string | number, options: NavigateOptions = {}) {
+  console.log(`[router] Perintah navigasi dipanggil ke:`, to, options);
   if (typeof to === "number") {
     window.history.go(to);
     return;
@@ -308,11 +368,12 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
       e.ctrlKey ||
       e.shiftKey ||
       e.altKey ||
-      /^https?:\/\//.test(to) // link eksternal: biarkan browser
+      /^https?:\/\//.test(to)
     ) {
       return;
     }
     e.preventDefault();
+    console.log(`[router] Element <Link> diklik menuju: ${to}`);
     navigate(to, { replace });
   };
 
@@ -322,7 +383,7 @@ export const Link = forwardRef<HTMLAnchorElement, LinkProps>(function Link(
 });
 
 // ==========================================
-// 5. Komponen outlet: menampilkan halaman aktif
+// 5. Outlet UI
 // ==========================================
 function Splash() {
   return (
@@ -346,16 +407,24 @@ function NotFound() {
 export function AppRoutes() {
   const { route, resolved } = useSyncExternalStore(subscribe, getSnapshot);
 
-  if (!resolved) return <Splash />;
-  if (!route) return <NotFound />;
+  if (!resolved) {
+    console.log("[router] Rendering <Splash /> (Router belum resolved)");
+    return <Splash />;
+  }
 
-  const { Page, authenticated, path } = route;
+  if (!route) {
+    console.log("[router] Rendering <NotFound /> (URL tidak cocok rute mana pun)");
+    return <NotFound />;
+  }
+
+  const { Page, authenticated, path, filePath } = route;
+  console.log(`[router] Rendering komponen halaman untuk: "${path}" (${filePath})`);
 
   return (
     <Suspense fallback={<Splash />}>
       {authenticated ? (
         <AuthenticatedLayout>
-          <Suspense fallback={null}>
+          <Suspense fallback={<Splash />}>
             <Page key={path} />
           </Suspense>
         </AuthenticatedLayout>
