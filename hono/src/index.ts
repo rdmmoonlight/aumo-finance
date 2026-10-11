@@ -7,6 +7,11 @@ import { redis } from './lib/redis.js';
 import { registerMiddleware } from './middlewares/index.js';
 import { registerRoutes } from './routes/index.js';
 import type { AppEnv } from './types/app.types.js';
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle({ client: sql });
 
 /** Factory aplikasi Hono */
 export function createApp(): OpenAPIHono<AppEnv> {
