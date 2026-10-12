@@ -37,10 +37,10 @@ import {
   Lock,
   Save,
 } from "lucide-react";
-import { useNavigate, useSearchParams } from "@/lib/router";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
-import { Link } from "@/lib/router";
+import { Link } from "react-router-dom";
 import { z } from "zod";
 
 export default function JournalEntryContent() {

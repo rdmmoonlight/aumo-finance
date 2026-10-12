@@ -17,7 +17,6 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useLocation } from "@/lib/router";
 import {
   AlertTriangle,
   Bell,
@@ -28,6 +27,7 @@ import {
   Search,
 } from "lucide-react";
 import * as React from "react";
+import { useLocation } from "react-router-dom";
 
 import { store } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
@@ -75,7 +75,7 @@ export function AppTopBar() {
 
   const isAuthenticated = !isProfileLoading && !!userProfile;
 
-  // 1. Fetch Profil User (/auth/me)
+  // 1. Fetch Profil User (/api/v1/auth/me)
   const fetchUserProfile = React.useCallback(async () => {
     setIsProfileLoading(true);
     try {

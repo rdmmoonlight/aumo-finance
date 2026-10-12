@@ -1,16 +1,6 @@
-// src/lib/store/auth/authApi.ts
 import { baseApi } from "@/lib/apiClient";
 
 // --- Types Request & Response ---
-
-// Diselaraskan dengan OpenAPI Register Schema
-export interface RegisterRequest {
-  email: string;
-  password: string;
-  name?: string;
-  clientType?: "web" | "mobile";
-}
-
 export interface LoginRequest {
   email: string;
   password?: string;
@@ -25,27 +15,15 @@ export interface GoogleLoginRequest {
   isMobileClient?: boolean;
 }
 
-export interface UserSchema {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean;
-  image: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
-
-// Diselaraskan dengan 201 Response OpenAPI Registrasi & Login
 export interface AuthResponse {
   success: boolean;
   message: string;
-  userId: string;
-  fullName: string;
-  avatarUrl: string | null;
-  user?: UserSchema;
+  userId?: string;
+  fullName?: string;
+  avatarUrl?: string;
   token?: string;
   lockoutEnd?: string;
-  errors?: Record<string, string[]>;
+  errors?: string[];
 }
 
 export interface UserProfileData {
@@ -74,48 +52,39 @@ export interface CommonActionResponse {
 
 // --- Inject Endpoints ke baseApi ---
 export const authApi = baseApi.injectEndpoints({
+  // Mencegah error 'overrideExisting' saat Next.js Turbopack HMR / Fast Refresh
   overrideExisting: !import.meta.env.PROD,
   endpoints: (builder) => ({
-    // 1. POST /auth/register
-    register: builder.mutation<AuthResponse, RegisterRequest>({
-      query: (body) => ({
-        url: "/auth/register",
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Auth"],
-    }),
-
-    // 2. POST /auth/login
+    // 1. POST /api/v1/auth/login
     login: builder.mutation<AuthResponse, LoginRequest>({
       query: (body) => ({
-        url: "/auth/login",
+        url: "/api/v1/auth/login",
         method: "POST",
         body,
       }),
       invalidatesTags: ["Auth"],
     }),
 
-    // 3. POST /auth/google-login
+    // 2. POST /api/v1/auth/google-login
     googleLogin: builder.mutation<AuthResponse, GoogleLoginRequest>({
       query: (body) => ({
-        url: "/auth/google-login",
+        url: "/api/v1/auth/google-login",
         method: "POST",
         body,
       }),
       invalidatesTags: ["Auth"],
     }),
 
-    // 4. GET /auth/me
+    // 3. GET /api/v1/auth/me
     getProfile: builder.query<ProfileResponse, void>({
-      query: () => "/auth/me",
+      query: () => "/api/v1/auth/me",
       providesTags: ["Auth"],
     }),
 
-    // 5. POST /auth/logout
+    // 4. POST /api/v1/auth/logout (Digabung & disederhanakan)
     logout: builder.mutation<CommonActionResponse, void>({
       query: () => ({
-        url: "/auth/logout",
+        url: "/api/v1/auth/logout",
         method: "POST",
       }),
       invalidatesTags: ["Auth"],
@@ -125,7 +94,6 @@ export const authApi = baseApi.injectEndpoints({
 
 // Export hooks otomatis dari RTK Query
 export const {
-  useRegisterMutation,
   useLoginMutation,
   useGoogleLoginMutation,
   useGetProfileQuery,

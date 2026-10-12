@@ -36,28 +36,28 @@ export type JournalImportRequestDto = {
 // --- API Slice Definition ---
 export const toolsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // GET /tools/download-journal-template
+    // GET /api/v1/tools/download-journal-template
     downloadJournalTemplate: builder.query<unknown, void>({
       query: () => ({
-        url: "/tools/download-journal-template", // Wajib diawali '/'
+        url: "/api/v1/tools/download-journal-template", // Wajib diawali '/'
       }),
       providesTags: ["Tools"],
     }),
 
-    // POST /tools/preview-journal-import
+    // POST /api/v1/tools/preview-journal-import
     previewJournalImport: builder.mutation<unknown, JournalImportRequestDto>({
       query: (body) => ({
-        url: "/tools/preview-journal-import",
+        url: "/api/v1/tools/preview-journal-import",
         method: "POST",
         body,
       }),
       invalidatesTags: ["Tools"],
     }),
 
-    // POST /tools/import-journal-entries
+    // POST /api/v1/tools/import-journal-entries
     importJournalEntries: builder.mutation<unknown, JournalImportRequestDto>({
       query: (body) => ({
-        url: "/tools/import-journal-entries",
+        url: "/api/v1/tools/import-journal-entries",
         method: "POST",
         body,
       }),

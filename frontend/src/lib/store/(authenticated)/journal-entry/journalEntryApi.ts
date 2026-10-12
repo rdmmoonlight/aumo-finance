@@ -46,56 +46,56 @@ export interface NextTransactionNumberArg {
 // --- Inject Endpoints ---
 export const journalEntryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // GET /journal-entry/{id}
+    // GET /api/v1/journal-entry/{id}
     getJournalEntryById: builder.query<any, GetJournalEntryByIdArg>({
       query: ({ id }) => ({
-        url: `/journal-entry/${id}`,
+        url: `/api/v1/journal-entry/${id}`,
       }),
       providesTags: ["JournalEntry"],
     }),
 
-    // POST /journal-entry/create
+    // POST /api/v1/journal-entry/create
     createJournalEntry: builder.mutation<any, CreateJournalEntryRequest>({
       query: (body) => ({
-        url: `/journal-entry/create`,
+        url: `/api/v1/journal-entry/create`,
         method: "POST",
         body,
       }),
       invalidatesTags: ["JournalEntry"],
     }),
 
-    // PUT /journal-entry/edit/{id}
+    // PUT /api/v1/journal-entry/edit/{id}
     editJournalEntry: builder.mutation<any, EditJournalEntryArg>({
       query: ({ id, body }) => ({
-        url: `/journal-entry/edit/${id}`,
+        url: `/api/v1/journal-entry/edit/${id}`,
         method: "PUT",
         body,
       }),
       invalidatesTags: ["JournalEntry"],
     }),
 
-    // DELETE /journal-entry/delete/{id}
+    // DELETE /api/v1/journal-entry/delete/{id}
     deleteJournalEntry: builder.mutation<any, number>({
       query: (id) => ({
-        url: `/journal-entry/delete/${id}`,
+        url: `/api/v1/journal-entry/delete/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["JournalEntry"],
     }),
 
-    // GET /journal-entry/search-descriptions
+    // GET /api/v1/journal-entry/search-descriptions
     searchDescriptions: builder.query<any, SearchDescriptionsArg>({
       query: (params) => ({
-        url: `/journal-entry/search-descriptions`,
+        url: `/api/v1/journal-entry/search-descriptions`,
         params,
       }),
       providesTags: ["JournalEntry"],
     }),
 
-    // GET /journal-entry/next-transaction-number
+    // GET /api/v1/journal-entry/next-transaction-number
     getNextTransactionNumber: builder.query<any, NextTransactionNumberArg>({
       query: (params) => ({
-        url: `/journal-entry/next-transaction-number`,
+        url: `/api/v1/journal-entry/next-transaction-number`,
         params,
       }),
       providesTags: ["JournalEntry"],

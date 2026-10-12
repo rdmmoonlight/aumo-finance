@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
-import { Link } from "@/lib/router";
+import { Link } from "react-router-dom";
 
 export function PageHeader({
   title,

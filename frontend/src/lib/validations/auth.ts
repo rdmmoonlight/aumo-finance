@@ -14,10 +14,6 @@ export const loginSchema = z.object({
 
 export const registerSchema = z
   .object({
-    name: z
-      .string()
-      .min(1, "Nama tidak boleh kosong")
-      .min(2, "Nama minimal 2 karakter"),
     email: z
       .string()
       .min(1, "Email tidak boleh kosong")
