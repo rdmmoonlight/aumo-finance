@@ -142,7 +142,7 @@ Target akhir: **0 file `.tsx`**, 0 dependensi React/Redux/Radix, bundel Vite mur
 
 **Selesai bila:** halaman katalog sementara (`/__ui`) menampilkan semua varian; TSX pasangannya dihapus bila tidak ada pemakai React lagi, atau ditandai sementara.
 
-### Fase 5 — Komponen UI Interaktif (15 TSX)
+### Fase 5 [✓] — Komponen UI Interaktif (15 TSX)
 | Komponen | Pengganti |
 |----------|-----------|
 | `dialog`, `alert-dialog`, `sheet` | `<dialog>` native (+ fokus-trap bawaan, Esc, backdrop) |
