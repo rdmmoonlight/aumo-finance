@@ -12,8 +12,14 @@ export default defineConfig([
 
   // 2. Konfigurasi dasar JS & Strict TypeScript
   js.configs.recommended,
-  ...tseslint.configs.strictTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
+  ...tseslint.configs.strictTypeChecked.map((c) => ({ ...c, files: ['**/*.{ts,tsx}'] })),
+  ...tseslint.configs.stylisticTypeChecked.map((c) => ({ ...c, files: ['**/*.{ts,tsx}'] })),
+
+  // File JS (mis. eslint.config.js) tidak ikut proyek TS, jadi tanpa aturan type-aware
+  {
+    files: ['**/*.{js,mjs,cjs}'],
+    ...tseslint.configs.disableTypeChecked,
+  },
 
   // 3. Konfigurasi utama untuk file TS/TSX
   {
