@@ -31,4 +31,8 @@ export type JournalImportRequestDto = {
 };
 
 // sekalian definisiin response biar gak pake <T = unknown>
-export type JournalPreviewResponseDto = { ... }
+export type JournalPreviewResponseDto = {
+    success?: boolean;
+    message?: string;
+    data?: JournalImportRequestDto | null;
+};
