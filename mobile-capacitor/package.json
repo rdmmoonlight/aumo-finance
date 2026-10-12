@@ -15,8 +15,11 @@
   },
   "dependencies": {
     "@capacitor/core": "^8.5.3",
+    "@tabler/icons-react": "^3.49.0",
+    "@tailwindcss/vite": "^4.3.3",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
     "@capacitor/android": "^8.5.3",
