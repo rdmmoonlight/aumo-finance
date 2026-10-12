@@ -1,10 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { authRoute } from '../../routes/auth'; // Sesuaikan lokasi impor authRoute
-import { AuthService } from '../services/auth.js';
-import { AppError } from '../lib/errors.js';
 
-// Mock AuthService agar test terisolasi tanpa koneksi DB
-vi.mock('../services/auth.js', () => ({
+// 1. Mock ioredis sebelum impor lain berjalan (mencegah error ECONNREFUSED ::1:6379)
+vi.mock('ioredis', () => {
+  return {
+    default: vi.fn().mockImplementation(() => ({
+      on: vi.fn(),
+      get: vi.fn(),
+      set: vi.fn(),
+      quit: vi.fn(),
+    })),
+  };
+});
+
+// 2. Mock AuthService menggunakan path alias `@/`
+vi.mock('@/services/auth.js', () => ({
   AuthService: {
     register: vi.fn(),
     login: vi.fn(),
@@ -18,10 +27,15 @@ vi.mock('../services/auth.js', () => ({
   },
 }));
 
-// Mock middleware rate-limit agar tidak menghambat pengujian
-vi.mock('../middlewares/rate-limit.js', () => ({
+// 3. Mock middleware rate-limit agar tidak menyentuh Redis saat testing
+vi.mock('@/middlewares/rate-limit.js', () => ({
   rateLimit: () => async (_c: unknown, next: () => Promise<void>) => await next(),
 }));
+
+// 4. Impor modul dengan path alias `@/`
+import { authRoute } from '@/routes/auth.js';
+import { AuthService } from '@/services/auth.js';
+import { AppError } from '@/lib/errors.js';
 
 describe('Auth Routes', () => {
   beforeEach(() => {
