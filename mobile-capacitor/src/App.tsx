@@ -11,6 +11,9 @@ import {
   Snackbar,
   TopBar,
 } from './components/ui';
+import { authService, logger } from './services';
+import { CrashLogScreen } from './screens/CrashLogScreen';
+import { LoginTestSection } from './screens/LoginTestSection';
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -35,7 +38,7 @@ const typeScale = [
 ] as const;
 
 /** Katalog komponen internal (Fase 3). Diganti router pada Fase 5. */
-function App() {
+function Catalog({ onOpenCrashLog }: { onOpenCrashLog: () => void }) {
   const [message, setMessage] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const clearMessage = useCallback(() => {
@@ -126,6 +129,16 @@ function App() {
           </Button>
         </Section>
 
+        <Section title="Log">
+          <Button variant="outline" fullWidth onClick={onOpenCrashLog}>
+            Buka Log
+          </Button>
+        </Section>
+
+        <Section title="Uji Login API (Fase 4)">
+          <LoginTestSection signIn={(params) => authService.signIn(params)} />
+        </Section>
+
         <Section title="Tipografi">
           {typeScale.map(([cls, label]) => (
             <p key={cls} className={cls}>
@@ -172,6 +185,31 @@ function App() {
       />
       <Snackbar message={message} onConsumed={clearMessage} duration="short" />
     </>
+  );
+}
+
+function App() {
+  const [view, setView] = useState<'catalog' | 'crashlog'>('catalog');
+  const readLog = useCallback(() => logger.read(), []);
+  const clearLog = useCallback(() => logger.clear(), []);
+
+  if (view === 'crashlog') {
+    return (
+      <CrashLogScreen
+        readLog={readLog}
+        clearLog={clearLog}
+        onBack={() => {
+          setView('catalog');
+        }}
+      />
+    );
+  }
+  return (
+    <Catalog
+      onOpenCrashLog={() => {
+        setView('crashlog');
+      }}
+    />
   );
 }
 

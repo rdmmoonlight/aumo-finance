@@ -70,10 +70,10 @@
 - [x] **Keluaran:** katalog komponen internal. **Selesai bila:** token setara `Theme.kt` dan `Dimens.kt`.
 
 ### Fase 4 — Jaringan, Sesi, Logger
-- [ ] `apiClient.ts`: Bearer interceptor, timeout 45 dtk, penanganan 401 → logout.
-- [ ] Penyimpanan token terenkripsi + fitur "Ingat saya".
-- [ ] Logger terpusat + layar CrashLog (padanan `AppLogger`, `CrashLogHandler`).
-- [ ] Format mata uang dan tanggal (`id-ID`), tanpa pergeseran zona waktu.
+- [x] `apiClient.ts`: Bearer interceptor, timeout 45 dtk, penanganan 401 → logout.
+- [x] Penyimpanan token terenkripsi + fitur "Ingat saya".
+- [x] Logger terpusat + layar CrashLog (padanan `AppLogger`, `CrashLogHandler`).
+- [x] Format mata uang dan tanggal (`id-ID`), tanpa pergeseran zona waktu.
 - [ ] **Keluaran:** lapisan data teruji. **Selesai bila:** login API sukses dari perangkat.
 
 ### Fase 5 — Splash, Login, Biometrik, Navigasi
