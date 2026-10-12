@@ -10,7 +10,7 @@ export default defineConfig({
   minify: false,
   splitting: false,
 
-  target: 'node20',
+  target: 'node24',
   platform: 'node',
 
   dts: false,
