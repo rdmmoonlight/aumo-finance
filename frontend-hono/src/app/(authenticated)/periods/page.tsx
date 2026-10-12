@@ -1,4 +1,3 @@
-"use client";
 
 import { CreatePeriodForm } from "@/app/(authenticated)/periods/open-new-period-form";
 import { getPeriodColumns } from "@/app/(authenticated)/periods/period-columns";

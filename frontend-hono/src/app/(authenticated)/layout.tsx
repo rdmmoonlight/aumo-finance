@@ -1,4 +1,3 @@
-"use client";
 
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";

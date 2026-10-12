@@ -1,4 +1,3 @@
-"use client";
 
 import { store } from "@/lib/store";
 import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";

@@ -1,4 +1,3 @@
-"use client";
 
 import JournalEntryContent from "@/app/(authenticated)/journal-entry/journal-entry-content";
 import { Loader2 } from "lucide-react";

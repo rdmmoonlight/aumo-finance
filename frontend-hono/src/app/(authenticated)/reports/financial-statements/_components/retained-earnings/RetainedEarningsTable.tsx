@@ -1,4 +1,3 @@
-"use client";
 import { formatNumber } from "@/app/(authenticated)/reports/financial-statements/_lib/formatters";
 import { StatementRow } from "@/app/(authenticated)/reports/financial-statements/_types";
 import {

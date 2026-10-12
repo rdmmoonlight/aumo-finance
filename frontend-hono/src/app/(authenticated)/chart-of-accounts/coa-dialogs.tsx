@@ -1,4 +1,3 @@
-"use client";
 
 import {
   ACCOUNT_RANGES,
