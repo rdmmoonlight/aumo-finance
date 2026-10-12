@@ -1,4 +1,3 @@
-"use client";
 
 import { DashboardCharts } from "@/app/(authenticated)/dashboard/dashboard-charts";
 import {

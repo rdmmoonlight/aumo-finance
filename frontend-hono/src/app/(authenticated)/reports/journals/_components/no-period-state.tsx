@@ -1,4 +1,3 @@
-"use client";
 
 import { EyeOff } from "lucide-react";
 import { Link } from "@/lib/router";

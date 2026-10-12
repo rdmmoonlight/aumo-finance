@@ -1,4 +1,3 @@
-"use client";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CheckCircle2 } from "lucide-react";
 

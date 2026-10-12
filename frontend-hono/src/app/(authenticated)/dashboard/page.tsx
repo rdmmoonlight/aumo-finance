@@ -1,4 +1,3 @@
-"use client";
 import DashboardContent from "@/app/(authenticated)/dashboard/dashboard-content";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Suspense } from "react";

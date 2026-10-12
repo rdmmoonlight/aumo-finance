@@ -1,4 +1,3 @@
-"use client";
 
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useNavigate } from "@/lib/router";
