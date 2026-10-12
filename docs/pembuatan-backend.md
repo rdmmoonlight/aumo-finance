@@ -155,3 +155,9 @@ export function registerRoutes(app: OpenAPIHono<AppEnv>): void {
 * Jika didaftarkan sebagai `apiV1.route('/journals', journalRoute)`
 * Dan di dalam `journalRoute` menggunakan `.post('/')`
 * Maka URL akhirnya adalah `POST /api/v1/journals`.
+
+** Ringkasan Urutan Kerja:
+Schema & Types (src/db/schema/periods.ts) \rightarrow Tentukan bentuk datanya.
+Service (src/services/period.ts) \rightarrow Tempatkan logika bisnisnya.
+Route (src/routes/period.ts) \rightarrow Ekspos endpoint-nya lewat Hono Zod OpenAPI.
+Test (src/test/vitest/period.test.ts) \rightarrow Uji kodenya lewat Vitest.
