@@ -1,9 +1,9 @@
 "use client";
 
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
-import { useNavigate } from "@/lib/router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "@/lib/router";
+import { Link } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

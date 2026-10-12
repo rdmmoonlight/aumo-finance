@@ -41,9 +41,9 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import { useLocation } from "@/lib/router";
+import { useLocation } from "react-router-dom";
 import * as React from "react";
-import { Link } from "@/lib/router";
+import { Link } from "react-router-dom";
 
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();

@@ -37,10 +37,10 @@ export const homeApi = baseApi.injectEndpoints({
   overrideExisting: !import.meta.env.PROD,
 
   endpoints: (builder) => ({
-    // 1. GET /kurs
+    // 1. GET /api/v1/kurs
     getKurs: builder.query<KursResponse, KursParams | void>({
       query: (params) => ({
-        url: "/kurs", // Wajib diawali slash '/'
+        url: "/api/v1/kurs", // Wajib diawali slash '/'
         params: params
           ? {
               baseCurrency: params.baseCurrency,
@@ -51,10 +51,10 @@ export const homeApi = baseApi.injectEndpoints({
       providesTags: ["MarketData"],
     }),
 
-    // 2. GET /home/market-indicators
+    // 2. GET /api/v1/home/market-indicators
     getMarketIndicators: builder.query<MarketIndicatorsResponse, void>({
       query: () => ({
-        url: "/home/market-indicators", // Wajib diawali slash '/'
+        url: "/api/v1/home/market-indicators", // Wajib diawali slash '/'
       }),
       providesTags: ["MarketData"],
     }),

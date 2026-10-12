@@ -1,5 +1,8 @@
-import mountLogin from "@/app/auth/login";
-import mountRegister from "@/app/auth/register";
+"use client";
+
+import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "@/app/auth/auth";
+import LoginPage from "@/app/auth/login";
+import RegisterPage from "@/app/auth/register";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,33 +10,32 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { VanillaMount } from "@/components/vanilla-mount";
-import { useNavigate } from "@/lib/router";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ArrowRight, Loader2, Lock, UserPlus } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Suspense, useEffect, useState } from "react";
 
 export default function LandingPage(): React.JSX.Element {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
+  // State pengganti RTK Query Hook
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";
 
-    let active = true;
-    const promise = store.dispatch(authApi.endpoints.getProfile.initiate());
-
+    // Cek auth status secara langsung menembak /api/v1/auth/me via store.dispatch
     async function checkAuthStatus() {
       try {
         setCheckingAuth(true);
-        const result = await promise;
-
-        if (!active) return;
+        const result = await store.dispatch(
+          authApi.endpoints.getProfile.initiate(),
+        );
 
         if (result.isSuccess && result.data?.success) {
           setIsAuthenticated(true);
@@ -42,20 +44,14 @@ export default function LandingPage(): React.JSX.Element {
           setIsAuthenticated(false);
         }
       } catch {
-        if (active) setIsAuthenticated(false);
+        setIsAuthenticated(false);
       } finally {
-        if (active) setCheckingAuth(false);
+        setCheckingAuth(false);
       }
     }
 
     checkAuthStatus();
-
-    return () => {
-      active = false;
-      // Batalkan/unsubscribe request jika komponen unmount sebelum selesai
-      promise.unsubscribe();
-    };
-  }, []); // Kosongkan dependency agar pengecekan auth hanya berjalan 1x saat mount
+  }, [navigate]);
 
   const handleOpenModal = (mode: "login" | "register"): void => {
     setAuthMode(mode);
@@ -67,23 +63,11 @@ export default function LandingPage(): React.JSX.Element {
     navigate("/home", { replace: true });
   };
 
-  // Tampilkan splash loader sementara saat pengecekan awal agar tidak ada UI flash
-  if (checkingAuth) {
-    return (
-      <div className="flex min-h-screen w-full items-center justify-center bg-black text-white">
-        <div className="flex items-center gap-3 text-sm text-zinc-400">
-          <Loader2 className="h-5 w-5 animate-spin text-white" />
-          <span>Memeriksa sesi...</span>
-        </div>
-      </div>
-    );
-  }
-
   if (isAuthenticated) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-black text-white">
         <div className="flex items-center gap-3 text-sm text-zinc-400">
-          <Loader2 className="h-5 w-5 animate-spin text-white" />
+          <Loader2 className="h-4 w-4 animate-spin" />
           <span>Redirecting to dashboard...</span>
         </div>
       </div>
@@ -92,7 +76,7 @@ export default function LandingPage(): React.JSX.Element {
 
   return (
     <div className="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]">
-      {/* LEFT PANEL */}
+      {/* LEFT */}
       <div className="flex flex-col justify-between border-r border-zinc-800 bg-zinc-950 p-8 lg:p-12">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded bg-white font-bold text-black">
@@ -133,7 +117,7 @@ export default function LandingPage(): React.JSX.Element {
         </div>
       </div>
 
-      {/* RIGHT PANEL */}
+      {/* RIGHT */}
       <div className="flex flex-col items-center justify-center gap-6 bg-black p-6 lg:p-12">
         <div className="max-w-sm text-center">
           <h2 className="text-2xl font-semibold tracking-tight">
@@ -146,17 +130,23 @@ export default function LandingPage(): React.JSX.Element {
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full max-w-sm">
           <Button
+            disabled={checkingAuth}
             onClick={() => handleOpenModal("login")}
-            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200"
+            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50"
           >
-            <Lock className="w-4 h-4" />
-            <span>Sign In</span>
-            <ArrowRight className="w-4 h-4" />
+            {checkingAuth ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Lock className="w-4 h-4" />
+            )}
+            <span>{checkingAuth ? "Checking..." : "Sign In"}</span>
+            {!checkingAuth && <ArrowRight className="w-4 h-4" />}
           </Button>
           <Button
+            disabled={checkingAuth}
             onClick={() => handleOpenModal("register")}
             variant="outline"
-            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white"
+            className="flex-1 w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50"
           >
             <UserPlus className="w-4 h-4" />
             <span>Register</span>
@@ -171,14 +161,18 @@ export default function LandingPage(): React.JSX.Element {
               </DialogTitle>
             </DialogHeader>
             <div className="p-6 pt-4">
-              <VanillaMount
-                key={authMode}
-                mount={(el) =>
-                  authMode === "login"
-                    ? mountLogin(el, { onSuccess: handleSuccess })
-                    : mountRegister(el, { onSuccess: handleSuccess })
-                }
-              />
+              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
+                <Suspense fallback={<AuthFormSkeleton />}>
+                  {authMode === "login" ? (
+                    <LoginPage initialMode="login" onSuccess={handleSuccess} />
+                  ) : (
+                    <RegisterPage
+                      initialMode="register"
+                      onSuccess={handleSuccess}
+                    />
+                  )}
+                </Suspense>
+              </GoogleOAuthProvider>
             </div>
           </DialogContent>
         </Dialog>

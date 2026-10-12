@@ -367,7 +367,10 @@ export default function ToolsPage() {
                   size="sm"
                   className="h-auto p-0 gap-1"
                   onClick={() =>
-                    window.open("/tools/download-journal-template", "_blank")
+                    window.open(
+                      "/api/v1/tools/download-journal-template",
+                      "_blank",
+                    )
                   }
                 >
                   <Download size={12} />

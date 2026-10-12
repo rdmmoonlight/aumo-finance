@@ -21,64 +21,64 @@ export interface RevokeSessionArg {
 // --- Slice Definition ---
 export const settingsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // PUT /settings/profile
+    // PUT /api/v1/settings/profile
     updateProfile: builder.mutation<unknown, UpdateProfileRequest>({
       query: (body) => ({
-        url: "/settings/profile",
+        url: "/api/v1/settings/profile",
         method: "PUT",
         body,
       }),
       invalidatesTags: ["Settings"],
     }),
 
-    // POST /settings/avatar
+    // POST /api/v1/settings/avatar
     uploadAvatar: builder.mutation<unknown, FormData>({
       query: (formData) => ({
-        url: "/settings/avatar",
+        url: "/api/v1/settings/avatar",
         method: "POST",
         body: formData,
       }),
       invalidatesTags: ["Settings"],
     }),
 
-    // POST /settings/change-password
+    // POST /api/v1/settings/change-password
     changePassword: builder.mutation<unknown, ChangePasswordRequest>({
       query: (body) => ({
-        url: "/settings/change-password",
+        url: "/api/v1/settings/change-password",
         method: "POST",
         body,
       }),
       invalidatesTags: ["Settings"],
     }),
 
-    // DELETE /settings/delete-account
+    // DELETE /api/v1/settings/delete-account
     deleteAccount: builder.mutation<unknown, void>({
       query: () => ({
-        url: "/settings/delete-account",
+        url: "/api/v1/settings/delete-account",
         method: "DELETE",
       }),
       invalidatesTags: ["Settings"],
     }),
 
-    // GET /settings/guardian/dashboard
+    // GET /api/v1/settings/guardian/dashboard
     getGuardianDashboard: builder.query<unknown, void>({
-      query: () => "/settings/guardian/dashboard",
+      query: () => "/api/v1/settings/guardian/dashboard",
       providesTags: ["Settings"],
     }),
 
-    // POST /settings/guardian/revoke-session/{sessionId}
+    // POST /api/v1/settings/guardian/revoke-session/{sessionId}
     revokeSessionById: builder.mutation<unknown, RevokeSessionArg>({
       query: ({ sessionId }) => ({
-        url: `/settings/guardian/revoke-session/${sessionId}`,
+        url: `/api/v1/settings/guardian/revoke-session/${sessionId}`,
         method: "POST",
       }),
       invalidatesTags: ["Settings"],
     }),
 
-    // POST /settings/guardian/revoke-all-sessions
+    // POST /api/v1/settings/guardian/revoke-all-sessions
     revokeAllSessions: builder.mutation<unknown, void>({
       query: () => ({
-        url: "/settings/guardian/revoke-all-sessions",
+        url: "/api/v1/settings/guardian/revoke-all-sessions",
         method: "POST",
       }),
       invalidatesTags: ["Settings"],

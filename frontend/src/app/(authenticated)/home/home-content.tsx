@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "@/lib/router";
+import { Link } from "react-router-dom";
 
 interface MarketItem {
   symbol: string;

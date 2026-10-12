@@ -1,7 +1,7 @@
 "use client";
 
 import { EyeOff } from "lucide-react";
-import { Link } from "@/lib/router";
+import { Link } from "react-router-dom";
 
 export function NoPeriodState() {
   return (
