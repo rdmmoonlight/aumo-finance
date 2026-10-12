@@ -11,10 +11,10 @@
 | Pos | Nilai |
 |---|---|
 | Layar (Activity) | 24 |
-| Endpoint dipakai mobile | 31 |
-| Endpoint terverifikasi ada di `/backend` | 30 |
+| Endpoint dipanggil layar mobile | 29 |
+| Endpoint terverifikasi ada di `/backend` | 28 |
 | **Endpoint tidak ada di `/backend`** | **1** (`GET /api/v1/reports/trial-balance`) |
-| Endpoint didefinisikan mobile tetapi tidak dipanggil layar | 2 (`auth/me`, `journal-entry/search-descriptions`) + 1 (`periods/clear-selection`) |
+| Endpoint didefinisikan mobile tetapi tidak dipanggil layar | 3 (`auth/me`, `journal-entry/search-descriptions`, `periods/clear-selection`) |
 | Layar terdampak gap | 3 (Neraca Saldo: unadjusted, adjusted, post-closing) |
 
 ## 2. Temuan Kritis (Wajib Diputuskan Sebelum Fase 8)
