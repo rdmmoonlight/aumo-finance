@@ -9,6 +9,10 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./hono
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,9 +30,7 @@ jobs:
           cache-dependency-path: 'hono/pnpm-lock.yaml'
 
       - name: Install dependencies
-        working-directory: ./hono
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --ignore-workspace
 
       - name: Run Vitest
-        working-directory: ./hono
         run: pnpm test -- --run
