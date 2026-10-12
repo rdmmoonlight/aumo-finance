@@ -23,7 +23,7 @@ export function getChartOfAccounts(arg?: GetChartOfAccountsArg): Promise<any> {
     return coreStore.fetchWithCache(
         endpoint,
         () => apiClient(endpoint),
-        { ttl: 60000, tags: ["ChartOfAccounts"] }
+        { ttl: 60000 }
     );
 }
 
