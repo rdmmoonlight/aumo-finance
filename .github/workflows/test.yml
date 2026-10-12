@@ -33,4 +33,4 @@ jobs:
         run: pnpm install --frozen-lockfile --ignore-workspace
 
       - name: Run Vitest
-        run: pnpm test -- --run
+        run: pnpm --ignore-workspace test -- --run
