@@ -52,67 +52,67 @@
 ## 4. Fase Migrasi (10 Fase)
 
 ### Fase 1 — Baseline & Kontrak
-- Bekukan fitur baru di `/mobile` selama migrasi.
-- Catat kontrak tiap endpoint yang dipakai (path absolut `/api/v1/...`).
-- Tetapkan matriks paritas: 24 layar × status.
-- **Keluaran:** `docs/parity-matrix.md`. **Selesai bila:** semua layar dan endpoint tercatat.
+- [x] Bekukan fitur baru di `/mobile` selama migrasi.
+- [x] Catat kontrak tiap endpoint yang dipakai (path absolut `/api/v1/...`).
+- [x] Tetapkan matriks paritas: 24 layar × status.
+- [x] **Keluaran:** `docs/parity-matrix.md`. **Selesai bila:** semua layar dan endpoint tercatat.
 
 ### Fase 2 — Scaffolding Capacitor + TypeScript
-- Buat `/mobile-capacitor` (Vite + React + TS strict, ESLint, Prettier).
-- `npx cap add android`; set `minSdk 28`, `targetSdk 34`, `appId com.bnrc.aumofinance`.
-- Workflow GitHub Actions: build APK debug otomatis.
-- **Keluaran:** APK debug "Hello" terpasang di Android 9. **Selesai bila:** CI hijau.
+- [x] Buat `/mobile-capacitor` (Vite + React + TS strict, ESLint, Prettier).
+- [x] `npx cap add android`; set `minSdk 28`, `targetSdk 34`, `appId com.bnrc.aumofinance`.
+- [x] Workflow GitHub Actions: build APK debug otomatis.
+- [x] **Keluaran:** APK debug "Hello" terpasang di Android 9. **Selesai bila:** CI hijau.
 
 ### Fase 3 — Fondasi UI & Tema
-- Pindahkan token warna (Ningrat Purple / Matte Black), tipografi, jarak ke Tailwind.
-- Bangun komponen dasar: Button (min 48px), Input, Card, Dialog, Snackbar, TopBar, List, Skeleton.
-- Ikon Tabler versi web.
-- **Keluaran:** katalog komponen internal. **Selesai bila:** token setara `Theme.kt` dan `Dimens.kt`.
+- [x] Pindahkan token warna (Ningrat Purple / Matte Black), tipografi, jarak ke Tailwind.
+- [x] Bangun komponen dasar: Button (min 48px), Input, Card, Dialog, Snackbar, TopBar, List, Skeleton.
+- [x] Ikon Tabler versi web.
+- [x] **Keluaran:** katalog komponen internal. **Selesai bila:** token setara `Theme.kt` dan `Dimens.kt`.
 
 ### Fase 4 — Jaringan, Sesi, Logger
-- `apiClient.ts`: Bearer interceptor, timeout 45 dtk, penanganan 401 → logout.
-- Penyimpanan token terenkripsi + fitur "Ingat saya".
-- Logger terpusat + layar CrashLog (padanan `AppLogger`, `CrashLogHandler`).
-- Format mata uang dan tanggal (`id-ID`), tanpa pergeseran zona waktu.
-- **Keluaran:** lapisan data teruji. **Selesai bila:** login API sukses dari perangkat.
+- [ ] `apiClient.ts`: Bearer interceptor, timeout 45 dtk, penanganan 401 → logout.
+- [ ] Penyimpanan token terenkripsi + fitur "Ingat saya".
+- [ ] Logger terpusat + layar CrashLog (padanan `AppLogger`, `CrashLogHandler`).
+- [ ] Format mata uang dan tanggal (`id-ID`), tanpa pergeseran zona waktu.
+- [ ] **Keluaran:** lapisan data teruji. **Selesai bila:** login API sukses dari perangkat.
 
 ### Fase 5 — Splash, Login, Biometrik, Navigasi
-- Router, guard autentikasi, penanganan tombol Back.
-- Splash → Login → Home. Biometrik opsional setelah login pertama.
-- Layar Logout.
-- **Keluaran:** alur masuk-keluar utuh. **Selesai bila:** sesi bertahan setelah app ditutup.
+- [ ] Router, guard autentikasi, penanganan tombol Back.
+- [ ] Splash → Login → Home. Biometrik opsional setelah login pertama.
+- [ ] Layar Logout.
+- [ ] **Keluaran:** alur masuk-keluar utuh. **Selesai bila:** sesi bertahan setelah app ditutup.
 
 ### Fase 6 — Home, Dashboard, Periods
-- Home dan Dashboard (`DashboardApi`).
-- Periods: daftar, pilih, tutup, buat periode.
-- Kontrak create-period (Month/Year/SetupMode + akun dari `/open-info`) **diverifikasi ulang ke backend live** sebelum kode ditulis.
-- **Selesai bila:** periode terpilih tersimpan di server dan konsisten di semua layar.
+- [ ] Home dan Dashboard (`DashboardApi`).
+- [ ] Periods: daftar, pilih, tutup, buat periode.
+- [ ] Kontrak create-period (Month/Year/SetupMode + akun dari `/open-info`) **diverifikasi ulang ke backend live** sebelum kode ditulis.
+- [ ] **Selesai bila:** periode terpilih tersimpan di server dan konsisten di semua layar.
 
 ### Fase 7 — COA & Jurnal Umum (Input)
-- COA: daftar, tambah, ubah. Kategori sesuai rentang nomor (Aset 100–199 … Beban Lain 800–999).
-- Journal Entry: baris debit/kredit, validasi seimbang, tanggal tanpa pergeseran zona waktu.
-- **Selesai bila:** jurnal tersimpan dan muncul di laporan.
+- [ ] COA: daftar, tambah, ubah. Kategori sesuai rentang nomor (Aset 100–199 … Beban Lain 800–999).
+- [ ] Journal Entry: baris debit/kredit, validasi seimbang, tanggal tanpa pergeseran zona waktu.
+- [ ] **Selesai bila:** jurnal tersimpan dan muncul di laporan.
 
 ### Fase 8 — Laporan Bagian 1: Jurnal, Buku Besar, Neraca Saldo, Worksheet
-- Menu laporan; Jurnal Umum dan Penyesuaian (termasuk hapus jurnal penyesuaian).
-- Buku Besar: **dua endpoint terpisah** (`/permanent`, `/temporary`).
-- Neraca Saldo: **satu endpoint** `type=unadjusted|adjusted|post-closing`.
-- Worksheet.
-- **Selesai bila:** angka sama dengan app Kotlin pada periode uji yang sama.
+- [ ] Menu laporan; Jurnal Umum dan Penyesuaian (termasuk hapus jurnal penyesuaian).
+- [ ] Buku Besar: **dua endpoint terpisah** (`/permanent`, `/temporary`).
+- [ ] Neraca Saldo: **satu endpoint** `type=unadjusted|adjusted|post-closing`.
+- [ ] Worksheet.
+- [ ] **Selesai bila:** angka sama dengan app Kotlin pada periode uji yang sama.
 
 ### Fase 9 — Laporan Bagian 2 + Pengaturan + Auto-Update
-- Laba Rugi, Perubahan Laba Ditahan, Posisi Keuangan, Arus Kas.
-- Jurnal Penutup: dihitung dari Neraca Saldo, **tidak disimpan**.
-- Settings (toggle auto-update).
-- Plugin native `AppUpdate`: cek GitHub Releases, unduh APK, pasang. Bandingkan versi per segmen numerik.
-- **Selesai bila:** update dari rilis lama ke rilis baru berhasil di perangkat.
+- [ ] Laba Rugi, Perubahan Laba Ditahan, Posisi Keuangan, Arus Kas.
+- [ ] Jurnal Penutup: dihitung dari Neraca Saldo, **tidak disimpan**.
+- [ ] Settings (toggle auto-update).
+- [ ] Plugin native `AppUpdate`: cek GitHub Releases, unduh APK, pasang. Bandingkan versi per segmen numerik.
+- [ ] **Selesai bila:** update dari rilis lama ke rilis baru berhasil di perangkat.
 
 ### Fase 10 — Hardening, Rilis, Cutover
-- Uji paritas penuh (24 layar), uji Android 9 dan versi terbaru, uji koneksi lambat/offline.
-- Signing rilis dengan keystore lama, versi CalVer, publikasi GitHub Release otomatis.
-- Pemeriksaan ukuran APK, performa render tabel laporan besar, aksesibilitas dasar.
-- Cutover: promosi ke `main` oleh pemilik; `/mobile` diarsipkan, bukan dihapus.
-- **Selesai bila:** APK Capacitor menimpa instalasi Kotlin tanpa kehilangan data login.
+- [ ] Uji paritas penuh (24 layar), uji Android 9 dan versi terbaru, uji koneksi lambat/offline.
+- [ ] Signing rilis dengan keystore lama, versi CalVer, publikasi GitHub Release otomatis.
+- [ ] Pemeriksaan ukuran APK, performa render tabel laporan besar, aksesibilitas dasar.
+- [ ] Cutover: promosi ke `main` oleh pemilik; `/mobile` diarsipkan, bukan dihapus.
+- [ ] **Selesai bila:** APK Capacitor menimpa instalasi Kotlin tanpa kehilangan data login.
 
 ## 5. Ringkasan Bobot Kerja
 
