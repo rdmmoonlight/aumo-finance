@@ -13,7 +13,8 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     envDir: '.', // Memuat file .env otomatis
-    include: ['src/test/**/*.ts'], // Fokus mencari file test di dalam folder src/test/
+    include: ['src/test/**/*.ts'],
+    exclude: ['./src/test/setup.ts'], // Fokus mencari file test di dalam folder src/test/
     setupFiles: ['./src/test/setup.ts'], // File setup global (buat file kosong jika belum ada)
     coverage: {
       provider: 'v8',
