@@ -32,9 +32,13 @@ test.describe('Fase 1 Smoke Test — Navigasi Rute Utama', () => {
         ];
 
         for (const route of mainRoutes) {
+            const errors: string[] = [];
+            page.on('pageerror', (e) => errors.push(e.message));
             await page.goto(route);
-            // Memastikan halaman berhasil dimuat tanpa crash/blank 500
+            // Halaman harus merender isi (bukan layar kosong) dan tanpa galat JS yang tidak tertangani
+            await expect(page.locator('#root')).not.toBeEmpty();
             await expect(page).not.toHaveTitle(/404/i);
+            expect(errors, `Galat JS pada ${route}`).toEqual([]);
         }
     });
 });

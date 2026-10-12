@@ -1,4 +1,4 @@
-// Helper Cookie Client-side (Pengganti next/headers)
+// Helper pembaca cookie sisi klien
 function getCookie(name: string): string | undefined {
   if (typeof document === "undefined") return undefined;
   const value = `; ${document.cookie}`;

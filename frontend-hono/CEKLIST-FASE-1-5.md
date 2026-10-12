@@ -18,21 +18,22 @@ Kesimpulan: Fase 1–3 sebagian besar selesai. Fase 4–5 berisi file pengganti,
 ---
 
 ## Fase 1 — Baseline & Pembersihan Sisa Next.js
-- [ ] Tag git `pre-vanilla-migration` (tidak ada)
+- [x] Tag git `pre-vanilla-migration` (di `fe790548`, commit terakhir sebelum `src/core`)
 - [x] Smoke test rute (`src/tests/smoke.spec.ts`)
-- [ ] Smoke test valid: `baseURL` Playwright menunjuk `aumonext-api.onrender.com` (backend), bukan frontend; asersi hanya cek URL/judul
+- [x] Smoke test valid: `baseURL` ke `http://localhost:3000`; asersi cek `#root` terisi dan tanpa galat JS
 - [x] Daftar rute (`ROUTE-CHECKLIST.md`)
 - [x] Direktif `"use client"` dihapus (0 sisa)
 - [x] `eslint-config-next` dihapus
-- [ ] Plugin `"next"`, `next-env.d.ts`, `.next/types/**` masih ada di `tsconfig.json`
-- [ ] Komentar `next/headers` masih ada di `src/lib/apiClient.ts`
+- [x] Plugin `"next"`, `next-env.d.ts`, `.next/types/**` dihapus dari `tsconfig.json`
+- [x] `eslint.config.mjs` tidak lagi memuat `@next/eslint-plugin-next` (sebelumnya `npm run lint` gagal); lint kini lulus
+- [x] Komentar `next/headers` dihapus dari `src/lib/apiClient.ts`
 - [x] Satu lockfile (`pnpm-lock.yaml`)
 - [x] `tsconfig.tsbuildinfo` dan `test-results/` di `.gitignore`, tidak ter-track
-- [ ] `playwright-report/index.html` masih ter-track git (belum di `.gitignore`)
+- [x] `playwright-report/` di `.gitignore` dan dilepas dari git
 - [x] `@react-oauth/google` dihapus
-- [ ] Paket `cn` (^0.3.0) masih terpasang, tanpa pemakai di `src/` → hapus
+- [x] Paket `cn` dihapus (tanpa pemakai)
 - [x] `vite.config.ts`: `server.proxy` `/api` memakai `backendTarget`
-- [ ] Gerbang: build hijau (gagal)
+- [ ] Gerbang: build hijau — masih gagal; penyebab bukan Fase 1, melainkan 5 ekspor hilang dari Fase 5 (`TabsList/TabsTrigger/TabsContent`, `SelectContent/SelectItem`)
 
 ## Fase 2 — Fondasi Runtime (`src/core/`)
 - [x] `dom.js` (`h`, `mount`, `on`, `createDisposer`, `isMobile`)

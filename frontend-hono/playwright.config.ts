@@ -17,8 +17,8 @@ export default defineConfig({
   timeout: 60000,
 
   use: {
-    /* Direct URL ke server online Render */
-    baseURL: 'https://aumonext-api.onrender.com',
+    /* Frontend lokal (webServer di bawah); backend diakses lewat proxy /api */
+    baseURL: 'http://localhost:3000',
 
     /* Toleransi batas waktu navigasi hingga 30 detik */
     navigationTimeout: 30000,
@@ -40,5 +40,4 @@ export default defineConfig({
     },
   ],
 
-  /* Blok webServer dikosongkan karena pengujian langsung diarahkan ke server online */
 });

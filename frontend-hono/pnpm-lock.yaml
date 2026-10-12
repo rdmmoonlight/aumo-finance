@@ -26,9 +26,6 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
-      cn:
-        specifier: ^0.3.0
-        version: 0.3.3
       lucide-react:
         specifier: ^1.47.0
         version: 1.48.0(react@19.3.0)
@@ -1512,11 +1509,6 @@ packages:
   clsx@2.1.1:
     resolution: {integrity: sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==}
     engines: {node: '>=6'}
-
-  cn@0.3.3:
-    resolution: {integrity: sha512-OEiyJkSpYm2kOuNOKQ+c2wmzZRG8orrb9fnObtHTbCGNx/E9KLnGcmcocItOzREKk5KzQN5I2e3BUCj563KEpw==}
-    engines: {node: '>=20'}
-    hasBin: true
 
   codepage@1.15.0:
     resolution: {integrity: sha512-3g6NUTPd/YtuuGrhMnOMRjFc+LJw/bnMp3+0r/Wcz3IXUuCosKRJvMphm5+Q+bvTVGcJJuRvVLuYba+WojaFaA==}
@@ -3835,8 +3827,6 @@ snapshots:
       clsx: 2.1.1
 
   clsx@2.1.1: {}
-
-  cn@0.3.3: {}
 
   codepage@1.15.0: {}
 
