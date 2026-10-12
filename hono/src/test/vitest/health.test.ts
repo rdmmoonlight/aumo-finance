@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { healthRoute } from './health'; // Sesuaikan lokasi impor healthRoute
+import { healthRoute } from '../../health'; // Sesuaikan lokasi impor healthRoute
 
 describe('Health Routes', () => {
   it('GET / - harus mengembalikan status 200 dan pesan server online', async () => {
