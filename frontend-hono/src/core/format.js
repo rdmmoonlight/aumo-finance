@@ -49,3 +49,38 @@ export function formatNumber(val, decimals = 0) {
         maximumFractionDigits: decimals,
     }).format(val);
 }
+
+export const formatNumberAccounting = (n) => {
+    const f = new Intl.NumberFormat("id-ID", {
+        style: "decimal",
+        maximumFractionDigits: 0,
+    }).format(Math.abs(n));
+    return n < 0 ? `(${f})` : f;
+};
+
+export const formatDateDisplay = (s) =>
+    !s
+        ? ""
+        : new Intl.DateTimeFormat("id-ID", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+        }).format(new Date(s));
+
+export const formatNumberWithParen = (amount) => {
+    const f = new Intl.NumberFormat("id-ID", {
+        style: "decimal",
+        maximumFractionDigits: 0,
+    }).format(Math.abs(amount));
+    return amount < 0 ? `(${f})` : f;
+};
+
+export const formatDateTimeDisplay = (s) => {
+    if (!s) return null;
+    const d = new Date(s);
+    return `${new Intl.DateTimeFormat("id-ID", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    }).format(d)}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+};

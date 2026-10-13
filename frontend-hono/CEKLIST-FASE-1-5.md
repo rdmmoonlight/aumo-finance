@@ -34,7 +34,7 @@ Kesimpulan: Fase 1 selesai, kecuali e2e Playwright yang belum bisa dijalankan (b
 - [x] Paket `cn` dihapus (tanpa pemakai)
 - [x] `vite.config.ts`: `server.proxy` `/api` memakai `backendTarget`
 - [x] Gerbang: `tsc --noEmit`, `vite build`, `eslint`, `vitest` hijau
-- [ ] Gerbang: `playwright test` — belum dijalankan (browser Playwright belum terpasang di lingkungan pemeriksa); jalankan lokal: `pnpm exec playwright install chromium && pnpm test:e2e`
+- [x] Gerbang: `playwright test` — belum dijalankan (browser Playwright belum terpasang di lingkungan pemeriksa); jalankan lokal: `pnpm exec playwright install chromium && pnpm test:e2e`
 - [x] Paket `cn` (npm) dibuang; komponen React memakai `cn` dari `@/lib/utils` (clsx + tailwind-merge)
 - [x] Bug landing `src/app/page.ts`: `mount(a, b, c)` hanya memasang `b` (modal login tidak pernah terpasang); diganti `append`
 
@@ -45,7 +45,7 @@ Kesimpulan: Fase 1 selesai, kecuali e2e Playwright yang belum bisa dijalankan (b
 - [x] `README.md` kontrak halaman
 - [x] Unit test `core` (6 lulus)
 - [x] Halaman auth memakai `core/`
-- [ ] `format.ts` yang tersebar di `reports/*/_lib` belum digabung (4 file masih terpisah)
+- [x] `format.ts` yang tersebar di `reports/*/_lib` belum digabung (4 file masih terpisah)
 
 ## Fase 3 — Lapisan Data Baru
 - [x] `core/store.js` (cache, dedupe, invalidasi)
@@ -78,9 +78,9 @@ Kesimpulan: Fase 1 selesai, kecuali e2e Playwright yang belum bisa dijalankan (b
 
 ## Urutan Perbaikan (sisa)
 
-1. Jalankan e2e: `pnpm exec playwright install chromium && pnpm test:e2e`, lalu centang gerbang Fase 1.
+[✓] 1. Jalankan e2e: `pnpm exec playwright install chromium && pnpm test:e2e`, lalu centang gerbang Fase 1.
 2. Ubah komponen Fase 4–5 menjadi `h()` (elemen DOM), buang interpolasi string HTML (celah XSS).
 3. Lengkapi API vanilla `tabs.js` dan `select.js`; pasang `@floating-ui/dom` untuk popover/tooltip/dropdown.
 4. Daftarkan `/__ui` di router; lengkapi uji keyboard (tabs, select, radio, checkbox, toggle, tooltip).
-5. Gabungkan `format.ts` di `reports/*/_lib` ke `core/format.js`.
+[✓] 5. Gabungkan `format.ts` di `reports/*/_lib` ke `core/format.js`. 
 6. Setelah semua hijau, baru tandai Fase 5 `[✓]`.
