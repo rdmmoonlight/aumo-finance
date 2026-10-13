@@ -11,8 +11,8 @@
 |---|---|
 | Folder target | `/mobile-capacitor` (baru, berdampingan). `/mobile` tetap utuh sampai Fase 10 |
 | Bahasa | TypeScript (strict) |
-| UI | React 19 + Vite + Tailwind 4 (selaras `/frontend`) |
-| State & data | Redux Toolkit + RTK Query |
+| UI | TypeScript murni (`.ts`, tanpa React/JSX/`.tsx`/`.vue`) + Vite + Tailwind 4; DOM lewat fungsi `h()` |
+| State & data | Store kecil + cache query buatan sendiri (tanpa Redux/RTK Query) |
 | Platform | Android saja. `minSdk` 28 **dikunci**, `targetSdk` 34 |
 | Identitas app | `applicationId` tetap `com.bnrc.aumofinance` + keystore rilis yang sama |
 | Auth | JWT Bearer (tetap), token disimpan terenkripsi |
@@ -34,20 +34,20 @@
 
 | Kotlin (asal) | Capacitor/TypeScript (tujuan) | Catatan |
 |---|---|---|
-| Activity + `setContent` | Route React (SPA) | 1 Activity → 1 route |
-| ViewModel + coroutines | Hook + RTK Query | `try/catch` → status query |
+| Activity + `setContent` | Route vanilla (SPA, `mount(container) => cleanup`) | 1 Activity → 1 route |
+| ViewModel + coroutines | Fungsi async + store kecil | `try/catch` → status query |
 | Ktor + Gson | `CapacitorHttp` / `fetch` | Request native, bebas CORS |
 | `ApiClient` BASE_URL + timeout 45 dtk | `apiClient.ts` + env `VITE_API_URL` | Timeout 45 dtk wajib (cold start Render) |
 | `EncryptedSharedPreferences` | Plugin secure storage (Keystore) | `@capacitor/preferences` **tidak** terenkripsi, jangan dipakai untuk token |
 | `BiometricPrompt` | Plugin biometric auth | Perlu uji perangkat Android 9 |
-| Jetpack Compose Material3 | Komponen React + Tailwind | Token dari `docs/typography-scale.md`, `docs/spacing-scale.md` |
+| Jetpack Compose Material3 | Komponen fungsi `.ts` + Tailwind | Token dari `docs/typography-scale.md`, `docs/spacing-scale.md` |
 | `AumoDatePickerDialog` | Date picker web (input date / pustaka ringan) | |
 | `CurrencyFormatter` | `Intl.NumberFormat('id-ID')` | Uji paritas angka |
 | `SplashActivity` | `@capacitor/splash-screen` | |
 | `AppUpdateService` (APK dari GitHub Releases) | Plugin native kustom (Kotlin) + `@capacitor/filesystem` | Butuh FileProvider + `REQUEST_INSTALL_PACKAGES` |
 | `CrashLogHandler` | `window.onerror` + log file + handler native | Layar CrashLog tetap ada |
 | Tombol Back Android | `@capacitor/app` | |
-| Snackbar / ConfirmDialog | Komponen React | |
+| Snackbar / ConfirmDialog | Komponen fungsi `.ts` | |
 
 ## 4. Fase Migrasi (10 Fase)
 
@@ -58,7 +58,7 @@
 - [x] **Keluaran:** `docs/parity-matrix.md`. **Selesai bila:** semua layar dan endpoint tercatat.
 
 ### Fase 2 — Scaffolding Capacitor + TypeScript
-- [x] Buat `/mobile-capacitor` (Vite + React + TS strict, ESLint, Prettier).
+- [x] Buat `/mobile-capacitor` (Vite + TS strict tanpa React, ESLint, Prettier).
 - [x] `npx cap add android`; set `minSdk 28`, `targetSdk 34`, `appId com.bnrc.aumofinance`.
 - [x] Workflow GitHub Actions: build APK debug otomatis.
 - [x] **Keluaran:** APK debug "Hello" terpasang di Android 9. **Selesai bila:** CI hijau.
