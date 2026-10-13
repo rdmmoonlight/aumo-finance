@@ -1,11 +1,11 @@
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui-react/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-react/select";
 import {
   Table,
   TableBody,
@@ -13,7 +13,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui-react/table";
 import {
   createColumnHelper,
   flexRender,

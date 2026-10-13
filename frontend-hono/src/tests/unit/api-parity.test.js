@@ -6,12 +6,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getChartOfAccounts } from '@/api/chart-of-accounts';
 import { getDashboard } from '@/api/dashboard';
 import { getPeriods } from '@/api/periods';
-import { getIncomeStatement } from '@/api/reports';
+import { getIncomeStatement, getJournalsGeneral } from '@/api/reports';
 
 // 2. Import RTK Query API Slices
 import { chartOfAccountsApi } from '@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi';
 import { dashboardApi } from '@/lib/store/(authenticated)/dashboard/dashboardApi';
-import { journalEntryApi } from '@/lib/store/(authenticated)/journal-entry/journalEntryApi';
 import { periodsApi } from '@/lib/store/(authenticated)/periods/periodsApi';
 import { reportsApi } from '@/lib/store/(authenticated)/reports/reportsApi';
 
@@ -77,7 +76,7 @@ describe('Fase 3 — Uji Perbandingan Respon API (RTK Query vs New Data Layer)',
         await assertParity(reportsApi, 'getIncomeStatement', getIncomeStatement);
     });
 
-    it('5. Journal Entry API Parity', async () => {
-        await assertParity(journalEntryApi, 'getJournalsGeneral', async () => mockPayload);
+    it('5. Reports (General Journal) API Parity', async () => {
+        await assertParity(reportsApi, 'getJournalsGeneral', getJournalsGeneral);
     });
 });

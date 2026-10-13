@@ -6,11 +6,11 @@ import {
   flexRender,
   createColumnHelper,
 } from "@tanstack/react-table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-react/card";
+import { Button } from "@/components/ui-react/button";
+import { Input } from "@/components/ui-react/input";
+import { Badge } from "@/components/ui-react/badge";
+import { ScrollArea } from "@/components/ui-react/scroll-area";
 import {
   Table,
   TableBody,
@@ -18,7 +18,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui-react/table";
 import { cn } from "@/lib/utils";
 import {
   Bot,

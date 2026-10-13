@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-react/button";
 import { BookOpen } from "lucide-react";
 import { Link } from "@/lib/router";
 

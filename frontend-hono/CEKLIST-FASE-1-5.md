@@ -8,12 +8,12 @@ Metode: baca kode + jalankan `tsc --noEmit`, `vitest run`, `vite build` (pnpm, `
 | Pemeriksaan | Hasil |
 |-------------|-------|
 | File `.tsx` tersisa | 69 (awal 98; berkurang 29) |
-| `tsc --noEmit` | **GAGAL** — 931 error |
-| `vite build` | **GAGAL** — 79 error (5 ekspor hilang) |
-| Unit test | 6 lulus, **5 gagal** (`api-parity`) |
+| `tsc --noEmit` | **Lulus** — 0 error (sebelumnya 931) |
+| `vite build` | **Lulus** (sebelumnya gagal, 79 error) |
+| Unit test | **11 lulus** (sebelumnya 5 gagal) |
 | Status Fase 5 `[✓]` pada dokumen | **Belum layak** |
 
-Kesimpulan: Fase 1–3 sebagian besar selesai. Fase 4–5 berisi file pengganti, tetapi build rusak karena TSX UI sudah dihapus sementara halaman React masih memakainya.
+Kesimpulan: Fase 1 selesai, kecuali e2e Playwright yang belum bisa dijalankan (browser belum terpasang). Build, typecheck, lint, dan unit test hijau. Fase 4–5 masih berisi komponen string HTML; React memakai salinan sementara di `src/components/ui-react/`.
 
 ---
 
@@ -33,7 +33,10 @@ Kesimpulan: Fase 1–3 sebagian besar selesai. Fase 4–5 berisi file pengganti,
 - [x] `@react-oauth/google` dihapus
 - [x] Paket `cn` dihapus (tanpa pemakai)
 - [x] `vite.config.ts`: `server.proxy` `/api` memakai `backendTarget`
-- [ ] Gerbang: build hijau — masih gagal; penyebab bukan Fase 1, melainkan 5 ekspor hilang dari Fase 5 (`TabsList/TabsTrigger/TabsContent`, `SelectContent/SelectItem`)
+- [x] Gerbang: `tsc --noEmit`, `vite build`, `eslint`, `vitest` hijau
+- [ ] Gerbang: `playwright test` — belum dijalankan (browser Playwright belum terpasang di lingkungan pemeriksa); jalankan lokal: `pnpm exec playwright install chromium && pnpm test:e2e`
+- [x] Paket `cn` (npm) dibuang; komponen React memakai `cn` dari `@/lib/utils` (clsx + tailwind-merge)
+- [x] Bug landing `src/app/page.ts`: `mount(a, b, c)` hanya memasang `b` (modal login tidak pernah terpasang); diganti `append`
 
 ## Fase 2 — Fondasi Runtime (`src/core/`)
 - [x] `dom.js` (`h`, `mount`, `on`, `createDisposer`, `isMobile`)
@@ -49,20 +52,21 @@ Kesimpulan: Fase 1–3 sebagian besar selesai. Fase 4–5 berisi file pengganti,
 - [x] 10 modul `src/api/*` (auth, chart-of-accounts, common, dashboard, home, journal-entry, periods, reports, settings, tools)
 - [x] Cabang SSR dibuang dari klien baru
 - [x] Slice RTK lama dipertahankan
-- [ ] Ekstensi sesuai rencana `.js`: semua modul berekstensi `.ts` tetapi berisi kode JS tanpa tipe → ±58 error `tsc` di `src/api/*`
-- [ ] Uji perbandingan lulus: 5 dari 5 tes `api-parity` gagal (RTK Query di Node menolak URL relatif `/periods`; hasil RTK `undefined`) → uji tidak valid, bukan bukti paritas
+- [x] `src/api/*` bertipe (tetap `.ts` dengan generik): `apiClient<T>` diketik, `store.fetchWithCache` diberi JSDoc; 0 error `tsc`
+- [x] Uji perbandingan lulus: 5 dari 5 tes `api-parity` (host placeholder lewat `vitest.config.ts`; tes ke-5 kini memakai `getJournalsGeneral` asli, bukan stub)
 
 ## Fase 4 — Komponen UI Statis (12)
 - [x] 12 file `.js`: alert, avatar, badge, breadcrumb, button, card, input, label, separator, skeleton, table, textarea
 - [x] Varian lewat `cva`
 - [ ] Mengembalikan elemen DOM lewat `h()` (kontrak keputusan #3): saat ini mengembalikan **string HTML**
 - [ ] Katalog `/__ui`: `src/pages/ui-catalog.js` ada, tetapi tidak terdaftar di router (tidak bisa dibuka)
-- [ ] TSX pasangan dihapus hanya bila tanpa pemakai React: sudah dihapus, padahal halaman React masih memakainya
+- [x] TSX pasangan: 28 file UI yang terhapus dipulihkan ke `src/components/ui-react/` (sementara, dihapus di Fase 14–15); import React dialihkan ke `@/components/ui-react/*`
 
 ## Fase 5 — Komponen UI Interaktif (15)
 - [x] 15 file ada: dialog, alert-dialog, sheet, popover, tooltip, dropdown-menu, select, tabs, toggle, toggle-group, radio-group, checkbox, collapsible, scroll-area, navigation-menu
-- [ ] `tabs.js` tanpa `TabsList`, `TabsTrigger`, `TabsContent` (dipakai `settings/page.tsx`)
-- [ ] `select.js` tanpa `SelectContent`, `SelectItem`
+- [x] Dampak ke halaman React: tidak ada lagi, `settings/page.tsx` memakai `ui-react/tabs`
+- [ ] `tabs.js` vanilla tanpa `TabsList`, `TabsTrigger`, `TabsContent`
+- [ ] `select.js` vanilla tanpa `SelectContent`, `SelectItem`
 - [ ] `@floating-ui/dom` tidak terpasang; popover/tooltip/dropdown tanpa posisi dinamis
 - [ ] Aturan 5 (data tidak lewat `innerHTML`): semua komponen menyisipkan `${title}`, `${content}`, `${label}` tanpa escape → celah XSS
 - [ ] Handler `onclick="..."` inline dengan `id` terinterpolasi
@@ -72,12 +76,11 @@ Kesimpulan: Fase 1–3 sebagian besar selesai. Fase 4–5 berisi file pengganti,
 
 ---
 
-## Urutan Perbaikan (prioritas)
+## Urutan Perbaikan (sisa)
 
-1. Pulihkan build: tambahkan ekspor `TabsList/TabsTrigger/TabsContent`, `SelectContent/SelectItem`, atau kembalikan TSX UI sampai Fase 14.
-2. Ubah komponen Fase 4–5 menjadi `h()` (elemen DOM), buang interpolasi string HTML.
-3. Rapikan `src/api/*`: ganti ke `.js` + JSDoc, atau beri tipe; target `tsc` 0 error.
-4. Perbaiki `api-parity.test.js`: pakai URL absolut dan `fetch` mock.
-5. Daftarkan `/__ui` di router; lengkapi uji keyboard.
-6. Selesaikan sisa Fase 1: tag git, `playwright-report` ke `.gitignore`, `tsconfig.json`, hapus `cn`, `baseURL` Playwright.
-7. Setelah semua di atas hijau, baru tandai Fase 5 `[✓]`.
+1. Jalankan e2e: `pnpm exec playwright install chromium && pnpm test:e2e`, lalu centang gerbang Fase 1.
+2. Ubah komponen Fase 4–5 menjadi `h()` (elemen DOM), buang interpolasi string HTML (celah XSS).
+3. Lengkapi API vanilla `tabs.js` dan `select.js`; pasang `@floating-ui/dom` untuk popover/tooltip/dropdown.
+4. Daftarkan `/__ui` di router; lengkapi uji keyboard (tabs, select, radio, checkbox, toggle, tooltip).
+5. Gabungkan `format.ts` di `reports/*/_lib` ke `core/format.js`.
+6. Setelah semua hijau, baru tandai Fase 5 `[✓]`.

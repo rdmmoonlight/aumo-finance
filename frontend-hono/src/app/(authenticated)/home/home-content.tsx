@@ -1,7 +1,7 @@
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent } from "@/components/ui-react/card";
 import { AppDispatch, RootState } from "@/lib/store";
 import { homeApi } from "@/lib/store/(authenticated)/home/homeApi";
 import {

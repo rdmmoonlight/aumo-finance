@@ -1,6 +1,6 @@
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent } from "@/components/ui-react/card";
 import { store } from "@/lib/store";
 import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";

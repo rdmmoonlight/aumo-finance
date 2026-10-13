@@ -1,12 +1,12 @@
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-react/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui-react/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, PiggyBank } from "lucide-react";

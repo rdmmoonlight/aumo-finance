@@ -81,7 +81,7 @@ export function renderAuthForm(container: HTMLElement, opts: AuthOptions = {}) {
 
     mount(container, form);
 
-    disposer.add(on(form, "submit", async (e) => {
+    disposer.add(on(form, "submit", async (e: SubmitEvent) => {
       e.preventDefault();
       const payload = { email: emailInput.value, password: passwordInput.value, mode: currentMode };
       console.log(`${currentMode} Payload:`, payload);

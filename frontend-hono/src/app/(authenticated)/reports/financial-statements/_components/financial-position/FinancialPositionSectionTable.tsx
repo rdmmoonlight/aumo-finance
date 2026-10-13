@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui-react/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-react/card";
 import {
   Table,
   TableBody,
@@ -8,7 +8,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui-react/table";
 import {
   createColumnHelper,
   flexRender,

@@ -1,5 +1,5 @@
 import DashboardContent from "@/app/(authenticated)/dashboard/dashboard-content";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/components/ui-react/skeleton";
 import { Suspense } from "react";
 
 export default function DashboardPage() {

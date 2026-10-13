@@ -5,19 +5,19 @@ import {
   formatNumberWithDots,
 } from "@/app/(authenticated)/journal-entry/helpers";
 import { JournalLinesTable } from "@/app/(authenticated)/journal-entry/journal-lines-table";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-react/card";
+import { Input } from "@/components/ui-react/input";
+import { Label } from "@/components/ui-react/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-react/select";
 import { store } from "@/lib/store";
 import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";

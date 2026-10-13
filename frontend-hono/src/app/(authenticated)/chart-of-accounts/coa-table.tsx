@@ -9,18 +9,18 @@ import {
   ACCOUNT_TYPES,
   AccountItem,
 } from "@/app/(authenticated)/chart-of-accounts/coa-types";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent } from "@/components/ui-react/card";
+import { Input } from "@/components/ui-react/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-react/select";
 import {
   Table,
   TableBody,
@@ -28,7 +28,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui-react/table";
 import { store } from "@/lib/store";
 import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import { cn } from "@/lib/utils";

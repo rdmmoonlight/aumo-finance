@@ -1,12 +1,12 @@
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui-react/avatar";
+import { Button } from "@/components/ui-react/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui-react/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -20,7 +20,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   useSidebar,
-} from "@/components/ui/sidebar";
+} from "@/components/ui-react/sidebar";
 import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { authApi, UserProfileData } from "@/lib/store/auth/authApi";

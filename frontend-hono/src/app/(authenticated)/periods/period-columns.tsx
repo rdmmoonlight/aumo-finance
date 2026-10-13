@@ -4,8 +4,8 @@ import type {
   PeriodItem,
   PeriodListProps,
 } from "@/app/(authenticated)/periods/types";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Eye, EyeOff, Loader2, Lock, LockOpen, PlusCircle } from "lucide-react";

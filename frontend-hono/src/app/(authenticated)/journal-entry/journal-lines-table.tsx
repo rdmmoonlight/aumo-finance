@@ -5,17 +5,17 @@ import {
   formatIDR,
   LineItem,
 } from "@/app/(authenticated)/journal-entry/helpers";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui-react/card";
+import { Input } from "@/components/ui-react/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-react/select";
 import {
   Table,
   TableBody,
@@ -24,7 +24,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@/components/ui-react/table";
 import {
   flexRender,
   getCoreRowModel,
