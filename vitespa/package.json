@@ -5,12 +5,32 @@
   "description": "Aumo SPA Pertama",
   "type": "module",
   "scripts": {
+    "start": "vite",
+    "clean": "rimraf dist node_modules/.cache",
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --port 3000",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:e2e": "playwright test",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:unit": "vitest run",
+    "test:unit:watch": "vitest",
+    "test": "pnpm test:unit && pnpm test:e2e",
+    "generate:api": "openapi-typescript https://aumohono.onrender.com/openapi.json -o ./src/api/schema.d.ts"
   },
   "devDependencies": {
+    "openapi-typescript": "^7.13.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "axios": "^1.20.0",
+    "navigo": "^8.11.1",
+    "tailwindcss": "^4.3.3",
+    "zustand": "^5.0.15"
   }
 }
