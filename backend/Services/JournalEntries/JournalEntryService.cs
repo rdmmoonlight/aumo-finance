@@ -114,39 +114,30 @@ public class JournalEntryService : IJournalEntryService
         string transactionNumber = await _transactionNumberService.GenerateAsync(userId, journalType, request.EntryDate);
 
         var deviceCreatedAt = request.CreatedAt == default ? DateTime.UtcNow : request.CreatedAt;
+        var entryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc);
+        var createdAt = DateTime.SpecifyKind(deviceCreatedAt, DateTimeKind.Utc);
 
-        var entry = new JournalEntry
-        {
-            UserId = userId,
-            TransactionNumber = transactionNumber,
-            JournalType = journalType,
-            EntryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc),
-            CreatedAt = DateTime.SpecifyKind(deviceCreatedAt, DateTimeKind.Utc),
-            Lines = effectiveLines.Select((l, index) => new JournalEntryLine
-            {
-                AccountId = l.AccountId,
-                LineDescription = l.LineDescription,
-                Debit = l.Debit,
-                Credit = l.Credit,
-                LineOrder = index
-            }).ToList()
-        };
+        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_db);
 
-        _db.JournalEntries.Add(entry);
+        var rows = GeneralJournalWriter.BuildRows(
+            journalEntryId, userId, transactionNumber, journalType, entryDate, createdAt, null,
+            effectiveLines.Select(l => new GeneralJournalWriter.Line(l.AccountId, l.LineDescription, l.Debit, l.Credit)));
+
+        _db.GeneralJournals.AddRange(rows);
         await _db.SaveChangesAsync();
 
         return new GeneralJournalResponseDto
         {
-            Id = entry.Id,
-            TransactionNumber = entry.TransactionNumber,
-            JournalType = entry.JournalType,
-            EntryDate = entry.EntryDate,
-            CreatedAt = entry.CreatedAt,
-            UpdatedAt = entry.UpdatedAt,
+            Id = journalEntryId,
+            TransactionNumber = transactionNumber,
+            JournalType = journalType,
+            EntryDate = entryDate,
+            CreatedAt = createdAt,
+            UpdatedAt = null,
             IsLocked = false,
-            Lines = entry.Lines.Select(l => new GeneralJournalLineDto
+            Lines = rows.Select(l => new GeneralJournalLineDto
             {
-                Id = l.Id,
+                Id = l.LineId,
                 AccountId = l.AccountId,
                 LineDescription = l.LineDescription,
                 Debit = l.Debit,
@@ -158,77 +149,69 @@ public class JournalEntryService : IJournalEntryService
 
     public async Task UpdateAsync(Guid userId, int id, UpdateGeneralJournalRequest request)
     {
-        var entry = await _db.JournalEntries
-            .Include(j => j.Lines)
-            .FirstOrDefaultAsync(j => j.Id == id && j.UserId == userId);
+        // id = JournalEntryId (id kelompok jurnal)
+        var existingRows = await _db.GeneralJournals
+            .Where(g => g.JournalEntryId == id && g.UserId == userId)
+            .ToListAsync();
 
-        if (entry == null)
+        if (existingRows.Count == 0)
         {
             throw new KeyNotFoundException("Journal entry not found.");
         }
+
+        var header = existingRows[0];
 
         var closedPeriods = await _db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
-        if (PeriodLock.IsDateLocked(entry.EntryDate, closedPeriods) || PeriodLock.IsDateLocked(request.EntryDate, closedPeriods))
+        if (PeriodLock.IsDateLocked(header.EntryDate, closedPeriods) || PeriodLock.IsDateLocked(request.EntryDate, closedPeriods))
         {
-            throw new InvalidOperationException($"Journal entry {entry.TransactionNumber} falls within a closed period and cannot be modified.");
+            throw new InvalidOperationException($"Journal entry {header.TransactionNumber} falls within a closed period and cannot be modified.");
         }
 
         var effectiveLines = ValidateAndExtractLines(request.Lines);
         await ValidateAccountsAsync(userId, effectiveLines);
 
-        entry.JournalType = string.IsNullOrWhiteSpace(request.JournalType) ? entry.JournalType : request.JournalType;
-        entry.EntryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc);
-
+        string journalType = string.IsNullOrWhiteSpace(request.JournalType) ? header.JournalType : request.JournalType;
+        var entryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc);
         var deviceUpdatedAt = request.UpdatedAt == default ? DateTime.UtcNow : request.UpdatedAt;
-        entry.UpdatedAt = DateTime.SpecifyKind(deviceUpdatedAt, DateTimeKind.Utc);
+        var updatedAt = DateTime.SpecifyKind(deviceUpdatedAt, DateTimeKind.Utc);
 
-        _db.JournalEntryLines.RemoveRange(entry.Lines);
+        var newRows = GeneralJournalWriter.BuildRows(
+            header.JournalEntryId, userId, header.TransactionNumber, journalType, entryDate,
+            header.CreatedAt, updatedAt,
+            effectiveLines.Select(l => new GeneralJournalWriter.Line(l.AccountId, l.LineDescription, l.Debit, l.Credit)),
+            header.Status ?? GeneralJournalWriter.PostedStatus);
 
-        entry.Lines = effectiveLines.Select((l, index) => new JournalEntryLine
-        {
-            JournalEntryId = entry.Id,
-            AccountId = l.AccountId,
-            LineDescription = l.LineDescription,
-            Debit = l.Debit,
-            Credit = l.Credit,
-            LineOrder = index
-        }).ToList();
-
+        // Hapus baris lama + tambah baris baru dalam satu SaveChanges (satu transaksi).
+        _db.GeneralJournals.RemoveRange(existingRows);
+        _db.GeneralJournals.AddRange(newRows);
         await _db.SaveChangesAsync();
     }
 
     public async Task DeleteByTransactionNumberAsync(Guid userId, string transactionNumber)
     {
-        var entry = await _db.JournalEntries
-            .FirstOrDefaultAsync(j => j.TransactionNumber == transactionNumber && j.UserId == userId);
-
-        if (entry == null)
-        {
-            throw new KeyNotFoundException("Journal entry not found.");
-        }
-
-        var closedPeriods = await _db.Periods
-            .Where(p => p.UserId == userId && p.IsClosed)
+        var rows = await _db.GeneralJournals
+            .Where(g => g.TransactionNumber == transactionNumber && g.UserId == userId)
             .ToListAsync();
 
-        if (PeriodLock.IsDateLocked(entry.EntryDate, closedPeriods))
-        {
-            throw new InvalidOperationException("Cannot delete transactions in closed accounting periods.");
-        }
-
-        _db.JournalEntries.Remove(entry);
-        await _db.SaveChangesAsync();
+        await DeleteRowsAsync(userId, rows);
     }
 
     public async Task DeleteAsync(Guid userId, int id)
     {
-        var entry = await _db.JournalEntries
-            .FirstOrDefaultAsync(j => j.Id == id && j.UserId == userId);
+        // id = JournalEntryId (id kelompok jurnal)
+        var rows = await _db.GeneralJournals
+            .Where(g => g.JournalEntryId == id && g.UserId == userId)
+            .ToListAsync();
 
-        if (entry == null)
+        await DeleteRowsAsync(userId, rows);
+    }
+
+    private async Task DeleteRowsAsync(Guid userId, List<AumoBackend.Models.Reports.GeneralJournal> rows)
+    {
+        if (rows.Count == 0)
         {
             throw new KeyNotFoundException("Journal entry not found.");
         }
@@ -237,12 +220,12 @@ public class JournalEntryService : IJournalEntryService
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
-        if (PeriodLock.IsDateLocked(entry.EntryDate, closedPeriods))
+        if (PeriodLock.IsDateLocked(rows[0].EntryDate, closedPeriods))
         {
             throw new InvalidOperationException("Cannot delete transactions in closed accounting periods.");
         }
 
-        _db.JournalEntries.Remove(entry);
+        _db.GeneralJournals.RemoveRange(rows);
         await _db.SaveChangesAsync();
     }
 
