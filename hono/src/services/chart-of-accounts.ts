@@ -1,10 +1,13 @@
-// chart-of-accounts.service.ts
 import { and, asc, desc, eq, gte, inArray, lte, ne, sql } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import * as schema from '../db/schema/chart-of-accounts';
+import * as chartOfAccountsSchema from '../db/schema/chart-of-accounts';
+import * as generalJournalSchema from '../db/schema/general-journal';
+import * as periodSchema from '../db/schema/periods';
 import { normalBalanceIsDebit, tryParseClassification, validateReferenceNumber } from '../lib/account-classification';
 
-type DrizzleDb = NodePgDatabase<typeof schema>;
+type DrizzleDb = NodePgDatabase<
+    typeof chartOfAccountsSchema & typeof periodSchema & typeof generalJournalSchema
+>;
 
 // DTOs
 export type AccountItemDto = {
@@ -15,47 +18,51 @@ export type AccountItemDto = {
     role: string;
     isActive: boolean;
     balance: number;
-}
+};
+
 export type ChartOfAccountsListResponseDto = {
     success: boolean;
     selectedPeriodName?: string | null;
     accounts: AccountItemDto[];
-}
+};
+
 export type CreateAccountRequestDto = {
     referenceNumber: number;
     accountName: string;
     type: string;
     role?: string;
-}
+};
+
 export type UpdateAccountRequestDto = CreateAccountRequestDto & { isActive: boolean };
+
 export type ServiceResultDto = {
     isSuccess: boolean;
     message: string;
     accountId?: number;
     statusCode: number;
-}
+};
 
 export class ChartOfAccountsService {
     constructor(private db: DrizzleDb) { }
 
     async getAccounts(userId: string, search?: string, category?: string): Promise<ChartOfAccountsListResponseDto> {
-        const conditions = [eq(schema.chartOfAccounts.userId, userId)];
+        const conditions = [eq(chartOfAccountsSchema.chartOfAccounts.userId, userId)];
 
         if (search?.trim()) {
             const kw = `%${search.trim()}%`;
             conditions.push(
-                sql`(${schema.chartOfAccounts.accountName} ILIKE ${kw} OR CAST(${schema.chartOfAccounts.referenceNumber} AS TEXT) ILIKE ${kw})`
+                sql`(${chartOfAccountsSchema.chartOfAccounts.accountName} ILIKE ${kw} OR CAST(${chartOfAccountsSchema.chartOfAccounts.referenceNumber} AS TEXT) ILIKE ${kw})`
             );
         }
         if (category?.trim()) {
-            conditions.push(eq(schema.chartOfAccounts.type, category.trim()));
+            conditions.push(eq(chartOfAccountsSchema.chartOfAccounts.type, category.trim()));
         }
 
         const loadedAccounts = await this.db
             .select()
-            .from(schema.chartOfAccounts)
+            .from(chartOfAccountsSchema.chartOfAccounts)
             .where(and(...conditions))
-            .orderBy(asc(schema.chartOfAccounts.referenceNumber));
+            .orderBy(asc(chartOfAccountsSchema.chartOfAccounts.referenceNumber));
 
         if (loadedAccounts.length === 0) {
             const currentPeriod = await this.getCurrentPeriod(userId);
@@ -81,22 +88,25 @@ export class ChartOfAccountsService {
 
             const rows = await this.db
                 .select({
-                    accountId: schema.journalEntryLines.accountId,
-                    totalDebit: sql<number>`SUM(${schema.journalEntryLines.debit}::decimal)`.mapWith(Number),
-                    totalCredit: sql<number>`SUM(${schema.journalEntryLines.credit}::decimal)`.mapWith(Number),
+                    accountId: generalJournalSchema.generalJournal.accountId,
+                    totalDebit: sql<number>`SUM(${generalJournalSchema.generalJournal.debit}::decimal)`.mapWith(Number),
+                    totalCredit: sql<number>`SUM(${generalJournalSchema.generalJournal.credit}::decimal)`.mapWith(Number),
                 })
-                .from(schema.journalEntryLines)
-                .innerJoin(schema.journalEntries, eq(schema.journalEntryLines.journalEntryId, schema.journalEntries.id))
+                .from(generalJournalSchema.generalJournal)
                 .where(and(
-                    inArray(schema.journalEntryLines.accountId, accountIds),
-                    eq(schema.journalEntries.userId, userId),
-                    inArray(schema.journalEntries.journalType, ['General', 'Adjusting']),
-                    gte(schema.journalEntries.entryDate, startUtc),
-                    lte(schema.journalEntries.entryDate, endUtc)
+                    inArray(generalJournalSchema.generalJournal.accountId, accountIds),
+                    eq(generalJournalSchema.generalJournal.userId, userId),
+                    inArray(generalJournalSchema.generalJournal.journalType, ['General', 'Adjusting']),
+                    gte(generalJournalSchema.generalJournal.entryDate, startUtc.toISOString()),
+                    lte(generalJournalSchema.generalJournal.entryDate, endUtc.toISOString())
                 ))
-                .groupBy(schema.journalEntryLines.accountId);
+                .groupBy(generalJournalSchema.generalJournal.accountId);
 
-            for (const r of rows) balanceMap.set(r.accountId, { debit: r.totalDebit ?? 0, credit: r.totalCredit ?? 0 });
+            for (const r of rows) {
+                if (r.accountId !== null) {
+                    balanceMap.set(r.accountId, { debit: r.totalDebit ?? 0, credit: r.totalCredit ?? 0 });
+                }
+            }
         }
 
         const accounts: AccountItemDto[] = loadedAccounts.map(acc => {
@@ -139,12 +149,12 @@ export class ChartOfAccountsService {
         if (!validateReferenceNumber(classification)) return this.fail(`Invalid reference number ${req.referenceNumber} for category ${req.type}.`, 400);
 
         const exists = await this.db.query.chartOfAccounts.findFirst({
-            where: and(eq(schema.chartOfAccounts.userId, userId), eq(schema.chartOfAccounts.referenceNumber, req.referenceNumber)),
+            where: and(eq(chartOfAccountsSchema.chartOfAccounts.userId, userId), eq(chartOfAccountsSchema.chartOfAccounts.referenceNumber, req.referenceNumber)),
         });
         if (exists) return this.fail(`Account code ${req.referenceNumber} is already in use.`, 400);
 
         try {
-            const [newAcc] = await this.db.insert(schema.chartOfAccounts).values({
+            const [newAcc] = await this.db.insert(chartOfAccountsSchema.chartOfAccounts).values({
                 id: sql<number>`DEFAULT`,
                 userId,
                 referenceNumber: req.referenceNumber,
@@ -162,7 +172,7 @@ export class ChartOfAccountsService {
 
     async updateAccount(userId: string, accountId: number, req: UpdateAccountRequestDto): Promise<ServiceResultDto> {
         const account = await this.db.query.chartOfAccounts.findFirst({
-            where: and(eq(schema.chartOfAccounts.id, accountId), eq(schema.chartOfAccounts.userId, userId)),
+            where: and(eq(chartOfAccountsSchema.chartOfAccounts.id, accountId), eq(chartOfAccountsSchema.chartOfAccounts.userId, userId)),
         });
         if (!account) return this.fail('Account not found.', 404);
         if (!req.accountName?.trim()) return this.fail('Account name is required.', 400);
@@ -173,21 +183,21 @@ export class ChartOfAccountsService {
 
         const codeTaken = await this.db.query.chartOfAccounts.findFirst({
             where: and(
-                eq(schema.chartOfAccounts.userId, userId),
-                eq(schema.chartOfAccounts.referenceNumber, req.referenceNumber),
-                ne(schema.chartOfAccounts.id, accountId)
+                eq(chartOfAccountsSchema.chartOfAccounts.userId, userId),
+                eq(chartOfAccountsSchema.chartOfAccounts.referenceNumber, req.referenceNumber),
+                ne(chartOfAccountsSchema.chartOfAccounts.id, accountId)
             ),
         });
         if (codeTaken) return this.fail(`Account code ${req.referenceNumber} is already in use.`, 400);
 
         try {
-            await this.db.update(schema.chartOfAccounts).set({
+            await this.db.update(chartOfAccountsSchema.chartOfAccounts).set({
                 referenceNumber: req.referenceNumber,
                 accountName: req.accountName.trim(),
                 type: req.type,
                 role: req.role?.trim() ? req.role : 'Default',
                 isActive: req.isActive,
-            }).where(eq(schema.chartOfAccounts.id, accountId));
+            }).where(eq(chartOfAccountsSchema.chartOfAccounts.id, accountId));
 
             return this.success(`Account '${req.accountName.trim()}' successfully updated.`);
         } catch (e: any) {
@@ -197,19 +207,19 @@ export class ChartOfAccountsService {
 
     async deleteAccount(userId: string, accountId: number): Promise<ServiceResultDto> {
         const entity = await this.db.query.chartOfAccounts.findFirst({
-            where: and(eq(schema.chartOfAccounts.id, accountId), eq(schema.chartOfAccounts.userId, userId)),
+            where: and(eq(chartOfAccountsSchema.chartOfAccounts.id, accountId), eq(chartOfAccountsSchema.chartOfAccounts.userId, userId)),
         });
         if (!entity) return this.fail('Account not found.', 404);
 
-        const hasJournal = await this.db.query.journalEntryLines.findFirst({
-            where: eq(schema.journalEntryLines.accountId, accountId),
+        const hasJournal = await this.db.query.generalJournal.findFirst({
+            where: eq(generalJournalSchema.generalJournal.accountId, accountId),
         });
         if (hasJournal) {
             return this.fail(`Account '${entity.accountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead.`, 400);
         }
 
         try {
-            await this.db.delete(schema.chartOfAccounts).where(eq(schema.chartOfAccounts.id, accountId));
+            await this.db.delete(chartOfAccountsSchema.chartOfAccounts).where(eq(chartOfAccountsSchema.chartOfAccounts.id, accountId));
             return this.success(`Account '${entity.accountName}' successfully deleted.`);
         } catch (e: any) {
             return this.fail(`A fatal error occurred while deleting the account: ${e.message}`, 500);
@@ -217,18 +227,16 @@ export class ChartOfAccountsService {
     }
 
     private async getCurrentPeriod(userId: string) {
-        // SelectedPeriodHelper.GetSelectedPeriodAsync equivalent
         const selected = await this.db.query.selectedPeriods.findFirst({
-            where: eq(schema.selectedPeriods.userId, userId),
+            where: eq(periodSchema.selectedPeriods.userId, userId),
         });
         if (selected) {
-            const period = await this.db.query.periods.findFirst({ where: eq(schema.periods.id, selected.periodId) });
+            const period = await this.db.query.periods.findFirst({ where: eq(periodSchema.periods.id, selected.periodId) });
             if (period) return period;
         }
-        // fallback: latest period
         return await this.db.query.periods.findFirst({
-            where: eq(schema.periods.userId, userId),
-            orderBy: desc(schema.periods.startDate),
+            where: eq(periodSchema.periods.userId, userId),
+            orderBy: desc(periodSchema.periods.startDate),
         });
     }
 
