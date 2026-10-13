@@ -1,4 +1,5 @@
 using AumoBackend.Models;
+using AumoBackend.Models.Reports;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -43,6 +44,9 @@ public class AppDbContext
 
     public DbSet<JournalEntryLine> JournalEntryLines
         => Set<JournalEntryLine>();
+
+    public DbSet<GeneralJournal> GeneralJournals
+        => Set<GeneralJournal>();
 
     public DbSet<TransactionCounter> TransactionCounters
         => Set<TransactionCounter>();
@@ -118,6 +122,20 @@ public class AppDbContext
             .IsUnique();
         });
 
+        // ========================================================
+        // General Journal
+        // ========================================================
+
+        builder.Entity<GeneralJournal>(entity =>
+        {
+            entity.HasKey(x => x.LineId); // Menggunakan LineId sebagai Primary Key
+
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.EntryDate
+            });
+        });
 
         // ========================================================
         // Journal Entry
