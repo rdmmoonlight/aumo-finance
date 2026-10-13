@@ -1,7 +1,5 @@
 import js from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
-import reactHooks from 'eslint-plugin-react-hooks';
-import reactRefresh from 'eslint-plugin-react-refresh';
 import { defineConfig, globalIgnores } from 'eslint/config';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
@@ -12,8 +10,8 @@ export default defineConfig([
 
   // 2. Konfigurasi dasar JS & Strict TypeScript
   js.configs.recommended,
-  ...tseslint.configs.strictTypeChecked.map((c) => ({ ...c, files: ['**/*.{ts,tsx}'] })),
-  ...tseslint.configs.stylisticTypeChecked.map((c) => ({ ...c, files: ['**/*.{ts,tsx}'] })),
+  ...tseslint.configs.strictTypeChecked.map((c) => ({ ...c, files: ['**/*.ts'] })),
+  ...tseslint.configs.stylisticTypeChecked.map((c) => ({ ...c, files: ['**/*.ts'] })),
 
   // File JS (mis. eslint.config.js) tidak ikut proyek TS, jadi tanpa aturan type-aware
   {
@@ -21,9 +19,9 @@ export default defineConfig([
     ...tseslint.configs.disableTypeChecked,
   },
 
-  // 3. Konfigurasi utama untuk file TS/TSX
+  // 3. Konfigurasi utama untuk file TS
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.ts'],
     languageOptions: {
       ecmaVersion: 'latest',
       globals: globals.browser,
@@ -32,13 +30,19 @@ export default defineConfig([
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    plugins: {
-      'react-hooks': reactHooks,
-      'react-refresh': reactRefresh,
-    },
     rules: {
-      ...reactHooks.configs.recommended.rules,
-      'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      // Proyek ini tanpa React/framework UI: DOM langsung dari TypeScript.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['react', 'react/*', 'react-dom', 'react-dom/*', 'preact', 'vue'],
+              message: 'Tanpa framework UI di proyek ini.',
+            },
+          ],
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
