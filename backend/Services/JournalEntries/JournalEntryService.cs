@@ -1,15 +1,5 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.JournalEntries;
-using AumoBackend.Services.Periods;
 using AumoBackend.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,32 +16,36 @@ public class JournalEntryService : IJournalEntryService
         _transactionNumberService = transactionNumberService;
     }
 
-    public async Task<JournalEntryResponseDto?> GetByIdAsync(Guid userId, int id)
+    public async Task<GeneralJournalResponseDto?> GetByIdAsync(Guid userId, int id)
     {
-        var entry = await _db.JournalEntries
-            .Include(j => j.Lines)
-            .FirstOrDefaultAsync(j => j.Id == id && j.UserId == userId);
+        // Membaca baris-baris detail dari tabel GeneralJournal berdasarkan JournalEntryId
+        var rows = await _db.GeneralJournals
+            .Where(gj => gj.JournalEntryId == id && gj.UserId == userId)
+            .OrderBy(gj => gj.LineOrder)
+            .ToListAsync();
 
-        if (entry == null) return null;
+        if (!rows.Any()) return null;
+
+        var firstRow = rows.First();
 
         var closedPeriods = await _db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
-        bool isLocked = PeriodLock.IsDateLocked(entry.EntryDate, closedPeriods);
+        bool isLocked = PeriodLock.IsDateLocked(firstRow.EntryDate, closedPeriods);
 
-        return new JournalEntryResponseDto
+        return new GeneralJournalResponseDto
         {
-            Id = entry.Id,
-            TransactionNumber = entry.TransactionNumber,
-            JournalType = entry.JournalType,
-            EntryDate = entry.EntryDate,
-            CreatedAt = entry.CreatedAt,
-            UpdatedAt = entry.UpdatedAt,
+            Id = firstRow.JournalEntryId,
+            TransactionNumber = firstRow.TransactionNumber,
+            JournalType = firstRow.JournalType,
+            EntryDate = firstRow.EntryDate,
+            CreatedAt = firstRow.CreatedAt,
+            UpdatedAt = firstRow.UpdatedAt,
             IsLocked = isLocked,
-            Lines = entry.Lines.OrderBy(l => l.LineOrder).Select(l => new JournalEntryLineResponseDto
+            Lines = rows.Select(l => new GeneralJournalLineDto
             {
-                Id = l.Id,
+                Id = l.LineId,
                 AccountId = l.AccountId,
                 LineDescription = l.LineDescription,
                 Debit = l.Debit,
@@ -61,7 +55,48 @@ public class JournalEntryService : IJournalEntryService
         };
     }
 
-    public async Task<CreateJournalEntryResponseDto> CreateAsync(Guid userId, CreateJournalEntryRequest request)
+    public async Task<List<GeneralJournalResponseDto>> GetByTransactionNumberAsync(Guid userId, string transactionNumber)
+    {
+        var rows = await _db.GeneralJournals
+            .Where(gj => gj.TransactionNumber == transactionNumber && gj.UserId == userId)
+            .OrderBy(gj => gj.LineOrder)
+            .ToListAsync();
+
+        if (!rows.Any()) return new List<GeneralJournalResponseDto>();
+
+        var closedPeriods = await _db.Periods
+            .Where(p => p.UserId == userId && p.IsClosed)
+            .ToListAsync();
+
+        return rows
+            .GroupBy(row => row.JournalEntryId)
+            .Select(group =>
+            {
+                var firstRow = group.First();
+                return new GeneralJournalResponseDto
+                {
+                    Id = firstRow.JournalEntryId,
+                    TransactionNumber = firstRow.TransactionNumber,
+                    JournalType = firstRow.JournalType,
+                    EntryDate = firstRow.EntryDate,
+                    CreatedAt = firstRow.CreatedAt,
+                    UpdatedAt = firstRow.UpdatedAt,
+                    IsLocked = PeriodLock.IsDateLocked(firstRow.EntryDate, closedPeriods),
+                    Lines = group.Select(l => new GeneralJournalLineDto
+                    {
+                        Id = l.LineId,
+                        AccountId = l.AccountId,
+                        LineDescription = l.LineDescription,
+                        Debit = l.Debit,
+                        Credit = l.Credit,
+                        LineOrder = l.LineOrder
+                    }).ToList()
+                };
+            })
+            .ToList();
+    }
+
+    public async Task<GeneralJournalResponseDto> CreateAsync(Guid userId, CreateGeneralJournalRequest request)
     {
         var effectiveLines = ValidateAndExtractLines(request.Lines);
         await ValidateAccountsAsync(userId, effectiveLines);
@@ -100,15 +135,28 @@ public class JournalEntryService : IJournalEntryService
         _db.JournalEntries.Add(entry);
         await _db.SaveChangesAsync();
 
-        return new CreateJournalEntryResponseDto
+        return new GeneralJournalResponseDto
         {
-            EntryId = entry.Id,
+            Id = entry.Id,
             TransactionNumber = entry.TransactionNumber,
-            Message = $"Journal entry {entry.TransactionNumber} has been posted."
+            JournalType = entry.JournalType,
+            EntryDate = entry.EntryDate,
+            CreatedAt = entry.CreatedAt,
+            UpdatedAt = entry.UpdatedAt,
+            IsLocked = false,
+            Lines = entry.Lines.Select(l => new GeneralJournalLineDto
+            {
+                Id = l.Id,
+                AccountId = l.AccountId,
+                LineDescription = l.LineDescription,
+                Debit = l.Debit,
+                Credit = l.Credit,
+                LineOrder = l.LineOrder
+            }).ToList()
         };
     }
 
-    public async Task UpdateAsync(Guid userId, int id, UpdateJournalEntryRequest request)
+    public async Task UpdateAsync(Guid userId, int id, UpdateGeneralJournalRequest request)
     {
         var entry = await _db.JournalEntries
             .Include(j => j.Lines)
@@ -152,6 +200,29 @@ public class JournalEntryService : IJournalEntryService
         await _db.SaveChangesAsync();
     }
 
+    public async Task DeleteByTransactionNumberAsync(Guid userId, string transactionNumber)
+    {
+        var entry = await _db.JournalEntries
+            .FirstOrDefaultAsync(j => j.TransactionNumber == transactionNumber && j.UserId == userId);
+
+        if (entry == null)
+        {
+            throw new KeyNotFoundException("Journal entry not found.");
+        }
+
+        var closedPeriods = await _db.Periods
+            .Where(p => p.UserId == userId && p.IsClosed)
+            .ToListAsync();
+
+        if (PeriodLock.IsDateLocked(entry.EntryDate, closedPeriods))
+        {
+            throw new InvalidOperationException("Cannot delete transactions in closed accounting periods.");
+        }
+
+        _db.JournalEntries.Remove(entry);
+        await _db.SaveChangesAsync();
+    }
+
     public async Task DeleteAsync(Guid userId, int id)
     {
         var entry = await _db.JournalEntries
@@ -175,7 +246,7 @@ public class JournalEntryService : IJournalEntryService
         await _db.SaveChangesAsync();
     }
 
-    public async Task<List<string>> SearchDescriptionsAsync(Guid userId, string query)
+    public async Task<List<string>> SearchLineDescriptionsAsync(Guid userId, string query)
     {
         if (string.IsNullOrWhiteSpace(query) || query.Trim().Length < 2)
         {
@@ -184,14 +255,14 @@ public class JournalEntryService : IJournalEntryService
 
         var keyword = query.Trim();
 
-        return await _db.JournalEntryLines
-            .Include(l => l.JournalEntry)
-            .Where(l => l.JournalEntry!.UserId == userId
-                     && l.LineDescription != null && l.LineDescription != ""
-                     && EF.Functions.ILike(l.LineDescription, $"%{keyword}%"))
-            .GroupBy(l => l.LineDescription)
+        // Membaca langsung dari GeneralJournals tanpa butuh .Include()
+        return await _db.GeneralJournals
+            .Where(gj => gj.UserId == userId
+                      && gj.LineDescription != null && gj.LineDescription != ""
+                      && EF.Functions.ILike(gj.LineDescription, $"%{keyword}%"))
+            .GroupBy(gj => gj.LineDescription)
             .OrderByDescending(g => g.Count())
-            .ThenByDescending(g => g.Max(l => l.Id))
+            .ThenByDescending(g => g.Max(gj => gj.LineId))
             .Select(g => g.Key!)
             .Take(8)
             .ToListAsync();
@@ -203,7 +274,7 @@ public class JournalEntryService : IJournalEntryService
         return await _transactionNumberService.PeekNextAsync(userId, type, entryDate ?? DateTime.Today);
     }
 
-    private static List<JournalEntryLineDto> ValidateAndExtractLines(List<JournalEntryLineDto> lines)
+    private static List<CreateGeneralJournalLineRequest> ValidateAndExtractLines(List<CreateGeneralJournalLineRequest> lines)
     {
         var effectiveLines = lines
             .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))
@@ -225,7 +296,7 @@ public class JournalEntryService : IJournalEntryService
         return effectiveLines;
     }
 
-    private async Task ValidateAccountsAsync(Guid userId, List<JournalEntryLineDto> lines)
+    private async Task ValidateAccountsAsync(Guid userId, List<CreateGeneralJournalLineRequest> lines)
     {
         var validAccountIds = (await _db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
