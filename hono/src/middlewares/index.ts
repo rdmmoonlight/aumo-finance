@@ -3,7 +3,7 @@ import { bodyLimit } from 'hono/body-limit';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import { env } from '../lib/env.js';
-import type { AppEnv } from '../types/app.types.js';
+import type { AppEnv } from '../types/app.js';
 import { corsMiddleware } from './cors.js';
 import { errorHandler, notFoundHandler } from './error-handler.js';
 import { requestLogger } from './logger.js';

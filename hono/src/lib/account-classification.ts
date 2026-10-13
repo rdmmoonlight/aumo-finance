@@ -147,3 +147,45 @@ export function isDateLocked(date: Date, periods?: Period[] | null): boolean {
     }
     return false;
 }
+
+// account-classification.helper.ts
+export enum AccountType {
+    Assets = 'Assets',
+    Liabilities = 'Liabilities',
+    Equity = 'Equity',
+    OperatingIncome = 'OperatingIncome',
+    OtherIncome = 'OtherIncome',
+    OperatingExpenses = 'OperatingExpenses',
+    OtherExpenses = 'OtherExpenses',
+}
+
+export function tryParseClassification(type: string): AccountClassification | null {
+    const normalized = type.trim().toLowerCase();
+    const found = Object.values(AccountType).find(value => value.toLowerCase() === normalized);
+
+    if (!found) {
+        return null;
+    }
+
+    switch (found) {
+        case AccountType.Assets:
+            return AccountClassification.Asset;
+        case AccountType.Liabilities:
+            return AccountClassification.Liability;
+        case AccountType.Equity:
+            return AccountClassification.Equity;
+        case AccountType.OperatingIncome:
+        case AccountType.OtherIncome:
+            return AccountClassification.Revenue;
+        case AccountType.OperatingExpenses:
+        case AccountType.OtherExpenses:
+            return AccountClassification.Expense;
+        default:
+            return null;
+    }
+}
+
+// Normal balance: Asset & Expense = Debit
+export function normalBalanceIsDebit(c: AccountClassification): boolean {
+    return normalBalanceIsDebitByClassification(c);
+}

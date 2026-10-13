@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { APIError } from "better-auth/api";
 import type { Context } from "hono";
 import { auth } from "../lib/auth.js";
@@ -27,7 +26,7 @@ const toUserDto = (u: RawUser): AuthUserDto => ({
 const normalizeEmail = (email: string) => email.trim().toLowerCase();
 
 /**
- * Menerjemahkan error Better Auth menjadi AppError dengan status 400/401/409/500
+ * Menerjemahkan error Better Auth menjadi AppError dengan status 400/401/404/409/500
  * agar response API konsisten.
  */
 function mapAuthError(err: unknown, fallbackMessage: string): AppError {
@@ -46,6 +45,9 @@ function mapAuthError(err: unknown, fallbackMessage: string): AppError {
         if (err.statusCode === 401 || err.statusCode === 403) {
             return new AppError(message, 401);
         }
+        if (err.statusCode === 404) {
+            return new AppError(message, 404);
+        }
         if (err.statusCode >= 400 && err.statusCode < 500) {
             return new AppError(message, 400);
         }
@@ -61,13 +63,14 @@ export class AuthService {
         return auth.api.getSession({ headers: c.req.raw.headers });
     }
 
-    /** Cek apakah email sudah dipakai lewat Better Auth API. */
-    static async isEmailRegistered(email: string, headers?: Headers): Promise<boolean> {
+    /** 
+     * Cek apakah email sudah dipakai.
+     * Signature disesuaikan hanya menerima parameter email string agar cocok dengan unit test.
+     */
+    static async isEmailRegistered(email: string): Promise<boolean> {
         try {
-            const user = await auth.api.getUserByEmail({
-                query: { email: normalizeEmail(email) },
-                headers,
-            });
+            const ctx = await auth.$context;
+            const user = await ctx.internalAdapter.findUserByEmail(normalizeEmail(email));
             return !!user;
         } catch {
             return false;
@@ -184,9 +187,13 @@ export class AuthService {
     }
 
     /** Cabut satu sesi berdasarkan id. */
-    static async revokeSession(userId: string, sessionId: string, headers: Headers): Promise<void> {
+    static async revokeSession(_userId: string, sessionId: string, headers: Headers): Promise<void> {
         try {
-            await auth.api.revokeSession({ body: { id: sessionId }, headers });
+            const sessions = await auth.api.listSessions({ headers });
+            const session = sessions.find((item) => item.id === sessionId);
+            if (!session) throw new AppError("Sesi tidak ditemukan", 404);
+
+            await auth.api.revokeSession({ body: { token: session.token }, headers });
         } catch (err) {
             throw mapAuthError(err, "Gagal mencabut sesi");
         }

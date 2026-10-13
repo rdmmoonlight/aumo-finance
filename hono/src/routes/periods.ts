@@ -1,102 +1,119 @@
-import { zValidator } from '@hono/zod-validator';
-import { Hono } from 'hono';
-import { z } from 'zod';
-import { requireAuth } from '../middlewares/auth';
-import { periodsService } from '../services/periods.service';
-import type { AppEnv } from '../types/app.types'; // Definisikan atau sesuaikan lokasi AppEnv Anda
-import { createPeriodSchema } from '../types/periods.type';
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
+import { PeriodsService } from '../services/periods';
 
-// passing AppEnv ke instance Hono agar context `user` terdeteksi dengan tepat
-export const periodsRoute = new Hono<AppEnv>();
+type CreatePeriodBody = {
+    setupMode: 'LoadExisting' | 'CreateNew';
+    [key: string]: unknown;
+};
 
-// Proteksi semua endpoint periode dengan autentikasi
-periodsRoute.use('*', requireAuth);
+export const periodsRoutes = new OpenAPIHono<{
+    Variables: { periodsService: PeriodsService; userId: string }
+}>()
 
-/**
- * GET /api/v1/periods
- * Mengambil daftar seluruh periode pengguna
- */
-periodsRoute.get('/', async (c) => {
-    const user = c.get('user');
-    const result = await periodsService.getPeriods(user.id);
-    return c.json(result);
-});
+// 1. Get Periods
+const getPeriodsRoute = createRoute({
+    method: 'get',
+    path: '/',
+    responses: {
+        200: {
+            content: { 'application/json': { schema: z.any() } },
+            description: 'Daftar periode',
+        },
+    },
+})
 
-/**
- * GET /api/v1/periods/open-info
- * Mengambil informasi akun pembantu saat akan membuka periode baru
- */
-periodsRoute.get('/open-info', async (c) => {
-    const user = c.get('user');
-    const result = await periodsService.getOpenPeriodInfo(user.id);
-    return c.json(result);
-});
+periodsRoutes.openapi(getPeriodsRoute, async (c) => {
+    const res = await c.get('periodsService').getPeriods(c.get('userId'))
+    return c.json(res, 200)
+})
 
-/**
- * POST /api/v1/periods
- * Membuat/membuka periode akuntansi baru
- */
-periodsRoute.post('/', zValidator('json', createPeriodSchema), async (c) => {
-    const user = c.get('user');
-    const body = c.req.valid('json');
+// 2. Open Period Info
+const getOpenPeriodInfoRoute = createRoute({
+    method: 'get',
+    path: '/open-info',
+    responses: {
+        200: {
+            content: { 'application/json': { schema: z.any() } },
+            description: 'Info akun periode baru',
+        },
+    },
+})
 
-    const result = await periodsService.createPeriod(user.id, body);
+periodsRoutes.openapi(getOpenPeriodInfoRoute, async (c) => {
+    const res = await c.get('periodsService').getOpenPeriodInfo(c.get('userId'))
+    return c.json(res, 200)
+})
 
-    if (!result.success) {
-        const statusCode = result.isServerError ? 500 : 400;
-        return c.json(result, statusCode);
-    }
+// 3. Create Period
+const createPeriodRoute = createRoute({
+    method: 'post',
+    path: '/',
+    request: {
+        body: {
+            content: { 'application/json': { schema: z.object({ setupMode: z.enum(['LoadExisting', 'CreateNew']) }).catchall(z.any()) } },
+        },
+    },
+    responses: {
+        201: { content: { 'application/json': { schema: z.any() } }, description: 'Berhasil' },
+        400: { content: { 'application/json': { schema: z.any() } }, description: 'Gagal' },
+    },
+})
 
-    return c.json(result, 201);
-});
+periodsRoutes.openapi(createPeriodRoute, async (c) => {
+    const body = c.req.valid('json')
+    const res = await c.get('periodsService').createPeriod(c.get('userId'), body as CreatePeriodBody)
+    return c.json(res, res.success ? 201 : 400)
+})
 
-/**
- * POST /api/v1/periods/select/:id
- * Memilih periode aktif
- */
-periodsRoute.post('/select/:id', async (c) => {
-    const user = c.get('user');
-    const periodId = Number(c.req.param('id'));
+// 4. Select Period
+const selectPeriodRoute = createRoute({
+    method: 'post',
+    path: '/:id/select',
+    request: {
+        params: z.object({ id: z.string().transform(Number) }),
+    },
+    responses: {
+        200: { content: { 'application/json': { schema: z.any() } }, description: 'Berhasil' },
+        404: { content: { 'application/json': { schema: z.any() } }, description: 'Tidak ditemukan' },
+    },
+})
 
-    if (isNaN(periodId)) {
-        return c.json({ success: false, message: 'Invalid period ID' }, 400);
-    }
+periodsRoutes.openapi(selectPeriodRoute, async (c) => {
+    const { id } = c.req.valid('param')
+    const res = await c.get('periodsService').selectPeriod(c.get('userId'), id)
+    if (!res) return c.json({ success: false, message: 'Not found' }, 404)
+    return c.json(res, 200)
+})
 
-    const result = await periodsService.selectPeriod(user.id, periodId);
-    if (!result) {
-        return c.json({ success: false, message: 'Period not found' }, 404);
-    }
+// 5. Clear Selection
+const clearSelectionRoute = createRoute({
+    method: 'post',
+    path: '/clear-selection',
+    responses: {
+        200: { content: { 'application/json': { schema: z.any() } }, description: 'Berhasil' },
+    },
+})
 
-    return c.json(result);
-});
+periodsRoutes.openapi(clearSelectionRoute, async (c) => {
+    const res = await c.get('periodsService').clearSelection(c.get('userId'))
+    return c.json(res, 200)
+})
 
-/**
- * DELETE /api/v1/periods/select
- * Menghapus/membersihkan pilihan periode aktif
- */
-periodsRoute.delete('/select', async (c) => {
-    const user = c.get('user');
-    const result = await periodsService.clearSelection(user.id);
-    return c.json(result);
-});
+// 6. Close Period
+const closePeriodRoute = createRoute({
+    method: 'post',
+    path: '/:id/close',
+    request: {
+        params: z.object({ id: z.string().transform(Number) }),
+    },
+    responses: {
+        200: { content: { 'application/json': { schema: z.any() } }, description: 'Berhasil' },
+        400: { content: { 'application/json': { schema: z.any() } }, description: 'Gagal' },
+    },
+})
 
-/**
- * POST /api/v1/periods/:id/close
- * Menutup periode akuntansi
- */
-periodsRoute.post('/:id/close', async (c) => {
-    const user = c.get('user');
-    const periodId = Number(c.req.param('id'));
-
-    if (isNaN(periodId)) {
-        return c.json({ success: false, message: 'Invalid period ID' }, 400);
-    }
-
-    const result = await periodsService.closePeriod(user.id, periodId);
-    if (!result.success) {
-        return c.json(result, 400);
-    }
-
-    return c.json(result);
-});
-export const createPeriodSchema = z.object({});
+periodsRoutes.openapi(closePeriodRoute, async (c) => {
+    const { id } = c.req.valid('param')
+    const res = await c.get('periodsService').closePeriod(c.get('userId'), id)
+    return c.json(res, res.success ? 200 : 400)
+})

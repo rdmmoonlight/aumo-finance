@@ -1,6 +1,6 @@
 import type { MiddlewareHandler } from 'hono';
 import { logger } from '../lib/logger.js';
-import type { AppEnv } from '../types/app.types.js';
+import type { AppEnv } from '../types/app.js';
 
 /**
  * Logger request/response berbasis Pino.
@@ -11,7 +11,7 @@ export const requestLogger = (): MiddlewareHandler<AppEnv> => async (c, next) =>
   const start = performance.now();
   const method = c.req.method;
   const path = c.req.path;
-  
+
   // Mengambil requestId (fallback ke undefined jika belum di-set)
   const requestId = c.get('requestId') as string | undefined;
 
