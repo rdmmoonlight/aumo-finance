@@ -21,11 +21,11 @@ namespace AumoBackend.Models.Reports
         public string? LineDescription { get; set; }
 
         [Required]
-        [Column("Debit", TypeName = "numeric")]
+        [Column("Debit", TypeName = "numeric(18,2)")]
         public decimal Debit { get; set; }
 
         [Required]
-        [Column("Credit", TypeName = "numeric")]
+        [Column("Credit", TypeName = "numeric(18,2)")]
         public decimal Credit { get; set; }
 
         [Required]
