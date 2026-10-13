@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { APP_FILTER } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
-import { databaseProvider } from './database/database.provider.js';
+import { databaseProvider } from './db/database.provider.js';
 
 @Module({
   imports: [
