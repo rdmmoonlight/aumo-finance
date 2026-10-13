@@ -1,21 +1,23 @@
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { Scalar } from '@scalar/hono-api-reference';
 import { auth } from '../lib/auth.js';
-import type { AppEnv } from '../types/app.types.js';
+import type { AppEnv } from '../types/app.js';
 
 import { authRoute } from './auth.js';
-import { getAvatarHandler } from './avatar-route.js';
-import { healthRoute } from './health.js';
-import { periodsRoute } from './periods.js';
+import { chartOfAccountsRoutes } from './chart-of-accounts';
+import { generalJournalRoutes } from './general-journal';
+import { healthRoute } from './health';
+import { periodsRoutes } from './periods';
 
 // Instance Hono untuk dokumentasi & routing utama OpenAPI
 const appApi = new OpenAPIHono<AppEnv>();
 
 // Daftarkan sub-routes bisnis
-appApi.route('/', healthRoute);          // GET / & GET /health
-appApi.route('/auth', authRoute);        // Custom auth endpoints (jika ada)
-appApi.route('/periods', periodsRoute);  // GET /periods/...
-appApi.get('/avatars/:fileName', getAvatarHandler);
+appApi.route('/', healthRoute);                       // GET / & GET /health
+appApi.route('/auth', authRoute);                     // Custom auth endpoints
+appApi.route('/periods', periodsRoutes);              // Management Periode Akuntansi
+appApi.route('/chart-of-accounts', chartOfAccountsRoutes); // Chart of Accounts (COA)
+appApi.route('/general-journals', generalJournalRoutes);   // Jurnal Umum & Penyesuaian
 
 // Spec OpenAPI
 appApi.doc('/openapi.json', {

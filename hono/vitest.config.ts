@@ -1,9 +1,8 @@
 import path from 'node:path';
-import tsconfigPaths from 'vite-tsconfig-paths';
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
-  plugins: [tsconfigPaths()], // Membaca alias dari tsconfig.json
+  envDir: '.', // Memuat file .env otomatis
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -12,7 +11,6 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    envDir: '.', // Memuat file .env otomatis
     include: ['src/test/**/*.ts'],
     exclude: ['./src/test/setup.ts'], // Fokus mencari file test di dalam folder src/test/
     setupFiles: ['./src/test/setup.ts'], // File setup global (buat file kosong jika belum ada)

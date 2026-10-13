@@ -3,17 +3,39 @@ import type { Context } from "hono";
 import { env } from "../lib/env.js";
 import { AppError } from "../lib/errors.js";
 import { rateLimit } from "../middlewares/rate-limit.js";
-import {
-  changePasswordSchema,
-  checkEmailQuerySchema,
-  loginRequestSchema,
-  registerSchema,
-} from "../db/schema/auth.validation.js";
 import { AuthService } from "../services/auth.js";
-import type { AppEnv } from "../types/app.types.js";
+import type { AppEnv } from "../types/app.js";
 import type { AuthResult } from "../types/auth.js";
 
-// Format error validasi seragam: { success:false, message, errors }
+// ==========================================
+// Skema Request (Input Validation)
+// ==========================================
+const registerSchema = z.object({
+  name: z.string().optional(),
+  email: z.string().email({ message: "Format email tidak valid" }),
+  password: z.string().min(8, { message: "Password minimal 8 karakter" }),
+  clientType: z.enum(["web", "mobile"]).optional(),
+});
+
+const loginRequestSchema = z.object({
+  email: z.string().email({ message: "Format email tidak valid" }),
+  password: z.string().min(1, { message: "Password tidak boleh kosong" }),
+  rememberMe: z.boolean().optional(),
+  clientType: z.enum(["web", "mobile"]).optional(),
+  isMobileClient: z.boolean().optional(),
+});
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, { message: "Password saat ini wajib diisi" }),
+  newPassword: z.string().min(8, { message: "Password baru minimal 8 karakter" }),
+  revokeOtherSessions: z.boolean().optional(),
+});
+
+const checkEmailQuerySchema = z.object({
+  email: z.string().email({ message: "Format email tidak valid" }),
+});
+
+// Format error validasi seragam: { success: false, message, errors }
 export const authRoute = new OpenAPIHono<AppEnv>({
   defaultHook: (result, c) => {
     if (!result.success) {
@@ -40,7 +62,7 @@ authRoute.use("/login", strictLimit);
 authRoute.use("/change-password", strictLimit);
 
 // ==========================================
-// Skema respons OpenAPI
+// Skema Respons OpenAPI
 // ==========================================
 const UserSchema = z.object({
   id: z.string(),
@@ -48,8 +70,8 @@ const UserSchema = z.object({
   email: z.string().email(),
   emailVerified: z.boolean(),
   image: z.string().nullable(),
-  createdAt: z.string().or(z.date()),
-  updatedAt: z.string().or(z.date()),
+  createdAt: z.date().or(z.string()),
+  updatedAt: z.date().or(z.string()),
 });
 
 const AuthSuccessSchema = z.object({
@@ -59,7 +81,7 @@ const AuthSuccessSchema = z.object({
   fullName: z.string(),
   avatarUrl: z.string().nullable(),
   user: UserSchema,
-  token: z.string().optional(), // hanya untuk clientType "mobile"
+  token: z.string().optional(), // Hanya untuk client mobile
 });
 
 const ErrorSchema = z.object({
@@ -168,7 +190,7 @@ export const checkEmailRoute = createRoute({
 authRoute.openapi(checkEmailRoute, async (c) => {
   const { email } = c.req.valid("query");
   try {
-    const registered = await AuthService.isEmailRegistered(email);
+    const registered = await AuthService.isEmailRegistered(email, c.req.raw.headers);
     return c.json(
       { success: true as const, email: email.toLowerCase(), available: !registered },
       200
@@ -200,7 +222,7 @@ authRoute.openapi(loginRoute, async (c) => {
   try {
     const result = await AuthService.login(body, c.req.raw.headers);
     applyCookies(c, result.setCookies);
-    const isMobile = body.clientType === "mobile" || body.isMobileClient;
+    const isMobile = body.clientType === "mobile" || !!body.isMobileClient;
     return c.json(authBody(result, "Login berhasil", isMobile), 200);
   } catch (err) {
     return fail(c, err);
@@ -250,7 +272,7 @@ export const getMeRoute = createRoute({
             .object({
               id: z.string(),
               userId: z.string(),
-              expiresAt: z.string().or(z.date()),
+              expiresAt: z.date().or(z.string()),
               token: z.string(),
             })
             .passthrough()
@@ -305,7 +327,7 @@ authRoute.openapi(changePasswordRoute, async (c) => {
 });
 
 // ==========================================
-// GET /sessions  |  DELETE /sessions  |  DELETE /sessions/:id
+// GET /sessions | DELETE /sessions | DELETE /sessions/:id
 // ==========================================
 export const sessionsRoute = createRoute({
   method: "get",
@@ -321,8 +343,8 @@ export const sessionsRoute = createRoute({
             id: z.string(),
             ipAddress: z.string().nullable(),
             userAgent: z.string().nullable(),
-            createdAt: z.string().or(z.date()),
-            expiresAt: z.string().or(z.date()),
+            createdAt: z.date().or(z.string()),
+            expiresAt: z.date().or(z.string()),
             isCurrent: z.boolean(),
           })
         ),

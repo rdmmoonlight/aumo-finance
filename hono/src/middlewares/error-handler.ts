@@ -2,7 +2,7 @@ import type { ErrorHandler, NotFoundHandler } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { ValidationError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
-import type { AppEnv } from '../types/app.types.js';
+import type { AppEnv } from '../types/app.js';
 
 export const errorHandler: ErrorHandler<AppEnv> = (err, c) => {
   if (err instanceof ValidationError) {

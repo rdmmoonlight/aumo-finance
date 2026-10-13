@@ -1,7 +1,7 @@
 import { getConnInfo } from '@hono/node-server/conninfo';
 import type { MiddlewareHandler } from 'hono';
 import { redis } from '../lib/redis.js';
-import type { AppEnv } from '../types/app.types.js';
+import type { AppEnv } from '../types/app.js';
 
 interface RateLimitOptions {
   /** Nama scope; tiap scope punya counter sendiri di Redis. */
