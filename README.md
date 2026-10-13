@@ -14,7 +14,9 @@ An integrated, precision-driven financial and accounting information system.
 - dibuat tgl 12 oktober 2026. jam 06.34.
 
 /nest (pioneer yg kembali pulang)
-- dibuat tgl 13 oktober.
+- dibuat tgl 13 oktober. jam 19.28.
+
+  
 /mobile
 - Android native (Kotlin), bukan React Native/Flutter/MAUI. Konsumen REST API `/backend` di repo yang sama, auth pakai JWT Bearer.
 
