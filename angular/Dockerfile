@@ -27,8 +27,8 @@ RUN pnpm run build
 FROM nginx:alpine AS runner
 
 # Copy hasil build dari stage builder ke direktori Nginx
-# Catatan: Sesuaikan 'dist' dengan direktori output build Vite Anda (misal: dist atau dist/client)
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Output SPA Analog (ssr: false) ada di dist/client
+COPY --from=builder /app/dist/client /usr/share/nginx/html
 
 # Copy konfigurasi Nginx kustom untuk mendukung Single Page Application (SPA) routing
 COPY nginx.conf /etc/nginx/conf.d/default.conf

@@ -1,0 +1,21 @@
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
+import { map, of } from 'rxjs';
+
+import { AuthService } from './auth.service';
+
+/** Halaman yang wajib login. */
+export const authGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.user()) return true;
+  return auth.loadSession().pipe(map((ok) => (ok ? true : router.parseUrl('/login'))));
+};
+
+/** Halaman khusus tamu (login/register); user yang sudah login diarahkan ke /home. */
+export const guestGuard: CanActivateFn = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+  if (auth.user()) return of(router.parseUrl('/home'));
+  return auth.loadSession().pipe(map((ok) => (ok ? router.parseUrl('/home') : true)));
+};
