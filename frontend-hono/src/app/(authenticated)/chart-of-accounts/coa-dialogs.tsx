@@ -4,7 +4,7 @@ import {
   ACCOUNT_TYPES,
   ChartOfAccount,
 } from "@/app/(authenticated)/chart-of-accounts/coa-types";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,24 +14,24 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
+} from "@/components/ui-react/alert-dialog";
+import { Button } from "@/components/ui-react/button";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+} from "@/components/ui-react/dialog";
+import { Input } from "@/components/ui-react/input";
+import { Label } from "@/components/ui-react/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-react/select";
 import { store } from "@/lib/store";
 import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import {

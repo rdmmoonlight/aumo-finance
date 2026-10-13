@@ -4,24 +4,24 @@ import {
   type AccountItem,
   type CreatePeriodFormProps,
 } from "@/app/(authenticated)/periods/types";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui-react/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/components/ui-react/card";
+import { Input } from "@/components/ui-react/input";
+import { Label } from "@/components/ui-react/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui-react/radio-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui-react/select";
 import {
   createPeriodSchema,
   type CreatePeriodFormValues,

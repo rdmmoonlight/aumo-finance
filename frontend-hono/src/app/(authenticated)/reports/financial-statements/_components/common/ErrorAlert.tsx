@@ -1,4 +1,4 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
 import { AlertTriangle } from "lucide-react";
 
 export function ErrorAlert({ message }: { message: string }) {

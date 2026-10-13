@@ -1,6 +1,6 @@
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
+import { Button } from "@/components/ui-react/button";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Info, Loader2, Lock } from "lucide-react";

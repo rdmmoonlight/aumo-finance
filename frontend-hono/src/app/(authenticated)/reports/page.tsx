@@ -1,8 +1,8 @@
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui-react/badge";
+import { Card, CardContent } from "@/components/ui-react/card";
+import { Input } from "@/components/ui-react/input";
+import { Separator } from "@/components/ui-react/separator";
 import { Link } from "@/lib/router";
 import { store } from "@/lib/store";
 import {

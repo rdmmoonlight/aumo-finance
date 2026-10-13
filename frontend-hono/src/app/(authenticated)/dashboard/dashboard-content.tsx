@@ -5,15 +5,15 @@ import {
   formatNumber,
   TrendTable,
 } from "@/app/(authenticated)/dashboard/dashboard-tables";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
+import { Button } from "@/components/ui-react/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
-} from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@/components/ui-react/card";
+import { Skeleton } from "@/components/ui-react/skeleton";
 import { store } from "@/lib/store";
 import { dashboardApi } from "@/lib/store/(authenticated)/dashboard/dashboardApi";
 import { cn } from "@/lib/utils";

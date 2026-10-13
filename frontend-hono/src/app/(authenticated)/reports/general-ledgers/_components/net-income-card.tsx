@@ -1,5 +1,5 @@
 // net-income-card.tsx (khusus temporary)
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui-react/card";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { formatNumber } from "../_lib/format";
 export function NetIncomeCard({ netIncome }: { netIncome: number }) {

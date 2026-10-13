@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent } from "@/components/ui-react/card";
 import { Calendar, EyeOff } from "lucide-react";
 import { Link } from "@/lib/router";
 

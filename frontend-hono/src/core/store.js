@@ -16,12 +16,17 @@ class CoreDataStore {
         return () => this.listeners.delete(listener);
     }
 
+    /** @param {string[]} [tags] */
     notify(tags = []) {
         this.listeners.forEach((listener) => listener(tags));
     }
 
     /**
      * Fetch data dengan deduplikasi request & cache TTL
+     * @param {string} key
+     * @param {() => Promise<any>} fetcher
+     * @param {{ ttl?: number, tags?: string[] }} [options]
+     * @returns {Promise<any>}
      */
     async fetchWithCache(key, fetcher, { ttl = 60000, tags = [] } = {}) {
         const now = Date.now();

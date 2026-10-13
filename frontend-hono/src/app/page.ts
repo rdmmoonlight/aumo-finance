@@ -105,9 +105,10 @@ export function renderLandingPage(container: HTMLElement) {
       h("button", { className: "text-zinc-500 hover:text-white text-2xl leading-none px-2" }, "×")
     );
     const body = h("div", { className: "p-6 pt-4", id: "auth-mount" });
-    mount(dialog, header, body);
+    dialog.append(header, body);
     mount(overlay, dialog);
-    mount(container, grid, overlay);
+    mount(container, grid);
+    container.appendChild(overlay);
 
     const titleEl = header.querySelector("#auth-title") as HTMLElement;
     const mountEl = body as HTMLElement;
@@ -140,7 +141,7 @@ export function renderLandingPage(container: HTMLElement) {
     disposer.add(on(btnLogin, "click", () => openModal("login")));
     disposer.add(on(btnRegister, "click", () => openModal("register")));
     disposer.add(on(closeBtn, "click", closeModal));
-    disposer.add(on(overlay, "click", (e) => { if (e.target === overlay) closeModal(); }));
+    disposer.add(on(overlay, "click", (e: MouseEvent) => { if (e.target === overlay) closeModal(); }));
     disposer.add(on(window, "keydown", (e: KeyboardEvent) => { if (e.key === "Escape") closeModal(); }));
   };
 

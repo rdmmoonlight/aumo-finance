@@ -1,5 +1,5 @@
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui-react/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui-react/card";
 import { formatNumber } from "../_lib/format";
 import { LedgerAccount } from "../_lib/types";
 import { LedgerTable } from "./ledger-table";

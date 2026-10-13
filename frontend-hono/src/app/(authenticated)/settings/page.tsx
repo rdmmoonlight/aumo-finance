@@ -1,7 +1,7 @@
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
+import { Card, CardContent } from "@/components/ui-react/card";
+import { Separator } from "@/components/ui-react/separator";
 import {
   Table,
   TableBody,
@@ -9,8 +9,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+} from "@/components/ui-react/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-react/tabs";
 import {
   createColumnHelper,
   flexRender,

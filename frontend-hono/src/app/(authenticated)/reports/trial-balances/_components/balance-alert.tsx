@@ -1,4 +1,4 @@
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
 import { CheckCircle2 } from "lucide-react";
 
 export function BalanceAlert({

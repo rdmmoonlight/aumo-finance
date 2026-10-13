@@ -1,10 +1,10 @@
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
+import { Badge } from "@/components/ui-react/badge";
+import { Button } from "@/components/ui-react/button";
+import { Card } from "@/components/ui-react/card";
+import { ScrollArea } from "@/components/ui-react/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui-react/tabs";
 import { store } from "@/lib/store";
 import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
 import { cn } from "@/lib/utils";

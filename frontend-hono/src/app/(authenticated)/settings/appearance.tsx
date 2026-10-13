@@ -4,9 +4,9 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+} from "@/components/ui-react/card";
+import { Label } from "@/components/ui-react/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui-react/radio-group";
 import { cn } from "@/lib/utils";
 import { Check, Monitor, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";

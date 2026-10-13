@@ -1,5 +1,5 @@
 
-import { Badge } from "@/components/ui/badge";
+import { Badge } from "@/components/ui-react/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,15 +7,15 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+} from "@/components/ui-react/breadcrumb";
+import { Button } from "@/components/ui-react/button";
+import { Input } from "@/components/ui-react/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/ui-react/popover";
+import { Separator } from "@/components/ui-react/separator";
 import { useLocation } from "@/lib/router";
 import {
   AlertTriangle,

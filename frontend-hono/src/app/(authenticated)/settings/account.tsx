@@ -1,18 +1,18 @@
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui-react/alert";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui-react/avatar";
+import { Button } from "@/components/ui-react/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
+} from "@/components/ui-react/card";
+import { Input } from "@/components/ui-react/input";
+import { Label } from "@/components/ui-react/label";
+import { Separator } from "@/components/ui-react/separator";
+import { Textarea } from "@/components/ui-react/textarea";
 import type { AppDispatch } from "@/lib/store";
 import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
 import { authApi } from "@/lib/store/auth/authApi";
