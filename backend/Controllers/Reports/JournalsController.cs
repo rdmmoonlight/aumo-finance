@@ -186,10 +186,12 @@ public class JournalController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        var entry = await _db.JournalEntries
-            .FirstOrDefaultAsync(j => j.Id == id && j.UserId == userId && j.JournalType == "Adjusting");
+        // id = JournalEntryId (id kelompok jurnal)
+        var rows = await _db.GeneralJournals
+            .Where(g => g.JournalEntryId == id && g.UserId == userId && g.JournalType == "Adjusting")
+            .ToListAsync();
 
-        if (entry == null)
+        if (rows.Count == 0)
         {
             return NotFound(new { success = false, message = "Adjusting journal entry not found." });
         }
@@ -200,7 +202,7 @@ public class JournalController : ControllerBase
             return BadRequest(new { success = false, message = "Cannot delete entry in a closed accounting period." });
         }
 
-        _db.JournalEntries.Remove(entry);
+        _db.GeneralJournals.RemoveRange(rows);
         await _db.SaveChangesAsync();
 
         return Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });

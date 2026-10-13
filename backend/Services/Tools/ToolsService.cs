@@ -3,6 +3,7 @@ using AumoBackend.Helpers;
 using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
 using AumoBackend.Data;
+using AumoBackend.Services.JournalEntries;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -205,9 +206,10 @@ public class ToolsService : IToolsService
                     StringComparer.OrdinalIgnoreCase
                 ) ?? new Dictionary<string, AccountMappingDetailDto>();
 
-            var existingTxNumbers = await _context.JournalEntries
+            var existingTxNumbers = await _context.GeneralJournals
                 .Where(j => j.UserId == userId)
                 .Select(j => j.TransactionNumber)
+                .Distinct()
                 .ToHashSetAsync();
 
             var activeCounters = new Dictionary<string, TransactionCounter>();
@@ -258,15 +260,7 @@ public class ToolsService : IToolsService
 
                 existingTxNumbers.Add(transactionNumber);
 
-                var journalEntry = new JournalEntry
-                {
-                    UserId = userId,
-                    TransactionNumber = transactionNumber,
-                    JournalType = txDto.JournalType,
-                    EntryDate = txDate,
-                    CreatedAt = txDate,
-                    Lines = new List<JournalEntryLine>()
-                };
+                var importLines = new List<GeneralJournalWriter.Line>();
 
                 foreach (var lineDto in txDto.Lines)
                 {
@@ -288,18 +282,20 @@ public class ToolsService : IToolsService
                         continue;
                     }
 
-                    journalEntry.Lines.Add(new JournalEntryLine
-                    {
-                        AccountId = coa.Id,
-                        LineDescription = lineDto.Description,
-                        Debit = lineDto.Debit ?? 0m,
-                        Credit = lineDto.Credit ?? 0m
-                    });
+                    importLines.Add(new GeneralJournalWriter.Line(
+                        coa.Id,
+                        lineDto.Description,
+                        lineDto.Debit ?? 0m,
+                        lineDto.Credit ?? 0m));
                 }
 
-                if (journalEntry.Lines.Any())
+                if (importLines.Any())
                 {
-                    _context.JournalEntries.Add(journalEntry);
+                    int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_context);
+
+                    _context.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+                        journalEntryId, userId, transactionNumber, txDto.JournalType,
+                        txDate, txDate, null, importLines));
                     importedEntriesCount++;
                 }
             }
