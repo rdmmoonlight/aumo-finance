@@ -1,5 +1,6 @@
 {
   "name": "aumo-finance",
+  "version": "4.0.0",
   "private": true,
   "type": "module",
   "allowScripts": {
