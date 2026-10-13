@@ -126,6 +126,11 @@ public class AppDbContext
         // General Journal
         // ========================================================
 
+        // Sequence untuk JournalEntryId (id kelompok/header jurnal).
+        // Setelah tabel JournalEntries dihapus, tidak ada lagi tabel header,
+        // sehingga id header dibangkitkan dari sequence ini.
+        builder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
+
         builder.Entity<GeneralJournal>(entity =>
         {
             entity.HasKey(x => x.LineId); // Menggunakan LineId sebagai Primary Key
@@ -135,6 +140,21 @@ public class AppDbContext
                 x.UserId,
                 x.EntryDate
             });
+
+            entity.HasIndex(x => new
+            {
+                x.UserId,
+                x.TransactionNumber
+            });
+
+            entity.HasIndex(x => x.JournalEntryId);
+
+            entity.HasIndex(x => x.AccountId);
+
+            entity.HasOne<ChartOfAccount>()
+                .WithMany()
+                .HasForeignKey(x => x.AccountId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ========================================================
