@@ -13,7 +13,3 @@ export const periods = pgTable("periods", {
     uniqueIndex("IX_Periods_IsSelected_Unique").using("btree", table.userId.asc().nullsLast().op("uuid_ops")).where(sql`("IsSelected" = true)`),
     index("IX_Periods_UserId").using("btree", table.userId.asc().nullsLast().op("uuid_ops")),
 ]);
-
-export function periods(periods: any) {
-    throw new Error('Function not implemented.');
-}

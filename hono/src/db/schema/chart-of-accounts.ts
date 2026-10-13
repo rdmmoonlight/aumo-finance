@@ -9,7 +9,3 @@ export const chartOfAccounts = pgTable("chart-of-accounts", {
     isActive: boolean("is_active").notNull(),
     userId: uuid("user_id").notNull(),
 });
-
-export function chartOfAccounts(chartOfAccounts: any) {
-    throw new Error('Function not implemented.');
-}

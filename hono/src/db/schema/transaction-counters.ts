@@ -6,7 +6,3 @@ export const transactionCounters = pgTable("transaction-counters", {
     counterKey: varchar("counter_key", { length: 10 }).notNull(),
     lastSequence: integer("last_sequence").notNull(),
 });
-
-export function transactionCounters(transactionCounters: any) {
-    throw new Error('Function not implemented.');
-}
