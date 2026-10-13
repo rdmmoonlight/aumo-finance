@@ -1,0 +1,61 @@
+{
+  "name": "aumoan",
+  "version": "1.9.0",
+  "private": true,
+  "type": "module",
+  "imports": {
+    "#/*": "./src/*",
+    "@/*": "./src/*"
+  },
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 3000",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist node_modules/.cache",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test:e2e": "playwright test"
+  },
+  "dependencies": {
+    "@angular/animations": "^19.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/compiler": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/forms": "^19.0.0",
+    "@angular/platform-browser": "^19.0.0",
+    "@angular/platform-browser-dynamic": "^19.0.0",
+    "@angular/router": "^19.0.0",
+    "chart.js": "^4.5.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-angular": "^0.470.0",
+    "rxjs": "~7.8.0",
+    "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.1.18",
+    "tslib": "^2.3.0",
+    "xlsx": "^0.18.5",
+    "zod": "^4.6.5",
+    "zone.js": "~0.15.0"
+  },
+  "devDependencies": {
+    "@analogjs/platform": "^1.11.0",
+    "@analogjs/vite-plugin-angular": "^1.11.0",
+    "@playwright/test": "^1.50.0",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tailwindcss/typography": "^0.5.16",
+    "@types/node": "^22.20.4",
+    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "cross-env": "^10.1.0",
+    "eslint": "^9.20.0",
+    "postcss": "^8.5.0",
+    "prettier": "^3.5.0",
+    "rimraf": "^6.1.3",
+    "typescript": "~5.7.3",
+    "vite": "^8.3.2",
+    "vite-tsconfig-paths": "^6.1.1"
+  }
+}
