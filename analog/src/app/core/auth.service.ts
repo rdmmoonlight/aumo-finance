@@ -7,6 +7,7 @@ import { AuthResponse, AuthUser, LoginPayload, MeResponse, RegisterPayload } fro
 import { API_URL } from './config';
 
 @Injectable({ providedIn: 'root' })
+
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
@@ -49,6 +50,10 @@ export class AuthService {
 
   clearSession(): void {
     this.user.set(null);
+  }
+
+  hasToken(): boolean {
+    return !!localStorage.getItem('token'); // Sesuaikan key storage yang kamu pakai (misal: 'access_token' atau 'auth_token')
   }
 }
 
