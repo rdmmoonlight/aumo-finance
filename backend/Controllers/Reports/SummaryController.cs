@@ -68,8 +68,8 @@ public class SummaryController : ControllerBase
            })
            .FirstOrDefaultAsync();
 
-        // 2. Query JournalEntries filtered berdasarkan rentang tanggal periode yang dipilih (jika ada)
-        var journalQuery = _context.JournalEntries
+        // 2. Query GeneralJournal filtered berdasarkan rentang tanggal periode yang dipilih (jika ada)
+        var journalQuery = _context.GeneralJournals
            .AsNoTracking()
            .Where(j => j.UserId == userId);
 
@@ -78,7 +78,7 @@ public class SummaryController : ControllerBase
             journalQuery = journalQuery.Where(j => j.EntryDate >= selectedPeriod.StartDate && j.EntryDate <= selectedPeriod.EndDate);
         }
 
-        var journalCount = await journalQuery.CountAsync();
+        var journalCount = await journalQuery.Select(j => j.JournalEntryId).Distinct().CountAsync();
 
         // 3. Hitung Active COA
         var activeCoaCount = await _context.ChartOfAccounts

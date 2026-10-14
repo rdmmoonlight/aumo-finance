@@ -36,19 +36,18 @@ public class TrialBalanceService : ITrialBalanceService
         var startUtc = period.StartDate.Date;
         var endUtc = period.EndDate.Date.AddDays(1).AddTicks(-1);
 
-        var linesQuery = db.JournalEntryLines
-            .Include(l => l.JournalEntry)
+        var linesQuery = db.GeneralJournals
             .Where(l => accountIds.Contains(l.AccountId)
-                     && l.JournalEntry!.UserId == userId
-                     && l.JournalEntry!.EntryDate >= startUtc
-                     && l.JournalEntry!.EntryDate <= endUtc);
+                     && l.UserId == userId
+                     && l.EntryDate >= startUtc
+                     && l.EntryDate <= endUtc);
 
         bool includeAdjustingLines = includeAdjusting || reportType == "adjusted" || reportType == "post-closing";
 
         var lines = includeAdjustingLines
-            ? await linesQuery.Where(l => l.JournalEntry!.JournalType == "General"
-                                       || l.JournalEntry!.JournalType == "Adjusting").ToListAsync()
-            : await linesQuery.Where(l => l.JournalEntry!.JournalType == "General").ToListAsync();
+            ? await linesQuery.Where(l => l.JournalType == "General"
+                                       || l.JournalType == "Adjusting").ToListAsync()
+            : await linesQuery.Where(l => l.JournalType == "General").ToListAsync();
 
         var rows = new List<TrialBalanceRow>();
         foreach (var account in accounts)
