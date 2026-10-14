@@ -6,19 +6,22 @@ FROM node:24-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Aktifkan Corepack untuk mengelola pnpm
+# Aktifkan Corepack
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy package.json (dan pnpm-lock.yaml jika ada)
+# Copy manifest
 COPY package.json pnpm-lock.yaml* ./
 
-# Pass daftar allowed built dependencies langsung via CLI flag ke pnpm
-RUN pnpm install --no-frozen-lockfile --config.onlyBuiltDependencies="@parcel/watcher,esbuild,lmdb,msgpackr-extract"
+# Izinkan build script dependency secara global via ENV PNPM
+ENV PNPM_ALLOW_BUILD=true
 
-# Copy seluruh source code proyek
+# Install dependency tanpa frozen lockfile
+RUN pnpm install --no-frozen-lockfile
+
+# Copy seluruh source code
 COPY . .
 
-# Jalankan skrip build
+# Build aplikasi
 RUN pnpm run build
 
 # ==========================================
@@ -26,14 +29,8 @@ RUN pnpm run build
 # ==========================================
 FROM nginx:alpine AS runner
 
-# Copy hasil build SPA dari stage builder ke direktori Nginx
 COPY --from=builder /app/dist/client /usr/share/nginx/html
-
-# Copy konfigurasi Nginx kustom untuk routing SPA
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
 EXPOSE 80
-
-# Jalankan Nginx di foreground
 CMD ["nginx", "-g", "daemon off;"]
