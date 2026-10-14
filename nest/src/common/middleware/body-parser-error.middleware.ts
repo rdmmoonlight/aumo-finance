@@ -1,36 +1,34 @@
-import type { NextFunction, Request, Response } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
-interface BodyParserError {
-  status: number;
-  type: string;
-}
-
-function isBodyParserError(err: unknown): err is BodyParserError {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    typeof (err as BodyParserError).status === 'number' &&
-    typeof (err as BodyParserError).type === 'string'
-  );
-}
-
-/**
- * Menangani error body-parser dengan format respons yang sama dengan filter global.
- * Dipasang tepat setelah body parser, sebelum Nest membungkus error-nya menjadi pesan bawaan Express.
- */
 export function bodyParserErrorMiddleware(
-  err: unknown,
+  err: any,
   _req: Request,
   res: Response,
-  next: NextFunction
-): void {
-  if (!isBodyParserError(err)) return next(err);
+  next: NextFunction,
+) {
+  if (!err) return next();
 
-  if (err.type === 'entity.too.large') {
-    res.status(413).json({ success: false, message: 'Ukuran request terlalu besar' });
-  } else if (err.type === 'entity.parse.failed') {
-    res.status(400).json({ success: false, message: 'Format JSON tidak valid' });
-  } else {
-    res.status(err.status).json({ success: false, message: 'Request tidak valid' });
+  const isTooLarge =
+    err.type === 'entity.too.large' ||
+    err.status === 413 ||
+    err.statusCode === 413 ||
+    err.message?.includes('too large') ||
+    err.message?.includes('limit') ||
+    err.message?.includes('request entity too large');
+
+  if (isTooLarge) {
+    return res.status(413).json({ success: false, message: 'Ukuran request terlalu besar' });
   }
+
+  const isJsonError =
+    err instanceof SyntaxError ||
+    err.type === 'entity.parse.failed' ||
+    err.message?.includes('Unexpected token') ||
+    err.message?.includes('JSON');
+
+  if (isJsonError) {
+    return res.status(400).json({ success: false, message: 'Format JSON tidak valid' });
+  }
+
+  return next(err);
 }

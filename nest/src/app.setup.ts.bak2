@@ -1,0 +1,84 @@
+import type { NestExpressApplication } from '@nestjs/platform-express';
+import { toNodeHandler } from 'better-auth/node';
+import helmet from 'helmet';
+import { bodyParserErrorMiddleware } from './common/middleware/body-parser-error.middleware.js';
+import { requestIdMiddleware } from './common/middleware/request-id.middleware.js';
+import { requestLoggerMiddleware } from './common/middleware/request-logger.middleware.js';
+import { createCorsOptions } from './config/cors.js';
+import { auth } from './lib/auth.js';
+import { env } from './lib/env.js';
+
+  // --- FIX v3: Guard agar custom auth tidak di-hijack Better Auth ---
+  const CUSTOM_AUTH_ROUTES = ['/auth/check-email', '/auth/register', '/auth/login', '/auth/logout', '/auth/me', '/auth/change-password', '/auth/sessions'];
+  const isCustomAuthPath = (path: string) => {
+    const clean = path.split('?')[0];
+    return CUSTOM_AUTH_ROUTES.some(r => clean === r || clean.startsWith(r + '/'));
+  };
+
+
+/**
+ * Middleware pipeline global (urutan eksekusi atas -> bawah):
+ *
+ *  1. requestId     : ID unik per request (header X-Request-Id)
+ *  2. helmet        : header keamanan standar
+ *  3. cors          : allowlist origin + credentials (menjawab preflight lebih awal)
+ *  4. requestLogger : log masuk/keluar + durasi + status
+ *  5. Better Auth   : handler bawaan di /auth/* (wajib sebelum body parser NestJS)
+ *  6. bodyLimit     : body parser dengan batas ukuran (413 jika terlewati)
+ *
+ * Rate limit (guard global), validasi (pipe) dan error handler (filter) dipasang di AppModule.
+ * Aplikasi harus dibuat dengan { bodyParser: false } saat NestFactory.create.
+ */
+export async function configureApp(app: NestExpressApplication): void {
+
+  // --- FIX v3: Body limit 413 & JSON invalid 400 (karena bodyParser:false) ---
+  const BODY_LIMIT = (env as any).BODY_LIMIT_BYTES || Number(process.env.BODY_LIMIT_BYTES) || 1_048_576;
+  
+  // raw body parser dengan limit
+  const { json, urlencoded } = await import('express');
+  
+  // middleware cek content-length dulu (fail fast)
+  app.use((req: any, res: any, next: any) => {
+    const cl = Number(req.headers['content-length'] || 0);
+    if (cl && cl > BODY_LIMIT) {
+      return res.status(413).json({ success: false, message: 'Ukuran request terlalu besar' });
+    }
+    next();
+  });
+
+  app.use(json({ 
+    limit: BODY_LIMIT,
+    verify: (req: any, _res: any, buf: Buffer) => {
+      (req as any).rawBody = buf;
+    }
+  }));
+  app.use(urlencoded({ extended: true, limit: BODY_LIMIT }));
+
+  // error handler untuk JSON rusak & payload too large
+  app.use((err: any, _req: any, res: any, next: any) => {
+    if (!err) return next();
+    const isTooLarge = err.type === 'entity.too.large' || err.status === 413 || err.statusCode === 413 || err.message?.includes('too large') || err.message?.includes('limit');
+    if (isTooLarge) {
+      return res.status(413).json({ success: false, message: 'Ukuran request terlalu besar' });
+    }
+    if (err instanceof SyntaxError || err.type === 'entity.parse.failed' || err.message?.includes('Unexpected token')) {
+      return res.status(400).json({ success: false, message: 'Format JSON tidak valid' });
+    }
+    next(err);
+  });
+
+
+  app.use(requestIdMiddleware);
+  app.use(
+    helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } })
+  );
+  app.enableCors(createCorsOptions());
+  app.use(requestLoggerMiddleware);
+
+  // Gunakan Express middleware (.use) untuk mencakup semua sub-rute /auth/*
+  app.getHttpAdapter().getInstance().use('/auth', (req: any, res: any, next: any) => { const p = (req as any).originalUrl || (req as any).url || ''; if (isCustomAuthPath(p)) return next(); return toNodeHandler(auth)(req as any, res as any, next as any); });
+
+  app.useBodyParser('json', { limit: env.BODY_LIMIT_BYTES });
+  app.useBodyParser('urlencoded', { limit: env.BODY_LIMIT_BYTES, extended: true });
+  app.use(bodyParserErrorMiddleware);
+}
