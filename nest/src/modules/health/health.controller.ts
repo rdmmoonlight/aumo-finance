@@ -8,7 +8,7 @@ export class HealthController {
   @ApiOperation({ summary: 'API Server Status', description: 'Mengecek status utama server' })
   @ApiResponse({ status: 200, description: 'Server online' })
   root() {
-    return { status: 'ok', message: 'AumoBackend API Server Online 🚀' };
+    return { status: 'ok', message: 'Aumone API Server Online 🚀' };
   }
 
   @Head()

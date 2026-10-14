@@ -1,9 +1,8 @@
 import { RouteMeta } from '@analogjs/router';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-
-import { AuthService, extractError } from '../../core/auth.service';
+import { RouterLink } from '@angular/router';
+import { AuthStore } from '../../core/auth.store';
 
 export const routeMeta: RouteMeta = { title: 'Masuk - Aumo Finance' };
 
@@ -14,9 +13,9 @@ export const routeMeta: RouteMeta = { title: 'Masuk - Aumo Finance' };
     <h1 class="text-xl font-bold text-slate-900">Masuk</h1>
     <p class="mt-1 text-sm text-slate-600">Gunakan email dan kata sandi akun Anda.</p>
 
-    @if (error()) {
+    @if (store.error()) {
       <div role="alert" class="mt-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-        {{ error() }}
+        {{ store.error() }}
       </div>
     }
 
@@ -42,8 +41,8 @@ export const routeMeta: RouteMeta = { title: 'Masuk - Aumo Finance' };
         Ingat saya
       </label>
 
-      <button type="submit" class="btn-primary w-full" [disabled]="loading()">
-        {{ loading() ? 'Memproses...' : 'Masuk' }}
+      <button type="submit" class="btn-primary w-full" [disabled]="store.isLoading()">
+        {{ store.isLoading() ? 'Memproses...' : 'Masuk' }}
       </button>
     </form>
 
@@ -55,11 +54,7 @@ export const routeMeta: RouteMeta = { title: 'Masuk - Aumo Finance' };
 })
 export default class LoginPage {
   private readonly fb = inject(FormBuilder).nonNullable;
-  private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
-
-  readonly loading = signal(false);
-  readonly error = signal<string | null>(null);
+  readonly store = inject(AuthStore);
 
   readonly form = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -77,14 +72,6 @@ export default class LoginPage {
       this.form.markAllAsTouched();
       return;
     }
-    this.loading.set(true);
-    this.error.set(null);
-    this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => void this.router.navigateByUrl('/home'),
-      error: (err) => {
-        this.error.set(extractError(err));
-        this.loading.set(false);
-      },
-    });
+    this.store.login(this.form.getRawValue());
   }
 }

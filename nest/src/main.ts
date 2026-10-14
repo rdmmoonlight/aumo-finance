@@ -32,16 +32,27 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
 
   // Spec mentah di /openapi.json (tanpa UI Swagger bawaan)
-  SwaggerModule.setup('openapi', app, document, { ui: false, jsonDocumentUrl: 'openapi.json' });
+  SwaggerModule.setup('openapi', app, document, {
+    ui: false,
+    jsonDocumentUrl: 'openapi.json',
+  });
 
   app.use('/reference', apiReference({ spec: { content: document } }));
 
   // Jalankan HTTP Server
-  await app.listen(env.PORT, '0.0.0.0');
-  logger.info(`🚀 Server berjalan di http://0.0.0.0:${env.PORT}`);
+  const host = '0.0.0.0';
+  await app.listen(env.PORT, host);
 
-  // Graceful shutdown (menggantikan enableShutdownHooks agar urutan penutupan terkontrol)
+  const displayHost = host === '0.0.0.0' ? 'localhost' : host;
+  logger.info(`🚀 Server berjalan di http://${displayHost}:${env.PORT}`);
+
+  // Graceful shutdown
+  let isShuttingDown = false;
+
   const shutdown = async (signal: string) => {
+    if (isShuttingDown) return;
+    isShuttingDown = true;
+
     logger.info(`${signal} diterima, menutup server...`);
 
     const forceExit = setTimeout(() => {
@@ -69,8 +80,8 @@ async function bootstrap() {
     }
   };
 
-  process.on('SIGTERM', () => shutdown('SIGTERM'));
-  process.on('SIGINT', () => shutdown('SIGINT'));
+  process.on('SIGTERM', () => void shutdown('SIGTERM'));
+  process.on('SIGINT', () => void shutdown('SIGINT'));
 }
 
 // Global Exception Handler
