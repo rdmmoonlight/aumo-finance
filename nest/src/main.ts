@@ -1,7 +1,9 @@
 import { NestFactory } from '@nestjs/core';
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import { AppModule } from './app.module.js';
+import { configureApp } from './app.setup.js';
 import { env } from './lib/env.js';
 import { logger } from './lib/logger.js';
 import { closeQueue, initQueueWorkers } from './lib/queue.js';
@@ -11,13 +13,14 @@ async function bootstrap() {
   // Inisialisasi Queue Worker
   initQueueWorkers();
 
-  const app = await NestFactory.create(AppModule, {
-    // Menonaktifkan logger bawaan Nest jika ingin sepenuhnya menggunakan Pino
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    // Logger bawaan Nest dimatikan, seluruh log memakai Pino
     logger: false,
+    // Body parser dipasang manual di configureApp (Better Auth butuh body mentah)
+    bodyParser: false,
   });
 
-  // NestJS memiliki fitur bawaan untuk menangani SIGTERM / SIGINT
-  app.enableShutdownHooks();
+  configureApp(app);
 
   // Penyiapan Dokumentasi OpenAPI & Scalar
   const config = new DocumentBuilder()
@@ -28,20 +31,16 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  app.use(
-    '/reference',
-    apiReference({
-      spec: {
-        content: document,
-      },
-    }),
-  );
+  // Spec mentah di /openapi.json (tanpa UI Swagger bawaan)
+  SwaggerModule.setup('openapi', app, document, { ui: false, jsonDocumentUrl: 'openapi.json' });
+
+  app.use('/reference', apiReference({ spec: { content: document } }));
 
   // Jalankan HTTP Server
   await app.listen(env.PORT, '0.0.0.0');
   logger.info(`🚀 Server berjalan di http://0.0.0.0:${env.PORT}`);
 
-  // Custom Graceful Shutdown Listener
+  // Graceful shutdown (menggantikan enableShutdownHooks agar urutan penutupan terkontrol)
   const shutdown = async (signal: string) => {
     logger.info(`${signal} diterima, menutup server...`);
 
