@@ -5,17 +5,22 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
+# Aktifkan Corepack
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Copy manifest
 COPY package.json pnpm-lock.yaml* ./
 
-# Buat pnpm-workspace.yaml khusus untuk daftar allowed build scripts
-RUN printf 'onlyBuiltDependencies:\n  - "@parcel/watcher"\n  - "esbuild"\n  - "lmdb"\n  - "msgpackr-extract"\n' > pnpm-workspace.yaml
+# Otomatis approve seluruh build scripts dependency
+RUN pnpm approve-builds --all
 
+# Install dependency tanpa frozen lockfile
 RUN pnpm install --no-frozen-lockfile
 
+# Copy seluruh source code
 COPY . .
 
+# Build aplikasi
 RUN pnpm run build
 
 # ==========================================
