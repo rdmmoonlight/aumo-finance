@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.fragment.app.FragmentActivity
 import com.aumofinance.app.home.HomeActivity
+import com.aumofinance.app.network.SessionExpiredHandler
 import com.aumofinance.app.network.SessionStore
 import com.aumofinance.app.ui.theme.AumoTheme
 
@@ -27,6 +28,8 @@ class LoginActivity : FragmentActivity() {
         val alreadyEnabled = SessionStore.isBiometricEnabled() && SessionStore.hasSavedSession()
         val showBiometricSetupCheckbox = biometricAvailable && !alreadyEnabled
         val showBiometricLoginButton = biometricAvailable && alreadyEnabled
+        // Diarahkan ke sini oleh SessionExpiredHandler saat server menolak token (401).
+        val sessionExpired = intent.getBooleanExtra(SessionExpiredHandler.EXTRA_SESSION_EXPIRED, false)
 
         setContent {
             var email by remember { mutableStateOf("") }
@@ -41,7 +44,9 @@ class LoginActivity : FragmentActivity() {
             }
 
             val errorMessage =
-                biometricError ?: (state as? LoginState.Error)?.message
+                biometricError
+                    ?: (state as? LoginState.Error)?.message
+                    ?: SessionExpiredHandler.SESSION_EXPIRED_MESSAGE.takeIf { sessionExpired }
 
             AumoTheme {
                 LoginScreen(

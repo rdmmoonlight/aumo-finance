@@ -84,9 +84,17 @@ object ApiClient {
             httpClient.plugin(HttpSend).intercept { request ->
                 val call = execute(request)
                 val status = call.response.status.value
+                val path = call.request.url.encodedPath
                 if (status >= 400) {
-                    val message = "${call.request.method.value} ${call.request.url.encodedPath} -> $status"
+                    val message = "${call.request.method.value} $path -> $status"
                     if (status >= 500) AppLogger.error("HTTP", message) else AppLogger.warn("HTTP", message)
+                }
+                // 401 di endpoint terproteksi = token tidak berlaku lagi. Bersihkan
+                // sesi, arahkan ke Login, dan hentikan pemanggil (lihat
+                // SessionExpiredException) alih-alih membiarkannya mem-parse body kosong.
+                if (SessionExpiredHandler.isSessionExpiry(status, path)) {
+                    SessionExpiredHandler.handle()
+                    throw SessionExpiredException()
                 }
                 call
             }
