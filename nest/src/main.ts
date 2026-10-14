@@ -31,7 +31,6 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  // Spec mentah di /openapi.json (tanpa UI Swagger bawaan)
   SwaggerModule.setup('openapi', app, document, {
     ui: false,
     jsonDocumentUrl: 'openapi.json',
