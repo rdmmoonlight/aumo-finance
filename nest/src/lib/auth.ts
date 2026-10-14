@@ -21,8 +21,8 @@ const trustedOrigins = Array.from(
 export const auth = betterAuth({
   secret: env.BETTER_AUTH_SECRET ?? env.JWT_SIGNING_KEY,
   baseURL: env.BETTER_AUTH_URL,
-  // Handler bawaan Better Auth dipasang di /api/auth/* (lihat app.setup.ts)
-  basePath: '/api/auth',
+  // Handler bawaan Better Auth dipasang di /auth/* (lihat app.setup.ts)
+  basePath: '/auth',
   trustedOrigins,
 
   database: drizzleAdapter(db, {

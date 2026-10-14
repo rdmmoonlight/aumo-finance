@@ -1,5 +1,5 @@
 import type { NestExpressApplication } from '@nestjs/platform-express';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import request from 'supertest';
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { auth } from '../lib/auth.js';
@@ -95,7 +95,7 @@ describe('Middleware pipeline', () => {
 
     it('fail-open jika Redis menggantung (timeout)', async () => {
       const chain = vi.mocked(redis.pipeline)();
-      vi.mocked(chain.exec).mockReturnValue(new Promise(() => {}));
+      vi.mocked(chain.exec).mockReturnValue(new Promise(() => { }));
 
       const res = await http().get('/health');
 
@@ -155,11 +155,11 @@ describe('Middleware pipeline', () => {
   });
 
   describe('Better Auth bawaan', () => {
-    it('/api/auth/* diteruskan ke handler Better Auth', async () => {
-      const res = await http().get('/api/auth/ok');
+    it('/auth/* diteruskan ke handler Better Auth', async () => {
+      const res = await http().get('/auth/ok');
 
       expect(res.status).toBe(200);
-      expect(res.body).toEqual({ handledBy: 'better-auth', path: '/api/auth/ok' });
+      expect(res.body).toEqual({ handledBy: 'better-auth', path: '/auth/ok' });
       expect(auth.handler).toHaveBeenCalled();
     });
   });
