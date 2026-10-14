@@ -12,12 +12,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Copy package.json (dan pnpm-lock.yaml jika ada)
 COPY package.json pnpm-lock.yaml* ./
 
-# Buat .npmrc lokal untuk menyetujui build scripts di PNPM v10+ & install tanpa frozen lockfile
-RUN echo 'onlyBuiltDependencies[]=@parcel/watcher' >> .npmrc && \
-    echo 'onlyBuiltDependencies[]=esbuild' >> .npmrc && \
-    echo 'onlyBuiltDependencies[]=lmdb' >> .npmrc && \
-    echo 'onlyBuiltDependencies[]=msgpackr-extract' >> .npmrc && \
-    pnpm install --no-frozen-lockfile
+# Pass daftar allowed built dependencies langsung via CLI flag ke pnpm
+RUN pnpm install --no-frozen-lockfile --config.onlyBuiltDependencies="@parcel/watcher,esbuild,lmdb,msgpackr-extract"
 
 # Copy seluruh source code proyek
 COPY . .
