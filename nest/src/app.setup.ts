@@ -9,17 +9,17 @@ import { auth } from './lib/auth.js';
 import { env } from './lib/env.js';
 
 /**
- * Middleware pipeline global (urutan eksekusi atas -> bawah), setara registerMiddleware di /hono:
+ * Middleware pipeline global (urutan eksekusi atas -> bawah):
  *
  *  1. requestId     : ID unik per request (header X-Request-Id)
  *  2. helmet        : header keamanan standar
  *  3. cors          : allowlist origin + credentials (menjawab preflight lebih awal)
  *  4. requestLogger : log masuk/keluar + durasi + status
- *  5. Better Auth   : handler bawaan di /api/auth/* (wajib sebelum body parser)
+ *  5. Better Auth   : handler bawaan di /auth/* (wajib sebelum body parser NestJS)
  *  6. bodyLimit     : body parser dengan batas ukuran (413 jika terlewati)
  *
  * Rate limit (guard global), validasi (pipe) dan error handler (filter) dipasang di AppModule.
- * Aplikasi harus dibuat dengan { bodyParser: false }.
+ * Aplikasi harus dibuat dengan { bodyParser: false } saat NestFactory.create.
  */
 export function configureApp(app: NestExpressApplication): void {
   app.use(requestIdMiddleware);
@@ -29,7 +29,8 @@ export function configureApp(app: NestExpressApplication): void {
   app.enableCors(createCorsOptions());
   app.use(requestLoggerMiddleware);
 
-  app.getHttpAdapter().getInstance().all('/auth/*', toNodeHandler(auth));
+  // Gunakan Express middleware (.use) untuk mencakup semua sub-rute /auth/*
+  app.getHttpAdapter().getInstance().use('/auth', toNodeHandler(auth));
 
   app.useBodyParser('json', { limit: env.BODY_LIMIT_BYTES });
   app.useBodyParser('urlencoded', { limit: env.BODY_LIMIT_BYTES, extended: true });

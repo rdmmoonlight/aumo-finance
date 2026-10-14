@@ -23,10 +23,12 @@ function httpExceptionMessage(exception: HttpException): string {
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  // Ubah ke any untuk mempermudah pengecekan error dari express middleware (body-parser)
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
+    const errorDetails = exception as { type?: unknown; status?: unknown } | null;
 
     let status: number = HttpStatus.INTERNAL_SERVER_ERROR;
     let body: ErrorBody = { success: false, message: 'Terjadi kesalahan pada server' };
@@ -40,6 +42,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     } else if (exception instanceof HttpException) {
       status = exception.getStatus();
       body = { success: false, message: httpExceptionMessage(exception) };
+    } else if (
+      exception instanceof SyntaxError &&
+      (exception as SyntaxError & { status?: number }).status === 400
+    ) {
+      // Menangkap error dari body-parser ketika format JSON rusak
+      status = HttpStatus.BAD_REQUEST;
+      body = { success: false, message: 'Format JSON tidak valid' };
+    } else if (errorDetails?.type === 'entity.too.large' || errorDetails?.status === 413) {
+      // Menangkap error dari body-parser ketika ukuran payload melebihi limit
+      status = HttpStatus.PAYLOAD_TOO_LARGE;
+      body = { success: false, message: 'Ukuran request terlalu besar' };
     }
 
     // Hanya kegagalan server yang dicatat sebagai error; 4xx adalah kesalahan client
@@ -51,6 +64,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       body = { success: false, message: 'Terjadi kesalahan pada server' };
     }
 
+    // Pastikan mengirim status code yang benar
     response.status(status).json(body);
   }
 }
