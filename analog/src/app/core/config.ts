@@ -1,4 +1,4 @@
-/** Base URL backend (/hono). Atur lewat VITE_API_URL di .env */
-export const API_URL: string = (
-  import.meta.env['VITE_API_URL'] ?? 'http://localhost:5000'
-).replace(/\/$/, '');
+/** Base URL backend. Atur lewat VITE_API_URL di .env atau Environment Variable platform deploy. */
+const rawApiUrl = (import.meta.env['VITE_API_URL'] as string | undefined) || 'http://localhost:5000';
+
+export const API_URL: string = rawApiUrl.replace(/\/$/, '');
