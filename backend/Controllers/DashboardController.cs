@@ -48,24 +48,24 @@ public class DashboardController : ControllerBase
         string displayPeriodName = isAnnual ? $"Annual {year}" : activePeriod?.PeriodName ?? "Current Period";
 
         // Scope per tab - REAL, bukan kumulatif
-        var monthlyLines = await _db.JournalEntryLines
+        var monthlyLines = await _db.GeneralJournals
           .AsNoTracking()
-          .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate >= monthlyStart && l.JournalEntry.EntryDate <= monthlyEnd)
-          .Select(l => new { l.AccountId, l.Debit, l.Credit, l.JournalEntry!.EntryDate })
+          .Where(l => l.UserId == userId && l.EntryDate >= monthlyStart && l.EntryDate <= monthlyEnd)
+          .Select(l => new { l.AccountId, l.Debit, l.Credit, l.EntryDate })
           .ToListAsync();
 
-        var annualLines = await _db.JournalEntryLines
+        var annualLines = await _db.GeneralJournals
           .AsNoTracking()
-          .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate >= annualStart && l.JournalEntry.EntryDate <= annualEnd)
-          .Select(l => new { l.AccountId, l.Debit, l.Credit, l.JournalEntry!.EntryDate })
+          .Where(l => l.UserId == userId && l.EntryDate >= annualStart && l.EntryDate <= annualEnd)
+          .Select(l => new { l.AccountId, l.Debit, l.Credit, l.EntryDate })
           .ToListAsync();
 
         var periodLines = isAnnual ? annualLines : monthlyLines;
 
         // Kumulatif tetap diambil untuk referensi (kalau masih butuh)
-        var cumulativeLines = await _db.JournalEntryLines
+        var cumulativeLines = await _db.GeneralJournals
           .AsNoTracking()
-          .Where(l => l.JournalEntry!.UserId == userId && l.JournalEntry.EntryDate <= reqEnd)
+          .Where(l => l.UserId == userId && l.EntryDate <= reqEnd)
           .Select(l => new { l.AccountId, l.Debit, l.Credit })
           .ToListAsync();
 

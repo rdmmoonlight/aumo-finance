@@ -66,27 +66,33 @@ public class JournalController : ControllerBase
         var startUtc = selectedPeriod.StartDate.Date;
         var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-        var entries = await _db.JournalEntries
-            .Include(j => j.Lines)
-                .ThenInclude(l => l.Account)
-            .Where(j => j.UserId == userId
-                     && j.JournalType == "General"
-                     && j.EntryDate >= startUtc
-                     && j.EntryDate <= endUtc)
-            .OrderBy(j => j.EntryDate)
-            .ThenBy(j => j.CreatedAt)
-            .ThenBy(j => j.Id)
-            .Select(j => new
+        var rows = await _db.GeneralJournals
+            .AsNoTracking()
+            .Include(g => g.Account)
+            .Where(g => g.UserId == userId
+                     && g.JournalType == "General"
+                     && g.EntryDate >= startUtc
+                     && g.EntryDate <= endUtc)
+            .ToListAsync();
+
+        // 1 baris GeneralJournal = 1 baris jurnal; kelompokkan per JournalEntryId menjadi header + lines.
+        var entries = rows
+            .GroupBy(g => g.JournalEntryId)
+            .Select(grp => new { Header = grp.First(), Lines = grp })
+            .OrderBy(x => x.Header.EntryDate)
+            .ThenBy(x => x.Header.CreatedAt)
+            .ThenBy(x => x.Header.JournalEntryId)
+            .Select(x => new
             {
-                j.Id,
-                j.TransactionNumber,
-                j.JournalType,
-                EntryDate = j.EntryDate.ToString("yyyy-MM-dd"),
-                j.CreatedAt,
-                j.UpdatedAt,
-                lines = j.Lines.OrderBy(l => l.LineOrder).Select(l => new
+                Id = x.Header.JournalEntryId,
+                x.Header.TransactionNumber,
+                x.Header.JournalType,
+                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd"),
+                x.Header.CreatedAt,
+                x.Header.UpdatedAt,
+                lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
                 {
-                    l.Id,
+                    Id = l.LineId,
                     l.AccountId,
                     AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
                     ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString() : "0",
@@ -94,9 +100,9 @@ public class JournalController : ControllerBase
                     l.Debit,
                     l.Credit,
                     l.LineOrder
-                })
+                }).ToList()
             })
-            .ToListAsync();
+            .ToList();
 
         return Ok(new
         {
@@ -136,27 +142,33 @@ public class JournalController : ControllerBase
         var startUtc = selectedPeriod.StartDate.Date;
         var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-        var entries = await _db.JournalEntries
-            .Include(j => j.Lines)
-                .ThenInclude(l => l.Account)
-            .Where(j => j.UserId == userId
-                     && j.JournalType == "Adjusting"
-                     && j.EntryDate >= startUtc
-                     && j.EntryDate <= endUtc)
-            .OrderBy(j => j.EntryDate)
-            .ThenBy(j => j.CreatedAt)
-            .ThenBy(j => j.Id)
-            .Select(j => new
+        var rows = await _db.GeneralJournals
+            .AsNoTracking()
+            .Include(g => g.Account)
+            .Where(g => g.UserId == userId
+                     && g.JournalType == "Adjusting"
+                     && g.EntryDate >= startUtc
+                     && g.EntryDate <= endUtc)
+            .ToListAsync();
+
+        // 1 baris GeneralJournal = 1 baris jurnal; kelompokkan per JournalEntryId menjadi header + lines.
+        var entries = rows
+            .GroupBy(g => g.JournalEntryId)
+            .Select(grp => new { Header = grp.First(), Lines = grp })
+            .OrderBy(x => x.Header.EntryDate)
+            .ThenBy(x => x.Header.CreatedAt)
+            .ThenBy(x => x.Header.JournalEntryId)
+            .Select(x => new
             {
-                j.Id,
-                j.TransactionNumber,
-                j.JournalType,
-                EntryDate = j.EntryDate.ToString("yyyy-MM-dd"), // FIX 2: Konsistensi format string tanggal
-                j.CreatedAt,
-                j.UpdatedAt,
-                lines = j.Lines.OrderBy(l => l.LineOrder).Select(l => new
+                Id = x.Header.JournalEntryId,
+                x.Header.TransactionNumber,
+                x.Header.JournalType,
+                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd"),
+                x.Header.CreatedAt,
+                x.Header.UpdatedAt,
+                lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
                 {
-                    l.Id,
+                    Id = l.LineId,
                     l.AccountId,
                     AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
                     ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString() : "0",
@@ -164,9 +176,9 @@ public class JournalController : ControllerBase
                     l.Debit,
                     l.Credit,
                     l.LineOrder
-                })
+                }).ToList()
             })
-            .ToListAsync();
+            .ToList();
 
         return Ok(new
         {
@@ -186,10 +198,12 @@ public class JournalController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        var entry = await _db.JournalEntries
-            .FirstOrDefaultAsync(j => j.Id == id && j.UserId == userId && j.JournalType == "Adjusting");
+        // id = JournalEntryId (id kelompok jurnal)
+        var rows = await _db.GeneralJournals
+            .Where(g => g.JournalEntryId == id && g.UserId == userId && g.JournalType == "Adjusting")
+            .ToListAsync();
 
-        if (entry == null)
+        if (rows.Count == 0)
         {
             return NotFound(new { success = false, message = "Adjusting journal entry not found." });
         }
@@ -200,7 +214,7 @@ public class JournalController : ControllerBase
             return BadRequest(new { success = false, message = "Cannot delete entry in a closed accounting period." });
         }
 
-        _db.JournalEntries.Remove(entry);
+        _db.GeneralJournals.RemoveRange(rows);
         await _db.SaveChangesAsync();
 
         return Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });

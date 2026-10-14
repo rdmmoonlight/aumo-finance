@@ -98,10 +98,10 @@ public class GeneralLedgersService : IGeneralLedgersService
                 var start = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
                 var end = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
-                var lines = await _db.JournalEntryLines.AsNoTracking()
-                    .Include(l => l.JournalEntry).Include(l => l.Account)
-                    .Where(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end)
-                    .OrderBy(l => l.AccountId).ThenBy(l => l.JournalEntry!.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
+                var lines = await _db.GeneralJournals.AsNoTracking()
+                    .Include(l => l.Account)
+                    .Where(l => l.UserId == userId && l.EntryDate >= start && l.EntryDate <= end)
+                    .OrderBy(l => l.AccountId).ThenBy(l => l.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
                     .ToListAsync();
 
                 if (!lines.Any())
@@ -126,9 +126,9 @@ public class GeneralLedgersService : IGeneralLedgersService
                     {
                         running += isDebitNormal ? (line.Debit - line.Credit) : (line.Credit - line.Debit);
                         if (isPermanent)
-                            permanents.Add(new GeneralLedgerPermanentAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.Id, EntryDate = line.JournalEntry!.EntryDate, TransactionNumber = line.JournalEntry.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
+                            permanents.Add(new GeneralLedgerPermanentAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.LineId, EntryDate = line.EntryDate, TransactionNumber = line.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                         else if (isTemporary)
-                            temporaries.Add(new GeneralLedgerTemporaryAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.Id, EntryDate = line.JournalEntry!.EntryDate, TransactionNumber = line.JournalEntry.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
+                            temporaries.Add(new GeneralLedgerTemporaryAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.LineId, EntryDate = line.EntryDate, TransactionNumber = line.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                     }
                 }
 
@@ -157,7 +157,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     // --- PRIVATE HELPERS ---
 
     /// <summary>
-    /// Memeriksa apakah data staging general ledger tertinggal/outdated dibanding tabel JournalEntryLines.
+    /// Memeriksa apakah data staging general ledger tertinggal/outdated dibanding tabel GeneralJournal.
     /// </summary>
     private async Task<bool> IsLedgerStaleAsync(Guid userId, Models.Period period)
     {
@@ -165,8 +165,8 @@ public class GeneralLedgersService : IGeneralLedgersService
         var end = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
         // Hitung total baris jurnal transaksi yang ada di periode ini
-        int totalJournalLines = await _db.JournalEntryLines.AsNoTracking()
-            .CountAsync(l => l.JournalEntry != null && l.JournalEntry.UserId == userId && l.JournalEntry.EntryDate >= start && l.JournalEntry.EntryDate <= end);
+        int totalJournalLines = await _db.GeneralJournals.AsNoTracking()
+            .CountAsync(l => l.UserId == userId && l.EntryDate >= start && l.EntryDate <= end);
 
         // Hitung total baris di staging ledger
         int permanentCount = await _db.GeneralLedgerPermanentAccounts.AsNoTracking().CountAsync(x => x.UserId == userId && x.PeriodId == period.Id);

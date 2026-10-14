@@ -78,13 +78,12 @@ public class ChartOfAccountsController : ControllerBase
             var startUtc = currentPeriod.StartDate.Date;
             var endUtc = currentPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-            var accountBalances = await _db.JournalEntryLines
+            var accountBalances = await _db.GeneralJournals
                 .Where(j => accountIds.Contains(j.AccountId) &&
-                            j.JournalEntry != null &&
-                            j.JournalEntry.UserId == userId &&
-                            (j.JournalEntry.JournalType == "General" || j.JournalEntry.JournalType == "Adjusting") &&
-                            j.JournalEntry.EntryDate >= startUtc &&
-                            j.JournalEntry.EntryDate <= endUtc)
+                            j.UserId == userId &&
+                            (j.JournalType == "General" || j.JournalType == "Adjusting") &&
+                            j.EntryDate >= startUtc &&
+                            j.EntryDate <= endUtc)
                 .GroupBy(j => j.AccountId)
                 .Select(g => new
                 {
@@ -257,7 +256,7 @@ public class ChartOfAccountsController : ControllerBase
             return NotFound(new { success = false, message = "Account not found." });
         }
 
-        bool hasJournalLines = await _db.JournalEntryLines.AnyAsync(l => l.AccountId == id);
+        bool hasJournalLines = await _db.GeneralJournals.AnyAsync(l => l.AccountId == id);
         if (hasJournalLines)
         {
             return BadRequest(new { success = false, message = $"Account '{entity.AccountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead." });
