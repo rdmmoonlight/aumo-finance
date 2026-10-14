@@ -13,7 +13,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json pnpm-lock.yaml* ./
 
 # Install seluruh dependency
-RUN pnpm install --frozen-lockfile --config.onlyBuiltDependencies=""
+RUN pnpm config set onlyBuiltDependencies "@parcel/watcher,esbuild,lmdb,msgpackr-extract" && pnpm install --frozen-lockfile
 
 # Copy seluruh source code proyek
 COPY . .
