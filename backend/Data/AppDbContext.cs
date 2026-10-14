@@ -39,12 +39,6 @@ public class AppDbContext
     public DbSet<ChartOfAccount> ChartOfAccounts
         => Set<ChartOfAccount>();
 
-    public DbSet<JournalEntry> JournalEntries
-        => Set<JournalEntry>();
-
-    public DbSet<JournalEntryLine> JournalEntryLines
-        => Set<JournalEntryLine>();
-
     public DbSet<GeneralJournal> GeneralJournals
         => Set<GeneralJournal>();
 
@@ -158,26 +152,6 @@ public class AppDbContext
         });
 
         // ========================================================
-        // Journal Entry
-        // ========================================================
-
-        builder.Entity<JournalEntry>(entity =>
-        {
-            entity.HasMany(x => x.Lines)
-                .WithOne(x => x.JournalEntry)
-                .HasForeignKey(x => x.JournalEntryId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasIndex(x => new
-            {
-                x.UserId,
-                x.TransactionNumber
-            })
-            .IsUnique();
-        });
-
-
-        // ========================================================
         // Transaction Counter
         // ========================================================
 
@@ -189,19 +163,6 @@ public class AppDbContext
                 x.CounterKey
             })
             .IsUnique();
-        });
-
-
-        // ========================================================
-        // Journal Entry Line
-        // ========================================================
-
-        builder.Entity<JournalEntryLine>(entity =>
-        {
-            entity.HasOne(x => x.Account)
-                .WithMany()
-                .HasForeignKey(x => x.AccountId)
-                .OnDelete(DeleteBehavior.Restrict);
         });
 
 
@@ -228,12 +189,9 @@ public class AppDbContext
                 .HasForeignKey(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(x => x.JournalEntry)
-                .WithMany()
-                .HasForeignKey(x => x.JournalEntryId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(x => x.JournalEntryLine)
+            // JournalEntryId tidak punya FK (tidak ada lagi tabel header jurnal).
+            // JournalEntryLineId merujuk ke GeneralJournal.LineId.
+            entity.HasOne(x => x.GeneralJournal)
                 .WithMany()
                 .HasForeignKey(x => x.JournalEntryLineId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -263,12 +221,9 @@ public class AppDbContext
                 .HasForeignKey(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            entity.HasOne(x => x.JournalEntry)
-                .WithMany()
-                .HasForeignKey(x => x.JournalEntryId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(x => x.JournalEntryLine)
+            // JournalEntryId tidak punya FK (tidak ada lagi tabel header jurnal).
+            // JournalEntryLineId merujuk ke GeneralJournal.LineId.
+            entity.HasOne(x => x.GeneralJournal)
                 .WithMany()
                 .HasForeignKey(x => x.JournalEntryLineId)
                 .OnDelete(DeleteBehavior.Cascade);

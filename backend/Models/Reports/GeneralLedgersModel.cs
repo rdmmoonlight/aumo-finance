@@ -47,11 +47,8 @@ public class GeneralLedgerPermanentAccounts
     [ForeignKey(nameof(AccountId))]
     public virtual ChartOfAccount? Account { get; set; }
 
-    [ForeignKey(nameof(JournalEntryId))]
-    public virtual JournalEntry? JournalEntry { get; set; }
-
     [ForeignKey(nameof(JournalEntryLineId))]
-    public virtual JournalEntryLine? JournalEntryLine { get; set; }
+    public virtual Reports.GeneralJournal? GeneralJournal { get; set; }
 }
 
 /// <summary>
@@ -98,9 +95,6 @@ public class GeneralLedgerTemporaryAccounts
     [ForeignKey(nameof(AccountId))]
     public virtual ChartOfAccount? Account { get; set; }
 
-    [ForeignKey(nameof(JournalEntryId))]
-    public virtual JournalEntry? JournalEntry { get; set; }
-
     [ForeignKey(nameof(JournalEntryLineId))]
-    public virtual JournalEntryLine? JournalEntryLine { get; set; }
+    public virtual Reports.GeneralJournal? GeneralJournal { get; set; }
 }
