@@ -1,6 +1,6 @@
 {
   "name": "aumoan",
-  "version": "1.9.0",
+  "version": "4.2.0",
   "private": true,
   "type": "module",
   "imports": {
@@ -10,8 +10,9 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
+    "prebuild": "pnpm run clean",
     "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --port 3000",
+    "prestart": "pnpm run build",
     "typecheck": "tsc --noEmit",
     "clean": "rimraf dist node_modules/.cache",
     "format": "prettier --write .",
@@ -33,6 +34,7 @@
     "chart.js": "^4.5.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "front-matter": "^4.0.2",
     "lucide-angular": "^0.470.0",
     "rxjs": "~7.8.0",
     "tailwind-merge": "^3.6.0",
@@ -43,8 +45,8 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@analogjs/platform": "^1.11.0",
-    "@analogjs/vite-plugin-angular": "^1.11.0",
+    "@analogjs/platform": "^2.8.0",
+    "@analogjs/vite-plugin-angular": "^2.8.0",
     "@angular/build": "^19.0.0",
     "@angular/cli": "^19.0.0",
     "@angular/compiler-cli": "^19.0.0",
@@ -53,7 +55,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.1.18",
     "@types/node": "^22.20.4",
-    "@vitejs/plugin-basic-ssl": "^1.2.0",
+    "@vitejs/plugin-basic-ssl": "^2.3.0",
     "cross-env": "^10.1.0",
     "eslint": "^9.20.0",
     "postcss": "^8.5.0",

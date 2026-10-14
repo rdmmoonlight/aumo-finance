@@ -3,7 +3,7 @@ import { env } from '../lib/env.js';
 
 function resolveAllowedOrigins(): string[] {
   const raw = env.CORS_ORIGINS ?? env.FRONTEND_URL ?? 'http://localhost:3000';
-  
+
   const origins = raw
     .split(',')
     .map((origin) => origin.trim().replace(/\/$/, ''))
@@ -13,7 +13,7 @@ function resolveAllowedOrigins(): string[] {
   const defaultLocalOrigins = [
     'http://localhost:3000',
     'http://localhost:5173',
-    'https://aumo-finance-web.vercel.app', // Hapus trailing slash '/'
+    'https://aumo-finance-web.vercel.app',
     'https://aumoweb.onrender.com',
   ];
 
