@@ -3,6 +3,7 @@ package com.aumofinance.app.core
 import android.app.Application
 import com.aumofinance.app.crashlog.AppLogger
 import com.aumofinance.app.crashlog.CrashLogHandler
+import com.aumofinance.app.network.SessionExpiredHandler
 import com.aumofinance.app.network.SessionStore
 
 // CrashLogHandler sebelumnya ada di codebase tapi TIDAK PERNAH benar-benar
@@ -14,5 +15,6 @@ class AumoApplication : Application() {
         AppLogger.init(this)
         Thread.setDefaultUncaughtExceptionHandler(CrashLogHandler())
         SessionStore.init(this)
+        SessionExpiredHandler.init(this)
     }
 }
