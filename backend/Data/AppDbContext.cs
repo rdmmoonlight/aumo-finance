@@ -151,7 +151,7 @@ public class AppDbContext
 
             entity.HasIndex(x => x.AccountId);
 
-            entity.HasOne<ChartOfAccount>()
+            entity.HasOne(x => x.Account)
                 .WithMany()
                 .HasForeignKey(x => x.AccountId)
                 .OnDelete(DeleteBehavior.Restrict);

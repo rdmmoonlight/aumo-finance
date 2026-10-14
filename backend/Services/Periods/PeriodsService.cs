@@ -314,12 +314,12 @@ public class PeriodsService : IPeriodsService
 
         if (accounts.All(a => a.Id != retainedAccount.Id)) accounts.Add(retainedAccount);
 
-        var totals = await _db.JournalEntryLines
+        var totals = await _db.GeneralJournals
             .AsNoTracking()
-            .Where(l => l.JournalEntry!.UserId == userId
-                     && (l.JournalEntry.JournalType == "General" || l.JournalEntry.JournalType == "Adjusting")
-                     && l.JournalEntry.EntryDate >= prevStart
-                     && l.JournalEntry.EntryDate <= prevEnd)
+            .Where(l => l.UserId == userId
+                     && (l.JournalType == "General" || l.JournalType == "Adjusting")
+                     && l.EntryDate >= prevStart
+                     && l.EntryDate <= prevEnd)
             .GroupBy(l => l.AccountId)
             .Select(g => new { AccountId = g.Key, Debit = g.Sum(x => x.Debit), Credit = g.Sum(x => x.Credit) })
             .ToDictionaryAsync(x => x.AccountId);

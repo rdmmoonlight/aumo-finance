@@ -44,14 +44,19 @@ public class JournalEntryController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        var entry = await _db.JournalEntries
-            .Include(j => j.Lines)
-            .FirstOrDefaultAsync(j => j.Id == id && j.UserId == userId);
+        // id = JournalEntryId (id kelompok jurnal)
+        var rows = await _db.GeneralJournals
+            .AsNoTracking()
+            .Where(g => g.JournalEntryId == id && g.UserId == userId)
+            .OrderBy(g => g.LineOrder)
+            .ToListAsync();
 
-        if (entry == null)
+        if (rows.Count == 0)
         {
             return NotFound(new { success = false, message = "Journal entry not found." });
         }
+
+        var entry = rows[0];
 
         var closedPeriods = await _db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
@@ -61,16 +66,16 @@ public class JournalEntryController : ControllerBase
 
         var result = new
         {
-            entry.Id,
+            Id = entry.JournalEntryId,
             entry.TransactionNumber,
             entry.JournalType,
             entry.EntryDate,
             entry.CreatedAt,
             entry.UpdatedAt,
             isLocked,
-            lines = entry.Lines.OrderBy(l => l.LineOrder).Select(l => new
+            lines = rows.Select(l => new
             {
-                l.Id,
+                Id = l.LineId,
                 l.AccountId,
                 l.LineDescription,
                 l.Debit,
@@ -294,14 +299,13 @@ public class JournalEntryController : ControllerBase
 
         var keyword = q.Trim();
 
-        var results = await _db.JournalEntryLines
-            .Include(l => l.JournalEntry)
-            .Where(l => l.JournalEntry!.UserId == userId
+        var results = await _db.GeneralJournals
+            .Where(l => l.UserId == userId
                      && l.LineDescription != null && l.LineDescription != ""
                      && EF.Functions.ILike(l.LineDescription, $"%{keyword}%"))
             .GroupBy(l => l.LineDescription)
             .OrderByDescending(g => g.Count())
-            .ThenByDescending(g => g.Max(l => l.Id))
+            .ThenByDescending(g => g.Max(l => l.LineId))
             .Select(g => g.Key)
             .Take(8)
             .ToListAsync();

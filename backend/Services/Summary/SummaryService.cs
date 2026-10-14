@@ -51,7 +51,7 @@ public class SummaryService : ISummaryService
             .FirstOrDefaultAsync();
 
         // 2. Query jurnal berdasarkan rentang periode
-        var journalQuery = _context.JournalEntries
+        var journalQuery = _context.GeneralJournals
             .AsNoTracking()
             .Where(j => j.UserId == uid);
 
@@ -60,7 +60,7 @@ public class SummaryService : ISummaryService
             journalQuery = journalQuery.Where(j => j.EntryDate >= selectedPeriod.StartDate && j.EntryDate <= selectedPeriod.EndDate);
         }
 
-        var journalCount = await journalQuery.CountAsync();
+        var journalCount = await journalQuery.Select(j => j.JournalEntryId).Distinct().CountAsync();
 
         // 3. Hitung COA aktif
         var activeCoaCount = await _context.ChartOfAccounts

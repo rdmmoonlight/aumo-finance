@@ -65,6 +65,11 @@ namespace AumoBackend.Models.Reports
 
         [Column("UpdatedAt", TypeName = "timestamp with time zone")]
         public DateTime? UpdatedAt { get; set; }
+
+        // --- Navigation ---
+
+        [ForeignKey(nameof(AccountId))]
+        public ChartOfAccount? Account { get; set; }
     }
 }
 
