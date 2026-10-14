@@ -13,8 +13,6 @@ export function resolveAllowedOrigins(): string[] {
   // Pastikan SEMUA URL bersih dari trailing slash
   const defaults = [
     'http://localhost:3000',
-    'http://localhost:5173',
-    'https://aumo-finance-web.vercel.app',
     'https://aumoweb.onrender.com',
   ];
 
