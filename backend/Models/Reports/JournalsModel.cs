@@ -21,11 +21,11 @@ namespace AumoBackend.Models.Reports
         public string? LineDescription { get; set; }
 
         [Required]
-        [Column("Debit", TypeName = "numeric")]
+        [Column("Debit", TypeName = "numeric(18,2)")]
         public decimal Debit { get; set; }
 
         [Required]
-        [Column("Credit", TypeName = "numeric")]
+        [Column("Credit", TypeName = "numeric(18,2)")]
         public decimal Credit { get; set; }
 
         [Required]
@@ -65,6 +65,11 @@ namespace AumoBackend.Models.Reports
 
         [Column("UpdatedAt", TypeName = "timestamp with time zone")]
         public DateTime? UpdatedAt { get; set; }
+
+        // --- Navigation ---
+
+        [ForeignKey(nameof(AccountId))]
+        public ChartOfAccount? Account { get; set; }
     }
 }
 
