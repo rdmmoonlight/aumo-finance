@@ -11,7 +11,7 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 # Copy manifest
 COPY package.json pnpm-lock.yaml* ./
 
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --no-frozen-lockfile --ignore-scripts
 
 # Copy seluruh source code
 COPY . .
