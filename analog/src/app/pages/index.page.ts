@@ -2,13 +2,13 @@ import { RouteMeta } from '@analogjs/router';
 import { HttpClient } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { catchError, of } from 'rxjs';
 
-import { pingGuard } from '../core/ping.guard';
+import { API_URL } from '../core/config';
 import { Logo } from '../shared/logo';
 
 export const routeMeta: RouteMeta = {
-  title: 'Aumo Finance - Aplikasi Akuntansi',
-  canActivate: [pingGuard]
+  title: 'Aumo Finance - Aplikasi Akuntansi'
 };
 
 @Component({
@@ -16,7 +16,7 @@ export const routeMeta: RouteMeta = {
   imports: [RouterLink, Logo],
   template: `
     @if (isWakingUp()) {
-      <!-- Tampilan Loading / Spinner saat DB sedang dibangunkan -->
+      <!-- Tampilan Loading / Spinner saat DB & Backend sedang dibangunkan -->
       <div class="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4 text-center">
         <div class="mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-brand-700"></div>
         <p class="text-base font-semibold text-slate-800">Membangunkan Server & Database...</p>
@@ -78,10 +78,16 @@ export default class LandingPage implements OnInit {
   ];
 
   ngOnInit() {
-    // Tembak GET / ping ke backend/database
-    this.http.get('/').subscribe({
-      next: () => this.isWakingUp.set(false),
-      error: () => this.isWakingUp.set(false) // Tetap tampilkan landing page meski gagal/timeout
+    // Memastikan API_URL tidak berakhiran slash ganda
+    const pingUrl = API_URL.endsWith('/') ? API_URL : `${API_URL}/`;
+
+    // Tembak GET / ke backend
+    this.http.get(pingUrl, { responseType: 'text' }).pipe(
+      catchError(() => {
+        return of(null);
+      })
+    ).subscribe(() => {
+      this.isWakingUp.set(false);
     });
   }
 }
