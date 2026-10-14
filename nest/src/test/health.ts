@@ -1,6 +1,6 @@
+import type { NestExpressApplication } from '@nestjs/platform-express';
 import request from 'supertest';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import type { NestExpressApplication } from '@nestjs/platform-express';
 import { createTestApp } from './helpers/create-test-app.js';
 
 describe('Health Routes', () => {
@@ -18,7 +18,7 @@ describe('Health Routes', () => {
     const res = await request(app.getHttpServer()).get('/');
 
     expect(res.status).toBe(200);
-    expect(res.body).toEqual({ status: 'ok', message: 'AumoBackend API Server Online 🚀' });
+    expect(res.body).toEqual({ status: 'ok', message: 'Aumone API Server Online 🚀' });
   });
 
   it('HEAD / - status 200 dengan body kosong (ping)', async () => {

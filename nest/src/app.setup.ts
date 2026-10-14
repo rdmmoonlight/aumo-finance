@@ -29,7 +29,7 @@ export function configureApp(app: NestExpressApplication): void {
   app.enableCors(createCorsOptions());
   app.use(requestLoggerMiddleware);
 
-  app.getHttpAdapter().getInstance().all('/api/auth/*splat', toNodeHandler(auth));
+  app.getHttpAdapter().getInstance().all('/auth/*splat', toNodeHandler(auth));
 
   app.useBodyParser('json', { limit: env.BODY_LIMIT_BYTES });
   app.useBodyParser('urlencoded', { limit: env.BODY_LIMIT_BYTES, extended: true });
