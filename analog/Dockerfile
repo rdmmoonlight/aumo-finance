@@ -5,6 +5,10 @@ FROM node:24-alpine AS builder
 
 WORKDIR /app
 
+# Ambil VITE_API_URL dari Build Argument (Render Environment)
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
+
 # Aktifkan Corepack
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
@@ -16,7 +20,7 @@ RUN pnpm install --no-frozen-lockfile --ignore-scripts
 # Copy seluruh source code
 COPY . .
 
-# Build aplikasi
+# Build aplikasi (Vite akan membaca ENV VITE_API_URL di sini)
 RUN pnpm run build
 
 # ==========================================
