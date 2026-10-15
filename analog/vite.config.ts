@@ -11,9 +11,16 @@ export default defineConfig(({ mode }) => ({
     mainFields: ['module'],
   },
   plugins: [
-    analog({ ssr: false, static: true, prerender: { routes: [] } }),
+    analog({
+      ssr: false,
+      static: true,
+      prerender: { routes: [] }
+    }),
     tailwindcss()
   ],
+  optimizeDeps: {
+    include: ['typescript']
+  },
   test: {
     globals: true,
     environment: 'jsdom',
