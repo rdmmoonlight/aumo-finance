@@ -103,7 +103,7 @@ export const session = pgTable("session", {
 ]);
 
 export const periods = pgTable("periods", {
-	id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: ""Periods_Id_seq"", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),
+	id: integer("Id").primaryKey().generatedByDefaultAsIdentity({ name: "Periods_Id_seq", startWith: 1, increment: 1, minValue: 1, maxValue: 2147483647 }),
 	periodName: varchar("PeriodName", { length: 50 }).notNull(),
 	startDate: timestamp("StartDate", { withTimezone: true, mode: 'string' }).notNull(),
 	endDate: timestamp("EndDate", { withTimezone: true, mode: 'string' }).notNull(),
