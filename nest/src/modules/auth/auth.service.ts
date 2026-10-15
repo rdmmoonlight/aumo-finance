@@ -1,3 +1,4 @@
+console.log('AUTH SERVICE FILE LOADED');
 import { Injectable } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
 import { auth } from '../../lib/auth.js';
@@ -24,7 +25,17 @@ const toUserDto = (u: RawUser): AuthUserDto => ({
   updatedAt: u.updatedAt,
 });
 
-const normalizeEmail = (email: string) => email.trim().toLowerCase();
+const normalizeEmail = (email: string): string => email.trim().toLowerCase();
+
+// Type untuk baris session dari better-auth, biar gak pakai any
+type BetterAuthSessionRow = {
+  id: string;
+  token: string;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+  createdAt: Date;
+  expiresAt: Date;
+};
 
 /** Menerjemahkan error Better Auth menjadi AppError agar response API konsisten. */
 export function mapAuthError(err: unknown, fallbackMessage: string): AppError {
@@ -63,7 +74,7 @@ export class AuthService {
       const ctx = await auth.$context;
       const user = await ctx.internalAdapter.findUserByEmail(normalizeEmail(email));
       return !!user;
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Gagal memeriksa email');
     }
   }
@@ -85,7 +96,7 @@ export class AuthService {
         token: response.token ?? null,
         setCookies: resHeaders.getSetCookie(),
       };
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Registrasi gagal');
     }
   }
@@ -108,7 +119,7 @@ export class AuthService {
         token: response.token ?? null,
         setCookies: resHeaders.getSetCookie(),
       };
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Login gagal');
     }
   }
@@ -118,7 +129,7 @@ export class AuthService {
     try {
       const { headers: resHeaders } = await auth.api.signOut({ headers, returnHeaders: true });
       return resHeaders.getSetCookie();
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Logout gagal');
     }
   }
@@ -141,7 +152,7 @@ export class AuthService {
         token: response.token ?? null,
         setCookies: resHeaders.getSetCookie(),
       };
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Gagal mengganti password');
     }
   }
@@ -152,8 +163,9 @@ export class AuthService {
       const current = await auth.api.getSession({ headers });
       if (!current) throw new AppError('Unauthorized: Silakan login terlebih dahulu', 401);
 
-      const rows = await auth.api.listSessions({ headers });
-      return rows.map((s) => ({
+      const rows = (await auth.api.listSessions({ headers })) as BetterAuthSessionRow[];
+
+      return rows.map((s: BetterAuthSessionRow): AuthSessionDto => ({
         id: s.id,
         ipAddress: s.ipAddress ?? null,
         userAgent: s.userAgent ?? null,
@@ -161,7 +173,7 @@ export class AuthService {
         expiresAt: s.expiresAt,
         isCurrent: s.id === current.session.id,
       }));
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Gagal mengambil daftar sesi');
     }
   }
@@ -169,12 +181,12 @@ export class AuthService {
   /** Cabut satu sesi berdasarkan id. */
   async revokeSession(sessionId: string, headers: Headers): Promise<void> {
     try {
-      const sessions = await auth.api.listSessions({ headers });
-      const session = sessions.find((item) => item.id === sessionId);
+      const sessions = (await auth.api.listSessions({ headers })) as BetterAuthSessionRow[];
+      const session = sessions.find((item: BetterAuthSessionRow) => item.id === sessionId);
       if (!session) throw new AppError('Sesi tidak ditemukan', 404);
 
       await auth.api.revokeSession({ body: { token: session.token }, headers });
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Gagal mencabut sesi');
     }
   }
@@ -183,7 +195,7 @@ export class AuthService {
   async revokeOtherSessions(headers: Headers): Promise<void> {
     try {
       await auth.api.revokeOtherSessions({ headers });
-    } catch (err) {
+    } catch (err: unknown) {
       throw mapAuthError(err, 'Gagal mencabut sesi lain');
     }
   }

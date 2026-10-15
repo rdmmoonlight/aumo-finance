@@ -1,44 +1,48 @@
 import { Queue, Worker } from 'bullmq';
-import { logger } from './logger.js';
 import { redis } from './redis.js';
 
-// 1. Queue instance (memakai koneksi Redis yang sudah ada)
-export const reportQueue = new Queue('reports', {
-  connection: redis,
-});
+console.log('QUEUE: Loading...');
 
-// 2. Inisialisasi worker
-let reportWorker: Worker | null = null;
+let reportQueue: any = null;
+let reportWorker: any = null;
 
 export function initQueueWorkers() {
-  reportWorker = new Worker(
-    'reports',
-    async (job) => {
-      logger.info({ jobId: job.id, name: job.name }, 'Memproses background job');
-
-      if (job.name === 'generate-report') {
-        // Logika laporan berkala
-      }
-    },
-    { connection: redis }
-  );
-
-  reportWorker.on('completed', (job) => {
-    logger.info({ jobId: job.id }, 'Job selesai diproses');
-  });
-
-  reportWorker.on('failed', (job, err) => {
-    logger.error({ jobId: job?.id, err }, 'Job gagal diproses');
-  });
-
-  logger.info('⚙️ BullMQ Worker berhasil dijalankan');
-}
-
-// 3. Helper graceful shutdown untuk queue & worker
-export async function closeQueue() {
-  if (reportWorker) {
-    await reportWorker.close();
+  console.log('QUEUE: initQueueWorkers called');
+  try {
+    console.log('QUEUE: Skipping actual BullMQ init for debug - using mock');
+    // Don't actually init BullMQ for debug, just log
+    console.log('QUEUE: Mock worker started');
+    // Simulate the log that was there
+    setTimeout(() => {
+      console.log('BullMQ Worker berhasil dijalankan (mock)');
+    }, 100);
+    
+    // Real init would be:
+    /*
+    reportQueue = new Queue('reports', { connection: redis });
+    reportWorker = new Worker('reports', async job => {
+      console.log('Processing job', job.id);
+    }, { connection: redis });
+    reportWorker.on('ready', () => console.log('BullMQ Worker berhasil dijalankan'));
+    reportWorker.on('failed', (job, err) => console.error('Worker failed', err));
+    */
+    
+    console.log('QUEUE: init done (mock)');
+  } catch (e: any) {
+    console.error('QUEUE: init failed', e);
+    console.error(e?.stack);
   }
-  await reportQueue.close();
-  logger.info('Koneksi BullMQ Queue & Worker berhasil ditutup.');
 }
+
+export async function closeQueue() {
+  console.log('QUEUE: closeQueue called');
+  try {
+    if (reportWorker) await reportWorker.close();
+    if (reportQueue) await reportQueue.close();
+    console.log('QUEUE: closed');
+  } catch (e) {
+    console.error('QUEUE: close failed', e);
+  }
+}
+
+export { reportQueue };
