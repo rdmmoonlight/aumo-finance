@@ -75,7 +75,33 @@ jobs:
         run: npx playwright test --pass-with-no-tests
         working-directory: frontend
 
-      # 5. COMMIT AUTO-FORMATTED CHANGES & UPDATED PACKAGE-LOCK
+      # 5. NESTJS SERVICE (nest)
+      - name: Install Nest Dependencies
+        run: npm install
+        working-directory: nest
+
+      - name: Typecheck & Build (Nest)
+        run: npm run build
+        working-directory: nest
+
+      - name: Run Prettier (Nest)
+        run: npx prettier --write .
+        working-directory: nest
+
+      # 6. ANALOG FRAMEWORK SERVICE (analog)
+      - name: Install Analog Dependencies
+        run: npm install
+        working-directory: analog
+
+      - name: Typecheck & Build (Analog)
+        run: npm run build
+        working-directory: analog
+
+      - name: Run Prettier (Analog)
+        run: npx prettier --write .
+        working-directory: analog
+
+      # 7. COMMIT AUTO-FORMATTED CHANGES & UPDATED PACKAGE-LOCK
       - name: Commit Formatted Changes & Lockfiles
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
@@ -83,9 +109,9 @@ jobs:
           commit_message: "style: auto-correct formatting & sync package-lock.json [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          file_pattern: "backend/* frontend/*"
+          file_pattern: "backend/* frontend/* nest/* analog/*"
 
-      # 6. UPLOAD PLAYWRIGHT REPORT
+      # 8. UPLOAD PLAYWRIGHT REPORT
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
