@@ -44,6 +44,10 @@ jobs:
         with:
           node-version: '24'
           cache: 'pnpm'
+          cache-dependency-path: |
+            frontend/pnpm-lock.yaml
+            nest/pnpm-lock.yaml
+            analog/pnpm-lock.yaml
 
       # 3. BACKEND (.NET C#)
       - name: Restore .NET Dependencies
