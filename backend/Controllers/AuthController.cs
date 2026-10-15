@@ -1,24 +1,15 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
 using AumoBackend.Models;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using AumoBackend.DTOs;
 using FluentValidation;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using AumoBackend.Validators.Common;
 
@@ -286,21 +277,21 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Google OAuth Login via GET Redirect (Server-Initiated OAuth)
-    /// Menangani browser direct navigation via window.location.href tanpa memicu HTTP 405.
+    /// Callback handler setelah autentikasi OAuth Google eksternal berhasil
     /// </summary>
     [HttpGet("google-login")]
     [AllowAnonymous]
-    public IActionResult GoogleLoginRedirect([FromQuery] string redirectTo = "/home")
+    public IActionResult GoogleLoginRedirect(string redirectTo = "/home")
     {
-        var redirectUrl = Url.Action(nameof(GoogleCallback), "Auth", new { redirectTo });
+        // Validasi URL awal sebelum dilewatkan ke Google Challenge
+        var safeRedirectUrl = GetSafeRedirectUrl(redirectTo);
+
+        var redirectUrl = Url.Action(nameof(GoogleCallback), new { redirectTo = safeRedirectUrl });
         var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+
         return Challenge(properties, "Google");
     }
 
-    /// <summary>
-    /// Callback handler setelah autentikasi OAuth Google eksternal berhasil
-    /// </summary>
     [HttpGet("google-callback")]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleCallback(string redirectTo = "/home", string? remoteError = null)
@@ -352,8 +343,42 @@ public class AuthController : ControllerBase
             await _signInManager.SignInAsync(user, isPersistent: true);
         }
 
-        // Redirect kembali ke aplikasi frontend Next.js setelah cookie session terbentuk
-        return Redirect(redirectTo);
+        // Validasi ulang URL sebelum eksekusi Redirect
+        var safeRedirectUrl = GetSafeRedirectUrl(redirectTo);
+
+        return Redirect(safeRedirectUrl);
+    }
+
+    [NonAction]
+    private string GetSafeRedirectUrl(string targetUrl)
+    {
+        const string defaultUrl = "/home";
+
+        if (string.IsNullOrWhiteSpace(targetUrl))
+            return defaultUrl;
+
+        // 1. Izinkan relative path lokal (contoh: /home, /dashboard)
+        if (Url.IsLocalUrl(targetUrl))
+            return targetUrl;
+
+        // 2. Daftar origin frontend yang diizinkan (misal Next.js)
+        var allowedOrigins = new[]
+        {
+        "http://localhost:3000",
+        "https://app.domainsaya.com"
+    };
+
+        if (Uri.TryCreate(targetUrl, UriKind.Absolute, out var uriResult))
+        {
+            var origin = $"{uriResult.Scheme}://{uriResult.Authority}";
+            if (allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
+            {
+                return targetUrl;
+            }
+        }
+
+        // Fallback jika URL tidak valid / terindikasi Open Redirect
+        return defaultUrl;
     }
 
     /// <summary>
