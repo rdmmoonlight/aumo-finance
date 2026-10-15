@@ -1,28 +1,17 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.JournalEntries;
-using AumoBackend.Models;
-using AumoBackend.Services.Periods;
 using AumoBackend.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using AumoBackend.DTOs;
-using AumoBackend.Services;
+using AumoBackend.Helpers;
+using AumoBackend.Services.Periods;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/api/v1/periods")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class PeriodsController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -136,8 +125,7 @@ public class PeriodsController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        // Validasi skema (Month, Year, field per mode, format numerik) sudah dijalankan
-        // FluentValidation sebelum masuk ke sini. Logika bisnis + transaksi ada di PeriodsService.
+        // Validasi skema dijalankan FluentValidation sebelum masuk ke sini.
         var result = await _periodsService.CreatePeriodAsync(userId, request);
 
         if (result.Success)
