@@ -1,37 +1,27 @@
-import { betterAuth } from 'better-auth';
+import { betterAuth, type BetterAuthOptions } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from './db.js';
 import * as schema from '../db/schema/index.js';
+import { db } from './db.js';
+import { logger } from './logger.js';
 
-console.log('BETTER AUTH: Loading...');
-
-let auth: any;
+let auth: ReturnType<typeof betterAuth>;
 
 try {
-  console.log('BETTER AUTH: Creating adapter...');
   const adapter = drizzleAdapter(db as any, {
     provider: 'pg',
     schema: schema as any,
   });
-  console.log('BETTER AUTH: Adapter OK');
 
-  console.log('BETTER AUTH: Creating betterAuth instance...');
   auth = betterAuth({
     database: adapter,
-    secret: process.env.BETTER_AUTH_SECRET || 'test-secret-for-debug-only-32chars',
+    secret: process.env.BETTER_AUTH_SECRET,
     emailAndPassword: { enabled: true },
     trustedOrigins: ['http://localhost:3000'],
-  });
-  console.log('BETTER AUTH: Instance OK');
+  } as BetterAuthOptions);
 } catch (e: any) {
-  console.error('BETTER AUTH FAILED:', e.message);
-  console.error(e?.stack);
-  // Mock auth to let app start
-  auth = {
-    api: {},
-    handler: async () => new Response('Auth mock'),
-  };
-  console.log('BETTER AUTH: Using mock due to failure');
+  logger.error({ err: e }, 'Failed to initialize Better Auth');
+  throw e;
 }
 
 export { auth };
+

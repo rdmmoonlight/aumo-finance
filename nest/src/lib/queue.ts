@@ -1,47 +1,41 @@
 import { Queue, Worker } from 'bullmq';
+import { logger } from './logger.js';
 import { redis } from './redis.js';
 
-console.log('QUEUE: Loading...');
-
-let reportQueue: any = null;
-let reportWorker: any = null;
+let reportQueue: Queue | null = null;
+let reportWorker: Worker | null = null;
 
 export function initQueueWorkers() {
-  console.log('QUEUE: initQueueWorkers called');
   try {
-    console.log('QUEUE: Skipping actual BullMQ init for debug - using mock');
-    // Don't actually init BullMQ for debug, just log
-    console.log('QUEUE: Mock worker started');
-    // Simulate the log that was there
-    setTimeout(() => {
-      console.log('BullMQ Worker berhasil dijalankan (mock)');
-    }, 100);
-    
-    // Real init would be:
-    /*
     reportQueue = new Queue('reports', { connection: redis });
-    reportWorker = new Worker('reports', async job => {
-      console.log('Processing job', job.id);
-    }, { connection: redis });
-    reportWorker.on('ready', () => console.log('BullMQ Worker berhasil dijalankan'));
-    reportWorker.on('failed', (job, err) => console.error('Worker failed', err));
-    */
-    
-    console.log('QUEUE: init done (mock)');
+
+    reportWorker = new Worker(
+      'reports',
+      async (job) => {
+        logger.info({ jobId: job.id }, 'Processing report job');
+      },
+      { connection: redis }
+    );
+
+    reportWorker.on('ready', () => {
+      logger.info('BullMQ Worker berhasil dijalankan');
+    });
+
+    reportWorker.on('failed', (job, err) => {
+      logger.error({ jobId: job?.id, err }, 'Worker failed processing job');
+    });
   } catch (e: any) {
-    console.error('QUEUE: init failed', e);
-    console.error(e?.stack);
+    logger.error({ err: e }, 'Queue initialization failed');
   }
 }
 
 export async function closeQueue() {
-  console.log('QUEUE: closeQueue called');
   try {
     if (reportWorker) await reportWorker.close();
     if (reportQueue) await reportQueue.close();
-    console.log('QUEUE: closed');
-  } catch (e) {
-    console.error('QUEUE: close failed', e);
+    logger.info('Queue connections closed');
+  } catch (e: any) {
+    logger.error({ err: e }, 'Failed to close queue connections');
   }
 }
 

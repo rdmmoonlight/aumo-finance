@@ -1,19 +1,16 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { Pool } from 'pg';
 import * as schema from '../db/schema/index.js';
-
-console.log('LIB/DB: Loading - NO POOL AT IMPORT');
+import { logger } from './logger.js';
 
 const url = process.env.DATABASE_URL;
-export let db: any = null;
-export let pool: any = null;
+export let db: ReturnType<typeof drizzle> | null = null;
+export let pool: Pool | null = null;
 
 if (!url) {
-  console.error('LIB/DB: DATABASE_URL missing');
+  logger.error('DATABASE_URL environment variable is missing');
 } else {
-  console.log('LIB/DB: Creating lazy pool...');
   pool = new Pool({ connectionString: url, ssl: { rejectUnauthorized: false } });
-  pool.on('error', (e: any) => console.error('LIB/DB pool error:', e.message));
+  pool.on('error', (e: Error) => logger.error({ err: e }, 'Database pool background error'));
   db = drizzle(pool, { schema });
-  console.log('LIB/DB: db created (no test)');
 }

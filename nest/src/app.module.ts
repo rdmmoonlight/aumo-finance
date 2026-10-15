@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-console.log('APP MODULE: File loaded, importing dependencies...');
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter.js';
 import { GlobalRateLimitGuard } from './common/guards/rate-limit.guard.js';
 import { databaseProvider } from './db/database.provider.js';
 import { AuthModule } from './modules/auth/auth.module.js';
-import { PeriodsModule } from './modules/periods/periods.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { PeriodsModule } from './modules/periods/periods.module.js';
 
 @Module({
   imports: [
