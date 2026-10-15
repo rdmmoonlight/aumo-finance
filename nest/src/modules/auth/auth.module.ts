@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-console.log('AUTH MODULE: File loaded');
 import { AuthGuard } from '../../common/guards/auth.guard.js';
 import { AuthRateLimitGuard } from '../../common/guards/rate-limit.guard.js';
 import { AuthController } from './auth.controller.js';
@@ -10,4 +9,4 @@ import { AuthService } from './auth.service.js';
   providers: [AuthService, AuthGuard, AuthRateLimitGuard],
   exports: [AuthService, AuthGuard],
 })
-export class AuthModule {}
+export class AuthModule { }

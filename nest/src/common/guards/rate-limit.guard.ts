@@ -1,9 +1,8 @@
-console.log('RATE LIMIT GUARD: File loaded');
-import { CanActivate, ExecutionContext, Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { env } from '../../lib/env.js';
-import { redis } from '../../lib/redis.js';
 import { logger } from '../../lib/logger.js';
+import { redis } from '../../lib/redis.js';
 
 const WINDOW_MS = () => (env as any).RATE_LIMIT_WINDOW_MS || 60_000;
 const MAX_GLOBAL = () => (env as any).RATE_LIMIT_MAX || 100;
@@ -12,7 +11,7 @@ const TIMEOUT_MS = 1000;
 
 @Injectable()
 export class GlobalRateLimitGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: any = context.switchToHttp().getRequest();
@@ -57,7 +56,7 @@ export class GlobalRateLimitGuard implements CanActivate {
           } else {
             await (redis as any).expire(key, windowSec);
           }
-        } catch {}
+        } catch { }
       }
 
       const remaining = Math.max(0, max - count);
@@ -92,6 +91,6 @@ export class GlobalRateLimitGuard implements CanActivate {
 }
 
 @Injectable()
-export class AuthRateLimitGuard extends GlobalRateLimitGuard {}
+export class AuthRateLimitGuard extends GlobalRateLimitGuard { }
 
-export class RateLimitGuard extends GlobalRateLimitGuard {}
+export class RateLimitGuard extends GlobalRateLimitGuard { }

@@ -1,4 +1,3 @@
-console.log('APP SETUP FILE LOADED');
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { toNodeHandler } from 'better-auth/node';
 import helmet from 'helmet';
@@ -10,7 +9,6 @@ import { auth } from './lib/auth.js';
 import { env } from './lib/env.js';
 
 export function configureApp(app: NestExpressApplication): void {
-  console.log('APP SETUP: configureApp called');
   app.use(requestIdMiddleware);
   app.use(
     helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: { policy: 'cross-origin' } })

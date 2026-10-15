@@ -1,4 +1,3 @@
-console.log('AUTH SERVICE FILE LOADED');
 import { Injectable } from '@nestjs/common';
 import { APIError } from 'better-auth/api';
 import { auth } from '../../lib/auth.js';
