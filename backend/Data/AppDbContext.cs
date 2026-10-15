@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using AumoBackend.Models;
+﻿using AumoBackend.Models;
+using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+
+// Gunakan type alias eksplisit untuk menyelesaikan ambiguitas
+using DataProtectionKeyEntity = Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey;
 
 namespace AumoBackend.Data;
 
-public partial class AppDbContext : DbContext
+public partial class AppDbContext : DbContext, IDataProtectionKeyContext
 {
     public AppDbContext()
     {
@@ -16,43 +18,44 @@ public partial class AppDbContext : DbContext
     {
     }
 
-    public virtual DbSet<AspNetRole> AspNetRoles { get; set; }
+    public virtual DbSet<AspNetRole> AspNetRoles { get; set; } = null!;
 
-    public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; }
+    public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; } = null!;
 
-    public virtual DbSet<AspNetUser> AspNetUsers { get; set; }
+    public virtual DbSet<AspNetUser> AspNetUsers { get; set; } = null!;
 
-    public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; }
+    public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
 
-    public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; }
+    public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; } = null!;
 
-    public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; }
+    public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; } = null!;
 
-    public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; }
+    public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; } = null!;
 
-    public virtual DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+    // Menggunakan type alias agar tidak bentrok dengan AumoBackend.Models.DataProtectionKey
+    public virtual DbSet<DataProtectionKeyEntity> DataProtectionKeys { get; set; } = null!;
 
-    public virtual DbSet<GeneralJournal> GeneralJournals { get; set; }
+    public virtual DbSet<GeneralJournal> GeneralJournals { get; set; } = null!;
 
-    public virtual DbSet<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; }
+    public virtual DbSet<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = null!;
 
-    public virtual DbSet<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; }
+    public virtual DbSet<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; } = null!;
 
-    public virtual DbSet<LoginActivity> LoginActivities { get; set; }
+    public virtual DbSet<LoginActivity> LoginActivities { get; set; } = null!;
 
-    public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<Notification> Notifications { get; set; } = null!;
 
-    public virtual DbSet<Period> Periods { get; set; }
+    public virtual DbSet<Period> Periods { get; set; } = null!;
 
-    public virtual DbSet<RecoveryCode> RecoveryCodes { get; set; }
+    public virtual DbSet<RecoveryCode> RecoveryCodes { get; set; } = null!;
 
-    public virtual DbSet<SecuritySetting> SecuritySettings { get; set; }
+    public virtual DbSet<SecuritySetting> SecuritySettings { get; set; } = null!;
 
-    public virtual DbSet<TransactionCounter> TransactionCounters { get; set; }
+    public virtual DbSet<TransactionCounter> TransactionCounters { get; set; } = null!;
 
-    public virtual DbSet<TrustedDevice> TrustedDevices { get; set; }
+    public virtual DbSet<TrustedDevice> TrustedDevices { get; set; } = null!;
 
-    public virtual DbSet<UserSession> UserSessions { get; set; }
+    public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -60,6 +63,7 @@ public partial class AppDbContext : DbContext
         {
         }
     }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>

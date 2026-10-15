@@ -110,8 +110,8 @@ public class GeneralLedgersService : IGeneralLedgersService
                     return new BaseServiceResult { Success = true, Message = $"General Ledger refreshed for period {selectedPeriod.PeriodName} (0 transactions found)." };
                 }
 
-                var permanents = new List<GeneralLedgerPermanentAccounts>();
-                var temporaries = new List<GeneralLedgerTemporaryAccounts>();
+                var permanents = new List<GeneralLedgerPermanentAccount>();
+                var temporaries = new List<GeneralLedgerTemporaryAccount>();
 
                 foreach (var g in lines.GroupBy(l => l.AccountId))
                 {
@@ -126,14 +126,16 @@ public class GeneralLedgersService : IGeneralLedgersService
                     {
                         running += isDebitNormal ? (line.Debit - line.Credit) : (line.Credit - line.Debit);
                         if (isPermanent)
-                            permanents.Add(new GeneralLedgerPermanentAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.LineId, EntryDate = line.EntryDate, TransactionNumber = line.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
+                            permanents.Add(new GeneralLedgerPermanentAccount { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.LineId, EntryDate = line.EntryDate, TransactionNumber = line.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                         else if (isTemporary)
-                            temporaries.Add(new GeneralLedgerTemporaryAccounts { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.LineId, EntryDate = line.EntryDate, TransactionNumber = line.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
+                            temporaries.Add(new GeneralLedgerTemporaryAccount { UserId = userId, PeriodId = selectedPeriod.Id, AccountId = line.AccountId, JournalEntryId = line.JournalEntryId, JournalEntryLineId = line.LineId, EntryDate = line.EntryDate, TransactionNumber = line.TransactionNumber, LineDescription = line.LineDescription, Debit = line.Debit, Credit = line.Credit, RunningBalance = running });
                     }
                 }
 
-                if (permanents.Any()) _db.GeneralLedgerPermanentAccounts.AddRange(permanents);
-                if (temporaries.Any()) _db.GeneralLedgerTemporaryAccounts.AddRange(temporaries);
+                foreach (var permanent in permanents)
+                    _db.GeneralLedgerPermanentAccounts.Add(permanent);
+                foreach (var temporary in temporaries)
+                    _db.GeneralLedgerTemporaryAccounts.Add(temporary);
                 await _db.SaveChangesAsync();
                 await tx.CommitAsync();
                 return new BaseServiceResult { Success = true, Message = $"General Ledger refreshed for period {selectedPeriod.PeriodName}." };
@@ -200,14 +202,14 @@ public class GeneralLedgersService : IGeneralLedgersService
         _db.GeneralLedgerPermanentAccounts.AsNoTracking().Include(x => x.Account)
            .Where(x => x.UserId == userId && x.PeriodId == periodId)
            .OrderBy(x => x.AccountId).ThenBy(x => x.EntryDate).ThenBy(x => x.Id)
-           .Select(x => new PermanentLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? "", LineDescription = x.LineDescription ?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
+           .Select(x => new PermanentLedgerDto { Id = (int)x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? "", LineDescription = x.LineDescription ?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
            .ToListAsync();
 
     private Task<List<TemporaryLedgerDto>> FetchTemporaryDtosAsync(Guid userId, int periodId) =>
         _db.GeneralLedgerTemporaryAccounts.AsNoTracking().Include(x => x.Account)
            .Where(x => x.UserId == userId && x.PeriodId == periodId)
            .OrderBy(x => x.AccountId).ThenBy(x => x.EntryDate).ThenBy(x => x.Id)
-           .Select(x => new TemporaryLedgerDto { Id = x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? "", LineDescription = x.LineDescription ?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
+           .Select(x => new TemporaryLedgerDto { Id = (int)x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? "", JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? "", LineDescription = x.LineDescription ?? "", Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
            .ToListAsync();
 
     private List<LedgerAccountResponse> MapToGrouped(List<PermanentLedgerDto> flat)
