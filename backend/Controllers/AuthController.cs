@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using AumoBackend.Validators.Common;
 
 namespace AumoBackend.Controllers;
 
@@ -35,19 +36,22 @@ public class AuthController : ControllerBase
     private readonly IGuardianService _guardianService;
     private readonly IConfiguration _configuration;
     private readonly IValidator<LoginRequest> _loginValidator;
+    private readonly IValidator<GoogleLoginRequest> _googleLoginValidator;
 
     public AuthController(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IGuardianService guardianService,
         IConfiguration configuration,
-        IValidator<LoginRequest> loginValidator)
+        IValidator<LoginRequest> loginValidator,
+        IValidator<GoogleLoginRequest> googleLoginValidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _guardianService = guardianService;
         _configuration = configuration;
         _loginValidator = loginValidator;
+        _googleLoginValidator = googleLoginValidator;
     }
 
     [HttpPost("login")]
@@ -58,12 +62,7 @@ public class AuthController : ControllerBase
         var validationResult = await _loginValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
-            return BadRequest(new
-            {
-                success = false,
-                message = "Validation failed.",
-                errors = validationResult.Errors.Select(e => e.ErrorMessage)
-            });
+            return BadRequest(validationResult.ToErrorResponse());
         }
 
         var user = await _userManager.FindByEmailAsync(request.Email)
@@ -214,9 +213,10 @@ public class AuthController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.IdToken))
+        var validationResult = await _googleLoginValidator.ValidateAsync(request);
+        if (!validationResult.IsValid)
         {
-            return BadRequest(new { success = false, message = "Google ID Token is required." });
+            return BadRequest(validationResult.ToErrorResponse());
         }
 
         GoogleJsonWebSignature.Payload payload;
