@@ -73,12 +73,11 @@ namespace AumoBackend
                 // ===================================== 
                 // 1. DATABASE CONFIGURATION (PostgreSQL - Neon DB Resilient Setup) 
                 // ===================================== 
-                var connectionString = builder.Configuration["DATABASE_URL"]
-                    ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+                var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
                 if (string.IsNullOrWhiteSpace(connectionString))
                 {
-                    throw new InvalidOperationException("Database connection string 'DATABASE_URL' is missing.");
+                    throw new InvalidOperationException("Database connection string 'DefaultConnection' is missing.");
                 }
 
                 builder.Services.AddDbContextFactory<AppDbContext>(options =>
@@ -160,16 +159,12 @@ namespace AumoBackend
                 // ===================================== 
                 // 5. AUTHENTICATION & AUTHORIZATION 
                 // ===================================== 
-                var jwtSigningKey = builder.Configuration["JWT_SIGNING_KEY"]
-                    ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY");
-
-                var jwtIssuer = builder.Configuration["JWT_ISSUER"]
-                    ?? Environment.GetEnvironmentVariable("JWT_ISSUER")
-                    ?? "AumoFinanceApp";
+                var jwtSigningKey = builder.Configuration["Jwt:SigningKey"];
+                var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "AumoFinanceApp";
 
                 if (string.IsNullOrWhiteSpace(jwtSigningKey))
                 {
-                    throw new InvalidOperationException("Fatal Error: Environment variable 'JWT_SIGNING_KEY' is missing.");
+                    throw new InvalidOperationException("Fatal Error: Configuration 'Jwt:SigningKey' is missing.");
                 }
 
                 var authBuilder = builder.Services.AddAuthentication(options =>
@@ -257,35 +252,45 @@ namespace AumoBackend
                 builder.Services.AddMemoryCache();
 
                 // Distributed Cache Configuration (Upstash / Redis TCP dengan Fallback parser & In-Memory) 
-                var redisUrl = builder.Configuration["REDIS_URL"]
-                    ?? Environment.GetEnvironmentVariable("REDIS_URL");
+                var redisUrl = builder.Configuration["Redis:Url"];
 
                 if (!string.IsNullOrWhiteSpace(redisUrl))
                 {
                     builder.Services.AddStackExchangeRedisCache(options =>
                     {
-                        // Jika me-refer ke format URI URL rediss:// atau redis://, di-parse otomatis ke StackExchange.Redis format
-                        if (redisUrl.StartsWith("rediss://", StringComparison.OrdinalIgnoreCase) ||
-                            redisUrl.StartsWith("redis://", StringComparison.OrdinalIgnoreCase))
+                        // Parse URL secara aman menggunakan parser bawaan StackExchange.Redis / Uri
+                        if (redisUrl.StartsWith("redis://", StringComparison.OrdinalIgnoreCase) ||
+                            redisUrl.StartsWith("rediss://", StringComparison.OrdinalIgnoreCase))
                         {
                             var uri = new Uri(redisUrl);
+                            var isSsl = uri.Scheme.Equals("rediss", StringComparison.OrdinalIgnoreCase);
                             var userInfo = uri.UserInfo.Split(':');
-                            var password = userInfo.Length > 1 ? userInfo[1] : userInfo[0];
-                            options.Configuration = $"{uri.Host}:{uri.Port},password={password},ssl=true,abortConnect=false";
+                            var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : Uri.UnescapeDataString(userInfo[0]);
+                            var port = uri.Port > 0 ? uri.Port : (isSsl ? 6380 : 6379);
+
+                            options.ConfigurationOptions = new StackExchange.Redis.ConfigurationOptions
+                            {
+                                EndPoints = { { uri.Host, port } },
+                                Password = password,
+                                Ssl = isSsl,
+                                AbortOnConnectFail = false
+                            };
                         }
                         else
                         {
+                            // Format standar StackExchange (misal: "localhost:6379,password=xxx")
                             options.Configuration = redisUrl;
                         }
 
                         options.InstanceName = "AumoFinance_";
                     });
-                    Log.Information("Distributed Caching (Upstash Redis) terkonfigurasi.");
+
+                    Log.Information("Distributed Caching (Redis) terkonfigurasi.");
                 }
                 else
                 {
                     builder.Services.AddDistributedMemoryCache();
-                    Log.Information("REDIS_URL belum dikonfigurasi. Menggunakan Fallback Distributed Memory Cache.");
+                    Log.Information("Redis:Url tidak dikonfigurasi. Menggunakan Fallback Distributed Memory Cache.");
                 }
 
                 // Auto-register semua FluentValidation Validator 

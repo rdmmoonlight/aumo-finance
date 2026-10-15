@@ -31,7 +31,7 @@ export function configureApp(app: NestExpressApplication): void {
     const clean = p.split('?')[0];
     const isCustom = CUSTOM_AUTH_ROUTES.some((r) => clean === r || clean.startsWith(r + '/'));
     if (isCustom) return next();
-    return toNodeHandler(auth)(req, res, next);
+    return toNodeHandler(auth)(req, res);
   });
 
   app.useBodyParser('json', { 

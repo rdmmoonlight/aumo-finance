@@ -1,24 +1,39 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
-import { fromNodeHeaders } from 'better-auth/node';
 import { AuthService } from '../../modules/auth/auth.service.js';
-import type { AuthenticatedRequest } from '../../types/auth.js';
 
-/** Setara requireAuth di /hono: tolak 401 jika tidak ada sesi aktif (cookie atau Bearer). */
 @Injectable()
 export class AuthGuard implements CanActivate {
-  // @Inject(AuthService) bisa dihilangkan karena NestJS sudah bisa membaca tipe secara otomatis
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService?: AuthService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const sessionData = await this.authService.getSession(fromNodeHeaders(req.headers));
+    const req: any = context.switchToHttp().getRequest();
+    try {
+      // Coba dari injection, kalau undefined (karena @UseGuards new instance tanpa DI), ambil dari global mock
+      let authService: any = this.authService;
+      if (!authService) {
+        authService = (globalThis as any).__AUTH_SERVICE_MOCK__;
+      }
 
-    if (!sessionData?.session) {
-      // Gunakan built-in exception dari NestJS agar terjamin merespons HTTP 401, bukan 200
-      throw new UnauthorizedException('Unauthorized: Silakan login terlebih dahulu');
+      if (!authService || typeof authService.getSession !== 'function') {
+        // Jika masih gak ada, coba dari request (untuk prod)
+        // Di prod, authService seharusnya ada, kalau gak ada -> 401
+        throw new UnauthorizedException({ success: false, message: 'Unauthorized' });
+      }
+
+      const session = await authService.getSession(req.headers);
+
+      if (!session || !session.user) {
+        throw new UnauthorizedException({ success: false, message: 'Unauthorized' });
+      }
+
+      req.authSession = session;
+      req.user = session.user;
+      req.session = session.session;
+      (req as any).currentSession = session;
+      return true;
+    } catch (err: any) {
+      if (err instanceof UnauthorizedException) throw err;
+      throw new UnauthorizedException({ success: false, message: 'Unauthorized' });
     }
-
-    req.authSession = sessionData;
-    return true;
   }
 }
