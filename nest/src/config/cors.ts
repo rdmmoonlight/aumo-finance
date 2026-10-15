@@ -11,10 +11,7 @@ export function resolveAllowedOrigins(): string[] {
   const configured = raw.split(',').map(clean).filter(Boolean);
 
   // Pastikan SEMUA URL bersih dari trailing slash
-  const defaults = [
-    'http://localhost:3000',
-    'https://aumoweb.onrender.com',
-  ];
+  const defaults = ['http://localhost:3000', 'https://aumoweb.onrender.com'];
 
   return Array.from(new Set([...configured, ...defaults].map(clean)));
 }

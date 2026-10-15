@@ -1,10 +1,10 @@
-import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { catchError, throwError } from 'rxjs';
+import { HttpErrorResponse, HttpInterceptorFn } from "@angular/common/http";
+import { inject } from "@angular/core";
+import { Router } from "@angular/router";
+import { catchError, throwError } from "rxjs";
 
-import { AuthService } from './auth.service';
-import { API_URL } from './config';
+import { AuthService } from "./auth.service";
+import { API_URL } from "./config";
 
 /** Kirim cookie sesi ke backend & arahkan ke /login saat sesi berakhir (401). */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
@@ -16,9 +16,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req.clone({ withCredentials: true })).pipe(
     catchError((err: unknown) => {
-      if (err instanceof HttpErrorResponse && err.status === 401 && !isAuthCall) {
+      if (
+        err instanceof HttpErrorResponse &&
+        err.status === 401 &&
+        !isAuthCall
+      ) {
         auth.clearSession();
-        void router.navigateByUrl('/login');
+        void router.navigateByUrl("/login");
       }
       return throwError(() => err);
     }),

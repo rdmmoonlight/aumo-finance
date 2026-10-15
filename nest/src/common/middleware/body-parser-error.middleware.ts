@@ -4,7 +4,7 @@ export function bodyParserErrorMiddleware(
   err: any,
   _req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   if (!err) return next();
 

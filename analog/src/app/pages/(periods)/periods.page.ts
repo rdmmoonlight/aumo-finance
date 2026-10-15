@@ -1,21 +1,31 @@
-import { RouteMeta } from '@analogjs/router';
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { OpenPeriodInfo, Period, PeriodsService } from '../(periods)/periods.service';
+import { RouteMeta } from "@analogjs/router";
+import { Component, inject, OnInit, signal } from "@angular/core";
+import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+import {
+  OpenPeriodInfo,
+  Period,
+  PeriodsService,
+} from "../(periods)/periods.service";
 
-export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' };
+export const routeMeta: RouteMeta = {
+  title: "Periode Keuangan - Aumo Finance",
+};
 
 @Component({
-  selector: 'app-periods-page',
+  selector: "app-periods-page",
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
     <div class="space-y-6 p-6">
       <!-- Header Page -->
-      <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div
+        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div>
           <h1 class="text-2xl font-bold text-slate-900">Periode Keuangan</h1>
-          <p class="text-sm text-slate-600">Kelola dan pantau siklus anggaran bulanan Anda.</p>
+          <p class="text-sm text-slate-600">
+            Kelola dan pantau siklus anggaran bulanan Anda.
+          </p>
         </div>
         <div class="flex gap-2">
           @if (selectedPeriodId()) {
@@ -31,8 +41,17 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
             (click)="openModal.set(true)"
             class="inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="size-5"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clip-rule="evenodd"
+              />
             </svg>
             Tambah Periode
           </button>
@@ -41,10 +60,17 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
 
       <!-- Info Banner Periode Terbuka -->
       @if (openPeriodInfo()?.period) {
-        <div class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900 flex items-center justify-between">
+        <div
+          class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900 flex items-center justify-between"
+        >
           <div>
-            <span class="text-xs font-semibold uppercase tracking-wider text-blue-600 block">Periode Berjalan</span>
-            <span class="text-lg font-bold">{{ openPeriodInfo()?.period?.name }}</span>
+            <span
+              class="text-xs font-semibold uppercase tracking-wider text-blue-600 block"
+              >Periode Berjalan</span
+            >
+            <span class="text-lg font-bold">{{
+              openPeriodInfo()?.period?.name
+            }}</span>
           </div>
           <button
             (click)="closePeriod(openPeriodInfo()!.period!.id)"
@@ -57,10 +83,14 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
       }
 
       <!-- Table Section -->
-      <div class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div
+        class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+      >
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm text-slate-600">
-            <thead class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-700">
+            <thead
+              class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-700"
+            >
               <tr>
                 <th scope="col" class="px-6 py-4">Nama Periode</th>
                 <th scope="col" class="px-6 py-4">Rentang Waktu</th>
@@ -79,29 +109,40 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
                 </tr>
               } @else {
                 @for (period of periods(); track period.id) {
-                  <tr class="hover:bg-slate-50/80 transition-colors" [class.bg-brand-50]="selectedPeriodId() === period.id">
+                  <tr
+                    class="hover:bg-slate-50/80 transition-colors"
+                    [class.bg-brand-50]="selectedPeriodId() === period.id"
+                  >
                     <td class="px-6 py-4 font-semibold text-slate-900">
                       {{ period.name }}
                       @if (selectedPeriodId() === period.id) {
-                        <span class="ml-2 text-xs text-brand-700 font-normal">(Terpilih)</span>
+                        <span class="ml-2 text-xs text-brand-700 font-normal"
+                          >(Terpilih)</span
+                        >
                       }
                     </td>
                     <td class="px-6 py-4 text-slate-500">
                       {{ period.startDate }} - {{ period.endDate }}
                     </td>
                     <td class="px-6 py-4 font-medium text-emerald-600">
-                      Rp {{ (period.income || 0).toLocaleString('id-ID') }}
+                      Rp {{ (period.income || 0).toLocaleString("id-ID") }}
                     </td>
                     <td class="px-6 py-4 font-medium text-rose-600">
-                      Rp {{ (period.expense || 0).toLocaleString('id-ID') }}
+                      Rp {{ (period.expense || 0).toLocaleString("id-ID") }}
                     </td>
                     <td class="px-6 py-4">
-                      @if (period.status === 'active' || period.status === 'OPEN') {
-                        <span class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20">
+                      @if (
+                        period.status === "active" || period.status === "OPEN"
+                      ) {
+                        <span
+                          class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
+                        >
                           Aktif
                         </span>
                       } @else {
-                        <span class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10">
+                        <span
+                          class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10"
+                        >
                           Selesai
                         </span>
                       }
@@ -114,7 +155,9 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
                       >
                         Pilih
                       </button>
-                      @if (period.status === 'active' || period.status === 'OPEN') {
+                      @if (
+                        period.status === "active" || period.status === "OPEN"
+                      ) {
                         <button
                           (click)="closePeriod(period.id)"
                           class="font-medium text-rose-600 hover:text-rose-800 hover:underline"
@@ -126,7 +169,10 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="6" class="px-6 py-8 text-center text-slate-500">
+                    <td
+                      colspan="6"
+                      class="px-6 py-8 text-center text-slate-500"
+                    >
                       Belum ada data periode keuangan.
                     </td>
                   </tr>
@@ -139,23 +185,46 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
 
       <!-- Modal Form Tambah Periode -->
       @if (openModal()) {
-        <div class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+        <div
+          class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
+        >
           <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h3 class="text-lg font-bold text-slate-900">Buat Periode Baru</h3>
+            <div
+              class="flex items-center justify-between border-b border-slate-100 pb-3"
+            >
+              <h3 class="text-lg font-bold text-slate-900">
+                Buat Periode Baru
+              </h3>
               <button
                 (click)="openModal.set(false)"
                 class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="size-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
                 </svg>
               </button>
             </div>
 
-            <form [formGroup]="form" (ngSubmit)="submitForm()" class="mt-4 space-y-4">
+            <form
+              [formGroup]="form"
+              (ngSubmit)="submitForm()"
+              class="mt-4 space-y-4"
+            >
               <div>
-                <label for="name" class="mb-1 block text-sm font-medium text-slate-700">Nama Periode</label>
+                <label
+                  for="name"
+                  class="mb-1 block text-sm font-medium text-slate-700"
+                  >Nama Periode</label
+                >
                 <input
                   id="name"
                   type="text"
@@ -167,7 +236,11 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
 
               <div class="grid grid-cols-2 gap-3">
                 <div>
-                  <label for="startDate" class="mb-1 block text-sm font-medium text-slate-700">Tanggal Mulai</label>
+                  <label
+                    for="startDate"
+                    class="mb-1 block text-sm font-medium text-slate-700"
+                    >Tanggal Mulai</label
+                  >
                   <input
                     id="startDate"
                     type="date"
@@ -176,7 +249,11 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
                   />
                 </div>
                 <div>
-                  <label for="endDate" class="mb-1 block text-sm font-medium text-slate-700">Tanggal Selesai</label>
+                  <label
+                    for="endDate"
+                    class="mb-1 block text-sm font-medium text-slate-700"
+                    >Tanggal Selesai</label
+                  >
                   <input
                     id="endDate"
                     type="date"
@@ -199,7 +276,7 @@ export const routeMeta: RouteMeta = { title: 'Periode Keuangan - Aumo Finance' }
                   [disabled]="isSubmitting()"
                   class="rounded-lg bg-brand-700 px-4 py-2 text-sm font-semibold text-white hover:bg-brand-800 disabled:opacity-50"
                 >
-                  {{ isSubmitting() ? 'Menyimpan...' : 'Simpan Periode' }}
+                  {{ isSubmitting() ? "Menyimpan..." : "Simpan Periode" }}
                 </button>
               </div>
             </form>
@@ -222,9 +299,9 @@ export default class PeriodsPage implements OnInit {
   readonly openModal = signal<boolean>(false);
 
   readonly form = this.fb.group({
-    name: ['', Validators.required],
-    startDate: ['', Validators.required],
-    endDate: ['', Validators.required],
+    name: ["", Validators.required],
+    startDate: ["", Validators.required],
+    endDate: ["", Validators.required],
   });
 
   ngOnInit(): void {
@@ -253,7 +330,11 @@ export default class PeriodsPage implements OnInit {
     if (this.form.invalid) return;
 
     this.isSubmitting.set(true);
-    const dto = this.form.getRawValue() as { name: string; startDate: string; endDate: string };
+    const dto = this.form.getRawValue() as {
+      name: string;
+      startDate: string;
+      endDate: string;
+    };
 
     this.periodsService.createPeriod(dto).subscribe({
       next: () => {
@@ -286,7 +367,7 @@ export default class PeriodsPage implements OnInit {
   }
 
   closePeriod(id: string): void {
-    if (!confirm('Apakah Anda yakin ingin menutup periode ini?')) return;
+    if (!confirm("Apakah Anda yakin ingin menutup periode ini?")) return;
 
     this.periodsService.closePeriod(id).subscribe({
       next: () => {

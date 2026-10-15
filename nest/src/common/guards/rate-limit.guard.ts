@@ -1,4 +1,10 @@
-import { CanActivate, ExecutionContext, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { env } from '../../lib/env.js';
 import { logger } from '../../lib/logger.js';
@@ -11,7 +17,7 @@ const TIMEOUT_MS = 1000;
 
 @Injectable()
 export class GlobalRateLimitGuard implements CanActivate {
-  constructor(private reflector: Reflector) { }
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req: any = context.switchToHttp().getRequest();
@@ -56,7 +62,7 @@ export class GlobalRateLimitGuard implements CanActivate {
           } else {
             await (redis as any).expire(key, windowSec);
           }
-        } catch { }
+        } catch {}
       }
 
       const remaining = Math.max(0, max - count);
@@ -77,7 +83,7 @@ export class GlobalRateLimitGuard implements CanActivate {
         res.setHeader('Retry-After', retryAfter);
         throw new HttpException(
           { success: false, message: 'Terlalu banyak request, coba lagi nanti', retryAfter },
-          HttpStatus.TOO_MANY_REQUESTS,
+          HttpStatus.TOO_MANY_REQUESTS
         );
       }
 
@@ -91,6 +97,6 @@ export class GlobalRateLimitGuard implements CanActivate {
 }
 
 @Injectable()
-export class AuthRateLimitGuard extends GlobalRateLimitGuard { }
+export class AuthRateLimitGuard extends GlobalRateLimitGuard {}
 
-export class RateLimitGuard extends GlobalRateLimitGuard { }
+export class RateLimitGuard extends GlobalRateLimitGuard {}

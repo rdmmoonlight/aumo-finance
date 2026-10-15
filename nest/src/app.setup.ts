@@ -17,28 +17,31 @@ export function configureApp(app: NestExpressApplication): void {
   app.use(requestLoggerMiddleware);
 
   const CUSTOM_AUTH_ROUTES = [
-    "/auth/check-email",
-    "/auth/register",
-    "/auth/login",
-    "/auth/logout",
-    "/auth/me",
-    "/auth/change-password",
-    "/auth/sessions",
+    '/auth/check-email',
+    '/auth/register',
+    '/auth/login',
+    '/auth/logout',
+    '/auth/me',
+    '/auth/change-password',
+    '/auth/sessions',
   ];
 
-  app.getHttpAdapter().getInstance().use('/auth', (req: any, res: any, next: any) => {
-    const p = (req.originalUrl || req.url || req.path || '') as string;
-    const clean = p.split('?')[0];
-    const isCustom = CUSTOM_AUTH_ROUTES.some((r) => clean === r || clean.startsWith(r + '/'));
-    if (isCustom) return next();
-    return toNodeHandler(auth)(req, res);
-  });
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .use('/auth', (req: any, res: any, next: any) => {
+      const p = (req.originalUrl || req.url || req.path || '') as string;
+      const clean = p.split('?')[0];
+      const isCustom = CUSTOM_AUTH_ROUTES.some((r) => clean === r || clean.startsWith(r + '/'));
+      if (isCustom) return next();
+      return toNodeHandler(auth)(req, res);
+    });
 
   app.useBodyParser('json', {
     limit: env.BODY_LIMIT_BYTES,
     verify: (req: any, _res: any, buf: Buffer) => {
       (req as any).rawBody = buf;
-    }
+    },
   } as any);
   app.useBodyParser('urlencoded', { limit: env.BODY_LIMIT_BYTES, extended: true } as any);
 
