@@ -7,7 +7,7 @@
 | Paket `FluentValidation.DependencyInjectionExtensions` 12.1.1 | Terpasang |
 | `AddValidatorsFromAssemblyContaining<Program>()` | Terdaftar di `Program.cs` (scan otomatis, tidak perlu registrasi manual per validator) |
 | `LoginRequestValidator` | Ada dan **dipakai** (`AuthController.Login`, `AuthService.ValidateLoginAsync`) |
-| `CreatePeriodRequestValidator` | Ada tetapi **tidak dipakai** (`PeriodsController.CreatePeriod` belum memanggilnya) |
+| `CreatePeriodRequestValidator` | Dipakai di `PeriodsController.CreatePeriod` (Fase 3) |
 | `GoogleLoginRequestValidator` | **Baru** (commit ini), dipakai di `AuthController.GoogleLogin` |
 | `ValidationResultExtensions.ToErrorResponse()` | **Baru** (commit ini), format error seragam |
 
@@ -34,27 +34,29 @@ if (!validation.IsValid)
 
 ## 3. Fase Pengerjaan
 
-### Fase 1 — Auth (selesai di commit ini)
+### Fase 1 — Auth (selesai)
 
 | Request | File DTO | Validator | Status |
 |---|---|---|---|
 | `LoginRequest` | `DTOs/AuthDto.cs` | `Validators/LoginRequestValidator.cs` | Selesai (sudah ada) |
 | `GoogleLoginRequest` | `DTOs/AuthDto.cs` | `Validators/Auth/GoogleLoginRequestValidator.cs` | Selesai |
 
-### Fase 2 — Auth: sisa pekerjaan (manual)
+### Fase 2 — Auth: sisa pekerjaan (selesai)
 
-| No | Pekerjaan | File | Catatan |
-|---|---|---|---|
-| 2.1 | Batasi `redirectTo` agar hanya path lokal atau origin yang diizinkan | `Controllers/AuthController.cs` (`GoogleLoginRedirect` baris ±294, `GoogleCallback` baris ±356) | **Risiko keamanan:** `Redirect(redirectTo)` menerima URL bebas (open redirect). Gunakan `Url.IsLocalUrl()` atau daftar origin yang sama dengan CORS |
-| 2.2 | Samakan alur validasi di `AuthService` | `Services/Auth/AuthService.cs`, `IAuthService.cs` | `AuthService` sudah terdaftar di DI tetapi `AuthController` memakai logika sendiri (duplikasi). Putuskan: controller memakai service, atau hapus service |
-| 2.3 | Hapus atau validasi DTO tidak terpakai | `DTOs/AuthDto.cs` (`ResendRequest`, `MobileLoginRequest`) | Tidak ada endpoint yang memakainya. Hapus, atau buat validator saat endpoint dibuat |
-| 2.4 | Validator `ChangePasswordRequest` | `DTOs/SettingsDto.cs`, `Controllers/SettingsController.cs` baris ±153 | `NewPassword`: tidak kosong, 6–128 karakter (selaras `Program.cs`: `RequiredLength = 6`), tidak sama dengan `CurrentPassword` |
+| No | Pekerjaan | Hasil |
+|---|---|---|
+| 2.1 | Batasi `redirectTo` | Selesai. `GetSafeRedirectUrl` memakai `Helpers/AllowedOrigins.cs` (satu sumber dengan CORS). Daftar placeholder `app.domainsaya.com` dihapus |
+| 2.2 | Hilangkan duplikasi `AuthController` vs `AuthService` | Selesai. Controller kini tipis dan memakai `IAuthService`. `AuthResponseDto` bertambah `IsLockedOut` dan `LockoutEnd` agar respons 429 tetap sama |
+| 2.3 | DTO tidak terpakai | Selesai. `ResendRequest`, `MobileLoginRequest`, `MobileLoginResponse` dihapus dari backend |
+| 2.4 | `ChangePasswordRequest` | Selesai. `Validators/Auth/ChangePasswordRequestValidator.cs`, dipasang di `SettingsController.ChangePassword` |
 
-### Fase 3 — Periods
+### Fase 3 — Periods (selesai)
 
-| Request | File DTO | Controller | Pekerjaan |
-|---|---|---|---|
-| `CreatePeriodRequest` | `DTOs/PeriodsDto.cs` | `PeriodsController.CreatePeriod` (±133) | Validator sudah ada; tinggal inject dan panggil |
+| Request | Hasil |
+|---|---|
+| `CreatePeriodRequest` | Validator dipasang di `PeriodsController.CreatePeriod`. Aturan baru: `SetupMode` wajib valid, kode akun harus berbeda, nama maks. 100 karakter, saldo awal tidak negatif, akun LoadExisting tidak boleh sama |
+
+Perubahan format error: `message` kini berisi error validasi pertama (sebelumnya selalu "Validation failed."), karena frontend menampilkan `error.data.message`. Array `errors` tetap lengkap.
 
 ### Fase 4 — Chart of Accounts
 

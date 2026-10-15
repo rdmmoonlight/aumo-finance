@@ -23,9 +23,6 @@ public class GoogleLoginRequest
     public bool IsMobileClient { get; set; } = false;
 }
 
-public record ResendRequest(string Email);
-
-
 public class AuthResponseDto
 {
     public bool Success { get; set; }
@@ -34,21 +31,10 @@ public class AuthResponseDto
     public string? FullName { get; set; }
     public string? AvatarUrl { get; set; }
     public string? Token { get; set; }
-}
 
-public class MobileLoginRequest
-{
-    public string Email { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-}
-
-public class MobileLoginResponse
-{
-    public bool Success { get; set; }
-    public string Message { get; set; } = string.Empty;
-    public string Token { get; set; } = string.Empty;
-    public string UserId { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
+    // Diisi saat akun terkunci (HTTP 429 di controller)
+    public bool IsLockedOut { get; set; }
+    public DateTime? LockoutEnd { get; set; }
 }
 
 public class UserSessionDto

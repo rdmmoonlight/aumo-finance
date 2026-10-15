@@ -15,6 +15,7 @@ namespace AumoBackend.Services.Auth;
 public interface IAuthService
 {
     Task<ValidationResult> ValidateLoginAsync(LoginRequest request);
+    Task<ValidationResult> ValidateGoogleLoginAsync(GoogleLoginRequest request);
     Task<AuthResponseDto?> ProcessLoginAsync(LoginRequest request, string ipAddress, string headerUserAgent);
     Task<AuthResponseDto?> ProcessGoogleLoginAsync(GoogleLoginRequest request);
     AuthenticationProperties ConfigureGoogleRedirectProperties(string redirectUrl);

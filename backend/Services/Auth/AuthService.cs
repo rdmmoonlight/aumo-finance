@@ -29,24 +29,44 @@ public class AuthService : IAuthService
     private readonly IGuardianService _guardianService;
     private readonly IConfiguration _configuration;
     private readonly IValidator<LoginRequest> _loginValidator;
+    private readonly IValidator<GoogleLoginRequest> _googleLoginValidator;
 
     public AuthService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
         IGuardianService guardianService,
         IConfiguration configuration,
-        IValidator<LoginRequest> loginValidator)
+        IValidator<LoginRequest> loginValidator,
+        IValidator<GoogleLoginRequest> googleLoginValidator)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _guardianService = guardianService;
         _configuration = configuration;
         _loginValidator = loginValidator;
+        _googleLoginValidator = googleLoginValidator;
     }
 
     public async Task<ValidationResult> ValidateLoginAsync(LoginRequest request)
     {
         return await _loginValidator.ValidateAsync(request);
+    }
+
+    public async Task<ValidationResult> ValidateGoogleLoginAsync(GoogleLoginRequest request)
+    {
+        return await _googleLoginValidator.ValidateAsync(request);
+    }
+
+    private async Task<AuthResponseDto> BuildLockedOutResponseAsync(ApplicationUser user)
+    {
+        var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+        return new AuthResponseDto
+        {
+            Success = false,
+            IsLockedOut = true,
+            Message = "Account is locked due to multiple failed login attempts.",
+            LockoutEnd = lockoutEnd?.UtcDateTime
+        };
     }
 
     public async Task<AuthResponseDto?> ProcessLoginAsync(LoginRequest request, string ipAddress, string headerUserAgent)
@@ -66,7 +86,7 @@ public class AuthService : IAuthService
 
         if (await _userManager.IsLockedOutAsync(user))
         {
-            return new AuthResponseDto { Success = false, Message = "LOCKED_OUT" };
+            return await BuildLockedOutResponseAsync(user);
         }
 
         var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
@@ -78,7 +98,7 @@ public class AuthService : IAuthService
                 isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", false,
                 osValue, safeUserAgent);
 
-            return new AuthResponseDto { Success = false, Message = "LOCKED_OUT" };
+            return await BuildLockedOutResponseAsync(user);
         }
 
         if (!signInResult.Succeeded)

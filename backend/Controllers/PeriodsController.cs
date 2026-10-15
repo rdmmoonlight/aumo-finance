@@ -2,6 +2,8 @@ using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Services.Periods;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,11 +18,16 @@ public class PeriodsController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly IPeriodsService _periodsService;
+    private readonly IValidator<CreatePeriodRequest> _createPeriodValidator;
 
-    public PeriodsController(AppDbContext db, IPeriodsService periodsService)
+    public PeriodsController(
+        AppDbContext db,
+        IPeriodsService periodsService,
+        IValidator<CreatePeriodRequest> createPeriodValidator)
     {
         _db = db;
         _periodsService = periodsService;
+        _createPeriodValidator = createPeriodValidator;
     }
 
     // ==========================================
@@ -125,7 +132,10 @@ public class PeriodsController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        // Validasi skema dijalankan FluentValidation sebelum masuk ke sini.
+        var validation = await _createPeriodValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.ToErrorResponse());
+
         var result = await _periodsService.CreatePeriodAsync(userId, request);
 
         if (result.Success)

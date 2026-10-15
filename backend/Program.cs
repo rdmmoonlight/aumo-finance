@@ -226,13 +226,7 @@ namespace AumoBackend
                 // Native Microsoft OpenAPI Support (.NET 9/10) 
                 builder.Services.AddOpenApi();
 
-                var originsList = new List<string>
-                {
-                    "http://localhost:3000",
-                    "https://aumo-finance-web.vercel.app",
-                };
-
-                var allowedOrigins = originsList.Distinct().ToArray();
+                var allowedOrigins = AllowedOrigins.All;
 
                 builder.Services.AddCors(options =>
                 {
