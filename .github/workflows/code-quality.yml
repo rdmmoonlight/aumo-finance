@@ -28,16 +28,22 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      # 2. SETUP ENVIRONMENT (.NET & NODE.JS)
+      # 2. SETUP ENVIRONMENT (.NET, PNPM, & NODE.JS)
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
 
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24'
+          cache: 'pnpm'
 
       # 3. BACKEND (.NET C#)
       - name: Restore .NET Dependencies
@@ -55,58 +61,58 @@ jobs:
 
       # 4. FRONTEND (Next.js & Playwright)
       - name: Install Frontend Dependencies
-        run: npm install
+        run: pnpm install
         working-directory: frontend
 
       # Typecheck tidak menulis tsbuildinfo agar tidak ikut ter-commit
       - name: Typecheck (Frontend)
-        run: npx tsc --noEmit --incremental false
+        run: pnpm exec tsc --noEmit --incremental false
         working-directory: frontend
 
       - name: Run Prettier Check/Write (Frontend)
-        run: npx prettier --write .
+        run: pnpm exec prettier --write .
         working-directory: frontend
 
       - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
+        run: pnpm exec playwright install --with-deps
         working-directory: frontend
 
       - name: Run Playwright Tests
-        run: npx playwright test --pass-with-no-tests
+        run: pnpm exec playwright test --pass-with-no-tests
         working-directory: frontend
 
       # 5. NESTJS SERVICE (nest)
       - name: Install Nest Dependencies
-        run: npm install
+        run: pnpm install
         working-directory: nest
 
       - name: Typecheck & Build (Nest)
-        run: npm run build
+        run: pnpm run build
         working-directory: nest
 
       - name: Run Prettier (Nest)
-        run: npx prettier --write .
+        run: pnpm exec prettier --write .
         working-directory: nest
 
       # 6. ANALOG FRAMEWORK SERVICE (analog)
       - name: Install Analog Dependencies
-        run: npm install
+        run: pnpm install
         working-directory: analog
 
       - name: Typecheck & Build (Analog)
-        run: npm run build
+        run: pnpm run build
         working-directory: analog
 
       - name: Run Prettier (Analog)
-        run: npx prettier --write .
+        run: pnpm exec prettier --write .
         working-directory: analog
 
-      # 7. COMMIT AUTO-FORMATTED CHANGES & UPDATED PACKAGE-LOCK
+      # 7. COMMIT AUTO-FORMATTED CHANGES & UPDATED LOCKFILES
       - name: Commit Formatted Changes & Lockfiles
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "style: auto-correct formatting & sync package-lock.json [skip ci]"
+          commit_message: "style: auto-correct formatting & sync pnpm-lock.yaml [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           file_pattern: "backend/* frontend/* nest/* analog/*"
