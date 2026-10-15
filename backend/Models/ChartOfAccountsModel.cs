@@ -75,9 +75,31 @@ namespace AumoBackend.Models
             throw new NotImplementedException();
         }
 
+        // Rentang kode akun per kategori (selaras ACCOUNT_RANGES di frontend/coa-types.ts)
+        private static readonly Dictionary<string, (int Start, int End)> ReferenceRanges = new()
+        {
+            ["Assets"] = (100, 199),
+            ["Liabilities"] = (200, 299),
+            ["Equity"] = (300, 399),
+            ["OperatingIncome"] = (400, 499),
+            ["OperatingExpenses"] = (500, 599),
+            ["OtherIncome"] = (600, 799),
+            ["OtherExpenses"] = (800, 999),
+        };
+
+        public static IReadOnlyCollection<string> AccountTypes => ReferenceRanges.Keys;
+
+        // Role akun yang dikenal sistem (dipakai Periods, laporan keuangan)
+        public static readonly string[] AccountRoles = { "Default", "CashAndEquivalents", "RetainedEarnings" };
+
+        public static bool IsKnownAccountType(string? type)
+            => type != null && ReferenceRanges.ContainsKey(type);
+
         internal static bool ValidateReferenceNumber(string type, int referenceNumber)
         {
-            throw new NotImplementedException();
+            return ReferenceRanges.TryGetValue(type ?? string.Empty, out var range)
+                && referenceNumber >= range.Start
+                && referenceNumber <= range.End;
         }
     }
 

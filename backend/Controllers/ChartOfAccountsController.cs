@@ -13,6 +13,8 @@ using AumoBackend.DTOs;
 using AumoBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Controllers;
@@ -24,10 +26,17 @@ namespace AumoBackend.Controllers;
 public class ChartOfAccountsController : ControllerBase
 {
     private readonly AppDbContext _db;
+    private readonly IValidator<CreateAccountRequest> _createAccountValidator;
+    private readonly IValidator<UpdateAccountRequest> _updateAccountValidator;
 
-    public ChartOfAccountsController(AppDbContext db)
+    public ChartOfAccountsController(
+        AppDbContext db,
+        IValidator<CreateAccountRequest> createAccountValidator,
+        IValidator<UpdateAccountRequest> updateAccountValidator)
     {
         _db = db;
+        _createAccountValidator = createAccountValidator;
+        _updateAccountValidator = updateAccountValidator;
     }
 
     // ==========================================
@@ -136,16 +145,9 @@ public class ChartOfAccountsController : ControllerBase
         var userId = GetCurrentUserId();
         if (userId == Guid.Empty) return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
-        if (string.IsNullOrWhiteSpace(request.AccountName))
-            return BadRequest(new { success = false, message = "Account name is required." });
-
-        if (string.IsNullOrWhiteSpace(request.Type))
-            return BadRequest(new { success = false, message = "Account category type is required." });
-
-        if (!AccountClassificationHelper.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
-        {
-            return BadRequest(new { success = false, message = $"Invalid reference number {request.ReferenceNumber} for category {request.Type}." });
-        }
+        var validation = await _createAccountValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.ToErrorResponse());
 
         bool isCodeTaken = await _db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber);
@@ -193,20 +195,16 @@ public class ChartOfAccountsController : ControllerBase
         var userId = GetCurrentUserId();
         if (userId == Guid.Empty) return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
+        var validation = await _updateAccountValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.ToErrorResponse());
+
         var account = await _db.ChartOfAccounts
             .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
 
         if (account == null)
         {
             return NotFound(new { success = false, message = "Account not found." });
-        }
-
-        if (string.IsNullOrWhiteSpace(request.AccountName))
-            return BadRequest(new { success = false, message = "Account name is required." });
-
-        if (!AccountClassificationHelper.ValidateReferenceNumber(request.Type, request.ReferenceNumber))
-        {
-            return BadRequest(new { success = false, message = $"Invalid reference number {request.ReferenceNumber} for category {request.Type}." });
         }
 
         bool isCodeTaken = await _db.ChartOfAccounts

@@ -58,22 +58,39 @@ if (!validation.IsValid)
 
 Perubahan format error: `message` kini berisi error validasi pertama (sebelumnya selalu "Validation failed."), karena frontend menampilkan `error.data.message`. Array `errors` tetap lengkap.
 
-### Fase 4 — Chart of Accounts
+### Fase 4 — Chart of Accounts (selesai)
 
-| Request | File DTO | Controller | Pekerjaan |
-|---|---|---|---|
-| `CreateAccountRequest` | `DTOs/ChartOfAccountsDto.cs` | `ChartOfAccountsController.CreateAccount` (±134) | Kode akun numerik, nama wajib, kategori valid |
-| `UpdateAccountRequest` | `DTOs/ChartOfAccountsDto.cs` | `ChartOfAccountsController.UpdateAccount` (±191) | Aturan sama dengan Create |
-| `CreateAccountRequestDto`, `UpdateAccountRequestDto` | `DTOs/ChartOfAccountsDto.cs` | Tidak dipakai controller | Periksa: duplikat DTO, hapus bila tidak terpakai |
+| Request | Hasil |
+|---|---|
+| `CreateAccountRequest` | `Validators/ChartOfAccounts/CreateAccountRequestValidator.cs`, dipasang di `ChartOfAccountsController.CreateAccount` |
+| `UpdateAccountRequest` | `Validators/ChartOfAccounts/UpdateAccountRequestValidator.cs`, dipasang di `UpdateAccount` (validasi kini dijalankan sebelum query akun) |
 
-### Fase 5 — Journal Entry (prioritas tinggi: integritas akuntansi)
+Aturan: nama wajib dan maks. 100 karakter; kategori harus salah satu dari 7 tipe; kode akun harus dalam rentang kategori (Assets 100–199, Liabilities 200–299, Equity 300–399, OperatingIncome 400–499, OperatingExpenses 500–599, OtherIncome 600–799, OtherExpenses 800–999, sama dengan frontend); role harus `Default`, `CashAndEquivalents`, atau `RetainedEarnings` (kosong diizinkan).
 
-| Request | File DTO | Controller | Pekerjaan |
-|---|---|---|---|
-| `CreateJournalEntryRequest` | `DTOs/JournalEntryDto.cs` | `JournalEntryController.Create` (±94) | Tanggal wajib, minimal 2 baris, tiap baris debit **atau** kredit (bukan keduanya, tidak negatif), total debit = total kredit, `AccountId` wajib |
-| `UpdateJournalEntryRequest` | `DTOs/JournalEntryDto.cs` | `JournalEntryController.Edit` (±166) | Aturan sama dengan Create |
-| Query `q` | — | `SearchDescriptions` (±289) | Panjang maksimum |
-| Query `journalType`, `entryDate` | — | `GetNextTransactionNumber` (±320) | Nilai `journalType` dalam daftar yang diizinkan |
+**Bug yang ditemukan dan diperbaiki:** `AccountClassificationHelper.ValidateReferenceNumber(string, int)` berisi `throw new NotImplementedException()`, sehingga Create dan Update akun selalu berakhir HTTP 500. Kini berisi pengecekan rentang yang sebenarnya.
+
+Sisa pekerjaan manual (opsional):
+- `Services/ChartOfAccounts/ChartOfAccountsService.cs` terdaftar di DI tetapi tidak dipakai controller (kasus sama seperti `AuthService` di Fase 2). Isinya masih memanggil stub `ValidateReferenceNumber(AccountClassification)` yang melempar `NotImplementedException`. Putuskan: controller memakai service ini, atau hapus service beserta `CreateAccountRequestDto`/`UpdateAccountRequestDto`.
+- Stub lain di `Models/ChartOfAccountsModel.cs` yang masih melempar `NotImplementedException`: `IsTemporary(string)`, `IsPermanent(string)`, `ValidateReferenceNumber(AccountClassification)`. Hapus bila tidak dipakai.
+
+### Fase 5 — Journal Entry (selesai)
+
+| Request | Hasil |
+|---|---|
+| `CreateJournalEntryRequest` | `Validators/JournalEntries/CreateJournalEntryRequestValidator.cs`, dipasang di `JournalEntryController.Create` |
+| `UpdateJournalEntryRequest` | `Validators/JournalEntries/UpdateJournalEntryRequestValidator.cs`, dipasang di `Edit` |
+
+Aturan bersama (`JournalEntryValidatorBase` dan `JournalLineDtoValidator`), hanya untuk baris efektif (`AccountId != 0` dan ada debit/kredit; baris kosong dari form tetap diabaikan seperti sebelumnya):
+- Tanggal antara 2000-01-01 dan 2100-12-31.
+- `JournalType` kosong, `General`, atau `Adjusting`.
+- `Lines` tidak null, maks. 200 baris, minimal 2 baris efektif.
+- Total debit sama dengan total kredit dan lebih dari 0.
+- Debit dan kredit tidak negatif, maks. 2 desimal (selaras `HasPrecision(18, 2)`), dan satu baris tidak boleh memiliki debit dan kredit sekaligus.
+- Deskripsi baris maks. 250 karakter.
+
+Cek yang membutuhkan database tetap di controller: akun aktif milik user dan periode tertutup. Cek jumlah baris dan total yang lama di controller dihapus karena sudah dicakup validator.
+
+Belum dikerjakan (masuk Fase 7): query `q` pada `SearchDescriptions`, serta `journalType` dan `entryDate` pada `GetNextTransactionNumber`.
 
 ### Fase 6 — Settings & Tools
 
