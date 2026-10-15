@@ -34,6 +34,8 @@ async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule, {
       logger: false,
       bodyParser: false,
+      // Error DI/bootstrap dilempar ke catch di bawah (bukan exit senyap karena logger: false)
+      abortOnError: false,
     });
     console.log('STEP 5: App created');
 
