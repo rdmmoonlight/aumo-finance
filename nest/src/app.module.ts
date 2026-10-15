@@ -14,7 +14,8 @@ import { PeriodsModule } from './modules/periods/periods.module.js';
       isGlobal: true, // Membuat ConfigService tersedia di seluruh modul tanpa perlu re-import
     }),
     HealthModule,
-    AuthModule, PeriodsModule,
+    AuthModule,
+    PeriodsModule,
   ],
   providers: [
     databaseProvider,
@@ -22,4 +23,4 @@ import { PeriodsModule } from './modules/periods/periods.module.js';
     { provide: APP_GUARD, useClass: GlobalRateLimitGuard },
   ],
 })
-export class AppModule { }
+export class AppModule {}

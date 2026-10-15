@@ -9,4 +9,4 @@ import { AuthService } from './auth.service.js';
   providers: [AuthService, AuthGuard, AuthRateLimitGuard],
   exports: [AuthService, AuthGuard],
 })
-export class AuthModule { }
+export class AuthModule {}

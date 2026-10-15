@@ -31,5 +31,8 @@ export interface RegisterPayload {
 
 export interface MeResponse {
   success: boolean;
-  data: { user: AuthUser | null; session: { id: string; expiresAt: string } | null };
+  data: {
+    user: AuthUser | null;
+    session: { id: string; expiresAt: string } | null;
+  };
 }

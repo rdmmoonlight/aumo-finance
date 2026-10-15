@@ -27,11 +27,11 @@ Run `npm run test` to run unit tests with [Vitest](https://vitest.dev).
 
 ## Halaman (SPA, siap terhubung ke backend /hono)
 
-| Rute        | Keterangan                              |
-| ----------- | --------------------------------------- |
-| `/`         | Landing                                 |
-| `/login`    | Masuk (`POST /auth/login`)              |
-| `/register` | Daftar (`POST /auth/register`)          |
+| Rute        | Keterangan                                |
+| ----------- | ----------------------------------------- |
+| `/`         | Landing                                   |
+| `/login`    | Masuk (`POST /auth/login`)                |
+| `/register` | Daftar (`POST /auth/register`)            |
 | `/home`     | Beranda + sidebar & top bar (wajib login) |
 
 Salin `.env.example` ke `.env` lalu atur `VITE_API_URL` ke URL backend. Sesi memakai cookie (`withCredentials`), cek sesi lewat `GET /auth/me`.

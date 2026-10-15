@@ -95,7 +95,7 @@ describe('Middleware pipeline', () => {
 
     it('fail-open jika Redis menggantung (timeout)', async () => {
       const chain = vi.mocked(redis.pipeline)();
-      vi.mocked(chain.exec).mockReturnValue(new Promise(() => { }));
+      vi.mocked(chain.exec).mockReturnValue(new Promise(() => {}));
 
       const res = await http().get('/health');
 

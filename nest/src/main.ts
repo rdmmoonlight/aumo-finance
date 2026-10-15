@@ -10,12 +10,16 @@ import { closeQueue, initQueueWorkers } from './lib/queue.js';
 import { redis } from './lib/redis.js';
 
 process.on('uncaughtException', (err: any) => {
-  try { logger.fatal({ err }, 'Uncaught Exception'); } catch { }
+  try {
+    logger.fatal({ err }, 'Uncaught Exception');
+  } catch {}
   process.exit(1);
 });
 
 process.on('unhandledRejection', (reason: any) => {
-  try { logger.error({ reason }, 'Unhandled Rejection'); } catch { }
+  try {
+    logger.error({ reason }, 'Unhandled Rejection');
+  } catch {}
 });
 
 async function bootstrap() {
@@ -71,7 +75,9 @@ async function bootstrap() {
     process.on('SIGTERM', () => void shutdown('SIGTERM'));
     process.on('SIGINT', () => void shutdown('SIGINT'));
   } catch (err: any) {
-    try { logger.fatal({ err }, 'Bootstrap failed'); } catch { }
+    try {
+      logger.fatal({ err }, 'Bootstrap failed');
+    } catch {}
     setTimeout(() => process.exit(1), 500);
   }
 }

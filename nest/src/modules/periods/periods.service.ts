@@ -7,7 +7,12 @@ import * as periodSchema from '../../db/schema/periods.js';
 import { db as drizzleDb } from '../../lib/db.js';
 
 const PermanentTypes = ['Assets', 'Liabilities', 'Equity'] as const;
-const TemporaryTypes = ['OperatingIncome', 'OtherIncome', 'OperatingExpenses', 'OtherExpenses'] as const;
+const TemporaryTypes = [
+  'OperatingIncome',
+  'OtherIncome',
+  'OperatingExpenses',
+  'OtherExpenses',
+] as const;
 
 type DrizzleDb = NodePgDatabase<
   typeof periodSchema & typeof accountSchema & typeof generalJournalSchema
@@ -31,29 +36,29 @@ export type CreatePeriodResult =
 
 export type CreatePeriodRequest =
   | {
-    year: number;
-    month: number;
-    setupMode: 'CreateNew';
-    cashAccountCode?: string;
-    cashAccountName?: string;
-    bankAccountCode?: string;
-    bankAccountName?: string;
-    retainedEarningsAccountCode?: string;
-    retainedEarningsAccountName?: string;
-    cashBalance?: number;
-    bankBalance?: number;
-  }
+      year: number;
+      month: number;
+      setupMode: 'CreateNew';
+      cashAccountCode?: string;
+      cashAccountName?: string;
+      bankAccountCode?: string;
+      bankAccountName?: string;
+      retainedEarningsAccountCode?: string;
+      retainedEarningsAccountName?: string;
+      cashBalance?: number;
+      bankBalance?: number;
+    }
   | {
-    year: number;
-    month: number;
-    setupMode: 'LoadExisting';
-    cashAccountId?: number;
-    bankAccountId?: number;
-    retainedEarningsAccountId?: number;
-  };
+      year: number;
+      month: number;
+      setupMode: 'LoadExisting';
+      cashAccountId?: number;
+      bankAccountId?: number;
+      retainedEarningsAccountId?: number;
+    };
 
 type AccountSimpleDto = Pick<
-  (typeof accountSchema.chartOfAccounts.$inferSelect),
+  typeof accountSchema.chartOfAccounts.$inferSelect,
   'id' | 'referenceNumber' | 'accountName' | 'type'
 > & { displayLabel: string };
 
@@ -113,8 +118,8 @@ export class PeriodsService {
       .where(
         and(
           eq(accountSchema.chartOfAccounts.userId, userId),
-          eq(accountSchema.chartOfAccounts.isActive, true),
-        ),
+          eq(accountSchema.chartOfAccounts.isActive, true)
+        )
       )
       .orderBy(asc(accountSchema.chartOfAccounts.referenceNumber));
 
@@ -161,7 +166,7 @@ export class PeriodsService {
         const exists = await tx.query.periods.findFirst({
           where: and(
             eq(periodSchema.periods.userId, userId),
-            eq(periodSchema.periods.startDate, startDate.toISOString()),
+            eq(periodSchema.periods.startDate, startDate.toISOString())
           ),
         });
         if (exists) return fail(`Period ${periodName} already exists.`);
@@ -172,19 +177,19 @@ export class PeriodsService {
             tx.query.chartOfAccounts.findFirst({
               where: and(
                 eq(accountSchema.chartOfAccounts.id, req.cashAccountId!),
-                eq(accountSchema.chartOfAccounts.userId, userId),
+                eq(accountSchema.chartOfAccounts.userId, userId)
               ),
             }),
             tx.query.chartOfAccounts.findFirst({
               where: and(
                 eq(accountSchema.chartOfAccounts.id, req.bankAccountId!),
-                eq(accountSchema.chartOfAccounts.userId, userId),
+                eq(accountSchema.chartOfAccounts.userId, userId)
               ),
             }),
             tx.query.chartOfAccounts.findFirst({
               where: and(
                 eq(accountSchema.chartOfAccounts.id, req.retainedEarningsAccountId!),
-                eq(accountSchema.chartOfAccounts.userId, userId),
+                eq(accountSchema.chartOfAccounts.userId, userId)
               ),
             }),
           ]);
@@ -192,7 +197,9 @@ export class PeriodsService {
           if (!cashAcc || !bankAcc || !retainedAcc)
             return fail('One or more selected accounts could not be found.');
           if (retainedAcc.role !== 'RetainedEarnings')
-            return fail('The selected Retained Earnings account is not a Retained Earnings account.');
+            return fail(
+              'The selected Retained Earnings account is not a Retained Earnings account.'
+            );
 
           const [newPeriod] = await tx
             .insert(periodSchema.periods)
@@ -210,7 +217,7 @@ export class PeriodsService {
             tx,
             userId,
             startDate,
-            retainedAcc as any,
+            retainedAcc as any
           );
           const openingError = opening.error;
           if (openingError !== null) {
@@ -237,16 +244,24 @@ export class PeriodsService {
           if (Number.isNaN(cashCode) || Number.isNaN(bankCode) || Number.isNaN(retainedCode))
             return fail('Account reference codes must be numeric.');
           if (cashCode === bankCode || cashCode === retainedCode || bankCode === retainedCode)
-            return fail('Cash, Bank, and Retained Earnings accounts must use different reference numbers.');
+            return fail(
+              'Cash, Bank, and Retained Earnings accounts must use different reference numbers.'
+            );
 
           const codeInUse = await tx.query.chartOfAccounts.findFirst({
             where: and(
               eq(accountSchema.chartOfAccounts.userId, userId),
-              inArray(accountSchema.chartOfAccounts.referenceNumber, [cashCode, bankCode, retainedCode]),
+              inArray(accountSchema.chartOfAccounts.referenceNumber, [
+                cashCode,
+                bankCode,
+                retainedCode,
+              ])
             ),
           });
           if (codeInUse)
-            return fail('One or more account reference numbers are already in use in your Chart of Accounts.');
+            return fail(
+              'One or more account reference numbers are already in use in your Chart of Accounts.'
+            );
 
           const [cashAccount] = await tx
             .insert(accountSchema.chartOfAccounts)
@@ -379,12 +394,12 @@ export class PeriodsService {
     tx: any,
     userId: string,
     startDate: Date,
-    retainedAccount: typeof accountSchema.chartOfAccounts.$inferSelect,
+    retainedAccount: typeof accountSchema.chartOfAccounts.$inferSelect
   ) {
     const previous = await tx.query.periods.findFirst({
       where: and(
         eq(periodSchema.periods.userId, userId),
-        lt(periodSchema.periods.startDate, startDate.toISOString()),
+        lt(periodSchema.periods.startDate, startDate.toISOString())
       ),
       orderBy: desc(periodSchema.periods.startDate),
     });
@@ -408,8 +423,8 @@ export class PeriodsService {
       .where(
         and(
           eq(accountSchema.chartOfAccounts.userId, userId),
-          eq(accountSchema.chartOfAccounts.isActive, true),
-        ),
+          eq(accountSchema.chartOfAccounts.isActive, true)
+        )
       );
     const allAccounts = accounts.some((a: any) => a.id === retainedAccount.id)
       ? accounts
@@ -418,8 +433,12 @@ export class PeriodsService {
     const totalsRows = await tx
       .select({
         accountId: generalJournalSchema.generalJournal.accountId,
-        debit: sql<number>`sum(${generalJournalSchema.generalJournal.debit}::decimal)`.mapWith(Number),
-        credit: sql<number>`sum(${generalJournalSchema.generalJournal.credit}::decimal)`.mapWith(Number),
+        debit: sql<number>`sum(${generalJournalSchema.generalJournal.debit}::decimal)`.mapWith(
+          Number
+        ),
+        credit: sql<number>`sum(${generalJournalSchema.generalJournal.credit}::decimal)`.mapWith(
+          Number
+        ),
       })
       .from(generalJournalSchema.generalJournal)
       .where(
@@ -427,15 +446,15 @@ export class PeriodsService {
           eq(generalJournalSchema.generalJournal.userId, userId),
           inArray(generalJournalSchema.generalJournal.journalType, ['General', 'Adjusting']),
           gte(generalJournalSchema.generalJournal.entryDate, prevStart.toISOString()),
-          lte(generalJournalSchema.generalJournal.entryDate, prevEnd.toISOString()),
-        ),
+          lte(generalJournalSchema.generalJournal.entryDate, prevEnd.toISOString())
+        )
       )
       .groupBy(generalJournalSchema.generalJournal.accountId);
 
     const totals = new Map(
       totalsRows
         .filter((r: any): r is typeof r & { accountId: number } => r.accountId !== null)
-        .map((r: any) => [r.accountId, { debit: r.debit ?? 0, credit: r.credit ?? 0 }]),
+        .map((r: any) => [r.accountId, { debit: r.debit ?? 0, credit: r.credit ?? 0 }])
     );
 
     const signed = (accountId: number) => {
@@ -460,7 +479,9 @@ export class PeriodsService {
     if (balances.length === 0) return { accountCount: 0, error: null };
 
     const totalDebit = balances.filter((b: any) => b.signed > 0).reduce((s, b) => s + b.signed, 0);
-    const totalCredit = balances.filter((b: any) => b.signed < 0).reduce((s, b) => s + Math.abs(b.signed), 0);
+    const totalCredit = balances
+      .filter((b: any) => b.signed < 0)
+      .reduce((s, b) => s + Math.abs(b.signed), 0);
 
     if (round2(totalDebit - totalCredit) !== 0) {
       return {
@@ -503,7 +524,9 @@ export class PeriodsService {
     await this.db
       .update(periodSchema.periods)
       .set({ isSelected: false })
-      .where(and(eq(periodSchema.periods.userId, userId), eq(periodSchema.periods.isSelected, true)));
+      .where(
+        and(eq(periodSchema.periods.userId, userId), eq(periodSchema.periods.isSelected, true))
+      );
     await this.db
       .update(periodSchema.periods)
       .set({ isSelected: true })
@@ -528,8 +551,12 @@ export class PeriodsService {
     await this.db
       .update(periodSchema.periods)
       .set({ isSelected: false })
-      .where(and(eq(periodSchema.periods.userId, userId), eq(periodSchema.periods.isSelected, true)));
-    await this.db.delete(periodSchema.selectedPeriods).where(eq(periodSchema.selectedPeriods.userId, userId));
+      .where(
+        and(eq(periodSchema.periods.userId, userId), eq(periodSchema.periods.isSelected, true))
+      );
+    await this.db
+      .delete(periodSchema.selectedPeriods)
+      .where(eq(periodSchema.selectedPeriods.userId, userId));
     return { success: true, message: 'Period selection cleared.' };
   }
 
@@ -538,14 +565,15 @@ export class PeriodsService {
       where: and(eq(periodSchema.periods.id, periodId), eq(periodSchema.periods.userId, userId)),
     });
     if (!entity) return { success: false, message: 'Accounting period not found.' };
-    if (entity.isClosed) return { success: false, message: `Period ${entity.periodName} is already closed.` };
+    if (entity.isClosed)
+      return { success: false, message: `Period ${entity.periodName} is already closed.` };
 
     const hasEarlierOpen = await this.db.query.periods.findFirst({
       where: and(
         eq(periodSchema.periods.userId, userId),
         lt(periodSchema.periods.startDate, entity.startDate),
         eq(periodSchema.periods.isClosed, false),
-        ne(periodSchema.periods.id, entity.id),
+        ne(periodSchema.periods.id, entity.id)
       ),
     });
     if (hasEarlierOpen)
@@ -554,7 +582,10 @@ export class PeriodsService {
         message: `Cannot close ${entity.periodName}: an earlier period is still open. Close earlier periods first.`,
       };
 
-    await this.db.update(periodSchema.periods).set({ isClosed: true }).where(eq(periodSchema.periods.id, entity.id));
+    await this.db
+      .update(periodSchema.periods)
+      .set({ isClosed: true })
+      .where(eq(periodSchema.periods.id, entity.id));
     return {
       success: true,
       message: `Period ${entity.periodName} has been closed. Transactions in this period are now locked.`,
