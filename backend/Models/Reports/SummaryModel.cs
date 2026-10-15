@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 
-namespace AumoBackend.Models.Reports;
+namespace AumoBackend.Models;
 

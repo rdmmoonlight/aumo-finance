@@ -1,37 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace AumoBackend.Models
 {
-    public class ChartOfAccount
-    {
-        public int Id { get; set; }
-
-        [Required(ErrorMessage = "Reference number is required.")]
-        public int ReferenceNumber { get; set; }
-
-        public Guid UserId { get; set; }
-
-        [Required(ErrorMessage = "Account name is required.")]
-        [StringLength(100)]
-        public string AccountName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Account type is required.")]
-        public string Type { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "System role is required.")]
-        public string Role { get; set; } = string.Empty;
-
-        [NotMapped]
-        public decimal Balance { get; set; }
-
-        public bool IsActive { get; set; } = true;
-
-        [NotMapped]
-        public string DisplayLabel => $"{ReferenceNumber} - {AccountName}";
-    }
 
     public enum AccountClassification
     {
@@ -115,7 +83,14 @@ namespace AumoBackend.Models
 
     public static class PeriodLock
     {
-        public static bool IsLocked(Period? period) => period?.IsClosed ?? false;
+        public static bool IsLocked(Period? period)
+        {
+            if (period == null) return false;
+
+            return period.GetType().GetProperties()
+                .FirstOrDefault(property => property.Name == "IsClosed")?
+                .GetValue(period) is true;
+        }
         public static bool IsLocked(bool isClosed) => isClosed;
 
         public static bool IsDateLocked(DateTime date, IEnumerable<Period>? periods)
@@ -125,7 +100,19 @@ namespace AumoBackend.Models
             // Memeriksa apakah tanggal masuk dalam rentang periode yang sudah ditutup (IsClosed = true)
             foreach (var period in periods)
             {
-                if (period.IsClosed && date >= period.StartDate && date <= period.EndDate)
+                var properties = period?.GetType().GetProperties();
+                var startDate = properties?
+                    .FirstOrDefault(property => property.Name == "StartDate")?
+                    .GetValue(period);
+                var endDate = properties?
+                    .FirstOrDefault(property => property.Name == "EndDate")?
+                    .GetValue(period);
+
+                if (IsLocked(period)
+                    && startDate is DateTime start
+                    && endDate is DateTime end
+                    && date >= start
+                    && date <= end)
                 {
                     return true;
                 }

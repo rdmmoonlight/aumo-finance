@@ -209,7 +209,7 @@ public class JournalEntryService : IJournalEntryService
         await DeleteRowsAsync(userId, rows);
     }
 
-    private async Task DeleteRowsAsync(Guid userId, List<AumoBackend.Models.Reports.GeneralJournal> rows)
+    private async Task DeleteRowsAsync(Guid userId, List<GeneralJournal> rows)
     {
         if (rows.Count == 0)
         {

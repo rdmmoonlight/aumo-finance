@@ -24,4 +24,10 @@ public partial class ChartOfAccount
     public virtual ICollection<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = new List<GeneralLedgerPermanentAccount>();
 
     public virtual ICollection<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; } = new List<GeneralLedgerTemporaryAccount>();
+
+    // Jika Balance dihitung dari posisi Debit/Kredit atau disimpan di DTO
+    public decimal Balance { get; set; }
+
+    // DisplayLabel helper untuk tampilan UI/Dropdown
+    public string DisplayLabel => $"{ReferenceNumber} - {AccountName}";
 }
