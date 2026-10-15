@@ -5,7 +5,9 @@ using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
 using AumoBackend.DTOs;
 using FluentValidation;
-namespace AumoBackend.Validators
+
+namespace AumoBackend.Validators.Auth
+
 {
     public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {
