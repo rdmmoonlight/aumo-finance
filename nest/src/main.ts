@@ -9,88 +9,92 @@ import { logger } from './lib/logger.js';
 import { closeQueue, initQueueWorkers } from './lib/queue.js';
 import { redis } from './lib/redis.js';
 
-async function bootstrap() {
-  // Inisialisasi Queue Worker
-  initQueueWorkers();
+console.log('STEP 1: Starting bootstrap...');
 
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    // Logger bawaan Nest dimatikan, seluruh log memakai Pino
-    logger: false,
-    // Body parser dipasang manual di configureApp (Better Auth butuh body mentah)
-    bodyParser: false,
-  });
-
-  configureApp(app);
-
-  // Penyiapan Dokumentasi OpenAPI & Scalar
-  const config = new DocumentBuilder()
-    .setTitle('Aumone API')
-    .setDescription('Dokumentasi API')
-    .setVersion('2.0.0')
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-
-  SwaggerModule.setup('openapi', app, document, {
-    ui: false,
-    jsonDocumentUrl: 'openapi.json',
-  });
-
-  app.use('/reference', apiReference({ spec: { content: document } }));
-
-  // Jalankan HTTP Server
-  const host = '0.0.0.0';
-  await app.listen(env.PORT, host);
-
-  const displayHost = host === '0.0.0.0' ? 'localhost' : host;
-  logger.info(`🚀 Server berjalan di http://${displayHost}:${env.PORT}`);
-
-  // Graceful shutdown
-  let isShuttingDown = false;
-
-  const shutdown = async (signal: string) => {
-    if (isShuttingDown) return;
-    isShuttingDown = true;
-
-    logger.info(`${signal} diterima, menutup server...`);
-
-    const forceExit = setTimeout(() => {
-      logger.error('Penutupan paksa karena batas waktu graceful shutdown terlampaui.');
-      process.exit(1);
-    }, 10_000);
-    forceExit.unref();
-
-    try {
-      // 1. Tutup aplikasi NestJS (HTTP Server)
-      await app.close();
-      logger.info('Server HTTP berhasil ditutup.');
-
-      // 2. Tutup BullMQ Worker & Queue
-      await closeQueue();
-
-      // 3. Tutup koneksi Redis
-      await redis.quit();
-      logger.info('Koneksi Redis berhasil ditutup.');
-
-      process.exit(0);
-    } catch (err) {
-      logger.error({ err }, 'Gagal menutup koneksi server/Redis/Queue');
-      process.exit(1);
-    }
-  };
-
-  process.on('SIGTERM', () => void shutdown('SIGTERM'));
-  process.on('SIGINT', () => void shutdown('SIGINT'));
-}
-
-// Global Exception Handler
-process.on('uncaughtException', (err) => {
-  logger.fatal({ err }, 'Uncaught Exception terdeteksi');
+process.on('uncaughtException', (err: any) => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+  console.error(err?.stack || err);
+  try { logger.fatal({ err }, 'Uncaught Exception'); } catch {}
   process.exit(1);
 });
 
-process.on('unhandledRejection', (reason) => {
-  logger.error({ reason }, 'Unhandled Rejection terdeteksi');
+process.on('unhandledRejection', (reason: any) => {
+  console.error('UNHANDLED REJECTION:', reason);
+  console.error((reason as any)?.stack || reason);
+  try { logger.error({ reason }, 'Unhandled Rejection'); } catch {}
 });
+
+async function bootstrap() {
+  try {
+    console.log('STEP 2: initQueueWorkers...');
+    initQueueWorkers();
+    console.log('STEP 3: Queue workers init done');
+
+    console.log('STEP 4: NestFactory.create...');
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+      logger: false,
+      bodyParser: false,
+    });
+    console.log('STEP 5: App created');
+
+    console.log('STEP 6: configureApp...');
+    configureApp(app);
+    console.log('STEP 7: configureApp done');
+
+    console.log('STEP 8: Swagger setup...');
+    const config = new DocumentBuilder()
+      .setTitle('Aumone API')
+      .setDescription('Dokumentasi API')
+      .setVersion('2.0.0')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('openapi', app, document, { ui: false, jsonDocumentUrl: 'openapi.json' });
+    app.use('/reference', apiReference({ spec: { content: document } }));
+    console.log('STEP 9: Swagger done');
+
+    console.log(`STEP 10: app.listen PORT=${env.PORT}...`);
+    const host = '0.0.0.0';
+    await app.listen(env.PORT, host);
+    console.log('STEP 11: listen done');
+
+    const displayHost = host === '0.0.0.0' ? 'localhost' : host;
+    logger.info(`🚀 Server berjalan di http://${displayHost}:${env.PORT}`);
+    console.log(`🚀 Server berjalan di http://${displayHost}:${env.PORT}`);
+
+    let isShuttingDown = false;
+    const shutdown = async (signal: string) => {
+      if (isShuttingDown) return;
+      isShuttingDown = true;
+      logger.info(`${signal} diterima, menutup server...`);
+      const forceExit = setTimeout(() => {
+        logger.error('Penutupan paksa karena batas waktu graceful shutdown terlampaui.');
+        process.exit(1);
+      }, 10_000);
+      forceExit.unref();
+      try {
+        await app.close();
+        logger.info('Server HTTP berhasil ditutup.');
+        await closeQueue();
+        await redis.quit();
+        logger.info('Koneksi Redis berhasil ditutup.');
+        process.exit(0);
+      } catch (err) {
+        logger.error({ err }, 'Gagal menutup koneksi server/Redis/Queue');
+        console.error('SHUTDOWN FAILED:', err);
+        process.exit(1);
+      }
+    };
+
+    process.on('SIGTERM', () => void shutdown('SIGTERM'));
+    process.on('SIGINT', () => void shutdown('SIGINT'));
+  } catch (err: any) {
+    console.error('BOOTSTRAP FAILED AT STEP:', err);
+    console.error(err?.stack || err);
+    console.error(JSON.stringify(err, null, 2));
+    try { logger.fatal({ err }, 'Bootstrap failed'); } catch {}
+    // Don't exit immediately, let logs flush
+    setTimeout(() => process.exit(1), 500);
+  }
+}
 
 bootstrap();

@@ -5,7 +5,7 @@ import {
     GL_SERVICE,
     PeriodsService,
     TX_NUMBER_SERVICE,
-} from '../modules/periods/periods.sevice';
+} from '../modules/periods/periods.service';
 
 // 1. Membuat Mocking Drizzle Query Builder yang bisa di-chain (berantai)
 const createQueryBuilderMock = () => {
