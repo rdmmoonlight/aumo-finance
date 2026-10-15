@@ -15,6 +15,8 @@ using AumoBackend.DTOs;
 using AumoBackend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Controllers;
@@ -27,11 +29,19 @@ public class JournalEntryController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly ITransactionNumberService _transactionNumberService;
+    private readonly IValidator<CreateJournalEntryRequest> _createValidator;
+    private readonly IValidator<UpdateJournalEntryRequest> _updateValidator;
 
-    public JournalEntryController(AppDbContext db, ITransactionNumberService transactionNumberService)
+    public JournalEntryController(
+        AppDbContext db,
+        ITransactionNumberService transactionNumberService,
+        IValidator<CreateJournalEntryRequest> createValidator,
+        IValidator<UpdateJournalEntryRequest> updateValidator)
     {
         _db = db;
         _transactionNumberService = transactionNumberService;
+        _createValidator = createValidator;
+        _updateValidator = updateValidator;
     }
 
     // ==========================================
@@ -97,22 +107,13 @@ public class JournalEntryController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
+        var validation = await _createValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.ToErrorResponse());
+
         var effectiveLines = request.Lines
             .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))
             .ToList();
-
-        if (effectiveLines.Count < 2)
-        {
-            return BadRequest(new { success = false, message = "A journal entry must have at least two line items." });
-        }
-
-        var totalDebit = effectiveLines.Sum(l => l.Debit);
-        var totalCredit = effectiveLines.Sum(l => l.Credit);
-
-        if (totalDebit != totalCredit || totalDebit == 0)
-        {
-            return BadRequest(new { success = false, message = "Total debit must equal total credit before posting." });
-        }
 
         var validAccountIds = (await _db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
@@ -169,6 +170,10 @@ public class JournalEntryController : ControllerBase
         if (userId == Guid.Empty)
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 
+        var validation = await _updateValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+            return BadRequest(validation.ToErrorResponse());
+
         // id = JournalEntryId (id kelompok jurnal)
         var existingRows = await _db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId)
@@ -193,19 +198,6 @@ public class JournalEntryController : ControllerBase
         var effectiveLines = request.Lines
             .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))
             .ToList();
-
-        if (effectiveLines.Count < 2)
-        {
-            return BadRequest(new { success = false, message = "A journal entry must have at least two line items." });
-        }
-
-        var totalDebit = effectiveLines.Sum(l => l.Debit);
-        var totalCredit = effectiveLines.Sum(l => l.Credit);
-
-        if (totalDebit != totalCredit || totalDebit == 0)
-        {
-            return BadRequest(new { success = false, message = "Total debit must equal total credit before posting." });
-        }
 
         var validAccountIds = (await _db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
