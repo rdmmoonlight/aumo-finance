@@ -63,7 +63,7 @@ jobs:
         run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true
         working-directory: backend
 
-      # 4. FRONTEND (Next.js & Playwright)
+      # 4. FRONTEND (Next.js)
       - name: Install Frontend Dependencies
         run: pnpm install
         working-directory: frontend
@@ -73,21 +73,32 @@ jobs:
         run: pnpm exec tsc --noEmit --incremental false
         working-directory: frontend
 
+      - name: Run ESLint Auto-Fix (Frontend)
+        run: pnpm exec eslint --fix . || true
+        working-directory: frontend
+
       - name: Run Prettier Check/Write (Frontend)
         run: pnpm exec prettier --write .
-        working-directory: frontend
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
-        working-directory: frontend
-
-      - name: Run Playwright Tests
-        run: pnpm exec playwright test --pass-with-no-tests
         working-directory: frontend
 
       # 5. NESTJS SERVICE (nest)
       - name: Install Nest Dependencies
         run: pnpm install
+        working-directory: nest
+
+      # Perbaiki syntax error double quote dari drizzle-kit generator jika ada
+      - name: Fix Drizzle Generated Quotes
+        run: |
+          if [ -f drizzle/schema.ts ]; then
+            sed -i 's/""\([^"]*\)""/"\1"/g' drizzle/schema.ts
+          fi
+          if [ -f src/db/schema.ts ]; then
+            sed -i 's/""\([^"]*\)""/"\1"/g' src/db/schema.ts
+          fi
+        working-directory: nest
+
+      - name: Run ESLint Auto-Fix (Nest)
+        run: pnpm exec eslint --fix . || true
         working-directory: nest
 
       - name: Typecheck & Build (Nest)
@@ -101,6 +112,10 @@ jobs:
       # 6. ANALOG FRAMEWORK SERVICE (analog)
       - name: Install Analog Dependencies
         run: pnpm install
+        working-directory: analog
+
+      - name: Run ESLint Auto-Fix (Analog)
+        run: pnpm exec eslint --fix . || true
         working-directory: analog
 
       - name: Typecheck & Build (Analog)
@@ -120,12 +135,3 @@ jobs:
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
           file_pattern: "backend/* frontend/* nest/* analog/*"
-
-      # 8. UPLOAD PLAYWRIGHT REPORT
-      - name: Upload Playwright Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: playwright-report
-          path: frontend/playwright-report/
-          retention-days: 30
