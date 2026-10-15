@@ -280,13 +280,10 @@ public class AuthService : IAuthService
 
     private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
-        var jwtSigningKey = _configuration["JWT_SIGNING_KEY"]
-            ?? Environment.GetEnvironmentVariable("JWT_SIGNING_KEY")
-            ?? throw new InvalidOperationException("JWT_SIGNING_KEY is missing.");
+        var jwtSigningKey = _configuration["Jwt:SigningKey"]
+     ?? throw new InvalidOperationException("Jwt:SigningKey is missing.");
 
-        var jwtIssuer = _configuration["JWT_ISSUER"]
-            ?? Environment.GetEnvironmentVariable("JWT_ISSUER")
-            ?? "AumoFinanceApp";
+        var jwtIssuer = _configuration["Jwt:Issuer"] ?? "AumoFinanceApp";
 
         var claims = new List<Claim>
         {

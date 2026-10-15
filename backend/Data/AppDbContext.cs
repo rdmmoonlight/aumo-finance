@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
+using Microsoft.Extensions.Configuration;
 
 namespace AumoBackend.Data;
 
@@ -282,8 +283,12 @@ public class AppDbContextFactory
         var optionsBuilder =
             new DbContextOptionsBuilder<AppDbContext>();
 
-        var connectionString =
-            Environment.GetEnvironmentVariable("DATABASE_URL")
+        var configuration = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
             ?? "Host=localhost;Database=aumo_db;Username=postgres;Password=postgres";
 
         optionsBuilder.UseNpgsql(connectionString);
