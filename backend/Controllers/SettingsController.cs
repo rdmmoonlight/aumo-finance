@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using AumoBackend.Services.Storage;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 
 namespace AumoBackend.Controllers
 {
@@ -27,17 +29,20 @@ namespace AumoBackend.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IGuardianService _guardianService;
         private readonly IAvatarStorage _avatarStorage;
+        private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IGuardianService guardianService,
-            IAvatarStorage avatarStorage)
+            IAvatarStorage avatarStorage,
+            IValidator<ChangePasswordRequest> changePasswordValidator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _guardianService = guardianService;
             _avatarStorage = avatarStorage;
+            _changePasswordValidator = changePasswordValidator;
         }
 
         #region Profile Settings
@@ -152,6 +157,10 @@ namespace AumoBackend.Controllers
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
+            var validation = await _changePasswordValidator.ValidateAsync(request);
+            if (!validation.IsValid)
+                return BadRequest(validation.ToErrorResponse());
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return Unauthorized();
 

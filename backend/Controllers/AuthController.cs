@@ -1,17 +1,12 @@
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using AumoBackend.DTOs;
-using FluentValidation;
-using Google.Apis.Auth;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
+using AumoBackend.Services.Auth;
+using AumoBackend.Validators.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.IdentityModel.Tokens;
-using AumoBackend.Validators.Common;
 
 namespace AumoBackend.Controllers;
 
@@ -19,265 +14,116 @@ namespace AumoBackend.Controllers;
 [Route("/api/v1/auth")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 [EnableRateLimiting("auth-strict")]
-
 public class AuthController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IAuthService _authService;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IGuardianService _guardianService;
-    private readonly IConfiguration _configuration;
-    private readonly IValidator<LoginRequest> _loginValidator;
-    private readonly IValidator<GoogleLoginRequest> _googleLoginValidator;
 
-    public AuthController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IGuardianService guardianService,
-        IConfiguration configuration,
-        IValidator<LoginRequest> loginValidator,
-        IValidator<GoogleLoginRequest> googleLoginValidator)
+    public AuthController(IAuthService authService, SignInManager<ApplicationUser> signInManager)
     {
-        _userManager = userManager;
+        _authService = authService;
         _signInManager = signInManager;
-        _guardianService = guardianService;
-        _configuration = configuration;
-        _loginValidator = loginValidator;
-        _googleLoginValidator = googleLoginValidator;
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
-        // 0. VALIDASI REQUEST MENGGUNAKAN FLUENTVALIDATION
-        var validationResult = await _loginValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var validation = await _authService.ValidateLoginAsync(request);
+        if (!validation.IsValid)
         {
-            return BadRequest(validationResult.ToErrorResponse());
+            return BadRequest(validation.ToErrorResponse());
         }
 
-        var user = await _userManager.FindByEmailAsync(request.Email)
-                   ?? await _userManager.FindByNameAsync(request.Email);
-
-        if (user == null)
-        {
-            return Unauthorized(new { success = false, message = "Invalid email/username or password." });
-        }
-
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
         var headerUserAgent = Request.Headers["User-Agent"].ToString();
-        var safeUserAgent = !string.IsNullOrWhiteSpace(request.UserAgent)
-            ? request.UserAgent
-            : (!string.IsNullOrWhiteSpace(headerUserAgent) ? headerUserAgent : "Aumo Client");
 
-        var isMobile = request.IsMobileClient;
+        var result = await _authService.ProcessLoginAsync(request, ip, headerUserAgent);
 
-        string deviceCategory = isMobile ? "Mobile" : "Web";
-        string ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
-        string osValue = !string.IsNullOrWhiteSpace(request.OperatingSystem) ? request.OperatingSystem : deviceCategory;
-
-        // 1. CEK UNTUK AKUN YANG SUDAH TERKUNCI SEBELUMNYA
-        if (await _userManager.IsLockedOutAsync(user))
+        if (result == null)
         {
-            var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
-            return StatusCode(StatusCodes.Status429TooManyRequests, new
-            {
-                success = false,
-                message = "Account is locked due to multiple failed login attempts.",
-                lockoutEnd = lockoutEndDate?.UtcDateTime
-            });
-        }
-
-        // 2. VALIDASI PASSWORD DENGAN MEMPERHITUNGKAN UNTUK LOCKOUT
-        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
-
-        if (signInResult.IsLockedOut)
-        {
-            var lockoutEndDate = await _userManager.GetLockoutEndDateAsync(user);
-
-            await _guardianService.CreateLoginActivityAsync(
-                user.Id,
-                "Locked Out Login Attempt",
-                deviceCategory,
-                isMobile ? "Mobile App" : "Web Browser",
-                ip,
-                "ID",
-                false,
-                osValue,
-                safeUserAgent
-            );
-
-            return StatusCode(StatusCodes.Status429TooManyRequests, new
-            {
-                success = false,
-                message = "Account is locked due to multiple failed login attempts.",
-                lockoutEnd = lockoutEndDate?.UtcDateTime
-            });
-        }
-
-        if (!signInResult.Succeeded)
-        {
-            await _guardianService.CreateLoginActivityAsync(
-                user.Id,
-                "Failed Login",
-                deviceCategory,
-                isMobile ? "Mobile App" : "Web Browser",
-                ip,
-                "ID",
-                false,
-                osValue,
-                safeUserAgent
-            );
-
             return Unauthorized(new { success = false, message = "Invalid email/username or password." });
         }
 
-        // =====================================
-        // PEMISAHAN MEKANISME: COOKIE VS JWT
-        // =====================================
-        string? jwtToken = null;
-
-        if (!isMobile)
+        if (result.IsLockedOut)
         {
-            // --- WEB FLOW: Hanya buat Cookie Session ---
-            await _signInManager.SignInAsync(user, isPersistent: request.RememberMe);
-        }
-        else
-        {
-            // --- MOBILE FLOW: Hanya buat JWT Token ---
-            jwtToken = await GenerateJwtTokenAsync(user);
+            return StatusCode(StatusCodes.Status429TooManyRequests, new
+            {
+                success = false,
+                message = result.Message,
+                lockoutEnd = result.LockoutEnd
+            });
         }
 
-        // Reset hitungan percobaan gagal setelah login berhasil
-        await _userManager.ResetAccessFailedCountAsync(user);
-
-        // Audit Log & Guardian Session
-        await _guardianService.CreateSessionAsync(
-            user.Id,
-            deviceName: deviceCategory,
-            osValue,
-            isMobile ? "Mobile App" : "Web Browser",
-            ip,
-            "ID",
-            isMobile ? "JWT_BEARER" : "COOKIE_SESSION",
-            safeUserAgent
-        );
-
-        await _guardianService.CreateLoginActivityAsync(
-            user.Id,
-            "Interactive Login",
-            deviceCategory,
-            isMobile ? "Mobile App" : "Web Browser",
-            ip,
-            "ID",
-            true,
-            osValue,
-            safeUserAgent
-        );
-
-        if (isMobile)
+        if (request.IsMobileClient)
         {
             return Ok(new
             {
                 success = true,
-                message = "Mobile login successful.",
-                userId = user.Id.ToString(),
-                fullName = user.FullName ?? user.UserName ?? "User",
-                avatarUrl = user.AvatarUrl,
-                token = jwtToken
+                message = result.Message,
+                userId = result.UserId,
+                fullName = result.FullName,
+                avatarUrl = result.AvatarUrl,
+                token = result.Token
             });
         }
 
         return Ok(new
         {
             success = true,
-            message = "Web login successful.",
-            userId = user.Id.ToString(),
-            fullName = user.FullName ?? user.UserName ?? "User",
-            avatarUrl = user.AvatarUrl
+            message = result.Message,
+            userId = result.UserId,
+            fullName = result.FullName,
+            avatarUrl = result.AvatarUrl
         });
     }
 
     /// <summary>
-    /// Google OAuth Login via POST (Mendukung Web via Cookie & Mobile via JWT dari SDK Frontend)
+    /// Google OAuth Login via POST (Web via Cookie & Mobile via JWT dari SDK Frontend)
     /// </summary>
     [HttpPost("google-login")]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
     {
-        var validationResult = await _googleLoginValidator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        var validation = await _authService.ValidateGoogleLoginAsync(request);
+        if (!validation.IsValid)
         {
-            return BadRequest(validationResult.ToErrorResponse());
+            return BadRequest(validation.ToErrorResponse());
         }
 
-        GoogleJsonWebSignature.Payload payload;
-        try
+        var result = await _authService.ProcessGoogleLoginAsync(request);
+
+        if (result == null)
         {
-            payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken);
-        }
-        catch (Exception)
-        {
-            return Unauthorized(new { success = false, message = "Invalid Google ID Token." });
+            return Unauthorized(new { success = false, message = "Invalid Google ID Token or account could not be created." });
         }
 
-        var info = new UserLoginInfo("Google", payload.Subject, "Google");
-        var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
-
-        if (user == null)
+        if (request.IsMobileClient)
         {
-            user = await _userManager.FindByEmailAsync(payload.Email);
-
-            if (user == null)
-            {
-                user = new ApplicationUser
-                {
-                    Id = Guid.NewGuid(),
-                    UserName = payload.Email,
-                    Email = payload.Email,
-                    EmailConfirmed = true,
-                    FullName = payload.Name,
-                    AvatarUrl = payload.Picture
-                };
-
-                var createResult = await _userManager.CreateAsync(user);
-                if (!createResult.Succeeded)
-                {
-                    return BadRequest(new { success = false, message = "Failed to create user from Google account." });
-                }
-
-                await _userManager.AddToRoleAsync(user, "User");
-            }
-
-            await _userManager.AddLoginAsync(user, info);
-        }
-
-        if (!request.IsMobileClient)
-        {
-            await _signInManager.SignInAsync(user, isPersistent: true);
             return Ok(new
             {
                 success = true,
-                message = "Google login successful (Cookie session established).",
-                userId = user.Id.ToString(),
-                fullName = user.FullName ?? user.UserName ?? "User",
-                avatarUrl = user.AvatarUrl
+                message = result.Message,
+                userId = result.UserId,
+                fullName = result.FullName,
+                avatarUrl = result.AvatarUrl,
+                token = result.Token
             });
         }
 
-        var token = await GenerateJwtTokenAsync(user);
         return Ok(new
         {
             success = true,
-            message = "Google login successful.",
-            userId = user.Id.ToString(),
-            fullName = user.FullName ?? user.UserName ?? "User",
-            avatarUrl = user.AvatarUrl,
-            token = token
+            message = result.Message,
+            userId = result.UserId,
+            fullName = result.FullName,
+            avatarUrl = result.AvatarUrl
         });
     }
 
     /// <summary>
-    /// Callback handler setelah autentikasi OAuth Google eksternal berhasil
+    /// Google OAuth Login via GET Redirect (Server-Initiated OAuth).
+    /// Menangani browser direct navigation via window.location.href tanpa memicu HTTP 405.
     /// </summary>
     [HttpGet("google-login")]
     [AllowAnonymous]
@@ -287,11 +133,14 @@ public class AuthController : ControllerBase
         var safeRedirectUrl = GetSafeRedirectUrl(redirectTo);
 
         var redirectUrl = Url.Action(nameof(GoogleCallback), new { redirectTo = safeRedirectUrl });
-        var properties = _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+        var properties = _authService.ConfigureGoogleRedirectProperties(redirectUrl!);
 
         return Challenge(properties, "Google");
     }
 
+    /// <summary>
+    /// Callback handler setelah autentikasi OAuth Google eksternal berhasil
+    /// </summary>
     [HttpGet("google-callback")]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleCallback(string redirectTo = "/home", string? remoteError = null)
@@ -307,78 +156,14 @@ public class AuthController : ControllerBase
             return BadRequest(new { success = false, message = "Error loading external login information." });
         }
 
-        var result = await _signInManager.ExternalLoginSignInAsync(info.LoginProvider, info.ProviderKey, isPersistent: true, bypassTwoFactor: true);
-
-        if (!result.Succeeded)
+        var error = await _authService.ProcessGoogleCallbackAsync(info.Principal, info.LoginProvider, info.ProviderKey);
+        if (error != null)
         {
-            var email = info.Principal.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(email))
-            {
-                return BadRequest(new { success = false, message = "Email claim not received from Google." });
-            }
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                user = new ApplicationUser
-                {
-                    Id = Guid.NewGuid(),
-                    UserName = email,
-                    Email = email,
-                    EmailConfirmed = true,
-                    FullName = info.Principal.FindFirstValue(ClaimTypes.Name) ?? email,
-                    AvatarUrl = info.Principal.FindFirstValue("picture")
-                };
-
-                var createResult = await _userManager.CreateAsync(user);
-                if (!createResult.Succeeded)
-                {
-                    return BadRequest(new { success = false, message = "Failed to create user from Google callback." });
-                }
-
-                await _userManager.AddToRoleAsync(user, "User");
-            }
-
-            await _userManager.AddLoginAsync(user, info);
-            await _signInManager.SignInAsync(user, isPersistent: true);
+            return BadRequest(new { success = false, message = error });
         }
 
-        // Validasi ulang URL sebelum eksekusi Redirect
-        var safeRedirectUrl = GetSafeRedirectUrl(redirectTo);
-
-        return Redirect(safeRedirectUrl);
-    }
-
-    [NonAction]
-    private string GetSafeRedirectUrl(string targetUrl)
-    {
-        const string defaultUrl = "/home";
-
-        if (string.IsNullOrWhiteSpace(targetUrl))
-            return defaultUrl;
-
-        // 1. Izinkan relative path lokal (contoh: /home, /dashboard)
-        if (Url.IsLocalUrl(targetUrl))
-            return targetUrl;
-
-        // 2. Daftar origin frontend yang diizinkan (misal Next.js)
-        var allowedOrigins = new[]
-        {
-        "http://localhost:3000",
-        "https://app.domainsaya.com"
-    };
-
-        if (Uri.TryCreate(targetUrl, UriKind.Absolute, out var uriResult))
-        {
-            var origin = $"{uriResult.Scheme}://{uriResult.Authority}";
-            if (allowedOrigins.Contains(origin, StringComparer.OrdinalIgnoreCase))
-            {
-                return targetUrl;
-            }
-        }
-
-        // Fallback jika URL tidak valid / terindikasi Open Redirect
-        return defaultUrl;
+        // Validasi ulang URL sebelum eksekusi Redirect (cegah open redirect)
+        return Redirect(GetSafeRedirectUrl(redirectTo));
     }
 
     /// <summary>
@@ -387,106 +172,68 @@ public class AuthController : ControllerBase
     [HttpGet("me")]
     public async Task<IActionResult> GetProfile()
     {
-        // 1. Ambil dari Cookie/Claims Principal
-        var user = await _userManager.GetUserAsync(User);
+        var profile = await _authService.GetUserProfileAsync(User);
 
-        // Fallback: Jika null, cari via Claim NameIdentifier / Sub (terutama untuk JWT Bearer)
-        if (user == null)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                         ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                user = await _userManager.FindByIdAsync(userId);
-            }
-        }
-
-        if (user == null)
+        if (profile == null)
         {
             return Unauthorized(new { success = false, message = "User session expired or user not found." });
         }
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var userClaims = await _userManager.GetClaimsAsync(user);
-
         var profileData = new
         {
-            id = user.Id,
-            userId = user.Id,
-            email = user.Email,
-            userName = user.UserName,
-            fullName = user.FullName,
-            phoneNumber = user.PhoneNumber,
-            avatarUrl = user.AvatarUrl,
-            bio = user.Bio,
-            roles = roles,
-            customClaims = userClaims
+            id = profile.Id,
+            userId = profile.UserId,
+            email = profile.Email,
+            userName = profile.UserName,
+            fullName = profile.FullName,
+            phoneNumber = profile.PhoneNumber,
+            avatarUrl = profile.AvatarUrl,
+            bio = profile.Bio,
+            roles = profile.Roles,
+            customClaims = profile.CustomClaims
         };
 
         return Ok(new
         {
             success = true,
             data = profileData,
-            id = user.Id,
-            userId = user.Id,
-            email = user.Email,
-            userName = user.UserName,
-            fullName = user.FullName,
-            phoneNumber = user.PhoneNumber,
-            avatarUrl = user.AvatarUrl,
-            bio = user.Bio,
-            roles = roles,
-            customClaims = userClaims
+            id = profile.Id,
+            userId = profile.UserId,
+            email = profile.Email,
+            userName = profile.UserName,
+            fullName = profile.FullName,
+            phoneNumber = profile.PhoneNumber,
+            avatarUrl = profile.AvatarUrl,
+            bio = profile.Bio,
+            roles = profile.Roles,
+            customClaims = profile.CustomClaims
         });
     }
 
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        await _signInManager.SignOutAsync();
+        await _authService.LogoutAsync();
         return Ok(new { success = true, message = "Logged out successfully." });
     }
 
     /// <summary>
-    /// Generate JWT Token async yang memuat data User, Roles, dan Claims.
+    /// Hanya mengizinkan path lokal atau origin frontend yang terdaftar (AllowedOrigins).
+    /// Selain itu kembali ke /home untuk mencegah open redirect.
     /// </summary>
-    private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
+    private string GetSafeRedirectUrl(string? targetUrl)
     {
-        var jwtSigningKey = _configuration["Jwt:SigningKey"]
-    ?? throw new InvalidOperationException("Jwt:SigningKey is missing.");
+        const string defaultUrl = "/home";
 
-        var jwtIssuer = _configuration["Jwt:Issuer"] ?? "AumoFinanceApp";
+        if (string.IsNullOrWhiteSpace(targetUrl))
+            return defaultUrl;
 
-        var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
-            new Claim(ClaimTypes.Name, user.FullName ?? user.UserName ?? string.Empty),
-            new Claim(ClaimTypes.Email, user.Email ?? string.Empty),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+        if (Url.IsLocalUrl(targetUrl))
+            return targetUrl;
 
-        var roles = await _userManager.GetRolesAsync(user);
-        foreach (var role in roles)
-        {
-            claims.Add(new Claim(ClaimTypes.Role, role));
-        }
+        if (Uri.TryCreate(targetUrl, UriKind.Absolute, out var uri) && AllowedOrigins.IsAllowed(uri))
+            return targetUrl;
 
-        var userClaims = await _userManager.GetClaimsAsync(user);
-        claims.AddRange(userClaims);
-
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey));
-        var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-            issuer: jwtIssuer,
-            audience: jwtIssuer,
-            claims: claims,
-            expires: DateTime.UtcNow.AddDays(30),
-            signingCredentials: credentials
-        );
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return defaultUrl;
     }
 }

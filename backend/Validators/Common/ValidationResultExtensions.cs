@@ -4,17 +4,23 @@ namespace AumoBackend.Validators.Common;
 
 /// <summary>
 /// Format respons error validasi yang seragam untuk seluruh endpoint.
-/// Bentuk JSON sama dengan respons Login sebelumnya, sehingga frontend/mobile tidak perlu berubah.
+/// `message` berisi error pertama (frontend menampilkan error.data.message),
+/// `errors` berisi seluruh error.
 /// </summary>
 public static class ValidationResultExtensions
 {
-    public static object ToErrorResponse(this ValidationResult result) => new
+    public static object ToErrorResponse(this ValidationResult result)
     {
-        success = false,
-        message = "Validation failed.",
-        errors = result.Errors
+        var errors = result.Errors
             .Select(e => e.ErrorMessage)
             .Distinct()
-            .ToArray()
-    };
+            .ToArray();
+
+        return new
+        {
+            success = false,
+            message = errors.FirstOrDefault() ?? "Validation failed.",
+            errors
+        };
+    }
 }

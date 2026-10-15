@@ -1,0 +1,20 @@
+namespace AumoBackend.Helpers;
+
+/// <summary>
+/// Satu sumber daftar origin frontend yang dipercaya.
+/// Dipakai oleh CORS (Program.cs) dan validasi redirect OAuth (AuthController).
+/// </summary>
+public static class AllowedOrigins
+{
+    public static readonly string[] All =
+    {
+        "http://localhost:3000",
+        "https://aumo-finance-web.vercel.app",
+    };
+
+    public static bool IsAllowed(Uri uri)
+    {
+        var origin = $"{uri.Scheme}://{uri.Authority}";
+        return All.Contains(origin, StringComparer.OrdinalIgnoreCase);
+    }
+}
