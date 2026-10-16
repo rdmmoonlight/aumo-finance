@@ -356,7 +356,8 @@ builder.Services.AddHttpClient("RustCore", client =>
     client.BaseAddress = new Uri(rustCoreUrl);
     client.Timeout = TimeSpan.FromSeconds(5);
 });
-
+builder.Services.AddScoped<IRustCoreService, RustCoreService>();
+                
                 // =====================================
                 // 8. FORWARDED HEADERS CONFIGURATION
                 // =====================================
