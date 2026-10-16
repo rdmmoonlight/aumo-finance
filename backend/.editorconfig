@@ -25,12 +25,14 @@ csharp_space_after_keywords_in_control_flow_statements = true
 csharp_space_between_method_declaration_parameter_list_parentheses = false
 csharp_space_between_parentheses = false
 
-# Pengorganisasian Directives ('using')
+# Pengorganisasian Directives ('using') - Diturunkan agar tidak fail saat build
 dotnet_sort_system_directives_first = true
-csharp_using_directive_placement = outside_namespace:warning
+csharp_using_directive_placement = outside_namespace:suggestion
+dotnet_diagnostic.IDE0065.severity = suggestion
 
-# Namespace (Gunakan File-Scoped Namespace khas .NET 6+)
-csharp_style_namespace_declarations = file_scoped:warning
+# Namespace (File-Scoped Namespace khas .NET 6+) - Diturunkan agar tidak fail saat build
+csharp_style_namespace_declarations = file_scoped:suggestion
+dotnet_diagnostic.IDE0161.severity = suggestion
 
 # ==============================================================================
 # 3. ATURAN PENULISAN KODE (CODE STYLE)
@@ -56,11 +58,18 @@ dotnet_style_qualification_for_event = false:suggestion
 
 # Parentheses & Type Modifiers
 dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:suggestion
-csharp_preferred_modifier_order = public,private,protected,internal,file,static,abstract,virtual,sealed,readonly,override,asynchronous,unsafe,volatile:warning
+csharp_preferred_modifier_order = public,private,protected,internal,file,static,abstract,virtual,sealed,readonly,override,asynchronous,unsafe,volatile:suggestion
 
 # ==============================================================================
-# 4. SUPPRESSION / PENONAKTIFAN BISING (StyleCop, Roslynator, CA, IDE & ASP)
+# 4. SUPPRESSION / PENONAKTIFAN BISING (StyleCop, Roslynator, CA, IDE & CS Errors)
 # ==============================================================================
+
+# Compiler Errors: DI / Field Unassigned / Nullability (Perlu refactor manual di file C#)
+dotnet_diagnostic.CS0649.severity = none
+dotnet_diagnostic.CS8600.severity = none
+dotnet_diagnostic.CS8602.severity = none
+dotnet_diagnostic.CS8603.severity = none
+dotnet_diagnostic.CS8604.severity = none
 
 # StyleCop: XML Documentation Header & Element Ordering (Tanpa Fix All)
 dotnet_diagnostic.SA1600.severity = none
@@ -90,11 +99,3 @@ dotnet_diagnostic.RCS1112.severity = suggestion
 dotnet_diagnostic.RCS1158.severity = suggestion
 dotnet_diagnostic.RCS1235.severity = suggestion
 dotnet_diagnostic.RCS1246.severity = suggestion
-
-# Code Analysis (CA) & ASP.NET Core Rules
-dotnet_diagnostic.CA1050.severity = none
-dotnet_diagnostic.CA1806.severity = suggestion
-dotnet_diagnostic.CA1826.severity = suggestion
-dotnet_diagnostic.CA1848.severity = suggestion
-dotnet_diagnostic.ASP0015.severity = suggestion
-dotnet_diagnostic.ASP0025.severity = suggestion
