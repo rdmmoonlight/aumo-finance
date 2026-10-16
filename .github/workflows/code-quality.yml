@@ -34,6 +34,10 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      # Mengaktifkan Problem Matcher agar error/warning .NET otomatis memunculkan penanda (annotation) di UI GitHub
+      - name: Register .NET Problem Matcher
+        run: echo "::add-matcher::.github/workflows/csc.json" || true
+
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
