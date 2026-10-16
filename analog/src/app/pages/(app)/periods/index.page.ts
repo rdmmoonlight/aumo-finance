@@ -1,13 +1,7 @@
 import { RouteMeta } from "@analogjs/router";
-import { Component, inject, OnInit, signal } from "@angular/core";
+import { Component, computed, inject, OnInit, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
-
-// Perbaiki relative import sesuai posisi baru di src/app/pages/(app)/periods.page.ts
-import {
-  OpenPeriodInfo,
-  Period,
-  PeriodsService,
-} from "./periods.service";
+import { CreatePeriodDto, Period, PeriodsService } from "./periods.service";
 
 export const routeMeta: RouteMeta = {
   title: "Periode Keuangan - Aumo Finance",
@@ -32,7 +26,7 @@ export const routeMeta: RouteMeta = {
           </p>
         </div>
         <div class="flex gap-2">
-          @if (selectedPeriodId()) {
+          @if (selectedPeriod()) {
             <button
               (click)="clearSelection()"
               [disabled]="isLoading()"
@@ -62,8 +56,8 @@ export const routeMeta: RouteMeta = {
         </div>
       </div>
 
-      <!-- Info Banner Periode Terbuka -->
-      @if (openPeriodInfo()?.period) {
+      <!-- Info Banner Periode Terbuka / Aktif -->
+      @if (openPeriod()) {
         <div
           class="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-200"
         >
@@ -74,11 +68,11 @@ export const routeMeta: RouteMeta = {
               Periode Berjalan
             </span>
             <span class="text-lg font-bold">
-              {{ openPeriodInfo()?.period?.name }}
+              {{ openPeriod()?.periodName }}
             </span>
           </div>
           <button
-            (click)="closePeriod(openPeriodInfo()!.period!.id)"
+            (click)="closePeriod(openPeriod()!.id)"
             [disabled]="isLoading()"
             class="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-rose-700 disabled:opacity-50"
           >
@@ -92,7 +86,9 @@ export const routeMeta: RouteMeta = {
         class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
+          <table
+            class="w-full text-left text-sm text-slate-600 dark:text-slate-300"
+          >
             <thead
               class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-700 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300"
             >
@@ -116,12 +112,16 @@ export const routeMeta: RouteMeta = {
                 @for (period of periods(); track period.id) {
                   <tr
                     class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50"
-                    [class.bg-brand-50]="selectedPeriodId() === period.id"
+                    [class.bg-brand-50]="period.isSelected"
                   >
-                    <td class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">
-                      {{ period.name }}
-                      @if (selectedPeriodId() === period.id) {
-                        <span class="ml-2 text-xs font-normal text-brand-700 dark:text-brand-400">
+                    <td
+                      class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100"
+                    >
+                      {{ period.periodName }}
+                      @if (period.isSelected) {
+                        <span
+                          class="ml-2 text-xs font-normal text-brand-700 dark:text-brand-400"
+                        >
                           (Terpilih)
                         </span>
                       }
@@ -129,16 +129,18 @@ export const routeMeta: RouteMeta = {
                     <td class="px-6 py-4 text-slate-500 dark:text-slate-400">
                       {{ period.startDate }} - {{ period.endDate }}
                     </td>
-                    <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-400">
+                    <td
+                      class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-400"
+                    >
                       Rp {{ (period.income || 0).toLocaleString("id-ID") }}
                     </td>
-                    <td class="px-6 py-4 font-medium text-rose-600 dark:text-rose-400">
+                    <td
+                      class="px-6 py-4 font-medium text-rose-600 dark:text-rose-400"
+                    >
                       Rp {{ (period.expense || 0).toLocaleString("id-ID") }}
                     </td>
                     <td class="px-6 py-4">
-                      @if (
-                        period.status === "active" || period.status === "OPEN"
-                      ) {
+                      @if (!period.isClosed) {
                         <span
                           class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950/50 dark:text-emerald-400"
                         >
@@ -155,14 +157,12 @@ export const routeMeta: RouteMeta = {
                     <td class="space-x-2 px-6 py-4 text-right">
                       <button
                         (click)="selectPeriod(period.id)"
-                        [disabled]="selectedPeriodId() === period.id"
+                        [disabled]="period.isSelected"
                         class="font-medium text-brand-700 hover:text-brand-900 hover:underline disabled:text-slate-400 dark:text-brand-400"
                       >
                         Pilih
                       </button>
-                      @if (
-                        period.status === "active" || period.status === "OPEN"
-                      ) {
+                      @if (!period.isClosed) {
                         <button
                           (click)="closePeriod(period.id)"
                           class="font-medium text-rose-600 hover:text-rose-800 hover:underline dark:text-rose-400"
@@ -193,7 +193,9 @@ export const routeMeta: RouteMeta = {
         <div
           class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
         >
-          <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 dark:border dark:border-slate-800">
+          <div
+            class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:border dark:border-slate-800 dark:bg-slate-900"
+          >
             <div
               class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800"
             >
@@ -226,15 +228,15 @@ export const routeMeta: RouteMeta = {
             >
               <div>
                 <label
-                  for="name"
+                  for="periodName"
                   class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
                   Nama Periode
                 </label>
                 <input
-                  id="name"
+                  id="periodName"
                   type="text"
-                  formControlName="name"
+                  formControlName="periodName"
                   placeholder="Contoh: Oktober 2026"
                   class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
@@ -299,22 +301,26 @@ export default class PeriodsPage implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   readonly periods = signal<Period[]>([]);
-  readonly openPeriodInfo = signal<OpenPeriodInfo | null>(null);
-  readonly selectedPeriodId = signal<string | null>(null);
-
   readonly isLoading = signal<boolean>(false);
   readonly isSubmitting = signal<boolean>(false);
   readonly openModal = signal<boolean>(false);
 
+  // Computed untuk membaca periode aktif / terpilih langsung dari list
+  readonly openPeriod = computed(() =>
+    this.periods().find((p) => !p.isClosed)
+  );
+  readonly selectedPeriod = computed(() =>
+    this.periods().find((p) => p.isSelected)
+  );
+
   readonly form = this.fb.group({
-    name: ["", Validators.required],
+    periodName: ["", Validators.required],
     startDate: ["", Validators.required],
     endDate: ["", Validators.required],
   });
 
   ngOnInit(): void {
     this.fetchPeriods();
-    this.fetchOpenPeriodInfo();
   }
 
   fetchPeriods(): void {
@@ -328,21 +334,11 @@ export default class PeriodsPage implements OnInit {
     });
   }
 
-  fetchOpenPeriodInfo(): void {
-    this.periodsService.getOpenPeriodInfo().subscribe({
-      next: (res) => this.openPeriodInfo.set(res),
-    });
-  }
-
   submitForm(): void {
     if (this.form.invalid) return;
 
     this.isSubmitting.set(true);
-    const dto = this.form.getRawValue() as {
-      name: string;
-      startDate: string;
-      endDate: string;
-    };
+    const dto = this.form.getRawValue() as CreatePeriodDto;
 
     this.periodsService.createPeriod(dto).subscribe({
       next: () => {
@@ -350,38 +346,28 @@ export default class PeriodsPage implements OnInit {
         this.openModal.set(false);
         this.form.reset();
         this.fetchPeriods();
-        this.fetchOpenPeriodInfo();
       },
       error: () => this.isSubmitting.set(false),
     });
   }
 
-  selectPeriod(id: string): void {
+  selectPeriod(id: number): void {
     this.periodsService.selectPeriod(id).subscribe({
-      next: () => {
-        this.selectedPeriodId.set(id);
-        this.fetchPeriods();
-      },
+      next: () => this.fetchPeriods(),
     });
   }
 
   clearSelection(): void {
     this.periodsService.clearSelection().subscribe({
-      next: () => {
-        this.selectedPeriodId.set(null);
-        this.fetchPeriods();
-      },
+      next: () => this.fetchPeriods(),
     });
   }
 
-  closePeriod(id: string): void {
+  closePeriod(id: number): void {
     if (!confirm("Apakah Anda yakin ingin menutup periode ini?")) return;
 
     this.periodsService.closePeriod(id).subscribe({
-      next: () => {
-        this.fetchPeriods();
-        this.fetchOpenPeriodInfo();
-      },
+      next: () => this.fetchPeriods(),
     });
   }
 }
