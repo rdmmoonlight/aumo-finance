@@ -56,13 +56,13 @@ dotnet_style_qualification_for_event = false:suggestion
 
 # Parentheses & Type Modifiers
 dotnet_style_parentheses_in_arithmetic_binary_operators = never_if_unnecessary:suggestion
-csharp_preferred_modifier_order = public,private,protected,internal,file,static,abstract,virtual,sealed,readonly,override,asynchronous,unsafe,volatile,unsafe:warning
+csharp_preferred_modifier_order = public,private,protected,internal,file,static,abstract,virtual,sealed,readonly,override,asynchronous,unsafe,volatile:warning
 
 # ==============================================================================
-# 4. PENONAKTIFAN BISING STYLECOP (Yang Tidak Punya Auto-Fix Massal)
+# 4. SUPPRESSION / PENONAKTIFAN BISING (StyleCop, Roslynator, CA, IDE & ASP)
 # ==============================================================================
 
-# Matikan kewajiban XML Documentation Header
+# StyleCop: XML Documentation Header & Element Ordering (Tanpa Fix All)
 dotnet_diagnostic.SA1600.severity = none
 dotnet_diagnostic.SA1601.severity = none
 dotnet_diagnostic.SA1602.severity = none
@@ -70,8 +70,6 @@ dotnet_diagnostic.SA1611.severity = none
 dotnet_diagnostic.SA1618.severity = none
 dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SA1649.severity = none
-
-# Matikan aturan urutan variabel/method yang kaku (Element Ordering)
 dotnet_diagnostic.SA1200.severity = none
 dotnet_diagnostic.SA1201.severity = none
 dotnet_diagnostic.SA1202.severity = none
@@ -80,5 +78,23 @@ dotnet_diagnostic.SA1214.severity = none
 dotnet_diagnostic.SA1117.severity = none
 dotnet_diagnostic.SA1402.severity = none
 
-# Turunkan severity Logger Performance (CA1848) menjadi suggestion
+# Unused Parameters & Variable Rules (Sering Memicu Error di CLI)
+dotnet_diagnostic.IDE0060.severity = none
+dotnet_diagnostic.RCS1163.severity = none
+
+# Roslynator Rules Tanpa Fix All Massal (Ubah jadi none / suggestion)
+dotnet_diagnostic.RCS1073.severity = suggestion
+dotnet_diagnostic.RCS1093.severity = none
+dotnet_diagnostic.RCS1110.severity = none
+dotnet_diagnostic.RCS1112.severity = suggestion
+dotnet_diagnostic.RCS1158.severity = suggestion
+dotnet_diagnostic.RCS1235.severity = suggestion
+dotnet_diagnostic.RCS1246.severity = suggestion
+
+# Code Analysis (CA) & ASP.NET Core Rules
+dotnet_diagnostic.CA1050.severity = none
+dotnet_diagnostic.CA1806.severity = suggestion
+dotnet_diagnostic.CA1826.severity = suggestion
 dotnet_diagnostic.CA1848.severity = suggestion
+dotnet_diagnostic.ASP0015.severity = suggestion
+dotnet_diagnostic.ASP0025.severity = suggestion
