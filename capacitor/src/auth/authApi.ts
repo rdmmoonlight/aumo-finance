@@ -48,14 +48,14 @@ export class AuthApi {
       isMobileClient: true,
       operatingSystem: 'Android',
     };
-    return this.client.post('/api/v1/auth/login', body);
+    return this.client.post('/auth/login', body);
   }
 
   me(): Promise<ApiResponse> {
-    return this.client.get('/api/v1/auth/me');
+    return this.client.get('/auth/me');
   }
 
   logout(): Promise<ApiResponse> {
-    return this.client.post('/api/v1/auth/logout');
+    return this.client.post('/auth/logout');
   }
 }

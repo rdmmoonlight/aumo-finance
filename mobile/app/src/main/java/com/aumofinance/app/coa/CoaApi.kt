@@ -54,13 +54,13 @@ class CoaApi(private val client: HttpClient = ApiClient.client) {
         search: String? = null,
         category: String? = null,
     ): HttpResponse =
-        client.get("/api/v1/chart-of-accounts") {
+        client.get("/chart-of-accounts") {
             if (search != null) parameter("search", search)
             if (category != null) parameter("category", category)
         }
 
     suspend fun create(request: AccountRequest): HttpResponse =
-        client.post("/api/v1/chart-of-accounts") {
+        client.post("/chart-of-accounts") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
@@ -69,10 +69,10 @@ class CoaApi(private val client: HttpClient = ApiClient.client) {
         id: Int,
         request: UpdateAccountRequest,
     ): HttpResponse =
-        client.put("/api/v1/chart-of-accounts/$id") {
+        client.put("/chart-of-accounts/$id") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
 
-    suspend fun delete(id: Int): HttpResponse = client.delete("/api/v1/chart-of-accounts/$id")
+    suspend fun delete(id: Int): HttpResponse = client.delete("/chart-of-accounts/$id")
 }

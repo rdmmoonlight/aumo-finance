@@ -15,7 +15,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/health")]
+[Route("/health")]
 [AllowAnonymous]
 
 public class HealthController : ControllerBase

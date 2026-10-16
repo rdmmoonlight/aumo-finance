@@ -6,7 +6,7 @@ using AumoBackend.Services.Home;
 namespace AumoBackend.Controllers.Api
 {
     [ApiController]
-    [Route("/api/v1")]
+    [Route("")]
     public class MarketDataController : ControllerBase
     {
         private readonly HttpClient _httpClient;
@@ -25,7 +25,7 @@ namespace AumoBackend.Controllers.Api
 
         /// <summary>
         /// Endpoint untuk mengambil nilai tukar mata uang (Default: USD ke IDR)
-        /// GET /api/v1/kurs?base=USD&target=IDR
+        /// GET /kurs?base=USD&target=IDR
         /// </summary>
         [HttpGet("kurs")]
         public async Task<IActionResult> GetKurs([FromQuery] string baseCurrency = "USD", [FromQuery] string targetCurrency = "IDR")
@@ -43,7 +43,7 @@ namespace AumoBackend.Controllers.Api
                     });
                 }
 
-                var requestUrl = $"https://use.apiindonesia.id/api/v1/kurs/latest?base={baseCurrency}&target={targetCurrency}";
+                var requestUrl = $"https://use.apiindonesia.id/kurs/latest?base={baseCurrency}&target={targetCurrency}";
 
                 using var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
                 request.Headers.Add("x-api-key", apiKey);
@@ -102,7 +102,7 @@ namespace AumoBackend.Controllers.Api
 }
 
 [ApiController]
-[Route("/api/v1/home")]
+[Route("/home")]
 [Tags("MarketData")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class HomeMarketController : ControllerBase
@@ -118,7 +118,7 @@ public class HomeMarketController : ControllerBase
 
     /// <summary>
     /// Indikator pasar untuk halaman Home: kurs USD/IDR dan IHSG.
-    /// GET /api/v1/home/market-indicators
+    /// GET /home/market-indicators
     /// </summary>
     [HttpGet("market-indicators")]
     public async Task<IActionResult> GetMarketIndicators()

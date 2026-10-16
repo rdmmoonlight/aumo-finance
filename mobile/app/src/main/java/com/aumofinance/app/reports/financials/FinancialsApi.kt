@@ -85,23 +85,23 @@ data class ClosingJournalReport(
 )
 
 class FinancialsApi(private val client: HttpClient = ApiClient.client) {
-    suspend fun getIncomeStatement(): HttpResponse = client.get("/api/v1/reports/income-statement")
+    suspend fun getIncomeStatement(): HttpResponse = client.get("/reports/income-statement")
 
-    suspend fun getRetainedEarnings(): HttpResponse = client.get("/api/v1/reports/retained-earnings")
+    suspend fun getRetainedEarnings(): HttpResponse = client.get("/reports/retained-earnings")
 
     // isPostClosing: laporan Neraca versi post-closing (akun Temporary sudah
     // ditutup) — dipisahkan sebagai query, bukan endpoint terpisah.
     suspend fun getFinancialPosition(isPostClosing: Boolean = false): HttpResponse =
-        client.get("/api/v1/reports/statement-of-financial-position") {
+        client.get("/reports/statement-of-financial-position") {
             parameter("isPostClosing", isPostClosing)
         }
 
-    suspend fun getCashFlow(): HttpResponse = client.get("/api/v1/reports/statement-of-cash-flow")
+    suspend fun getCashFlow(): HttpResponse = client.get("/reports/statement-of-cash-flow")
 
     // Read-only, murni dihitung dari Trial Balance — TIDAK ADA entri Closing
     // yang benar-benar tersimpan di database. Endpoint-nya ada di bawah route
-    // "/api/v1/reports/journals" backend (satu grup dengan General/Adjusting
+    // "/reports/journals" backend (satu grup dengan General/Adjusting
     // Journal, lihat reports.journal.JournalReportApi), bukan endpoint
     // "closing-journal" tersendiri seperti dugaan awal saya.
-    suspend fun getClosingJournal(): HttpResponse = client.get("/api/v1/reports/journals/closing")
+    suspend fun getClosingJournal(): HttpResponse = client.get("/reports/journals/closing")
 }

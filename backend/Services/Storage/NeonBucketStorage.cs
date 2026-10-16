@@ -108,7 +108,7 @@ namespace AumoBackend.Services.Storage
                 baseUrl = $"{request.Scheme}://{request.Host}";
             }
 
-            return $"{baseUrl.TrimEnd('/')}/api/v1/avatars/{fileName}";
+            return $"{baseUrl.TrimEnd('/')}/avatars/{fileName}";
         }
 
         private static string ContentTypeFor(string fileName) =>

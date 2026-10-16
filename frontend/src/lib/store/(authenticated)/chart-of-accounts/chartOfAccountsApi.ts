@@ -33,44 +33,44 @@ export type DeleteChartOfAccountsByIdArg = {
 // --- Inject Endpoints ---
 export const chartOfAccountsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // GET /api/v1/chart-of-accounts
+    // GET /chart-of-accounts
     getChartOfAccounts: builder.query<any, GetChartOfAccountsArg | void>({
       query: (arg) => ({
-        url: "/api/v1/chart-of-accounts",
+        url: "/chart-of-accounts",
         params: arg
           ? {
-              search: arg.search,
-              category: arg.category,
-            }
+            search: arg.search,
+            category: arg.category,
+          }
           : undefined,
       }),
       providesTags: ["ChartOfAccounts"],
     }),
 
-    // POST /api/v1/chart-of-accounts
+    // POST /chart-of-accounts
     createChartOfAccount: builder.mutation<any, CreateAccountRequest>({
       query: (body) => ({
-        url: "/api/v1/chart-of-accounts",
+        url: "/chart-of-accounts",
         method: "POST",
         body,
       }),
       invalidatesTags: ["ChartOfAccounts"],
     }),
 
-    // PUT /api/v1/chart-of-accounts/{id}
+    // PUT /chart-of-accounts/{id}
     updateChartOfAccount: builder.mutation<any, PutChartOfAccountsByIdArg>({
       query: ({ id, updateAccountRequest }) => ({
-        url: `/api/v1/chart-of-accounts/${id}`,
+        url: `/chart-of-accounts/${id}`,
         method: "PUT",
         body: updateAccountRequest,
       }),
       invalidatesTags: ["ChartOfAccounts"],
     }),
 
-    // DELETE /api/v1/chart-of-accounts/{id}
+    // DELETE /chart-of-accounts/{id}
     deleteChartOfAccount: builder.mutation<any, DeleteChartOfAccountsByIdArg>({
       query: ({ id }) => ({
-        url: `/api/v1/chart-of-accounts/${id}`,
+        url: `/chart-of-accounts/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["ChartOfAccounts"],

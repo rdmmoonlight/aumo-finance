@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("/api/v1/reports/general-ledgers")]
+[Route("/reports/general-ledgers")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class GeneralLedgersController : ControllerBase
 {

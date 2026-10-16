@@ -29,7 +29,7 @@ export default function LandingPage(): React.JSX.Element {
   useEffect(() => {
     document.title = "Aumo Finance | Operations, neatly organized.";
 
-    // Cek auth status secara langsung menembak /api/v1/auth/me via store.dispatch
+    // Cek auth status secara langsung menembak /auth/me via store.dispatch
     async function checkAuthStatus() {
       try {
         setCheckingAuth(true);

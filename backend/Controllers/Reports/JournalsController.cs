@@ -19,7 +19,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("/api/v1/reports/journals")]
+[Route("/reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class JournalController : ControllerBase
@@ -37,7 +37,7 @@ public class JournalController : ControllerBase
 
     // ==========================================
     // 1. GENERAL JOURNAL
-    // GET: /api/v1/reports/journals/general
+    // GET: /reports/journals/general
     // ==========================================
     [HttpGet("general")]
     public async Task<IActionResult> GetGeneralJournal()
@@ -116,7 +116,7 @@ public class JournalController : ControllerBase
 
     // ==========================================
     // 2. ADJUSTING JOURNAL
-    // GET: /api/v1/reports/journals/adjusting
+    // GET: /reports/journals/adjusting
     // ==========================================
     [HttpGet("adjusting")]
     public async Task<IActionResult> GetAdjustingJournal()
@@ -190,7 +190,7 @@ public class JournalController : ControllerBase
         });
     }
 
-    // DELETE: /api/v1/reports/journals/adjusting/{id}
+    // DELETE: /reports/journals/adjusting/{id}
     [HttpDelete("adjusting/{id:int}")]
     public async Task<IActionResult> DeleteAdjustingJournal(int id)
     {
@@ -222,7 +222,7 @@ public class JournalController : ControllerBase
 
     // ==========================================
     // 3. CLOSING JOURNAL
-    // GET: /api/v1/reports/journals/closing
+    // GET: /reports/journals/closing
     // ==========================================
     [HttpGet("closing")]
     public async Task<IActionResult> GetClosingJournal()

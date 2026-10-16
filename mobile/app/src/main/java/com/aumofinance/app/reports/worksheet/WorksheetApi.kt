@@ -44,5 +44,5 @@ data class WorksheetReport(
 )
 
 class WorksheetApi(private val client: HttpClient = ApiClient.client) {
-    suspend fun getWorksheet(): HttpResponse = client.get("/api/v1/reports/worksheet")
+    suspend fun getWorksheet(): HttpResponse = client.get("/reports/worksheet")
 }

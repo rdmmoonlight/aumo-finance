@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ApiClient, NetworkError } from '../network/apiClient';
 import type { Transport, TransportRequest, TransportResult } from '../network/apiClient';
+import { ApiClient, NetworkError } from '../network/apiClient';
 import { Session } from '../network/session';
-import { SessionStore } from '../network/sessionStore';
 import type { KeyValueStore } from '../network/sessionStore';
+import { SessionStore } from '../network/sessionStore';
 import { AuthApi } from './authApi';
 import { AuthService } from './authService';
 
@@ -56,7 +56,7 @@ describe('AuthService.signIn', () => {
     expect(result).toEqual({ ok: true, fullName: 'Ghofur' });
     expect(session.token).toBe('jwt');
     expect(session.userId).toBe('u1');
-    expect(calls[0]?.url).toBe('https://api.test/api/v1/auth/login');
+    expect(calls[0]?.url).toBe('https://api.test/auth/login');
     expect(calls[0]?.method).toBe('POST');
     expect(calls[0]?.data).toEqual({
       email: 'a@b.c',
@@ -148,7 +148,7 @@ describe('AuthService.signOut', () => {
     await service.signIn({ ...creds, keepSignedIn: true });
     await service.signOut();
 
-    const logoutCall = calls.find((c) => c.url.endsWith('/api/v1/auth/logout'));
+    const logoutCall = calls.find((c) => c.url.endsWith('/auth/logout'));
     expect(logoutCall?.headers.Authorization).toBe('Bearer jwt');
     expect(session.isLoggedIn()).toBe(false);
     expect(await sessionStore.hasSavedSession()).toBe(false);

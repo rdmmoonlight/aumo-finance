@@ -1,7 +1,7 @@
 /** Alamat backend bawaan (sama dengan BASE_URL di ApiClient.kt). */
 export const DEFAULT_API_URL = 'https://aumonext-api.onrender.com';
 
-/** Hanya scheme + host. Path (mis. "/api/v1") ditulis di setiap endpoint. */
+/** Hanya scheme + host. Path (mis. "") ditulis di setiap endpoint. */
 const fromEnv = import.meta.env.VITE_API_URL?.trim();
 export const API_URL: string = fromEnv !== undefined && fromEnv !== '' ? fromEnv : DEFAULT_API_URL;
 

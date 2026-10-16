@@ -10,7 +10,7 @@ namespace AumoBackend.Controllers
     /// </summary>
     [ApiController]
     [AllowAnonymous]
-    [Route("/api/v1/avatars")]
+    [Route("/avatars")]
     public class AvatarsController : ControllerBase
     {
         private readonly IAvatarStorage _avatarStorage;

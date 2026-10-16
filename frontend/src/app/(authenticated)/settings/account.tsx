@@ -222,7 +222,7 @@ export default function AccountSettings() {
               Status Akun
             </CardTitle>
             <CardDescription className="text-caption">
-              Status kredensial pengguna aktif dari `/api/v1/auth/me`
+              Status kredensial pengguna aktif dari `/auth/me`
             </CardDescription>
           </div>
         </CardHeader>

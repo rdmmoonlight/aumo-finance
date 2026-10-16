@@ -8,7 +8,7 @@ namespace AumoBackend.Services.Storage
 
     /// <summary>
     /// Penyimpanan avatar pada Neon Bucket (S3-compatible).
-    /// Bucket bersifat privat; avatar disajikan lewat endpoint GET /api/v1/avatars/{fileName}.
+    /// Bucket bersifat privat; avatar disajikan lewat endpoint GET /avatars/{fileName}.
     /// </summary>
     public interface IAvatarStorage
     {

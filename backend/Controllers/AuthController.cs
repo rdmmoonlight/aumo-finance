@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.RateLimiting;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/auth")]
+[Route("/auth")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 [EnableRateLimiting("auth-strict")]
 public class AuthController : ControllerBase

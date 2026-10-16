@@ -22,7 +22,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/journal-entry")]
+[Route("/journal-entry")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class JournalEntryController : ControllerBase
@@ -45,7 +45,7 @@ public class JournalEntryController : ControllerBase
     }
 
     // ==========================================
-    // 1. GET: /api/v1/journal-entry/{id}
+    // 1. GET: /journal-entry/{id}
     // ==========================================
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
@@ -98,7 +98,7 @@ public class JournalEntryController : ControllerBase
     }
 
     // ==========================================
-    // 2. POST: /api/v1/journal-entry/create
+    // 2. POST: /journal-entry/create
     // ==========================================
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateJournalEntryRequest request)
@@ -161,7 +161,7 @@ public class JournalEntryController : ControllerBase
     }
 
     // ==========================================
-    // 3. PUT: /api/v1/journal-entry/edit/{id}
+    // 3. PUT: /journal-entry/edit/{id}
     // ==========================================
     [HttpPut("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UpdateJournalEntryRequest request)
@@ -234,7 +234,7 @@ public class JournalEntryController : ControllerBase
     }
 
     // ==========================================
-    // 4. DELETE: /api/v1/journal-entry/delete/{id}
+    // 4. DELETE: /journal-entry/delete/{id}
     // ==========================================
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
@@ -275,7 +275,7 @@ public class JournalEntryController : ControllerBase
     }
 
     // ==========================================
-    // 5. GET: /api/v1/journal-entry/search-descriptions
+    // 5. GET: /journal-entry/search-descriptions
     // ==========================================
     [HttpGet("search-descriptions")]
     public async Task<IActionResult> SearchDescriptions([FromQuery] string q)
@@ -306,7 +306,7 @@ public class JournalEntryController : ControllerBase
     }
 
     // ==========================================
-    // 6. GET: /api/v1/journal-entry/next-transaction-number
+    // 6. GET: /journal-entry/next-transaction-number
     // ==========================================
     [HttpGet("next-transaction-number")]
     public async Task<IActionResult> GetNextTransactionNumber([FromQuery] string journalType = "General", [FromQuery] DateTime? entryDate = null)

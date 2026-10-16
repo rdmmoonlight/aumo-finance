@@ -50,7 +50,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export interface ApiClientOptions {
-  /** Hanya scheme + host. Path (mis. "/api/v1") ditulis di setiap endpoint. */
+  /** Hanya scheme + host. Path (mis. "") ditulis di setiap endpoint. */
   baseUrl: string;
   timeoutMs: number;
   transport: Transport;
@@ -88,7 +88,7 @@ export class ApiClient {
     path: string,
     body?: unknown
   ): Promise<ApiResponse<T>> {
-    // Path wajib absolut ("/api/v1/..."), konsisten dengan aturan ApiClient.kt.
+    // Path wajib absolut ("/..."), konsisten dengan aturan ApiClient.kt.
     if (!path.startsWith('/')) throw new Error(`Path endpoint harus diawali "/": ${path}`);
 
     const { baseUrl, timeoutMs, transport, getToken, logger } = this.options;
