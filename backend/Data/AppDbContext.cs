@@ -1,11 +1,15 @@
-﻿using AumoBackend.Models;
+﻿// <copyright file="AppDbContext.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Data;
+
+using AumoBackend.Models;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 // Gunakan type alias eksplisit untuk menyelesaikan ambiguitas
 using DataProtectionKeyEntity = Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey;
-
-namespace AumoBackend.Data;
 
 public partial class AppDbContext : DbContext, IDataProtectionKeyContext
 {
@@ -33,6 +37,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
     public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; } = null!;
 
     // Menggunakan type alias agar tidak bentrok dengan AumoBackend.Models.DataProtectionKey
+    /// <inheritdoc/>
     public virtual DbSet<DataProtectionKeyEntity> DataProtectionKeys { get; set; } = null!;
 
     public virtual DbSet<GeneralJournal> GeneralJournals { get; set; } = null!;
@@ -57,6 +62,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
 
     public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
 
+    /// <inheritdoc/>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -64,6 +70,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
         }
     }
 
+    /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AspNetRole>(entity =>
@@ -321,7 +328,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
         });
         modelBuilder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 
-        OnModelCreatingPartial(modelBuilder);
+        this.OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

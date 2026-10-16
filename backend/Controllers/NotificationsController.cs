@@ -1,17 +1,21 @@
+// <copyright file="NotificationsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
+using System.Security.Claims;
 using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
+using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.Identity;
+using AumoBackend.Services;
 using AumoBackend.Services.Auth;
-using AumoBackend.Data;
+using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using AumoBackend.DTOs;
-using AumoBackend.Services;
-
-namespace AumoBackend.Controllers;
 
 [Authorize]
 [ApiController]
@@ -19,17 +23,17 @@ namespace AumoBackend.Controllers;
 
 public class NotificationsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext context;
 
     public NotificationsController(AppDbContext context)
     {
-        _context = context;
+        this.context = context;
     }
 
     // Ubah return type method helper dari string ke Guid
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
         return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
     }
 
@@ -37,10 +41,13 @@ public class NotificationsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMyNotifications([FromQuery] int limit = 20)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized();
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized();
+        }
 
-        var notifications = await _context.Notifications
+        var notifications = await this.context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Take(limit)
@@ -52,42 +59,51 @@ public class NotificationsController : ControllerBase
                 Type = n.Type,
                 IsRead = n.IsRead,
                 TargetUrl = n.TargetUrl,
-                CreatedAt = n.CreatedAt.ToString("o")
+                CreatedAt = n.CreatedAt.ToString("o"),
             })
             .ToListAsync();
 
-        return Ok(notifications);
+        return this.Ok(notifications);
     }
 
     // PUT: api/v1/notifications/{id}/read
     [HttpPut("{id:guid}/read")]
     public async Task<IActionResult> MarkAsRead(Guid id)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized();
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized();
+        }
 
-        var notification = await _context.Notifications
+        var notification = await this.context.Notifications
             .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
 
-        if (notification == null) return NotFound();
+        if (notification == null)
+        {
+            return this.NotFound();
+        }
 
         notification.IsRead = true;
-        await _context.SaveChangesAsync();
+        await this.context.SaveChangesAsync();
 
-        return NoContent();
+        return this.NoContent();
     }
 
     // PUT: api/v1/notifications/read-all
     [HttpPut("read-all")]
     public async Task<IActionResult> MarkAllAsRead()
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized();
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized();
+        }
 
-        await _context.Notifications
+        await this.context.Notifications
             .Where(n => n.UserId == userId && !n.IsRead)
             .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
 
-        return NoContent();
+        return this.NoContent();
     }
 }

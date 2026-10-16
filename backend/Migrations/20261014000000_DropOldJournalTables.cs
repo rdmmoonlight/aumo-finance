@@ -1,9 +1,13 @@
-using Microsoft.EntityFrameworkCore.Migrations;
+// <copyright file="20261014000000_DropOldJournalTables.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 #nullable disable
 
 namespace AumoBackend.Migrations
 {
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     /// <inheritdoc />
     public partial class DropOldJournalTables : Migration
     {

@@ -1,80 +1,65 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
-using System.Collections.Generic;
+// <copyright file="AuthService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Services.Auth;
+
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
+using AumoBackend.Services.Settings;
 using AumoBackend.ViewModels;
 using FluentValidation;
 using FluentValidation.Results;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace AumoBackend.Services.Auth;
-
-public class AuthService : IAuthService
+public class AuthService(
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
+    IGuardianService guardianService,
+    IConfiguration configuration,
+    IValidator<LoginRequest> loginValidator,
+    IValidator<GoogleLoginRequest> googleLoginValidator) : IAuthService
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly IGuardianService _guardianService;
-    private readonly IConfiguration _configuration;
-    private readonly IValidator<LoginRequest> _loginValidator;
-    private readonly IValidator<GoogleLoginRequest> _googleLoginValidator;
-
-    public AuthService(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IGuardianService guardianService,
-        IConfiguration configuration,
-        IValidator<LoginRequest> loginValidator,
-        IValidator<GoogleLoginRequest> googleLoginValidator)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        _guardianService = guardianService;
-        _configuration = configuration;
-        _loginValidator = loginValidator;
-        _googleLoginValidator = googleLoginValidator;
-    }
-
+    /// <inheritdoc/>
     public async Task<ValidationResult> ValidateLoginAsync(LoginRequest request)
     {
-        return await _loginValidator.ValidateAsync(request);
+        return await loginValidator.ValidateAsync(request);
     }
 
+    /// <inheritdoc/>
     public async Task<ValidationResult> ValidateGoogleLoginAsync(GoogleLoginRequest request)
     {
-        return await _googleLoginValidator.ValidateAsync(request);
+        return await googleLoginValidator.ValidateAsync(request);
     }
 
     private async Task<AuthResponseDto> BuildLockedOutResponseAsync(ApplicationUser user)
     {
-        var lockoutEnd = await _userManager.GetLockoutEndDateAsync(user);
+        var lockoutEnd = await userManager.GetLockoutEndDateAsync(user);
         return new AuthResponseDto
         {
             Success = false,
             IsLockedOut = true,
             Message = "Account is locked due to multiple failed login attempts.",
-            LockoutEnd = lockoutEnd?.UtcDateTime
+            LockoutEnd = lockoutEnd?.UtcDateTime,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<AuthResponseDto?> ProcessLoginAsync(LoginRequest request, string ipAddress, string headerUserAgent)
     {
-        var user = await _userManager.FindByEmailAsync(request.Email)
-                   ?? await _userManager.FindByNameAsync(request.Email);
+        var user = await userManager.FindByEmailAsync(request.Email)
+                   ?? await userManager.FindByNameAsync(request.Email);
 
-        if (user == null) return null;
+        if (user == null)
+        {
+            return null;
+        }
 
         var safeUserAgent = !string.IsNullOrWhiteSpace(request.UserAgent)
             ? request.UserAgent
@@ -84,26 +69,26 @@ public class AuthService : IAuthService
         string deviceCategory = isMobile ? "Mobile" : "Web";
         string osValue = !string.IsNullOrWhiteSpace(request.OperatingSystem) ? request.OperatingSystem : deviceCategory;
 
-        if (await _userManager.IsLockedOutAsync(user))
+        if (await userManager.IsLockedOutAsync(user))
         {
-            return await BuildLockedOutResponseAsync(user);
+            return await this.BuildLockedOutResponseAsync(user);
         }
 
-        var signInResult = await _signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
+        var signInResult = await signInManager.CheckPasswordSignInAsync(user, request.Password, lockoutOnFailure: true);
 
         if (signInResult.IsLockedOut)
         {
-            await _guardianService.CreateLoginActivityAsync(
+            await guardianService.CreateLoginActivityAsync(
                 user.Id, "Locked Out Login Attempt", deviceCategory,
                 isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", false,
                 osValue, safeUserAgent);
 
-            return await BuildLockedOutResponseAsync(user);
+            return await this.BuildLockedOutResponseAsync(user);
         }
 
         if (!signInResult.Succeeded)
         {
-            await _guardianService.CreateLoginActivityAsync(
+            await guardianService.CreateLoginActivityAsync(
                 user.Id, "Failed Login", deviceCategory,
                 isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", false,
                 osValue, safeUserAgent);
@@ -115,16 +100,16 @@ public class AuthService : IAuthService
 
         if (!isMobile)
         {
-            await _signInManager.SignInAsync(user, isPersistent: request.RememberMe);
+            await signInManager.SignInAsync(user, isPersistent: request.RememberMe);
         }
         else
         {
-            jwtToken = await GenerateJwtTokenAsync(user);
+            jwtToken = await this.GenerateJwtTokenAsync(user);
         }
 
-        await _userManager.ResetAccessFailedCountAsync(user);
+        await userManager.ResetAccessFailedCountAsync(user);
 
-        await _guardianService.CreateSessionAsync(
+        await guardianService.CreateSessionAsync(
             user.Id,
             deviceName: deviceCategory,
             osValue,
@@ -132,14 +117,12 @@ public class AuthService : IAuthService
             ipAddress,
             "ID",
             isMobile ? "JWT_BEARER" : "COOKIE_SESSION",
-            safeUserAgent
-        );
+            safeUserAgent);
 
-        await _guardianService.CreateLoginActivityAsync(
+        await guardianService.CreateLoginActivityAsync(
             user.Id, "Interactive Login", deviceCategory,
             isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", true,
-            osValue, safeUserAgent
-        );
+            osValue, safeUserAgent);
 
         return new AuthResponseDto
         {
@@ -148,13 +131,17 @@ public class AuthService : IAuthService
             UserId = user.Id.ToString(),
             FullName = user.FullName ?? user.UserName ?? "User",
             AvatarUrl = user.AvatarUrl,
-            Token = jwtToken
+            Token = jwtToken,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<AuthResponseDto?> ProcessGoogleLoginAsync(GoogleLoginRequest request)
     {
-        if (string.IsNullOrWhiteSpace(request.IdToken)) return null;
+        if (string.IsNullOrWhiteSpace(request.IdToken))
+        {
+            return null;
+        }
 
         GoogleJsonWebSignature.Payload payload;
         try
@@ -167,11 +154,11 @@ public class AuthService : IAuthService
         }
 
         var info = new UserLoginInfo("Google", payload.Subject, "Google");
-        var user = await _userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
+        var user = await userManager.FindByLoginAsync(info.LoginProvider, info.ProviderKey);
 
         if (user == null)
         {
-            user = await _userManager.FindByEmailAsync(payload.Email);
+            user = await userManager.FindByEmailAsync(payload.Email);
 
             if (user == null)
             {
@@ -182,32 +169,35 @@ public class AuthService : IAuthService
                     Email = payload.Email,
                     EmailConfirmed = true,
                     FullName = payload.Name,
-                    AvatarUrl = payload.Picture
+                    AvatarUrl = payload.Picture,
                 };
 
-                var createResult = await _userManager.CreateAsync(user);
-                if (!createResult.Succeeded) return null;
+                var createResult = await userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
+                {
+                    return null;
+                }
 
-                await _userManager.AddToRoleAsync(user, "User");
+                await userManager.AddToRoleAsync(user, "User");
             }
 
-            await _userManager.AddLoginAsync(user, info);
+            await userManager.AddLoginAsync(user, info);
         }
 
         if (!request.IsMobileClient)
         {
-            await _signInManager.SignInAsync(user, isPersistent: true);
+            await signInManager.SignInAsync(user, isPersistent: true);
             return new AuthResponseDto
             {
                 Success = true,
                 Message = "Google login successful (Cookie session established).",
                 UserId = user.Id.ToString(),
                 FullName = user.FullName ?? user.UserName ?? "User",
-                AvatarUrl = user.AvatarUrl
+                AvatarUrl = user.AvatarUrl,
             };
         }
 
-        var token = await GenerateJwtTokenAsync(user);
+        var token = await this.GenerateJwtTokenAsync(user);
         return new AuthResponseDto
         {
             Success = true,
@@ -215,25 +205,33 @@ public class AuthService : IAuthService
             UserId = user.Id.ToString(),
             FullName = user.FullName ?? user.UserName ?? "User",
             AvatarUrl = user.AvatarUrl,
-            Token = token
+            Token = token,
         };
     }
 
+    /// <inheritdoc/>
     public AuthenticationProperties ConfigureGoogleRedirectProperties(string redirectUrl)
     {
-        return _signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
+        return signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
     }
 
+    /// <inheritdoc/>
     public async Task<string?> ProcessGoogleCallbackAsync(ClaimsPrincipal principal, string loginProvider, string providerKey)
     {
-        var result = await _signInManager.ExternalLoginSignInAsync(loginProvider, providerKey, isPersistent: true, bypassTwoFactor: true);
+        var result = await signInManager.ExternalLoginSignInAsync(loginProvider, providerKey, isPersistent: true, bypassTwoFactor: true);
 
-        if (result.Succeeded) return null;
+        if (result.Succeeded)
+        {
+            return null;
+        }
 
         var email = principal.FindFirstValue(ClaimTypes.Email);
-        if (string.IsNullOrEmpty(email)) return "Email claim not received from Google.";
+        if (string.IsNullOrEmpty(email))
+        {
+            return "Email claim not received from Google.";
+        }
 
-        var user = await _userManager.FindByEmailAsync(email);
+        var user = await userManager.FindByEmailAsync(email);
         if (user == null)
         {
             user = new ApplicationUser
@@ -243,24 +241,28 @@ public class AuthService : IAuthService
                 Email = email,
                 EmailConfirmed = true,
                 FullName = principal.FindFirstValue(ClaimTypes.Name) ?? email,
-                AvatarUrl = principal.FindFirstValue("picture")
+                AvatarUrl = principal.FindFirstValue("picture"),
             };
 
-            var createResult = await _userManager.CreateAsync(user);
-            if (!createResult.Succeeded) return "Failed to create user from Google callback.";
+            var createResult = await userManager.CreateAsync(user);
+            if (!createResult.Succeeded)
+            {
+                return "Failed to create user from Google callback.";
+            }
 
-            await _userManager.AddToRoleAsync(user, "User");
+            await userManager.AddToRoleAsync(user, "User");
         }
 
-        await _userManager.AddLoginAsync(user, new UserLoginInfo(loginProvider, providerKey, loginProvider));
-        await _signInManager.SignInAsync(user, isPersistent: true);
+        await userManager.AddLoginAsync(user, new UserLoginInfo(loginProvider, providerKey, loginProvider));
+        await signInManager.SignInAsync(user, isPersistent: true);
 
         return null;
     }
 
+    /// <inheritdoc/>
     public async Task<UserProfileViewModel?> GetUserProfileAsync(ClaimsPrincipal userPrincipal)
     {
-        var user = await _userManager.GetUserAsync(userPrincipal);
+        var user = await userManager.GetUserAsync(userPrincipal);
 
         if (user == null)
         {
@@ -269,14 +271,17 @@ public class AuthService : IAuthService
 
             if (!string.IsNullOrEmpty(userId))
             {
-                user = await _userManager.FindByIdAsync(userId);
+                user = await userManager.FindByIdAsync(userId);
             }
         }
 
-        if (user == null) return null;
+        if (user == null)
+        {
+            return null;
+        }
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var userClaims = await _userManager.GetClaimsAsync(user);
+        var roles = await userManager.GetRolesAsync(user);
+        var userClaims = await userManager.GetClaimsAsync(user);
 
         return new UserProfileViewModel
         {
@@ -289,21 +294,22 @@ public class AuthService : IAuthService
             AvatarUrl = user.AvatarUrl,
             Bio = user.Bio,
             Roles = roles,
-            CustomClaims = userClaims
+            CustomClaims = userClaims,
         };
     }
 
+    /// <inheritdoc/>
     public async Task LogoutAsync()
     {
-        await _signInManager.SignOutAsync();
+        await signInManager.SignOutAsync();
     }
 
     private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
-        var jwtSigningKey = _configuration["Jwt:SigningKey"]
-     ?? throw new InvalidOperationException("Jwt:SigningKey is missing.");
+        var jwtSigningKey = configuration["Jwt:SigningKey"]
+            ?? throw new InvalidOperationException("Jwt:SigningKey is missing.");
 
-        var jwtIssuer = _configuration["Jwt:Issuer"] ?? "AumoFinanceApp";
+        var jwtIssuer = configuration["Jwt:Issuer"] ?? "AumoFinanceApp";
 
         var claims = new List<Claim>
         {
@@ -311,16 +317,16 @@ public class AuthService : IAuthService
             new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(ClaimTypes.Name, user.FullName ?? user.UserName ?? string.Empty),
             new(ClaimTypes.Email, user.Email ?? string.Empty),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
         };
 
-        var roles = await _userManager.GetRolesAsync(user);
+        var roles = await userManager.GetRolesAsync(user);
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
         }
 
-        var userClaims = await _userManager.GetClaimsAsync(user);
+        var userClaims = await userManager.GetClaimsAsync(user);
         claims.AddRange(userClaims);
 
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey));
@@ -331,8 +337,7 @@ public class AuthService : IAuthService
             audience: jwtIssuer,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(30),
-            signingCredentials: credentials
-        );
+            signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }

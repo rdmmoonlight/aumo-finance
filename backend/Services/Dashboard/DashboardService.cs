@@ -1,31 +1,22 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using AumoBackend.Data;
-using AumoBackend.DTOs;
-using AumoBackend.Models;
-using AumoBackend.ViewModels;
+// <copyright file="DashboardService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Dashboard;
 
+using AumoBackend.Data;
+using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using Microsoft.EntityFrameworkCore;
+
 public class DashboardService : IDashboardService
 {
-    private readonly AppDbContext _db;
+    private readonly AppDbContext? db;
 
-    public DashboardService(AppDbContext db)
-    {
-        _db = db;
-    }
-
+    /// <inheritdoc/>
     public async Task<DashboardDataDto> GetDashboardDataAsync(Guid userId, string period)
     {
-        var activePeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var activePeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
 
         int year = activePeriod?.StartDate.Year ?? DateTime.UtcNow.Year;
 
@@ -41,13 +32,13 @@ public class DashboardService : IDashboardService
         string displayPeriodName = isAnnual ? $"Annual {year}" : activePeriod?.PeriodName ?? "Current Period";
 
         // Scope per tab
-        var monthlyLines = await _db.GeneralJournals
+        var monthlyLines = await this.db.GeneralJournals
             .AsNoTracking()
             .Where(l => l.UserId == userId && l.EntryDate >= monthlyStart && l.EntryDate <= monthlyEnd)
             .Select(l => new { l.AccountId, l.Debit, l.Credit, l.EntryDate })
             .ToListAsync();
 
-        var annualLines = await _db.GeneralJournals
+        var annualLines = await this.db.GeneralJournals
             .AsNoTracking()
             .Where(l => l.UserId == userId && l.EntryDate >= annualStart && l.EntryDate <= annualEnd)
             .Select(l => new { l.AccountId, l.Debit, l.Credit, l.EntryDate })
@@ -56,14 +47,14 @@ public class DashboardService : IDashboardService
         var periodLines = isAnnual ? annualLines : monthlyLines;
 
         // Kumulatif
-        var cumulativeLines = await _db.GeneralJournals
+        var cumulativeLines = await this.db.GeneralJournals
             .AsNoTracking()
             .Where(l => l.UserId == userId && l.EntryDate <= reqEnd)
             .Select(l => new { l.AccountId, l.Debit, l.Credit })
             .ToListAsync();
 
         // 1. Kas & Bank
-        var cashBankAccounts = await _db.ChartOfAccounts
+        var cashBankAccounts = await this.db.ChartOfAccounts
             .Where(a => a.UserId == userId && a.IsActive && a.Role == "CashAndEquivalents")
             .OrderBy(a => a.ReferenceNumber)
             .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName })
@@ -104,11 +95,11 @@ public class DashboardService : IDashboardService
 
         // 2. Pendapatan & Beban
         var incomeTypes = new[] { "OperatingIncome", "Income", "Revenue" };
-        var incomeIds = await _db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && incomeTypes.Contains(a.Type)).Select(a => a.Id).ToListAsync();
+        var incomeIds = await this.db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && incomeTypes.Contains(a.Type)).Select(a => a.Id).ToListAsync();
         var totalIncome = periodLines.Where(l => incomeIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
 
         var expenseTypes = new[] { "OperatingExpenses", "Expense", "Expenses" };
-        var expenseAccountsMeta = await _db.ChartOfAccounts
+        var expenseAccountsMeta = await this.db.ChartOfAccounts
             .Where(a => a.UserId == userId && a.IsActive && expenseTypes.Contains(a.Type))
             .OrderBy(a => a.ReferenceNumber)
             .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName })
@@ -120,7 +111,7 @@ public class DashboardService : IDashboardService
                 AccountId = a.Id.ToString(),
                 ReferenceNumber = a.ReferenceNumber.ToString(),
                 AccountName = a.AccountName,
-                Balance = periodLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit)
+                Balance = periodLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit),
             })
             .Where(a => a.Balance != 0)
             .ToList();
@@ -130,14 +121,14 @@ public class DashboardService : IDashboardService
 
         // 3. Liabilities & Equity
         var liabilityTypes = new[] { "Liabilities", "Liability" };
-        var liabilityIds = await _db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && liabilityTypes.Contains(a.Type)).Select(a => a.Id).ToListAsync();
+        var liabilityIds = await this.db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && liabilityTypes.Contains(a.Type)).Select(a => a.Id).ToListAsync();
 
         var totalLiabilitiesMonthly = monthlyLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
         var totalLiabilitiesAnnual = annualLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
         var totalLiabilities = isAnnual ? totalLiabilitiesAnnual : totalLiabilitiesMonthly;
         var totalLiabilitiesCumulative = cumulativeLines.Where(l => liabilityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
 
-        var equityIds = await _db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && a.Type == "Equity").Select(a => a.Id).ToListAsync();
+        var equityIds = await this.db.ChartOfAccounts.Where(a => a.UserId == userId && a.IsActive && a.Type == "Equity").Select(a => a.Id).ToListAsync();
         var totalEquity = cumulativeLines.Where(l => equityIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
 
         // 4. Chart Trend Data
@@ -152,7 +143,7 @@ public class DashboardService : IDashboardService
                     Label = new DateTime(2000, m, 1).ToString("MMM"),
                     Revenue = rev,
                     Expense = exp,
-                    Net = rev - exp
+                    Net = rev - exp,
                 };
             }).ToList()
             : periodLines.GroupBy(l => l.EntryDate.Date).OrderBy(g => g.Key).Select(g =>
@@ -164,7 +155,7 @@ public class DashboardService : IDashboardService
                     Label = g.Key.ToString("dd MMM"),
                     Revenue = rev,
                     Expense = exp,
-                    Net = rev - exp
+                    Net = rev - exp,
                 };
             }).ToList();
 
@@ -210,7 +201,7 @@ public class DashboardService : IDashboardService
 
             ExpenseAccountsList = expenseBreakdown,
             ChartTrend = trendData,
-            RecentEntries = new List<AumoBackend.DTOs.RecentActivityDto>()
+            RecentEntries = new List<AumoBackend.DTOs.RecentActivityDto>(),
         };
     }
 }

@@ -1,19 +1,22 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Data;
+// <copyright file="WorksheetService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Services;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
-using Microsoft.EntityFrameworkCore;
-
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Helpers;
 using AumoBackend.Models;
-
-namespace AumoBackend.Services;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
+using Microsoft.EntityFrameworkCore;
 
 public interface IWorksheetService
 {
@@ -26,6 +29,7 @@ public interface IWorksheetService
 
 public class WorksheetService : IWorksheetService
 {
+    /// <inheritdoc/>
     public async Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
         AppDbContext db,
         Guid userId,
@@ -48,7 +52,10 @@ public class WorksheetService : IWorksheetService
         foreach (var accountId in allAccountIds)
         {
             var account = accounts.FirstOrDefault(a => a.Id == accountId);
-            if (account == null) continue;
+            if (account == null)
+            {
+                continue;
+            }
 
             var u = unadjusted.FirstOrDefault(r => r.AccountId == accountId);
             var a = adjusted.FirstOrDefault(r => r.AccountId == accountId);
@@ -73,7 +80,7 @@ public class WorksheetService : IWorksheetService
                 AdjustmentDebit = adjNet > 0 ? adjNet : 0m,
                 AdjustmentCredit = adjNet < 0 ? -adjNet : 0m,
                 AdjustedDebit = aDebit,
-                AdjustedCredit = aCredit
+                AdjustedCredit = aCredit,
             };
 
             var isTemporary = AccountClassificationHelper.IsTemporary(account.Type);

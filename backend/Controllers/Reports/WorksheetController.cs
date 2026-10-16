@@ -1,20 +1,24 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using AumoBackend.Data;
+// <copyright file="WorksheetController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers.Reports;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
 using AumoBackend.Services;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
 [Route("/reports/worksheet")]
@@ -22,18 +26,18 @@ namespace AumoBackend.Controllers.Reports;
 
 public class WorksheetController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IWorksheetService _worksheetService;
-    private readonly ITrialBalanceService _trialBalanceService;
+    private readonly AppDbContext db;
+    private readonly IWorksheetService worksheetService;
+    private readonly ITrialBalanceService trialBalanceService;
 
     public WorksheetController(
         AppDbContext db,
         IWorksheetService worksheetService,
         ITrialBalanceService trialBalanceService)
     {
-        _db = db;
-        _worksheetService = worksheetService;
-        _trialBalanceService = trialBalanceService;
+        this.db = db;
+        this.worksheetService = worksheetService;
+        this.trialBalanceService = trialBalanceService;
     }
 
     // ==========================================
@@ -42,25 +46,27 @@ public class WorksheetController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetWorksheet()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
         if (period == null)
         {
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
                 message = "No accounting period selected.",
                 selectedPeriodName = (string?)null,
                 rows = Array.Empty<object>(),
-                totals = new { }
+                totals = new { },
             });
         }
 
-        var worksheetRows = await _worksheetService.BuildWorksheetRowsAsync(_db, userId, period, _trialBalanceService);
+        var worksheetRows = await this.worksheetService.BuildWorksheetRowsAsync(this.db, userId, period, this.trialBalanceService);
 
         decimal totalUnadjustedDebit = worksheetRows.Sum(r => r.UnadjustedDebit);
         decimal totalUnadjustedCredit = worksheetRows.Sum(r => r.UnadjustedCredit);
@@ -75,7 +81,7 @@ public class WorksheetController : ControllerBase
 
         decimal netIncome = totalIncomeStatementCredit - totalIncomeStatementDebit;
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             hasPeriodSelected = true,
@@ -96,7 +102,7 @@ public class WorksheetController : ControllerBase
                 isDebit = r.IncomeStatementDebit,
                 isCredit = r.IncomeStatementCredit,
                 bsDebit = r.FinancialPositionDebit,
-                bsCredit = r.FinancialPositionCredit
+                bsCredit = r.FinancialPositionCredit,
             }),
             totals = new
             {
@@ -111,14 +117,14 @@ public class WorksheetController : ControllerBase
                 bsDebit = totalFinancialPositionDebit,
                 bsCredit = totalFinancialPositionCredit,
                 netIncome = netIncome
-            }
+            },
         });
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("sub");
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? this.User.FindFirstValue("sub");
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }

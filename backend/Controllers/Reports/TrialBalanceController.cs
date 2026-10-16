@@ -1,9 +1,13 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using AumoBackend.DTOs.Reports;
+// <copyright file="TrialBalanceController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Controllers.Reports
 {
+    using AumoBackend.DTOs.Reports;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
     [ApiController]
     [Route("/[controller]")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]

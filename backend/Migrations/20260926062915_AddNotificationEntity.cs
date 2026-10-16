@@ -1,15 +1,19 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+// <copyright file="20260926062915_AddNotificationEntity.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 #nullable disable
 
 namespace AumoBackend.Migrations
 {
+    using System;
+    using AumoBackend.Controllers.Reports;
+    using AumoBackend.Helpers;
+    using AumoBackend.Models;
+    using AumoBackend.Services.Auth;
+    using AumoBackend.Services.Identity;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     /// <inheritdoc />
     public partial class AddNotificationEntity : Migration
     {
@@ -27,7 +31,7 @@ namespace AumoBackend.Migrations
                     Type = table.Column<string>(type: "text", nullable: false),
                     IsRead = table.Column<bool>(type: "boolean", nullable: false),
                     TargetUrl = table.Column<string>(type: "text", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                 },
                 constraints: table =>
                 {

@@ -1,16 +1,20 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using System;
-using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+// <copyright file="20260731050000_AddMobileTables.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 #nullable disable
 
 namespace AumoBackend.Migrations
 {
+    using System;
+    using AumoBackend.Controllers.Reports;
+    using AumoBackend.Helpers;
+    using AumoBackend.Models;
+    using AumoBackend.Services.Auth;
+    using AumoBackend.Services.Identity;
+    using Microsoft.EntityFrameworkCore.Migrations;
+    using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+
     /// <inheritdoc />
     public partial class AddMobileTables : Migration
     {
@@ -32,7 +36,7 @@ namespace AumoBackend.Migrations
                     SubmittedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     VerifiedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     RejectedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    VerifiedJournalEntryId = table.Column<int>(type: "integer", nullable: true)
+                    VerifiedJournalEntryId = table.Column<int>(type: "integer", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -56,7 +60,7 @@ namespace AumoBackend.Migrations
                     LineDescription = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: true),
                     Debit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Credit = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    LineOrder = table.Column<int>(type: "integer", nullable: false)
+                    LineOrder = table.Column<int>(type: "integer", nullable: false),
                 },
                 constraints: table =>
                 {

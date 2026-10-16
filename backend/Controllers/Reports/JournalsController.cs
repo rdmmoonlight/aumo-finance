@@ -1,22 +1,26 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
-using AumoBackend.Data;
+// <copyright file="JournalsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers.Reports;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
 using AumoBackend.Services;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
 [Route("/reports/journals")]
@@ -24,15 +28,15 @@ namespace AumoBackend.Controllers.Reports;
 
 public class JournalController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IJournalService _journalService;
-    private readonly IFinancialReportService _reportService;
+    private readonly AppDbContext db;
+    private readonly IJournalService journalService;
+    private readonly IFinancialReportService reportService;
 
     public JournalController(AppDbContext db, IJournalService journalService, IFinancialReportService reportService)
     {
-        _db = db;
-        _journalService = journalService;
-        _reportService = reportService;
+        this.db = db;
+        this.journalService = journalService;
+        this.reportService = reportService;
     }
 
     // ==========================================
@@ -42,31 +46,33 @@ public class JournalController : ControllerBase
     [HttpGet("general")]
     public async Task<IActionResult> GetGeneralJournal()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
 
         // FIX 1: Ubah dari NotFound(404) menjadi Ok(200) agar RTK Query Frontend
         // bisa membaca payload { selectedPeriodName = null } dengan wajar tanpa melempar isError.
         if (selectedPeriod == null)
         {
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
                 message = "No accounting period selected.",
                 selectedPeriodName = (string?)null,
                 isPeriodClosed = false,
-                entries = Array.Empty<object>()
+                entries = Array.Empty<object>(),
             });
         }
 
         var startUtc = selectedPeriod.StartDate.Date;
         var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-        var rows = await _db.GeneralJournals
+        var rows = await this.db.GeneralJournals
             .AsNoTracking()
             .Include(g => g.Account)
             .Where(g => g.UserId == userId
@@ -100,17 +106,17 @@ public class JournalController : ControllerBase
                     l.Debit,
                     l.Credit,
                     l.LineOrder
-                }).ToList()
+                }).ToList(),
             })
             .ToList();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = selectedPeriod.PeriodName,
             isPeriodClosed = selectedPeriod.IsClosed,
-            entries = entries
+            entries = entries,
         });
     }
 
@@ -121,28 +127,30 @@ public class JournalController : ControllerBase
     [HttpGet("adjusting")]
     public async Task<IActionResult> GetAdjustingJournal()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
         if (selectedPeriod == null)
         {
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
                 message = "No accounting period selected.",
                 selectedPeriodName = (string?)null,
                 isPeriodClosed = false,
-                entries = Array.Empty<object>()
+                entries = Array.Empty<object>(),
             });
         }
 
         var startUtc = selectedPeriod.StartDate.Date;
         var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-        var rows = await _db.GeneralJournals
+        var rows = await this.db.GeneralJournals
             .AsNoTracking()
             .Include(g => g.Account)
             .Where(g => g.UserId == userId
@@ -176,17 +184,17 @@ public class JournalController : ControllerBase
                     l.Debit,
                     l.Credit,
                     l.LineOrder
-                }).ToList()
+                }).ToList(),
             })
             .ToList();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = selectedPeriod.PeriodName,
             isPeriodClosed = selectedPeriod.IsClosed,
-            entries = entries
+            entries = entries,
         });
     }
 
@@ -194,30 +202,32 @@ public class JournalController : ControllerBase
     [HttpDelete("adjusting/{id:int}")]
     public async Task<IActionResult> DeleteAdjustingJournal(int id)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
         // id = JournalEntryId (id kelompok jurnal)
-        var rows = await _db.GeneralJournals
+        var rows = await this.db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId && g.JournalType == "Adjusting")
             .ToListAsync();
 
         if (rows.Count == 0)
         {
-            return NotFound(new { success = false, message = "Adjusting journal entry not found." });
+            return this.NotFound(new { success = false, message = "Adjusting journal entry not found." });
         }
 
-        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
         if (selectedPeriod != null && selectedPeriod.IsClosed)
         {
-            return BadRequest(new { success = false, message = "Cannot delete entry in a closed accounting period." });
+            return this.BadRequest(new { success = false, message = "Cannot delete entry in a closed accounting period." });
         }
 
-        _db.GeneralJournals.RemoveRange(rows);
-        await _db.SaveChangesAsync();
+        this.db.GeneralJournals.RemoveRange(rows);
+        await this.db.SaveChangesAsync();
 
-        return Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
+        return this.Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
     }
 
     // ==========================================
@@ -227,29 +237,31 @@ public class JournalController : ControllerBase
     [HttpGet("closing")]
     public async Task<IActionResult> GetClosingJournal()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
         if (period == null)
         {
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
                 message = "No accounting period selected.",
                 selectedPeriodName = (string?)null,
-                closingJournal = (object?)null
+                closingJournal = (object?)null,
             });
         }
 
-        var groups = await _journalService.BuildClosingJournalGroupsAsync(_db, userId, period, _reportService);
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(_db, userId, period, true);
-        var incomeStatement = _reportService.BuildIncomeStatement(rows, period);
+        var groups = await this.journalService.BuildClosingJournalGroupsAsync(this.db, userId, period, this.reportService);
+        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+        var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
         var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             hasPeriodSelected = true,
@@ -271,14 +283,14 @@ public class JournalController : ControllerBase
                         credit = l.Credit
                     })
                 })
-            }
+            },
         });
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("sub");
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? this.User.FindFirstValue("sub");
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }

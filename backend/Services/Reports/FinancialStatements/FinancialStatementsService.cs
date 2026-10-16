@@ -1,27 +1,34 @@
-using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
-using AumoBackend.Controllers.Reports;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
-using AumoBackend.Data;
+// <copyright file="FinancialStatementsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services;
+
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
+using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
 
 public interface IFinancialReportService
 {
     IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period);
+
     Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period);
+
     Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing);
 }
 
 public class FinancialReportService : IFinancialReportService
 {
+    /// <inheritdoc/>
     public IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period)
     {
         IncomeStatementLineApiResponse ToLine(TrialBalanceRow r) => new()
         {
             ReferenceNumber = r.ReferenceNumber ?? string.Empty,
             AccountName = r.AccountName,
-            Amount = r.NetBalance
+            Amount = r.NetBalance,
         };
 
         var revenues = rows.Where(r => r.Type == "OperatingIncome").Select(ToLine).ToList();
@@ -50,14 +57,15 @@ public class FinancialReportService : IFinancialReportService
             TotalOtherIncome = totalOtherIncome,
             OtherExpenses = otherExpenses,
             TotalOtherExpenses = totalOtherExpenses,
-            NetIncome = netIncome
+            NetIncome = netIncome,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period)
     {
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
-        var incomeStatement = BuildIncomeStatement(rows, period);
+        var incomeStatement = this.BuildIncomeStatement(rows, period);
         var reAccount = rows.Find(r => r.Role == "RetainedEarnings");
 
         decimal beginningBalance = reAccount?.NetBalance ?? 0m;
@@ -73,20 +81,21 @@ public class FinancialReportService : IFinancialReportService
             BeginningBalance = beginningBalance,
             NetIncome = netIncome,
             Dividends = dividends,
-            EndingBalance = endingBalance
+            EndingBalance = endingBalance,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing)
     {
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
-        var re = await BuildRetainedEarningsAsync(db, userId, period);
+        var re = await this.BuildRetainedEarningsAsync(db, userId, period);
 
         FinancialPositionLineApiResponse ToLine(TrialBalanceRow r) => new()
         {
-            ReferenceNumber = r.ReferenceNumber ?? "",
-            AccountName = r.AccountName ?? "",
-            Amount = r.NetBalance
+            ReferenceNumber = r.ReferenceNumber ?? string.Empty,
+            AccountName = r.AccountName ?? string.Empty,
+            Amount = r.NetBalance,
         };
 
         var assets = rows.Where(r => r.Type == "Assets").Select(ToLine).ToList();
@@ -115,7 +124,7 @@ public class FinancialReportService : IFinancialReportService
             RetainedEarningsEnding = retainedEarningsEnding,
             TotalEquity = totalEquity,
             TotalLiabilitiesAndEquity = totalLiabilitiesAndEquity,
-            IsBalanced = isBalanced
+            IsBalanced = isBalanced,
         };
     }
 }

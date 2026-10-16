@@ -1,9 +1,6 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System.Threading.Tasks;
+// <copyright file="ResendEmailSender.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Identity
 {
@@ -14,6 +11,7 @@ namespace AumoBackend.Services.Identity
 
     public class ResendEmailSender : IEmailSender
     {
+        /// <inheritdoc/>
         public Task SendEmailAsync(string email, string subject, string htmlMessage)
         {
             return Task.CompletedTask;

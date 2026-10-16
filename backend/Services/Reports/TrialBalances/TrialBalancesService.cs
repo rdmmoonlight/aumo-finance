@@ -1,9 +1,13 @@
-using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
-using AumoBackend.Models;
-using AumoBackend.Data;
-using Microsoft.EntityFrameworkCore;
+// <copyright file="TrialBalancesService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services;
+
+using AumoBackend.Data;
+using AumoBackend.Models;
+using Microsoft.EntityFrameworkCore;
+using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
 
 public interface ITrialBalanceService
 {
@@ -19,6 +23,7 @@ public interface ITrialBalanceService
 
 public class TrialBalanceService : ITrialBalanceService
 {
+    /// <inheritdoc/>
     public async Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
         AppDbContext db,
         Guid userId,
@@ -60,7 +65,10 @@ public class TrialBalanceService : ITrialBalanceService
             }
 
             var accountLines = lines.Where(l => l.AccountId == account.Id).ToList();
-            if (!accountLines.Any()) continue;
+            if (!accountLines.Any())
+            {
+                continue;
+            }
 
             bool normalDebit = IsAccountNormalBalanceDebit(account);
 
@@ -93,16 +101,17 @@ public class TrialBalanceService : ITrialBalanceService
                 NormalBalanceIsDebit = normalDebit,
                 NetBalance = netBalance,
                 Debit = debit,
-                Credit = credit
+                Credit = credit,
             });
         }
 
         return rows;
     }
 
+    /// <inheritdoc/>
     public async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
     {
-        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
+        var rows = await this.BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
 
         decimal totalRevenue = rows
             .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
@@ -122,19 +131,31 @@ public class TrialBalanceService : ITrialBalanceService
 
     private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
     {
-        if (string.IsNullOrEmpty(account.Type)) return false;
+        if (string.IsNullOrEmpty(account.Type))
+        {
+            return false;
+        }
+
         return AccountClassificationHelper.NormalBalanceIsDebit(account.Type);
     }
 
     private static bool IsAccountPermanent(ChartOfAccount account)
     {
-        if (string.IsNullOrEmpty(account.Type)) return false;
+        if (string.IsNullOrEmpty(account.Type))
+        {
+            return false;
+        }
+
         return AccountClassificationHelper.IsPermanent(account.Type);
     }
 
     private static bool IsTemporaryType(string? typeStr)
     {
-        if (string.IsNullOrEmpty(typeStr)) return false;
+        if (string.IsNullOrEmpty(typeStr))
+        {
+            return false;
+        }
+
         return AccountClassificationHelper.IsTemporary(typeStr);
     }
 }

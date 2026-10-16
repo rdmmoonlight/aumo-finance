@@ -1,9 +1,13 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
-using AumoBackend.Data;
+// <copyright file="JournalsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services;
+
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
 
 public interface IJournalService
 {
@@ -12,6 +16,7 @@ public interface IJournalService
 
 public class JournalService : IJournalService
 {
+    /// <inheritdoc/>
     public async Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(AppDbContext db, Guid userId, Period period, IFinancialReportService reportService)
     {
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
@@ -35,15 +40,16 @@ public class JournalService : IJournalService
                     ReferenceNumber = r.ReferenceNumber ?? "0",
                     AccountName = r.AccountName,
                     Debit = r.NetBalance,
-                    Credit = 0m
+                    Credit = 0m,
                 });
             }
+
             group1.Lines.Add(new ClosingJournalLineApiResponse
             {
                 ReferenceNumber = "0",
                 AccountName = incomeSummaryName,
                 Debit = 0m,
-                Credit = incomeRows.Sum(r => r.NetBalance)
+                Credit = incomeRows.Sum(r => r.NetBalance),
             });
             groups.Add(group1);
         }
@@ -57,7 +63,7 @@ public class JournalService : IJournalService
                 ReferenceNumber = "0",
                 AccountName = incomeSummaryName,
                 Debit = expenseRows.Sum(r => r.NetBalance),
-                Credit = 0m
+                Credit = 0m,
             });
             foreach (var r in expenseRows)
             {
@@ -66,9 +72,10 @@ public class JournalService : IJournalService
                     ReferenceNumber = r.ReferenceNumber ?? "0",
                     AccountName = r.AccountName,
                     Debit = 0m,
-                    Credit = r.NetBalance
+                    Credit = r.NetBalance,
                 });
             }
+
             groups.Add(group2);
         }
 
@@ -84,14 +91,14 @@ public class JournalService : IJournalService
                     ReferenceNumber = "0",
                     AccountName = incomeSummaryName,
                     Debit = incomeStatement.NetIncome,
-                    Credit = 0m
+                    Credit = 0m,
                 });
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
                     ReferenceNumber = "0",
                     AccountName = reAccountName,
                     Debit = 0m,
-                    Credit = incomeStatement.NetIncome
+                    Credit = incomeStatement.NetIncome,
                 });
             }
             else
@@ -102,14 +109,14 @@ public class JournalService : IJournalService
                     ReferenceNumber = "0",
                     AccountName = reAccountName,
                     Debit = netLoss,
-                    Credit = 0m
+                    Credit = 0m,
                 });
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
                     ReferenceNumber = "0",
                     AccountName = incomeSummaryName,
                     Debit = 0m,
-                    Credit = netLoss
+                    Credit = netLoss,
                 });
             }
 

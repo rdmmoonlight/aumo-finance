@@ -1,7 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// <copyright file="ChartOfAccount.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Models;
+
+using System;
+using System.Collections.Generic;
 
 public partial class ChartOfAccount
 {
@@ -29,5 +33,5 @@ public partial class ChartOfAccount
     public decimal Balance { get; set; }
 
     // DisplayLabel helper untuk tampilan UI/Dropdown
-    public string DisplayLabel => $"{ReferenceNumber} - {AccountName}";
+    public string DisplayLabel => $"{this.ReferenceNumber} - {this.AccountName}";
 }

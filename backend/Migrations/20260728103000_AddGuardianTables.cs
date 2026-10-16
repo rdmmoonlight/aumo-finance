@@ -1,15 +1,19 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+// <copyright file="20260728103000_AddGuardianTables.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 #nullable disable
 
 namespace AumoBackend.Migrations
 {
+    using System;
+    using AumoBackend.Controllers.Reports;
+    using AumoBackend.Helpers;
+    using AumoBackend.Models;
+    using AumoBackend.Services.Auth;
+    using AumoBackend.Services.Identity;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     /// <inheritdoc />
     public partial class AddGuardianTables : Migration
     {
@@ -33,7 +37,7 @@ namespace AumoBackend.Migrations
                     IsCurrent = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastActivityAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    RevokedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    RevokedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                 },
                 constraints: table =>
                 {
@@ -61,7 +65,7 @@ namespace AumoBackend.Migrations
                     Country = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     UserAgent = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
+                    Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                 },
                 constraints: table =>
                 {

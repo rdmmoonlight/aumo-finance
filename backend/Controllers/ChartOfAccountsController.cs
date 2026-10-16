@@ -1,23 +1,27 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using AumoBackend.Data;
+// <copyright file="ChartOfAccountsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
 using AumoBackend.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
 using AumoBackend.Validators.Common;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/chart-of-accounts")]
@@ -25,18 +29,18 @@ namespace AumoBackend.Controllers;
 
 public class ChartOfAccountsController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IValidator<CreateAccountRequest> _createAccountValidator;
-    private readonly IValidator<UpdateAccountRequest> _updateAccountValidator;
+    private readonly AppDbContext db;
+    private readonly IValidator<CreateAccountRequest> createAccountValidator;
+    private readonly IValidator<UpdateAccountRequest> updateAccountValidator;
 
     public ChartOfAccountsController(
         AppDbContext db,
         IValidator<CreateAccountRequest> createAccountValidator,
         IValidator<UpdateAccountRequest> updateAccountValidator)
     {
-        _db = db;
-        _createAccountValidator = createAccountValidator;
-        _updateAccountValidator = updateAccountValidator;
+        this.db = db;
+        this.createAccountValidator = createAccountValidator;
+        this.updateAccountValidator = updateAccountValidator;
     }
 
     // ==========================================
@@ -45,10 +49,13 @@ public class ChartOfAccountsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAccounts([FromQuery] string? search, [FromQuery] string? category)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var query = _db.ChartOfAccounts.Where(a => a.UserId == userId);
+        var query = this.db.ChartOfAccounts.Where(a => a.UserId == userId);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -68,8 +75,8 @@ public class ChartOfAccountsController : ControllerBase
 
         var accountIds = loadedAccounts.Select(a => a.Id).ToList();
 
-        var currentPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId)
-            ?? await _db.Periods
+        var currentPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId)
+            ?? await this.db.Periods
                 .AsNoTracking()
                 .Where(p => p.UserId == userId)
                 .OrderByDescending(p => p.StartDate)
@@ -87,7 +94,7 @@ public class ChartOfAccountsController : ControllerBase
             var startUtc = currentPeriod.StartDate.Date;
             var endUtc = currentPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-            var accountBalances = await _db.GeneralJournals
+            var accountBalances = await this.db.GeneralJournals
                 .Where(j => accountIds.Contains(j.AccountId) &&
                             j.UserId == userId &&
                             (j.JournalType == "General" || j.JournalType == "Adjusting") &&
@@ -98,7 +105,7 @@ public class ChartOfAccountsController : ControllerBase
                 {
                     AccountId = g.Key,
                     TotalDebit = g.Sum(j => j.Debit),
-                    TotalCredit = g.Sum(j => j.Credit)
+                    TotalCredit = g.Sum(j => j.Credit),
                 })
                 .ToDictionaryAsync(x => x.AccountId);
 
@@ -125,14 +132,14 @@ public class ChartOfAccountsController : ControllerBase
             a.Type,
             a.Role,
             a.IsActive,
-            a.Balance
+            a.Balance,
         });
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             selectedPeriodName = currentPeriod?.PeriodName,
-            accounts = result
+            accounts = result,
         });
     }
 
@@ -142,19 +149,24 @@ public class ChartOfAccountsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest request)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var validation = await _createAccountValidator.ValidateAsync(request);
+        var validation = await this.createAccountValidator.ValidateAsync(request);
         if (!validation.IsValid)
-            return BadRequest(validation.ToErrorResponse());
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
 
-        bool isCodeTaken = await _db.ChartOfAccounts
+        bool isCodeTaken = await this.db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber);
 
         if (isCodeTaken)
         {
-            return BadRequest(new { success = false, message = $"Account code {request.ReferenceNumber} is already in use." });
+            return this.BadRequest(new { success = false, message = $"Account code {request.ReferenceNumber} is already in use." });
         }
 
         var newAccount = new ChartOfAccount
@@ -165,24 +177,24 @@ public class ChartOfAccountsController : ControllerBase
             Type = request.Type,
             Role = string.IsNullOrWhiteSpace(request.Role) ? "Default" : request.Role,
             IsActive = true,
-            Balance = 0
+            Balance = 0,
         };
 
         try
         {
-            _db.ChartOfAccounts.Add(newAccount);
-            await _db.SaveChangesAsync();
+            this.db.ChartOfAccounts.Add(newAccount);
+            await this.db.SaveChangesAsync();
 
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
                 message = $"Account '{newAccount.AccountName}' successfully created.",
-                accountId = newAccount.Id
+                accountId = newAccount.Id,
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, message = $"A fatal error occurred while saving the account: {ex.Message}" });
+            return this.StatusCode(500, new { success = false, message = $"A fatal error occurred while saving the account: {ex.Message}" });
         }
     }
 
@@ -192,27 +204,32 @@ public class ChartOfAccountsController : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateAccount(int id, [FromBody] UpdateAccountRequest request)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var validation = await _updateAccountValidator.ValidateAsync(request);
+        var validation = await this.updateAccountValidator.ValidateAsync(request);
         if (!validation.IsValid)
-            return BadRequest(validation.ToErrorResponse());
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
 
-        var account = await _db.ChartOfAccounts
+        var account = await this.db.ChartOfAccounts
             .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
 
         if (account == null)
         {
-            return NotFound(new { success = false, message = "Account not found." });
+            return this.NotFound(new { success = false, message = "Account not found." });
         }
 
-        bool isCodeTaken = await _db.ChartOfAccounts
+        bool isCodeTaken = await this.db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber && a.Id != id);
 
         if (isCodeTaken)
         {
-            return BadRequest(new { success = false, message = $"Account code {request.ReferenceNumber} is already in use." });
+            return this.BadRequest(new { success = false, message = $"Account code {request.ReferenceNumber} is already in use." });
         }
 
         account.ReferenceNumber = request.ReferenceNumber;
@@ -223,17 +240,17 @@ public class ChartOfAccountsController : ControllerBase
 
         try
         {
-            await _db.SaveChangesAsync();
+            await this.db.SaveChangesAsync();
 
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
-                message = $"Account '{account.AccountName}' successfully updated."
+                message = $"Account '{account.AccountName}' successfully updated.",
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, message = $"A fatal error occurred while updating the account: {ex.Message}" });
+            return this.StatusCode(500, new { success = false, message = $"A fatal error occurred while updating the account: {ex.Message}" });
         }
     }
 
@@ -243,44 +260,47 @@ public class ChartOfAccountsController : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteAccount(int id)
     {
-        var userId = GetCurrentUserId();
-        if (userId == Guid.Empty) return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        var userId = this.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var entity = await _db.ChartOfAccounts
+        var entity = await this.db.ChartOfAccounts
             .FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
 
         if (entity == null)
         {
-            return NotFound(new { success = false, message = "Account not found." });
+            return this.NotFound(new { success = false, message = "Account not found." });
         }
 
-        bool hasJournalLines = await _db.GeneralJournals.AnyAsync(l => l.AccountId == id);
+        bool hasJournalLines = await this.db.GeneralJournals.AnyAsync(l => l.AccountId == id);
         if (hasJournalLines)
         {
-            return BadRequest(new { success = false, message = $"Account '{entity.AccountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead." });
+            return this.BadRequest(new { success = false, message = $"Account '{entity.AccountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead." });
         }
 
         try
         {
-            _db.ChartOfAccounts.Remove(entity);
-            await _db.SaveChangesAsync();
+            this.db.ChartOfAccounts.Remove(entity);
+            await this.db.SaveChangesAsync();
 
-            return Ok(new
+            return this.Ok(new
             {
                 success = true,
-                message = $"Account '{entity.AccountName}' successfully deleted."
+                message = $"Account '{entity.AccountName}' successfully deleted.",
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { success = false, message = $"A fatal error occurred while deleting the account: {ex.Message}" });
+            return this.StatusCode(500, new { success = false, message = $"A fatal error occurred while deleting the account: {ex.Message}" });
         }
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("sub");
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? this.User.FindFirstValue("sub");
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }

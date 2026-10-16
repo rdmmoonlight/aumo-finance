@@ -1,12 +1,16 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using AumoBackend.Models;
+// <copyright file="PeriodsViewModel.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.ViewModels;
+
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
 
 public class OpenPeriodViewModel
 {
@@ -60,7 +64,10 @@ public class OpenPeriodViewModel
     public string? RetainedEarningsAccountName { get; set; }
 
     public List<ChartOfAccount> PermanentAccounts { get; set; } = new();
+
     public List<ChartOfAccount> AvailableCashAndBankAccounts { get; set; } = new();
+
     public List<ChartOfAccount> AvailableRetainedEarningsAccounts { get; set; } = new();
+
     public bool HasExistingPermanentAccounts { get; set; }
 }

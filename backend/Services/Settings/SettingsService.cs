@@ -1,49 +1,36 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using System;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
-using AumoBackend.ViewModels;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using AumoBackend.Services.Storage;
+// <copyright file="SettingsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Settings
 {
+    using System.Security.Claims;
+    using AumoBackend.DTOs;
+    using AumoBackend.Models;
+    using AumoBackend.Services.Auth;
+    using AumoBackend.Services.Storage;
+    using AumoBackend.ViewModels;
+    using Microsoft.AspNetCore.Identity;
 
     public class SettingsService : ISettingsService
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IGuardianService _guardianService;
-        private readonly IAvatarStorage _avatarStorage;
+        private readonly UserManager<ApplicationUser>? userManager;
+        private readonly SignInManager<ApplicationUser>? signInManager;
+        private readonly IGuardianService? guardianService;
+        private readonly IAvatarStorage? avatarStorage;
 
-        public SettingsService(
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
-            IGuardianService guardianService,
-            IAvatarStorage avatarStorage)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _guardianService = guardianService;
-            _avatarStorage = avatarStorage;
-        }
-
+        /// <inheritdoc/>
         public async Task<ServiceResult> UpdateProfileAsync(ClaimsPrincipal userPrincipal, UpdateProfileRequest request)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
             if (!string.IsNullOrWhiteSpace(request.UserName) && request.UserName != user.UserName)
             {
-                var setUserNameResult = await _userManager.SetUserNameAsync(user, request.UserName);
+                var setUserNameResult = await this.userManager.SetUserNameAsync(user, request.UserName);
                 if (!setUserNameResult.Succeeded)
                 {
                     var errors = string.Join(", ", setUserNameResult.Errors.Select(e => e.Description));
@@ -53,7 +40,7 @@ namespace AumoBackend.Services.Settings
 
             if (request.PhoneNumber != user.PhoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
+                var setPhoneResult = await this.userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
                     var errors = string.Join(", ", setPhoneResult.Errors.Select(e => e.Description));
@@ -68,7 +55,7 @@ namespace AumoBackend.Services.Settings
                 user.AvatarUrl = request.AvatarUrl;
             }
 
-            var updateResult = await _userManager.UpdateAsync(user);
+            var updateResult = await this.userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
                 var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
@@ -78,10 +65,14 @@ namespace AumoBackend.Services.Settings
             return ServiceResult.Ok("Profile updated successfully.");
         }
 
+        /// <inheritdoc/>
         public async Task<ServiceResult> UploadAvatarAsync(ClaimsPrincipal userPrincipal, IFormFile? file, IFormFile? avatar, IFormFileCollection? files)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
             var uploadFile = file ?? avatar ?? files?.FirstOrDefault();
             if (uploadFile == null || uploadFile.Length == 0)
@@ -102,7 +93,7 @@ namespace AumoBackend.Services.Settings
                 return ServiceResult.BadRequest("Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed.");
             }
 
-            if (!_avatarStorage.IsConfigured)
+            if (!this.avatarStorage.IsConfigured)
             {
                 return ServiceResult.InternalServerError("Neon bucket belum dikonfigurasi di server.");
             }
@@ -115,10 +106,10 @@ namespace AumoBackend.Services.Settings
                 await uploadFile.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
 
-                var publicUrl = await _avatarStorage.UploadAvatarAsync(fileName, memoryStream);
+                var publicUrl = await this.avatarStorage.UploadAvatarAsync(fileName, memoryStream);
 
                 user.AvatarUrl = publicUrl;
-                await _userManager.UpdateAsync(user);
+                await this.userManager.UpdateAsync(user);
 
                 return ServiceResult.Ok("Avatar uploaded successfully.", new { avatarUrl = publicUrl });
             }
@@ -128,12 +119,16 @@ namespace AumoBackend.Services.Settings
             }
         }
 
+        /// <inheritdoc/>
         public async Task<ServiceResult> ChangePasswordAsync(ClaimsPrincipal userPrincipal, ChangePasswordRequest request)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
-            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+            var result = await this.userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
@@ -143,31 +138,39 @@ namespace AumoBackend.Services.Settings
             return ServiceResult.Ok("Password successfully updated.");
         }
 
+        /// <inheritdoc/>
         public async Task<ServiceResult> DeleteAccountAsync(ClaimsPrincipal userPrincipal)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
-            await _guardianService.RevokeAllSessionsAsync(user.Id);
+            await this.guardianService.RevokeAllSessionsAsync(user.Id);
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await this.userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 return ServiceResult.BadRequest(errors);
             }
 
-            await _signInManager.SignOutAsync();
+            await this.signInManager.SignOutAsync();
             return ServiceResult.Ok("Account successfully deleted.");
         }
 
+        /// <inheritdoc/>
         public async Task<ServiceResult> GetGuardianDashboardAsync(ClaimsPrincipal userPrincipal)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
-            var activeSessions = await _guardianService.GetActiveSessionsAsync(user.Id);
-            var loginActivities = await _guardianService.GetLoginActivitiesAsync(user.Id);
+            var activeSessions = await this.guardianService.GetActiveSessionsAsync(user.Id);
+            var loginActivities = await this.guardianService.GetLoginActivitiesAsync(user.Id);
 
             var failedAttempts = loginActivities.Count(a => !a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
             var lastSuccess = loginActivities.FirstOrDefault(a => a.IsSuccess)?.CreatedAt;
@@ -179,7 +182,7 @@ namespace AumoBackend.Services.Settings
                     StatusLevel = failedAttempts > 3 ? "Warning" : "Good",
                     ActiveSessionsCount = activeSessions.Count,
                     FailedAttemptsLast24Hours = failedAttempts,
-                    LastSuccessfulLogin = lastSuccess
+                    LastSuccessfulLogin = lastSuccess,
                 },
                 RecentActivities = loginActivities.Select(a => new LoginActivityViewModel
                 {
@@ -191,7 +194,7 @@ namespace AumoBackend.Services.Settings
                     IpAddress = a.IpAddress,
                     Country = a.Country,
                     IsSuccess = a.IsSuccess,
-                    CreatedAt = a.CreatedAt
+                    CreatedAt = a.CreatedAt,
                 }).ToList(),
                 ActiveSessions = activeSessions.Select(s => new ActiveSessionViewModel
                 {
@@ -203,27 +206,35 @@ namespace AumoBackend.Services.Settings
                     Country = s.Country,
                     IsCurrent = s.IsCurrent,
                     LastActivityAt = s.LastActivityAt
-                }).ToList()
+                }).ToList(),
             };
 
             return ServiceResult.Ok(data: dashboard);
         }
 
+        /// <inheritdoc/>
         public async Task<ServiceResult> RevokeSessionAsync(ClaimsPrincipal userPrincipal, Guid sessionId)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
-            await _guardianService.RevokeSessionAsync(sessionId, user.Id);
+            await this.guardianService.RevokeSessionAsync(sessionId, user.Id);
             return ServiceResult.Ok("Session revoked.");
         }
 
+        /// <inheritdoc/>
         public async Task<ServiceResult> RevokeAllSessionsAsync(ClaimsPrincipal userPrincipal)
         {
-            var user = await _userManager.GetUserAsync(userPrincipal);
-            if (user == null) return ServiceResult.Unauthorized();
+            var user = await this.userManager.GetUserAsync(userPrincipal);
+            if (user == null)
+            {
+                return ServiceResult.Unauthorized();
+            }
 
-            await _guardianService.RevokeAllSessionsAsync(user.Id);
+            await this.guardianService.RevokeAllSessionsAsync(user.Id);
             return ServiceResult.Ok("All other sessions revoked.");
         }
     }

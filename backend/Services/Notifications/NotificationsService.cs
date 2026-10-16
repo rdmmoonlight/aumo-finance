@@ -1,26 +1,21 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using AumoBackend.Data;
-using Microsoft.EntityFrameworkCore;
-using AumoBackend.DTOs;
+// <copyright file="NotificationsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Notifications;
 
+using AumoBackend.Data;
+using AumoBackend.DTOs;
+using Microsoft.EntityFrameworkCore;
+
 public class NotificationsService : INotificationsService
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext? context;
 
-    public NotificationsService(AppDbContext context)
-    {
-        _context = context;
-    }
-
+    /// <inheritdoc/>
     public async Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(Guid userId, int limit)
     {
-        return await _context.Notifications
+        return await this.context.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Take(limit)
@@ -32,26 +27,31 @@ public class NotificationsService : INotificationsService
                 Type = n.Type,
                 IsRead = n.IsRead,
                 TargetUrl = n.TargetUrl,
-                CreatedAt = n.CreatedAt.ToString("o")
+                CreatedAt = n.CreatedAt.ToString("o"),
             })
             .ToListAsync();
     }
 
+    /// <inheritdoc/>
     public async Task<bool> MarkAsReadAsync(Guid id, Guid userId)
     {
-        var notification = await _context.Notifications
+        var notification = await this.context.Notifications
             .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
 
-        if (notification == null) return false;
+        if (notification == null)
+        {
+            return false;
+        }
 
         notification.IsRead = true;
-        await _context.SaveChangesAsync();
+        await this.context.SaveChangesAsync();
         return true;
     }
 
+    /// <inheritdoc/>
     public async Task MarkAllAsReadAsync(Guid userId)
     {
-        await _context.Notifications
+        await this.context.Notifications
             .Where(n => n.UserId == userId && !n.IsRead)
             .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
     }

@@ -1,22 +1,26 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using AumoBackend.Data;
+// <copyright file="SummaryController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
+using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
+using AumoBackend.Services;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AumoBackend.DTOs;
-using AumoBackend.Services;
-
-namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/[controller]")]
@@ -24,19 +28,19 @@ namespace AumoBackend.Controllers;
 
 public class SummaryController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly AppDbContext context;
+    private readonly UserManager<ApplicationUser> userManager;
 
     public SummaryController(AppDbContext context, UserManager<ApplicationUser> userManager)
     {
-        _context = context;
-        _userManager = userManager;
+        this.context = context;
+        this.userManager = userManager;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetSummary()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await this.userManager.GetUserAsync(this.User);
 
         Guid userId;
         if (user != null)
@@ -45,17 +49,17 @@ public class SummaryController : ControllerBase
         }
         else
         {
-            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                             ?? User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var userIdClaim = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                             ?? this.User.FindFirstValue(JwtRegisteredClaimNames.Sub);
 
             if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out userId))
             {
-                return Unauthorized(new { success = false, message = "User session expired or invalid." });
+                return this.Unauthorized(new { success = false, message = "User session expired or invalid." });
             }
         }
 
         // 1. Cari periode yang sedang dipilih oleh user (IsSelected == true)
-        var selectedPeriod = await _context.Periods
+        var selectedPeriod = await this.context.Periods
            .AsNoTracking()
            .Where(p => p.UserId == userId && p.IsSelected)
            .Select(p => new
@@ -64,12 +68,12 @@ public class SummaryController : ControllerBase
                p.PeriodName,
                p.StartDate,
                p.EndDate,
-               p.IsClosed
+               p.IsClosed,
            })
            .FirstOrDefaultAsync();
 
         // 2. Query GeneralJournal filtered berdasarkan rentang tanggal periode yang dipilih (jika ada)
-        var journalQuery = _context.GeneralJournals
+        var journalQuery = this.context.GeneralJournals
            .AsNoTracking()
            .Where(j => j.UserId == userId);
 
@@ -81,7 +85,7 @@ public class SummaryController : ControllerBase
         var journalCount = await journalQuery.Select(j => j.JournalEntryId).Distinct().CountAsync();
 
         // 3. Hitung Active COA
-        var activeCoaCount = await _context.ChartOfAccounts
+        var activeCoaCount = await this.context.ChartOfAccounts
            .AsNoTracking()
            .CountAsync(c => c.UserId == userId && c.IsActive);
 
@@ -94,17 +98,17 @@ public class SummaryController : ControllerBase
             totalJournal = journalCount,
             activeCoa = activeCoaCount,
             activePeriodName = activePeriodName,
-            isPeriodOpen = isPeriodOpen
+            isPeriodOpen = isPeriodOpen,
         };
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             data = summaryData,
             totalJournal = journalCount,
             activeCoa = activeCoaCount,
             activePeriodName = summaryData.activePeriodName,
-            isPeriodOpen = summaryData.isPeriodOpen
+            isPeriodOpen = summaryData.isPeriodOpen,
         });
     }
 }

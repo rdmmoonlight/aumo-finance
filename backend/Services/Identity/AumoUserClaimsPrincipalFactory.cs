@@ -1,12 +1,14 @@
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
-using AumoBackend.Models;
+// <copyright file="AumoUserClaimsPrincipalFactory.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Identity
 {
+    using System.Security.Claims;
+    using AumoBackend.Models;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.Extensions.Options;
+
     public class AumoUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole<Guid>>
     {
         public AumoUserClaimsPrincipalFactory(
@@ -17,13 +19,13 @@ namespace AumoBackend.Services.Identity
         {
         }
 
+        /// <inheritdoc/>
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
         {
             var identity = await base.GenerateClaimsAsync(user);
 
             // Tambahkan custom claims di sini jika diperlukan
             // identity.AddClaim(new Claim("TenantId", user.TenantId.ToString()));
-
             return identity;
         }
     }

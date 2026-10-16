@@ -1,7 +1,10 @@
-using System.Text.Json.Serialization;
+// <copyright file="HomeDto.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.DTOs.Home
 {
+    using System.Text.Json.Serialization;
 
     public class ApiIndonesiaKursResponse
     {
@@ -28,73 +31,99 @@ namespace AumoBackend.DTOs.Home
     }
 
     /// <summary>
-    /// DTO untuk indikator data pasar (IHSG, Saham, Kurs, Emas, dll)
+    /// DTO untuk indikator data pasar (IHSG, Saham, Kurs, Emas, dll).
     /// </summary>
     public class MarketIndicatorDto
     {
         public string Symbol { get; set; } = string.Empty;
+
         public string Name { get; set; } = string.Empty;
 
         // Mendukung baik input decimal murni maupun string (dikonversi otomatis secara aman)
-        private decimal _price;
+        private decimal price;
+
         public object Price
         {
-            get => _price;
+            get => this.price;
             set
             {
                 if (value is decimal decValue)
-                    _price = decValue;
+                {
+                    this.price = decValue;
+                }
                 else if (value != null && decimal.TryParse(value.ToString(), out decimal parsedValue))
-                    _price = parsedValue;
+                {
+                    this.price = parsedValue;
+                }
                 else
-                    _price = 0m;
+                {
+                    this.price = 0m;
+                }
             }
         }
 
-        private decimal _change;
+        private decimal change;
+
         public object Change
         {
-            get => _change;
+            get => this.change;
             set
             {
                 if (value is decimal decValue)
-                    _change = decValue;
+                {
+                    this.change = decValue;
+                }
                 else if (value != null && decimal.TryParse(value.ToString(), out decimal parsedValue))
-                    _change = parsedValue;
+                {
+                    this.change = parsedValue;
+                }
                 else
-                    _change = 0m;
+                {
+                    this.change = 0m;
+                }
             }
         }
 
         // Fleksibel: dapat di-assign manual ATAU mengkalkulasi otomatis dari Change jika tidak di-assign
-        private bool? _isUp;
+        private bool? isUp;
+
         public bool IsUp
         {
             get
             {
-                if (_isUp.HasValue) return _isUp.Value;
-                return _change >= 0;
+                if (this.isUp.HasValue)
+                {
+                    return this.isUp.Value;
+                }
+
+                return this.change >= 0;
             }
-            set => _isUp = value;
+            set => this.isUp = value;
         }
     }
 
     public class KursDataDto
     {
         public string Base { get; set; } = string.Empty;
+
         public string Target { get; set; } = string.Empty;
+
         public decimal Rate { get; set; }
+
         public decimal Change { get; set; }
     }
 
     /// <summary>
-    /// Wrapper standar untuk response API
+    /// Wrapper standar untuk response API.
     /// </summary>
     public class ApiResponseDto<T>
     {
         public bool Success { get; set; }
+
         public T? Data { get; set; }
+
         public string? Error { get; set; }
+
         public string? Message { get; set; }
     }
 }

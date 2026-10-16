@@ -1,25 +1,25 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using AumoBackend.DTOs.Reports;
+// <copyright file="IJournalEntryService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.JournalEntries;
+
+using AumoBackend.DTOs.Reports;
 
 public interface IJournalEntryService
 {
     // Mengambil daftar baris GeneralJournal berdasarkan TransactionNumber atau JournalEntryId
     Task<List<GeneralJournalResponseDto>> GetByTransactionNumberAsync(Guid userId, string transactionNumber);
+
     Task<GeneralJournalResponseDto?> GetByIdAsync(Guid userId, int lineId);
 
     // CRUD GeneralJournal
     Task<GeneralJournalResponseDto> CreateAsync(Guid userId, CreateGeneralJournalRequest request);
+
     Task UpdateAsync(Guid userId, int lineId, UpdateGeneralJournalRequest request);
+
     Task DeleteAsync(Guid userId, int lineId);
+
     Task DeleteByTransactionNumberAsync(Guid userId, string transactionNumber);
 
     // Pencarian LineDescription (karena Description header sudah dihapus)

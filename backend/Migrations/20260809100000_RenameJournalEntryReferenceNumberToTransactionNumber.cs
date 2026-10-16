@@ -1,16 +1,21 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using Microsoft.EntityFrameworkCore.Migrations;
+// <copyright file="20260809100000_RenameJournalEntryReferenceNumberToTransactionNumber.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 #nullable disable
 
 namespace AumoBackend.Migrations
 {
+    using AumoBackend.Controllers.Reports;
+    using AumoBackend.Helpers;
+    using AumoBackend.Models;
+    using AumoBackend.Services.Auth;
+    using AumoBackend.Services.Identity;
+    using Microsoft.EntityFrameworkCore.Migrations;
+
     public partial class RenameJournalEntryReferenceNumberToTransactionNumber : Migration
     {
+        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Kolom JournalEntries.ReferenceNumber di-rename ke TransactionNumber
@@ -19,6 +24,7 @@ namespace AumoBackend.Migrations
             // dibiarkan kosong agar tidak error/duplikat saat aplikasi start.
         }
 
+        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

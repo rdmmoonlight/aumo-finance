@@ -54,9 +54,9 @@ jobs:
         run: dotnet restore
         working-directory: backend
 
-      # Mencegah error build akibat warning di dotnet format
+      # Otomatis merapikan kode C# berdasarkan .editorconfig & Roslyn
       - name: Auto-Format C# Code
-        run: dotnet format || true
+        run: dotnet format --severity info || true
         working-directory: backend
 
       - name: Build & Typecheck (.NET)

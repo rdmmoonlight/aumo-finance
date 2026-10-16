@@ -1,22 +1,20 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
+// <copyright file="HealthService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Health
 {
+    using AumoBackend.DTOs;
+
     public class HealthService : IHealthService
     {
+        /// <inheritdoc/>
         public Task<HealthStatusDto> GetHealthStatusAsync()
         {
             return Task.FromResult(new HealthStatusDto
             {
                 Status = "Healthy",
-                Timestamp = DateTime.UtcNow
+                Timestamp = DateTime.UtcNow,
             });
         }
     }
