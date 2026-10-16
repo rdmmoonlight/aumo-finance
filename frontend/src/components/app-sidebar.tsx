@@ -75,7 +75,7 @@ const navigation = [
 ];
 
 export function AppSidebar() {
-  const { pathname: pathname } = usePathname();
+  const pathname = usePathname();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
