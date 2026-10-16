@@ -345,6 +345,19 @@ namespace AumoBackend
                 builder.Services.AddHttpClient<IMarketDataService, MarketDataService>();
 
                 // =====================================
+// Rust Core Client
+// =====================================
+builder.Services.AddHttpClient("RustCore", client =>
+{
+    // Di development pakai localhost, di Docker pakai nama service
+    var rustCoreUrl = builder.Configuration["RustCore:BaseUrl"] 
+                      ?? "http://localhost:8081";
+    
+    client.BaseAddress = new Uri(rustCoreUrl);
+    client.Timeout = TimeSpan.FromSeconds(5);
+});
+
+                // =====================================
                 // 8. FORWARDED HEADERS CONFIGURATION
                 // =====================================
                 builder.Services.Configure<ForwardedHeadersOptions>(options =>
