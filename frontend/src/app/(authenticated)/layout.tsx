@@ -1,5 +1,9 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
@@ -8,26 +12,23 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { AppDispatch, RootState } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 
 export default function AuthenticatedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const navigate = useNavigate();
+  const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
 
-  // State lokal untuk melacak status fetching tanpa tergantung hook RTK Query generator
+  // State lokal untuk melacak status fetching
   const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [isAuthError, setIsAuthError] = useState(false);
   const [isPeriodsLoading, setIsPeriodsLoading] = useState(false);
 
   // Ambil data cache langsung dari Redux Store jika ada
   const authState = useSelector((state: RootState) =>
-    authApi.endpoints.getProfile.select()(state),
+    authApi.endpoints.getProfile.select()(state)
   );
 
   const verifySessionAndLoadData = useCallback(async () => {
@@ -38,7 +39,7 @@ export default function AuthenticatedLayout({
       const authResult = await dispatch(
         authApi.endpoints.getProfile.initiate(undefined, {
           forceRefetch: false,
-        }),
+        })
       );
 
       if (authResult.isError || !authResult.data) {
@@ -55,7 +56,7 @@ export default function AuthenticatedLayout({
       await dispatch(
         periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, {
           forceRefetch: false,
-        }),
+        })
       );
     } catch {
       setIsAuthError(true);
@@ -71,10 +72,10 @@ export default function AuthenticatedLayout({
 
   useEffect(() => {
     if (isAuthError) {
-      const t = setTimeout(() => navigate("/auth", { replace: true }), 800);
+      const t = setTimeout(() => router.replace("/auth"), 800);
       return () => clearTimeout(t);
     }
-  }, [isAuthError, navigate]);
+  }, [isAuthError, router]);
 
   // Render kondisi loading HANYA saat verifikasi awal
   if (isAuthLoading) {
@@ -108,7 +109,7 @@ export default function AuthenticatedLayout({
         <AppSidebar />
         <SidebarInset className="flex flex-1 flex-col min-w-0">
           <AppTopBar />
-          <main className="flex-1 p-6 relative">
+          <main className="relative flex-1 p-6">
             {isPeriodsLoading && (
               <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-[1px]">
                 <p className="text-sm text-muted-foreground">

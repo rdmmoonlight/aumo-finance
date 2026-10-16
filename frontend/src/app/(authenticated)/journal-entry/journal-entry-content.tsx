@@ -3,8 +3,7 @@
 import {
   AccountOption,
   LineItem,
-  formatNumberWithDots,
-} from "@/app/(authenticated)/journal-entry/helpers";
+  formatNumberWithDots} from "@/app/(authenticated)/journal-entry/helpers";
 import { JournalLinesTable } from "@/app/(authenticated)/journal-entry/journal-lines-table";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -17,15 +16,13 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  SelectValue} from "@/components/ui/select";
 import { store } from "@/lib/store";
 import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import {
   journalEntrySchema,
-  parseFormattedNumber,
-} from "@/lib/validations/journal-entry";
+  parseFormattedNumber} from "@/lib/validations/journal-entry";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   AlertTriangle,
@@ -35,17 +32,17 @@ import {
   Edit,
   Loader2,
   Lock,
-  Save,
-} from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+  Save} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { z } from "zod";
 
 export default function JournalEntryContent() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const navigate = useRouter();
+  const searchParams = useSearchParams();
   const entryIdParam = searchParams.get("id");
   const isEdit = Boolean(entryIdParam);
   const entryId = entryIdParam ? parseInt(entryIdParam, 10) : 0;
@@ -74,8 +71,7 @@ export default function JournalEntryContent() {
     setValue,
     watch,
     reset,
-    formState: { errors },
-  } = useForm<
+    formState: { errors }} = useForm<
     z.input<typeof journalEntrySchema>,
     any,
     z.output<typeof journalEntrySchema>
@@ -87,9 +83,7 @@ export default function JournalEntryContent() {
       lines: [
         { id: "1", accountId: 0, lineDescription: "", debit: "", credit: "" },
         { id: "2", accountId: 0, lineDescription: "", debit: "", credit: "" },
-      ],
-    },
-  });
+      ]}});
 
   const { fields, append, remove } = useFieldArray({ control, name: "lines" });
   const journalType = watch("journalType");
@@ -116,8 +110,7 @@ export default function JournalEntryContent() {
             ...a,
             id: Number(a.id || 0),
             referenceNumber: a.referenceNumber ?? "",
-            accountName: a.accountName ?? "",
-          }));
+            accountName: a.accountName ?? ""}));
           setAvailableAccounts(mapped);
         }
       } catch (err) {
@@ -143,8 +136,7 @@ export default function JournalEntryContent() {
         const result: any = await store.dispatch(
           journalEntryApi.endpoints.getNextTransactionNumber.initiate({
             journalType,
-            entryDate,
-          }),
+            entryDate}),
         );
         if (isMounted && result.data) {
           const raw = result.data;
@@ -179,8 +171,7 @@ export default function JournalEntryContent() {
       try {
         const result: any = await store.dispatch(
           journalEntryApi.endpoints.getJournalEntryById.initiate({
-            id: entryId,
-          }),
+            id: entryId}),
         );
         if (isMounted && result.data) {
           const resData = result.data;
@@ -198,8 +189,7 @@ export default function JournalEntryContent() {
                   accountId: Number(l.accountId || 0),
                   lineDescription: l.lineDescription || "",
                   debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
-                  credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-                })),
+                  credit: l.credit > 0 ? formatNumberWithDots(l.credit) : ""})),
               );
             }
           }
@@ -256,8 +246,7 @@ export default function JournalEntryContent() {
       accountId: 0,
       lineDescription: "",
       debit: "",
-      credit: "",
-    });
+      credit: ""});
   const removeLine = (index: number) => {
     if (fields.length <= 2) {
       setApiError("Minimal 2 baris jurnal wajib ada.");
@@ -275,8 +264,7 @@ export default function JournalEntryContent() {
     setValue(`lines.${index}.${field}`, formatted, { shouldValidate: true });
     if (value !== "")
       setValue(`lines.${index}.${field === "debit" ? "credit" : "debit"}`, "", {
-        shouldValidate: true,
-      });
+        shouldValidate: true});
   };
 
   const resetForm = () => {
@@ -289,17 +277,14 @@ export default function JournalEntryContent() {
           accountId: 0,
           lineDescription: "",
           debit: "",
-          credit: "",
-        },
+          credit: ""},
         {
           id: `${Date.now()}-2`,
           accountId: 0,
           lineDescription: "",
           debit: "",
-          credit: "",
-        },
-      ],
-    });
+          credit: ""},
+      ]});
     setApiError(null);
     setSuccessMessage(null);
   };
@@ -321,8 +306,7 @@ export default function JournalEntryContent() {
       accountId: Number(l.accountId),
       lineDescription: l.lineDescription || "",
       debit: parseFormattedNumber(l.debit || ""),
-      credit: parseFormattedNumber(l.credit || ""),
-    }));
+      credit: parseFormattedNumber(l.credit || "")}));
 
     try {
       if (isEdit) {
@@ -333,9 +317,7 @@ export default function JournalEntryContent() {
               entryDate: data.entryDate,
               journalType: data.journalType,
               transactionNumber: displayedTxNumber,
-              lines: payloadLines,
-            },
-          }),
+              lines: payloadLines}}),
         );
 
         if ("data" in result) {
@@ -343,7 +325,7 @@ export default function JournalEntryContent() {
           setSuccessMessage(
             `Updated ${res?.transactionNumber || displayedTxNumber}`,
           );
-          setTimeout(() => navigate("/reports/general-journal"), 1200);
+          setTimeout(() => router.push("/reports/general-journal"), 1200);
         } else if ("error" in result) {
           const err: any = result.error;
           setApiError(
@@ -357,8 +339,7 @@ export default function JournalEntryContent() {
           journalEntryApi.endpoints.createJournalEntry.initiate({
             journalType: data.journalType,
             entryDate: data.entryDate,
-            lines: payloadLines,
-          }),
+            lines: payloadLines}),
         );
 
         if ("data" in result) {
@@ -414,7 +395,7 @@ export default function JournalEntryContent() {
           </p>
         </div>
         <Button variant="outline" size="sm" asChild className="text-sm">
-          <Link to="/reports/general-journal" className="gap-1.5">
+          <Link href="/reports/general-journal" className="gap-1.5">
             <ArrowLeft size={14} /> Back to Journal
           </Link>
         </Button>
@@ -448,7 +429,7 @@ export default function JournalEntryContent() {
           <Lock size={16} />
           <AlertDescription className="text-xs">
             Journal {displayedTxNumber} is in closed period.{" "}
-            <Link to="/reports/general-journal" className="underline">
+            <Link href="/reports/general-journal" className="underline">
               Back
             </Link>
           </AlertDescription>

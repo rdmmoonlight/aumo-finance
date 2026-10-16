@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 interface MarketItem {
   symbol: string;
@@ -224,7 +224,7 @@ export default function HomeContent() {
                 asChild
                 className="flex items-center gap-2 rounded-xl border border-indigo-300/20 bg-gradient-to-br from-indigo-500/80 to-violet-600/80 text-sm text-white shadow-lg hover:from-indigo-500 hover:to-violet-600"
               >
-                <Link to="/dashboard">
+                <Link href="/dashboard">
                   <LayoutDashboard size={16} /> Dashboard
                 </Link>
               </Button>
@@ -233,7 +233,7 @@ export default function HomeContent() {
                 variant="secondary"
                 className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/10 text-sm text-white hover:bg-white/15"
               >
-                <Link to="/journal-entry">
+                <Link href="/journal-entry">
                   <Notebook size={16} /> Journal Entry
                 </Link>
               </Button>

@@ -53,7 +53,7 @@ export interface CommonActionResponse {
 // --- Inject Endpoints ke baseApi ---
 export const authApi = baseApi.injectEndpoints({
   // Mencegah error 'overrideExisting' saat Next.js Turbopack HMR / Fast Refresh
-  overrideExisting: !import.meta.env.PROD,
+  overrideExisting: !process.env.PROD,
   endpoints: (builder) => ({
     // 1. POST /auth/login
     login: builder.mutation<AuthResponse, LoginRequest>({

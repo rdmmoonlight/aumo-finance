@@ -4,16 +4,14 @@ import { DashboardCharts } from "@/app/(authenticated)/dashboard/dashboard-chart
 import {
   ExpenseTable,
   formatNumber,
-  TrendTable,
-} from "@/app/(authenticated)/dashboard/dashboard-tables";
+  TrendTable} from "@/app/(authenticated)/dashboard/dashboard-tables";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader,
-} from "@/components/ui/card";
+  CardHeader} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { store } from "@/lib/store";
 import { dashboardApi } from "@/lib/store/(authenticated)/dashboard/dashboardApi";
@@ -31,15 +29,15 @@ import {
   TrendingDown,
   TrendingUp,
   Wallet,
-  X,
-} from "lucide-react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+  X} from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 export default function DashboardContent() {
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const router = useRouter();
+  const navigate = useRouter();
+  const searchParams = useSearchParams();
 
   const [periodType, setPeriodType] = useState<"monthly" | "annual">(() =>
     searchParams.get("period")?.toLowerCase() === "annual"
@@ -92,7 +90,7 @@ export default function DashboardContent() {
     if (periodType === type || isFetching) return;
     setDismissError(false);
     setPeriodType(type);
-    navigate(`/dashboard?period=${type}`);
+    router.push(`/dashboard?period=${type}`);
   };
 
   const healthScore = useMemo(() => {
@@ -122,8 +120,7 @@ export default function DashboardContent() {
       cash: get("totalCashOnHand"),
       bank: get("totalBankBalance"),
       assets: get("totalAssets"),
-      liabilities: get("totalLiabilities"),
-    };
+      liabilities: get("totalLiabilities")};
   }, [resData, periodType]);
 
   const errorMessage = useMemo(() => {
@@ -155,7 +152,7 @@ export default function DashboardContent() {
             Go to Periods to select active accounting period.
           </p>
           <Button asChild>
-            <Link to="/periods">
+            <Link href="/periods">
               <Calendar size={16} /> Go to Periods
             </Link>
           </Button>
@@ -168,8 +165,7 @@ export default function DashboardContent() {
     cash: totalCashOnHand,
     bank: totalBankBalance,
     assets: totalAssets,
-    liabilities: totalLiabilities,
-  } = periodTotals;
+    liabilities: totalLiabilities} = periodTotals;
   const totalRevenue = Number(resData?.totalRevenue) || 0;
   const totalExpenses = Number(resData?.totalExpenses) || 0;
   const netIncome = Number(resData?.netIncome) || 0;
@@ -242,7 +238,7 @@ export default function DashboardContent() {
             </Button>
           </div>
           <Button asChild size="sm" className="h-8 gap-1 text-caption">
-            <Link to="/journal-entry">
+            <Link href="/journal-entry">
               <Plus size={14} /> New Entry
             </Link>
           </Button>
@@ -252,7 +248,7 @@ export default function DashboardContent() {
             size="sm"
             className="h-8 gap-1 text-caption"
           >
-            <Link to="/reports/income-statement">
+            <Link href="/reports/income-statement">
               <FileText size={14} /> Report
             </Link>
           </Button>

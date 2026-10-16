@@ -1,4 +1,5 @@
 "use client";
+import { usePathname } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -6,8 +7,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -20,8 +20,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar,
-} from "@/components/ui/sidebar";
+  useSidebar} from "@/components/ui/sidebar";
 import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { authApi, UserProfileData } from "@/lib/store/auth/authApi";
@@ -39,11 +38,10 @@ import {
   PanelLeftClose,
   Settings,
   User,
-  Wrench,
-} from "lucide-react";
-import { useLocation } from "react-router-dom";
+  Wrench} from "lucide-react";
+
 import * as React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();
@@ -77,7 +75,7 @@ const navigation = [
 ];
 
 export function AppSidebar() {
-  const { pathname: pathname } = useLocation();
+  const { pathname: pathname } = usePathname();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
@@ -130,8 +128,7 @@ export function AppSidebar() {
       style={
         {
           "--sidebar-width": "255px",
-          "--sidebar-width-icon": "4rem",
-        } as React.CSSProperties
+          "--sidebar-width-icon": "4rem"} as React.CSSProperties
       }
     >
       <SidebarHeader
@@ -180,7 +177,7 @@ export function AppSidebar() {
                       tooltip={item.title}
                       className="text-sm h-8 font-normal px-2"
                     >
-                      <Link to={item.url} className="flex items-center gap-2.5">
+                      <Link href={item.url} className="flex items-center gap-2.5">
                         <Icon className={ICON_CLASS} />
                         <span className="truncate group-data-[collapsible=icon]:hidden">
                           {item.title}
@@ -263,7 +260,7 @@ export function AppSidebar() {
                 className="w-56"
               >
                 <DropdownMenuItem asChild className="text-sm">
-                  <Link to="/settings">
+                  <Link href="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>

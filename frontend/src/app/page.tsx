@@ -8,17 +8,17 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { ArrowRight, Loader2, Lock, UserPlus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 
 export default function LandingPage(): React.JSX.Element {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
@@ -39,7 +39,7 @@ export default function LandingPage(): React.JSX.Element {
 
         if (result.isSuccess && result.data?.success) {
           setIsAuthenticated(true);
-          navigate("/home", { replace: true });
+          router.replace("/home");
         } else {
           setIsAuthenticated(false);
         }
@@ -51,7 +51,7 @@ export default function LandingPage(): React.JSX.Element {
     }
 
     checkAuthStatus();
-  }, [navigate]);
+  }, [router]);
 
   const handleOpenModal = (mode: "login" | "register"): void => {
     setAuthMode(mode);
@@ -60,7 +60,7 @@ export default function LandingPage(): React.JSX.Element {
 
   const handleSuccess = (): void => {
     setOpen(false);
-    navigate("/home", { replace: true });
+    router.replace("/home");
   };
 
   if (isAuthenticated) {

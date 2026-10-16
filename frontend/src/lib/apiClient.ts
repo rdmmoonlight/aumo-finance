@@ -18,8 +18,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // Ambil URL murni dari environment variable tanpa auto-correct/manipulasi string
 function getBackendTarget(): string {
   // Kosong = path relatif (/api/...), diteruskan oleh proxy Vite saat dev.
-  // Di production (Vercel) isi VITE_WEB_API_URL dengan URL backend.
-  return (import.meta.env.VITE_WEB_API_URL as string | undefined) || "";
+  // Di production (Vercel) isi NEXT_PUBLIC_WEB_API_URL dengan URL backend.
+  return (process.env.NEXT_PUBLIC_WEB_API_URL as string | undefined) || "";
 }
 
 const BASE_URL = getBackendTarget();

@@ -2,8 +2,8 @@ import { RouteMeta } from "@analogjs/router";
 import { HttpClient } from "@angular/common/http";
 import { Component, computed, inject, signal } from "@angular/core";
 
-import { AuthService } from "../../core/auth.service";
-import { API_URL } from "../../core/config";
+import { AuthService } from "../../../core/auth.service";
+import { API_URL } from "../../../core/config";
 
 export const routeMeta: RouteMeta = { title: "Beranda - Aumo Finance" };
 

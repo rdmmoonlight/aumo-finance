@@ -49,12 +49,12 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 export function ChartOfAccountsTable() {
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const highlightId = searchParams.get("highlight");
 
   const [searchText, setSearchText] = useState("");
@@ -273,7 +273,7 @@ export function ChartOfAccountsTable() {
               </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
                 <Link
-                  to={`/reports/general-ledger/permanent#account-${acc.id}`}
+                  href={`/reports/general-ledger/permanent#account-${acc.id}`}
                 >
                   <BookOpen size={14} />
                 </Link>

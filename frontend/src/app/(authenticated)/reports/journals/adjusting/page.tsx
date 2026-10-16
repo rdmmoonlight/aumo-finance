@@ -1,9 +1,9 @@
 "use client";
 
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -18,7 +18,7 @@ import { formatDateDisplay } from "../_lib/format";
 import { JournalEntry } from "../_lib/types";
 
 export default function AdjustingJournalPage() {
-  const navigate = useNavigate();
+  const navigate = useRouter();
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
@@ -133,7 +133,7 @@ export default function AdjustingJournalPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild size="sm">
-            <Link to="/journal-entry?type=adjusting">
+            <Link href="/journal-entry?type=adjusting">
               <Plus className="h-3.5 w-3.5" /> Add Adjusting
             </Link>
           </Button>
