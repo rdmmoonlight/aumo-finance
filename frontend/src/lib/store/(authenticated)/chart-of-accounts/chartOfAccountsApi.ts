@@ -39,9 +39,9 @@ export const chartOfAccountsApi = baseApi.injectEndpoints({
         url: "/chart-of-accounts",
         params: arg
           ? {
-            search: arg.search,
-            category: arg.category,
-          }
+              search: arg.search,
+              category: arg.category,
+            }
           : undefined,
       }),
       providesTags: ["ChartOfAccounts"],
