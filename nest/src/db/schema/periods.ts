@@ -4,9 +4,9 @@ import {
   index,
   integer,
   pgTable,
+  text,
   timestamp,
   uniqueIndex,
-  uuid,
   varchar,
 } from 'drizzle-orm/pg-core';
 
@@ -25,13 +25,13 @@ export const periods = pgTable(
     endDate: timestamp('EndDate', { withTimezone: true, mode: 'string' }).notNull(),
     isClosed: boolean('IsClosed').default(false).notNull(),
     isSelected: boolean('IsSelected').default(false).notNull(),
-    userId: uuid('UserId').notNull(),
+    userId: text('UserId').notNull(),
   },
   (table) => [
     uniqueIndex('IX_Periods_IsSelected_Unique')
-      .using('btree', table.userId.asc().nullsLast().op('uuid_ops'))
+      .using('btree', table.userId.asc().nullsLast())
       .where(sql`("IsSelected" = true)`),
-    index('IX_Periods_UserId').using('btree', table.userId.asc().nullsLast().op('uuid_ops')),
+    index('IX_Periods_UserId').using('btree', table.userId.asc().nullsLast()),
   ]
 );
 
