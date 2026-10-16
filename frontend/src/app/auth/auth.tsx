@@ -1,5 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useGoogleLogin } from "@react-oauth/google";
+import { useSearchParams } from "next/navigation";
+import React, { Suspense, useEffect, useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -8,12 +15,6 @@ import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useGoogleLogin } from "@react-oauth/google";
-import { useSearchParams } from "react-router-dom";
-import React, { Suspense, useEffect, useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
 
 // ===== TYPES =====
 export type AuthFormData = {
@@ -29,10 +30,12 @@ export interface AuthPageProps {
 }
 
 export const GOOGLE_CLIENT_ID: string =
-  import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
+  process.env.NEXT_PUBLIC__GOOGLE_CLIENT_ID ||
+  process.env.NEXT_PUBLIC__NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  "";
 
 export function GoogleIcon(
-  props: React.ComponentProps<"svg">,
+  props: React.ComponentProps<"svg">
 ): React.JSX.Element {
   return (
     <svg
@@ -87,12 +90,12 @@ export function GoogleAuthButtonInner({
       disabled={isPending}
       onClick={() => {
         if (!GOOGLE_CLIENT_ID) {
-          onError("VITE_GOOGLE_CLIENT_ID belum diset");
+          onError("NEXT_PUBLIC__GOOGLE_CLIENT_ID belum diset");
           return;
         }
         googleLogin();
       }}
-      className="w-full h-11 rounded-xl bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50"
+      className="h-11 w-full rounded-xl border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"
     >
       <GoogleIcon className="mr-2 h-4 w-4" /> Continue with Google
     </Button>
@@ -101,7 +104,7 @@ export function GoogleAuthButtonInner({
 
 export function AuthFormSkeleton(): React.JSX.Element {
   return (
-    <div className="w-full max-w-sm bg-white p-6 rounded-2xl border animate-pulse h-80 flex justify-center items-center">
+    <div className="flex h-80 w-full max-w-sm animate-pulse items-center justify-center rounded-2xl border bg-white p-6">
       <p className="text-sm text-zinc-400">Loading workspace...</p>
     </div>
   );
@@ -111,7 +114,7 @@ function AuthFormInner({
   initialMode = "login",
   onSuccess,
 }: AuthPageProps): React.JSX.Element {
-  const [searchParams] = useSearchParams();
+  const searchParams = useSearchParams();
   const dispatch = useDispatch();
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
@@ -140,14 +143,14 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
-  // Cek profil user saat pertama kali dimuat (Gantikan useGetApiV1AuthMeQuery)
+  // Cek profil user saat pertama kali dimuat
   useEffect(() => {
     let isMounted = true;
 
     async function checkAuthProfile() {
       try {
         const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate(),
+          authApi.endpoints.getProfile.initiate()
         );
 
         if (isMounted && "data" in result && result.data?.success) {
@@ -211,7 +214,7 @@ function AuthFormInner({
           password: values.password,
           rememberMe: values.keepMe ?? false,
           isMobileClient: false,
-        }),
+        })
       );
 
       if ("error" in result) {
@@ -238,7 +241,7 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch (e: any) {
+    } catch {
       setApiErr("Terjadi kesalahan sistem saat mencoba masuk.");
     } finally {
       setIsPending(false);
@@ -256,7 +259,7 @@ function AuthFormInner({
         authApi.endpoints.googleLogin.initiate({
           idToken,
           isMobileClient: false,
-        }),
+        })
       );
 
       if ("error" in result) {
@@ -271,7 +274,7 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch (e: any) {
+    } catch {
       setApiErr("Gagal verifikasi Google.");
     } finally {
       setIsPending(false);
@@ -281,12 +284,12 @@ function AuthFormInner({
   if (isProfileLoading) return <AuthFormSkeleton />;
 
   return (
-    <div className="light w-full max-w-sm bg-white text-black p-6 rounded-2xl shadow-sm border border-zinc-200">
+    <div className="light w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 text-black shadow-sm">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold tracking-tight">
           {mode === "login" ? "Sign in" : "Create account"}
         </h2>
-        <p className="text-sm text-zinc-600 mt-1">
+        <p className="mt-1 text-sm text-zinc-600">
           {mode === "login"
             ? "Masuk ke workspace kamu."
             : "Daftar untuk membuat workspace baru."}
@@ -300,16 +303,16 @@ function AuthFormInner({
           onError={setApiErr}
         />
         <div className="relative flex items-center justify-center">
-          <div className="border-t border-zinc-200 w-full" />
-          <span className="bg-white px-2 text-[10px] uppercase font-mono text-zinc-400 absolute">
+          <div className="w-full border-t border-zinc-200" />
+          <span className="absolute bg-white px-2 font-mono text-[10px] uppercase text-zinc-400">
             OR
           </span>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
+      <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
         <div className="space-y-1.5">
-          <Label className="text-xs uppercase font-semibold">Email</Label>
+          <Label className="text-xs font-semibold uppercase">Email</Label>
           <Input
             {...register("email")}
             placeholder="nama@email.com"
@@ -322,7 +325,7 @@ function AuthFormInner({
 
         <div className="space-y-1.5">
           <div className="flex justify-between">
-            <Label className="text-xs uppercase font-semibold">Password</Label>
+            <Label className="text-xs font-semibold uppercase">Password</Label>
             <button
               type="button"
               onClick={() => setShowPass(!showPass)}
@@ -345,7 +348,7 @@ function AuthFormInner({
         {mode === "register" && (
           <div className="space-y-1.5">
             <div className="flex justify-between">
-              <Label className="text-xs uppercase font-semibold">
+              <Label className="text-xs font-semibold uppercase">
                 Confirm Password
               </Label>
               <button
@@ -386,7 +389,7 @@ function AuthFormInner({
         )}
 
         {apiErr && (
-          <div className="bg-red-50 text-red-600 border border-red-200 text-xs px-3.5 py-3 rounded-xl">
+          <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-xs text-red-600">
             {apiErr}
           </div>
         )}
@@ -394,7 +397,7 @@ function AuthFormInner({
         <Button
           type="submit"
           disabled={isPending}
-          className="w-full h-11 rounded-xl bg-black text-white hover:bg-zinc-800"
+          className="h-11 w-full rounded-xl bg-black text-white hover:bg-zinc-800"
         >
           {isPending
             ? "Processing..."

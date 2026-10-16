@@ -12,7 +12,7 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, TrendingUp } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { ErrorAlert } from "../_components/common/ErrorAlert";
 import { LoadingState } from "../_components/common/LoadingState";
 import { NoPeriodCard } from "../_components/common/NoPeriodCard";
@@ -122,12 +122,12 @@ export default function IncomeStatementPage() {
             </div>
             <div className="flex gap-2">
               <Button asChild variant="outline" size="sm">
-                <Link to="/financial-statements/retained-earnings">
+                <Link href="/financial-statements/retained-earnings">
                   Retained Earnings
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm" className="gap-1.5">
-                <Link to="/financial-statements/statement-of-cash-flow">
+                <Link href="/financial-statements/statement-of-cash-flow">
                   <ArrowRight size={14} /> Cash Flow
                 </Link>
               </Button>

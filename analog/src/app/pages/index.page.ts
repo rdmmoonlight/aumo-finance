@@ -2,6 +2,7 @@ import { RouteMeta } from "@analogjs/router";
 import { Component } from "@angular/core";
 import { RouterLink } from "@angular/router";
 
+import { FooterComponent } from "../components/footer.component";
 import { pingGuard } from "../core/ping.guard";
 import { Logo } from "../shared/logo";
 
@@ -12,7 +13,8 @@ export const routeMeta: RouteMeta = {
 
 @Component({
   selector: "app-landing",
-  imports: [RouterLink, Logo],
+  standalone: true,
+  imports: [RouterLink, Logo, FooterComponent],
   template: `
     <div class="flex min-h-screen flex-col bg-slate-50 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
       <header class="border-b border-slate-200 bg-white transition-colors dark:border-slate-800 dark:bg-slate-900">
@@ -63,16 +65,12 @@ export const routeMeta: RouteMeta = {
         </section>
       </main>
 
-      <footer
-        class="border-t border-slate-200 bg-white py-6 text-center text-sm text-slate-500 transition-colors dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
-      >
-        &copy; {{ year }} Aumo Finance. Seluruh hak dilindungi.
-      </footer>
+      <!-- Panggil Komponent Footer -->
+      <app-footer />
     </div>
   `,
 })
 export default class LandingPage {
-  readonly year = new Date().getFullYear();
   readonly features = [
     {
       title: "Jurnal & Buku Besar",

@@ -14,7 +14,7 @@ export const customRoutes: Routes = [
   {
     path: "",
     canActivate: [guestGuard],
-    loadComponent: () => import("./pages/(auth).page").then((m) => m.default),
+    loadComponent: () => import("./pages/(auth)/(auth).page").then((m) => m.default),
     children: [
       {
         path: "login",
@@ -38,7 +38,7 @@ export const customRoutes: Routes = [
       {
         path: "home",
         loadComponent: () =>
-          import("./pages/(app)/home.page").then((m) => m.default),
+          import("./pages/(app)/home/index.page").then((m) => m.default),
       },
     ],
   },

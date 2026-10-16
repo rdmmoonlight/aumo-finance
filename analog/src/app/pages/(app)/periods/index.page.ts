@@ -1,11 +1,13 @@
 import { RouteMeta } from "@analogjs/router";
 import { Component, inject, OnInit, signal } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
+
+// Perbaiki relative import sesuai posisi baru di src/app/pages/(app)/periods.page.ts
 import {
   OpenPeriodInfo,
   Period,
   PeriodsService,
-} from "../(periods)/periods.service";
+} from "./periods.service";
 
 export const routeMeta: RouteMeta = {
   title: "Periode Keuangan - Aumo Finance",
@@ -16,14 +18,16 @@ export const routeMeta: RouteMeta = {
   standalone: true,
   imports: [ReactiveFormsModule],
   template: `
-    <div class="space-y-6 p-6">
+    <div class="space-y-6">
       <!-- Header Page -->
       <div
         class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 class="text-2xl font-bold text-slate-900">Periode Keuangan</h1>
-          <p class="text-sm text-slate-600">
+          <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            Periode Keuangan
+          </h1>
+          <p class="text-sm text-slate-600 dark:text-slate-400">
             Kelola dan pantau siklus anggaran bulanan Anda.
           </p>
         </div>
@@ -32,7 +36,7 @@ export const routeMeta: RouteMeta = {
             <button
               (click)="clearSelection()"
               [disabled]="isLoading()"
-              class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              class="inline-flex items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
             >
               Reset Pilihan
             </button>
@@ -61,16 +65,17 @@ export const routeMeta: RouteMeta = {
       <!-- Info Banner Periode Terbuka -->
       @if (openPeriodInfo()?.period) {
         <div
-          class="rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900 flex items-center justify-between"
+          class="flex items-center justify-between rounded-xl border border-blue-200 bg-blue-50 p-4 text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/40 dark:text-blue-200"
         >
           <div>
             <span
-              class="text-xs font-semibold uppercase tracking-wider text-blue-600 block"
-              >Periode Berjalan</span
+              class="block text-xs font-semibold uppercase tracking-wider text-blue-600 dark:text-blue-400"
             >
-            <span class="text-lg font-bold">{{
-              openPeriodInfo()?.period?.name
-            }}</span>
+              Periode Berjalan
+            </span>
+            <span class="text-lg font-bold">
+              {{ openPeriodInfo()?.period?.name }}
+            </span>
           </div>
           <button
             (click)="closePeriod(openPeriodInfo()!.period!.id)"
@@ -84,12 +89,12 @@ export const routeMeta: RouteMeta = {
 
       <!-- Table Section -->
       <div
-        class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+        class="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-slate-600">
+          <table class="w-full text-left text-sm text-slate-600 dark:text-slate-300">
             <thead
-              class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-700"
+              class="border-b border-slate-200 bg-slate-50 text-xs font-semibold uppercase tracking-wider text-slate-700 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-300"
             >
               <tr>
                 <th scope="col" class="px-6 py-4">Nama Periode</th>
@@ -100,7 +105,7 @@ export const routeMeta: RouteMeta = {
                 <th scope="col" class="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200">
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
               @if (isLoading()) {
                 <tr>
                   <td colspan="6" class="px-6 py-8 text-center text-slate-500">
@@ -110,24 +115,24 @@ export const routeMeta: RouteMeta = {
               } @else {
                 @for (period of periods(); track period.id) {
                   <tr
-                    class="hover:bg-slate-50/80 transition-colors"
+                    class="transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/50"
                     [class.bg-brand-50]="selectedPeriodId() === period.id"
                   >
-                    <td class="px-6 py-4 font-semibold text-slate-900">
+                    <td class="px-6 py-4 font-semibold text-slate-900 dark:text-slate-100">
                       {{ period.name }}
                       @if (selectedPeriodId() === period.id) {
-                        <span class="ml-2 text-xs text-brand-700 font-normal"
-                          >(Terpilih)</span
-                        >
+                        <span class="ml-2 text-xs font-normal text-brand-700 dark:text-brand-400">
+                          (Terpilih)
+                        </span>
                       }
                     </td>
-                    <td class="px-6 py-4 text-slate-500">
+                    <td class="px-6 py-4 text-slate-500 dark:text-slate-400">
                       {{ period.startDate }} - {{ period.endDate }}
                     </td>
-                    <td class="px-6 py-4 font-medium text-emerald-600">
+                    <td class="px-6 py-4 font-medium text-emerald-600 dark:text-emerald-400">
                       Rp {{ (period.income || 0).toLocaleString("id-ID") }}
                     </td>
-                    <td class="px-6 py-4 font-medium text-rose-600">
+                    <td class="px-6 py-4 font-medium text-rose-600 dark:text-rose-400">
                       Rp {{ (period.expense || 0).toLocaleString("id-ID") }}
                     </td>
                     <td class="px-6 py-4">
@@ -135,23 +140,23 @@ export const routeMeta: RouteMeta = {
                         period.status === "active" || period.status === "OPEN"
                       ) {
                         <span
-                          class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20"
+                          class="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700 ring-1 ring-inset ring-emerald-600/20 dark:bg-emerald-950/50 dark:text-emerald-400"
                         >
                           Aktif
                         </span>
                       } @else {
                         <span
-                          class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10"
+                          class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600 ring-1 ring-inset ring-slate-500/10 dark:bg-slate-800 dark:text-slate-400"
                         >
                           Selesai
                         </span>
                       }
                     </td>
-                    <td class="px-6 py-4 text-right space-x-2">
+                    <td class="space-x-2 px-6 py-4 text-right">
                       <button
                         (click)="selectPeriod(period.id)"
                         [disabled]="selectedPeriodId() === period.id"
-                        class="font-medium text-brand-700 hover:text-brand-900 hover:underline disabled:text-slate-400"
+                        class="font-medium text-brand-700 hover:text-brand-900 hover:underline disabled:text-slate-400 dark:text-brand-400"
                       >
                         Pilih
                       </button>
@@ -160,7 +165,7 @@ export const routeMeta: RouteMeta = {
                       ) {
                         <button
                           (click)="closePeriod(period.id)"
-                          class="font-medium text-rose-600 hover:text-rose-800 hover:underline"
+                          class="font-medium text-rose-600 hover:text-rose-800 hover:underline dark:text-rose-400"
                         >
                           Tutup
                         </button>
@@ -188,16 +193,16 @@ export const routeMeta: RouteMeta = {
         <div
           class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm"
         >
-          <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900 dark:border dark:border-slate-800">
             <div
-              class="flex items-center justify-between border-b border-slate-100 pb-3"
+              class="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800"
             >
-              <h3 class="text-lg font-bold text-slate-900">
+              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
                 Buat Periode Baru
               </h3>
               <button
                 (click)="openModal.set(false)"
-                class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                class="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -222,15 +227,16 @@ export const routeMeta: RouteMeta = {
               <div>
                 <label
                   for="name"
-                  class="mb-1 block text-sm font-medium text-slate-700"
-                  >Nama Periode</label
+                  class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
                 >
+                  Nama Periode
+                </label>
                 <input
                   id="name"
                   type="text"
                   formControlName="name"
                   placeholder="Contoh: Oktober 2026"
-                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                  class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 />
               </div>
 
@@ -238,27 +244,29 @@ export const routeMeta: RouteMeta = {
                 <div>
                   <label
                     for="startDate"
-                    class="mb-1 block text-sm font-medium text-slate-700"
-                    >Tanggal Mulai</label
+                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
+                    Tanggal Mulai
+                  </label>
                   <input
                     id="startDate"
                     type="date"
                     formControlName="startDate"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
                 <div>
                   <label
                     for="endDate"
-                    class="mb-1 block text-sm font-medium text-slate-700"
-                    >Tanggal Selesai</label
+                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300"
                   >
+                    Tanggal Selesai
+                  </label>
                   <input
                     id="endDate"
                     type="date"
                     formControlName="endDate"
-                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500"
+                    class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                   />
                 </div>
               </div>
@@ -267,7 +275,7 @@ export const routeMeta: RouteMeta = {
                 <button
                   type="button"
                   (click)="openModal.set(false)"
-                  class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                  class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 >
                   Batal
                 </button>

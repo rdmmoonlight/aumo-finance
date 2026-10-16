@@ -7,7 +7,7 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Banknote, Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { CashFlowSectionTable } from "../_components/cash-flow/CashFlowSectionTable";
 import { ErrorAlert } from "../_components/common/ErrorAlert";
 import { LoadingState } from "../_components/common/LoadingState";
@@ -111,7 +111,7 @@ export default function StatementOfCashFlowPage() {
               size="sm"
               className="gap-1.5 text-caption"
             >
-              <Link to="/financial-statements/income-statement">
+              <Link href="/financial-statements/income-statement">
                 <ArrowRight size={14} /> Income Statement
               </Link>
             </Button>

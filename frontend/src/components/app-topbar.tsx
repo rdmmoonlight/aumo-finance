@@ -1,4 +1,5 @@
 "use client";
+import { usePathname } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -7,15 +8,13 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+  BreadcrumbSeparator} from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  PopoverTrigger} from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
 import {
   AlertTriangle,
@@ -24,10 +23,9 @@ import {
   Info,
   Loader2,
   RefreshCw,
-  Search,
-} from "lucide-react";
+  Search} from "lucide-react";
 import * as React from "react";
-import { useLocation } from "react-router-dom";
+
 
 import { store } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
@@ -52,7 +50,7 @@ interface NotificationItem {
 }
 
 export function AppTopBar() {
-  const { pathname: pathname } = useLocation();
+  const { pathname: pathname } = usePathname();
 
   // State internal pengganti Auto-Generated Hooks
   const [userProfile, setUserProfile] = React.useState<any>(null);
