@@ -20,6 +20,8 @@ using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 
 [ApiController]
 [Route("/dashboard")]
@@ -29,11 +31,25 @@ public class DashboardController : ControllerBase
 {
     private readonly AppDbContext db;
 
-    public DashboardController(AppDbContext db) => this.db = db;
+    private readonly IValidator<GetDashboardQuery> queryValidator;
+
+    public DashboardController(AppDbContext db, IValidator<GetDashboardQuery> queryValidator)
+    {
+        this.db = db;
+        this.queryValidator = queryValidator;
+    }
 
     [HttpGet]
-    public async Task<IActionResult> GetDashboardData([FromQuery] string period = "monthly")
+    public async Task<IActionResult> GetDashboardData([FromQuery] GetDashboardQuery query)
     {
+        var validation = await this.queryValidator.ValidateAsync(query);
+        if (!validation.IsValid)
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
+
+        var period = query.Period ?? "monthly";
+
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
         {

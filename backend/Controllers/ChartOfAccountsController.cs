@@ -36,23 +36,35 @@ public class ChartOfAccountsController : ControllerBase
     private readonly AppDbContext db;
     private readonly IValidator<CreateAccountRequest> createAccountValidator;
     private readonly IValidator<UpdateAccountRequest> updateAccountValidator;
+    private readonly IValidator<GetAccountsQuery> getAccountsValidator;
 
     public ChartOfAccountsController(
         AppDbContext db,
         IValidator<CreateAccountRequest> createAccountValidator,
-        IValidator<UpdateAccountRequest> updateAccountValidator)
+        IValidator<UpdateAccountRequest> updateAccountValidator,
+        IValidator<GetAccountsQuery> getAccountsValidator)
     {
         this.db = db;
         this.createAccountValidator = createAccountValidator;
         this.updateAccountValidator = updateAccountValidator;
+        this.getAccountsValidator = getAccountsValidator;
     }
 
     // ==========================================
     // 1. GET: /chart-of-accounts
     // ==========================================
     [HttpGet]
-    public async Task<IActionResult> GetAccounts([FromQuery] string? search, [FromQuery] string? category)
+    public async Task<IActionResult> GetAccounts([FromQuery] GetAccountsQuery filter)
     {
+        var validation = await this.getAccountsValidator.ValidateAsync(filter);
+        if (!validation.IsValid)
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
+
+        var search = filter.Search;
+        var category = filter.Category;
+
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
         {

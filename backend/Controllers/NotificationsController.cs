@@ -16,6 +16,8 @@ using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 
 [Authorize]
 [ApiController]
@@ -24,10 +26,12 @@ using Microsoft.EntityFrameworkCore;
 public class NotificationsController : ControllerBase
 {
     private readonly AppDbContext context;
+    private readonly IValidator<GetNotificationsQuery> queryValidator;
 
-    public NotificationsController(AppDbContext context)
+    public NotificationsController(AppDbContext context, IValidator<GetNotificationsQuery> queryValidator)
     {
         this.context = context;
+        this.queryValidator = queryValidator;
     }
 
     // Ubah return type method helper dari string ke Guid
@@ -39,8 +43,16 @@ public class NotificationsController : ControllerBase
 
     // GET: api/v1/notifications
     [HttpGet]
-    public async Task<IActionResult> GetMyNotifications([FromQuery] int limit = 20)
+    public async Task<IActionResult> GetMyNotifications([FromQuery] GetNotificationsQuery query)
     {
+        var validation = await this.queryValidator.ValidateAsync(query);
+        if (!validation.IsValid)
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
+
+        var limit = query.Limit;
+
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
         {

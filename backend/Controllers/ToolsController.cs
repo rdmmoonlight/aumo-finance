@@ -25,6 +25,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 
 [ApiController]
 [Route("/tools")]
@@ -33,10 +35,12 @@ using Microsoft.EntityFrameworkCore;
 public class ToolsController : ControllerBase
 {
     private readonly AppDbContext context;
+    private readonly IValidator<JournalImportRequestDto> importValidator;
 
-    public ToolsController(AppDbContext context)
+    public ToolsController(AppDbContext context, IValidator<JournalImportRequestDto> importValidator)
     {
         this.context = context;
+        this.importValidator = importValidator;
     }
 
     // ==========================================
@@ -81,9 +85,10 @@ public class ToolsController : ControllerBase
     [HttpPost("preview-journal-import")]
     public async Task<IActionResult> PreviewJournalImport([FromBody] JournalImportRequestDto request)
     {
-        if (request?.Transactions == null || request.Transactions.Count == 0)
+        var validation = await this.importValidator.ValidateAsync(request);
+        if (!validation.IsValid)
         {
-            return this.BadRequest(new { message = "No transaction data provided for preview." });
+            return this.BadRequest(validation.ToErrorResponse());
         }
 
         var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -210,14 +215,10 @@ public class ToolsController : ControllerBase
     [HttpPost("import-journal-entries")]
     public async Task<IActionResult> ImportJournalEntries([FromBody] JournalImportRequestDto request)
     {
-        if (request?.Transactions == null || request.Transactions.Count == 0)
+        var validation = await this.importValidator.ValidateAsync(request);
+        if (!validation.IsValid)
         {
-            return this.BadRequest(new { message = "No transaction data provided for import." });
-        }
-
-        if (request.TargetMonth < 1 || request.TargetMonth > 12 || request.TargetYear < 2000)
-        {
-            return this.BadRequest(new { message = "Invalid period parameters provided." });
+            return this.BadRequest(validation.ToErrorResponse());
         }
 
         var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier);

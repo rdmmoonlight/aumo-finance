@@ -14,9 +14,6 @@ using FluentValidation;
 /// </summary>
 public abstract class JournalEntryValidatorBase<T> : AbstractValidator<T>
 {
-    // Selaras TransactionNumberService: "Adjusting" => AJ, selain itu GJ.
-    public static readonly string[] AllowedJournalTypes = { "General", "Adjusting" };
-
     private const int MaxLines = 200;
     private static readonly DateTime MinEntryDate = new(2000, 1, 1);
     private static readonly DateTime MaxEntryDate = new(2100, 12, 31);
@@ -34,7 +31,7 @@ public abstract class JournalEntryValidatorBase<T> : AbstractValidator<T>
 
         // Kosong diperbolehkan (Create => General, Edit => jenis jurnal semula).
         this.RuleFor(journalType)
-            .Must(t => string.IsNullOrWhiteSpace(t) || AllowedJournalTypes.Contains(t))
+            .Must(t => JournalTypes.IsValidOrEmpty(t))
             .WithMessage("Journal type must be 'General' or 'Adjusting'.");
 
         this.RuleFor(lines)

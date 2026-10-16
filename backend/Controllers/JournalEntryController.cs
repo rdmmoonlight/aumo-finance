@@ -35,17 +35,23 @@ public class JournalEntryController : ControllerBase
     private readonly ITransactionNumberService transactionNumberService;
     private readonly IValidator<CreateJournalEntryRequest> createValidator;
     private readonly IValidator<UpdateJournalEntryRequest> updateValidator;
+    private readonly IValidator<SearchDescriptionsQuery> searchValidator;
+    private readonly IValidator<NextTransactionNumberQuery> nextNumberValidator;
 
     public JournalEntryController(
         AppDbContext db,
         ITransactionNumberService transactionNumberService,
         IValidator<CreateJournalEntryRequest> createValidator,
-        IValidator<UpdateJournalEntryRequest> updateValidator)
+        IValidator<UpdateJournalEntryRequest> updateValidator,
+        IValidator<SearchDescriptionsQuery> searchValidator,
+        IValidator<NextTransactionNumberQuery> nextNumberValidator)
     {
         this.db = db;
         this.transactionNumberService = transactionNumberService;
         this.createValidator = createValidator;
         this.updateValidator = updateValidator;
+        this.searchValidator = searchValidator;
+        this.nextNumberValidator = nextNumberValidator;
     }
 
     // ==========================================
@@ -294,8 +300,16 @@ public class JournalEntryController : ControllerBase
     // 5. GET: /journal-entry/search-descriptions
     // ==========================================
     [HttpGet("search-descriptions")]
-    public async Task<IActionResult> SearchDescriptions([FromQuery] string q)
+    public async Task<IActionResult> SearchDescriptions([FromQuery] SearchDescriptionsQuery request)
     {
+        var validation = await this.searchValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
+
+        var q = request.Q ?? string.Empty;
+
         if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
         {
             return this.Ok(Array.Empty<string>());
@@ -327,8 +341,17 @@ public class JournalEntryController : ControllerBase
     // 6. GET: /journal-entry/next-transaction-number
     // ==========================================
     [HttpGet("next-transaction-number")]
-    public async Task<IActionResult> GetNextTransactionNumber([FromQuery] string journalType = "General", [FromQuery] DateTime? entryDate = null)
+    public async Task<IActionResult> GetNextTransactionNumber([FromQuery] NextTransactionNumberQuery request)
     {
+        var validation = await this.nextNumberValidator.ValidateAsync(request);
+        if (!validation.IsValid)
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
+
+        var journalType = request.JournalType ?? "General";
+        var entryDate = request.EntryDate;
+
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
