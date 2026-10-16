@@ -50,7 +50,7 @@ interface NotificationItem {
 }
 
 export function AppTopBar() {
-  const { pathname: pathname } = usePathname();
+  const pathname = usePathname();
 
   // State internal pengganti Auto-Generated Hooks
   const [userProfile, setUserProfile] = React.useState<any>(null);
