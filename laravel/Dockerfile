@@ -1,6 +1,6 @@
 FROM php:8.2-fpm-alpine
 
-RUN apk add --no-linux-headers --no-cache nginx curl git zip unzip libpng-dev libzip-dev \
+RUN apk add --no-cache nginx curl git zip unzip libpng-dev libzip-dev \
     && docker-php-ext-install pdo pdo_mysql zip
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -15,7 +15,7 @@ RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 # Konfigurasi Nginx minimalis
 RUN echo 'server { \
-    listen 8080; \
+    listen 5000; \
     root /var/www/public; \
     index index.php; \
     location / { try_files $uri $uri/ /index.php?$query_string; } \
@@ -26,6 +26,6 @@ RUN echo 'server { \
     } \
 }' > /etc/nginx/http.d/default.conf
 
-EXPOSE 8080
+EXPOSE 5000
 
 CMD php-fpm -D && nginx -g 'daemon off;'
