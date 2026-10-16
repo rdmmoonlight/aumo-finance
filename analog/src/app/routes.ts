@@ -1,6 +1,8 @@
 // src/app/routes.ts
 import { Routes } from "@angular/router";
 
+import { authGuard, guestGuard } from "./core/auth.guard";
+
 export const customRoutes: Routes = [
   // Rute Root / Beranda Utama
   {
@@ -11,6 +13,7 @@ export const customRoutes: Routes = [
   // Rute Auth (dengan Layout Parent `(auth).page.ts`)
   {
     path: "",
+    canActivate: [guestGuard],
     loadComponent: () => import("./pages/(auth).page").then((m) => m.default),
     children: [
       {
@@ -29,6 +32,7 @@ export const customRoutes: Routes = [
   // Rute App (dengan Layout Parent `(app).page.ts`)
   {
     path: "",
+    canActivate: [authGuard],
     loadComponent: () => import("./pages/(app).page").then((m) => m.default),
     children: [
       {

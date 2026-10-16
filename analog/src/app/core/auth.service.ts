@@ -64,10 +64,6 @@ export class AuthService {
   clearSession(): void {
     this.user.set(null);
   }
-
-  hasToken(): boolean {
-    return !!localStorage.getItem("token"); // Sesuaikan key storage yang kamu pakai (misal: 'access_token' atau 'auth_token')
-  }
 }
 
 /** Ambil pesan error dari format { success:false, message, errors } milik backend. */
