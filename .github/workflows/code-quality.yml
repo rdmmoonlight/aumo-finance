@@ -54,13 +54,16 @@ jobs:
         run: dotnet restore
         working-directory: backend
 
-      # Otomatis merapikan kode C# berdasarkan .editorconfig & Roslyn
-      - name: Auto-Format C# Code
-        run: dotnet format --severity info || true
+      # Merapikan whitespace & style aman tanpa memicu crash MSBuildWorkspace
+      - name: Auto-Format C# Code (Whitespace & Basic Style)
+        run: |
+          dotnet format whitespace || true
+          dotnet format style --severity error || true
         working-directory: backend
 
+      # Build & beri penanda (annotation) jika ada warning/error yang tersisa
       - name: Build & Typecheck (.NET)
-        run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true
+        run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true /p:ReportAnalyzer=true
         working-directory: backend
 
       # 4. FRONTEND (Next.js)
