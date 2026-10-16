@@ -30,7 +30,7 @@ public class JournalService : IJournalService
         var expenseRows = rows.Where(r => r.Type == "OperatingExpenses" || r.Type == "OtherExpenses").Where(r => r.NetBalance != 0).ToList();
 
         // BLOCK 1: Closing Revenues to Income Summary
-        if (incomeRows.Any())
+        if (incomeRows.Count > 0)
         {
             var group1 = new ClosingJournalEntryGroupApiResponse { Description = "Closing Revenue Accounts to Income Summary" };
             foreach (var r in incomeRows)
@@ -55,7 +55,7 @@ public class JournalService : IJournalService
         }
 
         // BLOCK 2: Closing Expenses to Income Summary
-        if (expenseRows.Any())
+        if (expenseRows.Count > 0)
         {
             var group2 = new ClosingJournalEntryGroupApiResponse { Description = "Closing Expense Accounts to Income Summary" };
             group2.Lines.Add(new ClosingJournalLineApiResponse

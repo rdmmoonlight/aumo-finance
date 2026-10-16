@@ -98,7 +98,7 @@ namespace AumoBackend.Controllers
             }
 
             // Flexible Binding
-            var uploadFile = file ?? avatar ?? this.Request.Form.Files.FirstOrDefault();
+            var uploadFile = file ?? avatar ?? (this.Request.Form.Files.Count > 0 ? this.Request.Form.Files[0] : null);
 
             if (uploadFile == null || uploadFile.Length == 0)
             {

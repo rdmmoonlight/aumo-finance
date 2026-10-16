@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="JournalsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -93,7 +94,7 @@ public class JournalController : ControllerBase
                 Id = x.Header.JournalEntryId,
                 x.Header.TransactionNumber,
                 x.Header.JournalType,
-                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd"),
+                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
                 x.Header.CreatedAt,
                 x.Header.UpdatedAt,
                 lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
@@ -101,7 +102,7 @@ public class JournalController : ControllerBase
                     Id = l.LineId,
                     l.AccountId,
                     AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString() : "0",
+                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
                     l.LineDescription,
                     l.Debit,
                     l.Credit,
@@ -171,7 +172,7 @@ public class JournalController : ControllerBase
                 Id = x.Header.JournalEntryId,
                 x.Header.TransactionNumber,
                 x.Header.JournalType,
-                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd"),
+                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
                 x.Header.CreatedAt,
                 x.Header.UpdatedAt,
                 lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
@@ -179,7 +180,7 @@ public class JournalController : ControllerBase
                     Id = l.LineId,
                     l.AccountId,
                     AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString() : "0",
+                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
                     l.LineDescription,
                     l.Debit,
                     l.Credit,

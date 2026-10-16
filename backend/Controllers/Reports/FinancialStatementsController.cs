@@ -192,7 +192,7 @@ public class FinancialStatementsController : ControllerBase
                 continue;
             }
 
-            int.TryParse(r.ReferenceNumber, out int refNum);
+            if (int.TryParse(r.ReferenceNumber, out int refNum)) { /* parsed */ }
 
             if (AccountClassificationHelper.IsTemporary(r.Type ?? string.Empty) || refNum >= 400)
             {

@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="DashboardService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -64,21 +65,21 @@ public class DashboardService : IDashboardService
         {
             var bal = monthlyLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
             bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase) || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
-            return new CashAccountItemDto { AccountId = a.Id.ToString(), ReferenceNumber = a.ReferenceNumber.ToString(), AccountName = a.AccountName, Balance = bal, IsBank = isBank };
+            return new CashAccountItemDto { AccountId = a.Id.ToString(CultureInfo.InvariantCulture), ReferenceNumber = a.ReferenceNumber.ToString(CultureInfo.InvariantCulture), AccountName = a.AccountName, Balance = bal, IsBank = isBank };
         }).ToList();
 
         var annualCashBreakdown = cashBankAccounts.Select(a =>
         {
             var bal = annualLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
             bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase) || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
-            return new CashAccountItemDto { AccountId = a.Id.ToString(), ReferenceNumber = a.ReferenceNumber.ToString(), AccountName = a.AccountName, Balance = bal, IsBank = isBank };
+            return new CashAccountItemDto { AccountId = a.Id.ToString(CultureInfo.InvariantCulture), ReferenceNumber = a.ReferenceNumber.ToString(CultureInfo.InvariantCulture), AccountName = a.AccountName, Balance = bal, IsBank = isBank };
         }).ToList();
 
         var cumulativeCashBreakdown = cashBankAccounts.Select(a =>
         {
             var bal = cumulativeLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit);
             bool isBank = a.AccountName.Contains("Bank", StringComparison.OrdinalIgnoreCase) || a.AccountName.Contains("Rekening", StringComparison.OrdinalIgnoreCase);
-            return new CashAccountItemDto { AccountId = a.Id.ToString(), ReferenceNumber = a.ReferenceNumber.ToString(), AccountName = a.AccountName, Balance = bal, IsBank = isBank };
+            return new CashAccountItemDto { AccountId = a.Id.ToString(CultureInfo.InvariantCulture), ReferenceNumber = a.ReferenceNumber.ToString(CultureInfo.InvariantCulture), AccountName = a.AccountName, Balance = bal, IsBank = isBank };
         }).ToList();
 
         var totalCashOnHandMonthly = monthlyCashBreakdown.Where(x => !x.IsBank).Sum(x => x.Balance);
@@ -108,8 +109,8 @@ public class DashboardService : IDashboardService
         var expenseBreakdown = expenseAccountsMeta
             .Select(a => new ExpenseAccountItemDto
             {
-                AccountId = a.Id.ToString(),
-                ReferenceNumber = a.ReferenceNumber.ToString(),
+                AccountId = a.Id.ToString(CultureInfo.InvariantCulture),
+                ReferenceNumber = a.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
                 AccountName = a.AccountName,
                 Balance = periodLines.Where(l => l.AccountId == a.Id).Sum(l => l.Debit - l.Credit),
             })
@@ -152,7 +153,7 @@ public class DashboardService : IDashboardService
                 var exp = g.Where(l => expenseAccountsMeta.Select(e => e.Id).Contains(l.AccountId)).Sum(l => l.Debit - l.Credit);
                 return new ChartTrendItemDto
                 {
-                    Label = g.Key.ToString("dd MMM"),
+                    Label = g.Key.ToString("dd MMM", CultureInfo.InvariantCulture),
                     Revenue = rev,
                     Expense = exp,
                     Net = rev - exp,

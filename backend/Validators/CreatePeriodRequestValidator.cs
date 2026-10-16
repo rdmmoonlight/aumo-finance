@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="CreatePeriodRequestValidator.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -102,9 +103,9 @@ public class CreatePeriodRequestValidator : AbstractValidator<CreatePeriodReques
     {
         var codes = new[]
         {
-            int.Parse(r.CashAccountCode!),
-            int.Parse(r.BankAccountCode!),
-            int.Parse(r.RetainedEarningsAccountCode!),
+            int.Parse(r.CashAccountCode!, System.Globalization.CultureInfo.InvariantCulture),
+            int.Parse(r.BankAccountCode!, System.Globalization.CultureInfo.InvariantCulture),
+            int.Parse(r.RetainedEarningsAccountCode!, System.Globalization.CultureInfo.InvariantCulture),
         };
         return codes.Distinct().Count() == codes.Length;
     }
