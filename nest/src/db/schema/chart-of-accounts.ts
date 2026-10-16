@@ -1,4 +1,4 @@
-import { boolean, integer, pgTable, text, uuid, varchar } from 'drizzle-orm/pg-core';
+import { boolean, integer, pgTable, text, varchar } from 'drizzle-orm/pg-core';
 
 export const chartOfAccounts = pgTable('chart-of-accounts', {
   id: integer().primaryKey().notNull(),
@@ -7,5 +7,5 @@ export const chartOfAccounts = pgTable('chart-of-accounts', {
   type: text().notNull(),
   role: text().notNull(),
   isActive: boolean('is_active').notNull(),
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
 });

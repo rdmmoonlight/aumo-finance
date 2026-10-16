@@ -1,63 +1,42 @@
 import { HttpClient } from "@angular/common/http";
 import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
+import { API_URL } from "../../../core/config";
 
 export interface Period {
-  id: string;
-  name: string;
+  id: number;
+  periodName: string;
   startDate: string;
   endDate: string;
-  income?: number;
-  expense?: number;
-  status?: "active" | "closed" | string;
-  isSelected?: boolean;
+  isClosed: boolean;
+  isSelected: boolean;
+  userId: string;
 }
 
-export interface OpenPeriodInfo {
-  hasOpenPeriod: boolean;
-  period?: Period;
-}
+export type CreatePeriodDto = Pick<Period, "periodName" | "startDate" | "endDate">;
 
-export interface CreatePeriodDto {
-  name: string;
-  startDate: string;
-  endDate: string;
-}
-
-@Injectable({
-  providedIn: "root",
-})
+@Injectable({ providedIn: "root" })
 export class PeriodsService {
   private readonly http = inject(HttpClient);
-  private readonly baseUrl = "/api/periods";
+  private readonly baseUrl = `${API_URL}/periods`;
 
-  // GET /periods
   getPeriods(): Observable<Period[]> {
     return this.http.get<Period[]>(this.baseUrl);
   }
 
-  // GET /periods/open-info
-  getOpenPeriodInfo(): Observable<OpenPeriodInfo> {
-    return this.http.get<OpenPeriodInfo>(`${this.baseUrl}/open-info`);
-  }
-
-  // POST /periods
   createPeriod(dto: CreatePeriodDto): Observable<Period> {
     return this.http.post<Period>(this.baseUrl, dto);
   }
 
-  // POST /periods/{id}/select
-  selectPeriod(id: string): Observable<void> {
+  selectPeriod(id: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${id}/select`, {});
   }
 
-  // POST /periods/clear-selection
   clearSelection(): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/clear-selection`, {});
   }
 
-  // POST /periods/{id}/close
-  closePeriod(id: string): Observable<void> {
+  closePeriod(id: number): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${id}/close`, {});
   }
 }

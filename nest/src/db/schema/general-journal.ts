@@ -1,4 +1,4 @@
-import { integer, numeric, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core';
+import { integer, numeric, pgTable, text, timestamp, varchar } from 'drizzle-orm/pg-core';
 
 export const generalJournal = pgTable('general-journal', {
   id: integer().primaryKey().notNull(),
@@ -12,7 +12,7 @@ export const generalJournal = pgTable('general-journal', {
   accountNumber: integer('account_number'),
   debit: numeric({ precision: 15, scale: 2 }).default('0'),
   credit: numeric({ precision: 15, scale: 2 }).default('0'),
-  userId: uuid('user_id').notNull(),
+  userId: text('user_id').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true, mode: 'string' }).notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'string' }),
 });
