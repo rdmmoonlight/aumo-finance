@@ -13,7 +13,7 @@ public static class AllowedOrigins
     public static readonly string[] All =
     {
         "http://localhost:3000",
-        "https://aumo-finance-web.vercel.app",
+        "https://aumonext.vercel.app",
     };
 
     public static bool IsAllowed(Uri uri)
