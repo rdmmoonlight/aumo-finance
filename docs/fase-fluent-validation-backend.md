@@ -92,25 +92,31 @@ Cek yang membutuhkan database tetap di controller: akun aktif milik user dan per
 
 Belum dikerjakan (masuk Fase 7): query `q` pada `SearchDescriptions`, serta `journalType` dan `entryDate` pada `GetNextTransactionNumber`.
 
-### Fase 6 — Settings & Tools
+### Fase 6 — Settings & Tools (selesai)
 
-| Request | File DTO | Controller | Pekerjaan |
-|---|---|---|---|
-| `UpdateProfileRequest` | `DTOs/SettingsDto.cs` | `SettingsController.UpdateProfile` (±46) | `UserName` 3–50 karakter dan format valid, `PhoneNumber` format, `Bio` maks. 500, `AvatarUrl` URL absolut |
-| `IFormFile` avatar | — | `SettingsController.UploadAvatar` (±90) | Ukuran maks., ekstensi dan content-type gambar |
-| `JournalImportRequestDto` | `DTOs/ToolsDto.cs` | `ToolsController.PreviewJournalImport` (±79), `ImportJournalEntries` (±208) | Daftar baris tidak kosong, batas jumlah baris, tiap baris mengikuti aturan jurnal Fase 5 |
+| Request | Hasil |
+|---|---|
+| `UpdateProfileRequest` | `Validators/Settings/UpdateProfileRequestValidator.cs`, dipasang di `SettingsController.UpdateProfile`. Nama lengkap maks. 100, username maks. 256 (karakter diperiksa Identity), telepon 5–20 karakter (digit, spasi, `+ - ( ) .`), bio maks. 500, `AvatarUrl` harus URL http/https absolut (menolak `javascript:` dan sejenisnya) |
+| `IFormFile` avatar | `Validators/Settings/AvatarFileValidator.cs`, dipasang di `UploadAvatar`. Maks. 2 MB, ekstensi JPG/PNG/GIF/WEBP, dan kini juga content-type gambar |
+| `JournalImportRequestDto` | `Validators/Tools/JournalImportRequestDtoValidator.cs`, dipasang di `PreviewJournalImport` dan `ImportJournalEntries` |
 
-### Fase 7 — Parameter Query (prioritas rendah)
+Aturan import: bulan 1–12, tahun 2000–2100; transaksi tidak kosong (maks. 5.000); tiap transaksi punya tanggal yang dapat dibaca, jenis jurnal `General`/`Adjusting`, minimal 2 baris, dan total debit = total kredit (dibulatkan 2 desimal untuk menoleransi floating point Excel); debit/kredit tidak negatif dan tidak terisi bersamaan; deskripsi baris maks. 250. Sebelumnya `PreviewJournalImport` tidak memeriksa bulan/tahun sama sekali (bulan di luar 1–12 menyebabkan 500).
 
-| Endpoint | Parameter | Aturan |
+Catatan untuk ditinjau manual: `ImportJournalEntries` melewati baris yang akunnya tidak ditemukan di COA (`continue`). Validator memastikan data Excel seimbang, tetapi bila ada baris yang terlewat, jurnal yang tersimpan bisa tidak seimbang. Ini aturan bisnis di controller/service (bukan skema), sebaiknya ditolak atau dilaporkan.
+
+### Fase 7 — Parameter Query (selesai)
+
+Parameter query dipindah ke model kecil (`DTOs/QueryParametersDto.cs`) agar dapat divalidasi. Nama parameter di URL tidak berubah.
+
+| Endpoint | Model | Aturan |
 |---|---|---|
-| `NotificationsController.GetMyNotifications` | `limit` | 1–100 |
-| `DashboardController.GetDashboardData` | `period` | `daily`/`weekly`/`monthly`/`yearly` |
-| `HomeController.GetKurs` | `baseCurrency`, `targetCurrency` | 3 huruf (ISO 4217) |
-| `ChartOfAccountsController.GetAccounts` | `search`, `category` | Panjang maks., kategori valid |
-| `FinancialStatementsController.GetStatementOfFinancialPosition` | `isPostClosing` | Tidak perlu (bool) |
-
-Untuk parameter query, gunakan model `record`/class kecil dengan `[AsParameters]`/`[FromQuery]` agar dapat divalidasi, atau cek langsung di action bila hanya satu parameter.
+| `NotificationsController.GetMyNotifications` | `GetNotificationsQuery` | `limit` 1–100 (sebelumnya nilai negatif menyebabkan 500) |
+| `DashboardController.GetDashboardData` | `GetDashboardQuery` | `period` kosong, `monthly`, atau `annual` |
+| `MarketDataController.GetKurs` | `GetKursQuery` | `baseCurrency`/`targetCurrency` kosong atau 3 huruf. Nilai ini disisipkan ke URL layanan eksternal tanpa escape, jadi sebelumnya bisa menyuntikkan parameter tambahan |
+| `ChartOfAccountsController.GetAccounts` | `GetAccountsQuery` | `search` maks. 100, `category` kosong atau salah satu tipe akun |
+| `JournalEntryController.SearchDescriptions` | `SearchDescriptionsQuery` | `q` maks. 100 |
+| `JournalEntryController.GetNextTransactionNumber` | `NextTransactionNumberQuery` | `journalType` kosong, `General`, atau `Adjusting`; `entryDate` 2000–2100 |
+| `FinancialStatementsController` (`isPostClosing`) | — | Tidak perlu (bool) |
 
 ## 4. Checklist per Fase
 

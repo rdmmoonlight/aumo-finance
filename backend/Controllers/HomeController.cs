@@ -6,6 +6,8 @@
 
 using AumoBackend.DTOs.Home;
 using AumoBackend.Services.Home;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,12 +20,15 @@ namespace AumoBackend.Controllers.Api
         private readonly HttpClient httpClient;
         private readonly IConfiguration configuration;
         private readonly ILogger<MarketDataController> logger;
+        private readonly IValidator<AumoBackend.DTOs.GetKursQuery> kursValidator;
 
         public MarketDataController(
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration,
-            ILogger<MarketDataController> logger)
+            ILogger<MarketDataController> logger,
+            IValidator<AumoBackend.DTOs.GetKursQuery> kursValidator)
         {
+            this.kursValidator = kursValidator;
             this.httpClient = httpClientFactory.CreateClient();
             this.configuration = configuration;
             this.logger = logger;
@@ -35,8 +40,17 @@ namespace AumoBackend.Controllers.Api
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         [HttpGet("kurs")]
-        public async Task<IActionResult> GetKurs([FromQuery] string baseCurrency = "USD", [FromQuery] string targetCurrency = "IDR")
+        public async Task<IActionResult> GetKurs([FromQuery] AumoBackend.DTOs.GetKursQuery query)
         {
+            var validation = await this.kursValidator.ValidateAsync(query);
+            if (!validation.IsValid)
+            {
+                return this.BadRequest(validation.ToErrorResponse());
+            }
+
+            var baseCurrency = string.IsNullOrWhiteSpace(query.BaseCurrency) ? "USD" : query.BaseCurrency;
+            var targetCurrency = string.IsNullOrWhiteSpace(query.TargetCurrency) ? "IDR" : query.TargetCurrency;
+
             try
             {
                 var apiKey = this.configuration["ApiIndonesia:ApiKey"];

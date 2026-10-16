@@ -26,24 +26,36 @@ namespace AumoBackend.Controllers
         private readonly IGuardianService guardianService;
         private readonly IAvatarStorage avatarStorage;
         private readonly IValidator<ChangePasswordRequest> changePasswordValidator;
+        private readonly IValidator<UpdateProfileRequest> updateProfileValidator;
+        private readonly IValidator<IFormFile> avatarFileValidator;
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IGuardianService guardianService,
             IAvatarStorage avatarStorage,
-            IValidator<ChangePasswordRequest> changePasswordValidator)
+            IValidator<ChangePasswordRequest> changePasswordValidator,
+            IValidator<UpdateProfileRequest> updateProfileValidator,
+            IValidator<IFormFile> avatarFileValidator)
         {
             this.userManager = userManager;
             this.signInManager = signInManager;
             this.guardianService = guardianService;
             this.avatarStorage = avatarStorage;
             this.changePasswordValidator = changePasswordValidator;
+            this.updateProfileValidator = updateProfileValidator;
+            this.avatarFileValidator = avatarFileValidator;
         }
 
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
+            var validation = await this.updateProfileValidator.ValidateAsync(request);
+            if (!validation.IsValid)
+            {
+                return this.BadRequest(validation.ToErrorResponse());
+            }
+
             var user = await this.userManager.GetUserAsync(this.User);
             if (user == null)
             {
@@ -105,18 +117,13 @@ namespace AumoBackend.Controllers
                 return this.BadRequest(new { success = false, message = "No file uploaded. Ensure the form-data key is named 'file' or 'avatar'." });
             }
 
-            if (uploadFile.Length > 2 * 1024 * 1024)
+            var fileValidation = await this.avatarFileValidator.ValidateAsync(uploadFile);
+            if (!fileValidation.IsValid)
             {
-                return this.BadRequest(new { success = false, message = "File size exceeds limit (Max 2MB)." });
+                return this.BadRequest(fileValidation.ToErrorResponse());
             }
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
             var extension = Path.GetExtension(uploadFile.FileName);
-
-            if (string.IsNullOrEmpty(extension) || !allowedExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
-            {
-                return this.BadRequest(new { success = false, message = "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed." });
-            }
 
             if (!this.avatarStorage.IsConfigured)
             {
