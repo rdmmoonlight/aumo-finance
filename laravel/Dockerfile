@@ -5,10 +5,12 @@ RUN apk add --no-cache nginx curl git zip unzip libpng-dev libzip-dev \
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+# Install Laravel ke folder temporary lalu pindahkan ke /var/www
+RUN composer create-project laravel/laravel /tmp/laravel --prefer-dist --no-interaction \
+    && cp -rn /tmp/laravel/. /var/www/ \
+    && rm -rf /tmp/laravel
 
-# Download & install Skeleton Laravel
-RUN composer create-project laravel/laravel . --prefer-dist --no-interaction
+WORKDIR /var/www
 
 # Set permission
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
