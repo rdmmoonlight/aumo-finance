@@ -23,7 +23,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/tools")]
+[Route("/tools")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class ToolsController : ControllerBase
@@ -36,7 +36,7 @@ public class ToolsController : ControllerBase
     }
 
     // ==========================================
-    // 1. GET: /api/v1/tools/download-journal-template
+    // 1. GET: /tools/download-journal-template
     // ==========================================
     [HttpGet("download-journal-template")]
     public IActionResult DownloadJournalTemplate()
@@ -73,7 +73,7 @@ public class ToolsController : ControllerBase
     }
 
     // ==========================================
-    // 2. POST: /api/v1/tools/preview-journal-import
+    // 2. POST: /tools/preview-journal-import
     // ==========================================
     [HttpPost("preview-journal-import")]
     public async Task<IActionResult> PreviewJournalImport([FromBody] JournalImportRequestDto request)
@@ -202,7 +202,7 @@ public class ToolsController : ControllerBase
     }
 
     // ==========================================
-    // 3. POST: /api/v1/tools/import-journal-entries
+    // 3. POST: /tools/import-journal-entries
     // ==========================================
     [HttpPost("import-journal-entries")]
     public async Task<IActionResult> ImportJournalEntries([FromBody] JournalImportRequestDto request)

@@ -17,7 +17,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("/api/v1/reports/worksheet")]
+[Route("/reports/worksheet")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class WorksheetController : ControllerBase
@@ -37,7 +37,7 @@ public class WorksheetController : ControllerBase
     }
 
     // ==========================================
-    // 1. GET: /api/v1/reports/worksheet
+    // 1. GET: /reports/worksheet
     // ==========================================
     [HttpGet]
     public async Task<IActionResult> GetWorksheet()

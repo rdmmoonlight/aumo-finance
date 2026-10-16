@@ -12,7 +12,7 @@ using System.Security.Claims;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/periods")]
+[Route("/periods")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class PeriodsController : ControllerBase
 {
@@ -31,7 +31,7 @@ public class PeriodsController : ControllerBase
     }
 
     // ==========================================
-    // 1. GET: /api/v1/periods (Period List & Selection Status)
+    // 1. GET: /periods (Period List & Selection Status)
     // ==========================================
     [HttpGet]
     public async Task<IActionResult> GetPeriods()
@@ -83,7 +83,7 @@ public class PeriodsController : ControllerBase
     }
 
     // ==========================================
-    // 2. GET: /api/v1/periods/open-info
+    // 2. GET: /periods/open-info
     // ==========================================
     [HttpGet("open-info")]
     public async Task<IActionResult> GetOpenPeriodInfo()
@@ -123,7 +123,7 @@ public class PeriodsController : ControllerBase
     }
 
     // ==========================================
-    // 3. POST: /api/v1/periods (Open New Period)
+    // 3. POST: /periods (Open New Period)
     // ==========================================
     [HttpPost]
     public async Task<IActionResult> CreatePeriod([FromBody] CreatePeriodRequest request)
@@ -146,7 +146,7 @@ public class PeriodsController : ControllerBase
     }
 
     // ==========================================
-    // 4. POST: /api/v1/periods/select/{id} (Set Active/Viewing)
+    // 4. POST: /periods/select/{id} (Set Active/Viewing)
     // ==========================================
     [HttpPost("select/{id:int}")]
     public async Task<IActionResult> SelectPeriod(int id)
@@ -181,7 +181,7 @@ public class PeriodsController : ControllerBase
     }
 
     // ==========================================
-    // 5. POST: /api/v1/periods/clear-selection (Stop Viewing)
+    // 5. POST: /periods/clear-selection (Stop Viewing)
     // ==========================================
     [HttpPost("clear-selection")]
     public async Task<IActionResult> ClearSelection()
@@ -205,7 +205,7 @@ public class PeriodsController : ControllerBase
     }
 
     // ==========================================
-    // 6. POST: /api/v1/periods/close/{id} (Close Period)
+    // 6. POST: /periods/close/{id} (Close Period)
     // ==========================================
     [HttpPost("close/{id:int}")]
     public async Task<IActionResult> ClosePeriod(int id)

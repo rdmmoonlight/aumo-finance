@@ -46,13 +46,13 @@ sealed interface LedgerResult {
 }
 
 class LedgerApi(private val client: HttpClient = ApiClient.client) {
-    // Route backend memakai bentuk JAMAK: /api/v1/reports/general-ledgers/...
+    // Route backend memakai bentuk JAMAK: /reports/general-ledgers/...
     // Hanya GET. Backend yang mengisi data staging sendiri bila belum ada.
     suspend fun getLedger(isTemporary: Boolean): HttpResponse =
         if (isTemporary) {
-            client.get("/api/v1/reports/general-ledgers/temporary")
+            client.get("/reports/general-ledgers/temporary")
         } else {
-            client.get("/api/v1/reports/general-ledgers/permanent")
+            client.get("/reports/general-ledgers/permanent")
         }
 
     suspend fun load(isTemporary: Boolean): LedgerResult =

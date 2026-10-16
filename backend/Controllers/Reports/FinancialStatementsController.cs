@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("/api/v1/reports")]
+[Route("/reports")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class FinancialStatementsController : ControllerBase
@@ -33,7 +33,7 @@ public class FinancialStatementsController : ControllerBase
     }
 
     // ==========================================
-    // 1. GET: /api/v1/reports/income-statement
+    // 1. GET: /reports/income-statement
     // ==========================================
     [HttpGet("income-statement")]
     public async Task<IActionResult> GetIncomeStatement()
@@ -81,7 +81,7 @@ public class FinancialStatementsController : ControllerBase
     }
 
     // ==========================================
-    // 2. GET: /api/v1/reports/retained-earnings
+    // 2. GET: /reports/retained-earnings
     // ==========================================
     [HttpGet("retained-earnings")]
     public async Task<IActionResult> GetRetainedEarnings()
@@ -127,7 +127,7 @@ public class FinancialStatementsController : ControllerBase
     }
 
     // ==========================================
-    // 3. GET: /api/v1/reports/statement-of-cash-flow
+    // 3. GET: /reports/statement-of-cash-flow
     // ==========================================
     [HttpGet("statement-of-cash-flow")]
     public async Task<IActionResult> GetCashFlowStatement()
@@ -243,7 +243,7 @@ public class FinancialStatementsController : ControllerBase
     }
 
     // ==========================================
-    // 4. GET: /api/v1/reports/statement-of-financial-position
+    // 4. GET: /reports/statement-of-financial-position
     // ==========================================
     [HttpGet("statement-of-financial-position")]
     public async Task<IActionResult> GetStatementOfFinancialPosition([FromQuery] bool isPostClosing = false)

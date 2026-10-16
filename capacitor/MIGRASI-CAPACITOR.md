@@ -53,7 +53,7 @@
 
 ### Fase 1 — Baseline & Kontrak
 - [x] Bekukan fitur baru di `/mobile` selama migrasi.
-- [x] Catat kontrak tiap endpoint yang dipakai (path absolut `/api/v1/...`).
+- [x] Catat kontrak tiap endpoint yang dipakai (path absolut `/...`).
 - [x] Tetapkan matriks paritas: 24 layar × status.
 - [x] **Keluaran:** `docs/parity-matrix.md`. **Selesai bila:** semua layar dan endpoint tercatat.
 

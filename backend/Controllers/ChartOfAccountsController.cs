@@ -20,7 +20,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/chart-of-accounts")]
+[Route("/chart-of-accounts")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class ChartOfAccountsController : ControllerBase
@@ -40,7 +40,7 @@ public class ChartOfAccountsController : ControllerBase
     }
 
     // ==========================================
-    // 1. GET: /api/v1/chart-of-accounts
+    // 1. GET: /chart-of-accounts
     // ==========================================
     [HttpGet]
     public async Task<IActionResult> GetAccounts([FromQuery] string? search, [FromQuery] string? category)
@@ -137,7 +137,7 @@ public class ChartOfAccountsController : ControllerBase
     }
 
     // ==========================================
-    // 2. POST: /api/v1/chart-of-accounts
+    // 2. POST: /chart-of-accounts
     // ==========================================
     [HttpPost]
     public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest request)
@@ -187,7 +187,7 @@ public class ChartOfAccountsController : ControllerBase
     }
 
     // ==========================================
-    // 3. PUT: /api/v1/chart-of-accounts/{id}
+    // 3. PUT: /chart-of-accounts/{id}
     // ==========================================
     [HttpPut("{id:int}")]
     public async Task<IActionResult> UpdateAccount(int id, [FromBody] UpdateAccountRequest request)
@@ -238,7 +238,7 @@ public class ChartOfAccountsController : ControllerBase
     }
 
     // ==========================================
-    // 4. DELETE: /api/v1/chart-of-accounts/{id}
+    // 4. DELETE: /chart-of-accounts/{id}
     // ==========================================
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> DeleteAccount(int id)

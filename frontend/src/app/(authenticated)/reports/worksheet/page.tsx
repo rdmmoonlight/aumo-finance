@@ -33,7 +33,7 @@ export default function WorksheetPage() {
       setErrorMessage(null);
 
       try {
-        // Tembak endpoint /api/v1/reports/worksheet langsung via store dispatch
+        // Tembak endpoint /reports/worksheet langsung via store dispatch
         const result = await store.dispatch(
           reportsApi.endpoints.getWorksheet.initiate(),
         );

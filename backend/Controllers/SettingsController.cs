@@ -20,7 +20,7 @@ using FluentValidation;
 namespace AumoBackend.Controllers
 {
     [ApiController]
-    [Route("/api/v1/settings")]
+    [Route("/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
     public class SettingsController : ControllerBase

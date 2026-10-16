@@ -5,7 +5,7 @@ using AumoBackend.DTOs.Reports;
 namespace AumoBackend.Controllers.Reports
 {
     [ApiController]
-    [Route("/api/v1/[controller]")]
+    [Route("/[controller]")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
     public class TrialBalanceController : ControllerBase

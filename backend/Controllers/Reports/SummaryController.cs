@@ -19,7 +19,7 @@ using AumoBackend.Services;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("/api/v1/[controller]")]
+[Route("/[controller]")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
 public class SummaryController : ControllerBase

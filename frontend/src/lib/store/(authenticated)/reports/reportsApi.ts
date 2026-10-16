@@ -15,46 +15,46 @@ export const reportsApi = baseApi
   })
   .injectEndpoints({
     endpoints: (build) => ({
-      // GET /api/v1/summary
+      // GET /summary
       getSummary: build.query<GetSummaryApiResponse, GetSummaryApiArg>({
-        query: () => "/api/v1/summary",
+        query: () => "/summary",
         providesTags: ["Summary"],
       }),
 
-      // GET /api/v1/reports/income-statement
+      // GET /reports/income-statement
       getIncomeStatement: build.query<
         GetIncomeStatementApiResponse,
         GetIncomeStatementApiArg
       >({
-        query: () => "/api/v1/reports/income-statement",
+        query: () => "/reports/income-statement",
         providesTags: ["FinancialStatements"],
       }),
 
-      // GET /api/v1/reports/retained-earnings
+      // GET /reports/retained-earnings
       getRetainedEarnings: build.query<
         GetRetainedEarningsApiResponse,
         GetRetainedEarningsApiArg
       >({
-        query: () => "/api/v1/reports/retained-earnings",
+        query: () => "/reports/retained-earnings",
         providesTags: ["FinancialStatements"],
       }),
 
-      // GET /api/v1/reports/statement-of-cash-flow
+      // GET /reports/statement-of-cash-flow
       getStatementOfCashFlow: build.query<
         GetStatementOfCashFlowApiResponse,
         GetStatementOfCashFlowApiArg
       >({
-        query: () => "/api/v1/reports/statement-of-cash-flow",
+        query: () => "/reports/statement-of-cash-flow",
         providesTags: ["FinancialStatements"],
       }),
 
-      // GET /api/v1/reports/statement-of-financial-position
+      // GET /reports/statement-of-financial-position
       getStatementOfFinancialPosition: build.query<
         GetStatementOfFinancialPositionApiResponse,
         GetStatementOfFinancialPositionApiArg
       >({
         query: (queryArg) => ({
-          url: "/api/v1/reports/statement-of-financial-position",
+          url: "/reports/statement-of-financial-position",
           params: {
             isPostClosing: queryArg?.isPostClosing,
           },
@@ -62,90 +62,90 @@ export const reportsApi = baseApi
         providesTags: ["FinancialStatements"],
       }),
 
-      // GET /api/v1/reports/general-ledgers/permanent
+      // GET /reports/general-ledgers/permanent
       getGeneralLedgerPermanent: build.query<
         GetGeneralLedgerPermanentApiResponse,
         GetGeneralLedgerPermanentApiArg
       >({
-        query: () => "/api/v1/reports/general-ledgers/permanent",
+        query: () => "/reports/general-ledgers/permanent",
         providesTags: ["GeneralLedgers"],
       }),
 
-      // GET /api/v1/reports/general-ledgers/temporary
+      // GET /reports/general-ledgers/temporary
       getGeneralLedgerTemporary: build.query<
         GetGeneralLedgerTemporaryApiResponse,
         GetGeneralLedgerTemporaryApiArg
       >({
-        query: () => "/api/v1/reports/general-ledgers/temporary",
+        query: () => "/reports/general-ledgers/temporary",
         providesTags: ["GeneralLedgers"],
       }),
 
-      // POST /api/v1/reports/general-ledgers/refresh
+      // POST /reports/general-ledgers/refresh
       refreshGeneralLedger: build.mutation<
         RefreshGeneralLedgerApiResponse,
         RefreshGeneralLedgerApiArg
       >({
         query: () => ({
-          url: "/api/v1/reports/general-ledgers/refresh",
+          url: "/reports/general-ledgers/refresh",
           method: "POST",
         }),
         invalidatesTags: ["GeneralLedgers"],
       }),
 
-      // GET /api/v1/reports/journals/general
+      // GET /reports/journals/general
       getJournalsGeneral: build.query<
         GetJournalsGeneralApiResponse,
         GetJournalsGeneralApiArg
       >({
-        query: () => "/api/v1/reports/journals/general",
+        query: () => "/reports/journals/general",
         providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
-      // GET /api/v1/reports/journals/adjusting
+      // GET /reports/journals/adjusting
       getJournalsAdjusting: build.query<
         GetJournalsAdjustingApiResponse,
         GetJournalsAdjustingApiArg
       >({
-        query: () => "/api/v1/reports/journals/adjusting",
+        query: () => "/reports/journals/adjusting",
         providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
-      // DELETE /api/v1/reports/journals/adjusting/{id}
+      // DELETE /reports/journals/adjusting/{id}
       deleteJournalsAdjustingById: build.mutation<
         DeleteJournalsAdjustingByIdApiResponse,
         DeleteJournalsAdjustingByIdApiArg
       >({
         query: (queryArg) => ({
-          url: `/api/v1/reports/journals/adjusting/${queryArg.id}`,
+          url: `/reports/journals/adjusting/${queryArg.id}`,
           method: "DELETE",
         }),
         invalidatesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
-      // GET /api/v1/reports/journals/closing
+      // GET /reports/journals/closing
       getJournalsClosing: build.query<
         GetJournalsClosingApiResponse,
         GetJournalsClosingApiArg
       >({
-        query: () => "/api/v1/reports/journals/closing",
+        query: () => "/reports/journals/closing",
         providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
       }),
 
-      // GET /api/v1/reports/trial-balances?type=unadjusted|adjusted|post-closing
+      // GET /reports/trial-balances?type=unadjusted|adjusted|post-closing
       getTrialBalance: build.query<
         GetTrialBalanceApiResponse,
         GetTrialBalanceApiArg
       >({
         query: (queryArg) => ({
-          url: "/api/v1/reports/trial-balances",
+          url: "/reports/trial-balances",
           params: { type: queryArg?.type ?? "unadjusted" },
         }),
         providesTags: ["TrialBalances"],
       }),
 
-      // GET /api/v1/reports/worksheet
+      // GET /reports/worksheet
       getWorksheet: build.query<GetWorksheetApiResponse, GetWorksheetApiArg>({
-        query: () => "/api/v1/reports/worksheet",
+        query: () => "/reports/worksheet",
         providesTags: ["Worksheet"],
       }),
     }),

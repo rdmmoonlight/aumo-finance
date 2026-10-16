@@ -204,7 +204,7 @@ function AuthFormInner({
       // Reset cache RTK Query
       dispatch(baseApi.util.resetApiState());
 
-      // Panggil endpoint /api/v1/auth/login via initiate
+      // Panggil endpoint /auth/login via initiate
       const result = await store.dispatch(
         authApi.endpoints.login.initiate({
           email: values.email,

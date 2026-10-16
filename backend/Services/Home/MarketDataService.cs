@@ -26,7 +26,7 @@ namespace AumoBackend.Services
             try
             {
                 var apiKey = _configuration["ApiIndonesia:ApiKey"];
-                var request = new HttpRequestMessage(HttpMethod.Get, "https://use.apiindonesia.id/api/v1/kurs/latest?base=USD&target=IDR");
+                var request = new HttpRequestMessage(HttpMethod.Get, "https://use.apiindonesia.id/kurs/latest?base=USD&target=IDR");
 
                 if (!string.IsNullOrEmpty(apiKey))
                 {

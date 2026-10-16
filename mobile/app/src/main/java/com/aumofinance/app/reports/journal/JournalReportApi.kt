@@ -37,20 +37,20 @@ data class JournalReportResponse(
 
 class JournalReportApi(private val client: HttpClient = ApiClient.client) {
     // Backend mengelompokkan General/Adjusting/Closing di bawah satu route
-    // "/api/v1/reports/journals" (bukan endpoint terpisah "general-journal"/
+    // "/reports/journals" (bukan endpoint terpisah "general-journal"/
     // "adjusting-journal" seperti dugaan awal saya) — General Journal berisi
     // seluruh entri tipe "General" di periode yang sedang dipilih. Beda dari
     // "journal-entry" (form input satu entri di journal.JournalApi).
-    suspend fun getGeneralJournal(): HttpResponse = client.get("/api/v1/reports/journals/general")
+    suspend fun getGeneralJournal(): HttpResponse = client.get("/reports/journals/general")
 
     // Adjusting Journal: sama seperti di atas tapi backend sudah memfilter
     // journalType == "Adjusting" saja.
-    suspend fun getAdjustingJournal(): HttpResponse = client.get("/api/v1/reports/journals/adjusting")
+    suspend fun getAdjustingJournal(): HttpResponse = client.get("/reports/journals/adjusting")
 
     // Backend juga menyediakan DELETE khusus untuk entri Adjusting di bawah
     // route yang sama ("/adjusting/{id}", memfilter JournalType=="Adjusting"
     // sebagai proteksi tambahan) — dipakai JournalReportViewModel untuk
     // delete di halaman Adjusting Journal, sedangkan General Journal tetap
     // pakai journal-entry/delete/{id} yang generik (journal.JournalApi).
-    suspend fun deleteAdjustingEntry(id: Int): HttpResponse = client.delete("/api/v1/reports/journals/adjusting/$id")
+    suspend fun deleteAdjustingEntry(id: Int): HttpResponse = client.delete("/reports/journals/adjusting/$id")
 }

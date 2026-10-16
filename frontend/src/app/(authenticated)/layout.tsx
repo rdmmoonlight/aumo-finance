@@ -34,7 +34,7 @@ export default function AuthenticatedLayout({
     try {
       setIsAuthLoading(true);
 
-      // 1. Eksekusi request GET /api/v1/auth/me langsung via initiate
+      // 1. Eksekusi request GET /auth/me langsung via initiate
       const authResult = await dispatch(
         authApi.endpoints.getProfile.initiate(undefined, {
           forceRefetch: false,
