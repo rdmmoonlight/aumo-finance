@@ -1,3 +1,4 @@
+#pragma warning disable CA1861
 // <copyright file="20260728103000_AddGuardianTables.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>

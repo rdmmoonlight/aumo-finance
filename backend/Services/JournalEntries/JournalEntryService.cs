@@ -1,3 +1,4 @@
+#pragma warning disable CA1725
 // <copyright file="JournalEntryService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -29,7 +30,7 @@ public class JournalEntryService : IJournalEntryService
             .OrderBy(gj => gj.LineOrder)
             .ToListAsync();
 
-        if (!rows.Any())
+        if (rows.Count == 0)
         {
             return null;
         }
@@ -71,7 +72,7 @@ public class JournalEntryService : IJournalEntryService
             .OrderBy(gj => gj.LineOrder)
             .ToListAsync();
 
-        if (!rows.Any())
+        if (rows.Count == 0)
         {
             return new List<GeneralJournalResponseDto>();
         }

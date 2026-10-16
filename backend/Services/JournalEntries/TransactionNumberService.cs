@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="TransactionNumberService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -37,7 +38,7 @@ public class TransactionNumberService(AppDbContext db) : ITransactionNumberServi
         counterKeyParam.Value = counterKey;
         command.Parameters.Add(counterKeyParam);
         var rawResult = await command.ExecuteScalarAsync() ?? throw new InvalidOperationException($"Transaction counter upsert for {counterKey} returned no result.");
-        int nextSeq = Convert.ToInt32(rawResult);
+        int nextSeq = Convert.ToInt32(rawResult, System.Globalization.CultureInfo.InvariantCulture);
         if (nextSeq > 9999)
         {
             throw new InvalidOperationException($"Transaction number sequence for {counterKey} has reached its 9999 capacity.");

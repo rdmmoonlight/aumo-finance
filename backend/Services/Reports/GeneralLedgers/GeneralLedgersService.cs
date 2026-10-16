@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="GeneralLedgersService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -43,7 +44,7 @@ public class GeneralLedgersService : IGeneralLedgersService
         }
 
         var flat = await this.FetchPermanentDtosAsync(userId, period.Id);
-        var grouped = this.MapToGrouped(flat);
+        var grouped = MapToGrouped(flat);
 
         return new BaseServiceResult<PermanentLedgerGroupedResponse>
         {
@@ -75,7 +76,7 @@ public class GeneralLedgersService : IGeneralLedgersService
         }
 
         var flat = await this.FetchTemporaryDtosAsync(userId, period.Id);
-        var grouped = this.MapToGrouped(flat);
+        var grouped = MapToGrouped(flat);
 
         decimal totalRev = flat.Where(x => RevenueTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Credit - x.Debit);
         decimal totalExp = flat.Where(x => ExpenseTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Debit - x.Credit);
@@ -119,7 +120,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                     .OrderBy(l => l.AccountId).ThenBy(l => l.EntryDate).ThenBy(l => l.JournalEntryId).ThenBy(l => l.LineOrder)
                     .ToListAsync();
 
-                if (!lines.Any())
+                if (lines.Count == 0)
                 {
                     await tx.CommitAsync();
                     return new BaseServiceResult { Success = true, Message = $"General Ledger refreshed for period {selectedPeriod.PeriodName} (0 transactions found)." };
@@ -258,7 +259,7 @@ public class GeneralLedgersService : IGeneralLedgersService
            .Select(x => new TemporaryLedgerDto { Id = (int)x.Id, AccountId = x.AccountId, AccountName = x.Account!.AccountName, AccountReferenceNumber = x.Account.ReferenceNumber, AccountType = x.Account.Type ?? string.Empty, JournalEntryId = x.JournalEntryId, JournalEntryLineId = x.JournalEntryLineId, EntryDate = x.EntryDate, TransactionNumber = x.TransactionNumber ?? string.Empty, LineDescription = x.LineDescription ?? string.Empty, Debit = x.Debit, Credit = x.Credit, RunningBalance = x.RunningBalance })
            .ToListAsync();
 
-    private List<LedgerAccountResponse> MapToGrouped(List<PermanentLedgerDto> flat)
+    private static List<LedgerAccountResponse> MapToGrouped(List<PermanentLedgerDto> flat)
     {
         return flat.GroupBy(x => x.AccountId).Select(g =>
         {
@@ -266,7 +267,7 @@ public class GeneralLedgersService : IGeneralLedgersService
             bool isDebitNormal = IsDebitNormal(first.AccountType);
             var ordered = g.OrderBy(x => x.EntryDate).ThenBy(x => x.Id).ToList();
             decimal beginning = 0;
-            if (ordered.Any())
+            if (ordered.Count > 0)
             {
                 var f = ordered.First();
                 var effect = isDebitNormal ? (f.Debit - f.Credit) : (f.Credit - f.Debit);
@@ -287,7 +288,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                 {
                     JournalEntryId = x.JournalEntryId,
                     TransactionNumber = x.TransactionNumber,
-                    EntryDate = x.EntryDate.ToString("yyyy-MM-dd"),
+                    EntryDate = x.EntryDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                     Description = x.LineDescription,
                     Debit = x.Debit,
                     Credit = x.Credit,
@@ -297,7 +298,7 @@ public class GeneralLedgersService : IGeneralLedgersService
         }).OrderBy(x => x.ReferenceNumber).ToList();
     }
 
-    private List<LedgerAccountResponse> MapToGrouped(List<TemporaryLedgerDto> flat)
+    private static List<LedgerAccountResponse> MapToGrouped(List<TemporaryLedgerDto> flat)
     {
         return flat.GroupBy(x => x.AccountId).Select(g =>
         {
@@ -305,7 +306,7 @@ public class GeneralLedgersService : IGeneralLedgersService
             bool isDebitNormal = IsDebitNormal(first.AccountType);
             var ordered = g.OrderBy(x => x.EntryDate).ThenBy(x => x.Id).ToList();
             decimal beginning = 0;
-            if (ordered.Any())
+            if (ordered.Count > 0)
             {
                 var f = ordered.First();
                 var effect = isDebitNormal ? (f.Debit - f.Credit) : (f.Credit - f.Debit);
@@ -326,7 +327,7 @@ public class GeneralLedgersService : IGeneralLedgersService
                 {
                     JournalEntryId = x.JournalEntryId,
                     TransactionNumber = x.TransactionNumber,
-                    EntryDate = x.EntryDate.ToString("yyyy-MM-dd"),
+                    EntryDate = x.EntryDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                     Description = x.LineDescription,
                     Debit = x.Debit,
                     Credit = x.Credit,

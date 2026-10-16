@@ -1,3 +1,7 @@
+#pragma warning disable CA1862
+#pragma warning disable CA1304
+#pragma warning disable CA1311
+using System.Globalization;
 // <copyright file="ChartOfAccountsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -60,8 +64,8 @@ public class ChartOfAccountsController : ControllerBase
         if (!string.IsNullOrWhiteSpace(search))
         {
             var keyword = search.Trim().ToLower();
-            query = query.Where(a => a.AccountName.ToLower().Contains(keyword)
-                                  || a.ReferenceNumber.ToString().Contains(keyword));
+            query = query.Where(a => a.AccountName.ToLower(System.Globalization.CultureInfo.InvariantCulture).Contains(keyword)
+                                  || a.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture).Contains(keyword));
         }
 
         if (!string.IsNullOrWhiteSpace(category))

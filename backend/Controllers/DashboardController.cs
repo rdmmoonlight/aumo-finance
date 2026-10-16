@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="DashboardController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -174,7 +175,7 @@ public class DashboardController : ControllerBase
             {
                 var rev = g.Where(l => incomeIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
                 var exp = g.Where(l => expenseAccountsMeta.Select(e => e.Id).Contains(l.AccountId)).Sum(l => l.Debit - l.Credit);
-                return new { label = g.Key.ToString("dd MMM"), revenue = rev, expense = exp, net = rev - exp };
+                return new { label = g.Key.ToString("dd MMM", CultureInfo.InvariantCulture), revenue = rev, expense = exp, net = rev - exp };
             }).ToList();
 
         return this.Ok(new

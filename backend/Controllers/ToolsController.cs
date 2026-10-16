@@ -81,7 +81,7 @@ public class ToolsController : ControllerBase
     [HttpPost("preview-journal-import")]
     public async Task<IActionResult> PreviewJournalImport([FromBody] JournalImportRequestDto request)
     {
-        if (request?.Transactions == null || !request.Transactions.Any())
+        if (request?.Transactions == null || request.Transactions.Count == 0)
         {
             return this.BadRequest(new { message = "No transaction data provided for preview." });
         }
@@ -174,7 +174,7 @@ public class ToolsController : ControllerBase
             processedTransactions.Add(new JournalTransactionDto
             {
                 TransactionNumber = generatedTxNumber,
-                Date = txDate.ToString("yyyy-MM-dd"),
+                Date = txDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
                 JournalType = txDto.JournalType,
                 Lines = processedLines,
             });
@@ -210,7 +210,7 @@ public class ToolsController : ControllerBase
     [HttpPost("import-journal-entries")]
     public async Task<IActionResult> ImportJournalEntries([FromBody] JournalImportRequestDto request)
     {
-        if (request?.Transactions == null || !request.Transactions.Any())
+        if (request?.Transactions == null || request.Transactions.Count == 0)
         {
             return this.BadRequest(new { message = "No transaction data provided for import." });
         }
@@ -349,7 +349,7 @@ public class ToolsController : ControllerBase
                         lineDto.Credit ?? 0m));
                 }
 
-                if (importLines.Any())
+                if (importLines.Count > 0)
                 {
                     int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.context);
 

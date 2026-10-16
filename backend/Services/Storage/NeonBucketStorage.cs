@@ -1,3 +1,4 @@
+#pragma warning disable CA1848
 // <copyright file="NeonBucketStorage.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>

@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="PeriodsService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -104,7 +105,7 @@ public class PeriodsService : IPeriodsService
             })
             .ToList();
 
-        var hasExistingPermanentAccounts = availableCashAndBank.Any() && availableRetainedEarnings.Any();
+        var hasExistingPermanentAccounts = availableCashAndBank.Count > 0 && availableRetainedEarnings.Count > 0;
 
         return new OpenPeriodInfoResponse
         {
@@ -121,7 +122,7 @@ public class PeriodsService : IPeriodsService
     {
         var startDate = DateTime.SpecifyKind(new DateTime(request.Year, request.Month, 1), DateTimeKind.Utc);
         var endDate = startDate.AddMonths(1).AddDays(-1);
-        var periodName = startDate.ToString("MMMM yyyy");
+        var periodName = startDate.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
         var isLoadExisting = request.SetupMode == CreatePeriodRequest.ModeLoadExisting;
 
         var strategy = this.db.Database.CreateExecutionStrategy();

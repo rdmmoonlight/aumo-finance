@@ -118,7 +118,7 @@ public class PeriodsController : ControllerBase
             .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName, a.DisplayLabel })
             .ToList();
 
-        var hasExistingPermanentAccounts = availableCashAndBank.Any() && availableRetainedEarnings.Any();
+        var hasExistingPermanentAccounts = availableCashAndBank.Count > 0 && availableRetainedEarnings.Count > 0;
 
         return this.Ok(new
         {

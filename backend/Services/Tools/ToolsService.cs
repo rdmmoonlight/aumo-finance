@@ -124,7 +124,7 @@ public class ToolsService(AppDbContext context) : IToolsService
             processedTransactions.Add(new JournalTransactionDto
             {
                 TransactionNumber = generatedTxNumber,
-                Date = txDate.ToString("yyyy-MM-dd"),
+                Date = txDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
                 JournalType = txDto.JournalType,
                 Lines = processedLines,
             });
@@ -277,7 +277,7 @@ public class ToolsService(AppDbContext context) : IToolsService
                         lineDto.Credit ?? 0m));
                 }
 
-                if (importLines.Any())
+                if (importLines.Count > 0)
                 {
                     int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(context);
 

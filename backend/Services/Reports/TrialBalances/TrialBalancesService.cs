@@ -1,3 +1,4 @@
+using System.Globalization;
 // <copyright file="TrialBalancesService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -65,7 +66,7 @@ public class TrialBalanceService : ITrialBalanceService
             }
 
             var accountLines = lines.Where(l => l.AccountId == account.Id).ToList();
-            if (!accountLines.Any())
+            if (accountLines.Count == 0)
             {
                 continue;
             }
@@ -94,7 +95,7 @@ public class TrialBalanceService : ITrialBalanceService
             rows.Add(new TrialBalanceRow
             {
                 AccountId = account.Id,
-                ReferenceNumber = account.ReferenceNumber.ToString(),
+                ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
                 AccountName = account.AccountName,
                 Type = account.Type,
                 Role = account.Role,

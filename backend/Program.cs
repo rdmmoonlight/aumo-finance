@@ -1,3 +1,8 @@
+#pragma warning disable CA1861
+#pragma warning disable CA1848
+#pragma warning disable CA1826
+#pragma warning disable CA1305
+using System.Globalization;
 // <copyright file="Program.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
