@@ -7,11 +7,12 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Install Laravel ke folder temporary lalu pindahkan seluruh isi (termasuk hidden files)
+# Install Laravel ke folder temporary lalu copy ke /var/www
 RUN composer create-project laravel/laravel /tmp/laravel --prefer-dist --no-interaction \
     && cp -a /tmp/laravel/. /var/www/ \
     && rm -rf /tmp/laravel \
-    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+    && chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache /var/www/database \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache /var/www/database
 
 # Konfigurasi Nginx minimalis
 RUN echo 'server { \
