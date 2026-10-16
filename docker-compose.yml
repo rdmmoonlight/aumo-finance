@@ -1,37 +1,25 @@
 services:
   # ======================
-  # PostgreSQL (opsional, kalau mau full lokal)
-  # ======================
-  # db:
-  #   image: postgres:16-alpine
-  #   environment:
-  #     POSTGRES_USER: aumo
-  #     POSTGRES_PASSWORD: aumo123
-  #     POSTGRES_DB: aumo_finance
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - pgdata:/var/lib/postgresql/data
-
-  # ======================
-  # Rust Core
+  # Rust Core (Internal Only)
   # ======================
   rust-core:
     build:
       context: ./rust-core
       dockerfile: Dockerfile
     container_name: aumo-rust-core
-    ports:
-      - "8081:8081"          # expose biar bisa ditest langsung
+    # Tidak ada "ports:" → tidak bisa diakses dari luar
+    expose:
+      - "8081"
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
       interval: 10s
       timeout: 3s
       retries: 3
+      start_period: 5s
 
   # ======================
-  # ASP.NET Core Backend
+  # ASP.NET Core (Satu-satunya yang terekspos)
   # ======================
   api:
     build:
@@ -39,16 +27,12 @@ services:
       dockerfile: Dockerfile
     container_name: aumo-api
     ports:
-      - "8080:8080"          # sesuaikan dengan port yang dipakai di Dockerfile backend
+      - "8080:8080"          # Hanya port ini yang terbuka ke luar
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
       - RustCore__BaseUrl=http://rust-core:8081
-      # - ConnectionStrings__DefaultConnection=Host=db;Database=aumo_finance;Username=aumo;Password=aumo123
     depends_on:
       rust-core:
         condition: service_healthy
     restart: unless-stopped
-
-# volumes:
-#   pgdata:
