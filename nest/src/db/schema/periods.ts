@@ -13,25 +13,25 @@ import {
 export const periods = pgTable(
   'periods',
   {
-    id: integer('Id').primaryKey().generatedByDefaultAsIdentity({
-      name: 'Periods_Id_seq',
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity({
+      name: 'periods_id_seq',
       startWith: 1,
       increment: 1,
       minValue: 1,
       maxValue: 2147483647,
     }),
-    periodName: varchar('PeriodName', { length: 50 }).notNull(),
-    startDate: timestamp('StartDate', { withTimezone: true, mode: 'string' }).notNull(),
-    endDate: timestamp('EndDate', { withTimezone: true, mode: 'string' }).notNull(),
-    isClosed: boolean('IsClosed').default(false).notNull(),
-    isSelected: boolean('IsSelected').default(false).notNull(),
-    userId: text('UserId').notNull(),
+    periodName: varchar('period_name', { length: 50 }).notNull(),
+    startDate: timestamp('start_date', { withTimezone: true, mode: 'string' }).notNull(),
+    endDate: timestamp('end_date', { withTimezone: true, mode: 'string' }).notNull(),
+    isClosed: boolean('is_closed').default(false).notNull(),
+    isSelected: boolean('is_selected').default(false).notNull(),
+    userId: text('user_id').notNull(),
   },
   (table) => [
-    uniqueIndex('IX_Periods_IsSelected_Unique')
+    uniqueIndex('ix_periods_is_selected_unique')
       .using('btree', table.userId.asc().nullsLast())
-      .where(sql`("IsSelected" = true)`),
-    index('IX_Periods_UserId').using('btree', table.userId.asc().nullsLast()),
+      .where(sql`(is_selected = true)`),
+    index('ix_periods_user_id').using('btree', table.userId.asc().nullsLast()),
   ]
 );
 
