@@ -1,7 +1,11 @@
-using AumoBackend.DTOs;
-using FluentValidation;
+// <copyright file="GoogleLoginRequestValidator.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Validators.Auth;
+
+using AumoBackend.DTOs;
+using FluentValidation;
 
 public class GoogleLoginRequestValidator : AbstractValidator<GoogleLoginRequest>
 {
@@ -10,7 +14,7 @@ public class GoogleLoginRequestValidator : AbstractValidator<GoogleLoginRequest>
 
     public GoogleLoginRequestValidator()
     {
-        RuleFor(x => x.IdToken)
+        this.RuleFor(x => x.IdToken)
             .NotEmpty().WithMessage("Google ID Token is required.")
             .MaximumLength(MaxIdTokenLength).WithMessage("Google ID Token is too long.")
             .Must(BeJwtShape).WithMessage("Google ID Token format is invalid.")
@@ -20,7 +24,10 @@ public class GoogleLoginRequestValidator : AbstractValidator<GoogleLoginRequest>
     // JWT = tiga segmen dipisah titik (header.payload.signature), tanpa spasi.
     private static bool BeJwtShape(string? token)
     {
-        if (string.IsNullOrWhiteSpace(token) || token.Any(char.IsWhiteSpace)) return false;
+        if (string.IsNullOrWhiteSpace(token) || token.Any(char.IsWhiteSpace))
+        {
+            return false;
+        }
 
         var parts = token.Split('.');
         return parts.Length == 3 && parts.All(p => p.Length > 0);

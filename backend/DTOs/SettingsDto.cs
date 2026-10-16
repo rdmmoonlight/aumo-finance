@@ -1,31 +1,44 @@
+// <copyright file="SettingsDto.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.DTOs;
+
 using AumoBackend.Controllers.Reports;
+using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
-using AumoBackend.DTOs;
-namespace AumoBackend.DTOs;
+using AumoBackend.Services.Identity;
 
 public class UpdateProfileRequest
 {
     public string? FullName { get; set; }
+
     public string? UserName { get; set; }
+
     public string? PhoneNumber { get; set; }
+
     public string? Bio { get; set; }
+
     public string? AvatarUrl { get; set; }
 }
 
 public class ChangePasswordRequest
 {
     public string CurrentPassword { get; set; } = string.Empty;
+
     public string NewPassword { get; set; } = string.Empty;
 }
 
 public class ServiceResult
 {
     public bool Success { get; set; }
+
     public string Message { get; set; } = string.Empty;
+
     public object? Data { get; set; }
+
     public int StatusCode { get; set; } = 200;
 
     public static ServiceResult Ok(string message = "", object? data = null) =>

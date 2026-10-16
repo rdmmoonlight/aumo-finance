@@ -1,30 +1,21 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using AumoBackend.Data;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs.Reports;
+// <copyright file="ChartOfAccountsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.ChartOfAccounts;
 
-public class ChartOfAccountsService : IChartOfAccountsService
+using AumoBackend.Data;
+using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
+using Microsoft.EntityFrameworkCore;
+
+public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
 {
-    private readonly AppDbContext _db;
-
-    public ChartOfAccountsService(AppDbContext db)
-    {
-        _db = db;
-    }
-
+    /// <inheritdoc/>
     public async Task<ChartOfAccountsListResponseDto> GetAccountsAsync(Guid userId, string? search, string? category)
     {
-        var query = _db.ChartOfAccounts.Where(a => a.UserId == userId);
+        var query = db.ChartOfAccounts.Where(a => a.UserId == userId);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -43,8 +34,8 @@ public class ChartOfAccountsService : IChartOfAccountsService
             .ToListAsync();
 
         var accountIds = loadedAccounts.Select(a => a.Id).ToList();
-        var currentPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId)
-            ?? await _db.Periods
+        var currentPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(db, userId)
+            ?? await db.Periods
                 .AsNoTracking()
                 .Where(p => p.UserId == userId)
                 .OrderByDescending(p => p.StartDate)
@@ -62,7 +53,7 @@ public class ChartOfAccountsService : IChartOfAccountsService
             var startUtc = currentPeriod.StartDate.Date;
             var endUtc = currentPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
 
-            var accountBalances = await _db.GeneralJournals
+            var accountBalances = await db.GeneralJournals
                 .Where(j => accountIds.Contains(j.AccountId) &&
                             j.UserId == userId &&
                             (j.JournalType == "General" || j.JournalType == "Adjusting") &&
@@ -73,7 +64,7 @@ public class ChartOfAccountsService : IChartOfAccountsService
                 {
                     AccountId = g.Key,
                     TotalDebit = g.Sum(j => j.Debit),
-                    TotalCredit = g.Sum(j => j.Credit)
+                    TotalCredit = g.Sum(j => j.Credit),
                 })
                 .ToDictionaryAsync(x => x.AccountId);
 
@@ -81,7 +72,6 @@ public class ChartOfAccountsService : IChartOfAccountsService
             {
                 if (accountBalances.TryGetValue(account.Id, out var balance))
                 {
-                    // Lakukan TryParse string 'account.Type' ke enum 'AccountClassification'
                     if (Enum.TryParse<AccountClassification>(account.Type, true, out var classification))
                     {
                         account.Balance = AccountClassificationHelper.NormalBalanceIsDebit(classification)
@@ -108,42 +98,47 @@ public class ChartOfAccountsService : IChartOfAccountsService
             Type = a.Type,
             Role = a.Role,
             IsActive = a.IsActive,
-            Balance = a.Balance
+            Balance = a.Balance,
         });
 
         return new ChartOfAccountsListResponseDto
         {
             Success = true,
             SelectedPeriodName = currentPeriod?.PeriodName,
-            Accounts = accountsList
+            Accounts = accountsList,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<ServiceResultDto> CreateAccountAsync(Guid userId, CreateAccountRequestDto request)
     {
         if (string.IsNullOrWhiteSpace(request.AccountName))
+        {
             return Fail("Account name is required.", 400);
+        }
 
         if (string.IsNullOrWhiteSpace(request.Type))
+        {
             return Fail("Account category type is required.", 400);
+        }
 
-        // Convert string category/type ke enum AccountClassification
         if (!Enum.TryParse<AccountClassification>(request.Type, true, out var classification))
         {
             return Fail($"Invalid account classification category '{request.Type}'.", 400);
         }
 
-        // Panggil ValidateReferenceNumber dengan tipe enum AccountClassification (1 argument)
         if (!AccountClassificationHelper.ValidateReferenceNumber(classification))
         {
             return Fail($"Invalid reference number {request.ReferenceNumber} for category {request.Type}.", 400);
         }
 
-        bool isCodeTaken = await _db.ChartOfAccounts
+        bool isCodeTaken = await db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber);
 
         if (isCodeTaken)
+        {
             return Fail($"Account code {request.ReferenceNumber} is already in use.", 400);
+        }
 
         var newAccount = new ChartOfAccount
         {
@@ -153,20 +148,20 @@ public class ChartOfAccountsService : IChartOfAccountsService
             Type = request.Type,
             Role = string.IsNullOrWhiteSpace(request.Role) ? "Default" : request.Role,
             IsActive = true,
-            Balance = 0
+            Balance = 0,
         };
 
         try
         {
-            _db.ChartOfAccounts.Add(newAccount);
-            await _db.SaveChangesAsync();
+            db.ChartOfAccounts.Add(newAccount);
+            await db.SaveChangesAsync();
 
             return new ServiceResultDto
             {
                 IsSuccess = true,
                 Message = $"Account '{newAccount.AccountName}' successfully created.",
                 AccountId = newAccount.Id,
-                StatusCode = 200
+                StatusCode = 200,
             };
         }
         catch (Exception ex)
@@ -175,34 +170,39 @@ public class ChartOfAccountsService : IChartOfAccountsService
         }
     }
 
+    /// <inheritdoc/>
     public async Task<ServiceResultDto> UpdateAccountAsync(Guid userId, int accountId, UpdateAccountRequestDto request)
     {
-        var account = await _db.ChartOfAccounts
+        var account = await db.ChartOfAccounts
             .FirstOrDefaultAsync(a => a.Id == accountId && a.UserId == userId);
 
         if (account == null)
+        {
             return Fail("Account not found.", 404);
+        }
 
         if (string.IsNullOrWhiteSpace(request.AccountName))
+        {
             return Fail("Account name is required.", 400);
+        }
 
-        // Convert string category/type ke enum AccountClassification
         if (!Enum.TryParse<AccountClassification>(request.Type, true, out var classification))
         {
             return Fail($"Invalid account classification category '{request.Type}'.", 400);
         }
 
-        // Panggil ValidateReferenceNumber dengan tipe enum AccountClassification (1 argument)
         if (!AccountClassificationHelper.ValidateReferenceNumber(classification))
         {
             return Fail($"Invalid reference number {request.ReferenceNumber} for category {request.Type}.", 400);
         }
 
-        bool isCodeTaken = await _db.ChartOfAccounts
+        bool isCodeTaken = await db.ChartOfAccounts
             .AnyAsync(a => a.UserId == userId && a.ReferenceNumber == request.ReferenceNumber && a.Id != accountId);
 
         if (isCodeTaken)
+        {
             return Fail($"Account code {request.ReferenceNumber} is already in use.", 400);
+        }
 
         account.ReferenceNumber = request.ReferenceNumber;
         account.AccountName = request.AccountName.Trim();
@@ -212,7 +212,7 @@ public class ChartOfAccountsService : IChartOfAccountsService
 
         try
         {
-            await _db.SaveChangesAsync();
+            await db.SaveChangesAsync();
             return Success($"Account '{account.AccountName}' successfully updated.");
         }
         catch (Exception ex)
@@ -221,15 +221,18 @@ public class ChartOfAccountsService : IChartOfAccountsService
         }
     }
 
+    /// <inheritdoc/>
     public async Task<ServiceResultDto> DeleteAccountAsync(Guid userId, int accountId)
     {
-        var entity = await _db.ChartOfAccounts
+        var entity = await db.ChartOfAccounts
             .FirstOrDefaultAsync(a => a.Id == accountId && a.UserId == userId);
 
         if (entity == null)
+        {
             return Fail("Account not found.", 404);
+        }
 
-        bool hasJournalLines = await _db.GeneralJournals.AnyAsync(l => l.AccountId == accountId);
+        bool hasJournalLines = await db.GeneralJournals.AnyAsync(l => l.AccountId == accountId);
         if (hasJournalLines)
         {
             return Fail($"Account '{entity.AccountName}' cannot be deleted because it already has journal entries. Set it to Inactive instead.", 400);
@@ -237,8 +240,8 @@ public class ChartOfAccountsService : IChartOfAccountsService
 
         try
         {
-            _db.ChartOfAccounts.Remove(entity);
-            await _db.SaveChangesAsync();
+            db.ChartOfAccounts.Remove(entity);
+            await db.SaveChangesAsync();
             return Success($"Account '{entity.AccountName}' successfully deleted.");
         }
         catch (Exception ex)

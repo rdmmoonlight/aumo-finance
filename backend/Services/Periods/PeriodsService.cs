@@ -1,40 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using AumoBackend.Controllers.Reports;
+// <copyright file="PeriodsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Services.Periods;
+
 using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Reports.GeneralLedgers;
-
-namespace AumoBackend.Services.Periods;
+using Microsoft.EntityFrameworkCore;
 
 public class PeriodsService : IPeriodsService
 {
-    private readonly AppDbContext _db;
-    private readonly ITransactionNumberService _txNumberService;
-    private readonly IGeneralLedgersService _glService;
+    private readonly AppDbContext? db;
+    private readonly ITransactionNumberService? txNumberService;
+    private readonly IGeneralLedgersService? glService;
 
-    public PeriodsService(
-        AppDbContext db,
-        ITransactionNumberService txNumberService,
-        IGeneralLedgersService glService)
-    {
-        _db = db;
-        _txNumberService = txNumberService;
-        _glService = glService;
-    }
-
+    /// <inheritdoc/>
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)
     {
-        var periodsData = await _db.Periods
+        var periodsData = await this.db.Periods
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.StartDate)
             .Select(p => new PeriodDto
@@ -44,7 +31,7 @@ public class PeriodsService : IPeriodsService
                 StartDate = p.StartDate,
                 EndDate = p.EndDate,
                 IsClosed = p.IsClosed,
-                IsSelected = p.IsSelected
+                IsSelected = p.IsSelected,
             })
             .ToListAsync();
 
@@ -53,7 +40,7 @@ public class PeriodsService : IPeriodsService
 
         if (!selectedPeriodId.HasValue)
         {
-            var selectedFromHelper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+            var selectedFromHelper = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
             selectedPeriodId = selectedFromHelper?.Id;
         }
 
@@ -64,20 +51,21 @@ public class PeriodsService : IPeriodsService
             StartDate = p.StartDate,
             EndDate = p.EndDate,
             IsClosed = p.IsClosed,
-            IsSelected = selectedPeriodId.HasValue ? (p.Id == selectedPeriodId.Value) : p.IsSelected
+            IsSelected = selectedPeriodId.HasValue ? (p.Id == selectedPeriodId.Value) : p.IsSelected,
         }).ToList();
 
         return new GetPeriodsResponse
         {
             Success = true,
             SelectedPeriodId = selectedPeriodId,
-            Periods = periods
+            Periods = periods,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<OpenPeriodInfoResponse> GetOpenPeriodInfoAsync(Guid userId)
     {
-        var accounts = await _db.ChartOfAccounts
+        var accounts = await this.db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
             .OrderBy(a => a.ReferenceNumber)
             .ToListAsync();
@@ -90,7 +78,7 @@ public class PeriodsService : IPeriodsService
                 ReferenceNumber = a.ReferenceNumber,
                 AccountName = a.AccountName,
                 Type = a.Type,
-                DisplayLabel = a.DisplayLabel
+                DisplayLabel = a.DisplayLabel,
             })
             .ToList();
 
@@ -101,7 +89,7 @@ public class PeriodsService : IPeriodsService
                 ReferenceNumber = a.ReferenceNumber,
                 AccountName = a.AccountName,
                 Type = a.Type,
-                DisplayLabel = a.DisplayLabel
+                DisplayLabel = a.DisplayLabel,
             })
             .ToList();
 
@@ -112,7 +100,7 @@ public class PeriodsService : IPeriodsService
                 ReferenceNumber = a.ReferenceNumber,
                 AccountName = a.AccountName,
                 Type = a.Type,
-                DisplayLabel = a.DisplayLabel
+                DisplayLabel = a.DisplayLabel,
             })
             .ToList();
 
@@ -124,10 +112,11 @@ public class PeriodsService : IPeriodsService
             HasExistingPermanentAccounts = hasExistingPermanentAccounts,
             AvailableCashAndBankAccounts = availableCashAndBank,
             AvailableRetainedEarningsAccounts = availableRetainedEarnings,
-            PermanentAccounts = permanentAccounts
+            PermanentAccounts = permanentAccounts,
         };
     }
 
+    /// <inheritdoc/>
     public async Task<CreatePeriodResult> CreatePeriodAsync(Guid userId, CreatePeriodRequest request)
     {
         var startDate = DateTime.SpecifyKind(new DateTime(request.Year, request.Month, 1), DateTimeKind.Utc);
@@ -135,17 +124,17 @@ public class PeriodsService : IPeriodsService
         var periodName = startDate.ToString("MMMM yyyy");
         var isLoadExisting = request.SetupMode == CreatePeriodRequest.ModeLoadExisting;
 
-        var strategy = _db.Database.CreateExecutionStrategy();
+        var strategy = this.db.Database.CreateExecutionStrategy();
 
         try
         {
             return await strategy.ExecuteAsync(async () =>
             {
-                _db.ChangeTracker.Clear();
+                this.db.ChangeTracker.Clear();
 
-                await using var transaction = await _db.Database.BeginTransactionAsync();
+                await using var transaction = await this.db.Database.BeginTransactionAsync();
 
-                var periodExists = await _db.Periods.AnyAsync(p => p.UserId == userId && p.StartDate == startDate);
+                var periodExists = await this.db.Periods.AnyAsync(p => p.UserId == userId && p.StartDate == startDate);
                 if (periodExists)
                 {
                     return Fail($"Period {periodName} already exists.");
@@ -153,9 +142,9 @@ public class PeriodsService : IPeriodsService
 
                 if (isLoadExisting)
                 {
-                    var cashAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.CashAccountId && a.UserId == userId);
-                    var bankAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.BankAccountId && a.UserId == userId);
-                    var retainedAccount = await _db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.RetainedEarningsAccountId && a.UserId == userId);
+                    var cashAccount = await this.db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.CashAccountId && a.UserId == userId);
+                    var bankAccount = await this.db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.BankAccountId && a.UserId == userId);
+                    var retainedAccount = await this.db.ChartOfAccounts.FirstOrDefaultAsync(a => a.Id == request.RetainedEarningsAccountId && a.UserId == userId);
 
                     if (cashAccount == null || bankAccount == null || retainedAccount == null)
                     {
@@ -174,12 +163,12 @@ public class PeriodsService : IPeriodsService
                         StartDate = startDate,
                         EndDate = endDate,
                         IsClosed = false,
-                        IsSelected = false
+                        IsSelected = false,
                     };
-                    _db.Periods.Add(newPeriod);
-                    await _db.SaveChangesAsync();
+                    this.db.Periods.Add(newPeriod);
+                    await this.db.SaveChangesAsync();
 
-                    var opening = await AddOpeningBalanceJournalAsync(userId, startDate, retainedAccount);
+                    var opening = await this.AddOpeningBalanceJournalAsync(userId, startDate, retainedAccount);
                     if (opening.Error != null)
                     {
                         return Fail(opening.Error);
@@ -195,7 +184,7 @@ public class PeriodsService : IPeriodsService
                     {
                         Success = true,
                         Message = $"Period {newPeriod.PeriodName} has been opened successfully.{carryInfo}",
-                        PeriodId = newPeriod.Id
+                        PeriodId = newPeriod.Id,
                     };
                 }
                 else
@@ -212,7 +201,7 @@ public class PeriodsService : IPeriodsService
                         return Fail("Cash, Bank, and Retained Earnings accounts must use different reference numbers.");
                     }
 
-                    var codeInUse = await _db.ChartOfAccounts.AnyAsync(a => a.UserId == userId
+                    var codeInUse = await this.db.ChartOfAccounts.AnyAsync(a => a.UserId == userId
                         && (a.ReferenceNumber == cashCode || a.ReferenceNumber == bankCode || a.ReferenceNumber == retainedCode));
                     if (codeInUse)
                     {
@@ -223,7 +212,7 @@ public class PeriodsService : IPeriodsService
                     var bankAccount = new ChartOfAccount { UserId = userId, ReferenceNumber = bankCode, AccountName = request.BankAccountName!.Trim(), Type = "Assets", Role = "CashAndEquivalents", IsActive = true };
                     var retainedAccount = new ChartOfAccount { UserId = userId, ReferenceNumber = retainedCode, AccountName = request.RetainedEarningsAccountName!.Trim(), Type = "Equity", Role = "RetainedEarnings", IsActive = true };
 
-                    _db.ChartOfAccounts.AddRange(cashAccount, bankAccount, retainedAccount);
+                    this.db.ChartOfAccounts.AddRange(cashAccount, bankAccount, retainedAccount);
 
                     var newPeriod = new Period
                     {
@@ -232,10 +221,10 @@ public class PeriodsService : IPeriodsService
                         StartDate = startDate,
                         EndDate = endDate,
                         IsClosed = false,
-                        IsSelected = false
+                        IsSelected = false,
                     };
-                    _db.Periods.Add(newPeriod);
-                    await _db.SaveChangesAsync();
+                    this.db.Periods.Add(newPeriod);
+                    await this.db.SaveChangesAsync();
 
                     var cashBalance = request.CashBalance ?? 0;
                     var bankBalance = request.BankBalance ?? 0;
@@ -243,21 +232,27 @@ public class PeriodsService : IPeriodsService
 
                     if (totalOpeningBalance != 0)
                     {
-                        var transactionNumber = await _txNumberService.GenerateAsync(userId, "General", startDate);
+                        var transactionNumber = await this.txNumberService.GenerateAsync(userId, "General", startDate);
 
                         var openingLines = new List<GeneralJournalWriter.Line>();
                         if (cashBalance != 0)
+                        {
                             openingLines.Add(new GeneralJournalWriter.Line(cashAccount.Id, "Saldo Awal", cashBalance, 0));
+                        }
+
                         if (bankBalance != 0)
+                        {
                             openingLines.Add(new GeneralJournalWriter.Line(bankAccount.Id, "Saldo Awal", bankBalance, 0));
+                        }
+
                         openingLines.Add(new GeneralJournalWriter.Line(retainedAccount.Id, "Saldo Awal", 0, totalOpeningBalance));
 
-                        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_db);
+                        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.db);
 
-                        _db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+                        this.db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
                             journalEntryId, userId, transactionNumber, "General",
                             startDate, DateTime.UtcNow, null, openingLines));
-                        await _db.SaveChangesAsync();
+                        await this.db.SaveChangesAsync();
                     }
 
                     await transaction.CommitAsync();
@@ -266,7 +261,7 @@ public class PeriodsService : IPeriodsService
                     {
                         Success = true,
                         Message = $"Period {newPeriod.PeriodName} has been opened successfully.",
-                        PeriodId = newPeriod.Id
+                        PeriodId = newPeriod.Id,
                     };
                 }
             });
@@ -277,7 +272,7 @@ public class PeriodsService : IPeriodsService
             {
                 Success = false,
                 IsServerError = true,
-                Message = $"Failed to open period: {ex.InnerException?.Message ?? ex.Message}"
+                Message = $"Failed to open period: {ex.InnerException?.Message ?? ex.Message}",
             };
         }
 
@@ -291,13 +286,16 @@ public class PeriodsService : IPeriodsService
 
     private async Task<OpeningResult> AddOpeningBalanceJournalAsync(Guid userId, DateTime startDate, ChartOfAccount retainedAccount)
     {
-        var previous = await _db.Periods
+        var previous = await this.db.Periods
             .AsNoTracking()
             .Where(p => p.UserId == userId && p.StartDate < startDate)
             .OrderByDescending(p => p.StartDate)
             .FirstOrDefaultAsync();
 
-        if (previous == null) return new OpeningResult(0, null);
+        if (previous == null)
+        {
+            return new OpeningResult(0, null);
+        }
 
         var prevStart = previous.StartDate.Date;
         var prevEnd = previous.EndDate.Date.AddDays(1).AddTicks(-1);
@@ -307,14 +305,17 @@ public class PeriodsService : IPeriodsService
             return new OpeningResult(0, "The selected Retained Earnings account must be an Equity account.");
         }
 
-        var accounts = await _db.ChartOfAccounts
+        var accounts = await this.db.ChartOfAccounts
             .AsNoTracking()
             .Where(a => a.UserId == userId && a.IsActive)
             .ToListAsync();
 
-        if (accounts.All(a => a.Id != retainedAccount.Id)) accounts.Add(retainedAccount);
+        if (accounts.All(a => a.Id != retainedAccount.Id))
+        {
+            accounts.Add(retainedAccount);
+        }
 
-        var totals = await _db.GeneralJournals
+        var totals = await this.db.GeneralJournals
             .AsNoTracking()
             .Where(l => l.UserId == userId
                      && (l.JournalType == "General" || l.JournalType == "Adjusting")
@@ -341,20 +342,27 @@ public class PeriodsService : IPeriodsService
             }
 
             balance = Math.Round(balance, 2);
-            if (balance != 0m) balances.Add((account, balance));
+            if (balance != 0m)
+            {
+                balances.Add((account, balance));
+            }
         }
 
-        if (balances.Count == 0) return new OpeningResult(0, null);
+        if (balances.Count == 0)
+        {
+            return new OpeningResult(0, null);
+        }
 
         var totalDebit = balances.Where(b => b.Signed > 0).Sum(b => b.Signed);
         var totalCredit = balances.Where(b => b.Signed < 0).Sum(b => -b.Signed);
         if (Math.Round(totalDebit - totalCredit, 2) != 0m)
         {
-            return new OpeningResult(0,
+            return new OpeningResult(
+                0,
                 $"Saldo Awal is not balanced (debit {totalDebit:N2} vs credit {totalCredit:N2}). Check the journals of {previous.PeriodName}.");
         }
 
-        var transactionNumber = await _txNumberService.GenerateAsync(userId, "General", startDate);
+        var transactionNumber = await this.txNumberService.GenerateAsync(userId, "General", startDate);
 
         var openingLines = balances.Select(b => new GeneralJournalWriter.Line(
             b.Account.Id,
@@ -362,69 +370,75 @@ public class PeriodsService : IPeriodsService
             b.Signed > 0 ? b.Signed : 0m,
             b.Signed < 0 ? -b.Signed : 0m)).ToList();
 
-        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_db);
+        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.db);
 
-        _db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+        this.db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
             journalEntryId, userId, transactionNumber, "General",
             startDate, DateTime.UtcNow, null, openingLines));
-        await _db.SaveChangesAsync();
+        await this.db.SaveChangesAsync();
 
         return new OpeningResult(balances.Count, null);
     }
 
+    /// <inheritdoc/>
     public async Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId)
     {
-        var entity = await _db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
-        if (entity == null) return null;
+        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
+        if (entity == null)
+        {
+            return null;
+        }
 
-        await _db.Periods
+        await this.db.Periods
             .Where(p => p.UserId == userId && p.IsSelected)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
 
-        await _db.Periods
+        await this.db.Periods
             .Where(p => p.Id == periodId && p.UserId == userId)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, true));
 
-        await SelectedPeriodHelper.SelectPeriodAsync(_db, userId, entity.Id);
+        await SelectedPeriodHelper.SelectPeriodAsync(this.db, userId, entity.Id);
 
         // Regenerasikan data staging General Ledgers untuk periode terpilih
-        await _glService.RefreshGeneralLedgersAsync(userId);
+        await this.glService.RefreshGeneralLedgersAsync(userId);
 
         return new SelectPeriodResult
         {
             Success = true,
             SelectedPeriodId = entity.Id,
-            Message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : ".")
+            Message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
         };
     }
 
+    /// <inheritdoc/>
     public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
     {
         // Bersihkan staging table sebelum menghilangkan penanda pilihan
-        await _glService.ClearSelectedPeriodLedgersAsync(userId);
+        await this.glService.ClearSelectedPeriodLedgersAsync(userId);
 
-        await _db.Periods
+        await this.db.Periods
             .Where(p => p.UserId == userId && p.IsSelected)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
 
-        await SelectedPeriodHelper.ClearSelectionAsync(_db, userId);
+        await SelectedPeriodHelper.ClearSelectionAsync(this.db, userId);
 
         return new BaseServiceResult
         {
             Success = true,
-            Message = "Period selection cleared."
+            Message = "Period selection cleared.",
         };
     }
 
+    /// <inheritdoc/>
     public async Task<BaseServiceResult> ClosePeriodAsync(Guid userId, int periodId)
     {
-        var entity = await _db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
+        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
         if (entity == null)
         {
             return new BaseServiceResult
             {
                 Success = false,
-                Message = "Accounting period not found."
+                Message = "Accounting period not found.",
             };
         }
 
@@ -433,11 +447,11 @@ public class PeriodsService : IPeriodsService
             return new BaseServiceResult
             {
                 Success = false,
-                Message = $"Period {entity.PeriodName} is already closed."
+                Message = $"Period {entity.PeriodName} is already closed.",
             };
         }
 
-        var hasEarlierOpenPeriod = await _db.Periods
+        var hasEarlierOpenPeriod = await this.db.Periods
             .AnyAsync(p => p.UserId == userId && p.Id != entity.Id && p.StartDate < entity.StartDate && !p.IsClosed);
 
         if (hasEarlierOpenPeriod)
@@ -445,17 +459,17 @@ public class PeriodsService : IPeriodsService
             return new BaseServiceResult
             {
                 Success = false,
-                Message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first."
+                Message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first.",
             };
         }
 
         entity.IsClosed = true;
-        await _db.SaveChangesAsync();
+        await this.db.SaveChangesAsync();
 
         return new BaseServiceResult
         {
             Success = true,
-            Message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked."
+            Message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked.",
         };
     }
 }

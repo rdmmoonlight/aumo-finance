@@ -1,18 +1,22 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Data;
+// <copyright file="HealthController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
 using System;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
 using AumoBackend.Services;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/health")]
@@ -20,11 +24,11 @@ namespace AumoBackend.Controllers;
 
 public class HealthController : ControllerBase
 {
-    private readonly AppDbContext _dbContext;
+    private readonly AppDbContext dbContext;
 
     public HealthController(AppDbContext dbContext)
     {
-        _dbContext = dbContext;
+        this.dbContext = dbContext;
     }
 
     [HttpGet]
@@ -33,34 +37,34 @@ public class HealthController : ControllerBase
         try
         {
             // Cek koneksi ke database PostgreSQL via AppDbContext
-            bool canConnect = await _dbContext.Database.CanConnectAsync();
+            bool canConnect = await this.dbContext.Database.CanConnectAsync();
 
             if (canConnect)
             {
-                return Ok(new
+                return this.Ok(new
                 {
                     status = "online",
                     database = "connected",
                     commit = Environment.GetEnvironmentVariable("RENDER_GIT_COMMIT"),
-                    timestamp = DateTime.UtcNow
+                    timestamp = DateTime.UtcNow,
                 });
             }
 
-            return StatusCode(503, new
+            return this.StatusCode(503, new
             {
                 status = "offline",
                 database = "disconnected",
-                timestamp = DateTime.UtcNow
+                timestamp = DateTime.UtcNow,
             });
         }
         catch (Exception ex)
         {
-            return StatusCode(503, new
+            return this.StatusCode(503, new
             {
                 status = "offline",
                 database = "error",
                 message = ex.Message,
-                timestamp = DateTime.UtcNow
+                timestamp = DateTime.UtcNow,
             });
         }
     }

@@ -1,6 +1,6 @@
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+// <copyright file="IAvatarStorage.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Storage
 {
@@ -15,9 +15,11 @@ namespace AumoBackend.Services.Storage
         bool IsConfigured { get; }
 
         /// <summary>Unggah avatar, kembalikan URL publik (endpoint API) yang disimpan ke database.</summary>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task<string> UploadAvatarAsync(string fileName, Stream content, CancellationToken cancellationToken = default);
 
         /// <summary>Ambil avatar dari bucket. Null bila tidak ditemukan.</summary>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task<AvatarObject?> GetAvatarAsync(string fileName, CancellationToken cancellationToken = default);
     }
 }

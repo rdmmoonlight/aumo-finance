@@ -1,13 +1,16 @@
+// <copyright file="ChartOfAccountsModel.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
 namespace AumoBackend.Models
 {
-
     public enum AccountClassification
     {
         Asset,
         Liability,
         Equity,
         Revenue,
-        Expense
+        Expense,
     }
 
     public static class AccountClassificationExtensions
@@ -44,7 +47,7 @@ namespace AumoBackend.Models
             {
                 "Assets" or "OperatingExpenses" or "OtherExpenses" => true,
                 "Liabilities" or "Equity" or "OperatingIncome" or "OtherIncome" => false,
-                _ => true // Default fallback jika tipe tidak dikenali
+                _ => true, // Default fallback jika tipe tidak dikenali
             };
         }
 
@@ -56,7 +59,11 @@ namespace AumoBackend.Models
 
         public static bool ValidateReferenceNumber(string? refNum)
         {
-            if (string.IsNullOrWhiteSpace(refNum)) return false;
+            if (string.IsNullOrWhiteSpace(refNum))
+            {
+                return false;
+            }
+
             return int.TryParse(refNum, out _);
         }
 
@@ -107,17 +114,24 @@ namespace AumoBackend.Models
     {
         public static bool IsLocked(Period? period)
         {
-            if (period == null) return false;
+            if (period == null)
+            {
+                return false;
+            }
 
             return period.GetType().GetProperties()
                 .FirstOrDefault(property => property.Name == "IsClosed")?
                 .GetValue(period) is true;
         }
+
         public static bool IsLocked(bool isClosed) => isClosed;
 
         public static bool IsDateLocked(DateTime date, IEnumerable<Period>? periods)
         {
-            if (periods == null) return false;
+            if (periods == null)
+            {
+                return false;
+            }
 
             // Memeriksa apakah tanggal masuk dalam rentang periode yang sudah ditutup (IsClosed = true)
             foreach (var period in periods)

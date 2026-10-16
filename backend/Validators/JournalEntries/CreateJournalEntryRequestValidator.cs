@@ -1,6 +1,10 @@
-using AumoBackend.DTOs;
+// <copyright file="CreateJournalEntryRequestValidator.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Validators.JournalEntries;
+
+using AumoBackend.DTOs;
 
 public class CreateJournalEntryRequestValidator : JournalEntryValidatorBase<CreateJournalEntryRequest>
 {

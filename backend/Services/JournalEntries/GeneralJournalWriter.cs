@@ -1,8 +1,12 @@
+// <copyright file="GeneralJournalWriter.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Services.JournalEntries;
+
 using AumoBackend.Data;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Services.JournalEntries;
 
 /// <summary>
 /// Satu-satunya jalur penulisan jurnal ke tabel GeneralJournal.
@@ -20,6 +24,7 @@ public static class GeneralJournalWriter
     /// "GeneralJournal_JournalEntryId_seq". Tidak ada tabel header lagi,
     /// sehingga id ini dibangkitkan di sini.
     /// </summary>
+    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public static Task<int> NextJournalEntryIdAsync(AppDbContext db, CancellationToken ct = default)
         => db.Database
             .SqlQuery<int>($"SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
@@ -30,6 +35,7 @@ public static class GeneralJournalWriter
     /// berurutan sesuai urutan baris yang diberikan. Baris belum ditambahkan
     /// ke DbContext; pemanggil yang memanggil AddRange lalu SaveChanges.
     /// </summary>
+    /// <returns></returns>
     public static List<GeneralJournal> BuildRows(
         int journalEntryId,
         Guid userId,
@@ -56,7 +62,7 @@ public static class GeneralJournalWriter
             LineDescription = l.LineDescription,
             Debit = l.Debit,
             Credit = l.Credit,
-            LineOrder = order++
+            LineOrder = order++,
         }).ToList();
     }
 }

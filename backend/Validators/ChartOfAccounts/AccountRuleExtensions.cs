@@ -1,7 +1,11 @@
-using AumoBackend.Models;
-using FluentValidation;
+// <copyright file="AccountRuleExtensions.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Validators.ChartOfAccounts;
+
+using AumoBackend.Models;
+using FluentValidation;
 
 /// <summary>Aturan bersama untuk request Create/Update akun.</summary>
 internal static class AccountRuleExtensions

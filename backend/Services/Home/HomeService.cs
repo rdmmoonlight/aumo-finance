@@ -1,21 +1,21 @@
-using AumoBackend.DTOs.Home;
-using System.Globalization;
-using System.Text.Json;
+// <copyright file="HomeService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Home;
 
+using System.Globalization;
+using System.Text.Json;
+using AumoBackend.DTOs.Home;
+
 public class HomeService : IHomeService
 {
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly IHttpClientFactory? httpClientFactory;
 
-    public HomeService(IHttpClientFactory httpClientFactory)
-    {
-        _httpClientFactory = httpClientFactory;
-    }
-
+    /// <inheritdoc/>
     public async Task<List<MarketIndicatorDto>> GetMarketIndicatorsAsync()
     {
-        var client = _httpClientFactory.CreateClient();
+        var client = this.httpClientFactory.CreateClient();
         client.Timeout = TimeSpan.FromSeconds(5);
 
         client.DefaultRequestHeaders.UserAgent.Clear();
@@ -31,8 +31,15 @@ public class HomeService : IHomeService
 
         var resultData = new List<MarketIndicatorDto>();
 
-        if (usdResult != null) resultData.Add(usdResult);
-        if (ihsgResult != null) resultData.Add(ihsgResult);
+        if (usdResult != null)
+        {
+            resultData.Add(usdResult);
+        }
+
+        if (ihsgResult != null)
+        {
+            resultData.Add(ihsgResult);
+        }
 
         return resultData;
     }
@@ -43,14 +50,20 @@ public class HomeService : IHomeService
         {
             var yahooUrl = $"https://{host}.finance.yahoo.com/v8/finance/chart/IDR=X";
             var yahooResult = await FetchYahooChartDataAsync(client, yahooUrl, "USD/IDR", "Dolar AS / Rupiah");
-            if (yahooResult != null) return yahooResult;
+            if (yahooResult != null)
+            {
+                return yahooResult;
+            }
         }
 
         try
         {
             const string fallbackUrl = "https://open.er-api.com/v6/latest/USD";
             var response = await client.GetAsync(fallbackUrl);
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
 
             using var stream = await response.Content.ReadAsStreamAsync();
             using var jsonDoc = await JsonDocument.ParseAsync(stream);
@@ -64,7 +77,7 @@ public class HomeService : IHomeService
                     Symbol = "USD/IDR",
                     Name = "Dolar AS / Rupiah",
                     Price = rate,
-                    Change = 0m
+                    Change = 0m,
                 };
             }
         }
@@ -77,23 +90,23 @@ public class HomeService : IHomeService
     }
 
     // Cache hasil IDX (data penutupan harian) agar tidak membebani server IDX
-    private static MarketIndicatorDto? _ihsgCache;
-    private static DateTime _ihsgCacheAtUtc = DateTime.MinValue;
+    private static MarketIndicatorDto? ihsgCache;
+    private static DateTime ihsgCacheAtUtc = DateTime.MinValue;
     private static readonly TimeSpan IhsgCacheTtl = TimeSpan.FromMinutes(5);
 
     private static async Task<MarketIndicatorDto?> FetchIhsgAsync(HttpClient client)
     {
         // 1. Sumber utama: API resmi IDX (GetIndexSummary, kode indeks COMPOSITE = IHSG)
-        if (_ihsgCache != null && DateTime.UtcNow - _ihsgCacheAtUtc < IhsgCacheTtl)
+        if (ihsgCache != null && DateTime.UtcNow - ihsgCacheAtUtc < IhsgCacheTtl)
         {
-            return _ihsgCache;
+            return ihsgCache;
         }
 
         var idxResult = await FetchIhsgFromIdxAsync(client);
         if (idxResult != null)
         {
-            _ihsgCache = idxResult;
-            _ihsgCacheAtUtc = DateTime.UtcNow;
+            ihsgCache = idxResult;
+            ihsgCacheAtUtc = DateTime.UtcNow;
             return idxResult;
         }
 
@@ -102,7 +115,10 @@ public class HomeService : IHomeService
         {
             var yahooUrl = $"https://{host}.finance.yahoo.com/v8/finance/chart/%5EJKSE";
             var result = await FetchYahooChartDataAsync(client, yahooUrl, "IHSG", "Indeks Harga Saham Gabungan");
-            if (result != null) return result;
+            if (result != null)
+            {
+                return result;
+            }
         }
 
         return null;
@@ -116,7 +132,10 @@ public class HomeService : IHomeService
         for (var i = 0; i < 7; i++)
         {
             var date = todayWib.AddDays(-i);
-            if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday) continue;
+            if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
+            {
+                continue;
+            }
 
             try
             {
@@ -127,7 +146,10 @@ public class HomeService : IHomeService
                 request.Headers.TryAddWithoutValidation("Referer", "https://www.idx.co.id/");
 
                 using var response = await client.SendAsync(request);
-                if (!response.IsSuccessStatusCode) return null; // diblokir atau error: pakai cadangan
+                if (!response.IsSuccessStatusCode)
+                {
+                    return null; // diblokir atau error: pakai cadangan
+                }
 
                 using var stream = await response.Content.ReadAsStreamAsync();
                 using var doc = await JsonDocument.ParseAsync(stream);
@@ -146,7 +168,10 @@ public class HomeService : IHomeService
                         continue;
                     }
 
-                    if (!TryReadDecimal(item, "Close", out var close) || close <= 0) break;
+                    if (!TryReadDecimal(item, "Close", out var close) || close <= 0)
+                    {
+                        break;
+                    }
 
                     TryReadDecimal(item, "Previous", out var previous);
                     var changePercent = previous > 0 ? ((close - previous) / previous) * 100 : 0m;
@@ -156,9 +181,10 @@ public class HomeService : IHomeService
                         Symbol = "IHSG",
                         Name = "Indeks Harga Saham Gabungan",
                         Price = close,
-                        Change = Math.Round(changePercent, 2)
+                        Change = Math.Round(changePercent, 2),
                     };
                 }
+
                 // Tidak ada data COMPOSITE pada tanggal ini (libur bursa): coba hari sebelumnya
             }
             catch
@@ -173,7 +199,10 @@ public class HomeService : IHomeService
     private static bool TryReadDecimal(JsonElement element, string property, out decimal value)
     {
         value = 0m;
-        if (!element.TryGetProperty(property, out var prop)) return false;
+        if (!element.TryGetProperty(property, out var prop))
+        {
+            return false;
+        }
 
         switch (prop.ValueKind)
         {
@@ -200,7 +229,10 @@ public class HomeService : IHomeService
         try
         {
             var response = await client.GetAsync(url);
-            if (!response.IsSuccessStatusCode) return null;
+            if (!response.IsSuccessStatusCode)
+            {
+                return null;
+            }
 
             using var stream = await response.Content.ReadAsStreamAsync();
             using var jsonDoc = await JsonDocument.ParseAsync(stream);
@@ -236,7 +268,7 @@ public class HomeService : IHomeService
                 Symbol = symbol,
                 Name = name,
                 Price = price,
-                Change = Math.Round(changePercent, 2)
+                Change = Math.Round(changePercent, 2),
             };
         }
         catch

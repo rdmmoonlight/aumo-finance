@@ -1,32 +1,21 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Data;
-using AumoBackend.Services.JournalEntries;
-using System;
-using System.Collections.Generic;
+// <copyright file="ToolsService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Services.Tools;
+
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
+using AumoBackend.Services.JournalEntries;
 using AumoBackend.ViewModels;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
 
-namespace AumoBackend.Services.Tools;
-
-public class ToolsService : IToolsService
+public class ToolsService(AppDbContext context) : IToolsService
 {
-    private readonly AppDbContext _context;
-
-    public ToolsService(AppDbContext context)
-    {
-        _context = context;
-    }
-
+    /// <inheritdoc/>
     public byte[] GenerateJournalTemplate()
     {
         using var workbook = new XLWorkbook();
@@ -51,9 +40,10 @@ public class ToolsService : IToolsService
         ws.Row(1).Style.Font.Bold = true;
     }
 
+    /// <inheritdoc/>
     public async Task<PreviewJournalImportViewModel> PreviewJournalImportAsync(Guid userId, JournalImportRequestDto request)
     {
-        var existingCoas = await _context.ChartOfAccounts
+        var existingCoas = await context.ChartOfAccounts
             .AsNoTracking()
             .Where(c => c.UserId == userId && c.IsActive)
             .ToListAsync();
@@ -77,7 +67,7 @@ public class ToolsService : IToolsService
 
             if (!counterMemory.ContainsKey(counterKey))
             {
-                var existingCounter = await _context.TransactionCounters
+                var existingCounter = await context.TransactionCounters
                     .AsNoTracking()
                     .FirstOrDefaultAsync(c => c.UserId == userId && c.CounterKey == counterKey);
 
@@ -105,7 +95,7 @@ public class ToolsService : IToolsService
                         MappedRef = coa.ReferenceNumber,
                         MappedAccountName = coa.AccountName,
                         Status = "EXACT_MATCH",
-                        Reason = "Nomor Ref dan Nama Akun cocok 100% presisi dengan Master COA."
+                        Reason = "Nomor Ref dan Nama Akun cocok 100% presisi dengan Master COA.",
                     });
                 }
                 else
@@ -117,7 +107,7 @@ public class ToolsService : IToolsService
                         MappedRef = 0,
                         MappedAccountName = string.Empty,
                         Status = "UNMAPPED",
-                        Reason = "Silakan pilih akun pelimpahan manual dari dropdown."
+                        Reason = "Silakan pilih akun pelimpahan manual dari dropdown.",
                     });
                 }
 
@@ -127,7 +117,7 @@ public class ToolsService : IToolsService
                     AccountName = excelAccountName,
                     Description = lineDto.Description,
                     Debit = lineDto.Debit,
-                    Credit = lineDto.Credit
+                    Credit = lineDto.Credit,
                 });
             }
 
@@ -136,7 +126,7 @@ public class ToolsService : IToolsService
                 TransactionNumber = generatedTxNumber,
                 Date = txDate.ToString("yyyy-MM-dd"),
                 JournalType = txDto.JournalType,
-                Lines = processedLines
+                Lines = processedLines,
             });
         }
 
@@ -159,22 +149,22 @@ public class ToolsService : IToolsService
                 ExactMatchCount = exactMatchCount,
                 ReallocatedCount = reallocatedCount,
                 UnmappedCount = unmappedCount,
-                IsPerfectMatch = (unmappedCount == 0)
-            }
+                IsPerfectMatch = unmappedCount == 0
+            },
         };
     }
 
+    /// <inheritdoc/>
     public async Task<ImportJournalResultViewModel> ImportJournalEntriesAsync(Guid userId, JournalImportRequestDto request)
     {
-        using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        using var dbTransaction = await context.Database.BeginTransactionAsync();
 
         try
         {
-            var period = await _context.Periods.FirstOrDefaultAsync(p =>
+            var period = await context.Periods.FirstOrDefaultAsync(p =>
                 p.UserId == userId &&
                 p.StartDate.Year == request.TargetYear &&
-                p.StartDate.Month == request.TargetMonth
-            );
+                p.StartDate.Month == request.TargetMonth);
 
             if (period == null)
             {
@@ -188,13 +178,13 @@ public class ToolsService : IToolsService
                     StartDate = DateTime.SpecifyKind(new DateTime(request.TargetYear, request.TargetMonth, 1), DateTimeKind.Utc),
                     EndDate = DateTime.SpecifyKind(new DateTime(request.TargetYear, request.TargetMonth, DateTime.DaysInMonth(request.TargetYear, request.TargetMonth)), DateTimeKind.Utc),
                     IsClosed = false,
-                    IsSelected = false
+                    IsSelected = false,
                 };
-                _context.Periods.Add(period);
-                await _context.SaveChangesAsync();
+                context.Periods.Add(period);
+                await context.SaveChangesAsync();
             }
 
-            var existingCoas = await _context.ChartOfAccounts
+            var existingCoas = await context.ChartOfAccounts
                 .Where(c => c.UserId == userId && c.IsActive)
                 .ToListAsync();
 
@@ -203,10 +193,9 @@ public class ToolsService : IToolsService
                 .ToDictionary(
                     m => $"{m.ExcelRef}|||{m.ExcelAccountName.Trim()}",
                     m => m,
-                    StringComparer.OrdinalIgnoreCase
-                ) ?? new Dictionary<string, AccountMappingDetailDto>();
+                    StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, AccountMappingDetailDto>();
 
-            var existingTxNumbers = await _context.GeneralJournals
+            var existingTxNumbers = await context.GeneralJournals
                 .Where(j => j.UserId == userId)
                 .Select(j => j.TransactionNumber)
                 .Distinct()
@@ -230,10 +219,9 @@ public class ToolsService : IToolsService
 
                 if (!activeCounters.TryGetValue(counterKey, out var counter))
                 {
-                    counter = await _context.TransactionCounters.FirstOrDefaultAsync(c =>
+                    counter = await context.TransactionCounters.FirstOrDefaultAsync(c =>
                         c.UserId == userId &&
-                        c.CounterKey == counterKey
-                    );
+                        c.CounterKey == counterKey);
 
                     if (counter == null)
                     {
@@ -241,9 +229,9 @@ public class ToolsService : IToolsService
                         {
                             UserId = userId,
                             CounterKey = counterKey,
-                            LastSequence = 0
+                            LastSequence = 0,
                         };
-                        _context.TransactionCounters.Add(counter);
+                        context.TransactionCounters.Add(counter);
                     }
 
                     activeCounters[counterKey] = counter;
@@ -291,22 +279,22 @@ public class ToolsService : IToolsService
 
                 if (importLines.Any())
                 {
-                    int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_context);
+                    int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(context);
 
-                    _context.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+                    context.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
                         journalEntryId, userId, transactionNumber, txDto.JournalType,
                         txDate, txDate, null, importLines));
                     importedEntriesCount++;
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await context.SaveChangesAsync();
             await dbTransaction.CommitAsync();
 
             return new ImportJournalResultViewModel
             {
                 Message = "Journal data successfully imported.",
-                ImportedEntriesCount = importedEntriesCount
+                ImportedEntriesCount = importedEntriesCount,
             };
         }
         catch

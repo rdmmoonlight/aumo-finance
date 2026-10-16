@@ -1,3 +1,10 @@
+// <copyright file="PeriodsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
+using System.Security.Claims;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
@@ -7,27 +14,24 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-
-namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/periods")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class PeriodsController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly IPeriodsService _periodsService;
-    private readonly IValidator<CreatePeriodRequest> _createPeriodValidator;
+    private readonly AppDbContext db;
+    private readonly IPeriodsService periodsService;
+    private readonly IValidator<CreatePeriodRequest> createPeriodValidator;
 
     public PeriodsController(
         AppDbContext db,
         IPeriodsService periodsService,
         IValidator<CreatePeriodRequest> createPeriodValidator)
     {
-        _db = db;
-        _periodsService = periodsService;
-        _createPeriodValidator = createPeriodValidator;
+        this.db = db;
+        this.periodsService = periodsService;
+        this.createPeriodValidator = createPeriodValidator;
     }
 
     // ==========================================
@@ -36,11 +40,13 @@ public class PeriodsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetPeriods()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var periodsData = await _db.Periods
+        var periodsData = await this.db.Periods
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.StartDate)
             .Select(p => new
@@ -50,7 +56,7 @@ public class PeriodsController : ControllerBase
                 p.StartDate,
                 p.EndDate,
                 p.IsClosed,
-                p.IsSelected
+                p.IsSelected,
             })
             .ToListAsync();
 
@@ -60,7 +66,7 @@ public class PeriodsController : ControllerBase
         // Fallback ke helper jika di DB belum ada yang bernilai IsSelected = true
         if (!selectedPeriodId.HasValue)
         {
-            var selectedFromHelper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+            var selectedFromHelper = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
             selectedPeriodId = selectedFromHelper?.Id;
         }
 
@@ -71,14 +77,14 @@ public class PeriodsController : ControllerBase
             p.StartDate,
             p.EndDate,
             p.IsClosed,
-            IsSelected = selectedPeriodId.HasValue ? (p.Id == selectedPeriodId.Value) : p.IsSelected
+            IsSelected = selectedPeriodId.HasValue ? (p.Id == selectedPeriodId.Value) : p.IsSelected,
         }).ToList();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             selectedPeriodId = selectedPeriodId,
-            periods = periods
+            periods = periods,
         });
     }
 
@@ -88,11 +94,13 @@ public class PeriodsController : ControllerBase
     [HttpGet("open-info")]
     public async Task<IActionResult> GetOpenPeriodInfo()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var accounts = await _db.ChartOfAccounts
+        var accounts = await this.db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
             .OrderBy(a => a.ReferenceNumber)
             .ToListAsync();
@@ -112,13 +120,13 @@ public class PeriodsController : ControllerBase
 
         var hasExistingPermanentAccounts = availableCashAndBank.Any() && availableRetainedEarnings.Any();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             hasExistingPermanentAccounts,
             availableCashAndBankAccounts = availableCashAndBank,
             availableRetainedEarningsAccounts = availableRetainedEarnings,
-            permanentAccounts
+            permanentAccounts,
         });
     }
 
@@ -128,21 +136,27 @@ public class PeriodsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreatePeriod([FromBody] CreatePeriodRequest request)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var validation = await _createPeriodValidator.ValidateAsync(request);
+        var validation = await this.createPeriodValidator.ValidateAsync(request);
         if (!validation.IsValid)
-            return BadRequest(validation.ToErrorResponse());
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
 
-        var result = await _periodsService.CreatePeriodAsync(userId, request);
+        var result = await this.periodsService.CreatePeriodAsync(userId, request);
 
         if (result.Success)
-            return Ok(new { success = true, message = result.Message, periodId = result.PeriodId });
+        {
+            return this.Ok(new { success = true, message = result.Message, periodId = result.PeriodId });
+        }
 
         var body = new { success = false, message = result.Message };
-        return result.IsServerError ? StatusCode(500, body) : BadRequest(body);
+        return result.IsServerError ? this.StatusCode(500, body) : this.BadRequest(body);
     }
 
     // ==========================================
@@ -151,32 +165,36 @@ public class PeriodsController : ControllerBase
     [HttpPost("select/{id:int}")]
     public async Task<IActionResult> SelectPeriod(int id)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var entity = await _db.Periods.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
         if (entity == null)
-            return NotFound(new { success = false, message = "Accounting period not found." });
+        {
+            return this.NotFound(new { success = false, message = "Accounting period not found." });
+        }
 
         // TAHAP 1: Reset SEMUA IsSelected milik user ini menjadi false
-        await _db.Periods
+        await this.db.Periods
             .Where(p => p.UserId == userId && p.IsSelected)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
 
         // TAHAP 2: Set HANYA 1 periode yang dipilih menjadi true
-        await _db.Periods
+        await this.db.Periods
             .Where(p => p.Id == id && p.UserId == userId)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, true));
 
         // Sinkronisasi dengan helper session/cache
-        await SelectedPeriodHelper.SelectPeriodAsync(_db, userId, entity.Id);
+        await SelectedPeriodHelper.SelectPeriodAsync(this.db, userId, entity.Id);
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             selectedPeriodId = entity.Id,
-            message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : ".")
+            message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
         });
     }
 
@@ -186,21 +204,23 @@ public class PeriodsController : ControllerBase
     [HttpPost("clear-selection")]
     public async Task<IActionResult> ClearSelection()
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
         // Set semua IsSelected milik user menjadi false
-        await _db.Periods
+        await this.db.Periods
             .Where(p => p.UserId == userId && p.IsSelected)
             .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
 
-        await SelectedPeriodHelper.ClearSelectionAsync(_db, userId);
+        await SelectedPeriodHelper.ClearSelectionAsync(this.db, userId);
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
-            message = "Period selection cleared."
+            message = "Period selection cleared.",
         });
     }
 
@@ -210,37 +230,45 @@ public class PeriodsController : ControllerBase
     [HttpPost("close/{id:int}")]
     public async Task<IActionResult> ClosePeriod(int id)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var entity = await _db.Periods.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
+        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
         if (entity == null)
-            return NotFound(new { success = false, message = "Accounting period not found." });
+        {
+            return this.NotFound(new { success = false, message = "Accounting period not found." });
+        }
 
         if (entity.IsClosed)
-            return BadRequest(new { success = false, message = $"Period {entity.PeriodName} is already closed." });
+        {
+            return this.BadRequest(new { success = false, message = $"Period {entity.PeriodName} is already closed." });
+        }
 
-        var hasEarlierOpenPeriod = await _db.Periods
+        var hasEarlierOpenPeriod = await this.db.Periods
             .AnyAsync(p => p.UserId == userId && p.Id != entity.Id && p.StartDate < entity.StartDate && !p.IsClosed);
 
         if (hasEarlierOpenPeriod)
-            return BadRequest(new { success = false, message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first." });
+        {
+            return this.BadRequest(new { success = false, message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first." });
+        }
 
         entity.IsClosed = true;
-        await _db.SaveChangesAsync();
+        await this.db.SaveChangesAsync();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
-            message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked."
+            message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked.",
         });
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("sub");
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? this.User.FindFirstValue("sub");
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }

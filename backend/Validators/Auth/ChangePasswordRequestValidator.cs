@@ -1,7 +1,11 @@
-using AumoBackend.DTOs;
-using FluentValidation;
+// <copyright file="ChangePasswordRequestValidator.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Validators.Auth;
+
+using AumoBackend.DTOs;
+using FluentValidation;
 
 public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {
@@ -11,11 +15,11 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
 
     public ChangePasswordRequestValidator()
     {
-        RuleFor(x => x.CurrentPassword)
+        this.RuleFor(x => x.CurrentPassword)
             .NotEmpty().WithMessage("Current password is required.")
             .MaximumLength(MaxPasswordLength).WithMessage("Current password must not exceed 128 characters.");
 
-        RuleFor(x => x.NewPassword)
+        this.RuleFor(x => x.NewPassword)
             .NotEmpty().WithMessage("New password is required.")
             .MinimumLength(MinPasswordLength).WithMessage("New password must be at least 6 characters.")
             .MaximumLength(MaxPasswordLength).WithMessage("New password must not exceed 128 characters.")

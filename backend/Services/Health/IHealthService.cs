@@ -1,13 +1,11 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
+// <copyright file="IHealthService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Health
 {
+    using AumoBackend.DTOs;
+
     public interface IHealthService
     {
         Task<HealthStatusDto> GetHealthStatusAsync();

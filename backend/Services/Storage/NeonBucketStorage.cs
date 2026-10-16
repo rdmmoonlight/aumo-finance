@@ -1,44 +1,42 @@
-using System;
-using System.IO;
-using System.Net;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
-using Amazon.Runtime;
-using Amazon.S3;
-using Amazon.S3.Model;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+// <copyright file="NeonBucketStorage.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Storage
 {
+    using System.Net;
+    using System.Text.RegularExpressions;
+    using Amazon.Runtime;
+    using Amazon.S3;
+    using Amazon.S3.Model;
+
     public sealed class NeonBucketStorage : IAvatarStorage, IDisposable
     {
         private const string KeyPrefix = "avatars/";
         private static readonly Regex FileNamePattern =
             new(@"^[A-Za-z0-9_\-]+\.(jpg|jpeg|png|gif|webp)$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
-        private readonly IConfiguration _configuration;
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private readonly string _bucket;
-        private readonly AmazonS3Client? _client;
+        private readonly IConfiguration configuration;
+        private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly string bucket;
+        private readonly AmazonS3Client? client;
 
-        public bool IsConfigured => _client != null;
+        /// <inheritdoc/>
+        public bool IsConfigured => this.client != null;
 
         public NeonBucketStorage(
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
             ILogger<NeonBucketStorage> logger)
         {
-            _configuration = configuration;
-            _httpContextAccessor = httpContextAccessor;
+            this.configuration = configuration;
+            this.httpContextAccessor = httpContextAccessor;
 
             var endpoint = configuration["AWS_ENDPOINT_URL_S3"];
             var accessKey = configuration["AWS_ACCESS_KEY_ID"];
             var secretKey = configuration["AWS_SECRET_ACCESS_KEY"];
             var region = configuration["AWS_REGION"] ?? "ap-southeast-1";
-            _bucket = configuration["S3_BUCKET"] ?? "assets";
+            this.bucket = configuration["S3_BUCKET"] ?? "assets";
 
             if (string.IsNullOrWhiteSpace(endpoint)
                 || string.IsNullOrWhiteSpace(accessKey)
@@ -53,41 +51,49 @@ namespace AumoBackend.Services.Storage
                 ServiceURL = endpoint,
                 AuthenticationRegion = region,
                 ForcePathStyle = true,
+
                 // Penyimpanan S3-compatible tidak selalu mendukung checksum tambahan SDK terbaru.
                 RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
-                ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED
+                ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
             };
 
-            _client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
+            this.client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
         }
 
+        /// <inheritdoc/>
         public async Task<string> UploadAvatarAsync(string fileName, Stream content, CancellationToken cancellationToken = default)
         {
-            var client = RequireClient();
+            var client = this.RequireClient();
             EnsureValidFileName(fileName);
 
-            await client.PutObjectAsync(new PutObjectRequest
+            await client.PutObjectAsync(
+                new PutObjectRequest
             {
-                BucketName = _bucket,
+                BucketName = this.bucket,
                 Key = KeyPrefix + fileName,
                 InputStream = content,
-                ContentType = ContentTypeFor(fileName)
+                ContentType = ContentTypeFor(fileName),
             }, cancellationToken);
 
-            return BuildPublicUrl(fileName);
+            return this.BuildPublicUrl(fileName);
         }
 
+        /// <inheritdoc/>
         public async Task<AvatarObject?> GetAvatarAsync(string fileName, CancellationToken cancellationToken = default)
         {
-            var client = RequireClient();
-            if (!FileNamePattern.IsMatch(fileName)) return null;
+            var client = this.RequireClient();
+            if (!FileNamePattern.IsMatch(fileName))
+            {
+                return null;
+            }
 
             try
             {
-                var response = await client.GetObjectAsync(new GetObjectRequest
+                var response = await client.GetObjectAsync(
+                    new GetObjectRequest
                 {
-                    BucketName = _bucket,
-                    Key = KeyPrefix + fileName
+                    BucketName = this.bucket,
+                    Key = KeyPrefix + fileName,
                 }, cancellationToken);
 
                 return new AvatarObject(response.ResponseStream, ContentTypeFor(fileName));
@@ -100,10 +106,10 @@ namespace AumoBackend.Services.Storage
 
         private string BuildPublicUrl(string fileName)
         {
-            var baseUrl = _configuration["PUBLIC_API_URL"];
+            var baseUrl = this.configuration["PUBLIC_API_URL"];
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
-                var request = _httpContextAccessor.HttpContext?.Request
+                var request = this.httpContextAccessor.HttpContext?.Request
                     ?? throw new InvalidOperationException("Set PUBLIC_API_URL: konteks HTTP tidak tersedia untuk membentuk URL avatar.");
                 baseUrl = $"{request.Scheme}://{request.Host}";
             }
@@ -118,18 +124,21 @@ namespace AumoBackend.Services.Storage
                 ".png" => "image/png",
                 ".gif" => "image/gif",
                 ".webp" => "image/webp",
-                _ => "application/octet-stream"
+                _ => "application/octet-stream",
             };
 
         private static void EnsureValidFileName(string fileName)
         {
             if (!FileNamePattern.IsMatch(fileName))
+            {
                 throw new ArgumentException("Nama file avatar tidak valid.", nameof(fileName));
+            }
         }
 
         private AmazonS3Client RequireClient() =>
-            _client ?? throw new InvalidOperationException("Neon bucket belum dikonfigurasi di server.");
+            this.client ?? throw new InvalidOperationException("Neon bucket belum dikonfigurasi di server.");
 
-        public void Dispose() => _client?.Dispose();
+        /// <inheritdoc/>
+        public void Dispose() => this.client?.Dispose();
     }
 }

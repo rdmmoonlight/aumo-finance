@@ -1,15 +1,21 @@
-using AumoBackend.DTOs;
-using AumoBackend.DTOs.Reports;
+// <copyright file="IGeneralLedgersService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Reports.GeneralLedgers;
+
+using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 
 public interface IGeneralLedgersService
 {
     Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId);
+
     Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId);
 
     // Baru - semua bisnis GET pindah kesini
     Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId);
+
     Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId);
 }
 

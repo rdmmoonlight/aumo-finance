@@ -1,6 +1,10 @@
-using FluentValidation.Results;
+// <copyright file="ValidationResultExtensions.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Validators.Common;
+
+using FluentValidation.Results;
 
 /// <summary>
 /// Format respons error validasi yang seragam untuk seluruh endpoint.
@@ -20,7 +24,7 @@ public static class ValidationResultExtensions
         {
             success = false,
             message = errors.FirstOrDefault() ?? "Validation failed.",
-            errors
+            errors,
         };
     }
 }

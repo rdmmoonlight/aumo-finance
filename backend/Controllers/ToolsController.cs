@@ -1,10 +1,9 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Models;
-using AumoBackend.Data;
-using AumoBackend.Services.JournalEntries;
+// <copyright file="ToolsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -12,15 +11,20 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
 using AumoBackend.Services;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.JournalEntries;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/tools")]
@@ -28,11 +32,11 @@ namespace AumoBackend.Controllers;
 
 public class ToolsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly AppDbContext context;
 
     public ToolsController(AppDbContext context)
     {
-        _context = context;
+        this.context = context;
     }
 
     // ==========================================
@@ -65,11 +69,10 @@ public class ToolsController : ControllerBase
         workbook.SaveAs(stream);
         var content = stream.ToArray();
 
-        return File(
+        return this.File(
             content,
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "JournalImportTemplate.xlsx"
-        );
+            "JournalImportTemplate.xlsx");
     }
 
     // ==========================================
@@ -80,16 +83,16 @@ public class ToolsController : ControllerBase
     {
         if (request?.Transactions == null || !request.Transactions.Any())
         {
-            return BadRequest(new { message = "No transaction data provided for preview." });
+            return this.BadRequest(new { message = "No transaction data provided for preview." });
         }
 
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdStr, out var userId))
         {
-            return Unauthorized();
+            return this.Unauthorized();
         }
 
-        var existingCoas = await _context.ChartOfAccounts
+        var existingCoas = await this.context.ChartOfAccounts
             .AsNoTracking()
             .Where(c => c.UserId == userId && c.IsActive)
             .ToListAsync();
@@ -114,7 +117,7 @@ public class ToolsController : ControllerBase
 
             if (!counterMemory.ContainsKey(counterKey))
             {
-                var existingCounter = await _context.TransactionCounters
+                var existingCounter = await this.context.TransactionCounters
                     .AsNoTracking()
                     .FirstOrDefaultAsync(c => c.UserId == userId && c.CounterKey == counterKey);
 
@@ -142,7 +145,7 @@ public class ToolsController : ControllerBase
                         MappedRef = coa.ReferenceNumber,
                         MappedAccountName = coa.AccountName,
                         Status = "EXACT_MATCH",
-                        Reason = "Nomor Ref dan Nama Akun cocok 100% presisi dengan Master COA."
+                        Reason = "Nomor Ref dan Nama Akun cocok 100% presisi dengan Master COA.",
                     });
                 }
                 else
@@ -154,7 +157,7 @@ public class ToolsController : ControllerBase
                         MappedRef = 0,
                         MappedAccountName = string.Empty,
                         Status = "UNMAPPED",
-                        Reason = "Silakan pilih akun pelimpahan manual dari dropdown."
+                        Reason = "Silakan pilih akun pelimpahan manual dari dropdown.",
                     });
                 }
 
@@ -164,7 +167,7 @@ public class ToolsController : ControllerBase
                     AccountName = excelAccountName,
                     Description = lineDto.Description,
                     Debit = lineDto.Debit,
-                    Credit = lineDto.Credit
+                    Credit = lineDto.Credit,
                 });
             }
 
@@ -173,7 +176,7 @@ public class ToolsController : ControllerBase
                 TransactionNumber = generatedTxNumber,
                 Date = txDate.ToString("yyyy-MM-dd"),
                 JournalType = txDto.JournalType,
-                Lines = processedLines
+                Lines = processedLines,
             });
         }
 
@@ -186,7 +189,7 @@ public class ToolsController : ControllerBase
         int reallocatedCount = uniqueMappings.Count(m => m.Status == "REALLOCATED_NAME" || m.Status == "REALLOCATED_REF");
         int unmappedCount = uniqueMappings.Count(m => m.Status == "UNMAPPED" || m.MappedRef == 0);
 
-        return Ok(new
+        return this.Ok(new
         {
             transactions = processedTransactions,
             accountMappings = uniqueMappings,
@@ -196,8 +199,8 @@ public class ToolsController : ControllerBase
                 exactMatchCount = exactMatchCount,
                 reallocatedCount = reallocatedCount,
                 unmappedCount = unmappedCount,
-                isPerfectMatch = (unmappedCount == 0)
-            }
+                isPerfectMatch = unmappedCount == 0
+            },
         });
     }
 
@@ -209,30 +212,29 @@ public class ToolsController : ControllerBase
     {
         if (request?.Transactions == null || !request.Transactions.Any())
         {
-            return BadRequest(new { message = "No transaction data provided for import." });
+            return this.BadRequest(new { message = "No transaction data provided for import." });
         }
 
         if (request.TargetMonth < 1 || request.TargetMonth > 12 || request.TargetYear < 2000)
         {
-            return BadRequest(new { message = "Invalid period parameters provided." });
+            return this.BadRequest(new { message = "Invalid period parameters provided." });
         }
 
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!Guid.TryParse(userIdStr, out var userId))
         {
-            return Unauthorized();
+            return this.Unauthorized();
         }
 
-        using var dbTransaction = await _context.Database.BeginTransactionAsync();
+        using var dbTransaction = await this.context.Database.BeginTransactionAsync();
 
         try
         {
             // Cek / Buat Periode Akuntansi
-            var period = await _context.Periods.FirstOrDefaultAsync(p =>
+            var period = await this.context.Periods.FirstOrDefaultAsync(p =>
                 p.UserId == userId &&
                 p.StartDate.Year == request.TargetYear &&
-                p.StartDate.Month == request.TargetMonth
-            );
+                p.StartDate.Month == request.TargetMonth);
 
             if (period == null)
             {
@@ -246,13 +248,13 @@ public class ToolsController : ControllerBase
                     StartDate = DateTime.SpecifyKind(new DateTime(request.TargetYear, request.TargetMonth, 1), DateTimeKind.Utc),
                     EndDate = DateTime.SpecifyKind(new DateTime(request.TargetYear, request.TargetMonth, DateTime.DaysInMonth(request.TargetYear, request.TargetMonth)), DateTimeKind.Utc),
                     IsClosed = false,
-                    IsSelected = false
+                    IsSelected = false,
                 };
-                _context.Periods.Add(period);
-                await _context.SaveChangesAsync();
+                this.context.Periods.Add(period);
+                await this.context.SaveChangesAsync();
             }
 
-            var existingCoas = await _context.ChartOfAccounts
+            var existingCoas = await this.context.ChartOfAccounts
                 .Where(c => c.UserId == userId && c.IsActive)
                 .ToListAsync();
 
@@ -261,10 +263,9 @@ public class ToolsController : ControllerBase
                 .ToDictionary(
                     m => $"{m.ExcelRef}|||{m.ExcelAccountName.Trim()}",
                     m => m,
-                    StringComparer.OrdinalIgnoreCase
-                ) ?? new Dictionary<string, AccountMappingDetailDto>();
+                    StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, AccountMappingDetailDto>();
 
-            var existingTxNumbers = await _context.GeneralJournals
+            var existingTxNumbers = await this.context.GeneralJournals
                 .Where(j => j.UserId == userId)
                 .Select(j => j.TransactionNumber)
                 .Distinct()
@@ -290,10 +291,9 @@ public class ToolsController : ControllerBase
 
                 if (!activeCounters.TryGetValue(counterKey, out var counter))
                 {
-                    counter = await _context.TransactionCounters.FirstOrDefaultAsync(c =>
+                    counter = await this.context.TransactionCounters.FirstOrDefaultAsync(c =>
                         c.UserId == userId &&
-                        c.CounterKey == counterKey
-                    );
+                        c.CounterKey == counterKey);
 
                     if (counter == null)
                     {
@@ -301,9 +301,9 @@ public class ToolsController : ControllerBase
                         {
                             UserId = userId,
                             CounterKey = counterKey,
-                            LastSequence = 0
+                            LastSequence = 0,
                         };
-                        _context.TransactionCounters.Add(counter);
+                        this.context.TransactionCounters.Add(counter);
                     }
 
                     activeCounters[counterKey] = counter;
@@ -351,28 +351,28 @@ public class ToolsController : ControllerBase
 
                 if (importLines.Any())
                 {
-                    int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_context);
+                    int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.context);
 
-                    _context.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+                    this.context.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
                         journalEntryId, userId, transactionNumber, txDto.JournalType,
                         txDate, txDate, null, importLines));
                     importedEntriesCount++;
                 }
             }
 
-            await _context.SaveChangesAsync();
+            await this.context.SaveChangesAsync();
             await dbTransaction.CommitAsync();
 
-            return Ok(new
+            return this.Ok(new
             {
                 message = "Journal data successfully imported.",
-                importedEntriesCount = importedEntriesCount
+                importedEntriesCount = importedEntriesCount,
             });
         }
         catch (Exception ex)
         {
             await dbTransaction.RollbackAsync();
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = $"Failed to save data: {ex.Message}" });
+            return this.StatusCode(StatusCodes.Status500InternalServerError, new { message = $"Failed to save data: {ex.Message}" });
         }
     }
 }

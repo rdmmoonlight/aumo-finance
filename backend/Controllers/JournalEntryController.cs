@@ -1,25 +1,29 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.JournalEntries;
-using AumoBackend.Models;
-using AumoBackend.Services.Periods;
-using AumoBackend.Data;
+// <copyright file="JournalEntryController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Controllers;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AumoBackend.Controllers.Reports;
+using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.Helpers;
+using AumoBackend.Models;
 using AumoBackend.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+using AumoBackend.Services.Auth;
+using AumoBackend.Services.Identity;
+using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.Periods;
 using AumoBackend.Validators.Common;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Controllers;
 
 [ApiController]
 [Route("/journal-entry")]
@@ -27,10 +31,10 @@ namespace AumoBackend.Controllers;
 
 public class JournalEntryController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    private readonly ITransactionNumberService _transactionNumberService;
-    private readonly IValidator<CreateJournalEntryRequest> _createValidator;
-    private readonly IValidator<UpdateJournalEntryRequest> _updateValidator;
+    private readonly AppDbContext db;
+    private readonly ITransactionNumberService transactionNumberService;
+    private readonly IValidator<CreateJournalEntryRequest> createValidator;
+    private readonly IValidator<UpdateJournalEntryRequest> updateValidator;
 
     public JournalEntryController(
         AppDbContext db,
@@ -38,10 +42,10 @@ public class JournalEntryController : ControllerBase
         IValidator<CreateJournalEntryRequest> createValidator,
         IValidator<UpdateJournalEntryRequest> updateValidator)
     {
-        _db = db;
-        _transactionNumberService = transactionNumberService;
-        _createValidator = createValidator;
-        _updateValidator = updateValidator;
+        this.db = db;
+        this.transactionNumberService = transactionNumberService;
+        this.createValidator = createValidator;
+        this.updateValidator = updateValidator;
     }
 
     // ==========================================
@@ -50,12 +54,14 @@ public class JournalEntryController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
         // id = JournalEntryId (id kelompok jurnal)
-        var rows = await _db.GeneralJournals
+        var rows = await this.db.GeneralJournals
             .AsNoTracking()
             .Where(g => g.JournalEntryId == id && g.UserId == userId)
             .OrderBy(g => g.LineOrder)
@@ -63,12 +69,12 @@ public class JournalEntryController : ControllerBase
 
         if (rows.Count == 0)
         {
-            return NotFound(new { success = false, message = "Journal entry not found." });
+            return this.NotFound(new { success = false, message = "Journal entry not found." });
         }
 
         var entry = rows[0];
 
-        var closedPeriods = await _db.Periods
+        var closedPeriods = await this.db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
@@ -91,10 +97,10 @@ public class JournalEntryController : ControllerBase
                 l.Debit,
                 l.Credit,
                 l.LineOrder
-            })
+            }),
         };
 
-        return Ok(new { success = true, entry = result });
+        return this.Ok(new { success = true, entry = result });
     }
 
     // ==========================================
@@ -103,19 +109,23 @@ public class JournalEntryController : ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateJournalEntryRequest request)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var validation = await _createValidator.ValidateAsync(request);
+        var validation = await this.createValidator.ValidateAsync(request);
         if (!validation.IsValid)
-            return BadRequest(validation.ToErrorResponse());
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
 
         var effectiveLines = request.Lines
             .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))
             .ToList();
 
-        var validAccountIds = (await _db.ChartOfAccounts
+        var validAccountIds = (await this.db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
             .Select(a => a.Id)
             .ToListAsync())
@@ -123,40 +133,40 @@ public class JournalEntryController : ControllerBase
 
         if (effectiveLines.Any(l => !validAccountIds.Contains(l.AccountId)))
         {
-            return BadRequest(new { success = false, message = "One or more selected accounts are invalid or inactive." });
+            return this.BadRequest(new { success = false, message = "One or more selected accounts are invalid or inactive." });
         }
 
-        var closedPeriods = await _db.Periods
+        var closedPeriods = await this.db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
         if (PeriodLock.IsDateLocked(request.EntryDate, closedPeriods))
         {
-            return BadRequest(new { success = false, message = "This date falls within a closed accounting period. Choose a date in an open period." });
+            return this.BadRequest(new { success = false, message = "This date falls within a closed accounting period. Choose a date in an open period." });
         }
 
         string journalType = string.IsNullOrWhiteSpace(request.JournalType) ? "General" : request.JournalType;
-        string transactionNumber = await _transactionNumberService.GenerateAsync(userId, journalType, request.EntryDate);
+        string transactionNumber = await this.transactionNumberService.GenerateAsync(userId, journalType, request.EntryDate);
 
         var deviceCreatedAt = request.CreatedAt == default ? DateTime.UtcNow : request.CreatedAt;
         var entryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc);
         var createdAt = DateTime.SpecifyKind(deviceCreatedAt, DateTimeKind.Utc);
 
-        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_db);
+        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.db);
 
         var rows = GeneralJournalWriter.BuildRows(
             journalEntryId, userId, transactionNumber, journalType, entryDate, createdAt, null,
             effectiveLines.Select(l => new GeneralJournalWriter.Line(l.AccountId, l.LineDescription, l.Debit, l.Credit)));
 
-        _db.GeneralJournals.AddRange(rows);
-        await _db.SaveChangesAsync();
+        this.db.GeneralJournals.AddRange(rows);
+        await this.db.SaveChangesAsync();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
             message = $"Journal entry {transactionNumber} has been posted.",
             entryId = journalEntryId,
-            transactionNumber
+            transactionNumber,
         });
     }
 
@@ -166,40 +176,44 @@ public class JournalEntryController : ControllerBase
     [HttpPut("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UpdateJournalEntryRequest request)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
-        var validation = await _updateValidator.ValidateAsync(request);
+        var validation = await this.updateValidator.ValidateAsync(request);
         if (!validation.IsValid)
-            return BadRequest(validation.ToErrorResponse());
+        {
+            return this.BadRequest(validation.ToErrorResponse());
+        }
 
         // id = JournalEntryId (id kelompok jurnal)
-        var existingRows = await _db.GeneralJournals
+        var existingRows = await this.db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId)
             .ToListAsync();
 
         if (existingRows.Count == 0)
         {
-            return NotFound(new { success = false, message = "Journal entry not found." });
+            return this.NotFound(new { success = false, message = "Journal entry not found." });
         }
 
         var header = existingRows[0];
 
-        var closedPeriods = await _db.Periods
+        var closedPeriods = await this.db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
         if (PeriodLock.IsDateLocked(header.EntryDate, closedPeriods) || PeriodLock.IsDateLocked(request.EntryDate, closedPeriods))
         {
-            return BadRequest(new { success = false, message = $"Journal entry {header.TransactionNumber} falls within a closed period and cannot be modified." });
+            return this.BadRequest(new { success = false, message = $"Journal entry {header.TransactionNumber} falls within a closed period and cannot be modified." });
         }
 
         var effectiveLines = request.Lines
             .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))
             .ToList();
 
-        var validAccountIds = (await _db.ChartOfAccounts
+        var validAccountIds = (await this.db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
             .Select(a => a.Id)
             .ToListAsync())
@@ -207,7 +221,7 @@ public class JournalEntryController : ControllerBase
 
         if (effectiveLines.Any(l => !validAccountIds.Contains(l.AccountId)))
         {
-            return BadRequest(new { success = false, message = "One or more selected accounts are invalid or inactive." });
+            return this.BadRequest(new { success = false, message = "One or more selected accounts are invalid or inactive." });
         }
 
         string journalType = string.IsNullOrWhiteSpace(request.JournalType) ? header.JournalType : request.JournalType;
@@ -222,14 +236,14 @@ public class JournalEntryController : ControllerBase
             header.Status ?? GeneralJournalWriter.PostedStatus);
 
         // Hapus baris lama + tambah baris baru dalam satu SaveChanges (satu transaksi).
-        _db.GeneralJournals.RemoveRange(existingRows);
-        _db.GeneralJournals.AddRange(newRows);
-        await _db.SaveChangesAsync();
+        this.db.GeneralJournals.RemoveRange(existingRows);
+        this.db.GeneralJournals.AddRange(newRows);
+        await this.db.SaveChangesAsync();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
-            message = $"Journal entry {header.TransactionNumber} updated successfully."
+            message = $"Journal entry {header.TransactionNumber} updated successfully.",
         });
     }
 
@@ -239,38 +253,40 @@ public class JournalEntryController : ControllerBase
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
         // id = JournalEntryId (id kelompok jurnal)
-        var rows = await _db.GeneralJournals
+        var rows = await this.db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId)
             .ToListAsync();
 
         if (rows.Count == 0)
         {
-            return NotFound(new { success = false, message = "Journal entry not found." });
+            return this.NotFound(new { success = false, message = "Journal entry not found." });
         }
 
-        var closedPeriods = await _db.Periods
+        var closedPeriods = await this.db.Periods
             .Where(p => p.UserId == userId && p.IsClosed)
             .ToListAsync();
 
         if (PeriodLock.IsDateLocked(rows[0].EntryDate, closedPeriods))
         {
-            return BadRequest(new { success = false, message = "Cannot delete transactions in closed accounting periods." });
+            return this.BadRequest(new { success = false, message = "Cannot delete transactions in closed accounting periods." });
         }
 
         string transactionNumber = rows[0].TransactionNumber;
 
-        _db.GeneralJournals.RemoveRange(rows);
-        await _db.SaveChangesAsync();
+        this.db.GeneralJournals.RemoveRange(rows);
+        await this.db.SaveChangesAsync();
 
-        return Ok(new
+        return this.Ok(new
         {
             success = true,
-            message = $"Journal entry {transactionNumber} deleted successfully."
+            message = $"Journal entry {transactionNumber} deleted successfully.",
         });
     }
 
@@ -282,18 +298,20 @@ public class JournalEntryController : ControllerBase
     {
         if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
         {
-            return Ok(Array.Empty<string>());
+            return this.Ok(Array.Empty<string>());
         }
 
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
         var keyword = q.Trim();
 
-        var results = await _db.GeneralJournals
+        var results = await this.db.GeneralJournals
             .Where(l => l.UserId == userId
-                     && l.LineDescription != null && l.LineDescription != ""
+                     && l.LineDescription != null && l.LineDescription != string.Empty
                      && EF.Functions.ILike(l.LineDescription, $"%{keyword}%"))
             .GroupBy(l => l.LineDescription)
             .OrderByDescending(g => g.Count())
@@ -302,7 +320,7 @@ public class JournalEntryController : ControllerBase
             .Take(8)
             .ToListAsync();
 
-        return Ok(results);
+        return this.Ok(results);
     }
 
     // ==========================================
@@ -311,21 +329,23 @@ public class JournalEntryController : ControllerBase
     [HttpGet("next-transaction-number")]
     public async Task<IActionResult> GetNextTransactionNumber([FromQuery] string journalType = "General", [FromQuery] DateTime? entryDate = null)
     {
-        var userId = GetCurrentUserId();
+        var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        {
+            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
 
         string type = string.IsNullOrWhiteSpace(journalType) ? "General" : journalType;
 
-        string nextNumber = await _transactionNumberService.PeekNextAsync(userId, type, entryDate ?? DateTime.Today);
+        string nextNumber = await this.transactionNumberService.PeekNextAsync(userId, type, entryDate ?? DateTime.Today);
 
-        return Ok(new { success = true, transactionNumber = nextNumber });
+        return this.Ok(new { success = true, transactionNumber = nextNumber });
     }
 
     private Guid GetCurrentUserId()
     {
-        var userIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? User.FindFirstValue("sub");
+        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                     ?? this.User.FindFirstValue("sub");
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }

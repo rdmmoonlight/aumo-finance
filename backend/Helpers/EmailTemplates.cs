@@ -1,11 +1,15 @@
+// <copyright file="EmailTemplates.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
+
+namespace AumoBackend.Helpers;
+
+using System;
 using AumoBackend.Controllers.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.Identity;
 using AumoBackend.Services.Auth;
-using System;
-
-namespace AumoBackend.Helpers;
+using AumoBackend.Services.Identity;
 
 public static class EmailTemplates
 {

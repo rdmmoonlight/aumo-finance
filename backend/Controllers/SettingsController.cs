@@ -1,35 +1,31 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using AumoBackend.ViewModels;
-using AumoBackend.Models;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using AumoBackend.Services.Storage;
-using AumoBackend.Validators.Common;
-using FluentValidation;
+// <copyright file="SettingsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Controllers
 {
+    using AumoBackend.DTOs;
+    using AumoBackend.Models;
+    using AumoBackend.Services.Settings;
+    using AumoBackend.Services.Storage;
+    using AumoBackend.Validators.Common;
+    using AumoBackend.ViewModels;
+    using FluentValidation;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
+
     [ApiController]
     [Route("/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
     public class SettingsController : ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IGuardianService _guardianService;
-        private readonly IAvatarStorage _avatarStorage;
-        private readonly IValidator<ChangePasswordRequest> _changePasswordValidator;
+        private readonly UserManager<ApplicationUser> userManager;
+        private readonly SignInManager<ApplicationUser> signInManager;
+        private readonly IGuardianService guardianService;
+        private readonly IAvatarStorage avatarStorage;
+        private readonly IValidator<ChangePasswordRequest> changePasswordValidator;
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
@@ -38,38 +34,39 @@ namespace AumoBackend.Controllers
             IAvatarStorage avatarStorage,
             IValidator<ChangePasswordRequest> changePasswordValidator)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _guardianService = guardianService;
-            _avatarStorage = avatarStorage;
-            _changePasswordValidator = changePasswordValidator;
+            this.userManager = userManager;
+            this.signInManager = signInManager;
+            this.guardianService = guardianService;
+            this.avatarStorage = avatarStorage;
+            this.changePasswordValidator = changePasswordValidator;
         }
-
-        #region Profile Settings
 
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
             if (!string.IsNullOrWhiteSpace(request.UserName) && request.UserName != user.UserName)
             {
-                var setUserNameResult = await _userManager.SetUserNameAsync(user, request.UserName);
+                var setUserNameResult = await this.userManager.SetUserNameAsync(user, request.UserName);
                 if (!setUserNameResult.Succeeded)
                 {
                     var errors = string.Join(", ", setUserNameResult.Errors.Select(e => e.Description));
-                    return BadRequest(new { success = false, message = errors });
+                    return this.BadRequest(new { success = false, message = errors });
                 }
             }
 
             if (request.PhoneNumber != user.PhoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
+                var setPhoneResult = await this.userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
                     var errors = string.Join(", ", setPhoneResult.Errors.Select(e => e.Description));
-                    return BadRequest(new { success = false, message = errors });
+                    return this.BadRequest(new { success = false, message = errors });
                 }
             }
 
@@ -80,34 +77,37 @@ namespace AumoBackend.Controllers
                 user.AvatarUrl = request.AvatarUrl;
             }
 
-            var updateResult = await _userManager.UpdateAsync(user);
+            var updateResult = await this.userManager.UpdateAsync(user);
             if (!updateResult.Succeeded)
             {
                 var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-                return BadRequest(new { success = false, message = errors });
+                return this.BadRequest(new { success = false, message = errors });
             }
 
-            return Ok(new { success = true, message = "Profile updated successfully." });
+            return this.Ok(new { success = true, message = "Profile updated successfully." });
         }
 
         [HttpPost("avatar")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadAvatar([FromForm] IFormFile? file, [FromForm] IFormFile? avatar)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
             // Flexible Binding
-            var uploadFile = file ?? avatar ?? Request.Form.Files.FirstOrDefault();
+            var uploadFile = file ?? avatar ?? this.Request.Form.Files.FirstOrDefault();
 
             if (uploadFile == null || uploadFile.Length == 0)
             {
-                return BadRequest(new { success = false, message = "No file uploaded. Ensure the form-data key is named 'file' or 'avatar'." });
+                return this.BadRequest(new { success = false, message = "No file uploaded. Ensure the form-data key is named 'file' or 'avatar'." });
             }
 
             if (uploadFile.Length > 2 * 1024 * 1024)
             {
-                return BadRequest(new { success = false, message = "File size exceeds limit (Max 2MB)." });
+                return this.BadRequest(new { success = false, message = "File size exceeds limit (Max 2MB)." });
             }
 
             var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
@@ -115,12 +115,12 @@ namespace AumoBackend.Controllers
 
             if (string.IsNullOrEmpty(extension) || !allowedExtensions.Any(e => e.Equals(extension, StringComparison.OrdinalIgnoreCase)))
             {
-                return BadRequest(new { success = false, message = "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed." });
+                return this.BadRequest(new { success = false, message = "Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed." });
             }
 
-            if (!_avatarStorage.IsConfigured)
+            if (!this.avatarStorage.IsConfigured)
             {
-                return StatusCode(500, new { success = false, message = "Neon bucket belum dikonfigurasi di server." });
+                return this.StatusCode(500, new { success = false, message = "Neon bucket belum dikonfigurasi di server." });
             }
 
             try
@@ -131,80 +131,83 @@ namespace AumoBackend.Controllers
                 await uploadFile.CopyToAsync(memoryStream);
                 memoryStream.Position = 0;
 
-                var publicUrl = await _avatarStorage.UploadAvatarAsync(fileName, memoryStream);
+                var publicUrl = await this.avatarStorage.UploadAvatarAsync(fileName, memoryStream);
 
                 // Simpan URL avatar ke database user
                 user.AvatarUrl = publicUrl;
-                await _userManager.UpdateAsync(user);
+                await this.userManager.UpdateAsync(user);
 
-                return Ok(new
+                return this.Ok(new
                 {
                     success = true,
                     message = "Avatar uploaded successfully.",
-                    avatarUrl = publicUrl
+                    avatarUrl = publicUrl,
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { success = false, message = $"Avatar upload error: {ex.Message}", details = ex.InnerException?.Message });
+                return this.StatusCode(500, new { success = false, message = $"Avatar upload error: {ex.Message}", details = ex.InnerException?.Message });
             }
         }
-
-        #endregion
-
-        #region Security & Account Settings
 
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            var validation = await _changePasswordValidator.ValidateAsync(request);
+            var validation = await this.changePasswordValidator.ValidateAsync(request);
             if (!validation.IsValid)
-                return BadRequest(validation.ToErrorResponse());
+            {
+                return this.BadRequest(validation.ToErrorResponse());
+            }
 
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
-            var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+            var result = await this.userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return BadRequest(new { success = false, message = errors });
+                return this.BadRequest(new { success = false, message = errors });
             }
 
-            return Ok(new { success = true, message = "Password successfully updated." });
+            return this.Ok(new { success = true, message = "Password successfully updated." });
         }
 
         [HttpDelete("delete-account")]
         public async Task<IActionResult> DeleteAccount()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
-            await _guardianService.RevokeAllSessionsAsync(user.Id);
+            await this.guardianService.RevokeAllSessionsAsync(user.Id);
 
-            var result = await _userManager.DeleteAsync(user);
+            var result = await this.userManager.DeleteAsync(user);
             if (!result.Succeeded)
             {
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                return BadRequest(new { success = false, message = errors });
+                return this.BadRequest(new { success = false, message = errors });
             }
 
-            await _signInManager.SignOutAsync();
-            return Ok(new { success = true, message = "Account successfully deleted." });
+            await this.signInManager.SignOutAsync();
+            return this.Ok(new { success = true, message = "Account successfully deleted." });
         }
-
-        #endregion
-
-        #region Guardian Dashboard & Sessions
 
         [HttpGet("guardian/dashboard")]
         public async Task<IActionResult> GetDashboard()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
-            var activeSessions = await _guardianService.GetActiveSessionsAsync(user.Id);
-            var loginActivities = await _guardianService.GetLoginActivitiesAsync(user.Id);
+            var activeSessions = await this.guardianService.GetActiveSessionsAsync(user.Id);
+            var loginActivities = await this.guardianService.GetLoginActivitiesAsync(user.Id);
 
             var failedAttempts = loginActivities.Count(a => !a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
             var lastSuccess = loginActivities.FirstOrDefault(a => a.IsSuccess)?.CreatedAt;
@@ -216,7 +219,7 @@ namespace AumoBackend.Controllers
                     StatusLevel = failedAttempts > 3 ? "Warning" : "Good",
                     ActiveSessionsCount = activeSessions.Count,
                     FailedAttemptsLast24Hours = failedAttempts,
-                    LastSuccessfulLogin = lastSuccess
+                    LastSuccessfulLogin = lastSuccess,
                 },
                 RecentActivities = loginActivities.Select(a => new LoginActivityViewModel
                 {
@@ -228,7 +231,7 @@ namespace AumoBackend.Controllers
                     IpAddress = a.IpAddress,
                     Country = a.Country,
                     IsSuccess = a.IsSuccess,
-                    CreatedAt = a.CreatedAt
+                    CreatedAt = a.CreatedAt,
                 }).ToList(),
                 ActiveSessions = activeSessions.Select(s => new ActiveSessionViewModel
                 {
@@ -240,32 +243,36 @@ namespace AumoBackend.Controllers
                     Country = s.Country,
                     IsCurrent = s.IsCurrent,
                     LastActivityAt = s.LastActivityAt
-                }).ToList()
+                }).ToList(),
             };
 
-            return Ok(new { success = true, data = dashboard });
+            return this.Ok(new { success = true, data = dashboard });
         }
 
         [HttpPost("guardian/revoke-session/{sessionId}")]
         public async Task<IActionResult> RevokeSession(Guid sessionId)
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
-            await _guardianService.RevokeSessionAsync(sessionId, user.Id);
-            return Ok(new { success = true, message = "Session revoked." });
+            await this.guardianService.RevokeSessionAsync(sessionId, user.Id);
+            return this.Ok(new { success = true, message = "Session revoked." });
         }
 
         [HttpPost("guardian/revoke-all-sessions")]
         public async Task<IActionResult> RevokeAllSessions()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return Unauthorized();
+            var user = await this.userManager.GetUserAsync(this.User);
+            if (user == null)
+            {
+                return this.Unauthorized();
+            }
 
-            await _guardianService.RevokeAllSessionsAsync(user.Id);
-            return Ok(new { success = true, message = "All other sessions revoked." });
+            await this.guardianService.RevokeAllSessionsAsync(user.Id);
+            return this.Ok(new { success = true, message = "All other sessions revoked." });
         }
-
-        #endregion
     }
 }

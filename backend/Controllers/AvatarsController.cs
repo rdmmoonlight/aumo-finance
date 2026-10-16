@@ -1,9 +1,13 @@
-using AumoBackend.Services.Storage;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+// <copyright file="AvatarsController.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Controllers
 {
+    using AumoBackend.Services.Storage;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
+
     /// <summary>
     /// Menyajikan avatar dari Neon Bucket (privat) melalui API.
     /// Nama file memuat GUID acak sehingga tidak dapat ditebak; respons di-cache lama.
@@ -13,24 +17,30 @@ namespace AumoBackend.Controllers
     [Route("/avatars")]
     public class AvatarsController : ControllerBase
     {
-        private readonly IAvatarStorage _avatarStorage;
+        private readonly IAvatarStorage avatarStorage;
 
         public AvatarsController(IAvatarStorage avatarStorage)
         {
-            _avatarStorage = avatarStorage;
+            this.avatarStorage = avatarStorage;
         }
 
         [HttpGet("{fileName}")]
         public async Task<IActionResult> Get(string fileName, CancellationToken cancellationToken)
         {
-            if (!_avatarStorage.IsConfigured) return NotFound();
+            if (!this.avatarStorage.IsConfigured)
+            {
+                return this.NotFound();
+            }
 
-            var avatar = await _avatarStorage.GetAvatarAsync(fileName, cancellationToken);
-            if (avatar == null) return NotFound();
+            var avatar = await this.avatarStorage.GetAvatarAsync(fileName, cancellationToken);
+            if (avatar == null)
+            {
+                return this.NotFound();
+            }
 
-            Response.Headers["Cache-Control"] = "public, max-age=31536000, immutable";
-            Response.Headers["X-Content-Type-Options"] = "nosniff";
-            return File(avatar.Stream, avatar.ContentType);
+            this.Response.Headers["Cache-Control"] = "public, max-age=31536000, immutable";
+            this.Response.Headers["X-Content-Type-Options"] = "nosniff";
+            return this.File(avatar.Stream, avatar.ContentType);
         }
     }
 }

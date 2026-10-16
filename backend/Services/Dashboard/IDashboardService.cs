@@ -1,13 +1,10 @@
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Identity;
-using AumoBackend.Services.Auth;
-using System;
-using System.Threading.Tasks;
-using AumoBackend.DTOs;
+// <copyright file="IDashboardService.cs" company="PlaceholderCompany">
+// Copyright (c) PlaceholderCompany. All rights reserved.
+// </copyright>
 
 namespace AumoBackend.Services.Dashboard;
+
+using AumoBackend.DTOs;
 
 public interface IDashboardService
 {
