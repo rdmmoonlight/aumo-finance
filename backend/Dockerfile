@@ -8,6 +8,12 @@ ENV ASPNETCORE_HTTP_PORTS=8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# Tambahkan mkdir -p /usr/share/man/man1 sebelum apt-get install
+RUN mkdir -p /usr/share/man/man1 && \
+    apt-get update && apt-get install -y curl build-essential && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Install Rust & Cargo (diperlukan untuk build target di AumoBackend.csproj)
 RUN apt-get update && apt-get install -y curl build-essential && \
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
