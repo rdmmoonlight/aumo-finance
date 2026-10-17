@@ -8,7 +8,7 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { store } from "@/lib/store";
 import { authApi } from "@/lib/store/auth/authApi";

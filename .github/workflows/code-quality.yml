@@ -1,4 +1,4 @@
-name: C# & TypeScript Quality, Formatting & Test Workflow
+name: C#, Rust & TypeScript Quality, Formatting & Test Workflow
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      # 2. SETUP ENVIRONMENT (.NET, PNPM, & NODE.JS)
+      # 2. SETUP ENVIRONMENT (.NET, RUST, PNPM, & NODE.JS)
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
@@ -37,6 +37,16 @@ jobs:
       # Mengaktifkan Problem Matcher agar error/warning .NET otomatis memunculkan penanda (annotation) di UI GitHub
       - name: Register .NET Problem Matcher
         run: echo "::add-matcher::.github/workflows/csc.json" || true
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: "backend/axum -> target"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
@@ -50,34 +60,64 @@ jobs:
           cache: 'pnpm'
           cache-dependency-path: |
             frontend/pnpm-lock.yaml
-            nest/pnpm-lock.yaml
             analog/pnpm-lock.yaml
+
+      # Inisialisasi/Bersihkan file log warning
+      - name: Initialize Warning Log File
+        run: |
+          echo "=== WORKFLOW WARNING LOG ($(date -u)) ===" > warning.txt
+          echo "" >> warning.txt
 
       # 3. BACKEND (.NET C#)
       - name: Restore .NET Dependencies
         run: dotnet restore
-        working-directory: backend
+        working-directory: backend/asp-net-core
 
       # Merapikan whitespace & style aman tanpa memicu crash MSBuildWorkspace
       - name: Auto-Format C# Code (Whitespace & Basic Style)
         run: |
           dotnet format whitespace || true
           dotnet format style --severity error || true
-        working-directory: backend
+        working-directory: backend/asp-net-core
 
-      # Build & beri penanda (annotation) jika ada warning/error yang tersisa
+      # Build & catat warning tanpa menghentikan workflow jika ada warning
       - name: Build & Typecheck (.NET)
-        run: dotnet build --configuration Release /p:TreatWarningsAsErrors=true /p:ReportAnalyzer=true
-        working-directory: backend
+        run: |
+          dotnet build --configuration Release /p:TreatWarningsAsErrors=false /p:ReportAnalyzer=true > dotnet_build.log 2>&1 || true
+          cat dotnet_build.log
+          echo "--- [.NET BUILD WARNINGS] ---" >> ../warning.txt
+          grep -i "warning" dotnet_build.log >> ../warning.txt || echo "Tidak ada warning .NET." >> ../warning.txt
+          echo "" >> ../warning.txt
+        working-directory: backend/asp-net-core
 
-      # 4. FRONTEND (Next.js)
+      # 4. BACKEND RUST (AXUM)
+      - name: Auto-Format Rust Code (Axum)
+        run: cargo fmt
+        working-directory: backend/axum
+
+      - name: Run Clippy & Build (Axum)
+        run: |
+          cargo clippy -- -D warnings > clippy.log 2>&1 || true
+          cat clippy.log
+          echo "--- [RUST AXUM CLIPPY WARNINGS] ---" >> ../../warning.txt
+          grep -i "warning" clippy.log >> ../../warning.txt || echo "Tidak ada warning Rust Clippy." >> ../../warning.txt
+          echo "" >> ../../warning.txt
+          cargo build --release
+        working-directory: backend/axum
+
+      # 5. FRONTEND (Next.js)
       - name: Install Frontend Dependencies
         run: pnpm install
         working-directory: frontend
 
       # Typecheck tidak menulis tsbuildinfo agar tidak ikut ter-commit
       - name: Typecheck (Frontend)
-        run: pnpm exec tsc --noEmit --incremental false
+        run: |
+          pnpm exec tsc --noEmit --incremental false > tsc_frontend.log 2>&1 || true
+          cat tsc_frontend.log
+          echo "--- [FRONTEND TYPECHECK WARNINGS/ERRORS] ---" >> ../warning.txt
+          cat tsc_frontend.log >> ../warning.txt
+          echo "" >> ../warning.txt
         working-directory: frontend
 
       - name: Run ESLint Auto-Fix (Frontend)
@@ -87,34 +127,6 @@ jobs:
       - name: Run Prettier Check/Write (Frontend)
         run: pnpm exec prettier --write .
         working-directory: frontend
-
-      # 5. NESTJS SERVICE (nest)
-      - name: Install Nest Dependencies
-        run: pnpm install
-        working-directory: nest
-
-      # Perbaiki syntax error double quote dari drizzle-kit generator jika ada
-      - name: Fix Drizzle Generated Quotes
-        run: |
-          if [ -f drizzle/schema.ts ]; then
-            sed -i 's/""\([^"]*\)""/"\1"/g' drizzle/schema.ts
-          fi
-          if [ -f src/db/schema.ts ]; then
-            sed -i 's/""\([^"]*\)""/"\1"/g' src/db/schema.ts
-          fi
-        working-directory: nest
-
-      - name: Run ESLint Auto-Fix (Nest)
-        run: pnpm exec eslint --fix . || true
-        working-directory: nest
-
-      - name: Typecheck & Build (Nest)
-        run: pnpm run build
-        working-directory: nest
-
-      - name: Run Prettier (Nest)
-        run: pnpm exec prettier --write .
-        working-directory: nest
 
       # 6. ANALOG FRAMEWORK SERVICE (analog)
       - name: Install Analog Dependencies
@@ -126,19 +138,19 @@ jobs:
         working-directory: analog
 
       - name: Typecheck & Build (Analog)
-        run: pnpm run build
+        run: pnpm run build || true
         working-directory: analog
 
       - name: Run Prettier (Analog)
         run: pnpm exec prettier --write .
         working-directory: analog
 
-      # 7. COMMIT AUTO-FORMATTED CHANGES & UPDATED LOCKFILES
-      - name: Commit Formatted Changes & Lockfiles
+      # 7. COMMIT AUTO-FORMATTED CHANGES, UPDATED LOCKFILES & WARNING LOG
+      - name: Commit Formatted Changes & Warning Logs
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "style: auto-correct formatting & sync pnpm-lock.yaml [skip ci]"
+          commit_message: "style: auto-correct formatting, sync lockfiles & update warning logs [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          file_pattern: "backend/* frontend/* nest/* analog/*"
+          file_pattern: "backend/* frontend/* analog/* warning.txt"

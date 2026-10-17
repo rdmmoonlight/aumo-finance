@@ -79,12 +79,12 @@ namespace AumoBackend.Services.Storage
 
             await client.PutObjectAsync(
                 new PutObjectRequest
-            {
-                BucketName = this.bucket,
-                Key = KeyPrefix + fileName,
-                InputStream = content,
-                ContentType = ContentTypeFor(fileName),
-            }, cancellationToken);
+                {
+                    BucketName = this.bucket,
+                    Key = KeyPrefix + fileName,
+                    InputStream = content,
+                    ContentType = ContentTypeFor(fileName),
+                }, cancellationToken);
 
             return this.BuildPublicUrl(fileName);
         }
@@ -104,10 +104,10 @@ namespace AumoBackend.Services.Storage
             {
                 var response = await client.GetObjectAsync(
                     new GetObjectRequest
-                {
-                    BucketName = this.bucket,
-                    Key = KeyPrefix + fileName,
-                }, cancellationToken);
+                    {
+                        BucketName = this.bucket,
+                        Key = KeyPrefix + fileName,
+                    }, cancellationToken);
 
                 return new AvatarObject(response.ResponseStream, ContentTypeFor(fileName));
             }

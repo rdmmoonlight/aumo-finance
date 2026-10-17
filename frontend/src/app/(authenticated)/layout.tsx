@@ -28,7 +28,7 @@ export default function AuthenticatedLayout({
 
   // Ambil data cache langsung dari Redux Store jika ada
   const authState = useSelector((state: RootState) =>
-    authApi.endpoints.getProfile.select()(state)
+    authApi.endpoints.getProfile.select()(state),
   );
 
   const verifySessionAndLoadData = useCallback(async () => {
@@ -39,7 +39,7 @@ export default function AuthenticatedLayout({
       const authResult = await dispatch(
         authApi.endpoints.getProfile.initiate(undefined, {
           forceRefetch: false,
-        })
+        }),
       );
 
       if (authResult.isError || !authResult.data) {
@@ -56,7 +56,7 @@ export default function AuthenticatedLayout({
       await dispatch(
         periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, {
           forceRefetch: false,
-        })
+        }),
       );
     } catch {
       setIsAuthError(true);
