@@ -60,8 +60,8 @@
       <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
       <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
       <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
-      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum.exe</RustExecutableName>
-      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum</RustExecutableName>
+      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum.exe</RustExecutableName>
+      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum</RustExecutableName>
     </PropertyGroup>
 
     <Message Text="[RUST] Mengompilasi kode Rust ($(Configuration))..." Importance="high" />
@@ -74,8 +74,8 @@
   <!-- Salin Binary Rust saat dotnet publish ke folder /app/publish -->
   <Target Name="CopyRustToPublish" AfterTargets="ComputeFilesToPublish">
     <PropertyGroup>
-      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum.exe</RustExecutableName>
-      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum</RustExecutableName>
+      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum.exe</RustExecutableName>
+      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum</RustExecutableName>
     </PropertyGroup>
 
     <ItemGroup>
