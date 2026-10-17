@@ -5,9 +5,9 @@
 namespace AumoBackend.Services
 {
     using AumoBackend.DTOs.Home;
-/// <summary>
-/// Layanan logika bisnis untuk I Market Data Service.
-/// </summary>
+    /// <summary>
+    /// Layanan logika bisnis untuk I Market Data Service.
+    /// </summary>
 
     public interface IMarketDataService
     {

@@ -35,9 +35,9 @@ public class JournalController : ControllerBase
     private readonly AppDbContext db;
     private readonly IJournalService journalService;
     private readonly IFinancialReportService reportService;
-/// <summary>
-/// Controller API untuk mengelola Journal.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Journal.
+    /// </summary>
 
     public JournalController(AppDbContext db, IJournalService journalService, IFinancialReportService reportService)
     {
@@ -45,9 +45,9 @@ public class JournalController : ControllerBase
         this.journalService = journalService;
         this.reportService = reportService;
     }
-/// <summary>
-/// Mengambil data  General Journal.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  General Journal.
+    /// </summary>
 
     // ==========================================
     // 1. GENERAL JOURNAL
@@ -129,9 +129,9 @@ public class JournalController : ControllerBase
             entries = entries,
         });
     }
-/// <summary>
-/// Mengambil data  Adjusting Journal.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Adjusting Journal.
+    /// </summary>
 
     // ==========================================
     // 2. ADJUSTING JOURNAL
@@ -210,9 +210,9 @@ public class JournalController : ControllerBase
             entries = entries,
         });
     }
-/// <summary>
-/// Menghapus data  Adjusting Journal.
-/// </summary>
+    /// <summary>
+    /// Menghapus data  Adjusting Journal.
+    /// </summary>
 
     // DELETE: /reports/journals/adjusting/{id}
     [HttpDelete("adjusting/{id:int}")]
@@ -245,9 +245,9 @@ public class JournalController : ControllerBase
 
         return this.Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
     }
-/// <summary>
-/// Mengambil data  Closing Journal.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Closing Journal.
+    /// </summary>
 
     // ==========================================
     // 3. CLOSING JOURNAL

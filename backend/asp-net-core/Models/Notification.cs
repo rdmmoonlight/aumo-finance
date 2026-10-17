@@ -16,44 +16,44 @@ public partial class Notification
     /// Mewakili Id.
     /// </summary>
     public Guid Id { get; set; }
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili Title.
-/// </summary>
+    /// <summary>
+    /// Mewakili Title.
+    /// </summary>
 
     public string Title { get; set; } = null!;
-/// <summary>
-/// Mewakili Message.
-/// </summary>
+    /// <summary>
+    /// Mewakili Message.
+    /// </summary>
 
     public string Message { get; set; } = null!;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = null!;
-/// <summary>
-/// Mewakili Is Read.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Read.
+    /// </summary>
 
     public bool IsRead { get; set; }
-/// <summary>
-/// Mewakili Target Url.
-/// </summary>
+    /// <summary>
+    /// Mewakili Target Url.
+    /// </summary>
 
     public string? TargetUrl { get; set; }
-/// <summary>
-/// Membuat data d At baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data d At baru.
+    /// </summary>
 
     public DateTime CreatedAt { get; set; }
-/// <summary>
-/// Mewakili User.
-/// </summary>
+    /// <summary>
+    /// Mewakili User.
+    /// </summary>
 
     public virtual ApplicationUser User { get; set; } = null!;
 }

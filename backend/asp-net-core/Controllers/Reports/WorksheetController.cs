@@ -32,9 +32,9 @@ public class WorksheetController : ControllerBase
     private readonly AppDbContext db;
     private readonly IWorksheetService worksheetService;
     private readonly ITrialBalanceService trialBalanceService;
-/// <summary>
-/// Controller API untuk mengelola Worksheet.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Worksheet.
+    /// </summary>
 
     public WorksheetController(
         AppDbContext db,
@@ -45,9 +45,9 @@ public class WorksheetController : ControllerBase
         this.worksheetService = worksheetService;
         this.trialBalanceService = trialBalanceService;
     }
-/// <summary>
-/// Mengambil data  Worksheet.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Worksheet.
+    /// </summary>
 
     // ==========================================
     // 1. GET: /reports/worksheet

@@ -13,9 +13,9 @@ using FluentValidation;
 public class SearchDescriptionsQueryValidator : AbstractValidator<SearchDescriptionsQuery>
 {
     private const int MaxKeywordLength = 100;
-/// <summary>
-/// Validator untuk Search Descriptions Query Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Search Descriptions Query Validator.
+    /// </summary>
 
     public SearchDescriptionsQueryValidator()
     {

@@ -51,9 +51,9 @@ public class TransactionNumberService(AppDbContext db) : ITransactionNumberServi
 
         return $"{counterKey}{nextSeq:D4}";
     }
-/// <summary>
-/// Mewakili Peek Next Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Peek Next Async.
+    /// </summary>
 
     public async Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate)
     {

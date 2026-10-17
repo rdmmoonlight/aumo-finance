@@ -44,9 +44,9 @@ public class ToolsService(AppDbContext context) : IToolsService
         ws.Cell(1, 6).Value = "Credit";
         ws.Row(1).Style.Font.Bold = true;
     }
-/// <summary>
-/// Mewakili Preview Journal Import Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Preview Journal Import Async.
+    /// </summary>
 
     public async Task<PreviewJournalImportViewModel> PreviewJournalImportAsync(Guid userId, JournalImportRequestDto request)
     {
@@ -160,9 +160,9 @@ public class ToolsService(AppDbContext context) : IToolsService
             },
         };
     }
-/// <summary>
-/// Mewakili Import Journal Entries Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Import Journal Entries Async.
+    /// </summary>
 
     public async Task<ImportJournalResultViewModel> ImportJournalEntriesAsync(Guid userId, JournalImportRequestDto request)
     {

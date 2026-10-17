@@ -35,9 +35,9 @@ public class GetKursQuery
     /// Mewakili Base Currency.
     /// </summary>
     public string? BaseCurrency { get; set; } = "USD";
-/// <summary>
-/// Mewakili Target Currency.
-/// </summary>
+    /// <summary>
+    /// Mewakili Target Currency.
+    /// </summary>
 
     public string? TargetCurrency { get; set; } = "IDR";
 }
@@ -51,9 +51,9 @@ public class GetAccountsQuery
     /// Mewakili Search.
     /// </summary>
     public string? Search { get; set; }
-/// <summary>
-/// Mewakili Category.
-/// </summary>
+    /// <summary>
+    /// Mewakili Category.
+    /// </summary>
 
     public string? Category { get; set; }
 }
@@ -75,9 +75,9 @@ public class NextTransactionNumberQuery
     /// Mewakili Journal Type.
     /// </summary>
     public string? JournalType { get; set; } = "General";
-/// <summary>
-/// Mewakili Entry Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Entry Date.
+    /// </summary>
 
     public DateTime? EntryDate { get; set; }
 }

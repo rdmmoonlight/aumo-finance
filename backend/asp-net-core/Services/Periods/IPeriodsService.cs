@@ -15,29 +15,29 @@ public interface IPeriodsService
     /// Mengambil data  Periods Async.
     /// </summary>
     Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId);
-/// <summary>
-/// Mengambil data  Open Period Info Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Open Period Info Async.
+    /// </summary>
 
     Task<OpenPeriodInfoResponse> GetOpenPeriodInfoAsync(Guid userId);
-/// <summary>
-/// Membuat data  Period Async baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data  Period Async baru.
+    /// </summary>
 
     Task<CreatePeriodResult> CreatePeriodAsync(Guid userId, CreatePeriodRequest request);
-/// <summary>
-/// Mewakili Select Period Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Select Period Async.
+    /// </summary>
 
     Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId);
-/// <summary>
-/// Mewakili Clear Selection Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Clear Selection Async.
+    /// </summary>
 
     Task<BaseServiceResult> ClearSelectionAsync(Guid userId);
-/// <summary>
-/// Mewakili Close Period Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Close Period Async.
+    /// </summary>
 
     Task<BaseServiceResult> ClosePeriodAsync(Guid userId, int periodId);
 }

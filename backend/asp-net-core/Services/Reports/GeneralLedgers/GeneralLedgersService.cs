@@ -23,9 +23,9 @@ public class GeneralLedgersService : IGeneralLedgersService
     private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "Income", "Revenue", "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
     private static readonly string[] RevenueTypes = { "OperatingIncome", "OtherIncome", "Revenue", "Income" };
     private static readonly string[] ExpenseTypes = { "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
-/// <summary>
-/// Mengambil data  Permanent Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Permanent Ledgers Async.
+    /// </summary>
 
     public async Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId)
     {
@@ -57,9 +57,9 @@ public class GeneralLedgersService : IGeneralLedgersService
             Data = new PermanentLedgerGroupedResponse { SelectedPeriodName = period.PeriodName, Accounts = grouped },
         };
     }
-/// <summary>
-/// Mengambil data  Temporary Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Temporary Ledgers Async.
+    /// </summary>
 
     public async Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId)
     {
@@ -99,9 +99,9 @@ public class GeneralLedgersService : IGeneralLedgersService
             },
         };
     }
-/// <summary>
-/// Proses eksekusi kalkulasi Refresh General Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Proses eksekusi kalkulasi Refresh General Ledgers Async.
+    /// </summary>
 
     public async Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId)
     {
@@ -186,9 +186,9 @@ public class GeneralLedgersService : IGeneralLedgersService
             }
         });
     }
-/// <summary>
-/// Mewakili Clear Selected Period Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Clear Selected Period Ledgers Async.
+    /// </summary>
 
     public async Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId)
     {

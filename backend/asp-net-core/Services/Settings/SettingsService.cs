@@ -12,9 +12,9 @@ namespace AumoBackend.Services.Settings
     using AumoBackend.Services.Storage;
     using AumoBackend.ViewModels;
     using Microsoft.AspNetCore.Identity;
-/// <summary>
-/// Layanan logika bisnis untuk Settings Service.
-/// </summary>
+    /// <summary>
+    /// Layanan logika bisnis untuk Settings Service.
+    /// </summary>
 
     public class SettingsService : ISettingsService
     {
@@ -22,9 +22,9 @@ namespace AumoBackend.Services.Settings
         private readonly SignInManager<ApplicationUser>? signInManager;
         private readonly IGuardianService? guardianService;
         private readonly IAvatarStorage? avatarStorage;
-/// <summary>
-/// Memperbarui data  Profile Async.
-/// </summary>
+        /// <summary>
+        /// Memperbarui data  Profile Async.
+        /// </summary>
 
         public async Task<ServiceResult> UpdateProfileAsync(ClaimsPrincipal userPrincipal, UpdateProfileRequest request)
         {
@@ -70,9 +70,9 @@ namespace AumoBackend.Services.Settings
 
             return ServiceResult.Ok("Profile updated successfully.");
         }
-/// <summary>
-/// Mewakili Upload Avatar Async.
-/// </summary>
+        /// <summary>
+        /// Mewakili Upload Avatar Async.
+        /// </summary>
 
         public async Task<ServiceResult> UploadAvatarAsync(ClaimsPrincipal userPrincipal, IFormFile? file, IFormFile? avatar, IFormFileCollection? files)
         {
@@ -126,9 +126,9 @@ namespace AumoBackend.Services.Settings
                 return ServiceResult.InternalServerError($"Avatar upload error: {ex.Message}");
             }
         }
-/// <summary>
-/// Mewakili Change Password Async.
-/// </summary>
+        /// <summary>
+        /// Mewakili Change Password Async.
+        /// </summary>
 
         public async Task<ServiceResult> ChangePasswordAsync(ClaimsPrincipal userPrincipal, ChangePasswordRequest request)
         {
@@ -147,9 +147,9 @@ namespace AumoBackend.Services.Settings
 
             return ServiceResult.Ok("Password successfully updated.");
         }
-/// <summary>
-/// Menghapus data  Account Async.
-/// </summary>
+        /// <summary>
+        /// Menghapus data  Account Async.
+        /// </summary>
 
         public async Task<ServiceResult> DeleteAccountAsync(ClaimsPrincipal userPrincipal)
         {
@@ -171,9 +171,9 @@ namespace AumoBackend.Services.Settings
             await this.signInManager.SignOutAsync();
             return ServiceResult.Ok("Account successfully deleted.");
         }
-/// <summary>
-/// Mengambil data  Guardian Dashboard Async.
-/// </summary>
+        /// <summary>
+        /// Mengambil data  Guardian Dashboard Async.
+        /// </summary>
 
         public async Task<ServiceResult> GetGuardianDashboardAsync(ClaimsPrincipal userPrincipal)
         {
@@ -225,9 +225,9 @@ namespace AumoBackend.Services.Settings
 
             return ServiceResult.Ok(data: dashboard);
         }
-/// <summary>
-/// Mewakili Revoke Session Async.
-/// </summary>
+        /// <summary>
+        /// Mewakili Revoke Session Async.
+        /// </summary>
 
         public async Task<ServiceResult> RevokeSessionAsync(ClaimsPrincipal userPrincipal, Guid sessionId)
         {
@@ -240,9 +240,9 @@ namespace AumoBackend.Services.Settings
             await this.guardianService.RevokeSessionAsync(sessionId, user.Id);
             return ServiceResult.Ok("Session revoked.");
         }
-/// <summary>
-/// Mewakili Revoke All Sessions Async.
-/// </summary>
+        /// <summary>
+        /// Mewakili Revoke All Sessions Async.
+        /// </summary>
 
         public async Task<ServiceResult> RevokeAllSessionsAsync(ClaimsPrincipal userPrincipal)
         {
