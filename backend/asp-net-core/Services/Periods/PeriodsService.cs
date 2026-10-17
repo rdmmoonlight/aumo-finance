@@ -308,8 +308,8 @@ public class PeriodsService : IPeriodsService
             return new OpeningResult(0, null);
         }
 
-        var prevStart = previous.StartDate.Date;
-        var prevEnd = previous.EndDate.Date.AddDays(1).AddTicks(-1);
+        var prevStart = DateTime.SpecifyKind(previous.StartDate.Date, DateTimeKind.Utc);
+        var prevEnd = DateTime.SpecifyKind(previous.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
         if (!PermanentTypes.Contains(retainedAccount.Type))
         {

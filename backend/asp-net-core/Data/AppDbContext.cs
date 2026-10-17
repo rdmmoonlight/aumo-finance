@@ -124,6 +124,9 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.HasIndex(e => new { e.UserId, e.ReferenceNumber }, "IX_ChartOfAccounts_UserId_ReferenceNumber").IsUnique();
 
             entity.Property(e => e.AccountName).HasMaxLength(100);
+
+            // Balance dihitung di memori dari GeneralJournal (bukan kolom tabel).
+            entity.Ignore(e => e.Balance);
         });
 
         builder.Entity<GeneralJournal>(entity =>

@@ -59,8 +59,8 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
         }
         else
         {
-            var startUtc = currentPeriod.StartDate.Date;
-            var endUtc = currentPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
+            var startUtc = DateTime.SpecifyKind(currentPeriod.StartDate.Date, DateTimeKind.Utc);
+            var endUtc = DateTime.SpecifyKind(currentPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
             var accountBalances = await db.GeneralJournals
                 .Where(j => accountIds.Contains(j.AccountId) &&
