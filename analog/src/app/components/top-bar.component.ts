@@ -2,9 +2,9 @@ import { Component, computed, inject, output } from "@angular/core";
 import { AuthService } from "../core/auth.service";
 
 @Component({
-    selector: "app-top-bar",
-    standalone: true,
-    template: `
+  selector: "app-top-bar",
+  standalone: true,
+  template: `
     <header
       class="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4 transition-colors dark:border-slate-800 dark:bg-slate-900/95 dark:backdrop-blur sm:px-6"
     >
@@ -26,7 +26,8 @@ import { AuthService } from "../core/auth.service";
         </svg>
       </button>
 
-      <span class="hidden text-sm font-semibold text-slate-700 dark:text-slate-200 lg:block"
+      <span
+        class="hidden text-sm font-semibold text-slate-700 dark:text-slate-200 lg:block"
         >Aumo Finance</span
       >
 
@@ -49,11 +50,11 @@ import { AuthService } from "../core/auth.service";
   `,
 })
 export class TopBarComponent {
-    readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
 
-    openMenu = output<void>();
+  openMenu = output<void>();
 
-    readonly initial = computed(() =>
-        (this.auth.user()?.name?.trim()[0] ?? "?").toUpperCase()
-    );
+  readonly initial = computed(() =>
+    (this.auth.user()?.name?.trim()[0] ?? "?").toUpperCase(),
+  );
 }

@@ -4,14 +4,16 @@ import { DashboardCharts } from "@/app/(authenticated)/dashboard/dashboard-chart
 import {
   ExpenseTable,
   formatNumber,
-  TrendTable} from "@/app/(authenticated)/dashboard/dashboard-tables";
+  TrendTable,
+} from "@/app/(authenticated)/dashboard/dashboard-tables";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
-  CardHeader} from "@/components/ui/card";
+  CardHeader,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { store } from "@/lib/store";
 import { dashboardApi } from "@/lib/store/(authenticated)/dashboard/dashboardApi";
@@ -29,7 +31,8 @@ import {
   TrendingDown,
   TrendingUp,
   Wallet,
-  X} from "lucide-react";
+  X,
+} from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -120,7 +123,8 @@ export default function DashboardContent() {
       cash: get("totalCashOnHand"),
       bank: get("totalBankBalance"),
       assets: get("totalAssets"),
-      liabilities: get("totalLiabilities")};
+      liabilities: get("totalLiabilities"),
+    };
   }, [resData, periodType]);
 
   const errorMessage = useMemo(() => {
@@ -165,7 +169,8 @@ export default function DashboardContent() {
     cash: totalCashOnHand,
     bank: totalBankBalance,
     assets: totalAssets,
-    liabilities: totalLiabilities} = periodTotals;
+    liabilities: totalLiabilities,
+  } = periodTotals;
   const totalRevenue = Number(resData?.totalRevenue) || 0;
   const totalExpenses = Number(resData?.totalExpenses) || 0;
   const netIncome = Number(resData?.netIncome) || 0;
