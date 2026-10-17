@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
+/// <summary>
+/// Controller API untuk mengelola Auth.
+/// </summary>
 [ApiController]
 [Route("/auth")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
@@ -23,12 +26,18 @@ public class AuthController : ControllerBase
     private readonly IAuthService authService;
     private readonly SignInManager<ApplicationUser> signInManager;
 
+    /// <summary>
+    /// Controller API untuk mengelola Auth.
+    /// </summary>
     public AuthController(IAuthService authService, SignInManager<ApplicationUser> signInManager)
     {
         this.authService = authService;
         this.signInManager = signInManager;
     }
 
+    /// <summary>
+    /// Mewakili Login.
+    /// </summary>
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -83,9 +92,8 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Google OAuth Login via POST (Web via Cookie & Mobile via JWT dari SDK Frontend).
+    /// Mewakili Google Login.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     [HttpPost("google-login")]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
@@ -127,10 +135,8 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Google OAuth Login via GET Redirect (Server-Initiated OAuth).
-    /// Menangani browser direct navigation via window.location.href tanpa memicu HTTP 405.
+    /// Mewakili Google Login Redirect.
     /// </summary>
-    /// <returns></returns>
     [HttpGet("google-login")]
     [AllowAnonymous]
     public IActionResult GoogleLoginRedirect(string redirectTo = "/home")
@@ -145,9 +151,8 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Callback handler setelah autentikasi OAuth Google eksternal berhasil.
+    /// Mewakili Google Callback.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     [HttpGet("google-callback")]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleCallback(string redirectTo = "/home", string? remoteError = null)
@@ -174,9 +179,8 @@ public class AuthController : ControllerBase
     }
 
     /// <summary>
-    /// Endpoint untuk mendapatkan profil user aktif secara realtime.
+    /// Mengambil data  Profile.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     [HttpGet("me")]
     public async Task<IActionResult> GetProfile()
     {
@@ -218,6 +222,9 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mewakili Logout.
+    /// </summary>
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {

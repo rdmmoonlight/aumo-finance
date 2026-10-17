@@ -16,6 +16,9 @@ using AumoBackend.ViewModels;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Auth Service.
+/// </summary>
 public interface IAuthService
 {
     Task<ValidationResult> ValidateLoginAsync(LoginRequest request);

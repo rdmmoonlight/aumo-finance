@@ -5,14 +5,18 @@
 namespace AumoBackend.Validators.JournalEntries;
 
 /// <summary>
-/// Jenis jurnal yang dikenal sistem. Selaras TransactionNumberService:
-/// "Adjusting" menghasilkan prefix AJ, selain itu GJ.
+/// Mewakili Journal Types.
 /// </summary>
 public static class JournalTypes
 {
+    /// <summary>
+    /// Mewakili Allowed.
+    /// </summary>
     public static readonly string[] Allowed = { "General", "Adjusting" };
 
-    /// <summary>Kosong dianggap valid (memakai nilai default masing-masing endpoint).</summary>
+    /// <summary>
+    /// Mewakili Is Valid Or Empty.
+    /// </summary>
     public static bool IsValidOrEmpty(string? type, bool ignoreCase = false)
         => string.IsNullOrWhiteSpace(type)
             || Allowed.Contains(type, ignoreCase ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal);

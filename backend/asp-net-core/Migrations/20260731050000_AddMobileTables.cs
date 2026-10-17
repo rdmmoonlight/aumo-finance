@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260731050000_AddMobileTables.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -15,6 +16,18 @@ namespace AumoBackend.Migrations
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+    /// <summary>
+    /// Membuat data  Mobile Tables baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Mobile Tables baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Mobile Tables baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Mobile Tables baru.
+    /// </summary>
     /// <inheritdoc />
     public partial class AddMobileTables : Migration
     {

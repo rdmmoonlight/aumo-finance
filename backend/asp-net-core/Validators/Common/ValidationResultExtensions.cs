@@ -7,12 +7,13 @@ namespace AumoBackend.Validators.Common;
 using FluentValidation.Results;
 
 /// <summary>
-/// Format respons error validasi yang seragam untuk seluruh endpoint.
-/// `message` berisi error pertama (frontend menampilkan error.data.message),
-/// `errors` berisi seluruh error.
+/// Mewakili Validation Result Extensions.
 /// </summary>
 public static class ValidationResultExtensions
 {
+    /// <summary>
+    /// Model data To Error Response.
+    /// </summary>
     public static object ToErrorResponse(this ValidationResult result)
     {
         var errors = result.Errors

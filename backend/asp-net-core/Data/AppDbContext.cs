@@ -14,46 +14,95 @@ using Microsoft.EntityFrameworkCore;
 // Gunakan type alias eksplisit untuk menyelesaikan ambiguitas
 using DataProtectionKeyEntity = Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey;
 
+/// <summary>
+/// Konteks database Entity Framework App Db Context.
+/// </summary>
 public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
 {
+    /// <summary>
+    /// Konteks database Entity Framework App Db Context.
+    /// </summary>
     public AppDbContext()
     {
     }
 
+    /// <summary>
+    /// Konteks database Entity Framework App Db Context.
+    /// </summary>
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
     }
 
+    /// <summary>
+    /// Mewakili Chart Of Accounts.
+    /// </summary>
     public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Data Protection Keys.
+    /// </summary>
     // Menggunakan type alias agar tidak bentrok dengan AumoBackend.Models.DataProtectionKey
-    /// <inheritdoc/>
     public virtual DbSet<DataProtectionKeyEntity> DataProtectionKeys { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili General Journals.
+    /// </summary>
     public virtual DbSet<GeneralJournal> GeneralJournals { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili General Ledger Permanent Accounts.
+    /// </summary>
     public virtual DbSet<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili General Ledger Temporary Accounts.
+    /// </summary>
     public virtual DbSet<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Login Activities.
+    /// </summary>
     public virtual DbSet<LoginActivity> LoginActivities { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Notifications.
+    /// </summary>
     public virtual DbSet<Notification> Notifications { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Periods.
+    /// </summary>
     public virtual DbSet<Period> Periods { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Recovery Codes.
+    /// </summary>
     public virtual DbSet<RecoveryCode> RecoveryCodes { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Security Settings.
+    /// </summary>
     public virtual DbSet<SecuritySetting> SecuritySettings { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Transaction Counters.
+    /// </summary>
     public virtual DbSet<TransactionCounter> TransactionCounters { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili Trusted Devices.
+    /// </summary>
     public virtual DbSet<TrustedDevice> TrustedDevices { get; set; } = null!;
 
+    /// <summary>
+    /// Mewakili User Sessions.
+    /// </summary>
     public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Konfigurasi hook/event On Configuring.
+    /// </summary>
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -61,12 +110,14 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
         }
     }
 
-    /// <inheritdoc/>
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    /// <summary>
+    /// Konfigurasi hook/event On Model Creating.
+    /// </summary>
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(builder);
 
-        modelBuilder.Entity<ChartOfAccount>(entity =>
+        builder.Entity<ChartOfAccount>(entity =>
         {
             entity.HasIndex(e => e.UserId, "IX_ChartOfAccounts_UserId");
 
@@ -75,7 +126,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.AccountName).HasMaxLength(100);
         });
 
-        modelBuilder.Entity<GeneralJournal>(entity =>
+        builder.Entity<GeneralJournal>(entity =>
         {
             entity.HasKey(e => e.LineId);
 
@@ -101,7 +152,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .OnDelete(DeleteBehavior.Restrict);
         });
 
-        modelBuilder.Entity<GeneralLedgerPermanentAccount>(entity =>
+        builder.Entity<GeneralLedgerPermanentAccount>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("GeneralLedgerPermanentAccounts_pkey");
 
@@ -129,7 +180,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .HasConstraintName("FK_GLPermanent_Periods");
         });
 
-        modelBuilder.Entity<GeneralLedgerTemporaryAccount>(entity =>
+        builder.Entity<GeneralLedgerTemporaryAccount>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("GeneralLedgerTemporaryAccounts_pkey");
 
@@ -157,7 +208,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .HasConstraintName("FK_GLTemporary_Periods");
         });
 
-        modelBuilder.Entity<LoginActivity>(entity =>
+        builder.Entity<LoginActivity>(entity =>
         {
             entity.HasIndex(e => new { e.UserId, e.CreatedAt }, "IX_LoginActivities_UserId_CreatedAt");
 
@@ -166,7 +217,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<Notification>(entity =>
+        builder.Entity<Notification>(entity =>
         {
             entity.HasIndex(e => new { e.UserId, e.IsRead, e.CreatedAt }, "IX_Notifications_UserId_IsRead_CreatedAt");
 
@@ -175,7 +226,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<Period>(entity =>
+        builder.Entity<Period>(entity =>
         {
             entity.HasIndex(e => e.UserId, "IX_Periods_IsSelected_Unique")
                 .IsUnique()
@@ -188,7 +239,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.PeriodName).HasMaxLength(50);
         });
 
-        modelBuilder.Entity<RecoveryCode>(entity =>
+        builder.Entity<RecoveryCode>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("RecoveryCodes_pkey");
 
@@ -203,7 +254,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .HasConstraintName("FK_RecoveryCodes_AspNetUsers");
         });
 
-        modelBuilder.Entity<SecuritySetting>(entity =>
+        builder.Entity<SecuritySetting>(entity =>
         {
             entity.HasKey(e => e.UserId).HasName("SecuritySettings_pkey");
 
@@ -218,7 +269,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .HasConstraintName("FK_SecuritySettings_AspNetUsers");
         });
 
-        modelBuilder.Entity<TransactionCounter>(entity =>
+        builder.Entity<TransactionCounter>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TransactionCounters_pkey");
 
@@ -227,7 +278,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.CounterKey).HasMaxLength(10);
         });
 
-        modelBuilder.Entity<TrustedDevice>(entity =>
+        builder.Entity<TrustedDevice>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrustedDevices_pkey");
 
@@ -247,7 +298,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
                 .HasConstraintName("FK_TrustedDevices_AspNetUsers");
         });
 
-        modelBuilder.Entity<UserSession>(entity =>
+        builder.Entity<UserSession>(entity =>
         {
             entity.HasIndex(e => new { e.UserId, e.IsActive }, "IX_UserSessions_UserId_IsActive");
 
@@ -255,10 +306,10 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
-        modelBuilder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
+        builder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 
-        this.OnModelCreatingPartial(modelBuilder);
+        this.OnModelCreatingPartial(builder);
     }
 
-    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    partial void OnModelCreatingPartial(ModelBuilder builder);
 }

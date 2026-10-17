@@ -7,13 +7,22 @@ namespace AumoBackend.Validators.Settings;
 using FluentValidation;
 using Microsoft.AspNetCore.Http;
 
+/// <summary>
+/// Validator untuk Avatar File Validator.
+/// </summary>
 public class AvatarFileValidator : AbstractValidator<IFormFile>
 {
+    /// <summary>
+    /// Mewakili Max File Size Bytes.
+    /// </summary>
     public const long MaxFileSizeBytes = 2 * 1024 * 1024;
 
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
     private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" };
 
+    /// <summary>
+    /// Validator untuk Avatar File Validator.
+    /// </summary>
     public AvatarFileValidator()
     {
         this.RuleFor(x => x.Length)

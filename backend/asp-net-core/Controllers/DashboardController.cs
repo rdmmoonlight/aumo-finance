@@ -27,18 +27,27 @@ using FluentValidation;
 [Route("/dashboard")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+/// <summary>
+/// Controller API untuk mengelola Dashboard.
+/// </summary>
 public class DashboardController : ControllerBase
 {
     private readonly AppDbContext db;
 
     private readonly IValidator<GetDashboardQuery> queryValidator;
 
+    /// <summary>
+    /// Controller API untuk mengelola Dashboard.
+    /// </summary>
     public DashboardController(AppDbContext db, IValidator<GetDashboardQuery> queryValidator)
     {
         this.db = db;
         this.queryValidator = queryValidator;
     }
 
+    /// <summary>
+    /// Mengambil data  Dashboard Data.
+    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetDashboardData([FromQuery] GetDashboardQuery query)
     {
@@ -185,7 +194,7 @@ public class DashboardController : ControllerBase
                var monthLines = periodLines.Where(l => l.EntryDate.Month == m);
                var rev = monthLines.Where(l => incomeIds.Contains(l.AccountId)).Sum(l => l.Credit - l.Debit);
                var exp = monthLines.Where(l => expenseAccountsMeta.Select(e => e.Id).Contains(l.AccountId)).Sum(l => l.Debit - l.Credit);
-               return new { label = new DateTime(2000, m, 1).ToString("MMM"), revenue = rev, expense = exp, net = rev - exp };
+               return new { label = new DateTime(2000, m, 1).ToString("MMM", CultureInfo.InvariantCulture), revenue = rev, expense = exp, net = rev - exp };
            }).ToList()
             : periodLines.GroupBy(l => l.EntryDate.Date).OrderBy(g => g.Key).Select(g =>
             {

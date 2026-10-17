@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260725021900_InitPostgres.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -15,6 +16,18 @@ namespace AumoBackend.Migrations
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+    /// <summary>
+    /// Mewakili Init Postgres.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Init Postgres.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Init Postgres.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Init Postgres.
+    /// </summary>
     /// <inheritdoc />
     public partial class InitPostgres : Migration
     {

@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AumoBackend.Controllers.Api
 {
+    /// <summary>
+    /// Controller API untuk mengelola Market Data.
+    /// </summary>
     [ApiController]
     [Route("")]
     public class MarketDataController : ControllerBase
@@ -22,6 +25,9 @@ namespace AumoBackend.Controllers.Api
         private readonly ILogger<MarketDataController> logger;
         private readonly IValidator<AumoBackend.DTOs.GetKursQuery> kursValidator;
 
+        /// <summary>
+        /// Controller API untuk mengelola Market Data.
+        /// </summary>
         public MarketDataController(
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration,
@@ -35,10 +41,8 @@ namespace AumoBackend.Controllers.Api
         }
 
         /// <summary>
-        /// Endpoint untuk mengambil nilai tukar mata uang (Default: USD ke IDR)
-        /// GET /kurs?base=USD&target=IDR.
+        /// Mengambil data  Kurs.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         [HttpGet("kurs")]
         public async Task<IActionResult> GetKurs([FromQuery] AumoBackend.DTOs.GetKursQuery query)
         {
@@ -122,6 +126,9 @@ namespace AumoBackend.Controllers.Api
     }
 }
 
+/// <summary>
+/// Controller API untuk mengelola Home Market.
+/// </summary>
 [ApiController]
 [Route("/home")]
 [Tags("MarketData")]
@@ -131,6 +138,9 @@ public class HomeMarketController : ControllerBase
     private readonly IHomeService homeService;
     private readonly ILogger<HomeMarketController> logger;
 
+    /// <summary>
+    /// Controller API untuk mengelola Home Market.
+    /// </summary>
     public HomeMarketController(IHomeService homeService, ILogger<HomeMarketController> logger)
     {
         this.homeService = homeService;
@@ -138,10 +148,8 @@ public class HomeMarketController : ControllerBase
     }
 
     /// <summary>
-    /// Indikator pasar untuk halaman Home: kurs USD/IDR dan IHSG.
-    /// GET /home/market-indicators.
+    /// Mengambil data  Market Indicators.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     [HttpGet("market-indicators")]
     public async Task<IActionResult> GetMarketIndicators()
     {

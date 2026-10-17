@@ -8,10 +8,16 @@ using AumoBackend.DTOs;
 using AumoBackend.Models;
 using FluentValidation;
 
+/// <summary>
+/// Validator untuk Get Accounts Query Validator.
+/// </summary>
 public class GetAccountsQueryValidator : AbstractValidator<GetAccountsQuery>
 {
     private const int MaxSearchLength = 100;
 
+    /// <summary>
+    /// Validator untuk Get Accounts Query Validator.
+    /// </summary>
     public GetAccountsQueryValidator()
     {
         this.RuleFor(x => x.Search)

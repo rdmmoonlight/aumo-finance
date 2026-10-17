@@ -8,6 +8,9 @@ using System.Text.RegularExpressions;
 using AumoBackend.DTOs;
 using FluentValidation;
 
+/// <summary>
+/// Validator untuk Update Profile Request Validator.
+/// </summary>
 public partial class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequest>
 {
     private const int MaxFullNameLength = 100;
@@ -15,6 +18,9 @@ public partial class UpdateProfileRequestValidator : AbstractValidator<UpdatePro
     private const int MaxBioLength = 500;
     private const int MaxAvatarUrlLength = 2048;
 
+    /// <summary>
+    /// Validator untuk Update Profile Request Validator.
+    /// </summary>
     public UpdateProfileRequestValidator()
     {
         this.RuleFor(x => x.FullName)

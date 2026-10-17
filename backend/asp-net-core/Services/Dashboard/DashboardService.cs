@@ -10,11 +10,16 @@ using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Layanan logika bisnis untuk Dashboard Service.
+/// </summary>
 public class DashboardService : IDashboardService
 {
     private readonly AppDbContext? db;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Dashboard Data Async.
+    /// </summary>
     public async Task<DashboardDataDto> GetDashboardDataAsync(Guid userId, string period)
     {
         var activePeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
@@ -141,7 +146,7 @@ public class DashboardService : IDashboardService
                 var exp = monthLines.Where(l => expenseAccountsMeta.Select(e => e.Id).Contains(l.AccountId)).Sum(l => l.Debit - l.Credit);
                 return new ChartTrendItemDto
                 {
-                    Label = new DateTime(2000, m, 1).ToString("MMM"),
+                    Label = new DateTime(2000, m, 1).ToString("MMM", CultureInfo.InvariantCulture),
                     Revenue = rev,
                     Expense = exp,
                     Net = rev - exp,

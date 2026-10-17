@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AumoBackend.Controllers;
 
+/// <summary>
+/// Controller API untuk mengelola Core.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class CoreController : ControllerBase
@@ -17,6 +20,9 @@ public class CoreController : ControllerBase
     private readonly IValidator<SalamRequestDto> _salamValidator;
     private readonly ILogger<CoreController> _logger;
 
+    /// <summary>
+    /// Controller API untuk mengelola Core.
+    /// </summary>
     public CoreController(
         RustCoreService rustCoreService,
         IValidator<SalamRequestDto> salamValidator,
@@ -28,7 +34,7 @@ public class CoreController : ControllerBase
     }
 
     /// <summary>
-    /// Endpoint untuk memanggil fungsi native Rust FFI setelah validasi input.
+    /// Mengambil data  Salam.
     /// </summary>
     [HttpPost("salam")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -74,7 +80,7 @@ public class CoreController : ControllerBase
     }
 
     /// <summary>
-    /// Endpoint GET sederhana (tanpa payload body).
+    /// Mengambil data  Salam Simple.
     /// </summary>
     [HttpGet("salam")]
     [ProducesResponseType(StatusCodes.Status200OK)]

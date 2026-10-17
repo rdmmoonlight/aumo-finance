@@ -15,6 +15,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Controller API untuk mengelola Periods.
+/// </summary>
 [ApiController]
 [Route("/periods")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
@@ -24,6 +27,9 @@ public class PeriodsController : ControllerBase
     private readonly IPeriodsService periodsService;
     private readonly IValidator<CreatePeriodRequest> createPeriodValidator;
 
+    /// <summary>
+    /// Controller API untuk mengelola Periods.
+    /// </summary>
     public PeriodsController(
         AppDbContext db,
         IPeriodsService periodsService,
@@ -34,6 +40,9 @@ public class PeriodsController : ControllerBase
         this.createPeriodValidator = createPeriodValidator;
     }
 
+    /// <summary>
+    /// Mengambil data  Periods.
+    /// </summary>
     // ==========================================
     // 1. GET: /periods (Period List & Selection Status)
     // ==========================================
@@ -88,6 +97,9 @@ public class PeriodsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mengambil data  Open Period Info.
+    /// </summary>
     // ==========================================
     // 2. GET: /periods/open-info
     // ==========================================
@@ -130,6 +142,9 @@ public class PeriodsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Membuat data  Period baru.
+    /// </summary>
     // ==========================================
     // 3. POST: /periods (Open New Period)
     // ==========================================
@@ -159,6 +174,9 @@ public class PeriodsController : ControllerBase
         return result.IsServerError ? this.StatusCode(500, body) : this.BadRequest(body);
     }
 
+    /// <summary>
+    /// Mewakili Select Period.
+    /// </summary>
     // ==========================================
     // 4. POST: /periods/select/{id} (Set Active/Viewing)
     // ==========================================
@@ -198,6 +216,9 @@ public class PeriodsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mewakili Clear Selection.
+    /// </summary>
     // ==========================================
     // 5. POST: /periods/clear-selection (Stop Viewing)
     // ==========================================
@@ -224,6 +245,9 @@ public class PeriodsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mewakili Close Period.
+    /// </summary>
     // ==========================================
     // 6. POST: /periods/close/{id} (Close Period)
     // ==========================================

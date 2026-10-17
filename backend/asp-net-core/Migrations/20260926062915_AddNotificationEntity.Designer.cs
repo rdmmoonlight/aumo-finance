@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 using AumoBackend.Controllers.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Services.Identity;

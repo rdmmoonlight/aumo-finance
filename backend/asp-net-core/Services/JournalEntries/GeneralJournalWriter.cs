@@ -9,33 +9,31 @@ using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Satu-satunya jalur penulisan jurnal ke tabel GeneralJournal.
-/// 1 baris GeneralJournal = 1 baris jurnal (data header ikut di setiap baris).
+/// Mewakili General Journal Writer.
 /// </summary>
 public static class GeneralJournalWriter
 {
+    /// <summary>
+    /// Mewakili Posted Status.
+    /// </summary>
     public const string PostedStatus = "Posted";
 
-    /// <summary>Data satu baris jurnal (tanpa header).</summary>
+    /// <summary>
+    /// Mewakili Line.
+    /// </summary>
     public sealed record Line(int AccountId, string? LineDescription, decimal Debit, decimal Credit);
 
     /// <summary>
-    /// Mengambil id kelompok jurnal (JournalEntryId) berikutnya dari sequence
-    /// "GeneralJournal_JournalEntryId_seq". Tidak ada tabel header lagi,
-    /// sehingga id ini dibangkitkan di sini.
+    /// Mewakili Next Journal Entry Id Async.
     /// </summary>
-    /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
     public static Task<int> NextJournalEntryIdAsync(AppDbContext db, CancellationToken ct = default)
         => db.Database
             .SqlQuery<int>($"SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
             .SingleAsync(ct);
 
     /// <summary>
-    /// Membentuk baris GeneralJournal untuk satu jurnal. LineOrder diisi
-    /// berurutan sesuai urutan baris yang diberikan. Baris belum ditambahkan
-    /// ke DbContext; pemanggil yang memanggil AddRange lalu SaveChanges.
+    /// Proses eksekusi/kalkulasi Build Rows.
     /// </summary>
-    /// <returns></returns>
     public static List<GeneralJournal> BuildRows(
         int journalEntryId,
         Guid userId,

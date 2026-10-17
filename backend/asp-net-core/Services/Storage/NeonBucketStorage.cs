@@ -11,6 +11,9 @@ namespace AumoBackend.Services.Storage
     using Amazon.S3;
     using Amazon.S3.Model;
 
+    /// <summary>
+    /// Mewakili Neon Bucket Storage.
+    /// </summary>
     public sealed class NeonBucketStorage : IAvatarStorage, IDisposable
     {
         private const string KeyPrefix = "avatars/";
@@ -22,9 +25,14 @@ namespace AumoBackend.Services.Storage
         private readonly string bucket;
         private readonly AmazonS3Client? client;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Mewakili Is Configured.
+        /// </summary>
         public bool IsConfigured => this.client != null;
 
+        /// <summary>
+        /// Mewakili Neon Bucket Storage.
+        /// </summary>
         public NeonBucketStorage(
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
@@ -61,7 +69,9 @@ namespace AumoBackend.Services.Storage
             this.client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Mewakili Upload Avatar Async.
+        /// </summary>
         public async Task<string> UploadAvatarAsync(string fileName, Stream content, CancellationToken cancellationToken = default)
         {
             var client = this.RequireClient();
@@ -79,7 +89,9 @@ namespace AumoBackend.Services.Storage
             return this.BuildPublicUrl(fileName);
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Mengambil data  Avatar Async.
+        /// </summary>
         public async Task<AvatarObject?> GetAvatarAsync(string fileName, CancellationToken cancellationToken = default)
         {
             var client = this.RequireClient();
@@ -139,7 +151,9 @@ namespace AumoBackend.Services.Storage
         private AmazonS3Client RequireClient() =>
             this.client ?? throw new InvalidOperationException("Neon bucket belum dikonfigurasi di server.");
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Mewakili Dispose.
+        /// </summary>
         public void Dispose() => this.client?.Dispose();
     }
 }

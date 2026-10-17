@@ -6,6 +6,9 @@ namespace AumoBackend.Services.Home;
 
 using AumoBackend.DTOs.Home;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Home Service.
+/// </summary>
 public interface IHomeService
 {
     Task<List<MarketIndicatorDto>> GetMarketIndicatorsAsync();

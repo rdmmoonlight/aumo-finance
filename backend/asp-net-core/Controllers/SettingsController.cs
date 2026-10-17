@@ -19,6 +19,9 @@ namespace AumoBackend.Controllers
     [Route("/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+    /// <summary>
+    /// Controller API untuk mengelola Settings.
+    /// </summary>
     public class SettingsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -29,6 +32,9 @@ namespace AumoBackend.Controllers
         private readonly IValidator<UpdateProfileRequest> updateProfileValidator;
         private readonly IValidator<IFormFile> avatarFileValidator;
 
+        /// <summary>
+        /// Controller API untuk mengelola Settings.
+        /// </summary>
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -47,6 +53,9 @@ namespace AumoBackend.Controllers
             this.avatarFileValidator = avatarFileValidator;
         }
 
+        /// <summary>
+        /// Memperbarui data  Profile.
+        /// </summary>
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
@@ -99,6 +108,9 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, message = "Profile updated successfully." });
         }
 
+        /// <summary>
+        /// Mewakili Upload Avatar.
+        /// </summary>
         [HttpPost("avatar")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadAvatar([FromForm] IFormFile? file, [FromForm] IFormFile? avatar)
@@ -157,6 +169,9 @@ namespace AumoBackend.Controllers
             }
         }
 
+        /// <summary>
+        /// Mewakili Change Password.
+        /// </summary>
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
@@ -182,6 +197,9 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, message = "Password successfully updated." });
         }
 
+        /// <summary>
+        /// Menghapus data  Account.
+        /// </summary>
         [HttpDelete("delete-account")]
         public async Task<IActionResult> DeleteAccount()
         {
@@ -204,6 +222,9 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, message = "Account successfully deleted." });
         }
 
+        /// <summary>
+        /// Mengambil data  Dashboard.
+        /// </summary>
         [HttpGet("guardian/dashboard")]
         public async Task<IActionResult> GetDashboard()
         {
@@ -256,6 +277,9 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, data = dashboard });
         }
 
+        /// <summary>
+        /// Mewakili Revoke Session.
+        /// </summary>
         [HttpPost("guardian/revoke-session/{sessionId}")]
         public async Task<IActionResult> RevokeSession(Guid sessionId)
         {
@@ -269,6 +293,9 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, message = "Session revoked." });
         }
 
+        /// <summary>
+        /// Mewakili Revoke All Sessions.
+        /// </summary>
         [HttpPost("guardian/revoke-all-sessions")]
         public async Task<IActionResult> RevokeAllSessions()
         {

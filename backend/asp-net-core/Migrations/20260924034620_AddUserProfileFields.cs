@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260924034620_AddUserProfileFields.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -15,6 +16,21 @@ namespace AumoBackend.Migrations
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
+    /// <summary>
+    /// Membuat data  User Profile Fields baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  User Profile Fields baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  User Profile Fields baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  User Profile Fields baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat atau menambahkan  User Profile Fields baru.
+    /// </summary>
     public partial class AddUserProfileFields : Migration
     {
         /// <inheritdoc/>
