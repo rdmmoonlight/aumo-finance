@@ -13,7 +13,10 @@ export interface Period {
   userId: string;
 }
 
-export type CreatePeriodDto = Pick<Period, "periodName" | "startDate" | "endDate">;
+export type CreatePeriodDto = Pick<
+  Period,
+  "periodName" | "startDate" | "endDate"
+>;
 
 @Injectable({ providedIn: "root" })
 export class PeriodsService {

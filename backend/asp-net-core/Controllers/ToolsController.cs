@@ -20,7 +20,9 @@ using AumoBackend.Services;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using AumoBackend.Services.JournalEntries;
+using AumoBackend.Validators.Common;
 using ClosedXML.Excel;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,18 +41,18 @@ public class ToolsController : ControllerBase
 {
     private readonly AppDbContext context;
     private readonly IValidator<JournalImportRequestDto> importValidator;
-/// <summary>
-/// Controller API untuk mengelola Tools.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Tools.
+    /// </summary>
 
     public ToolsController(AppDbContext context, IValidator<JournalImportRequestDto> importValidator)
     {
         this.context = context;
         this.importValidator = importValidator;
     }
-/// <summary>
-/// Mewakili Download Journal Template.
-/// </summary>
+    /// <summary>
+    /// Mewakili Download Journal Template.
+    /// </summary>
 
     // ==========================================
     // 1. GET: /tools/download-journal-template
@@ -87,9 +89,9 @@ public class ToolsController : ControllerBase
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             "JournalImportTemplate.xlsx");
     }
-/// <summary>
-/// Mewakili Preview Journal Import.
-/// </summary>
+    /// <summary>
+    /// Mewakili Preview Journal Import.
+    /// </summary>
 
     // ==========================================
     // 2. POST: /tools/preview-journal-import
@@ -220,9 +222,9 @@ public class ToolsController : ControllerBase
             },
         });
     }
-/// <summary>
-/// Mewakili Import Journal Entries.
-/// </summary>
+    /// <summary>
+    /// Mewakili Import Journal Entries.
+    /// </summary>
 
     // ==========================================
     // 3. POST: /tools/import-journal-entries

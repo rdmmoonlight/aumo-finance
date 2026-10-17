@@ -13,6 +13,8 @@ using AumoBackend.Models;
 using AumoBackend.Services;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
+using AumoBackend.Validators.Common;
+using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,9 +32,9 @@ public class NotificationsController : ControllerBase
 {
     private readonly AppDbContext context;
     private readonly IValidator<GetNotificationsQuery> queryValidator;
-/// <summary>
-/// Controller API untuk mengelola Notifications.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Notifications.
+    /// </summary>
 
     public NotificationsController(AppDbContext context, IValidator<GetNotificationsQuery> queryValidator)
     {
@@ -46,9 +48,9 @@ public class NotificationsController : ControllerBase
         var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier);
         return Guid.TryParse(userIdStr, out var userId) ? userId : Guid.Empty;
     }
-/// <summary>
-/// Mengambil data  My Notifications.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  My Notifications.
+    /// </summary>
 
     // GET: api/v1/notifications
     [HttpGet]
@@ -86,9 +88,9 @@ public class NotificationsController : ControllerBase
 
         return this.Ok(notifications);
     }
-/// <summary>
-/// Mewakili Mark As Read.
-/// </summary>
+    /// <summary>
+    /// Mewakili Mark As Read.
+    /// </summary>
 
     // PUT: api/v1/notifications/{id}/read
     [HttpPut("{id:guid}/read")]
@@ -113,9 +115,9 @@ public class NotificationsController : ControllerBase
 
         return this.NoContent();
     }
-/// <summary>
-/// Mewakili Mark All As Read.
-/// </summary>
+    /// <summary>
+    /// Mewakili Mark All As Read.
+    /// </summary>
 
     // PUT: api/v1/notifications/read-all
     [HttpPut("read-all")]
