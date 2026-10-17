@@ -20,31 +20,31 @@ using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+/// <summary>
+/// Controller API untuk mengelola Financial Statements.
+/// </summary>
 
 [ApiController]
 [Route("/reports")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
-/// <summary>
-/// Controller API untuk mengelola Financial Statements.
-/// </summary>
 public class FinancialStatementsController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IFinancialReportService reportService;
+/// <summary>
+/// Controller API untuk mengelola Financial Statements.
+/// </summary>
 
-    /// <summary>
-    /// Controller API untuk mengelola Financial Statements.
-    /// </summary>
     public FinancialStatementsController(AppDbContext db, IFinancialReportService reportService)
     {
         this.db = db;
         this.reportService = reportService;
     }
+/// <summary>
+/// Mengambil data  Income Statement.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Income Statement.
-    /// </summary>
     // ==========================================
     // 1. GET: /reports/income-statement
     // ==========================================
@@ -94,10 +94,10 @@ public class FinancialStatementsController : ControllerBase
             netIncome = statementData.NetIncome,
         });
     }
+/// <summary>
+/// Mengambil data  Retained Earnings.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Retained Earnings.
-    /// </summary>
     // ==========================================
     // 2. GET: /reports/retained-earnings
     // ==========================================
@@ -145,10 +145,10 @@ public class FinancialStatementsController : ControllerBase
             endingRetainedEarnings = statementData.EndingBalance,
         });
     }
+/// <summary>
+/// Mengambil data  Cash Flow Statement.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Cash Flow Statement.
-    /// </summary>
     // ==========================================
     // 3. GET: /reports/statement-of-cash-flow
     // ==========================================
@@ -278,10 +278,10 @@ public class FinancialStatementsController : ControllerBase
             endingCash = endingCash,
         });
     }
+/// <summary>
+/// Mengambil data  Statement Of Financial Position.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Statement Of Financial Position.
-    /// </summary>
     // ==========================================
     // 4. GET: /reports/statement-of-financial-position
     // ==========================================

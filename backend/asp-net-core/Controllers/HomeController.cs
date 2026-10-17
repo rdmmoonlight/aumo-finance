@@ -1,5 +1,3 @@
-#pragma warning disable CA1050
-#pragma warning disable CA1848
 // <copyright file="HomeController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -24,10 +22,10 @@ namespace AumoBackend.Controllers.Api
         private readonly IConfiguration configuration;
         private readonly ILogger<MarketDataController> logger;
         private readonly IValidator<AumoBackend.DTOs.GetKursQuery> kursValidator;
-
         /// <summary>
         /// Controller API untuk mengelola Market Data.
         /// </summary>
+
         public MarketDataController(
             IHttpClientFactory httpClientFactory,
             IConfiguration configuration,
@@ -39,10 +37,10 @@ namespace AumoBackend.Controllers.Api
             this.configuration = configuration;
             this.logger = logger;
         }
-
         /// <summary>
         /// Mengambil data  Kurs.
         /// </summary>
+
         [HttpGet("kurs")]
         public async Task<IActionResult> GetKurs([FromQuery] AumoBackend.DTOs.GetKursQuery query)
         {
@@ -125,10 +123,10 @@ namespace AumoBackend.Controllers.Api
         }
     }
 }
-
 /// <summary>
 /// Controller API untuk mengelola Home Market.
 /// </summary>
+
 [ApiController]
 [Route("/home")]
 [Tags("MarketData")]
@@ -137,19 +135,19 @@ public class HomeMarketController : ControllerBase
 {
     private readonly IHomeService homeService;
     private readonly ILogger<HomeMarketController> logger;
-
     /// <summary>
     /// Controller API untuk mengelola Home Market.
     /// </summary>
+
     public HomeMarketController(IHomeService homeService, ILogger<HomeMarketController> logger)
     {
         this.homeService = homeService;
         this.logger = logger;
     }
-
     /// <summary>
     /// Mengambil data  Market Indicators.
     /// </summary>
+
     [HttpGet("market-indicators")]
     public async Task<IActionResult> GetMarketIndicators()
     {

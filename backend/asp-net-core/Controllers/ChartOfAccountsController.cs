@@ -26,24 +26,24 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+/// <summary>
+/// Controller API untuk mengelola Chart Of Accounts.
+/// </summary>
 
 [ApiController]
 [Route("/chart-of-accounts")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
-/// <summary>
-/// Controller API untuk mengelola Chart Of Accounts.
-/// </summary>
 public class ChartOfAccountsController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IValidator<CreateAccountRequest> createAccountValidator;
     private readonly IValidator<UpdateAccountRequest> updateAccountValidator;
     private readonly IValidator<GetAccountsQuery> getAccountsValidator;
+/// <summary>
+/// Controller API untuk mengelola Chart Of Accounts.
+/// </summary>
 
-    /// <summary>
-    /// Controller API untuk mengelola Chart Of Accounts.
-    /// </summary>
     public ChartOfAccountsController(
         AppDbContext db,
         IValidator<CreateAccountRequest> createAccountValidator,
@@ -55,10 +55,10 @@ public class ChartOfAccountsController : ControllerBase
         this.updateAccountValidator = updateAccountValidator;
         this.getAccountsValidator = getAccountsValidator;
     }
+/// <summary>
+/// Mengambil data  Accounts.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Accounts.
-    /// </summary>
     // ==========================================
     // 1. GET: /chart-of-accounts
     // ==========================================
@@ -167,10 +167,10 @@ public class ChartOfAccountsController : ControllerBase
             accounts = result,
         });
     }
+/// <summary>
+/// Membuat data  Account baru.
+/// </summary>
 
-    /// <summary>
-    /// Membuat data  Account baru.
-    /// </summary>
     // ==========================================
     // 2. POST: /chart-of-accounts
     // ==========================================
@@ -225,10 +225,10 @@ public class ChartOfAccountsController : ControllerBase
             return this.StatusCode(500, new { success = false, message = $"A fatal error occurred while saving the account: {ex.Message}" });
         }
     }
+/// <summary>
+/// Memperbarui data  Account.
+/// </summary>
 
-    /// <summary>
-    /// Memperbarui data  Account.
-    /// </summary>
     // ==========================================
     // 3. PUT: /chart-of-accounts/{id}
     // ==========================================
@@ -284,10 +284,10 @@ public class ChartOfAccountsController : ControllerBase
             return this.StatusCode(500, new { success = false, message = $"A fatal error occurred while updating the account: {ex.Message}" });
         }
     }
+/// <summary>
+/// Menghapus data  Account.
+/// </summary>
 
-    /// <summary>
-    /// Menghapus data  Account.
-    /// </summary>
     // ==========================================
     // 4. DELETE: /chart-of-accounts/{id}
     // ==========================================

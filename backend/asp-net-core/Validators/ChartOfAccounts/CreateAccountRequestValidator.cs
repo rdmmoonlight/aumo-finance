@@ -7,10 +7,10 @@ namespace AumoBackend.Validators.ChartOfAccounts;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
 using FluentValidation;
-
 /// <summary>
 /// Validator untuk Create Account Request Validator.
 /// </summary>
+
 public class CreateAccountRequestValidator : AbstractValidator<CreateAccountRequest>
 {
     /// <summary>

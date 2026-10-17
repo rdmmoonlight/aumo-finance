@@ -1,23 +1,24 @@
-using System.Globalization;
 // <copyright file="CreatePeriodRequestValidator.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
+
+using System.Globalization;
 
 namespace AumoBackend.Validators;
 
 using AumoBackend.DTOs;
 using FluentValidation;
-
 /// <summary>
 /// Validator untuk Create Period Request Validator.
 /// </summary>
+
 public class CreatePeriodRequestValidator : AbstractValidator<CreatePeriodRequest>
 {
     private const int MaxAccountNameLength = 100; // selaras HasMaxLength(100) di AppDbContext
+/// <summary>
+/// Validator untuk Create Period Request Validator.
+/// </summary>
 
-    /// <summary>
-    /// Validator untuk Create Period Request Validator.
-    /// </summary>
     public CreatePeriodRequestValidator()
     {
         // 1. Bulan & Tahun

@@ -9,10 +9,10 @@ using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
-
 /// <summary>
 /// Layanan logika bisnis untuk I Financial Report Service.
 /// </summary>
+
 public interface IFinancialReportService
 {
     IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period);
@@ -21,14 +21,14 @@ public interface IFinancialReportService
 
     Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing);
 }
-
 /// <summary>
 /// Layanan logika bisnis untuk Financial Report Service.
 /// </summary>
+
 public class FinancialReportService : IFinancialReportService
 {
     /// <summary>
-    /// Proses eksekusi/kalkulasi Build Income Statement.
+    /// Proses eksekusi kalkulasi Build Income Statement.
     /// </summary>
     public IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period)
     {
@@ -68,10 +68,10 @@ public class FinancialReportService : IFinancialReportService
             NetIncome = netIncome,
         };
     }
+/// <summary>
+/// Proses eksekusi kalkulasi Build Retained Earnings Async.
+/// </summary>
 
-    /// <summary>
-    /// Proses eksekusi/kalkulasi Build Retained Earnings Async.
-    /// </summary>
     public async Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period)
     {
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
@@ -94,10 +94,10 @@ public class FinancialReportService : IFinancialReportService
             EndingBalance = endingBalance,
         };
     }
+/// <summary>
+/// Proses eksekusi kalkulasi Build Sofp Async.
+/// </summary>
 
-    /// <summary>
-    /// Proses eksekusi/kalkulasi Build Sofp Async.
-    /// </summary>
     public async Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing)
     {
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);

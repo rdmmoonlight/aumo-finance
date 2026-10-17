@@ -6,10 +6,10 @@ namespace AumoBackend.Validators.Queries;
 
 using AumoBackend.DTOs;
 using FluentValidation;
-
 /// <summary>
 /// Validator untuk Get Dashboard Query Validator.
 /// </summary>
+
 public class GetDashboardQueryValidator : AbstractValidator<GetDashboardQuery>
 {
     /// <summary>

@@ -31,9 +31,6 @@ using Serilog;
 
 namespace AumoBackend;
 
-/// <summary>
-/// Mewakili Program.
-/// </summary>
 public partial class Program
 {
     private static readonly string[] RootMethods = ["GET", "HEAD"];
@@ -44,9 +41,6 @@ public partial class Program
     [LoggerMessage(EventId = 1002, Level = LogLevel.Error, Message = "Unhandled exception on {Path}")]
     private static partial void LogUnhandledException(Microsoft.Extensions.Logging.ILogger logger, Exception exception, PathString path);
 
-    /// <summary>
-    /// Mewakili Main.
-    /// </summary>
     public static async Task Main(string[] args)
     {
         // Konfigurasi awal Serilog untuk mencatat proses bootstrap/startup
@@ -517,14 +511,8 @@ public partial class Program
     }
 }
 
-/// <summary>
-/// Mewakili Hangfire Custom Authorization Filter.
-/// </summary>
 public class HangfireCustomAuthorizationFilter : IDashboardAuthorizationFilter
 {
-    /// <summary>
-    /// Mewakili Authorize.
-    /// </summary>
     public bool Authorize(DashboardContext context)
     {
         var httpContext = context.GetHttpContext();

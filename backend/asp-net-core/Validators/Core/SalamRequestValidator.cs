@@ -2,10 +2,10 @@ using FluentValidation;
 using AumoBackend.DTOs.Core;
 
 namespace AumoBackend.Validators.Core;
-
 /// <summary>
 /// Validator untuk Salam Request Validator.
 /// </summary>
+
 public class SalamRequestValidator : AbstractValidator<SalamRequestDto>
 {
     /// <summary>

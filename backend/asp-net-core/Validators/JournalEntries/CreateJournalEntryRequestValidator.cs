@@ -5,10 +5,10 @@
 namespace AumoBackend.Validators.JournalEntries;
 
 using AumoBackend.DTOs;
-
 /// <summary>
 /// Validator untuk Create Journal Entry Request Validator.
 /// </summary>
+
 public class CreateJournalEntryRequestValidator : JournalEntryValidatorBase<CreateJournalEntryRequest>
 {
     /// <summary>

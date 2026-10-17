@@ -6,17 +6,17 @@ namespace AumoBackend.Validators.JournalEntries;
 
 using AumoBackend.DTOs;
 using FluentValidation;
-
 /// <summary>
 /// Validator untuk Journal Line Dto Validator.
 /// </summary>
+
 public class JournalLineDtoValidator : AbstractValidator<JournalEntryLineDto>
 {
     private const int MaxLineDescriptionLength = 250; // selaras HasMaxLength(250) di AppDbContext
+/// <summary>
+/// Validator untuk Journal Line Dto Validator.
+/// </summary>
 
-    /// <summary>
-    /// Validator untuk Journal Line Dto Validator.
-    /// </summary>
     public JournalLineDtoValidator()
     {
         this.RuleFor(x => x.AccountId)

@@ -6,10 +6,10 @@
 namespace AumoBackend.Services;
 
 using AumoBackend.DTOs.Home;
-
 /// <summary>
 /// Layanan logika bisnis untuk Market Data Service.
 /// </summary>
+
 public class MarketDataService(
     HttpClient httpClient,
     ILogger<MarketDataService> logger,

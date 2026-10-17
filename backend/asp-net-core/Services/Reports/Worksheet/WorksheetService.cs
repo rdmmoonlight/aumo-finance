@@ -17,10 +17,10 @@ using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using Microsoft.EntityFrameworkCore;
-
 /// <summary>
 /// Layanan logika bisnis untuk I Worksheet Service.
 /// </summary>
+
 public interface IWorksheetService
 {
     Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
@@ -29,14 +29,14 @@ public interface IWorksheetService
         Period period,
         ITrialBalanceService trialBalanceService);
 }
-
 /// <summary>
 /// Layanan logika bisnis untuk Worksheet Service.
 /// </summary>
+
 public class WorksheetService : IWorksheetService
 {
     /// <summary>
-    /// Proses eksekusi/kalkulasi Build Worksheet Rows Async.
+    /// Proses eksekusi kalkulasi Build Worksheet Rows Async.
     /// </summary>
     public async Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
         AppDbContext db,
