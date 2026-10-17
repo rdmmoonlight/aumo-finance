@@ -352,17 +352,7 @@ public partial class Program
             // Axum Core Client
             // =====================================
             builder.Services.AddHostedService<AxumProcessHostedService>();
-            builder.Services.AddHttpClient("RustCore", client =>
-            {
-                // Di development pakai localhost, di Docker pakai nama service
-                var rustCoreUrl = builder.Configuration["RustCore:BaseUrl"]
-                                  ?? "http://localhost:8081";
-
-                client.BaseAddress = new Uri(rustCoreUrl);
-                client.Timeout = TimeSpan.FromSeconds(5);
-            });
-            builder.Services.AddScoped<IRustCoreService, RustCoreService>();
-
+         
             // =====================================
             // 8. FORWARDED HEADERS CONFIGURATION
             // =====================================
