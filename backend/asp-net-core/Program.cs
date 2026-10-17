@@ -347,6 +347,7 @@ public partial class Program
             builder.Services.AddScoped<AumoBackend.Services.Reports.Summary.ISummaryService, AumoBackend.Services.Reports.Summary.SummaryService>();
             builder.Services.AddScoped<AumoBackend.Services.Tools.IToolsService, AumoBackend.Services.Tools.ToolsService>();
             builder.Services.AddHttpClient<IMarketDataService, MarketDataService>();
+            builder.Services.AddValidatorsFromAssemblyContaining<AumoBackend.Validators.Core.SalamRequestValidator>();
 
             // =====================================
             // Axum Core Services
