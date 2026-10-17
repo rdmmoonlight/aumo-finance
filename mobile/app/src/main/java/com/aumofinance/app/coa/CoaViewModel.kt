@@ -27,7 +27,7 @@ class CoaViewModel : ViewModel() {
         viewModelScope.launch {
             accounts =
                 try {
-                    api.list(search, category).body<AccountsResponse>().accounts
+                    api.list(search, category).body<AccountsResponse>().accounts.orEmpty()
                 } catch (t: Throwable) {
                     com.aumofinance.app.crashlog.AppLogger.error("CoaViewModel", "Error tertangkap", t)
                     emptyList()

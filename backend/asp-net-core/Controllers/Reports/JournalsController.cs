@@ -79,8 +79,8 @@ public class JournalController : ControllerBase
             });
         }
 
-        var startUtc = selectedPeriod.StartDate.Date;
-        var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
+        var startUtc = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
+        var endUtc = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
         var rows = await this.db.GeneralJournals
             .AsNoTracking()
@@ -160,8 +160,8 @@ public class JournalController : ControllerBase
             });
         }
 
-        var startUtc = selectedPeriod.StartDate.Date;
-        var endUtc = selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1);
+        var startUtc = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
+        var endUtc = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
         var rows = await this.db.GeneralJournals
             .AsNoTracking()
