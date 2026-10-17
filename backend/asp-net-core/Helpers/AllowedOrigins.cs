@@ -15,7 +15,8 @@ public static class AllowedOrigins
     public static readonly string[] All =
     {
         "http://localhost:3000",
-        "https://aumonext.vercel.app",
+        "https://aumoweb.vercel.app",
+        "https://aumoweb.onrender.com"
     };
     /// <summary>
     /// Mewakili Is Allowed.
