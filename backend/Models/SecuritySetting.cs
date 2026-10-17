@@ -21,5 +21,5 @@ public partial class SecuritySetting
 
     public DateTime UpdatedAt { get; set; }
 
-    public virtual AspNetUser User { get; set; } = null!;
+    public virtual ApplicationUser User { get; set; } = null!;
 }
