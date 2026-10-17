@@ -7,7 +7,8 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Sidebar,
   SidebarContent,
@@ -20,7 +21,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
-  useSidebar} from "@/components/ui/sidebar";
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { authApi, UserProfileData } from "@/lib/store/auth/authApi";
@@ -38,7 +40,8 @@ import {
   PanelLeftClose,
   Settings,
   User,
-  Wrench} from "lucide-react";
+  Wrench,
+} from "lucide-react";
 
 import * as React from "react";
 import Link from "next/link";
@@ -128,7 +131,8 @@ export function AppSidebar() {
       style={
         {
           "--sidebar-width": "255px",
-          "--sidebar-width-icon": "4rem"} as React.CSSProperties
+          "--sidebar-width-icon": "4rem",
+        } as React.CSSProperties
       }
     >
       <SidebarHeader
@@ -177,7 +181,10 @@ export function AppSidebar() {
                       tooltip={item.title}
                       className="text-sm h-8 font-normal px-2"
                     >
-                      <Link href={item.url} className="flex items-center gap-2.5">
+                      <Link
+                        href={item.url}
+                        className="flex items-center gap-2.5"
+                      >
                         <Icon className={ICON_CLASS} />
                         <span className="truncate group-data-[collapsible=icon]:hidden">
                           {item.title}

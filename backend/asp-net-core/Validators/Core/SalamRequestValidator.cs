@@ -1,5 +1,5 @@
-using FluentValidation;
 using AumoBackend.DTOs.Core;
+using FluentValidation;
 
 namespace AumoBackend.Validators.Core;
 

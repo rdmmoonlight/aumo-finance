@@ -5,16 +5,16 @@ import { Icon, IconName } from "../shared/icon";
 import { Logo } from "../shared/logo";
 
 export interface NavItem {
-    label: string;
-    path?: string;
-    icon: IconName;
+  label: string;
+  path?: string;
+  icon: IconName;
 }
 
 @Component({
-    selector: "app-sidebar",
-    standalone: true,
-    imports: [RouterLink, RouterLinkActive, Logo, Icon],
-    template: `
+  selector: "app-sidebar",
+  standalone: true,
+  imports: [RouterLink, RouterLinkActive, Logo, Icon],
+  template: `
     <!-- Overlay Mobile -->
     @if (open()) {
       <div
@@ -88,10 +88,10 @@ export interface NavItem {
   `,
 })
 export class SidebarComponent {
-    readonly auth = inject(AuthService);
+  readonly auth = inject(AuthService);
 
-    open = input<boolean>(false);
-    nav = input<NavItem[]>([]);
+  open = input<boolean>(false);
+  nav = input<NavItem[]>([]);
 
-    closeSidebar = output<void>();
+  closeSidebar = output<void>();
 }
