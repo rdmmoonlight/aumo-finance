@@ -306,11 +306,9 @@ export default class PeriodsPage implements OnInit {
   readonly openModal = signal<boolean>(false);
 
   // Computed untuk membaca periode aktif / terpilih langsung dari list
-  readonly openPeriod = computed(() =>
-    this.periods().find((p) => !p.isClosed)
-  );
+  readonly openPeriod = computed(() => this.periods().find((p) => !p.isClosed));
   readonly selectedPeriod = computed(() =>
-    this.periods().find((p) => p.isSelected)
+    this.periods().find((p) => p.isSelected),
   );
 
   readonly form = this.fb.group({

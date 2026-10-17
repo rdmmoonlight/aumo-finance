@@ -1,5 +1,12 @@
 import { RouteMeta } from "@analogjs/router";
-import { Component, computed, DestroyRef, inject, OnInit, signal } from "@angular/core";
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnInit,
+  signal,
+} from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
 import { AuthService } from "../../../core/auth.service";
@@ -22,8 +29,12 @@ export const routeMeta: RouteMeta = { title: "Home - Aumo Finance" };
       <article
         class="rounded-xl border border-slate-200 bg-white p-5 transition-colors dark:border-slate-800 dark:bg-slate-800/60"
       >
-        <p class="text-sm text-slate-500 dark:text-slate-400">Periode Terpilih</p>
-        <p class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          Periode Terpilih
+        </p>
+        <p
+          class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100"
+        >
           {{ selectedName() }}
         </p>
       </article>
@@ -32,7 +43,9 @@ export const routeMeta: RouteMeta = { title: "Home - Aumo Finance" };
         class="rounded-xl border border-slate-200 bg-white p-5 transition-colors dark:border-slate-800 dark:bg-slate-800/60"
       >
         <p class="text-sm text-slate-500 dark:text-slate-400">Total Periode</p>
-        <p class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <p
+          class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100"
+        >
           {{ periods().length }}
         </p>
       </article>
@@ -40,8 +53,12 @@ export const routeMeta: RouteMeta = { title: "Home - Aumo Finance" };
       <article
         class="rounded-xl border border-slate-200 bg-white p-5 transition-colors dark:border-slate-800 dark:bg-slate-800/60"
       >
-        <p class="text-sm text-slate-500 dark:text-slate-400">Periode Terbuka</p>
-        <p class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100">
+        <p class="text-sm text-slate-500 dark:text-slate-400">
+          Periode Terbuka
+        </p>
+        <p
+          class="mt-2 text-lg font-semibold text-slate-900 dark:text-slate-100"
+        >
           {{ openCount() }}
         </p>
       </article>
@@ -111,7 +128,7 @@ export default class HomePage implements OnInit {
   readonly error = signal<string | null>(null);
 
   readonly openCount = computed(
-    () => this.periods().filter((p) => !p.isClosed).length
+    () => this.periods().filter((p) => !p.isClosed).length,
   );
 
   readonly selectedName = computed(() => {

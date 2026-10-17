@@ -16,8 +16,12 @@ export const routeMeta: RouteMeta = {
   standalone: true,
   imports: [RouterLink, Logo, FooterComponent],
   template: `
-    <div class="flex min-h-screen flex-col bg-slate-50 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100">
-      <header class="border-b border-slate-200 bg-white transition-colors dark:border-slate-800 dark:bg-slate-900">
+    <div
+      class="flex min-h-screen flex-col bg-slate-50 text-slate-900 transition-colors dark:bg-slate-900 dark:text-slate-100"
+    >
+      <header
+        class="border-b border-slate-200 bg-white transition-colors dark:border-slate-800 dark:bg-slate-900"
+      >
         <div
           class="mx-auto flex h-16 max-w-6xl items-center justify-between px-4"
         >
@@ -41,7 +45,9 @@ export const routeMeta: RouteMeta = {
           >
             Catat, kelola, dan laporkan keuangan dengan rapi.
           </h1>
-          <p class="mx-auto mt-5 max-w-2xl text-lg text-slate-600 dark:text-slate-400">
+          <p
+            class="mx-auto mt-5 max-w-2xl text-lg text-slate-600 dark:text-slate-400"
+          >
             Aumo Finance membantu Anda menyusun jurnal, buku besar, dan laporan
             keuangan per periode secara sederhana dan terstruktur.
           </p>
@@ -53,11 +59,17 @@ export const routeMeta: RouteMeta = {
 
         <section class="mx-auto grid max-w-6xl gap-4 px-4 pb-20 sm:grid-cols-3">
           @for (f of features; track f.title) {
-            <article class="rounded-xl border border-slate-200 bg-white p-6 transition-colors dark:border-slate-800 dark:bg-slate-800/60">
-              <h2 class="text-base font-semibold text-slate-900 dark:text-slate-100">
+            <article
+              class="rounded-xl border border-slate-200 bg-white p-6 transition-colors dark:border-slate-800 dark:bg-slate-800/60"
+            >
+              <h2
+                class="text-base font-semibold text-slate-900 dark:text-slate-100"
+              >
                 {{ f.title }}
               </h2>
-              <p class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
+              <p
+                class="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400"
+              >
                 {{ f.desc }}
               </p>
             </article>

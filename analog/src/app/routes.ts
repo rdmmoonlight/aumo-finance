@@ -14,7 +14,8 @@ export const customRoutes: Routes = [
   {
     path: "",
     canActivate: [guestGuard],
-    loadComponent: () => import("./pages/(auth)/(auth).page").then((m) => m.default),
+    loadComponent: () =>
+      import("./pages/(auth)/(auth).page").then((m) => m.default),
     children: [
       {
         path: "login",
