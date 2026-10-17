@@ -1,5 +1,9 @@
 <Solution>
-  <Folder Name="/asp-net-core/">
-    <Project Path="asp-net-core/AumoBackend.csproj" />
-  </Folder>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/asp-net-core/" />
+  <Project Path="asp-net-core/AumoBackend.csproj" />
 </Solution>
