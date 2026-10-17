@@ -1,9 +1,20 @@
 =================================================
-   WORKFLOW WARNING LOG (Sat Oct 17 22:24:06 UTC 2026)
+   WORKFLOW WARNING LOG (Sat Oct 17 22:27:48 UTC 2026)
 =================================================
 
 --- [.NET BUILD WARNINGS] ---
-Tidak ada warning .NET.
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/DashboardController.cs(21,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/DashboardController.cs(23,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/NotificationsController.cs(17,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/NotificationsController.cs(19,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(24,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(27,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/DashboardController.cs(21,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/DashboardController.cs(23,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/NotificationsController.cs(17,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/NotificationsController.cs(19,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(24,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(27,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 
 --- [RUST AXUM CLIPPY WARNINGS] ---
 Tidak ada warning Rust Clippy.
