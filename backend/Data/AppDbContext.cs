@@ -7,12 +7,14 @@ namespace AumoBackend.Data;
 
 using AumoBackend.Models;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 // Gunakan type alias eksplisit untuk menyelesaikan ambiguitas
 using DataProtectionKeyEntity = Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey;
 
-public partial class AppDbContext : DbContext, IDataProtectionKeyContext
+public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
 {
     public AppDbContext()
     {
@@ -22,18 +24,6 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
         : base(options)
     {
     }
-
-    public virtual DbSet<AspNetRole> AspNetRoles { get; set; } = null!;
-
-    public virtual DbSet<AspNetRoleClaim> AspNetRoleClaims { get; set; } = null!;
-
-    public virtual DbSet<AspNetUser> AspNetUsers { get; set; } = null!;
-
-    public virtual DbSet<AspNetUserClaim> AspNetUserClaims { get; set; } = null!;
-
-    public virtual DbSet<AspNetUserLogin> AspNetUserLogins { get; set; } = null!;
-
-    public virtual DbSet<AspNetUserToken> AspNetUserTokens { get; set; } = null!;
 
     public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; } = null!;
 
@@ -74,69 +64,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
     /// <inheritdoc/>
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<AspNetRole>(entity =>
-        {
-            entity.HasIndex(e => e.NormalizedName, "RoleNameIndex").IsUnique();
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Name).HasMaxLength(256);
-            entity.Property(e => e.NormalizedName).HasMaxLength(256);
-        });
-
-        modelBuilder.Entity<AspNetRoleClaim>(entity =>
-        {
-            entity.HasIndex(e => e.RoleId, "IX_AspNetRoleClaims_RoleId");
-
-            entity.HasOne(d => d.Role).WithMany(p => p.AspNetRoleClaims).HasForeignKey(d => d.RoleId);
-        });
-
-        modelBuilder.Entity<AspNetUser>(entity =>
-        {
-            entity.HasIndex(e => e.NormalizedEmail, "EmailIndex");
-
-            entity.HasIndex(e => e.NormalizedUserName, "UserNameIndex").IsUnique();
-
-            entity.Property(e => e.Id).ValueGeneratedNever();
-            entity.Property(e => e.Email).HasMaxLength(256);
-            entity.Property(e => e.NormalizedEmail).HasMaxLength(256);
-            entity.Property(e => e.NormalizedUserName).HasMaxLength(256);
-            entity.Property(e => e.UserName).HasMaxLength(256);
-
-            entity.HasMany(d => d.Roles).WithMany(p => p.Users)
-                .UsingEntity<Dictionary<string, object>>(
-                    "AspNetUserRole",
-                    r => r.HasOne<AspNetRole>().WithMany().HasForeignKey("RoleId"),
-                    l => l.HasOne<AspNetUser>().WithMany().HasForeignKey("UserId"),
-                    j =>
-                    {
-                        j.HasKey("UserId", "RoleId");
-                        j.ToTable("AspNetUserRoles");
-                        j.HasIndex(new[] { "RoleId" }, "IX_AspNetUserRoles_RoleId");
-                    });
-        });
-
-        modelBuilder.Entity<AspNetUserClaim>(entity =>
-        {
-            entity.HasIndex(e => e.UserId, "IX_AspNetUserClaims_UserId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.AspNetUserClaims).HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<AspNetUserLogin>(entity =>
-        {
-            entity.HasKey(e => new { e.LoginProvider, e.ProviderKey });
-
-            entity.HasIndex(e => e.UserId, "IX_AspNetUserLogins_UserId");
-
-            entity.HasOne(d => d.User).WithMany(p => p.AspNetUserLogins).HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<AspNetUserToken>(entity =>
-        {
-            entity.HasKey(e => new { e.UserId, e.LoginProvider, e.Name });
-
-            entity.HasOne(d => d.User).WithMany(p => p.AspNetUserTokens).HasForeignKey(d => d.UserId);
-        });
+        base.OnModelCreating(modelBuilder);
 
         modelBuilder.Entity<ChartOfAccount>(entity =>
         {
@@ -235,7 +163,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
-            entity.HasOne(d => d.User).WithMany(p => p.LoginActivities).HasForeignKey(d => d.UserId);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
 
         modelBuilder.Entity<Notification>(entity =>
@@ -244,7 +172,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
-            entity.HasOne(d => d.User).WithMany(p => p.Notifications).HasForeignKey(d => d.UserId);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
 
         modelBuilder.Entity<Period>(entity =>
@@ -270,7 +198,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
             entity.Property(e => e.CodeHash).HasMaxLength(255);
             entity.Property(e => e.Used).HasDefaultValue(false);
 
-            entity.HasOne(d => d.User).WithMany(p => p.RecoveryCodes)
+            entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_RecoveryCodes_AspNetUsers");
         });
@@ -285,7 +213,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
             entity.Property(e => e.SessionTimeoutMinutes).HasDefaultValue(30);
             entity.Property(e => e.TwoFactorEnabled).HasDefaultValue(false);
 
-            entity.HasOne(d => d.User).WithOne(p => p.SecuritySetting)
+            entity.HasOne(d => d.User).WithOne()
                 .HasForeignKey<SecuritySetting>(d => d.UserId)
                 .HasConstraintName("FK_SecuritySettings_AspNetUsers");
         });
@@ -314,7 +242,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
             entity.Property(e => e.IsTrusted).HasDefaultValue(true);
             entity.Property(e => e.OperatingSystem).HasMaxLength(100);
 
-            entity.HasOne(d => d.User).WithMany(p => p.TrustedDevices)
+            entity.HasOne(d => d.User).WithMany()
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_TrustedDevices_AspNetUsers");
         });
@@ -325,7 +253,7 @@ public partial class AppDbContext : DbContext, IDataProtectionKeyContext
 
             entity.Property(e => e.Id).ValueGeneratedNever();
 
-            entity.HasOne(d => d.User).WithMany(p => p.UserSessions).HasForeignKey(d => d.UserId);
+            entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
         modelBuilder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 

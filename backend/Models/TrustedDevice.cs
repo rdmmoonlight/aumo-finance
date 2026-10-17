@@ -27,5 +27,5 @@ public partial class TrustedDevice
 
     public DateTime LastUsedAt { get; set; }
 
-    public virtual AspNetUser User { get; set; } = null!;
+    public virtual ApplicationUser User { get; set; } = null!;
 }
