@@ -15,9 +15,9 @@ public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRe
     // Selaras dengan aturan Identity di Program.cs (RequiredLength = 6).
     private const int MinPasswordLength = 6;
     private const int MaxPasswordLength = 128;
-/// <summary>
-/// Validator untuk Change Password Request Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Change Password Request Validator.
+    /// </summary>
 
     public ChangePasswordRequestValidator()
     {

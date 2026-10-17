@@ -16,44 +16,44 @@ public partial class Period
     /// Mewakili Id.
     /// </summary>
     public int Id { get; set; }
-/// <summary>
-/// Mewakili Period Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Period Name.
+    /// </summary>
 
     public string PeriodName { get; set; } = null!;
-/// <summary>
-/// Mewakili Start Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Start Date.
+    /// </summary>
 
     public DateTime StartDate { get; set; }
-/// <summary>
-/// Mewakili End Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili End Date.
+    /// </summary>
 
     public DateTime EndDate { get; set; }
-/// <summary>
-/// Mewakili Is Closed.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Closed.
+    /// </summary>
 
     public bool IsClosed { get; set; }
-/// <summary>
-/// Mewakili Is Selected.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Selected.
+    /// </summary>
 
     public bool IsSelected { get; set; }
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili General Ledger Permanent Accounts.
-/// </summary>
+    /// <summary>
+    /// Mewakili General Ledger Permanent Accounts.
+    /// </summary>
 
     public virtual ICollection<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = new List<GeneralLedgerPermanentAccount>();
-/// <summary>
-/// Mewakili General Ledger Temporary Accounts.
-/// </summary>
+    /// <summary>
+    /// Mewakili General Ledger Temporary Accounts.
+    /// </summary>
 
     public virtual ICollection<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; } = new List<GeneralLedgerTemporaryAccount>();
 }

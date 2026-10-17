@@ -8,9 +8,9 @@ namespace AumoBackend.Services.Storage
     /// Mewakili Avatar Object.
     /// </summary>
     public sealed record AvatarObject(Stream Stream, string ContentType);
-/// <summary>
-/// Mewakili I Avatar Storage.
-/// </summary>
+    /// <summary>
+    /// Mewakili I Avatar Storage.
+    /// </summary>
 
     public interface IAvatarStorage
     {

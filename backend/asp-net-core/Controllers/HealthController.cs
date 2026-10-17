@@ -28,17 +28,17 @@ using Microsoft.EntityFrameworkCore;
 public class HealthController : ControllerBase
 {
     private readonly AppDbContext dbContext;
-/// <summary>
-/// Controller API untuk mengelola Health.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Health.
+    /// </summary>
 
     public HealthController(AppDbContext dbContext)
     {
         this.dbContext = dbContext;
     }
-/// <summary>
-/// Mengambil data  Health.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Health.
+    /// </summary>
 
     [HttpGet]
     public async Task<IActionResult> GetHealth()

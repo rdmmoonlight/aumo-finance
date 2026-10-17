@@ -21,34 +21,34 @@ public class LedgerAccountViewModel
     /// Mewakili Account Id.
     /// </summary>
     public int AccountId { get; set; }
-/// <summary>
-/// Mewakili Reference Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Reference Number.
+    /// </summary>
 
     public string? ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Normal Balance Is Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Normal Balance Is Debit.
+    /// </summary>
 
     public bool NormalBalanceIsDebit { get; set; }
-/// <summary>
-/// Mewakili Lines.
-/// </summary>
+    /// <summary>
+    /// Mewakili Lines.
+    /// </summary>
 
     public List<LedgerLineViewModel> Lines { get; set; } = new();
-/// <summary>
-/// Mewakili Ending Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Ending Balance.
+    /// </summary>
 
     public decimal EndingBalance { get; set; }
 }
@@ -62,24 +62,24 @@ public class LedgerLineViewModel
     /// Mewakili Entry Date.
     /// </summary>
     public DateTime EntryDate { get; set; }
-/// <summary>
-/// Mewakili Description.
-/// </summary>
+    /// <summary>
+    /// Mewakili Description.
+    /// </summary>
 
     public string? Description { get; set; }
-/// <summary>
-/// Mewakili Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Debit.
+    /// </summary>
 
     public decimal Debit { get; set; }
-/// <summary>
-/// Mewakili Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Credit.
+    /// </summary>
 
     public decimal Credit { get; set; }
-/// <summary>
-/// Mewakili Running Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Running Balance.
+    /// </summary>
 
     public decimal RunningBalance { get; set; }
 }

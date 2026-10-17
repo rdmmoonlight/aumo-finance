@@ -17,9 +17,9 @@ public static class AllowedOrigins
         "http://localhost:3000",
         "https://aumonext.vercel.app",
     };
-/// <summary>
-/// Mewakili Is Allowed.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Allowed.
+    /// </summary>
 
     public static bool IsAllowed(Uri uri)
     {

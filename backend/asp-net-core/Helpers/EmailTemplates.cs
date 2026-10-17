@@ -19,9 +19,9 @@ public static class EmailTemplates
     private const string AccentColor = "#0d6efd";
     private const string DarkColor = "#181818";
     private const string MutedColor = "#6c757d";
-/// <summary>
-/// Mewakili Email Confirmation.
-/// </summary>
+    /// <summary>
+    /// Mewakili Email Confirmation.
+    /// </summary>
 
     public static string EmailConfirmation(string? fullName, string confirmUrl) => Layout(
         "Confirm your email to activate your Aumo Finance account.",
@@ -29,9 +29,9 @@ public static class EmailTemplates
         $@"<p>Hi {(string.IsNullOrWhiteSpace(fullName) ? "there" : fullName)},</p><p>Thanks for signing up for Aumo Finance. Confirm your email address to activate your account.</p>",
         "Confirm Email Address",
         confirmUrl);
-/// <summary>
-/// Mewakili Password Reset.
-/// </summary>
+    /// <summary>
+    /// Mewakili Password Reset.
+    /// </summary>
 
     public static string PasswordReset(string? fullName, string resetUrl) => Layout(
         "Reset the password for your Aumo Finance account.",

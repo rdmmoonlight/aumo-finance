@@ -20,14 +20,14 @@ public interface INotificationsService
     /// Mengambil data  Notifications By User Id Async.
     /// </summary>
     Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(Guid userId, int limit);
-/// <summary>
-/// Mewakili Mark As Read Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Mark As Read Async.
+    /// </summary>
 
     Task<bool> MarkAsReadAsync(Guid id, Guid userId);
-/// <summary>
-/// Mewakili Mark All As Read Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Mark All As Read Async.
+    /// </summary>
 
     Task MarkAllAsReadAsync(Guid userId);
 }

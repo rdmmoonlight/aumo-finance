@@ -24,44 +24,44 @@ public class TrialBalanceRow
     /// Mewakili Account Id.
     /// </summary>
     public int AccountId { get; set; }
-/// <summary>
-/// Mewakili Reference Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Reference Number.
+    /// </summary>
 
     public string? ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string? Type { get; set; }
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string? Role { get; set; }
-/// <summary>
-/// Mewakili Normal Balance Is Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Normal Balance Is Debit.
+    /// </summary>
 
     public bool NormalBalanceIsDebit { get; set; }
-/// <summary>
-/// Mewakili Net Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Balance.
+    /// </summary>
 
     public decimal NetBalance { get; set; }
-/// <summary>
-/// Mewakili Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Debit.
+    /// </summary>
 
     public decimal Debit { get; set; }
-/// <summary>
-/// Mewakili Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Credit.
+    /// </summary>
 
     public decimal Credit { get; set; }
 }
@@ -75,24 +75,24 @@ public class TrialBalanceViewModel
     /// Mewakili Title.
     /// </summary>
     public string Title { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Rows.
-/// </summary>
+    /// <summary>
+    /// Mewakili Rows.
+    /// </summary>
 
     public List<TrialBalanceRow> Rows { get; set; } = new();
-/// <summary>
-/// Mewakili Total Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Debit.
+    /// </summary>
 
     public decimal TotalDebit => this.Rows.Sum(r => r.Debit);
-/// <summary>
-/// Mewakili Total Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Credit.
+    /// </summary>
 
     public decimal TotalCredit => this.Rows.Sum(r => r.Credit);
-/// <summary>
-/// Mewakili Is Balanced.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Balanced.
+    /// </summary>
 
     public bool IsBalanced => Math.Round(this.TotalDebit - this.TotalCredit, 2) == 0;
 }

@@ -13,9 +13,9 @@ public interface ITransactionNumberService
     /// Proses eksekusi kalkulasi Generate Async.
     /// </summary>
     Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate);
-/// <summary>
-/// Mewakili Peek Next Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Peek Next Async.
+    /// </summary>
 
     Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate);
 }

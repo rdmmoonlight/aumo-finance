@@ -117,9 +117,9 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             Accounts = accountsList,
         };
     }
-/// <summary>
-/// Membuat data  Account Async baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data  Account Async baru.
+    /// </summary>
 
     public async Task<ServiceResultDto> CreateAccountAsync(Guid userId, CreateAccountRequestDto request)
     {
@@ -180,9 +180,9 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             return Fail($"A fatal error occurred while saving the account: {ex.Message}", 500);
         }
     }
-/// <summary>
-/// Memperbarui data  Account Async.
-/// </summary>
+    /// <summary>
+    /// Memperbarui data  Account Async.
+    /// </summary>
 
     public async Task<ServiceResultDto> UpdateAccountAsync(Guid userId, int accountId, UpdateAccountRequestDto request)
     {
@@ -233,9 +233,9 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             return Fail($"A fatal error occurred while updating the account: {ex.Message}", 500);
         }
     }
-/// <summary>
-/// Menghapus data  Account Async.
-/// </summary>
+    /// <summary>
+    /// Menghapus data  Account Async.
+    /// </summary>
 
     public async Task<ServiceResultDto> DeleteAccountAsync(Guid userId, int accountId)
     {

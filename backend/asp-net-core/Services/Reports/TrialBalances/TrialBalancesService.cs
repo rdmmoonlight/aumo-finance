@@ -116,9 +116,9 @@ public class TrialBalanceService : ITrialBalanceService
 
         return rows;
     }
-/// <summary>
-/// Proses eksekusi kalkulasi Compute Retained Earnings Ending Async.
-/// </summary>
+    /// <summary>
+    /// Proses eksekusi kalkulasi Compute Retained Earnings Ending Async.
+    /// </summary>
 
     public async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
     {

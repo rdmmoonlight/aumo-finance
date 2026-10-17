@@ -26,9 +26,9 @@ public class PeriodsController : ControllerBase
     private readonly AppDbContext db;
     private readonly IPeriodsService periodsService;
     private readonly IValidator<CreatePeriodRequest> createPeriodValidator;
-/// <summary>
-/// Controller API untuk mengelola Periods.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Periods.
+    /// </summary>
 
     public PeriodsController(
         AppDbContext db,
@@ -39,9 +39,9 @@ public class PeriodsController : ControllerBase
         this.periodsService = periodsService;
         this.createPeriodValidator = createPeriodValidator;
     }
-/// <summary>
-/// Mengambil data  Periods.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Periods.
+    /// </summary>
 
     // ==========================================
     // 1. GET: /periods (Period List & Selection Status)
@@ -96,9 +96,9 @@ public class PeriodsController : ControllerBase
             periods = periods,
         });
     }
-/// <summary>
-/// Mengambil data  Open Period Info.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Open Period Info.
+    /// </summary>
 
     // ==========================================
     // 2. GET: /periods/open-info
@@ -141,9 +141,9 @@ public class PeriodsController : ControllerBase
             permanentAccounts,
         });
     }
-/// <summary>
-/// Membuat data  Period baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data  Period baru.
+    /// </summary>
 
     // ==========================================
     // 3. POST: /periods (Open New Period)
@@ -173,9 +173,9 @@ public class PeriodsController : ControllerBase
         var body = new { success = false, message = result.Message };
         return result.IsServerError ? this.StatusCode(500, body) : this.BadRequest(body);
     }
-/// <summary>
-/// Mewakili Select Period.
-/// </summary>
+    /// <summary>
+    /// Mewakili Select Period.
+    /// </summary>
 
     // ==========================================
     // 4. POST: /periods/select/{id} (Set Active/Viewing)
@@ -215,9 +215,9 @@ public class PeriodsController : ControllerBase
             message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
         });
     }
-/// <summary>
-/// Mewakili Clear Selection.
-/// </summary>
+    /// <summary>
+    /// Mewakili Clear Selection.
+    /// </summary>
 
     // ==========================================
     // 5. POST: /periods/clear-selection (Stop Viewing)
@@ -244,9 +244,9 @@ public class PeriodsController : ControllerBase
             message = "Period selection cleared.",
         });
     }
-/// <summary>
-/// Mewakili Close Period.
-/// </summary>
+    /// <summary>
+    /// Mewakili Close Period.
+    /// </summary>
 
     // ==========================================
     // 6. POST: /periods/close/{id} (Close Period)

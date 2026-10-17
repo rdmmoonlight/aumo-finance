@@ -19,9 +19,9 @@ public class CoreController : ControllerBase
     private readonly RustCoreService _rustCoreService;
     private readonly IValidator<SalamRequestDto> _salamValidator;
     private readonly ILogger<CoreController> _logger;
-/// <summary>
-/// Controller API untuk mengelola Core.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Core.
+    /// </summary>
 
     public CoreController(
         RustCoreService rustCoreService,
@@ -32,9 +32,9 @@ public class CoreController : ControllerBase
         _salamValidator = salamValidator;
         _logger = logger;
     }
-/// <summary>
-/// Mengambil data  Salam.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Salam.
+    /// </summary>
 
     [HttpPost("salam")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -78,9 +78,9 @@ public class CoreController : ControllerBase
             Data = response
         });
     }
-/// <summary>
-/// Mengambil data  Salam Simple.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Salam Simple.
+    /// </summary>
 
     [HttpGet("salam")]
     [ProducesResponseType(StatusCodes.Status200OK)]

@@ -15,9 +15,9 @@ public class JournalImportRequestDtoValidator : AbstractValidator<JournalImportR
 {
     private const int MaxTransactions = 5000;
     private const int MaxMappings = 5000;
-/// <summary>
-/// Validator untuk Journal Import Request Dto Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Journal Import Request Dto Validator.
+    /// </summary>
 
     public JournalImportRequestDtoValidator()
     {
@@ -55,9 +55,9 @@ public class JournalImportRequestDtoValidator : AbstractValidator<JournalImportR
 public class JournalTransactionDtoValidator : AbstractValidator<JournalTransactionDto>
 {
     private const int MaxLinesPerTransaction = 500;
-/// <summary>
-/// Validator untuk Journal Transaction Dto Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Journal Transaction Dto Validator.
+    /// </summary>
 
     public JournalTransactionDtoValidator()
     {
@@ -98,9 +98,9 @@ public class JournalImportLineValidator : AbstractValidator<JournalLineDto>
 {
     private const int MaxDescriptionLength = 250; // selaras HasMaxLength(250) di AppDbContext
     private const int MaxAccountNameLength = 200;
-/// <summary>
-/// Validator untuk Journal Import Line Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Journal Import Line Validator.
+    /// </summary>
 
     public JournalImportLineValidator()
     {
@@ -132,9 +132,9 @@ public class JournalImportLineValidator : AbstractValidator<JournalLineDto>
 public class AccountMappingDetailDtoValidator : AbstractValidator<AccountMappingDetailDto>
 {
     private const int MaxAccountNameLength = 200;
-/// <summary>
-/// Validator untuk Account Mapping Detail Dto Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Account Mapping Detail Dto Validator.
+    /// </summary>
 
     public AccountMappingDetailDtoValidator()
     {

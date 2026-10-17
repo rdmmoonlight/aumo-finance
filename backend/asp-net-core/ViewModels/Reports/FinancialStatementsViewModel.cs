@@ -24,44 +24,44 @@ public class CashFlowStatementViewModel
     /// Mewakili Beginning Cash.
     /// </summary>
     public decimal BeginningCash { get; set; }
-/// <summary>
-/// Mewakili Operating Activities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Operating Activities.
+    /// </summary>
 
     public List<CashFlowLine> OperatingActivities { get; set; } = new();
-/// <summary>
-/// Mewakili Investing Activities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Investing Activities.
+    /// </summary>
 
     public List<CashFlowLine> InvestingActivities { get; set; } = new();
-/// <summary>
-/// Mewakili Financing Activities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Financing Activities.
+    /// </summary>
 
     public List<CashFlowLine> FinancingActivities { get; set; } = new();
-/// <summary>
-/// Mewakili Net Operating.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Operating.
+    /// </summary>
 
     public decimal NetOperating => this.OperatingActivities.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Net Investing.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Investing.
+    /// </summary>
 
     public decimal NetInvesting => this.InvestingActivities.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Net Financing.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Financing.
+    /// </summary>
 
     public decimal NetFinancing => this.FinancingActivities.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Net Change In Cash.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Change In Cash.
+    /// </summary>
 
     public decimal NetChangeInCash => this.NetOperating + this.NetInvesting + this.NetFinancing;
-/// <summary>
-/// Mewakili Ending Cash.
-/// </summary>
+    /// <summary>
+    /// Mewakili Ending Cash.
+    /// </summary>
 
     public decimal EndingCash => this.BeginningCash + this.NetChangeInCash;
 }
@@ -75,54 +75,54 @@ public class IncomeStatementViewModel
     /// Mewakili As Of Date.
     /// </summary>
     public DateTime AsOfDate { get; set; }
-/// <summary>
-/// Mewakili Revenues.
-/// </summary>
+    /// <summary>
+    /// Mewakili Revenues.
+    /// </summary>
 
     public List<IncomeStatementLine> Revenues { get; set; } = new();
-/// <summary>
-/// Mewakili Operating Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Operating Expenses.
+    /// </summary>
 
     public List<IncomeStatementLine> OperatingExpenses { get; set; } = new();
-/// <summary>
-/// Mewakili Other Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Other Income.
+    /// </summary>
 
     public List<IncomeStatementLine> OtherIncome { get; set; } = new();
-/// <summary>
-/// Mewakili Other Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Other Expenses.
+    /// </summary>
 
     public List<IncomeStatementLine> OtherExpenses { get; set; } = new();
-/// <summary>
-/// Mewakili Total Revenue.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Revenue.
+    /// </summary>
 
     public decimal TotalRevenue => this.Revenues.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Total Operating Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Operating Expenses.
+    /// </summary>
 
     public decimal TotalOperatingExpenses => this.OperatingExpenses.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Operating Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Operating Income.
+    /// </summary>
 
     public decimal OperatingIncome => this.TotalRevenue - this.TotalOperatingExpenses;
-/// <summary>
-/// Mewakili Total Other Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Other Income.
+    /// </summary>
 
     public decimal TotalOtherIncome => this.OtherIncome.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Total Other Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Other Expenses.
+    /// </summary>
 
     public decimal TotalOtherExpenses => this.OtherExpenses.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Net Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Income.
+    /// </summary>
 
     public decimal NetIncome => this.OperatingIncome + this.TotalOtherIncome - this.TotalOtherExpenses;
 }
@@ -136,54 +136,54 @@ public class StatementOfFinancialPositionViewModel
     /// Mewakili As Of Date.
     /// </summary>
     public DateTime AsOfDate { get; set; }
-/// <summary>
-/// Mewakili Is Post Closing.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Post Closing.
+    /// </summary>
 
     public bool IsPostClosing { get; set; }
-/// <summary>
-/// Mewakili Assets.
-/// </summary>
+    /// <summary>
+    /// Mewakili Assets.
+    /// </summary>
 
     public List<FinancialPositionLine> Assets { get; set; } = new();
-/// <summary>
-/// Mewakili Liabilities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Liabilities.
+    /// </summary>
 
     public List<FinancialPositionLine> Liabilities { get; set; } = new();
-/// <summary>
-/// Mewakili Equity Excluding Retained Earnings.
-/// </summary>
+    /// <summary>
+    /// Mewakili Equity Excluding Retained Earnings.
+    /// </summary>
 
     public List<FinancialPositionLine> EquityExcludingRetainedEarnings { get; set; } = new();
-/// <summary>
-/// Mewakili Retained Earnings Ending.
-/// </summary>
+    /// <summary>
+    /// Mewakili Retained Earnings Ending.
+    /// </summary>
 
     public decimal RetainedEarningsEnding { get; set; }
-/// <summary>
-/// Mewakili Total Assets.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Assets.
+    /// </summary>
 
     public decimal TotalAssets => this.Assets.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Total Liabilities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Liabilities.
+    /// </summary>
 
     public decimal TotalLiabilities => this.Liabilities.Sum(l => l.Amount);
-/// <summary>
-/// Mewakili Total Equity.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Equity.
+    /// </summary>
 
     public decimal TotalEquity => this.EquityExcludingRetainedEarnings.Sum(l => l.Amount) + this.RetainedEarningsEnding;
-/// <summary>
-/// Mewakili Total Liabilities And Equity.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Liabilities And Equity.
+    /// </summary>
 
     public decimal TotalLiabilitiesAndEquity => this.TotalLiabilities + this.TotalEquity;
-/// <summary>
-/// Mewakili Is Balanced.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Balanced.
+    /// </summary>
 
     public bool IsBalanced => Math.Round(this.TotalAssets - this.TotalLiabilitiesAndEquity, 2) == 0;
 }
@@ -197,34 +197,34 @@ public class RetainedEarningsViewModel
     /// Mewakili Account Name.
     /// </summary>
     public string AccountName { get; set; } = "Retained Earnings";
-/// <summary>
-/// Mewakili Start Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Start Date.
+    /// </summary>
 
     public DateTime StartDate { get; set; }
-/// <summary>
-/// Mewakili End Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili End Date.
+    /// </summary>
 
     public DateTime EndDate { get; set; }
-/// <summary>
-/// Mewakili Beginning Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Beginning Balance.
+    /// </summary>
 
     public decimal BeginningBalance { get; set; }
-/// <summary>
-/// Mewakili Net Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Income.
+    /// </summary>
 
     public decimal NetIncome { get; set; }
-/// <summary>
-/// Mewakili Dividends.
-/// </summary>
+    /// <summary>
+    /// Mewakili Dividends.
+    /// </summary>
 
     public decimal Dividends { get; set; }
-/// <summary>
-/// Mewakili Ending Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Ending Balance.
+    /// </summary>
 
     public decimal EndingBalance => this.BeginningBalance + this.NetIncome - this.Dividends;
 }

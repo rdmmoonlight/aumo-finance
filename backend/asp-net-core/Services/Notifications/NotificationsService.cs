@@ -14,9 +14,9 @@ using Microsoft.EntityFrameworkCore;
 public class NotificationsService : INotificationsService
 {
     private readonly AppDbContext? context;
-/// <summary>
-/// Mengambil data  Notifications By User Id Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Notifications By User Id Async.
+    /// </summary>
 
     public async Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(Guid userId, int limit)
     {
@@ -36,9 +36,9 @@ public class NotificationsService : INotificationsService
             })
             .ToListAsync();
     }
-/// <summary>
-/// Mewakili Mark As Read Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Mark As Read Async.
+    /// </summary>
 
     public async Task<bool> MarkAsReadAsync(Guid id, Guid userId)
     {
@@ -54,9 +54,9 @@ public class NotificationsService : INotificationsService
         await this.context.SaveChangesAsync();
         return true;
     }
-/// <summary>
-/// Mewakili Mark All As Read Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Mark All As Read Async.
+    /// </summary>
 
     public async Task MarkAllAsReadAsync(Guid userId)
     {

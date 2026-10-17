@@ -23,59 +23,59 @@ public class GeneralJournalResponseDto
         get => this.Id;
         set => this.Id = value;
     }
-/// <summary>
-/// Mewakili Journal Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Journal Type.
+    /// </summary>
 
     public string JournalType { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Entry Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Entry Date.
+    /// </summary>
 
     public DateTime EntryDate { get; set; }
-/// <summary>
-/// Mewakili Transaction Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Transaction Number.
+    /// </summary>
 
     public string TransactionNumber { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili Status.
-/// </summary>
+    /// <summary>
+    /// Mewakili Status.
+    /// </summary>
 
     public string Status { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Is Locked.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Locked.
+    /// </summary>
 
     public bool IsLocked { get; set; }
-/// <summary>
-/// Membuat data d At baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data d At baru.
+    /// </summary>
 
     public DateTime CreatedAt { get; set; }
-/// <summary>
-/// Memperbarui data d At.
-/// </summary>
+    /// <summary>
+    /// Memperbarui data d At.
+    /// </summary>
 
     public DateTime? UpdatedAt { get; set; }
-/// <summary>
-/// Mewakili Lines.
-/// </summary>
+    /// <summary>
+    /// Mewakili Lines.
+    /// </summary>
 
     public List<GeneralJournalLineDto> Lines { get; set; } = new();
-/// <summary>
-/// Mewakili Total Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Debit.
+    /// </summary>
 
     public decimal TotalDebit => this.Lines.Sum(l => l.Debit);
-/// <summary>
-/// Mewakili Total Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Credit.
+    /// </summary>
 
     public decimal TotalCredit => this.Lines.Sum(l => l.Credit);
 }
@@ -102,14 +102,14 @@ public class GeneralJournalLineDto
         get => this.Id;
         set => this.Id = value;
     }
-/// <summary>
-/// Mewakili Account Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Id.
+    /// </summary>
 
     public int AccountId { get; set; }
-/// <summary>
-/// Mewakili Line Description.
-/// </summary>
+    /// <summary>
+    /// Mewakili Line Description.
+    /// </summary>
 
     public string? LineDescription { get; set; }
 
@@ -118,19 +118,19 @@ public class GeneralJournalLineDto
         get => this.LineDescription;
         set => this.LineDescription = value;
     }
-/// <summary>
-/// Mewakili Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Debit.
+    /// </summary>
 
     public decimal Debit { get; set; }
-/// <summary>
-/// Mewakili Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Credit.
+    /// </summary>
 
     public decimal Credit { get; set; }
-/// <summary>
-/// Mewakili Line Order.
-/// </summary>
+    /// <summary>
+    /// Mewakili Line Order.
+    /// </summary>
 
     public int LineOrder { get; set; }
 }
@@ -144,69 +144,69 @@ public class FlatGeneralJournalResponseDto
     /// Mewakili Line Id.
     /// </summary>
     public int LineId { get; set; }
-/// <summary>
-/// Mewakili Journal Entry Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili Journal Entry Id.
+    /// </summary>
 
     public int JournalEntryId { get; set; }
-/// <summary>
-/// Mewakili Journal Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Journal Type.
+    /// </summary>
 
     public string JournalType { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Entry Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Entry Date.
+    /// </summary>
 
     public DateTime EntryDate { get; set; }
-/// <summary>
-/// Mewakili Transaction Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Transaction Number.
+    /// </summary>
 
     public string TransactionNumber { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili Status.
-/// </summary>
+    /// <summary>
+    /// Mewakili Status.
+    /// </summary>
 
     public string Status { get; set; } = string.Empty;
-/// <summary>
-/// Membuat data d At baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data d At baru.
+    /// </summary>
 
     public DateTime CreatedAt { get; set; }
-/// <summary>
-/// Memperbarui data d At.
-/// </summary>
+    /// <summary>
+    /// Memperbarui data d At.
+    /// </summary>
 
     public DateTime? UpdatedAt { get; set; }
-/// <summary>
-/// Mewakili Account Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Id.
+    /// </summary>
 
     public int AccountId { get; set; }
-/// <summary>
-/// Mewakili Line Description.
-/// </summary>
+    /// <summary>
+    /// Mewakili Line Description.
+    /// </summary>
 
     public string? LineDescription { get; set; }
-/// <summary>
-/// Mewakili Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Debit.
+    /// </summary>
 
     public decimal Debit { get; set; }
-/// <summary>
-/// Mewakili Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Credit.
+    /// </summary>
 
     public decimal Credit { get; set; }
-/// <summary>
-/// Mewakili Line Order.
-/// </summary>
+    /// <summary>
+    /// Mewakili Line Order.
+    /// </summary>
 
     public int LineOrder { get; set; }
 }
@@ -223,24 +223,24 @@ public class ClosingJournalEntryGroupApiResponse
     /// Mewakili Title.
     /// </summary>
     public string Title { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Description.
-/// </summary>
+    /// <summary>
+    /// Mewakili Description.
+    /// </summary>
 
     public string Description { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Lines.
-/// </summary>
+    /// <summary>
+    /// Mewakili Lines.
+    /// </summary>
 
     public List<ClosingJournalLineApiResponse> Lines { get; set; } = new();
-/// <summary>
-/// Mewakili Total Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Debit.
+    /// </summary>
 
     public decimal TotalDebit => this.Lines.Sum(l => l.Debit);
-/// <summary>
-/// Mewakili Total Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Credit.
+    /// </summary>
 
     public decimal TotalCredit => this.Lines.Sum(l => l.Credit);
 }
@@ -254,19 +254,19 @@ public class ClosingJournalLineApiResponse
     /// Mewakili Reference Number.
     /// </summary>
     public string ReferenceNumber { get; set; } = "0";
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Debit.
+    /// </summary>
 
     public decimal Debit { get; set; }
-/// <summary>
-/// Mewakili Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Credit.
+    /// </summary>
 
     public decimal Credit { get; set; }
 }
@@ -284,29 +284,29 @@ public class CreateGeneralJournalRequest
     /// Mewakili Journal Type.
     /// </summary>
     public string JournalType { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Entry Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Entry Date.
+    /// </summary>
 
     public DateTime EntryDate { get; set; }
-/// <summary>
-/// Mewakili Transaction Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Transaction Number.
+    /// </summary>
 
     public string TransactionNumber { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Status.
-/// </summary>
+    /// <summary>
+    /// Mewakili Status.
+    /// </summary>
 
     public string Status { get; set; } = "Posted";
-/// <summary>
-/// Membuat data d At baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data d At baru.
+    /// </summary>
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-/// <summary>
-/// Mewakili Lines.
-/// </summary>
+    /// <summary>
+    /// Mewakili Lines.
+    /// </summary>
 
     public List<CreateGeneralJournalLineRequest> Lines { get; set; } = new();
 }
@@ -320,9 +320,9 @@ public class CreateGeneralJournalLineRequest
     /// Mewakili Account Id.
     /// </summary>
     public int AccountId { get; set; }
-/// <summary>
-/// Mewakili Line Description.
-/// </summary>
+    /// <summary>
+    /// Mewakili Line Description.
+    /// </summary>
 
     public string? LineDescription { get; set; }
 
@@ -331,19 +331,19 @@ public class CreateGeneralJournalLineRequest
         get => this.LineDescription;
         set => this.LineDescription = value;
     }
-/// <summary>
-/// Mewakili Debit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Debit.
+    /// </summary>
 
     public decimal Debit { get; set; }
-/// <summary>
-/// Mewakili Credit.
-/// </summary>
+    /// <summary>
+    /// Mewakili Credit.
+    /// </summary>
 
     public decimal Credit { get; set; }
-/// <summary>
-/// Mewakili Line Order.
-/// </summary>
+    /// <summary>
+    /// Mewakili Line Order.
+    /// </summary>
 
     public int LineOrder { get; set; }
 }
@@ -357,29 +357,29 @@ public class UpdateGeneralJournalRequest
     /// Mewakili Journal Type.
     /// </summary>
     public string JournalType { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Entry Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Entry Date.
+    /// </summary>
 
     public DateTime EntryDate { get; set; }
-/// <summary>
-/// Mewakili Transaction Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Transaction Number.
+    /// </summary>
 
     public string TransactionNumber { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Status.
-/// </summary>
+    /// <summary>
+    /// Mewakili Status.
+    /// </summary>
 
     public string Status { get; set; } = string.Empty;
-/// <summary>
-/// Memperbarui data d At.
-/// </summary>
+    /// <summary>
+    /// Memperbarui data d At.
+    /// </summary>
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-/// <summary>
-/// Mewakili Lines.
-/// </summary>
+    /// <summary>
+    /// Mewakili Lines.
+    /// </summary>
 
     public List<CreateGeneralJournalLineRequest> Lines { get; set; } = new();
 }

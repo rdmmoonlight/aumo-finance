@@ -21,84 +21,84 @@ public class IncomeStatementApiResponse
     /// Mewakili Period Name.
     /// </summary>
     public string PeriodName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Start Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Start Date.
+    /// </summary>
 
     public DateTime StartDate { get; set; }
-/// <summary>
-/// Mewakili End Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili End Date.
+    /// </summary>
 
     public DateTime EndDate { get; set; }
-/// <summary>
-/// Mewakili As Of Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili As Of Date.
+    /// </summary>
 
     public DateTime AsOfDate { get; set; }
-/// <summary>
-/// Mewakili Total Revenues.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Revenues.
+    /// </summary>
 
     public decimal TotalRevenues { get; set; }
-/// <summary>
-/// Mewakili Total Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Expenses.
+    /// </summary>
 
     public decimal TotalExpenses { get; set; }
-/// <summary>
-/// Mewakili Total Revenue.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Revenue.
+    /// </summary>
 
     public decimal TotalRevenue { get; set; }
-/// <summary>
-/// Mewakili Total Operating Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Operating Expenses.
+    /// </summary>
 
     public decimal TotalOperatingExpenses { get; set; }
-/// <summary>
-/// Mewakili Operating Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Operating Income.
+    /// </summary>
 
     public decimal OperatingIncome { get; set; }
-/// <summary>
-/// Mewakili Other Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Other Income.
+    /// </summary>
 
     public List<IncomeStatementLineApiResponse> OtherIncome { get; set; } = new();
-/// <summary>
-/// Mewakili Total Other Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Other Income.
+    /// </summary>
 
     public decimal TotalOtherIncome { get; set; }
-/// <summary>
-/// Mewakili Other Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Other Expenses.
+    /// </summary>
 
     public List<IncomeStatementLineApiResponse> OtherExpenses { get; set; } = new();
-/// <summary>
-/// Mewakili Total Other Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Other Expenses.
+    /// </summary>
 
     public decimal TotalOtherExpenses { get; set; }
-/// <summary>
-/// Mewakili Net Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Income.
+    /// </summary>
 
     public decimal NetIncome { get; set; }
-/// <summary>
-/// Mewakili Revenues.
-/// </summary>
+    /// <summary>
+    /// Mewakili Revenues.
+    /// </summary>
 
     public List<IncomeStatementLineApiResponse> Revenues { get; set; } = new();
-/// <summary>
-/// Mewakili Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Expenses.
+    /// </summary>
 
     public List<IncomeStatementLineApiResponse> Expenses { get; set; } = new();
-/// <summary>
-/// Mewakili Operating Expenses.
-/// </summary>
+    /// <summary>
+    /// Mewakili Operating Expenses.
+    /// </summary>
 
     public List<IncomeStatementLineApiResponse> OperatingExpenses { get; set; } = new();
 }
@@ -112,14 +112,14 @@ public class IncomeStatementLineApiResponse
     /// Mewakili Reference Number.
     /// </summary>
     public string ReferenceNumber { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Amount.
-/// </summary>
+    /// <summary>
+    /// Mewakili Amount.
+    /// </summary>
 
     public decimal Amount { get; set; }
 }
@@ -133,39 +133,39 @@ public class RetainedEarningsApiResponse
     /// Mewakili Period Name.
     /// </summary>
     public string PeriodName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Start Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili Start Date.
+    /// </summary>
 
     public DateTime? StartDate { get; set; }
-/// <summary>
-/// Mewakili End Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili End Date.
+    /// </summary>
 
     public DateTime? EndDate { get; set; }
-/// <summary>
-/// Mewakili Beginning Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Beginning Balance.
+    /// </summary>
 
     public decimal BeginningBalance { get; set; }
-/// <summary>
-/// Mewakili Ending Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Ending Balance.
+    /// </summary>
 
     public decimal EndingBalance { get; set; }
-/// <summary>
-/// Mewakili Net Income.
-/// </summary>
+    /// <summary>
+    /// Mewakili Net Income.
+    /// </summary>
 
     public decimal NetIncome { get; set; }
-/// <summary>
-/// Mewakili Dividends.
-/// </summary>
+    /// <summary>
+    /// Mewakili Dividends.
+    /// </summary>
 
     public decimal Dividends { get; set; }
 }
@@ -179,14 +179,14 @@ public class StatementOfCashFlowLineResponse
     /// Mewakili Activity Type.
     /// </summary>
     public string ActivityType { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Description.
-/// </summary>
+    /// <summary>
+    /// Mewakili Description.
+    /// </summary>
 
     public string Description { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Amount.
-/// </summary>
+    /// <summary>
+    /// Mewakili Amount.
+    /// </summary>
 
     public decimal Amount { get; set; }
 }
@@ -200,64 +200,64 @@ public class StatementOfFinancialPositionApiResponse
     /// Mewakili Period Name.
     /// </summary>
     public string PeriodName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili As Of Date.
-/// </summary>
+    /// <summary>
+    /// Mewakili As Of Date.
+    /// </summary>
 
     public DateTime AsOfDate { get; set; }
-/// <summary>
-/// Mewakili Total Assets.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Assets.
+    /// </summary>
 
     public decimal TotalAssets { get; set; }
-/// <summary>
-/// Mewakili Total Liabilities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Liabilities.
+    /// </summary>
 
     public decimal TotalLiabilities { get; set; }
-/// <summary>
-/// Mewakili Total Equity.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Equity.
+    /// </summary>
 
     public decimal TotalEquity { get; set; }
-/// <summary>
-/// Mewakili Total Liabilities And Equity.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Liabilities And Equity.
+    /// </summary>
 
     public decimal TotalLiabilitiesAndEquity { get; set; }
-/// <summary>
-/// Mewakili Equity Excluding Retained Earnings.
-/// </summary>
+    /// <summary>
+    /// Mewakili Equity Excluding Retained Earnings.
+    /// </summary>
 
     public List<FinancialPositionLineApiResponse> EquityExcludingRetainedEarnings { get; set; } = new();
-/// <summary>
-/// Mewakili Retained Earnings Ending.
-/// </summary>
+    /// <summary>
+    /// Mewakili Retained Earnings Ending.
+    /// </summary>
 
     public decimal RetainedEarningsEnding { get; set; }
-/// <summary>
-/// Mewakili Is Post Closing.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Post Closing.
+    /// </summary>
 
     public bool IsPostClosing { get; set; }
-/// <summary>
-/// Mewakili Is Balanced.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Balanced.
+    /// </summary>
 
     public bool IsBalanced { get; set; }
-/// <summary>
-/// Mewakili Assets.
-/// </summary>
+    /// <summary>
+    /// Mewakili Assets.
+    /// </summary>
 
     public List<FinancialPositionLineApiResponse> Assets { get; set; } = new();
-/// <summary>
-/// Mewakili Liabilities.
-/// </summary>
+    /// <summary>
+    /// Mewakili Liabilities.
+    /// </summary>
 
     public List<FinancialPositionLineApiResponse> Liabilities { get; set; } = new();
-/// <summary>
-/// Mewakili Equity.
-/// </summary>
+    /// <summary>
+    /// Mewakili Equity.
+    /// </summary>
 
     public List<FinancialPositionLineApiResponse> Equity { get; set; } = new();
 }
@@ -271,14 +271,14 @@ public class FinancialPositionLineApiResponse
     /// Mewakili Reference Number.
     /// </summary>
     public string ReferenceNumber { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Amount.
-/// </summary>
+    /// <summary>
+    /// Mewakili Amount.
+    /// </summary>
 
     public decimal Amount { get; set; }
 }
@@ -292,9 +292,9 @@ public class CashFlowLine
     /// Mewakili Description.
     /// </summary>
     public string Description { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Amount.
-/// </summary>
+    /// <summary>
+    /// Mewakili Amount.
+    /// </summary>
 
     public decimal Amount { get; set; }
 }
@@ -308,9 +308,9 @@ public class IncomeStatementLine
     /// Mewakili Account Name.
     /// </summary>
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Amount.
-/// </summary>
+    /// <summary>
+    /// Mewakili Amount.
+    /// </summary>
 
     public decimal Amount { get; set; }
 }
@@ -324,14 +324,14 @@ public class FinancialPositionLine
     /// Mewakili Account Name.
     /// </summary>
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Balance.
+    /// </summary>
 
     public decimal Balance { get; set; }
-/// <summary>
-/// Mewakili Amount.
-/// </summary>
+    /// <summary>
+    /// Mewakili Amount.
+    /// </summary>
 
     public decimal Amount { get; set; }
 }

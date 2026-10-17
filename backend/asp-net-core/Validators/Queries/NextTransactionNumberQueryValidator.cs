@@ -15,9 +15,9 @@ public class NextTransactionNumberQueryValidator : AbstractValidator<NextTransac
 {
     private static readonly DateTime MinEntryDate = new(2000, 1, 1);
     private static readonly DateTime MaxEntryDate = new(2100, 12, 31);
-/// <summary>
-/// Validator untuk Next Transaction Number Query Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Next Transaction Number Query Validator.
+    /// </summary>
 
     public NextTransactionNumberQueryValidator()
     {

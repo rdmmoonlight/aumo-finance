@@ -30,9 +30,9 @@ namespace AumoBackend.Models
         /// </summary>
         Expense,
     }
-/// <summary>
-/// Mewakili Account Classification Extensions.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Classification Extensions.
+    /// </summary>
 
     public static class AccountClassificationExtensions
     {
@@ -44,27 +44,27 @@ namespace AumoBackend.Models
             return classification == AccountClassification.Asset
                 || classification == AccountClassification.Expense;
         }
-/// <summary>
-/// Mewakili Is Temporary.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Temporary.
+        /// </summary>
 
         public static bool IsTemporary(this AccountClassification classification)
         {
             return classification == AccountClassification.Revenue
                 || classification == AccountClassification.Expense;
         }
-/// <summary>
-/// Mewakili Is Permanent.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Permanent.
+        /// </summary>
 
         public static bool IsPermanent(this AccountClassification classification)
         {
             return !IsTemporary(classification);
         }
     }
-/// <summary>
-/// Mewakili Account Classification Helper.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Classification Helper.
+    /// </summary>
 
     public static class AccountClassificationHelper
     {
@@ -73,9 +73,9 @@ namespace AumoBackend.Models
         /// </summary>
         public static bool NormalBalanceIsDebit(AccountClassification classification)
             => classification.NormalBalanceIsDebit();
-/// <summary>
-/// Mewakili Normal Balance Is Debit.
-/// </summary>
+        /// <summary>
+        /// Mewakili Normal Balance Is Debit.
+        /// </summary>
 
         // Saldo Normal:
         // Debit  : Assets, OperatingExpenses, OtherExpenses
@@ -89,21 +89,21 @@ namespace AumoBackend.Models
                 _ => true, // Default fallback jika tipe tidak dikenali
             };
         }
-/// <summary>
-/// Mewakili Is Temporary.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Temporary.
+        /// </summary>
 
         public static bool IsTemporary(AccountClassification classification)
             => classification.IsTemporary();
-/// <summary>
-/// Mewakili Is Permanent.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Permanent.
+        /// </summary>
 
         public static bool IsPermanent(AccountClassification classification)
             => classification.IsPermanent();
-/// <summary>
-/// Mewakili Validate Reference Number.
-/// </summary>
+        /// <summary>
+        /// Mewakili Validate Reference Number.
+        /// </summary>
 
         public static bool ValidateReferenceNumber(string? refNum)
         {
@@ -114,25 +114,25 @@ namespace AumoBackend.Models
 
             return int.TryParse(refNum, out _);
         }
-/// <summary>
-/// Mewakili Validate Reference Number.
-/// </summary>
+        /// <summary>
+        /// Mewakili Validate Reference Number.
+        /// </summary>
 
         internal static bool ValidateReferenceNumber(AccountClassification classification)
         {
             throw new NotImplementedException();
         }
-/// <summary>
-/// Mewakili Is Temporary.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Temporary.
+        /// </summary>
 
         internal static bool IsTemporary(string type)
         {
             throw new NotImplementedException();
         }
-/// <summary>
-/// Mewakili Is Permanent.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Permanent.
+        /// </summary>
 
         internal static bool IsPermanent(string type)
         {
@@ -150,26 +150,26 @@ namespace AumoBackend.Models
             ["OtherIncome"] = (600, 799),
             ["OtherExpenses"] = (800, 999),
         };
-/// <summary>
-/// Mewakili Account Types.
-/// </summary>
+        /// <summary>
+        /// Mewakili Account Types.
+        /// </summary>
 
         public static IReadOnlyCollection<string> AccountTypes => ReferenceRanges.Keys;
-/// <summary>
-/// Mewakili Account Roles.
-/// </summary>
+        /// <summary>
+        /// Mewakili Account Roles.
+        /// </summary>
 
         // Role akun yang dikenal sistem (dipakai Periods, laporan keuangan)
         public static readonly string[] AccountRoles = { "Default", "CashAndEquivalents", "RetainedEarnings" };
-/// <summary>
-/// Mewakili Is Known Account Type.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Known Account Type.
+        /// </summary>
 
         public static bool IsKnownAccountType(string? type)
             => type != null && ReferenceRanges.ContainsKey(type);
-/// <summary>
-/// Mewakili Validate Reference Number.
-/// </summary>
+        /// <summary>
+        /// Mewakili Validate Reference Number.
+        /// </summary>
 
         internal static bool ValidateReferenceNumber(string type, int referenceNumber)
         {
@@ -178,9 +178,9 @@ namespace AumoBackend.Models
                 && referenceNumber <= range.End;
         }
     }
-/// <summary>
-/// Mewakili Period Lock.
-/// </summary>
+    /// <summary>
+    /// Mewakili Period Lock.
+    /// </summary>
 
     public static class PeriodLock
     {
@@ -198,14 +198,14 @@ namespace AumoBackend.Models
                 .FirstOrDefault(property => property.Name == "IsClosed")?
                 .GetValue(period) is true;
         }
-/// <summary>
-/// Mewakili Is Locked.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Locked.
+        /// </summary>
 
         public static bool IsLocked(bool isClosed) => isClosed;
-/// <summary>
-/// Mewakili Is Date Locked.
-/// </summary>
+        /// <summary>
+        /// Mewakili Is Date Locked.
+        /// </summary>
 
         public static bool IsDateLocked(DateTime date, IEnumerable<Period>? periods)
         {

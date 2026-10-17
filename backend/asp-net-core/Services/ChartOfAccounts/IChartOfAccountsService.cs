@@ -15,19 +15,19 @@ public interface IChartOfAccountsService
     /// Mengambil data  Accounts Async.
     /// </summary>
     Task<ChartOfAccountsListResponseDto> GetAccountsAsync(Guid userId, string? search, string? category);
-/// <summary>
-/// Membuat data  Account Async baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data  Account Async baru.
+    /// </summary>
 
     Task<ServiceResultDto> CreateAccountAsync(Guid userId, CreateAccountRequestDto request);
-/// <summary>
-/// Memperbarui data  Account Async.
-/// </summary>
+    /// <summary>
+    /// Memperbarui data  Account Async.
+    /// </summary>
 
     Task<ServiceResultDto> UpdateAccountAsync(Guid userId, int accountId, UpdateAccountRequestDto request);
-/// <summary>
-/// Menghapus data  Account Async.
-/// </summary>
+    /// <summary>
+    /// Menghapus data  Account Async.
+    /// </summary>
 
     Task<ServiceResultDto> DeleteAccountAsync(Guid userId, int accountId);
 }

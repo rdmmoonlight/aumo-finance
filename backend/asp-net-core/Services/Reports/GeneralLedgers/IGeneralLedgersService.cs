@@ -16,20 +16,20 @@ public interface IGeneralLedgersService
     /// Proses eksekusi kalkulasi Refresh General Ledgers Async.
     /// </summary>
     Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId);
-/// <summary>
-/// Mewakili Clear Selected Period Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Clear Selected Period Ledgers Async.
+    /// </summary>
 
     Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId);
-/// <summary>
-/// Mengambil data  Permanent Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Permanent Ledgers Async.
+    /// </summary>
 
     // Baru - semua bisnis GET pindah kesini
     Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId);
-/// <summary>
-/// Mengambil data  Temporary Ledgers Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Temporary Ledgers Async.
+    /// </summary>
 
     Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId);
 }

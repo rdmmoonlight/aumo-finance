@@ -20,24 +20,24 @@ public class SummaryDto
     /// Mewakili Selected Period Id.
     /// </summary>
     public Guid? SelectedPeriodId { get; set; }
-/// <summary>
-/// Mewakili Total Journal.
-/// </summary>
+    /// <summary>
+    /// Mewakili Total Journal.
+    /// </summary>
 
     public int TotalJournal { get; set; }
-/// <summary>
-/// Mewakili Active Coa.
-/// </summary>
+    /// <summary>
+    /// Mewakili Active Coa.
+    /// </summary>
 
     public int ActiveCoa { get; set; }
-/// <summary>
-/// Mewakili Active Period Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Active Period Name.
+    /// </summary>
 
     public string ActivePeriodName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Is Period Open.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Period Open.
+    /// </summary>
 
     public bool IsPeriodOpen { get; set; }
 }
@@ -51,14 +51,14 @@ public class ApiResponse<T>
     /// Mewakili Success.
     /// </summary>
     public bool Success { get; set; }
-/// <summary>
-/// Mewakili Message.
-/// </summary>
+    /// <summary>
+    /// Mewakili Message.
+    /// </summary>
 
     public string? Message { get; set; }
-/// <summary>
-/// Mewakili Data.
-/// </summary>
+    /// <summary>
+    /// Mewakili Data.
+    /// </summary>
 
     public T? Data { get; set; }
 }
