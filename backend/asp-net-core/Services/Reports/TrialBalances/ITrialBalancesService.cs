@@ -2,12 +2,18 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using AumoBackend.Controllers.Reports;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using AumoBackend.Data;
+using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
+using Microsoft.EntityFrameworkCore;
 
+namespace AumoBackend.Services;
 
 /// <summary>
 /// Antarmuka layanan untuk pembuatan 3 jenis Trial Balance (Unadjusted, Adjusted, Post-Closing).
