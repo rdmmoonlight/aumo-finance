@@ -173,8 +173,8 @@ public class TrialBalancesService : ITrialBalancesService
 
         var accountIds = accounts.Select(a => a.Id).ToList();
 
-        var startUtc = period.StartDate.Date;
-        var endUtc = period.EndDate.Date.AddDays(1).AddTicks(-1);
+        var startUtc = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);
+        var endUtc = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
         var linesQuery = db.GeneralJournals
             .Where(l => accountIds.Contains(l.AccountId)

@@ -112,7 +112,7 @@ class JournalEntryViewModel : ViewModel() {
     private fun loadActiveAccounts() {
         viewModelScope.launch {
             try {
-                accounts = coaApi.list().body<AccountsResponse>().accounts.filter { it.isActive }
+                accounts = coaApi.list().body<AccountsResponse>().accounts.orEmpty().filter { it.isActive }
             } catch (t: Throwable) {
                 com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 // kegagalan diabaikan (tidak ada pesan ke pengguna)

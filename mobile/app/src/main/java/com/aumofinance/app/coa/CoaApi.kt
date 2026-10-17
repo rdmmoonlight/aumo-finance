@@ -30,7 +30,14 @@ data class Account(
     val balance: Double,
 )
 
-data class AccountsResponse(val success: Boolean, val selectedPeriodName: String?, val accounts: List<Account>)
+// Nullable: pada respons error (mis. 500) backend hanya mengirim success + message,
+// sehingga accounts tidak ada (Gson mengisinya null walau tipe Kotlin non-null).
+data class AccountsResponse(
+    val success: Boolean,
+    val selectedPeriodName: String?,
+    val accounts: List<Account>?,
+    val message: String? = null,
+)
 
 data class AccountRequest(
     val referenceNumber: Int,
