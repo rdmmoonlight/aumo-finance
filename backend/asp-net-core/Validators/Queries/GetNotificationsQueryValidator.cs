@@ -6,10 +6,10 @@ namespace AumoBackend.Validators.Queries;
 
 using AumoBackend.DTOs;
 using FluentValidation;
-
 /// <summary>
 /// Validator untuk Get Notifications Query Validator.
 /// </summary>
+
 public class GetNotificationsQueryValidator : AbstractValidator<GetNotificationsQuery>
 {
     /// <summary>

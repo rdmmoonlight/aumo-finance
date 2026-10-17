@@ -7,33 +7,33 @@ namespace AumoBackend.Services.JournalEntries;
 using AumoBackend.Data;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-
 /// <summary>
 /// Mewakili General Journal Writer.
 /// </summary>
+
 public static class GeneralJournalWriter
 {
     /// <summary>
     /// Mewakili Posted Status.
     /// </summary>
     public const string PostedStatus = "Posted";
+/// <summary>
+/// Mewakili Line.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Line.
-    /// </summary>
     public sealed record Line(int AccountId, string? LineDescription, decimal Debit, decimal Credit);
+/// <summary>
+/// Mewakili Next Journal Entry Id Async.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Next Journal Entry Id Async.
-    /// </summary>
     public static Task<int> NextJournalEntryIdAsync(AppDbContext db, CancellationToken ct = default)
         => db.Database
             .SqlQuery<int>($"SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
             .SingleAsync(ct);
+/// <summary>
+/// Proses eksekusi kalkulasi Build Rows.
+/// </summary>
 
-    /// <summary>
-    /// Proses eksekusi/kalkulasi Build Rows.
-    /// </summary>
     public static List<GeneralJournal> BuildRows(
         int journalEntryId,
         Guid userId,

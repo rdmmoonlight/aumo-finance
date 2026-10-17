@@ -8,10 +8,10 @@ namespace AumoBackend.Services.Identity
     using AumoBackend.Models;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Options;
+/// <summary>
+/// Mewakili Aumo User Claims Principal Factory.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Aumo User Claims Principal Factory.
-    /// </summary>
     public class AumoUserClaimsPrincipalFactory : UserClaimsPrincipalFactory<ApplicationUser, IdentityRole<Guid>>
     {
         /// <summary>
@@ -24,10 +24,10 @@ namespace AumoBackend.Services.Identity
             : base(userManager, roleManager, optionsAccessor)
         {
         }
+/// <summary>
+/// Proses eksekusi kalkulasi Generate Claims Async.
+/// </summary>
 
-        /// <summary>
-        /// Proses eksekusi/kalkulasi Generate Claims Async.
-        /// </summary>
         protected override async Task<ClaimsIdentity> GenerateClaimsAsync(ApplicationUser user)
         {
             var identity = await base.GenerateClaimsAsync(user);

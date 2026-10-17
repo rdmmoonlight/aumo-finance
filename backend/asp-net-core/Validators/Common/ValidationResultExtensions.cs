@@ -5,10 +5,10 @@
 namespace AumoBackend.Validators.Common;
 
 using FluentValidation.Results;
-
 /// <summary>
 /// Mewakili Validation Result Extensions.
 /// </summary>
+
 public static class ValidationResultExtensions
 {
     /// <summary>

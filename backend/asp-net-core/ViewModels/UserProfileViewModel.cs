@@ -12,59 +12,59 @@ using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
-
 /// <summary>
 /// Model data User Profile View Model.
 /// </summary>
+
 public class UserProfileViewModel
 {
     /// <summary>
     /// Mewakili Id.
     /// </summary>
     public Guid Id { get; set; }
+/// <summary>
+/// Mewakili User Id.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili User Id.
-    /// </summary>
     public Guid UserId { get; set; }
+/// <summary>
+/// Mewakili Email.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Email.
-    /// </summary>
     public string? Email { get; set; }
+/// <summary>
+/// Mewakili User Name.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili User Name.
-    /// </summary>
     public string? UserName { get; set; }
+/// <summary>
+/// Mewakili Full Name.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Full Name.
-    /// </summary>
     public string? FullName { get; set; }
+/// <summary>
+/// Mewakili Phone Number.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Phone Number.
-    /// </summary>
     public string? PhoneNumber { get; set; }
+/// <summary>
+/// Mewakili Avatar Url.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Avatar Url.
-    /// </summary>
     public string? AvatarUrl { get; set; }
+/// <summary>
+/// Mewakili Bio.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Bio.
-    /// </summary>
     public string? Bio { get; set; }
+/// <summary>
+/// Mewakili Roles.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Roles.
-    /// </summary>
     public IList<string> Roles { get; set; } = new List<string>();
+/// <summary>
+/// Mewakili Custom Claims.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Custom Claims.
-    /// </summary>
     public IList<Claim> CustomClaims { get; set; } = new List<Claim>();
 }

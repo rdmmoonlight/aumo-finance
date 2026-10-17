@@ -14,14 +14,14 @@ namespace AumoBackend.Controllers
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
+/// <summary>
+/// Controller API untuk mengelola Settings.
+/// </summary>
 
     [ApiController]
     [Route("/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
-    /// <summary>
-    /// Controller API untuk mengelola Settings.
-    /// </summary>
     public class SettingsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -31,10 +31,10 @@ namespace AumoBackend.Controllers
         private readonly IValidator<ChangePasswordRequest> changePasswordValidator;
         private readonly IValidator<UpdateProfileRequest> updateProfileValidator;
         private readonly IValidator<IFormFile> avatarFileValidator;
+/// <summary>
+/// Controller API untuk mengelola Settings.
+/// </summary>
 
-        /// <summary>
-        /// Controller API untuk mengelola Settings.
-        /// </summary>
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
@@ -52,10 +52,10 @@ namespace AumoBackend.Controllers
             this.updateProfileValidator = updateProfileValidator;
             this.avatarFileValidator = avatarFileValidator;
         }
+/// <summary>
+/// Memperbarui data  Profile.
+/// </summary>
 
-        /// <summary>
-        /// Memperbarui data  Profile.
-        /// </summary>
         [HttpPut("profile")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
         {
@@ -107,10 +107,10 @@ namespace AumoBackend.Controllers
 
             return this.Ok(new { success = true, message = "Profile updated successfully." });
         }
+/// <summary>
+/// Mewakili Upload Avatar.
+/// </summary>
 
-        /// <summary>
-        /// Mewakili Upload Avatar.
-        /// </summary>
         [HttpPost("avatar")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadAvatar([FromForm] IFormFile? file, [FromForm] IFormFile? avatar)
@@ -168,10 +168,10 @@ namespace AumoBackend.Controllers
                 return this.StatusCode(500, new { success = false, message = $"Avatar upload error: {ex.Message}", details = ex.InnerException?.Message });
             }
         }
+/// <summary>
+/// Mewakili Change Password.
+/// </summary>
 
-        /// <summary>
-        /// Mewakili Change Password.
-        /// </summary>
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
@@ -196,10 +196,10 @@ namespace AumoBackend.Controllers
 
             return this.Ok(new { success = true, message = "Password successfully updated." });
         }
+/// <summary>
+/// Menghapus data  Account.
+/// </summary>
 
-        /// <summary>
-        /// Menghapus data  Account.
-        /// </summary>
         [HttpDelete("delete-account")]
         public async Task<IActionResult> DeleteAccount()
         {
@@ -221,10 +221,10 @@ namespace AumoBackend.Controllers
             await this.signInManager.SignOutAsync();
             return this.Ok(new { success = true, message = "Account successfully deleted." });
         }
+/// <summary>
+/// Mengambil data  Dashboard.
+/// </summary>
 
-        /// <summary>
-        /// Mengambil data  Dashboard.
-        /// </summary>
         [HttpGet("guardian/dashboard")]
         public async Task<IActionResult> GetDashboard()
         {
@@ -276,10 +276,10 @@ namespace AumoBackend.Controllers
 
             return this.Ok(new { success = true, data = dashboard });
         }
+/// <summary>
+/// Mewakili Revoke Session.
+/// </summary>
 
-        /// <summary>
-        /// Mewakili Revoke Session.
-        /// </summary>
         [HttpPost("guardian/revoke-session/{sessionId}")]
         public async Task<IActionResult> RevokeSession(Guid sessionId)
         {
@@ -292,10 +292,10 @@ namespace AumoBackend.Controllers
             await this.guardianService.RevokeSessionAsync(sessionId, user.Id);
             return this.Ok(new { success = true, message = "Session revoked." });
         }
+/// <summary>
+/// Mewakili Revoke All Sessions.
+/// </summary>
 
-        /// <summary>
-        /// Mewakili Revoke All Sessions.
-        /// </summary>
         [HttpPost("guardian/revoke-all-sessions")]
         public async Task<IActionResult> RevokeAllSessions()
         {
