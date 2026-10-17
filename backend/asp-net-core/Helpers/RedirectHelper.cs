@@ -2,12 +2,11 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace AumoBackend.Helpers;
-
 using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// Mewakili Redirect Helper.
 /// </summary>
+namespace AumoBackend.Helpers;
 
 public static class RedirectHelper
 {

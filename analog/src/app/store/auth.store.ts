@@ -4,7 +4,7 @@ import { tapResponse } from "@ngrx/operators";
 import { patchState, signalStore, withMethods, withState } from "@ngrx/signals";
 import { rxMethod } from "@ngrx/signals/rxjs-interop";
 import { pipe, switchMap, tap } from "rxjs";
-import { AuthService, extractError } from "./auth.service";
+import { AuthService, extractError } from "../services/auth.service";
 
 type AuthState = {
   isLoading: boolean;

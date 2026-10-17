@@ -2,8 +2,8 @@ import { RouteMeta } from "@analogjs/router";
 import { Component } from "@angular/core";
 import { RouterLink, RouterOutlet } from "@angular/router";
 
-import { guestGuard } from "../core/auth.guard";
-import { Logo } from "../shared/logo";
+import { guestGuard } from "../../guards/auth.guard";
+import { Logo } from "../../shared/logo";
 
 export const routeMeta: RouteMeta = { canActivate: [guestGuard] };
 
@@ -24,4 +24,4 @@ export const routeMeta: RouteMeta = { canActivate: [guestGuard] };
     </div>
   `,
 })
-export default class AuthLayout {}
+export default class AuthLayout { }

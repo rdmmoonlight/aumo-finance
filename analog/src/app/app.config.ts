@@ -6,12 +6,12 @@ import {
 } from "@angular/common/http";
 import { ApplicationConfig } from "@angular/core";
 
-import { authInterceptor } from "./core/auth.interceptor";
-import { customRoutes } from "./routes";
+import { authInterceptor } from "./interceptors/auth.interceptor";
+import { routes } from "./routes";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideFileRouter(withExtraRoutes(customRoutes)),
+    provideFileRouter(withExtraRoutes(routes)),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
   ],
 };

@@ -2,7 +2,7 @@ import { RouteMeta } from "@analogjs/router";
 import { Component, inject } from "@angular/core";
 import { FormBuilder, ReactiveFormsModule, Validators } from "@angular/forms";
 import { RouterLink } from "@angular/router";
-import { AuthStore } from "../../core/auth.store";
+import { AuthStore } from "../../store/auth.store";
 
 export const routeMeta: RouteMeta = { title: "Masuk - Aumo Finance" };
 

@@ -2,8 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace AumoBackend.Helpers;
-
 using System;
 using AumoBackend.Controllers.Reports;
 using AumoBackend.Helpers;
@@ -13,6 +11,8 @@ using AumoBackend.Services.Identity;
 /// <summary>
 /// Mewakili Email Templates.
 /// </summary>
+/// 
+namespace AumoBackend.Helpers;
 
 public static class EmailTemplates
 {

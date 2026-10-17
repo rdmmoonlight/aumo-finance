@@ -3,8 +3,8 @@ import { inject } from "@angular/core";
 import { Router } from "@angular/router";
 import { catchError, throwError } from "rxjs";
 
-import { AuthService } from "./auth.service";
-import { API_URL } from "./config";
+import { API_URL } from "../core/config";
+import { AuthService } from "../services/auth.service";
 
 /** Kirim cookie sesi ke backend & arahkan ke /login saat sesi berakhir (401). */
 export const authInterceptor: HttpInterceptorFn = (req, next) => {

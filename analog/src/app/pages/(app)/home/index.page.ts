@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 
-import { AuthService } from "../../../core/auth.service";
+import { AuthService } from "../../../services/auth.service";
 import { Period, PeriodsService } from "../periods/periods.service";
 
 export const routeMeta: RouteMeta = { title: "Home - Aumo Finance" };

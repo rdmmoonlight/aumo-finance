@@ -1,6 +1,6 @@
 import { Component, inject, input, output } from "@angular/core";
 import { RouterLink, RouterLinkActive } from "@angular/router";
-import { AuthService } from "../core/auth.service";
+import { AuthService } from "../services/auth.service";
 import { Icon, IconName } from "../shared/icon";
 import { Logo } from "../shared/logo";
 
