@@ -349,8 +349,9 @@ public partial class Program
             builder.Services.AddHttpClient<IMarketDataService, MarketDataService>();
 
             // =====================================
-            // Rust Core Client
+            // Axum Core Client
             // =====================================
+            builder.Services.AddHostedService<AxumProcessHostedService>();
             builder.Services.AddHttpClient("RustCore", client =>
             {
                 // Di development pakai localhost, di Docker pakai nama service
