@@ -1,4 +1,4 @@
-// <copyright file="TrialBalanceDto.cs" company="PlaceholderCompany">
+// <copyright file="TrialBalancesDto.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
@@ -7,9 +7,9 @@ using System;
 namespace AumoBackend.DTOs.Reports;
 
 /// <summary>
-/// Mewakili Trial Balance Row.
+/// Mewakili Trial Balances Row.
 /// </summary>
-public class TrialBalanceRow
+public class TrialBalancesRow
 {
     /// <summary>
     /// Mewakili Id.
