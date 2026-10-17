@@ -7,7 +7,8 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 // Helper Cookie Client-side
 function getCookie(name: string): string | undefined {
-  if (typeof window === "undefined" || typeof document === "undefined") return undefined;
+  if (typeof window === "undefined" || typeof document === "undefined")
+    return undefined;
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
   if (parts.length === 2) return parts.pop()?.split(";").shift();
@@ -114,10 +115,7 @@ const baseQueryWithReauth: BaseQueryFn<
     const currentPath = window.location.pathname;
 
     // Cegah loop jika sedang berada di halaman login/auth
-    if (
-      !currentPath.startsWith("/auth") &&
-      !isRedirecting
-    ) {
+    if (!currentPath.startsWith("/auth") && !isRedirecting) {
       isRedirecting = true;
       window.location.replace(
         `/auth?redirectTo=${encodeURIComponent(currentPath)}`,

@@ -24,4 +24,4 @@ export const routeMeta: RouteMeta = { canActivate: [guestGuard] };
     </div>
   `,
 })
-export default class AuthLayout { }
+export default class AuthLayout {}
