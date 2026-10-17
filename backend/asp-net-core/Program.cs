@@ -353,7 +353,7 @@ public partial class Program
             // Axum Core Services
             // =====================================
             builder.Services.AddScoped<IRustCoreService, RustCoreService>();
-         
+
             // =====================================
             // 8. FORWARDED HEADERS CONFIGURATION
             // =====================================
