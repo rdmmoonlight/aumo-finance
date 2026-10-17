@@ -1,5 +1,5 @@
 =================================================
-   WORKFLOW WARNING LOG (Sat Oct 17 06:55:45 UTC 2026)
+   WORKFLOW WARNING LOG (Sat Oct 17 07:07:19 UTC 2026)
 =================================================
 
 --- [.NET BUILD WARNINGS] ---
@@ -9,6 +9,7 @@
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/NotificationsController.cs(19,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(24,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(27,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Program.cs(62,17): warning ASPDEPR005: 'ForwardedHeadersOptions.KnownNetworks' is obsolete: 'Please use KnownIPNetworks instead. For more information, visit https://aka.ms/aspnet/deprecate/005.' (https://aka.ms/aspnet/deprecate/005) [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/DTOs/HomeDto.cs(75,23): warning CS1591: Missing XML comment for publicly visible type or member 'MarketIndicatorDto.Price' [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/DTOs/HomeDto.cs(97,23): warning CS1591: Missing XML comment for publicly visible type or member 'MarketIndicatorDto.Change' [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/DTOs/HomeDto.cs(120,21): warning CS1591: Missing XML comment for publicly visible type or member 'MarketIndicatorDto.IsUp' [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
@@ -52,6 +53,7 @@ Build succeeded.
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/NotificationsController.cs(19,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(24,7): warning CS0105: The using directive for 'AumoBackend.Validators.Common' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Controllers/ToolsController.cs(27,7): warning CS0105: The using directive for 'FluentValidation' appeared previously in this namespace [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
+/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Program.cs(62,17): warning ASPDEPR005: 'ForwardedHeadersOptions.KnownNetworks' is obsolete: 'Please use KnownIPNetworks instead. For more information, visit https://aka.ms/aspnet/deprecate/005.' (https://aka.ms/aspnet/deprecate/005) [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/DTOs/HomeDto.cs(75,23): warning CS1591: Missing XML comment for publicly visible type or member 'MarketIndicatorDto.Price' [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/DTOs/HomeDto.cs(97,23): warning CS1591: Missing XML comment for publicly visible type or member 'MarketIndicatorDto.Change' [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/DTOs/HomeDto.cs(120,21): warning CS1591: Missing XML comment for publicly visible type or member 'MarketIndicatorDto.IsUp' [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
