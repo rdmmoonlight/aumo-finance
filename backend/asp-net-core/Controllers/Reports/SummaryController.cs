@@ -21,31 +21,31 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+/// <summary>
+/// Controller API untuk mengelola Summary.
+/// </summary>
 
 [ApiController]
 [Route("/[controller]")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
-/// <summary>
-/// Controller API untuk mengelola Summary.
-/// </summary>
 public class SummaryController : ControllerBase
 {
     private readonly AppDbContext context;
     private readonly UserManager<ApplicationUser> userManager;
+/// <summary>
+/// Controller API untuk mengelola Summary.
+/// </summary>
 
-    /// <summary>
-    /// Controller API untuk mengelola Summary.
-    /// </summary>
     public SummaryController(AppDbContext context, UserManager<ApplicationUser> userManager)
     {
         this.context = context;
         this.userManager = userManager;
     }
+/// <summary>
+/// Mengambil data  Summary.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Summary.
-    /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetSummary()
     {

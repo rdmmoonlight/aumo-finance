@@ -6,24 +6,24 @@ namespace AumoBackend.Models;
 
 using System;
 using System.Collections.Generic;
-
 /// <summary>
 /// Mewakili Data Protection Key.
 /// </summary>
+
 public partial class DataProtectionKey
 {
     /// <summary>
     /// Mewakili Id.
     /// </summary>
     public int Id { get; set; }
+/// <summary>
+/// Mewakili Friendly Name.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Friendly Name.
-    /// </summary>
     public string? FriendlyName { get; set; }
+/// <summary>
+/// Mewakili Xml.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Xml.
-    /// </summary>
     public string? Xml { get; set; }
 }

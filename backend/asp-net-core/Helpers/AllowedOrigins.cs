@@ -3,10 +3,10 @@
 // </copyright>
 
 namespace AumoBackend.Helpers;
-
 /// <summary>
 /// Mewakili Allowed Origins.
 /// </summary>
+
 public static class AllowedOrigins
 {
     /// <summary>
@@ -17,10 +17,10 @@ public static class AllowedOrigins
         "http://localhost:3000",
         "https://aumonext.vercel.app",
     };
+/// <summary>
+/// Mewakili Is Allowed.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Is Allowed.
-    /// </summary>
     public static bool IsAllowed(Uri uri)
     {
         var origin = $"{uri.Scheme}://{uri.Authority}";

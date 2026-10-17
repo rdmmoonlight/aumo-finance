@@ -19,23 +19,23 @@ using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+/// <summary>
+/// Controller API untuk mengelola Worksheet.
+/// </summary>
 
 [ApiController]
 [Route("/reports/worksheet")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
-/// <summary>
-/// Controller API untuk mengelola Worksheet.
-/// </summary>
 public class WorksheetController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IWorksheetService worksheetService;
     private readonly ITrialBalanceService trialBalanceService;
+/// <summary>
+/// Controller API untuk mengelola Worksheet.
+/// </summary>
 
-    /// <summary>
-    /// Controller API untuk mengelola Worksheet.
-    /// </summary>
     public WorksheetController(
         AppDbContext db,
         IWorksheetService worksheetService,
@@ -45,10 +45,10 @@ public class WorksheetController : ControllerBase
         this.worksheetService = worksheetService;
         this.trialBalanceService = trialBalanceService;
     }
+/// <summary>
+/// Mengambil data  Worksheet.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Worksheet.
-    /// </summary>
     // ==========================================
     // 1. GET: /reports/worksheet
     // ==========================================

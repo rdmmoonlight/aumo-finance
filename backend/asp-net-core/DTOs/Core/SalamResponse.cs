@@ -1,9 +1,9 @@
 // backend/DTOs/Core/SalamResponse.cs
 namespace AumoBackend.DTOs.Core;
-
 /// <summary>
 /// Model data Salam Response.
 /// </summary>
+
 public class SalamResponse
 {
     /// <summary>
@@ -23,10 +23,10 @@ public class SalamResponse
     /// </summary>
     public string Status { get; set; } = string.Empty;
 }
-
 /// <summary>
 /// Model data Salam Request Dto.
 /// </summary>
+
 public class SalamRequestDto
 {
     /// <summary>

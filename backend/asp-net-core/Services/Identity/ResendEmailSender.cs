@@ -11,10 +11,10 @@ namespace AumoBackend.Services.Identity
     {
         Task SendEmailAsync(string email, string subject, string htmlMessage);
     }
+/// <summary>
+/// Mewakili Resend Email Sender.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Resend Email Sender.
-    /// </summary>
     public class ResendEmailSender : IEmailSender
     {
         /// <summary>

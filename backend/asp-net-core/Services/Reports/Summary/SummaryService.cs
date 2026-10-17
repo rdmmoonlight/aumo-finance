@@ -11,18 +11,18 @@ using AumoBackend.DTOs;
 using AumoBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-
 /// <summary>
 /// Layanan logika bisnis untuk Summary Service.
 /// </summary>
+
 public class SummaryService : ISummaryService
 {
     private readonly AppDbContext? context;
     private readonly UserManager<ApplicationUser>? userManager;
+/// <summary>
+/// Mengambil data  Summary Async.
+/// </summary>
 
-    /// <summary>
-    /// Mengambil data  Summary Async.
-    /// </summary>
     public async Task<SummaryDto?> GetSummaryAsync(ClaimsPrincipal userPrincipal)
     {
         var userId = await this.ResolveUserIdAsync(userPrincipal);

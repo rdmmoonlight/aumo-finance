@@ -2,23 +2,23 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace AumoBackend.Validators.Tools;
-
 using AumoBackend.DTOs;
 using AumoBackend.Validators.JournalEntries;
 using FluentValidation;
 
+namespace AumoBackend.Validators.Tools;
 /// <summary>
 /// Validator untuk Journal Import Request Dto Validator.
 /// </summary>
+
 public class JournalImportRequestDtoValidator : AbstractValidator<JournalImportRequestDto>
 {
     private const int MaxTransactions = 5000;
     private const int MaxMappings = 5000;
+/// <summary>
+/// Validator untuk Journal Import Request Dto Validator.
+/// </summary>
 
-    /// <summary>
-    /// Validator untuk Journal Import Request Dto Validator.
-    /// </summary>
     public JournalImportRequestDtoValidator()
     {
         this.RuleFor(x => x.TargetMonth)
@@ -48,17 +48,17 @@ public class JournalImportRequestDtoValidator : AbstractValidator<JournalImportR
             .When(x => x.CustomMappings != null);
     }
 }
-
 /// <summary>
 /// Validator untuk Journal Transaction Dto Validator.
 /// </summary>
+
 public class JournalTransactionDtoValidator : AbstractValidator<JournalTransactionDto>
 {
     private const int MaxLinesPerTransaction = 500;
+/// <summary>
+/// Validator untuk Journal Transaction Dto Validator.
+/// </summary>
 
-    /// <summary>
-    /// Validator untuk Journal Transaction Dto Validator.
-    /// </summary>
     public JournalTransactionDtoValidator()
     {
         this.RuleFor(x => x.Date)
@@ -90,18 +90,18 @@ public class JournalTransactionDtoValidator : AbstractValidator<JournalTransacti
         return totalDebit == totalCredit && totalDebit > 0;
     }
 }
-
 /// <summary>
 /// Validator untuk Journal Import Line Validator.
 /// </summary>
+
 public class JournalImportLineValidator : AbstractValidator<JournalLineDto>
 {
     private const int MaxDescriptionLength = 250; // selaras HasMaxLength(250) di AppDbContext
     private const int MaxAccountNameLength = 200;
+/// <summary>
+/// Validator untuk Journal Import Line Validator.
+/// </summary>
 
-    /// <summary>
-    /// Validator untuk Journal Import Line Validator.
-    /// </summary>
     public JournalImportLineValidator()
     {
         this.RuleFor(x => x.Debit)
@@ -125,17 +125,17 @@ public class JournalImportLineValidator : AbstractValidator<JournalLineDto>
             .WithMessage($"Account name must not exceed {MaxAccountNameLength} characters.");
     }
 }
-
 /// <summary>
 /// Validator untuk Account Mapping Detail Dto Validator.
 /// </summary>
+
 public class AccountMappingDetailDtoValidator : AbstractValidator<AccountMappingDetailDto>
 {
     private const int MaxAccountNameLength = 200;
+/// <summary>
+/// Validator untuk Account Mapping Detail Dto Validator.
+/// </summary>
 
-    /// <summary>
-    /// Validator untuk Account Mapping Detail Dto Validator.
-    /// </summary>
     public AccountMappingDetailDtoValidator()
     {
         this.RuleFor(x => x.MappedRef)

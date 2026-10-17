@@ -3,10 +3,10 @@
 // </copyright>
 
 namespace AumoBackend.DTOs;
-
 /// <summary>
 /// Mengambil data  Notifications Query.
 /// </summary>
+
 public class GetNotificationsQuery
 {
     /// <summary>
@@ -14,10 +14,10 @@ public class GetNotificationsQuery
     /// </summary>
     public int Limit { get; set; } = 20;
 }
-
 /// <summary>
 /// Mengambil data  Dashboard Query.
 /// </summary>
+
 public class GetDashboardQuery
 {
     /// <summary>
@@ -25,62 +25,59 @@ public class GetDashboardQuery
     /// </summary>
     public string? Period { get; set; } = "monthly";
 }
-
 /// <summary>
 /// Mengambil data  Kurs Query.
 /// </summary>
+
 public class GetKursQuery
 {
     /// <summary>
     /// Mewakili Base Currency.
     /// </summary>
     public string? BaseCurrency { get; set; } = "USD";
+/// <summary>
+/// Mewakili Target Currency.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Target Currency.
-    /// </summary>
     public string? TargetCurrency { get; set; } = "IDR";
 }
-
 /// <summary>
 /// Mengambil data  Accounts Query.
 /// </summary>
+
 public class GetAccountsQuery
 {
     /// <summary>
     /// Mewakili Search.
     /// </summary>
     public string? Search { get; set; }
+/// <summary>
+/// Mewakili Category.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Category.
-    /// </summary>
     public string? Category { get; set; }
 }
-
 /// <summary>
 /// Mewakili Search Descriptions Query.
 /// </summary>
+
 public class SearchDescriptionsQuery
 {
-    /// <summary>
-    /// Mewakili Q.
-    /// </summary>
     public string? Q { get; set; }
 }
-
 /// <summary>
 /// Mewakili Next Transaction Number Query.
 /// </summary>
+
 public class NextTransactionNumberQuery
 {
     /// <summary>
     /// Mewakili Journal Type.
     /// </summary>
     public string? JournalType { get; set; } = "General";
+/// <summary>
+/// Mewakili Entry Date.
+/// </summary>
 
-    /// <summary>
-    /// Mewakili Entry Date.
-    /// </summary>
     public DateTime? EntryDate { get; set; }
 }

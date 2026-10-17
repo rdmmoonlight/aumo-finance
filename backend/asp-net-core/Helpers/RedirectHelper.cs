@@ -5,10 +5,10 @@
 namespace AumoBackend.Helpers;
 
 using Microsoft.AspNetCore.Mvc;
-
 /// <summary>
 /// Mewakili Redirect Helper.
 /// </summary>
+
 public static class RedirectHelper
 {
     /// <summary>
