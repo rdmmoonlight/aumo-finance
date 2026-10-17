@@ -20,7 +20,9 @@
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_core.dll</RustLibName>
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">libaumo_core.dylib</RustLibName>
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
-  </PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  <GenerateProgramFile>false</GenerateProgramFile>
+</PropertyGroup>
 
   <ItemGroup>
     <!-- Roslyn Analyzers -->
@@ -92,4 +94,7 @@
     </ItemGroup>
   </Target>
 
+  <PropertyGroup>
+    <NoWarn>$(NoWarn);IDE0005</NoWarn>
+  </PropertyGroup>
 </Project>

@@ -18,6 +18,9 @@ using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Worksheet Service.
+/// </summary>
 public interface IWorksheetService
 {
     Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
@@ -27,9 +30,14 @@ public interface IWorksheetService
         ITrialBalanceService trialBalanceService);
 }
 
+/// <summary>
+/// Layanan logika bisnis untuk Worksheet Service.
+/// </summary>
 public class WorksheetService : IWorksheetService
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Proses eksekusi/kalkulasi Build Worksheet Rows Async.
+    /// </summary>
     public async Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
         AppDbContext db,
         Guid userId,

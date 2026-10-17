@@ -6,13 +6,14 @@ namespace AumoBackend.Helpers;
 
 using Microsoft.AspNetCore.Mvc;
 
+/// <summary>
+/// Mewakili Redirect Helper.
+/// </summary>
 public static class RedirectHelper
 {
     /// <summary>
-    /// Hanya mengizinkan path lokal atau origin frontend yang terdaftar (AllowedOrigins).
-    /// Selain itu kembali ke /home untuk mencegah open redirect.
+    /// Mengambil data  Safe Redirect Url.
     /// </summary>
-    /// <returns></returns>
     public static string GetSafeRedirectUrl(this IUrlHelper urlHelper, string? targetUrl)
     {
         const string defaultUrl = "/home";

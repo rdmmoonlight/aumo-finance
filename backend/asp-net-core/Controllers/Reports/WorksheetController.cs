@@ -24,12 +24,18 @@ using Microsoft.AspNetCore.Mvc;
 [Route("/reports/worksheet")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+/// <summary>
+/// Controller API untuk mengelola Worksheet.
+/// </summary>
 public class WorksheetController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IWorksheetService worksheetService;
     private readonly ITrialBalanceService trialBalanceService;
 
+    /// <summary>
+    /// Controller API untuk mengelola Worksheet.
+    /// </summary>
     public WorksheetController(
         AppDbContext db,
         IWorksheetService worksheetService,
@@ -40,6 +46,9 @@ public class WorksheetController : ControllerBase
         this.trialBalanceService = trialBalanceService;
     }
 
+    /// <summary>
+    /// Mengambil data  Worksheet.
+    /// </summary>
     // ==========================================
     // 1. GET: /reports/worksheet
     // ==========================================

@@ -12,6 +12,9 @@ using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Layanan logika bisnis untuk General Ledgers Service.
+/// </summary>
 public class GeneralLedgersService : IGeneralLedgersService
 {
     private readonly AppDbContext? db;
@@ -21,7 +24,9 @@ public class GeneralLedgersService : IGeneralLedgersService
     private static readonly string[] RevenueTypes = { "OperatingIncome", "OtherIncome", "Revenue", "Income" };
     private static readonly string[] ExpenseTypes = { "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Permanent Ledgers Async.
+    /// </summary>
     public async Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId)
     {
         var period = await this.ResolveSelectedPeriodAsync(userId);
@@ -53,7 +58,9 @@ public class GeneralLedgersService : IGeneralLedgersService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Temporary Ledgers Async.
+    /// </summary>
     public async Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId)
     {
         var period = await this.ResolveSelectedPeriodAsync(userId);
@@ -93,7 +100,9 @@ public class GeneralLedgersService : IGeneralLedgersService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Refresh General Ledgers Async.
+    /// </summary>
     public async Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId)
     {
         var selectedPeriod = await this.ResolveSelectedPeriodAsync(userId);
@@ -178,7 +187,9 @@ public class GeneralLedgersService : IGeneralLedgersService
         });
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Clear Selected Period Ledgers Async.
+    /// </summary>
     public async Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId)
     {
         var period = await this.ResolveSelectedPeriodAsync(userId);
@@ -193,9 +204,6 @@ public class GeneralLedgersService : IGeneralLedgersService
 
     // --- PRIVATE HELPERS ---
 
-    /// <summary>
-    /// Memeriksa apakah data staging general ledger tertinggal/outdated dibanding tabel GeneralJournal.
-    /// </summary>
     private async Task<bool> IsLedgerStaleAsync(Guid userId, Models.Period period)
     {
         var start = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);

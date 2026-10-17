@@ -5,17 +5,22 @@
 namespace AumoBackend.Helpers;
 
 /// <summary>
-/// Satu sumber daftar origin frontend yang dipercaya.
-/// Dipakai oleh CORS (Program.cs) dan validasi redirect OAuth (AuthController).
+/// Mewakili Allowed Origins.
 /// </summary>
 public static class AllowedOrigins
 {
+    /// <summary>
+    /// Mewakili All.
+    /// </summary>
     public static readonly string[] All =
     {
         "http://localhost:3000",
         "https://aumonext.vercel.app",
     };
 
+    /// <summary>
+    /// Mewakili Is Allowed.
+    /// </summary>
     public static bool IsAllowed(Uri uri)
     {
         var origin = $"{uri.Scheme}://{uri.Authority}";

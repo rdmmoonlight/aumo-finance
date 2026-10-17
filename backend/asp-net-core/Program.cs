@@ -2,6 +2,7 @@
 // Copyright (c) rdmmoonlight. All rights reserved.
 // </copyright>
 
+using System.Globalization;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
@@ -30,6 +31,9 @@ using Serilog;
 
 namespace AumoBackend;
 
+/// <summary>
+/// Mewakili Program.
+/// </summary>
 public partial class Program
 {
     private static readonly string[] RootMethods = ["GET", "HEAD"];
@@ -40,11 +44,14 @@ public partial class Program
     [LoggerMessage(EventId = 1002, Level = LogLevel.Error, Message = "Unhandled exception on {Path}")]
     private static partial void LogUnhandledException(Microsoft.Extensions.Logging.ILogger logger, Exception exception, PathString path);
 
+    /// <summary>
+    /// Mewakili Main.
+    /// </summary>
     public static async Task Main(string[] args)
     {
         // Konfigurasi awal Serilog untuk mencatat proses bootstrap/startup
         Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console()
+            .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
             .CreateBootstrapLogger();
 
         try
@@ -58,7 +65,7 @@ public partial class Program
                 .ReadFrom.Configuration(context.Configuration)
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext()
-                .WriteTo.Console());
+                .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture));
 
             // =====================================
             // 0. HTTP CLIENT REGISTRATION
@@ -511,11 +518,13 @@ public partial class Program
 }
 
 /// <summary>
-/// Security Filter untuk Dashboard Hangfire: Memastikan request menggunakan HTTPS dan user adalah Admin.
+/// Mewakili Hangfire Custom Authorization Filter.
 /// </summary>
 public class HangfireCustomAuthorizationFilter : IDashboardAuthorizationFilter
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Authorize.
+    /// </summary>
     public bool Authorize(DashboardContext context)
     {
         var httpContext = context.GetHttpContext();

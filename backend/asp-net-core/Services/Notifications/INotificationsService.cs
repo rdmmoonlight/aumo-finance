@@ -11,6 +11,9 @@ using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Notifications Service.
+/// </summary>
 public interface INotificationsService
 {
     Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(Guid userId, int limit);

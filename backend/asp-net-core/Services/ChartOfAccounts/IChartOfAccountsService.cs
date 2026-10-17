@@ -6,6 +6,9 @@ namespace AumoBackend.Services.ChartOfAccounts;
 
 using AumoBackend.DTOs;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Chart Of Accounts Service.
+/// </summary>
 public interface IChartOfAccountsService
 {
     Task<ChartOfAccountsListResponseDto> GetAccountsAsync(Guid userId, string? search, string? category);

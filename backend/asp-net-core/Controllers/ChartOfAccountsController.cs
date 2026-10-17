@@ -31,6 +31,9 @@ using Microsoft.EntityFrameworkCore;
 [Route("/chart-of-accounts")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+/// <summary>
+/// Controller API untuk mengelola Chart Of Accounts.
+/// </summary>
 public class ChartOfAccountsController : ControllerBase
 {
     private readonly AppDbContext db;
@@ -38,6 +41,9 @@ public class ChartOfAccountsController : ControllerBase
     private readonly IValidator<UpdateAccountRequest> updateAccountValidator;
     private readonly IValidator<GetAccountsQuery> getAccountsValidator;
 
+    /// <summary>
+    /// Controller API untuk mengelola Chart Of Accounts.
+    /// </summary>
     public ChartOfAccountsController(
         AppDbContext db,
         IValidator<CreateAccountRequest> createAccountValidator,
@@ -50,6 +56,9 @@ public class ChartOfAccountsController : ControllerBase
         this.getAccountsValidator = getAccountsValidator;
     }
 
+    /// <summary>
+    /// Mengambil data  Accounts.
+    /// </summary>
     // ==========================================
     // 1. GET: /chart-of-accounts
     // ==========================================
@@ -159,6 +168,9 @@ public class ChartOfAccountsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Membuat data  Account baru.
+    /// </summary>
     // ==========================================
     // 2. POST: /chart-of-accounts
     // ==========================================
@@ -214,6 +226,9 @@ public class ChartOfAccountsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Memperbarui data  Account.
+    /// </summary>
     // ==========================================
     // 3. PUT: /chart-of-accounts/{id}
     // ==========================================
@@ -270,6 +285,9 @@ public class ChartOfAccountsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Menghapus data  Account.
+    /// </summary>
     // ==========================================
     // 4. DELETE: /chart-of-accounts/{id}
     // ==========================================

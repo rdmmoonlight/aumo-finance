@@ -6,6 +6,9 @@ namespace AumoBackend.Services.Health
 {
     using AumoBackend.DTOs;
 
+    /// <summary>
+    /// Layanan logika bisnis untuk I Health Service.
+    /// </summary>
     public interface IHealthService
     {
         Task<HealthStatusDto> GetHealthStatusAsync();

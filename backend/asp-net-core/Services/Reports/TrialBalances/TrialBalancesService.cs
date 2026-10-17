@@ -10,6 +10,9 @@ using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Trial Balance Service.
+/// </summary>
 public interface ITrialBalanceService
 {
     Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
@@ -22,9 +25,14 @@ public interface ITrialBalanceService
     Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period);
 }
 
+/// <summary>
+/// Layanan logika bisnis untuk Trial Balance Service.
+/// </summary>
 public class TrialBalanceService : ITrialBalanceService
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Proses eksekusi/kalkulasi Build Trial Balance Rows Async.
+    /// </summary>
     public async Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
         AppDbContext db,
         Guid userId,
@@ -109,7 +117,9 @@ public class TrialBalanceService : ITrialBalanceService
         return rows;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Proses eksekusi/kalkulasi Compute Retained Earnings Ending Async.
+    /// </summary>
     public async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
     {
         var rows = await this.BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");

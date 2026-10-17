@@ -7,6 +7,9 @@ namespace AumoBackend.Services.Settings
     using System.Security.Claims;
     using AumoBackend.DTOs;
 
+    /// <summary>
+    /// Layanan logika bisnis untuk I Settings Service.
+    /// </summary>
     public interface ISettingsService
     {
         Task<ServiceResult> UpdateProfileAsync(ClaimsPrincipal userPrincipal, UpdateProfileRequest request);

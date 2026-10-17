@@ -7,11 +7,17 @@ namespace AumoBackend.Validators.Auth;
 using AumoBackend.DTOs;
 using FluentValidation;
 
+/// <summary>
+/// Validator untuk Google Login Request Validator.
+/// </summary>
 public class GoogleLoginRequestValidator : AbstractValidator<GoogleLoginRequest>
 {
     // Batas wajar untuk Google ID Token (JWT) agar payload abnormal ditolak sebelum diverifikasi ke Google.
     private const int MaxIdTokenLength = 4096;
 
+    /// <summary>
+    /// Validator untuk Google Login Request Validator.
+    /// </summary>
     public GoogleLoginRequestValidator()
     {
         this.RuleFor(x => x.IdToken)

@@ -7,12 +7,18 @@ namespace AumoBackend.Validators.Auth;
 using AumoBackend.DTOs;
 using FluentValidation;
 
+/// <summary>
+/// Validator untuk Change Password Request Validator.
+/// </summary>
 public class ChangePasswordRequestValidator : AbstractValidator<ChangePasswordRequest>
 {
     // Selaras dengan aturan Identity di Program.cs (RequiredLength = 6).
     private const int MinPasswordLength = 6;
     private const int MaxPasswordLength = 128;
 
+    /// <summary>
+    /// Validator untuk Change Password Request Validator.
+    /// </summary>
     public ChangePasswordRequestValidator()
     {
         this.RuleFor(x => x.CurrentPassword)

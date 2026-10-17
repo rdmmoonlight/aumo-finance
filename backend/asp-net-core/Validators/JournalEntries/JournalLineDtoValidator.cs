@@ -8,14 +8,15 @@ using AumoBackend.DTOs;
 using FluentValidation;
 
 /// <summary>
-/// Validasi satu baris jurnal. Hanya dijalankan untuk baris efektif
-/// (AccountId != 0 dan ada nilai debit/kredit); baris kosong dari form diabaikan,
-/// sama seperti perilaku controller.
+/// Validator untuk Journal Line Dto Validator.
 /// </summary>
 public class JournalLineDtoValidator : AbstractValidator<JournalEntryLineDto>
 {
     private const int MaxLineDescriptionLength = 250; // selaras HasMaxLength(250) di AppDbContext
 
+    /// <summary>
+    /// Validator untuk Journal Line Dto Validator.
+    /// </summary>
     public JournalLineDtoValidator()
     {
         this.RuleFor(x => x.AccountId)

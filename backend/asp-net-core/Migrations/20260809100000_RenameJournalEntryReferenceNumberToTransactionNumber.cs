@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260809100000_RenameJournalEntryReferenceNumberToTransactionNumber.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -13,6 +14,21 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
+    /// </summary>
     public partial class RenameJournalEntryReferenceNumberToTransactionNumber : Migration
     {
         /// <inheritdoc/>

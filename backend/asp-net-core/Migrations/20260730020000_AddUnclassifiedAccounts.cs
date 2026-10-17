@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260730020000_AddUnclassifiedAccounts.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -13,6 +14,18 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Membuat data  Unclassified Accounts baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Unclassified Accounts baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Unclassified Accounts baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Unclassified Accounts baru.
+    /// </summary>
     /// <inheritdoc />
     public partial class AddUnclassifiedAccounts : Migration
     {
