@@ -4,7 +4,7 @@ import { RouterOutlet } from "@angular/router";
 
 import { NavItem, SidebarComponent } from "../components/sidebar.component";
 import { TopBarComponent } from "../components/top-bar.component";
-import { authGuard } from "../core/auth.guard";
+import { authGuard } from "../guards/auth.guard";
 
 export const routeMeta: RouteMeta = { canActivate: [authGuard] };
 

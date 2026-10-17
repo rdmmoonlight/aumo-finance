@@ -9,7 +9,7 @@ const baseUrl = (process.env.VITE_API_URL || "http://localhost:5000").replace(
   /\/$/,
   "",
 );
-const specUrl = `${baseUrl}/openapi.json`;
+const specUrl = `${baseUrl}/openapi/v1.json`;
 const tempFile = "./temp-openapi.json";
 
 async function generateApiTypes() {
