@@ -1,9 +1,9 @@
 import { Component } from "@angular/core";
-import { RouterOutlet } from "@angular/router";
+import { Outlet } from "@tanstack/angular-router";
 
 @Component({
   selector: "app-root",
-  imports: [RouterOutlet],
+  imports: [Outlet],
   template: `<router-outlet />`,
 })
 export class App {}
