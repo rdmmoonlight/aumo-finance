@@ -62,10 +62,12 @@ jobs:
             frontend/pnpm-lock.yaml
             analog/pnpm-lock.yaml
 
-      # Inisialisasi/Bersihkan file log warning
+      # Inisialisasi/Bersihkan file log warning di root repository
       - name: Initialize Warning Log File
         run: |
-          echo "=== WORKFLOW WARNING LOG ($(date -u)) ===" > warning.txt
+          echo "=================================================" > warning.txt
+          echo "   WORKFLOW WARNING LOG ($(date -u))" >> warning.txt
+          echo "=================================================" >> warning.txt
           echo "" >> warning.txt
 
       # 3. BACKEND (.NET C#)
@@ -73,21 +75,23 @@ jobs:
         run: dotnet restore
         working-directory: backend/asp-net-core
 
-      # Merapikan whitespace & style aman tanpa memicu crash MSBuildWorkspace
+      # Merapikan whitespace & style aman
       - name: Auto-Format C# Code (Whitespace & Basic Style)
         run: |
           dotnet format whitespace || true
           dotnet format style --severity error || true
         working-directory: backend/asp-net-core
 
-      # Build & catat warning tanpa menghentikan workflow jika ada warning
+      # Build & tangkap SELURUH baris warning .NET ke warning.txt
       - name: Build & Typecheck (.NET)
         run: |
           dotnet build --configuration Release /p:TreatWarningsAsErrors=false /p:ReportAnalyzer=true > dotnet_build.log 2>&1 || true
           cat dotnet_build.log
-          echo "--- [.NET BUILD WARNINGS] ---" >> ../warning.txt
-          grep -i "warning" dotnet_build.log >> ../warning.txt || echo "Tidak ada warning .NET." >> ../warning.txt
-          echo "" >> ../warning.txt
+          
+          echo "--- [.NET BUILD WARNINGS] ---" >> ../../warning.txt
+          # Mengambil baris ringkasan "succeeded with X warning(s)" dan baris individual "warning CS/CA/etc."
+          grep -E "warning|succeeded with|Build succeeded" dotnet_build.log >> ../../warning.txt || echo "Tidak ada warning .NET." >> ../../warning.txt
+          echo "" >> ../../warning.txt
         working-directory: backend/asp-net-core
 
       # 4. BACKEND RUST (AXUM)
@@ -99,9 +103,11 @@ jobs:
         run: |
           cargo clippy -- -D warnings > clippy.log 2>&1 || true
           cat clippy.log
+          
           echo "--- [RUST AXUM CLIPPY WARNINGS] ---" >> ../../warning.txt
           grep -i "warning" clippy.log >> ../../warning.txt || echo "Tidak ada warning Rust Clippy." >> ../../warning.txt
           echo "" >> ../../warning.txt
+          
           cargo build --release
         working-directory: backend/axum
 
@@ -110,11 +116,11 @@ jobs:
         run: pnpm install
         working-directory: frontend
 
-      # Typecheck tidak menulis tsbuildinfo agar tidak ikut ter-commit
       - name: Typecheck (Frontend)
         run: |
           pnpm exec tsc --noEmit --incremental false > tsc_frontend.log 2>&1 || true
           cat tsc_frontend.log
+          
           echo "--- [FRONTEND TYPECHECK WARNINGS/ERRORS] ---" >> ../warning.txt
           cat tsc_frontend.log >> ../warning.txt
           echo "" >> ../warning.txt
