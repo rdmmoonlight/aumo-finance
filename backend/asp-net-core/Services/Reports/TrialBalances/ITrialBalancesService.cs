@@ -7,3 +7,30 @@ using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.Identity;
+
+
+/// <summary>
+/// Antarmuka layanan untuk pembuatan 3 jenis Trial Balance (Unadjusted, Adjusted, Post-Closing).
+/// </summary>
+public interface ITrialBalancesService
+{
+    /// <summary>
+    /// Membuat data Unadjusted Trial Balance.
+    /// </summary>
+    Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(AppDbContext db, Guid userId, Period period);
+
+    /// <summary>
+    /// Membuat data Adjusted Trial Balance.
+    /// </summary>
+    Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(AppDbContext db, Guid userId, Period period);
+
+    /// <summary>
+    /// Membuat data Post-Closing Trial Balance.
+    /// </summary>
+    Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(AppDbContext db, Guid userId, Period period);
+
+    /// <summary>
+    /// Menghitung total saldo akhir Laba Ditahan (Retained Earnings).
+    /// </summary>
+    Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period);
+}
