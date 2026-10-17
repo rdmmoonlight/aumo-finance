@@ -1,44 +1,170 @@
-using System.Globalization;
 // <copyright file="TrialBalancesService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-namespace AumoBackend.Services;
-
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
 using AumoBackend.Data;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
+
+namespace AumoBackend.Services;
+
 /// <summary>
-/// Layanan logika bisnis untuk I Trial Balance Service.
+/// Layanan logika bisnis untuk kalkulasi 3 jenis Trial Balance.
 /// </summary>
-
-public interface ITrialBalanceService
-{
-    Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
-        AppDbContext db,
-        Guid userId,
-        Period period,
-        bool includeAdjusting = false,
-        string reportType = "unadjusted");
-
-    Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period);
-}
-/// <summary>
-/// Layanan logika bisnis untuk Trial Balance Service.
-/// </summary>
-
-public class TrialBalanceService : ITrialBalanceService
+public class TrialBalancesService : ITrialBalancesService
 {
     /// <summary>
-    /// Proses eksekusi kalkulasi Build Trial Balance Rows Async.
+    /// Proses eksekusi kalkulasi Unadjusted Trial Balance.
     /// </summary>
-    public async Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
+    public async Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(
+        AppDbContext db,
+        Guid userId,
+        Period period)
+    {
+        var rawRows = await this.BuildBaseTrialBalanceRowsAsync(db, userId, period, includeAdjusting: false, isPostClosing: false);
+
+        var result = rawRows.Select(r => new TrialBalanceUnadjustedRow
+        {
+            UserId = userId,
+            PeriodId = period.Id,
+            AccountNumber = r.ReferenceNumber,
+            AccountName = r.AccountName,
+            DebitBalance = r.Debit,
+            CreditBalance = r.Credit,
+            IsTotalRow = false,
+            CreatedAt = DateTimeOffset.UtcNow,
+        }).ToList();
+
+        // Menambahkan Baris Total di Bagian Paling Bawah
+        result.Add(new TrialBalanceUnadjustedRow
+        {
+            UserId = userId,
+            PeriodId = period.Id,
+            AccountNumber = "TOTAL",
+            AccountName = "Total Overall",
+            DebitBalance = result.Sum(x => x.DebitBalance),
+            CreditBalance = result.Sum(x => x.CreditBalance),
+            IsTotalRow = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        });
+
+        return result;
+    }
+
+    /// <summary>
+    /// Proses eksekusi kalkulasi Adjusted Trial Balance.
+    /// </summary>
+    public async Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(
+        AppDbContext db,
+        Guid userId,
+        Period period)
+    {
+        var rawRows = await this.BuildBaseTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, isPostClosing: false);
+
+        var result = rawRows.Select(r => new TrialBalanceAdjustedRow
+        {
+            UserId = userId,
+            PeriodId = period.Id,
+            AccountNumber = r.ReferenceNumber,
+            AccountName = r.AccountName,
+            DebitBalance = r.Debit,
+            CreditBalance = r.Credit,
+            IsTotalRow = false,
+            CreatedAt = DateTimeOffset.UtcNow,
+        }).ToList();
+
+        // Menambahkan Baris Total di Bagian Paling Bawah
+        result.Add(new TrialBalanceAdjustedRow
+        {
+            UserId = userId,
+            PeriodId = period.Id,
+            AccountNumber = "TOTAL",
+            AccountName = "Total Overall",
+            DebitBalance = result.Sum(x => x.DebitBalance),
+            CreditBalance = result.Sum(x => x.CreditBalance),
+            IsTotalRow = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        });
+
+        return result;
+    }
+
+    /// <summary>
+    /// Proses eksekusi kalkulasi Post-Closing Trial Balance.
+    /// </summary>
+    public async Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(
+        AppDbContext db,
+        Guid userId,
+        Period period)
+    {
+        var rawRows = await this.BuildBaseTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, isPostClosing: true);
+
+        var result = rawRows.Select(r => new TrialBalancePostClosingRow
+        {
+            UserId = userId,
+            PeriodId = period.Id,
+            AccountNumber = r.ReferenceNumber,
+            AccountName = r.AccountName,
+            DebitBalance = r.Debit,
+            CreditBalance = r.Credit,
+            IsTotalRow = false,
+            CreatedAt = DateTimeOffset.UtcNow,
+        }).ToList();
+
+        // Menambahkan Baris Total di Bagian Paling Bawah
+        result.Add(new TrialBalancePostClosingRow
+        {
+            UserId = userId,
+            PeriodId = period.Id,
+            AccountNumber = "TOTAL",
+            AccountName = "Total Overall",
+            DebitBalance = result.Sum(x => x.DebitBalance),
+            CreditBalance = result.Sum(x => x.CreditBalance),
+            IsTotalRow = true,
+            CreatedAt = DateTimeOffset.UtcNow,
+        });
+
+        return result;
+
+    }
+
+    /// <summary>
+    /// Proses eksekusi kalkulasi Retained Earnings Ending.
+    /// </summary>
+
+    public async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
+    {
+        var rows = await this.BuildBaseTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, isPostClosing: false);
+
+        decimal totalRevenue = rows
+            .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
+            .Sum(r => r.NetBalance);
+
+        decimal totalExpense = rows
+            .Where(r => r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
+            .Sum(r => r.NetBalance);
+
+        decimal netIncome = totalRevenue - totalExpense;
+
+        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
+        decimal initialRE = reRow?.NetBalance ?? 0m;
+
+        return initialRE + netIncome;
+    }
+
+    private async Task<List<InternalLedgerCalculation>> BuildBaseTrialBalanceRowsAsync(
         AppDbContext db,
         Guid userId,
         Period period,
-        bool includeAdjusting = false,
-        string reportType = "unadjusted")
+        bool includeAdjusting,
+        bool isPostClosing)
     {
         var accounts = await db.ChartOfAccounts
             .Where(a => a.IsActive && a.UserId == userId)
@@ -56,19 +182,17 @@ public class TrialBalanceService : ITrialBalanceService
                      && l.EntryDate >= startUtc
                      && l.EntryDate <= endUtc);
 
-        bool includeAdjustingLines = includeAdjusting || reportType == "adjusted" || reportType == "post-closing";
-
-        var lines = includeAdjustingLines
-            ? await linesQuery.Where(l => l.JournalType == "General"
-                                       || l.JournalType == "Adjusting").ToListAsync()
+        var lines = includeAdjusting
+            ? await linesQuery.Where(l => l.JournalType == "General" || l.JournalType == "Adjusting").ToListAsync()
             : await linesQuery.Where(l => l.JournalType == "General").ToListAsync();
 
-        var rows = new List<TrialBalanceRow>();
+        var rows = new List<InternalLedgerCalculation>();
         foreach (var account in accounts)
         {
             bool isPermanent = IsAccountPermanent(account);
 
-            if (reportType == "post-closing" && !isPermanent)
+            // Filter akun temporary jika tipe laporan adalah post-closing
+            if (isPostClosing && !isPermanent)
             {
                 continue;
             }
@@ -100,7 +224,7 @@ public class TrialBalanceService : ITrialBalanceService
                 credit = totalCreditLines - totalDebitLines;
             }
 
-            rows.Add(new TrialBalanceRow
+            rows.Add(new InternalLedgerCalculation
             {
                 AccountId = account.Id,
                 ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
@@ -115,29 +239,6 @@ public class TrialBalanceService : ITrialBalanceService
         }
 
         return rows;
-    }
-    /// <summary>
-    /// Proses eksekusi kalkulasi Compute Retained Earnings Ending Async.
-    /// </summary>
-
-    public async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
-    {
-        var rows = await this.BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true, reportType: "adjusted");
-
-        decimal totalRevenue = rows
-            .Where(r => !r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
-            .Sum(r => r.NetBalance);
-
-        decimal totalExpense = rows
-            .Where(r => r.NormalBalanceIsDebit && IsTemporaryType(r.Type))
-            .Sum(r => r.NetBalance);
-
-        decimal netIncome = totalRevenue - totalExpense;
-
-        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role ?? string.Empty, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
-        decimal initialRE = reRow?.NetBalance ?? 0m;
-
-        return initialRE + netIncome;
     }
 
     private static bool IsAccountNormalBalanceDebit(ChartOfAccount account)
@@ -168,5 +269,26 @@ public class TrialBalanceService : ITrialBalanceService
         }
 
         return AccountClassificationHelper.IsTemporary(typeStr);
+    }
+
+    private sealed class InternalLedgerCalculation
+    {
+        public int AccountId { get; set; }
+
+        public string ReferenceNumber { get; set; } = string.Empty;
+
+        public string AccountName { get; set; } = string.Empty;
+
+        public string Type { get; set; } = string.Empty;
+
+        public string? Role { get; set; }
+
+        public bool NormalBalanceIsDebit { get; set; }
+
+        public decimal NetBalance { get; set; }
+
+        public decimal Debit { get; set; }
+
+        public decimal Credit { get; set; }
     }
 }
