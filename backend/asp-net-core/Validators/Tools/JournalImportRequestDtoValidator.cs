@@ -8,12 +8,17 @@ using AumoBackend.DTOs;
 using AumoBackend.Validators.JournalEntries;
 using FluentValidation;
 
-/// <summary>Validasi skema untuk preview dan import jurnal dari Excel.</summary>
+/// <summary>
+/// Validator untuk Journal Import Request Dto Validator.
+/// </summary>
 public class JournalImportRequestDtoValidator : AbstractValidator<JournalImportRequestDto>
 {
     private const int MaxTransactions = 5000;
     private const int MaxMappings = 5000;
 
+    /// <summary>
+    /// Validator untuk Journal Import Request Dto Validator.
+    /// </summary>
     public JournalImportRequestDtoValidator()
     {
         this.RuleFor(x => x.TargetMonth)
@@ -44,10 +49,16 @@ public class JournalImportRequestDtoValidator : AbstractValidator<JournalImportR
     }
 }
 
+/// <summary>
+/// Validator untuk Journal Transaction Dto Validator.
+/// </summary>
 public class JournalTransactionDtoValidator : AbstractValidator<JournalTransactionDto>
 {
     private const int MaxLinesPerTransaction = 500;
 
+    /// <summary>
+    /// Validator untuk Journal Transaction Dto Validator.
+    /// </summary>
     public JournalTransactionDtoValidator()
     {
         this.RuleFor(x => x.Date)
@@ -80,11 +91,17 @@ public class JournalTransactionDtoValidator : AbstractValidator<JournalTransacti
     }
 }
 
+/// <summary>
+/// Validator untuk Journal Import Line Validator.
+/// </summary>
 public class JournalImportLineValidator : AbstractValidator<JournalLineDto>
 {
     private const int MaxDescriptionLength = 250; // selaras HasMaxLength(250) di AppDbContext
     private const int MaxAccountNameLength = 200;
 
+    /// <summary>
+    /// Validator untuk Journal Import Line Validator.
+    /// </summary>
     public JournalImportLineValidator()
     {
         this.RuleFor(x => x.Debit)
@@ -109,10 +126,16 @@ public class JournalImportLineValidator : AbstractValidator<JournalLineDto>
     }
 }
 
+/// <summary>
+/// Validator untuk Account Mapping Detail Dto Validator.
+/// </summary>
 public class AccountMappingDetailDtoValidator : AbstractValidator<AccountMappingDetailDto>
 {
     private const int MaxAccountNameLength = 200;
 
+    /// <summary>
+    /// Validator untuk Account Mapping Detail Dto Validator.
+    /// </summary>
     public AccountMappingDetailDtoValidator()
     {
         this.RuleFor(x => x.MappedRef)

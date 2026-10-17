@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20261014000000_DropOldJournalTables.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -8,6 +9,18 @@ namespace AumoBackend.Migrations
 {
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Mewakili Drop Old Journal Tables.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Drop Old Journal Tables.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Drop Old Journal Tables.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Drop Old Journal Tables.
+    /// </summary>
     /// <inheritdoc />
     public partial class DropOldJournalTables : Migration
     {

@@ -7,12 +7,17 @@ namespace AumoBackend.Services;
 
 using AumoBackend.DTOs.Home;
 
+/// <summary>
+/// Layanan logika bisnis untuk Market Data Service.
+/// </summary>
 public class MarketDataService(
     HttpClient httpClient,
     ILogger<MarketDataService> logger,
     IConfiguration configuration) : IMarketDataService
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Market Indicators Async.
+    /// </summary>
     public async Task<IEnumerable<MarketIndicatorDto>> GetMarketIndicatorsAsync()
     {
         var result = new List<MarketIndicatorDto>();

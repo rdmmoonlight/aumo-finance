@@ -18,6 +18,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
+/// <summary>
+/// Layanan logika bisnis untuk Auth Service.
+/// </summary>
 public class AuthService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
@@ -26,13 +29,17 @@ public class AuthService(
     IValidator<LoginRequest> loginValidator,
     IValidator<GoogleLoginRequest> googleLoginValidator) : IAuthService
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Validate Login Async.
+    /// </summary>
     public async Task<ValidationResult> ValidateLoginAsync(LoginRequest request)
     {
         return await loginValidator.ValidateAsync(request);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Validate Google Login Async.
+    /// </summary>
     public async Task<ValidationResult> ValidateGoogleLoginAsync(GoogleLoginRequest request)
     {
         return await googleLoginValidator.ValidateAsync(request);
@@ -50,7 +57,9 @@ public class AuthService(
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Process Login Async.
+    /// </summary>
     public async Task<AuthResponseDto?> ProcessLoginAsync(LoginRequest request, string ipAddress, string headerUserAgent)
     {
         var user = await userManager.FindByEmailAsync(request.Email)
@@ -135,7 +144,9 @@ public class AuthService(
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Process Google Login Async.
+    /// </summary>
     public async Task<AuthResponseDto?> ProcessGoogleLoginAsync(GoogleLoginRequest request)
     {
         if (string.IsNullOrWhiteSpace(request.IdToken))
@@ -209,13 +220,17 @@ public class AuthService(
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Configure Google Redirect Properties.
+    /// </summary>
     public AuthenticationProperties ConfigureGoogleRedirectProperties(string redirectUrl)
     {
         return signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Process Google Callback Async.
+    /// </summary>
     public async Task<string?> ProcessGoogleCallbackAsync(ClaimsPrincipal principal, string loginProvider, string providerKey)
     {
         var result = await signInManager.ExternalLoginSignInAsync(loginProvider, providerKey, isPersistent: true, bypassTwoFactor: true);
@@ -259,7 +274,9 @@ public class AuthService(
         return null;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  User Profile Async.
+    /// </summary>
     public async Task<UserProfileViewModel?> GetUserProfileAsync(ClaimsPrincipal userPrincipal)
     {
         var user = await userManager.GetUserAsync(userPrincipal);
@@ -298,7 +315,9 @@ public class AuthService(
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Logout Async.
+    /// </summary>
     public async Task LogoutAsync()
     {
         await signInManager.SignOutAsync();

@@ -9,8 +9,7 @@ using AumoBackend.DTOs;
 using FluentValidation;
 
 /// <summary>
-/// Aturan skema bersama untuk request Create dan Edit jurnal.
-/// Aturan yang butuh database (akun aktif, periode tertutup) tetap di controller.
+/// Mewakili Journal Entry Validator Base.
 /// </summary>
 public abstract class JournalEntryValidatorBase<T> : AbstractValidator<T>
 {

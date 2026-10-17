@@ -9,8 +9,7 @@ namespace AumoBackend.Controllers
     using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
-    /// Menyajikan avatar dari Neon Bucket (privat) melalui API.
-    /// Nama file memuat GUID acak sehingga tidak dapat ditebak; respons di-cache lama.
+    /// Controller API untuk mengelola Avatars.
     /// </summary>
     [ApiController]
     [AllowAnonymous]
@@ -19,11 +18,17 @@ namespace AumoBackend.Controllers
     {
         private readonly IAvatarStorage avatarStorage;
 
+        /// <summary>
+        /// Controller API untuk mengelola Avatars.
+        /// </summary>
         public AvatarsController(IAvatarStorage avatarStorage)
         {
             this.avatarStorage = avatarStorage;
         }
 
+        /// <summary>
+        /// Mengambil data .
+        /// </summary>
         [HttpGet("{fileName}")]
         public async Task<IActionResult> Get(string fileName, CancellationToken cancellationToken)
         {

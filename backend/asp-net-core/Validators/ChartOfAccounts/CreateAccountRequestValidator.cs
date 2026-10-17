@@ -8,8 +8,14 @@ using AumoBackend.DTOs;
 using AumoBackend.Models;
 using FluentValidation;
 
+/// <summary>
+/// Validator untuk Create Account Request Validator.
+/// </summary>
 public class CreateAccountRequestValidator : AbstractValidator<CreateAccountRequest>
 {
+    /// <summary>
+    /// Validator untuk Create Account Request Validator.
+    /// </summary>
     public CreateAccountRequestValidator()
     {
         this.RuleFor(x => x.AccountName).MustBeValidAccountName();

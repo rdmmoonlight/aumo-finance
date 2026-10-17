@@ -27,12 +27,18 @@ using Microsoft.EntityFrameworkCore;
 [Route("/reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+/// <summary>
+/// Controller API untuk mengelola Journal.
+/// </summary>
 public class JournalController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IJournalService journalService;
     private readonly IFinancialReportService reportService;
 
+    /// <summary>
+    /// Controller API untuk mengelola Journal.
+    /// </summary>
     public JournalController(AppDbContext db, IJournalService journalService, IFinancialReportService reportService)
     {
         this.db = db;
@@ -40,6 +46,9 @@ public class JournalController : ControllerBase
         this.reportService = reportService;
     }
 
+    /// <summary>
+    /// Mengambil data  General Journal.
+    /// </summary>
     // ==========================================
     // 1. GENERAL JOURNAL
     // GET: /reports/journals/general
@@ -121,6 +130,9 @@ public class JournalController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mengambil data  Adjusting Journal.
+    /// </summary>
     // ==========================================
     // 2. ADJUSTING JOURNAL
     // GET: /reports/journals/adjusting
@@ -199,6 +211,9 @@ public class JournalController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Menghapus data  Adjusting Journal.
+    /// </summary>
     // DELETE: /reports/journals/adjusting/{id}
     [HttpDelete("adjusting/{id:int}")]
     public async Task<IActionResult> DeleteAdjustingJournal(int id)
@@ -231,6 +246,9 @@ public class JournalController : ControllerBase
         return this.Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
     }
 
+    /// <summary>
+    /// Mengambil data  Closing Journal.
+    /// </summary>
     // ==========================================
     // 3. CLOSING JOURNAL
     // GET: /reports/journals/closing

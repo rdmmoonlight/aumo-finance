@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260804090000_AddFolders.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -14,6 +15,18 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Membuat data  Folders baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Folders baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Folders baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Folders baru.
+    /// </summary>
     /// <inheritdoc />
     public partial class AddFolders : Migration
     {

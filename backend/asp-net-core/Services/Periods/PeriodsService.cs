@@ -13,13 +13,18 @@ using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Layanan logika bisnis untuk Periods Service.
+/// </summary>
 public class PeriodsService : IPeriodsService
 {
     private readonly AppDbContext? db;
     private readonly ITransactionNumberService? txNumberService;
     private readonly IGeneralLedgersService? glService;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Periods Async.
+    /// </summary>
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)
     {
         var periodsData = await this.db.Periods
@@ -63,7 +68,9 @@ public class PeriodsService : IPeriodsService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Open Period Info Async.
+    /// </summary>
     public async Task<OpenPeriodInfoResponse> GetOpenPeriodInfoAsync(Guid userId)
     {
         var accounts = await this.db.ChartOfAccounts
@@ -117,7 +124,9 @@ public class PeriodsService : IPeriodsService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Membuat data  Period Async baru.
+    /// </summary>
     public async Task<CreatePeriodResult> CreatePeriodAsync(Guid userId, CreatePeriodRequest request)
     {
         var startDate = DateTime.SpecifyKind(new DateTime(request.Year, request.Month, 1), DateTimeKind.Utc);
@@ -381,7 +390,9 @@ public class PeriodsService : IPeriodsService
         return new OpeningResult(balances.Count, null);
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Select Period Async.
+    /// </summary>
     public async Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId)
     {
         var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
@@ -411,7 +422,9 @@ public class PeriodsService : IPeriodsService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Clear Selection Async.
+    /// </summary>
     public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
     {
         // Bersihkan staging table sebelum menghilangkan penanda pilihan
@@ -430,7 +443,9 @@ public class PeriodsService : IPeriodsService
         };
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Close Period Async.
+    /// </summary>
     public async Task<BaseServiceResult> ClosePeriodAsync(Guid userId, int periodId)
     {
         var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);

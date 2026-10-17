@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20261013000000_AddGeneralJournalTable.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -13,6 +14,18 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Membuat data  General Journal Table baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  General Journal Table baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  General Journal Table baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  General Journal Table baru.
+    /// </summary>
     /// <inheritdoc />
     public partial class AddGeneralJournalTable : Migration
     {

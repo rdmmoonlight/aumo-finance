@@ -9,14 +9,22 @@ using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Journal Service.
+/// </summary>
 public interface IJournalService
 {
     Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(AppDbContext db, Guid userId, Period period, IFinancialReportService reportService);
 }
 
+/// <summary>
+/// Layanan logika bisnis untuk Journal Service.
+/// </summary>
 public class JournalService : IJournalService
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Proses eksekusi/kalkulasi Build Closing Journal Groups Async.
+    /// </summary>
     public async Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(AppDbContext db, Guid userId, Period period, IFinancialReportService reportService)
     {
         var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);

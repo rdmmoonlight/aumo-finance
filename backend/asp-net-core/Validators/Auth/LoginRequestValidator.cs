@@ -12,8 +12,14 @@ namespace AumoBackend.Validators.Auth
     using AumoBackend.Services.Identity;
     using FluentValidation;
 
+    /// <summary>
+    /// Validator untuk Login Request Validator.
+    /// </summary>
     public class LoginRequestValidator : AbstractValidator<LoginRequest>
     {
+        /// <summary>
+        /// Validator untuk Login Request Validator.
+        /// </summary>
         public LoginRequestValidator()
         {
             // 1. Validasi Email / Username

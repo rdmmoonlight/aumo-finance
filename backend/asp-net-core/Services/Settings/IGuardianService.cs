@@ -6,6 +6,9 @@ namespace AumoBackend.Services.Settings
 {
     using AumoBackend.DTOs;
 
+    /// <summary>
+    /// Layanan logika bisnis untuk I Guardian Service.
+    /// </summary>
     public interface IGuardianService
     {
         Task<bool> RevokeSessionAsync(string sessionId);

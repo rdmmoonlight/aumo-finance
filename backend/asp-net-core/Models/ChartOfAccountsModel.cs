@@ -4,40 +4,79 @@
 
 namespace AumoBackend.Models
 {
+    /// <summary>
+    /// Mewakili Account Classification.
+    /// </summary>
     public enum AccountClassification
     {
+        /// <summary>
+        /// Mewakili Asset.
+        /// </summary>
         Asset,
+        /// <summary>
+        /// Mewakili Liability.
+        /// </summary>
         Liability,
+        /// <summary>
+        /// Mewakili Equity.
+        /// </summary>
         Equity,
+        /// <summary>
+        /// Mewakili Revenue.
+        /// </summary>
         Revenue,
+        /// <summary>
+        /// Mewakili Expense.
+        /// </summary>
         Expense,
     }
 
+    /// <summary>
+    /// Mewakili Account Classification Extensions.
+    /// </summary>
     public static class AccountClassificationExtensions
     {
+        /// <summary>
+        /// Mewakili Normal Balance Is Debit.
+        /// </summary>
         public static bool NormalBalanceIsDebit(this AccountClassification classification)
         {
             return classification == AccountClassification.Asset
                 || classification == AccountClassification.Expense;
         }
 
+        /// <summary>
+        /// Mewakili Is Temporary.
+        /// </summary>
         public static bool IsTemporary(this AccountClassification classification)
         {
             return classification == AccountClassification.Revenue
                 || classification == AccountClassification.Expense;
         }
 
+        /// <summary>
+        /// Mewakili Is Permanent.
+        /// </summary>
         public static bool IsPermanent(this AccountClassification classification)
         {
             return !IsTemporary(classification);
         }
     }
 
+    /// <summary>
+    /// Mewakili Account Classification Helper.
+    /// </summary>
     public static class AccountClassificationHelper
     {
+        /// <summary>
+        /// Mewakili Normal Balance Is Debit.
+        /// </summary>
         public static bool NormalBalanceIsDebit(AccountClassification classification)
             => classification.NormalBalanceIsDebit();
 
+        /// <summary>
+        /// Mewakili Normal Balance Is Debit.
+        /// </summary>
         // Saldo Normal:
         // Debit  : Assets, OperatingExpenses, OtherExpenses
         // Kredit : Liabilities, Equity, OperatingIncome, OtherIncome
@@ -51,12 +90,21 @@ namespace AumoBackend.Models
             };
         }
 
+        /// <summary>
+        /// Mewakili Is Temporary.
+        /// </summary>
         public static bool IsTemporary(AccountClassification classification)
             => classification.IsTemporary();
 
+        /// <summary>
+        /// Mewakili Is Permanent.
+        /// </summary>
         public static bool IsPermanent(AccountClassification classification)
             => classification.IsPermanent();
 
+        /// <summary>
+        /// Mewakili Validate Reference Number.
+        /// </summary>
         public static bool ValidateReferenceNumber(string? refNum)
         {
             if (string.IsNullOrWhiteSpace(refNum))
@@ -94,11 +142,20 @@ namespace AumoBackend.Models
             ["OtherExpenses"] = (800, 999),
         };
 
+        /// <summary>
+        /// Mewakili Account Types.
+        /// </summary>
         public static IReadOnlyCollection<string> AccountTypes => ReferenceRanges.Keys;
 
+        /// <summary>
+        /// Mewakili Account Roles.
+        /// </summary>
         // Role akun yang dikenal sistem (dipakai Periods, laporan keuangan)
         public static readonly string[] AccountRoles = { "Default", "CashAndEquivalents", "RetainedEarnings" };
 
+        /// <summary>
+        /// Mewakili Is Known Account Type.
+        /// </summary>
         public static bool IsKnownAccountType(string? type)
             => type != null && ReferenceRanges.ContainsKey(type);
 
@@ -110,8 +167,14 @@ namespace AumoBackend.Models
         }
     }
 
+    /// <summary>
+    /// Mewakili Period Lock.
+    /// </summary>
     public static class PeriodLock
     {
+        /// <summary>
+        /// Mewakili Is Locked.
+        /// </summary>
         public static bool IsLocked(Period? period)
         {
             if (period == null)
@@ -124,8 +187,14 @@ namespace AumoBackend.Models
                 .GetValue(period) is true;
         }
 
+        /// <summary>
+        /// Mewakili Is Locked.
+        /// </summary>
         public static bool IsLocked(bool isClosed) => isClosed;
 
+        /// <summary>
+        /// Mewakili Is Date Locked.
+        /// </summary>
         public static bool IsDateLocked(DateTime date, IEnumerable<Period>? periods)
         {
             if (periods == null)

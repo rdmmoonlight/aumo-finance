@@ -4,6 +4,9 @@ using AumoBackend.DTOs.Core;
 
 namespace AumoBackend.Services.Core;
 
+/// <summary>
+/// Layanan logika bisnis untuk Rust Core Service.
+/// </summary>
 public partial class RustCoreService : IRustCoreService
 {
     private readonly ILogger<RustCoreService> _logger;
@@ -23,11 +26,17 @@ public partial class RustCoreService : IRustCoreService
     [LibraryImport("aumo_core", EntryPoint = "free_string")]
     private static partial void NativeFreeString(IntPtr ptr);
 
+    /// <summary>
+    /// Layanan logika bisnis untuk Rust Core Service.
+    /// </summary>
     public RustCoreService(ILogger<RustCoreService> logger)
     {
         _logger = logger;
     }
 
+    /// <summary>
+    /// Mengambil data  Salam Async.
+    /// </summary>
     public Task<SalamResponse?> GetSalamAsync(CancellationToken ct = default)
     {
         try

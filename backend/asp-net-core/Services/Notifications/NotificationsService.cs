@@ -8,11 +8,16 @@ using AumoBackend.Data;
 using AumoBackend.DTOs;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Layanan logika bisnis untuk Notifications Service.
+/// </summary>
 public class NotificationsService : INotificationsService
 {
     private readonly AppDbContext? context;
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mengambil data  Notifications By User Id Async.
+    /// </summary>
     public async Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(Guid userId, int limit)
     {
         return await this.context.Notifications
@@ -32,7 +37,9 @@ public class NotificationsService : INotificationsService
             .ToListAsync();
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Mark As Read Async.
+    /// </summary>
     public async Task<bool> MarkAsReadAsync(Guid id, Guid userId)
     {
         var notification = await this.context.Notifications
@@ -48,7 +55,9 @@ public class NotificationsService : INotificationsService
         return true;
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Mark All As Read Async.
+    /// </summary>
     public async Task MarkAllAsReadAsync(Guid userId)
     {
         await this.context.Notifications

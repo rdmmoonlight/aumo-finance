@@ -25,17 +25,26 @@ using Microsoft.AspNetCore.Mvc;
 [Route("/reports")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+/// <summary>
+/// Controller API untuk mengelola Financial Statements.
+/// </summary>
 public class FinancialStatementsController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IFinancialReportService reportService;
 
+    /// <summary>
+    /// Controller API untuk mengelola Financial Statements.
+    /// </summary>
     public FinancialStatementsController(AppDbContext db, IFinancialReportService reportService)
     {
         this.db = db;
         this.reportService = reportService;
     }
 
+    /// <summary>
+    /// Mengambil data  Income Statement.
+    /// </summary>
     // ==========================================
     // 1. GET: /reports/income-statement
     // ==========================================
@@ -86,6 +95,9 @@ public class FinancialStatementsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mengambil data  Retained Earnings.
+    /// </summary>
     // ==========================================
     // 2. GET: /reports/retained-earnings
     // ==========================================
@@ -134,6 +146,9 @@ public class FinancialStatementsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mengambil data  Cash Flow Statement.
+    /// </summary>
     // ==========================================
     // 3. GET: /reports/statement-of-cash-flow
     // ==========================================
@@ -264,6 +279,9 @@ public class FinancialStatementsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mengambil data  Statement Of Financial Position.
+    /// </summary>
     // ==========================================
     // 4. GET: /reports/statement-of-financial-position
     // ==========================================

@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260727100000_DropJournalEntryMemo.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -13,6 +14,18 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Mewakili Drop Journal Entry Memo.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Drop Journal Entry Memo.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Drop Journal Entry Memo.
+    /// </summary>
+    /// <summary>
+    /// Mewakili Drop Journal Entry Memo.
+    /// </summary>
     /// <inheritdoc />
     public partial class DropJournalEntryMemo : Migration
     {

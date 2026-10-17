@@ -9,9 +9,14 @@ using System.Data;
 using AumoBackend.Data;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Layanan logika bisnis untuk Transaction Number Service.
+/// </summary>
 public class TransactionNumberService(AppDbContext db) : ITransactionNumberService
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Proses eksekusi/kalkulasi Generate Async.
+    /// </summary>
     public async Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate)
     {
         string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
@@ -47,7 +52,9 @@ public class TransactionNumberService(AppDbContext db) : ITransactionNumberServi
         return $"{counterKey}{nextSeq:D4}";
     }
 
-    /// <inheritdoc/>
+    /// <summary>
+    /// Mewakili Peek Next Async.
+    /// </summary>
     public async Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate)
     {
         string prefix = journalType == "Adjusting" ? "AJ" : "GJ";

@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="AppDbContextModelSnapshot.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>

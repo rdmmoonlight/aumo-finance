@@ -32,17 +32,26 @@ using FluentValidation;
 [Route("/tools")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 
+/// <summary>
+/// Controller API untuk mengelola Tools.
+/// </summary>
 public class ToolsController : ControllerBase
 {
     private readonly AppDbContext context;
     private readonly IValidator<JournalImportRequestDto> importValidator;
 
+    /// <summary>
+    /// Controller API untuk mengelola Tools.
+    /// </summary>
     public ToolsController(AppDbContext context, IValidator<JournalImportRequestDto> importValidator)
     {
         this.context = context;
         this.importValidator = importValidator;
     }
 
+    /// <summary>
+    /// Mewakili Download Journal Template.
+    /// </summary>
     // ==========================================
     // 1. GET: /tools/download-journal-template
     // ==========================================
@@ -79,6 +88,9 @@ public class ToolsController : ControllerBase
             "JournalImportTemplate.xlsx");
     }
 
+    /// <summary>
+    /// Mewakili Preview Journal Import.
+    /// </summary>
     // ==========================================
     // 2. POST: /tools/preview-journal-import
     // ==========================================
@@ -209,6 +221,9 @@ public class ToolsController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Mewakili Import Journal Entries.
+    /// </summary>
     // ==========================================
     // 3. POST: /tools/import-journal-entries
     // ==========================================

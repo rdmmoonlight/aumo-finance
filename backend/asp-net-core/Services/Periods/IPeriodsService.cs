@@ -6,6 +6,9 @@ namespace AumoBackend.Services.Periods;
 
 using AumoBackend.DTOs;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Periods Service.
+/// </summary>
 public interface IPeriodsService
 {
     Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId);

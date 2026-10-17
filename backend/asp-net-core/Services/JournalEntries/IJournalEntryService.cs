@@ -6,6 +6,9 @@ namespace AumoBackend.Services.JournalEntries;
 
 using AumoBackend.DTOs.Reports;
 
+/// <summary>
+/// Layanan logika bisnis untuk I Journal Entry Service.
+/// </summary>
 public interface IJournalEntryService
 {
     // Mengambil daftar baris GeneralJournal berdasarkan TransactionNumber atau JournalEntryId

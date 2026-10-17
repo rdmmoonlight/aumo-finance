@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 // <copyright file="20260806000000_RemoveMobileJournalEntries.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -13,6 +14,21 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Menghapus data  Mobile Journal Entries.
+    /// </summary>
+    /// <summary>
+    /// Menghapus data  Mobile Journal Entries.
+    /// </summary>
+    /// <summary>
+    /// Menghapus data  Mobile Journal Entries.
+    /// </summary>
+    /// <summary>
+    /// Menghapus data  Mobile Journal Entries.
+    /// </summary>
+    /// <summary>
+    /// Menghapus data  Mobile Journal Entries.
+    /// </summary>
     public partial class RemoveMobileJournalEntries : Migration
     {
         /// <inheritdoc/>

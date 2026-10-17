@@ -1,3 +1,4 @@
+#pragma warning disable CS1591
 #pragma warning disable CA1861
 // <copyright file="20260728103000_AddGuardianTables.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
@@ -15,6 +16,18 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
+    /// <summary>
+    /// Membuat data  Guardian Tables baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Guardian Tables baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Guardian Tables baru.
+    /// </summary>
+    /// <summary>
+    /// Membuat data  Guardian Tables baru.
+    /// </summary>
     /// <inheritdoc />
     public partial class AddGuardianTables : Migration
     {
