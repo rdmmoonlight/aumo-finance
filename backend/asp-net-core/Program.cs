@@ -73,16 +73,6 @@ public partial class Program
             builder.Services.AddOpenApi();
             builder.Services.AddHealthChecks();
 
-            // 2. Rate Limiter Registration
-            builder.Services.AddRateLimiter(options =>
-            {
-                options.AddFixedWindowLimiter("global", opt =>
-                {
-                    opt.PermitLimit = 100;
-                    opt.Window = TimeSpan.FromMinutes(1);
-                });
-            });
-
             var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
                      ?? ["https://aumoweb.vercel.app"];
 
