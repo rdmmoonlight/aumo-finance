@@ -13,8 +13,8 @@ RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy csproj dan restore (Caching layer)
-COPY ["AumoBackend.csproj", "./"]
-RUN dotnet restore "AumoBackend.csproj"
+COPY ["asp-net-core/AumoBackend.csproj", "./"]
+RUN dotnet restore "asp-net-core/AumoBackend.csproj"
 
 # Copy seluruh source code backend
 COPY . .
