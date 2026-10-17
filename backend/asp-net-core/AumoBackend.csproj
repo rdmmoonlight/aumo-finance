@@ -13,14 +13,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Roslyn Analyzers (Aturan Analisis Kode Otomatis) -->
+    <!-- Roslyn Analyzers -->
     <PackageReference Include="Roslynator.Analyzers" Version="4.13.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    
 
-    <!-- Microsoft / EF Core / Identity Package (.NET 10) -->
+    <!-- Microsoft / EF Core / Identity Package -->
     <PackageReference Include="AWSSDK.Core" Version="4.0.3.3" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.25" />
@@ -35,7 +34,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
 
-    <!-- Native OpenAPI Support & Modern UI (.NET 10) -->
+    <!-- Native OpenAPI Support & Modern UI -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
     <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
@@ -55,9 +54,36 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
   </ItemGroup>
 
-  <!-- Target untuk kompilasi Rust sebelum .NET di-build -->
+  <!-- Target Kompilasi & Copy Binary Rust ke OutDir / PublishDir -->
   <Target Name="BuildRust" BeforeTargets="BeforeBuild">
-    <Message Text="[RUST] Mengompilasi kode Rust..." Importance="high" />
-    <Exec Command="cargo build --manifest-path ../axum/Cargo.toml" />
+    <PropertyGroup>
+      <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
+      <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
+      <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
+      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum.exe</RustExecutableName>
+      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum</RustExecutableName>
+    </PropertyGroup>
+
+    <Message Text="[RUST] Mengompilasi kode Rust ($(Configuration))..." Importance="high" />
+    <Exec Command="cargo build $(RustBuildMode) --manifest-path ../axum/Cargo.toml" />
+
+    <!-- Copy Binary Rust ke OutDir lokal -->
+    <Copy SourceFiles="../axum/target/$(RustTargetDir)/$(RustExecutableName)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
+
+  <!-- Salin Binary Rust saat dotnet publish ke folder /app/publish -->
+  <Target Name="CopyRustToPublish" AfterTargets="ComputeFilesToPublish">
+    <PropertyGroup>
+      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum.exe</RustExecutableName>
+      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_axum</RustExecutableName>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ResolvedFileToPublish Include="../axum/target/release/$(RustExecutableName)">
+        <RelativePath>%(Filename)%(Extension)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
+
 </Project>
