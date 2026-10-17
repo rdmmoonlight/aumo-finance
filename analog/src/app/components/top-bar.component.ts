@@ -1,5 +1,5 @@
 import { Component, computed, inject, output } from "@angular/core";
-import { AuthService } from "../core/auth.service";
+import { AuthService } from "../services/auth.service";
 
 @Component({
   selector: "app-top-bar",

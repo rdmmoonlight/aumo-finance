@@ -3,14 +3,14 @@ import { Injectable, inject, signal } from "@angular/core";
 import { Router } from "@angular/router";
 import { Observable, catchError, map, of, tap } from "rxjs";
 
+import { API_URL } from "../core/config";
 import {
   AuthResponse,
   AuthUser,
   LoginPayload,
   MeResponse,
   RegisterPayload,
-} from "./auth.models";
-import { API_URL } from "./config";
+} from "../models/auth.models";
 
 @Injectable({ providedIn: "root" })
 export class AuthService {

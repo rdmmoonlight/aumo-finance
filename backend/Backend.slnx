@@ -1,9 +1,20 @@
+PS C:\Users\chethusk\Code\example> dotnet new classlib -n asp-net-core
+The template "Class Library" was created successfully.
+
+Processing post-creation actions...
+Restoring C:\Users\chethusk\Code\example\asp-net-core\asp-net-core.csproj:
+Restore succeeded.
+
+PS C:\Users\chethusk\Code\example> dotnet sln .\example.slnx add asp-net-core
+Project `asp-net-core\asp-net-core.csproj` added to the solution.
+
+PS C:\Users\chethusk\Code\example> cat .\example.slnx
 <Solution>
   <Configurations>
     <Platform Name="Any CPU" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Folder Name="/asp-net-core/" />
-  <Project Path="asp-net-core/AumoBackend.csproj" />
+  <Project Path="asp-net-core/asp-net-core.csproj" />
+  <Project Path="asp-net-core/asp-net-core.csproj" />
 </Solution>

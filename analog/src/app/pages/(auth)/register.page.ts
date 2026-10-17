@@ -9,7 +9,7 @@ import {
 } from "@angular/forms";
 import { Router, RouterLink } from "@angular/router";
 
-import { AuthService, extractError } from "../../core/auth.service";
+import { AuthService, extractError } from "../../services/auth.service";
 
 export const routeMeta: RouteMeta = { title: "Daftar - Aumo Finance" };
 

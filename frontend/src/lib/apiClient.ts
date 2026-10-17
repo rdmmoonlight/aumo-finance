@@ -1,13 +1,3 @@
-// Helper Cookie Client-side (Pengganti next/headers)
-function getCookie(name: string): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(";").shift();
-  return undefined;
-}
-
-// src/lib/apiClient.ts
 import type {
   BaseQueryFn,
   FetchArgs,
@@ -15,11 +5,18 @@ import type {
 } from "@reduxjs/toolkit/query";
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-// Ambil URL murni dari environment variable tanpa auto-correct/manipulasi string
+// Helper Cookie Client-side
+function getCookie(name: string): string | undefined {
+  if (typeof window === "undefined" || typeof document === "undefined") return undefined;
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop()?.split(";").shift();
+  return undefined;
+}
+
 function getBackendTarget(): string {
-  // Kosong = path relatif (/api/...), diteruskan oleh proxy Vite saat dev.
-  // Di production (Vercel) isi NEXT_PUBLIC_WEB_API_URL dengan URL backend.
-  return (process.env.NEXT_PUBLIC_WEB_API_URL as string | undefined) || "";
+  // Ambil URL Backend dari environment variable Next.js
+  return process.env.NEXT_PUBLIC_WEB_API_URL || "";
 }
 
 const BASE_URL = getBackendTarget();
@@ -31,18 +28,6 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   credentials: "include",
   prepareHeaders: async (headers, { arg }) => {
-    // SSR: forward cookies dari server secara dinamis (Hanya di server context)
-    if (typeof window === "undefined") {
-      try {
-        const cookieHeader = document.cookie;
-        if (cookieHeader) {
-          headers.set("Cookie", cookieHeader);
-        }
-      } catch {
-        // Mengabaikan error jika dipanggil di luar konteks request server Next.js
-      }
-    }
-
     // Biarkan browser menentukan Content-Type & boundary secara otomatis jika mengirim FormData
     const fetchArgs = arg as FetchArgs;
     if (
@@ -68,8 +53,6 @@ const baseQueryWithReauth: BaseQueryFn<
   const requestUrl = typeof args === "string" ? args : args.url;
   const requestMethod = typeof args === "string" ? "GET" : args.method || "GET";
 
-  // --- LOGGING & VALIDASI RUTE MURNI ---
-  // Cetak gabungan akhir URL murni ke console agar mudah di-debug mana rute yang typo/double slash
   const fullTargetUrl = `${BASE_URL}${requestUrl}`;
 
   if (!requestUrl || !requestUrl.startsWith("/")) {
@@ -77,7 +60,7 @@ const baseQueryWithReauth: BaseQueryFn<
       `❌ [RTK Query Route Error]: Route "${requestUrl}" tidak diawali slash '/'. Full Target URL: "${fullTargetUrl}"`,
     );
     throw new Error(
-      `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'. Mohon perbaiki penulisan endpoint pada slice API tempat permintaan ini dipanggil.`,
+      `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'. Mohon perbaiki penulisan endpoint.`,
     );
   }
 
@@ -115,7 +98,6 @@ const baseQueryWithReauth: BaseQueryFn<
 
   const result = await rawBaseQuery(adjustedArgs, api, extraOptions);
 
-  // Jika dapat error status (404, 500, dll), print log murni rute mana yang gagal
   if (result.error) {
     console.warn(
       `⚠️ [RTK Query Fetch Error ${result.error.status}]: ${requestMethod} ${fullTargetUrl}`,
@@ -130,9 +112,10 @@ const baseQueryWithReauth: BaseQueryFn<
     typeof window !== "undefined"
   ) {
     const currentPath = window.location.pathname;
+
+    // Cegah loop jika sedang berada di halaman login/auth
     if (
       !currentPath.startsWith("/auth") &&
-      currentPath !== "/" &&
       !isRedirecting
     ) {
       isRedirecting = true;
@@ -150,6 +133,7 @@ export const baseApi = createApi({
   baseQuery: baseQueryWithReauth,
   refetchOnFocus: false,
   refetchOnReconnect: false,
+  refetchOnMountOrArgChange: false, // Disabilitas otomatis refetch pada mount untuk cegah loop
   keepUnusedDataFor: 300,
   tagTypes: [
     "Auth",
