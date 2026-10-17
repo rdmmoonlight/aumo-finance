@@ -11,7 +11,9 @@ using AumoBackend.Middlewares;
 using AumoBackend.Models;
 using FluentValidation;
 using Hangfire;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -53,6 +55,14 @@ public partial class Program
                 .Enrich.FromLogContext()
                 .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture));
 
+            // 1. Forwarded Headers Configuration (Render.com Proxy)
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
             builder.Services.AddHttpClient();
             builder.Services.AddDatabaseServices(builder.Configuration);
             builder.Services.AddIdentityAndAuthServices(builder.Configuration);
@@ -61,6 +71,17 @@ public partial class Program
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+            builder.Services.AddHealthChecks();
+
+            // 2. Rate Limiter Registration
+            builder.Services.AddRateLimiter(options =>
+            {
+                options.AddFixedWindowLimiter("global", opt =>
+                {
+                    opt.PermitLimit = 100;
+                    opt.Window = TimeSpan.FromMinutes(1);
+                });
+            });
 
             builder.Services.AddCors(options =>
             {
@@ -77,6 +98,7 @@ public partial class Program
 
             var app = builder.Build();
 
+            // 3. Forwarded Headers Middleware MUST be placed at the very top
             app.UseForwardedHeaders();
 
             app.Use(async (context, next) =>
@@ -158,16 +180,18 @@ public partial class Program
 
             app.UseSerilogRequestLogging();
 
-            app.MapOpenApi();
-            app.MapScalarApiReference();
-
+            // 4. Proper Pipeline Ordering
             app.UseRouting();
+
             app.UseCors("AllowFrontend");
 
             app.UseRateLimiter();
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.MapOpenApi();
+            app.MapScalarApiReference();
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
