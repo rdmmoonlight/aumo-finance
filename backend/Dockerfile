@@ -12,18 +12,22 @@ WORKDIR /src
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
-# Copy csproj dan restore (Caching layer)
-COPY ["asp-net-core/AumoBackend.csproj", "./"]
+# Copy csproj ke subfolder struktur yang sama agar path tetap konsisten
+COPY ["asp-net-core/AumoBackend.csproj", "asp-net-core/"]
 RUN dotnet restore "asp-net-core/AumoBackend.csproj"
 
-# Copy seluruh source code backend
+# Copy seluruh source code monorepo
 COPY . .
 
-# Publish aplikasi
+# Pindah ke subfolder proyek .NET
+WORKDIR "/src/asp-net-core"
+
+# Publish aplikasi .NET
 RUN dotnet publish "AumoBackend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-# 3. Stage Migration Runner (Khusus untuk Update Database Manual via Docker)
+# 3. Stage Migration Runner (Khusus untuk Update Database Manual)
 FROM build AS migration-runner
+WORKDIR "/src/asp-net-core"
 ENTRYPOINT ["dotnet", "ef", "database", "update"]
 
 # 4. Stage Final (App Production)
