@@ -7,6 +7,14 @@ namespace AumoBackend.Services.Core;
 public partial class RustCoreService : IRustCoreService
 {
     private readonly ILogger<RustCoreService> _logger;
+    private static readonly Action<ILogger, Exception?> LogNativeCallFailed = LoggerMessage.Define(
+        LogLevel.Error,
+        new EventId(0, "NativeCallFailed"),
+        "[RUST FFI] Gagal memanggil fungsi native get_salam");
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
 
     // Menghubungkan langsung ke Shared Library Rust (aumo_core.so di Linux / aumo_core.dll di Windows)
     [LibraryImport("aumo_core", EntryPoint = "get_salam")]
@@ -38,16 +46,13 @@ public partial class RustCoreService : IRustCoreService
                 return Task.FromResult<SalamResponse?>(null);
             }
 
-            var result = JsonSerializer.Deserialize<SalamResponse>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var result = JsonSerializer.Deserialize<SalamResponse>(json, SerializerOptions);
 
             return Task.FromResult(result);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[RUST FFI] Gagal memanggil fungsi native get_salam");
+            LogNativeCallFailed(_logger, ex);
             return Task.FromResult<SalamResponse?>(null);
         }
     }
