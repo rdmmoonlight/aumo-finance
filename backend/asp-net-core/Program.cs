@@ -349,9 +349,9 @@ public partial class Program
             builder.Services.AddHttpClient<IMarketDataService, MarketDataService>();
 
             // =====================================
-            // Axum Core Client
+            // Axum Core Services
             // =====================================
-            builder.Services.AddHostedService<AxumProcessHostedService>();
+            builder.Services.AddScoped<IRustCoreService, RustCoreService>();
          
             // =====================================
             // 8. FORWARDED HEADERS CONFIGURATION
