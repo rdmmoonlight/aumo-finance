@@ -8,6 +8,12 @@ ENV ASPNETCORE_HTTP_PORTS=8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
+# Install Rust & Cargo (diperlukan untuk build target di AumoBackend.csproj)
+RUN apt-get update && apt-get install -y curl build-essential && \
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 # Install EF Core CLI Tool di stage build
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
@@ -16,13 +22,13 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 COPY ["asp-net-core/AumoBackend.csproj", "asp-net-core/"]
 RUN dotnet restore "asp-net-core/AumoBackend.csproj"
 
-# Copy seluruh source code monorepo
+# Copy seluruh source code monorepo (termasuk folder axum)
 COPY . .
 
 # Pindah ke subfolder proyek .NET
 WORKDIR "/src/asp-net-core"
 
-# Publish aplikasi .NET
+# Publish aplikasi .NET (akan berhasil memanggil cargo build)
 RUN dotnet publish "AumoBackend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # 3. Stage Migration Runner (Khusus untuk Update Database Manual)
