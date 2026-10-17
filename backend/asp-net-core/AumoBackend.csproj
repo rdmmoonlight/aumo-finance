@@ -11,6 +11,15 @@
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
     <AnalysisLevel>latest-recommended</AnalysisLevel>
     <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Property Deteksi Platform Lintas OS untuk Dynamic Library (.so / .dylib / .dll) -->
+    <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
+    <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
+    <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
+
+    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_core.dll</RustLibName>
+    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">libaumo_core.dylib</RustLibName>
+    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -55,17 +64,6 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
   </ItemGroup>
 
-  <!-- Property Deteksi Platform Lintas OS untuk Dynamic Library (.so / .dylib / .dll) -->
-  <PropertyGroup>
-    <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
-    <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
-    <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
-
-    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_core.dll</RustLibName>
-    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">libaumo_core.dylib</RustLibName>
-    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
-  </PropertyGroup>
-
   <!-- Target Kompilasi Cargo & Copy Dynamic Library ke OutDir Lokal -->
   <Target Name="BuildRustFFI" BeforeTargets="BeforeBuild">
     <Message Text="[RUST FFI] Mengompilasi C-Shared Library Rust ($(Configuration))..." Importance="high" />
@@ -75,10 +73,10 @@
     <Copy SourceFiles="../axum/target/$(RustTargetDir)/$(RustLibName)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Salin File Shared Library saat dotnet publish ke Root /app/publish -->
+  <!-- Salin File Shared Library saat dotnet publish ke Root Output (/app/publish) -->
   <Target Name="CopyRustFFIToPublish" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
-      <ResolvedFileToPublish Include="../axum/target/release/$(RustLibName)">
+      <ResolvedFileToPublish Include="../axum/target/$(RustTargetDir)/$(RustLibName)">
         <RelativePath>$(RustLibName)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
