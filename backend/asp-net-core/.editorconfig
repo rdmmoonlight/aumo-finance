@@ -30,6 +30,9 @@ dotnet_sort_system_directives_first = true
 csharp_using_directive_placement = outside_namespace:suggestion
 dotnet_diagnostic.IDE0065.severity = suggestion
 
+# Memicu pembersihan otomatis untuk unused using directive saat save
+dotnet_diagnostic.IDE0005.severity = warning
+
 # Namespace (File-Scoped Namespace khas .NET 6+) - Diturunkan agar tidak fail saat build
 csharp_style_namespace_declarations = file_scoped:suggestion
 dotnet_diagnostic.IDE0161.severity = suggestion

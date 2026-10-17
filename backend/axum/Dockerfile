@@ -1,5 +1,5 @@
 # Stage 1: Build
-FROM rust:1.82-slim AS builder
+FROM axum:1.82-slim AS builder
 
 WORKDIR /app
 COPY Cargo.toml Cargo.lock* ./
