@@ -1,3 +1,0 @@
- "RustCore": {
-    "BaseUrl": "http://localhost:8081"
-  }

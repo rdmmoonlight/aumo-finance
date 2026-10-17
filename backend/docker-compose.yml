@@ -2,11 +2,11 @@ services:
   # ======================
   # Rust Core (Internal Only)
   # ======================
-  rust-core:
+  axum:
     build:
-      context: ./rust-core
+      context: ./axum
       dockerfile: Dockerfile
-    container_name: aumo-rust-core
+    container_name: aumo-axum
     # Tidak ada "ports:" → tidak bisa diakses dari luar
     expose:
       - "8081"
@@ -31,8 +31,8 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:8080
-      - RustCore__BaseUrl=http://rust-core:8081
+      - RustCore__BaseUrl=http://axum:8081
     depends_on:
-      rust-core:
+      axum:
         condition: service_healthy
     restart: unless-stopped

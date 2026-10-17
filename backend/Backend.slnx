@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/asp-net-core/">
+    <Project Path="asp-net-core/AumoBackend.csproj" />
+  </Folder>
+</Solution>
