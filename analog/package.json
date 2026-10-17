@@ -22,7 +22,6 @@
     "gen:api": "node scripts/gen-api.mjs"
   },
   "dependencies": {
-    "@analogjs/router": "^1.13.0",
     "@angular/animations": "^19.1.0",
     "@angular/common": "^19.1.0",
     "@angular/compiler": "^19.1.0",
@@ -33,6 +32,7 @@
     "@angular/router": "^19.1.0",
     "@ngrx/operators": "^19.0.0",
     "@ngrx/signals": "^19.0.0",
+    "@tanstack/angular-router": "^1.112.0",
     "chart.js": "^4.4.7",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -56,6 +56,7 @@
     "@tailwindcss/postcss": "^4.0.0",
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.0",
+    "@tanstack/router-plugin": "^1.112.0",
     "@types/node": "^22.10.0",
     "@vitejs/plugin-basic-ssl": "^1.2.0",
     "cross-env": "^7.0.3",
