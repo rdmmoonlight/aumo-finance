@@ -83,6 +83,9 @@ public partial class Program
                 });
             });
 
+            var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() 
+                     ?? ["https://aumoweb.vercel.app"];
+            
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
