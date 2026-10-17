@@ -14,7 +14,6 @@ export default defineConfig(({ mode }) => ({
     analog({
       ssr: false,
       static: true,
-      router: false,
       prerender: { routes: [] },
     }),
     tailwindcss(),
