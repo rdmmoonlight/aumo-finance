@@ -1,25 +1,17 @@
+import { provideFileRouter, withExtraRoutes } from "@analogjs/router";
 import {
   provideHttpClient,
   withFetch,
   withInterceptors,
 } from "@angular/common/http";
 import { ApplicationConfig } from "@angular/core";
-import { createRouter, provideTanStackRouter } from "@tanstack/angular-router";
 
 import { authInterceptor } from "./interceptors/auth.interceptor";
-import { routeTree } from "./routeTree.gen"; // atau pohon rute gabungan dari ./routes
-
-const router = createRouter({ routeTree });
-
-declare module "@tanstack/angular-router" {
-  interface Register {
-    router: typeof router;
-  }
-}
+import { routes } from "./routes";
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideTanStackRouter(router),
+    provideFileRouter(withExtraRoutes(routes)),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
   ],
 };
