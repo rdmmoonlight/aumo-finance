@@ -54,7 +54,7 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
   </ItemGroup>
 
-  <!-- Target Kompilasi & Copy Binary Rust ke OutDir / PublishDir -->
+  <!-- Target Kompilasi & Copy Binary Rust ke OutDir Lokal -->
   <Target Name="BuildRust" BeforeTargets="BeforeBuild">
     <PropertyGroup>
       <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
@@ -71,7 +71,7 @@
     <Copy SourceFiles="../axum/target/$(RustTargetDir)/$(RustExecutableName)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Salin Binary Rust saat dotnet publish ke folder /app/publish -->
+  <!-- Salin Binary Rust saat dotnet publish ke folder output -->
   <Target Name="CopyRustToPublish" AfterTargets="ComputeFilesToPublish">
     <PropertyGroup>
       <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum.exe</RustExecutableName>
@@ -80,7 +80,7 @@
 
     <ItemGroup>
       <ResolvedFileToPublish Include="../axum/target/release/$(RustExecutableName)">
-        <RelativePath>%(Filename)%(Extension)</RelativePath>
+        <RelativePath>$(RustExecutableName)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
     </ItemGroup>
