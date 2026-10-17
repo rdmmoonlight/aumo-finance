@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 /// Mewakili Selected Period Helper.
 /// </summary>
 namespace AumoBackend.Helpers
+{
     public static class SelectedPeriodHelper
 {
     /// <summary>
