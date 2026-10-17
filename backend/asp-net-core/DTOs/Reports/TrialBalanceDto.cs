@@ -2,63 +2,57 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
+using System;
+
 namespace AumoBackend.DTOs.Reports;
 
-using AumoBackend.Controllers.Reports;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 /// <summary>
 /// Mewakili Trial Balance Row.
 /// </summary>
-
 public class TrialBalanceRow
 {
     /// <summary>
-    /// Mewakili Account Id.
+    /// Mewakili Id.
     /// </summary>
-    public int AccountId { get; set; }
-    /// <summary>
-    /// Mewakili Reference Number.
-    /// </summary>
+    public long Id { get; set; }
 
-    public string ReferenceNumber { get; set; } = string.Empty;
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
+    public Guid UserId { get; set; }
+
+    /// <summary>
+    /// Mewakili Period Id.
+    /// </summary>
+    public int PeriodId { get; set; }
+
+    /// <summary>
+    /// Mewakili Account Number.
+    /// </summary>
+    public string AccountNumber { get; set; } = string.Empty;
+
     /// <summary>
     /// Mewakili Account Name.
     /// </summary>
-
     public string AccountName { get; set; } = string.Empty;
-    /// <summary>
-    /// Mewakili Type.
-    /// </summary>
 
-    public string Type { get; set; } = string.Empty;
     /// <summary>
-    /// Mewakili Role.
+    /// Mewakili Debit Balance.
     /// </summary>
+    public decimal DebitBalance { get; set; }
 
-    public string? Role { get; set; }
     /// <summary>
-    /// Mewakili Normal Balance Is Debit.
+    /// Mewakili Credit Balance.
     /// </summary>
+    public decimal CreditBalance { get; set; }
 
-    public bool NormalBalanceIsDebit { get; set; }
     /// <summary>
-    /// Mewakili Net Balance.
+    /// Mewakili Is Total Row.
     /// </summary>
+    public bool IsTotalRow { get; set; }
 
-    public decimal NetBalance { get; set; }
     /// <summary>
-    /// Mewakili Debit.
+    /// Mewakili Created At.
     /// </summary>
-
-    public decimal Debit { get; set; }
-    /// <summary>
-    /// Mewakili Credit.
-    /// </summary>
-
-    public decimal Credit { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
