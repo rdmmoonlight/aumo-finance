@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>3b80a545-4808-45e1-aed8-8b28c45e72fe</UserSecretsId>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   
     <!-- Konfigurasi Analysis & Formatting -->
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
@@ -54,33 +55,31 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
   </ItemGroup>
 
-  <!-- Target Kompilasi & Copy Binary Rust ke OutDir Lokal -->
-  <Target Name="BuildRust" BeforeTargets="BeforeBuild">
-    <PropertyGroup>
-      <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
-      <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
-      <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
-      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum.exe</RustExecutableName>
-      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum</RustExecutableName>
-    </PropertyGroup>
+  <!-- Property Deteksi Platform Lintas OS untuk Dynamic Library (.so / .dylib / .dll) -->
+  <PropertyGroup>
+    <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
+    <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
+    <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
 
-    <Message Text="[RUST] Mengompilasi kode Rust ($(Configuration))..." Importance="high" />
+    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_core.dll</RustLibName>
+    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">libaumo_core.dylib</RustLibName>
+    <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
+  </PropertyGroup>
+
+  <!-- Target Kompilasi Cargo & Copy Dynamic Library ke OutDir Lokal -->
+  <Target Name="BuildRustFFI" BeforeTargets="BeforeBuild">
+    <Message Text="[RUST FFI] Mengompilasi C-Shared Library Rust ($(Configuration))..." Importance="high" />
     <Exec Command="cargo build $(RustBuildMode) --manifest-path ../axum/Cargo.toml" />
 
-    <!-- Copy Binary Rust ke OutDir lokal -->
-    <Copy SourceFiles="../axum/target/$(RustTargetDir)/$(RustExecutableName)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <!-- Copy File Shared Library ke Target Directory Build .NET -->
+    <Copy SourceFiles="../axum/target/$(RustTargetDir)/$(RustLibName)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
   </Target>
 
-  <!-- Salin Binary Rust saat dotnet publish ke folder output -->
-  <Target Name="CopyRustToPublish" AfterTargets="ComputeFilesToPublish">
-    <PropertyGroup>
-      <RustExecutableName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum.exe</RustExecutableName>
-      <RustExecutableName Condition="!$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">axum</RustExecutableName>
-    </PropertyGroup>
-
+  <!-- Salin File Shared Library saat dotnet publish ke Root /app/publish -->
+  <Target Name="CopyRustFFIToPublish" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
-      <ResolvedFileToPublish Include="../axum/target/release/$(RustExecutableName)">
-        <RelativePath>$(RustExecutableName)</RelativePath>
+      <ResolvedFileToPublish Include="../axum/target/release/$(RustLibName)">
+        <RelativePath>$(RustLibName)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>
     </ItemGroup>
