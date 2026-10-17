@@ -185,7 +185,7 @@ private fun EntryCard(
 
         Spacer(modifier = Modifier.height(AumoDimens.SpacingSmall))
 
-        entry.lines.sortedBy { it.lineOrder }.forEach { line ->
+        entry.lines.orEmpty().sortedBy { it.lineOrder }.forEach { line ->
             JournalLineRow(line)
         }
     }

@@ -24,7 +24,9 @@ data class JournalReportEntry(
     val entryDate: String,
     val createdAt: String,
     val updatedAt: String?,
-    val lines: List<JournalReportLine>,
+    // Nullable: Gson mengabaikan non-null Kotlin, jadi field yang hilang di JSON
+    // akan menjadi null di runtime.
+    val lines: List<JournalReportLine>?,
 )
 
 data class JournalReportResponse(
@@ -32,7 +34,10 @@ data class JournalReportResponse(
     val hasPeriodSelected: Boolean?,
     val selectedPeriodName: String?,
     val isPeriodClosed: Boolean,
-    val entries: List<JournalReportEntry>,
+    // Nullable: pada respons error (mis. 500) backend hanya mengirim
+    // success + message, sehingga entries tidak ada.
+    val entries: List<JournalReportEntry>?,
+    val message: String? = null,
 )
 
 class JournalReportApi(private val client: HttpClient = ApiClient.client) {

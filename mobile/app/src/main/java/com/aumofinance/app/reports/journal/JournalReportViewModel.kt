@@ -45,12 +45,20 @@ class JournalReportViewModel : ViewModel() {
     private fun fetch(call: suspend () -> io.ktor.client.statement.HttpResponse) {
         viewModelScope.launch {
             try {
-                val body = call().body<JournalReportResponse>()
-                entries = body.entries
+                val response = call()
+                val body = runCatching { response.body<JournalReportResponse>() }.getOrNull()
+                if (!response.status.isSuccess() || body == null || !body.success) {
+                    entries = emptyList()
+                    snackbarMessage = body?.message?.takeIf { it.isNotBlank() }
+                        ?: "Failed to load journal (${response.status.value})."
+                    return@launch
+                }
+                entries = body.entries.orEmpty()
                 selectedPeriodName = body.selectedPeriodName
             } catch (t: Throwable) {
                 com.aumofinance.app.crashlog.AppLogger.error("JournalReportViewModel", "Error tertangkap", t)
                 entries = emptyList()
+                snackbarMessage = t.message ?: "Connection failed."
             }
         }
     }
