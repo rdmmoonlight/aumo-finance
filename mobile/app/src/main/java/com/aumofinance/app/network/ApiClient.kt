@@ -33,14 +33,10 @@ private val AuthPlugin =
     }
 
 object ApiClient {
-    // HANYA scheme+host, TANPA path — endpoint di setiap ApiX.kt WAJIB
-    // ditulis absolut mulai dari "/" (mis. "/auth/login"). Ktor
-    // memperlakukan path yang diawali "/" sebagai path ABSOLUT yang
-    // MENGGANTIKAN seluruh path bawaan di sini (bukan digabung/append) —
-    // jadi kalau BASE_URL ikut menyertakan "", bagian itu justru
-    // dibuang begitu request memberi path absolut, dan "" harus
-    // ditulis ulang di endpoint itu sendiri. Simpan "" di endpoint,
-    // bukan di sini, supaya konsisten dan tidak diam-diam hilang.
+    // HANYA scheme+host, TANPA path. Backend tidak memakai prefix apa pun,
+    // jadi endpoint di setiap ApiX.kt ditulis absolut mulai dari "/"
+    // (mis. "/auth/login", "/periods"). Ktor memperlakukan path yang diawali
+    // "/" sebagai path ABSOLUT yang menggantikan path bawaan BASE_URL.
     private const val BASE_URL = "https://aumonext-api.onrender.com"
 
     // Render free-tier bisa cold start 30-60 detik kalau server sempat tidur.
