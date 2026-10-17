@@ -3,9 +3,7 @@ using AumoBackend.DTOs.Core;
 using AumoBackend.Services.Core;
 using FluentValidation;
 using FluentValidation.Results;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
@@ -13,14 +11,14 @@ namespace AumoBackend.Tests.Controllers;
 
 public class CoreControllerTests
 {
-    private readonly Mock<IRustCoreService> _rustCoreServiceMock;
+    private readonly Mock<RustCoreService> _rustCoreServiceMock;
     private readonly Mock<IValidator<SalamRequestDto>> _validatorMock;
     private readonly Mock<ILogger<CoreController>> _loggerMock;
     private readonly CoreController _controller;
 
     public CoreControllerTests()
     {
-        _rustCoreServiceMock = new Mock<IRustCoreService>();
+        _rustCoreServiceMock = new Mock<RustCoreService>();
         _validatorMock = new Mock<IValidator<SalamRequestDto>>();
         _loggerMock = new Mock<ILogger<CoreController>>();
 
