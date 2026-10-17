@@ -33,18 +33,18 @@ public class SummaryController : ControllerBase
 {
     private readonly AppDbContext context;
     private readonly UserManager<ApplicationUser> userManager;
-/// <summary>
-/// Controller API untuk mengelola Summary.
-/// </summary>
+    /// <summary>
+    /// Controller API untuk mengelola Summary.
+    /// </summary>
 
     public SummaryController(AppDbContext context, UserManager<ApplicationUser> userManager)
     {
         this.context = context;
         this.userManager = userManager;
     }
-/// <summary>
-/// Mengambil data  Summary.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Summary.
+    /// </summary>
 
     [HttpGet]
     public async Task<IActionResult> GetSummary()

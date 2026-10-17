@@ -22,34 +22,34 @@ public class AccountItemDto
     /// Mewakili Id.
     /// </summary>
     public int Id { get; set; }
-/// <summary>
-/// Mewakili Reference Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Reference Number.
+    /// </summary>
 
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string Role { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Is Active.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Active.
+    /// </summary>
 
     public bool IsActive { get; set; }
-/// <summary>
-/// Mewakili Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Balance.
+    /// </summary>
 
     public decimal Balance { get; set; }
 }
@@ -63,14 +63,14 @@ public class ChartOfAccountsListResponseDto
     /// Mewakili Success.
     /// </summary>
     public bool Success { get; set; }
-/// <summary>
-/// Mewakili Selected Period Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Selected Period Name.
+    /// </summary>
 
     public string? SelectedPeriodName { get; set; }
-/// <summary>
-/// Mewakili Accounts.
-/// </summary>
+    /// <summary>
+    /// Mewakili Accounts.
+    /// </summary>
 
     public IEnumerable<AccountItemDto> Accounts { get; set; } = new List<AccountItemDto>();
 }
@@ -84,19 +84,19 @@ public class CreateAccountRequestDto
     /// Mewakili Reference Number.
     /// </summary>
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string? Role { get; set; }
 }
@@ -110,24 +110,24 @@ public class UpdateAccountRequestDto
     /// Mewakili Reference Number.
     /// </summary>
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string? Role { get; set; }
-/// <summary>
-/// Mewakili Is Active.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Active.
+    /// </summary>
 
     public bool IsActive { get; set; }
 }
@@ -141,19 +141,19 @@ public class ServiceResultDto
     /// Mewakili Is Success.
     /// </summary>
     public bool IsSuccess { get; set; }
-/// <summary>
-/// Mewakili Message.
-/// </summary>
+    /// <summary>
+    /// Mewakili Message.
+    /// </summary>
 
     public string Message { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Account Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Id.
+    /// </summary>
 
     public int? AccountId { get; set; }
-/// <summary>
-/// Mewakili Status Code.
-/// </summary>
+    /// <summary>
+    /// Mewakili Status Code.
+    /// </summary>
 
     public int StatusCode { get; set; } = 200;
 }
@@ -167,24 +167,24 @@ public class AccountDto
     /// Mewakili Id.
     /// </summary>
     public int Id { get; set; }
-/// <summary>
-/// Mewakili Reference Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Reference Number.
+    /// </summary>
 
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string Role { get; set; } = string.Empty;
 }
@@ -198,19 +198,19 @@ public class CreateAccountRequest
     /// Mewakili Reference Number.
     /// </summary>
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string Role { get; set; } = string.Empty;
 }
@@ -224,24 +224,24 @@ public class UpdateAccountRequest
     /// Mewakili Reference Number.
     /// </summary>
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string Role { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Is Active.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Active.
+    /// </summary>
 
     public bool IsActive { get; set; } = true;
 }

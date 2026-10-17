@@ -36,9 +36,9 @@ public class AuthService(
     {
         return await loginValidator.ValidateAsync(request);
     }
-/// <summary>
-/// Mewakili Validate Google Login Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Validate Google Login Async.
+    /// </summary>
 
     public async Task<ValidationResult> ValidateGoogleLoginAsync(GoogleLoginRequest request)
     {
@@ -56,9 +56,9 @@ public class AuthService(
             LockoutEnd = lockoutEnd?.UtcDateTime,
         };
     }
-/// <summary>
-/// Mewakili Process Login Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Process Login Async.
+    /// </summary>
 
     public async Task<AuthResponseDto?> ProcessLoginAsync(LoginRequest request, string ipAddress, string headerUserAgent)
     {
@@ -143,9 +143,9 @@ public class AuthService(
             Token = jwtToken,
         };
     }
-/// <summary>
-/// Mewakili Process Google Login Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Process Google Login Async.
+    /// </summary>
 
     public async Task<AuthResponseDto?> ProcessGoogleLoginAsync(GoogleLoginRequest request)
     {
@@ -219,17 +219,17 @@ public class AuthService(
             Token = token,
         };
     }
-/// <summary>
-/// Mewakili Configure Google Redirect Properties.
-/// </summary>
+    /// <summary>
+    /// Mewakili Configure Google Redirect Properties.
+    /// </summary>
 
     public AuthenticationProperties ConfigureGoogleRedirectProperties(string redirectUrl)
     {
         return signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
     }
-/// <summary>
-/// Mewakili Process Google Callback Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Process Google Callback Async.
+    /// </summary>
 
     public async Task<string?> ProcessGoogleCallbackAsync(ClaimsPrincipal principal, string loginProvider, string providerKey)
     {
@@ -273,9 +273,9 @@ public class AuthService(
 
         return null;
     }
-/// <summary>
-/// Mengambil data  User Profile Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  User Profile Async.
+    /// </summary>
 
     public async Task<UserProfileViewModel?> GetUserProfileAsync(ClaimsPrincipal userPrincipal)
     {
@@ -314,9 +314,9 @@ public class AuthService(
             CustomClaims = userClaims,
         };
     }
-/// <summary>
-/// Mewakili Logout Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Logout Async.
+    /// </summary>
 
     public async Task LogoutAsync()
     {

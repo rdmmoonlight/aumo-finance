@@ -21,14 +21,14 @@ public class PreviewJournalImportViewModel
     /// Mewakili Transactions.
     /// </summary>
     public List<JournalTransactionDto> Transactions { get; set; } = new();
-/// <summary>
-/// Mewakili Account Mappings.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Mappings.
+    /// </summary>
 
     public List<AccountMappingDetailDto> AccountMappings { get; set; } = new();
-/// <summary>
-/// Mewakili Summary.
-/// </summary>
+    /// <summary>
+    /// Mewakili Summary.
+    /// </summary>
 
     public PreviewJournalSummaryViewModel Summary { get; set; } = new();
 }
@@ -42,24 +42,24 @@ public class PreviewJournalSummaryViewModel
     /// Mewakili Total Unique Accounts.
     /// </summary>
     public int TotalUniqueAccounts { get; set; }
-/// <summary>
-/// Mewakili Exact Match Count.
-/// </summary>
+    /// <summary>
+    /// Mewakili Exact Match Count.
+    /// </summary>
 
     public int ExactMatchCount { get; set; }
-/// <summary>
-/// Mewakili Reallocated Count.
-/// </summary>
+    /// <summary>
+    /// Mewakili Reallocated Count.
+    /// </summary>
 
     public int ReallocatedCount { get; set; }
-/// <summary>
-/// Mewakili Unmapped Count.
-/// </summary>
+    /// <summary>
+    /// Mewakili Unmapped Count.
+    /// </summary>
 
     public int UnmappedCount { get; set; }
-/// <summary>
-/// Mewakili Is Perfect Match.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Perfect Match.
+    /// </summary>
 
     public bool IsPerfectMatch { get; set; }
 }
@@ -73,9 +73,9 @@ public class ImportJournalResultViewModel
     /// Mewakili Message.
     /// </summary>
     public string Message { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Imported Entries Count.
-/// </summary>
+    /// <summary>
+    /// Mewakili Imported Entries Count.
+    /// </summary>
 
     public int ImportedEntriesCount { get; set; }
 }

@@ -16,59 +16,59 @@ public partial class LoginActivity
     /// Mewakili Id.
     /// </summary>
     public Guid Id { get; set; }
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili Activity Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Activity Type.
+    /// </summary>
 
     public string ActivityType { get; set; } = null!;
-/// <summary>
-/// Mewakili Is Success.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Success.
+    /// </summary>
 
     public bool IsSuccess { get; set; }
-/// <summary>
-/// Mewakili Device.
-/// </summary>
+    /// <summary>
+    /// Mewakili Device.
+    /// </summary>
 
     public string Device { get; set; } = null!;
-/// <summary>
-/// Mewakili Browser.
-/// </summary>
+    /// <summary>
+    /// Mewakili Browser.
+    /// </summary>
 
     public string Browser { get; set; } = null!;
-/// <summary>
-/// Mewakili Operating System.
-/// </summary>
+    /// <summary>
+    /// Mewakili Operating System.
+    /// </summary>
 
     public string OperatingSystem { get; set; } = null!;
-/// <summary>
-/// Mewakili Ip Address.
-/// </summary>
+    /// <summary>
+    /// Mewakili Ip Address.
+    /// </summary>
 
     public string IpAddress { get; set; } = null!;
-/// <summary>
-/// Mewakili Country.
-/// </summary>
+    /// <summary>
+    /// Mewakili Country.
+    /// </summary>
 
     public string Country { get; set; } = null!;
-/// <summary>
-/// Mewakili User Agent.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Agent.
+    /// </summary>
 
     public string UserAgent { get; set; } = null!;
-/// <summary>
-/// Membuat data d At baru.
-/// </summary>
+    /// <summary>
+    /// Membuat data d At baru.
+    /// </summary>
 
     public DateTime CreatedAt { get; set; }
-/// <summary>
-/// Mewakili User.
-/// </summary>
+    /// <summary>
+    /// Mewakili User.
+    /// </summary>
 
     public virtual ApplicationUser User { get; set; } = null!;
 }

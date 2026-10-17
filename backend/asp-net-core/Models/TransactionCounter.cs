@@ -16,19 +16,19 @@ public partial class TransactionCounter
     /// Mewakili Id.
     /// </summary>
     public int Id { get; set; }
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili Counter Key.
-/// </summary>
+    /// <summary>
+    /// Mewakili Counter Key.
+    /// </summary>
 
     public string CounterKey { get; set; } = null!;
-/// <summary>
-/// Mewakili Last Sequence.
-/// </summary>
+    /// <summary>
+    /// Mewakili Last Sequence.
+    /// </summary>
 
     public int LastSequence { get; set; }
 }

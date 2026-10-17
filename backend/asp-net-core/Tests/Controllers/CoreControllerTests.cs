@@ -20,9 +20,9 @@ public class CoreControllerTests
     private readonly Mock<IValidator<SalamRequestDto>> _validatorMock;
     private readonly Mock<ILogger<CoreController>> _loggerMock;
     private readonly CoreController _controller;
-/// <summary>
-/// Mewakili Core Controller Tests.
-/// </summary>
+    /// <summary>
+    /// Mewakili Core Controller Tests.
+    /// </summary>
 
     public CoreControllerTests()
     {
@@ -36,9 +36,9 @@ public class CoreControllerTests
             _loggerMock.Object
         );
     }
-/// <summary>
-/// Mengambil data  Salam Valid Input And Service Ready Returns200 Ok.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Salam Valid Input And Service Ready Returns200 Ok.
+    /// </summary>
 
     [Fact]
     public async Task GetSalam_ValidInputAndServiceReady_Returns200Ok()
@@ -68,9 +68,9 @@ public class CoreControllerTests
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(StatusCodes.Status200OK, okResult.StatusCode);
     }
-/// <summary>
-/// Model data Get Salam Invalid Input Returns400 Bad Request.
-/// </summary>
+    /// <summary>
+    /// Model data Get Salam Invalid Input Returns400 Bad Request.
+    /// </summary>
 
     [Fact]
     public async Task GetSalam_InvalidInput_Returns400BadRequest()
@@ -96,9 +96,9 @@ public class CoreControllerTests
         // Pastikan Rust Service TIDAK dipanggil jika validasi input gagal
         _rustCoreServiceMock.Verify(s => s.GetSalamAsync(It.IsAny<CancellationToken>()), Times.Never);
     }
-/// <summary>
-/// Mengambil data  Salam Rust Service Returns Null Returns503 Service Unavailable.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Salam Rust Service Returns Null Returns503 Service Unavailable.
+    /// </summary>
 
     [Fact]
     public async Task GetSalam_RustServiceReturnsNull_Returns503ServiceUnavailable()

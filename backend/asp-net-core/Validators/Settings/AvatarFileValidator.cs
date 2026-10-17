@@ -19,9 +19,9 @@ public class AvatarFileValidator : AbstractValidator<IFormFile>
 
     private static readonly string[] AllowedExtensions = { ".jpg", ".jpeg", ".png", ".gif", ".webp" };
     private static readonly string[] AllowedContentTypes = { "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp" };
-/// <summary>
-/// Validator untuk Avatar File Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Avatar File Validator.
+    /// </summary>
 
     public AvatarFileValidator()
     {

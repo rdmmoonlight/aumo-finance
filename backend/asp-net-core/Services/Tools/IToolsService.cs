@@ -16,14 +16,14 @@ public interface IToolsService
     /// Proses eksekusi kalkulasi Generate Journal Template.
     /// </summary>
     byte[] GenerateJournalTemplate();
-/// <summary>
-/// Mewakili Preview Journal Import Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Preview Journal Import Async.
+    /// </summary>
 
     Task<PreviewJournalImportViewModel> PreviewJournalImportAsync(Guid userId, JournalImportRequestDto request);
-/// <summary>
-/// Mewakili Import Journal Entries Async.
-/// </summary>
+    /// <summary>
+    /// Mewakili Import Journal Entries Async.
+    /// </summary>
 
     Task<ImportJournalResultViewModel> ImportJournalEntriesAsync(Guid userId, JournalImportRequestDto request);
 }

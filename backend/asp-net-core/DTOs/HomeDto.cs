@@ -5,9 +5,9 @@
 namespace AumoBackend.DTOs.Home
 {
     using System.Text.Json.Serialization;
-/// <summary>
-/// Model data Api Indonesia Kurs Response.
-/// </summary>
+    /// <summary>
+    /// Model data Api Indonesia Kurs Response.
+    /// </summary>
 
     public class ApiIndonesiaKursResponse
     {
@@ -16,16 +16,16 @@ namespace AumoBackend.DTOs.Home
         /// </summary>
         [JsonPropertyName("success")]
         public bool Success { get; set; }
-/// <summary>
-/// Mewakili Data.
-/// </summary>
+        /// <summary>
+        /// Mewakili Data.
+        /// </summary>
 
         [JsonPropertyName("data")]
         public KursData? Data { get; set; }
     }
-/// <summary>
-/// Mewakili Kurs Data.
-/// </summary>
+    /// <summary>
+    /// Mewakili Kurs Data.
+    /// </summary>
 
     public class KursData
     {
@@ -34,28 +34,28 @@ namespace AumoBackend.DTOs.Home
         /// </summary>
         [JsonPropertyName("base")]
         public string Base { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Target.
-/// </summary>
+        /// <summary>
+        /// Mewakili Target.
+        /// </summary>
 
         [JsonPropertyName("target")]
         public string Target { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Rate.
-/// </summary>
+        /// <summary>
+        /// Mewakili Rate.
+        /// </summary>
 
         [JsonPropertyName("rate")]
         public decimal Rate { get; set; }
-/// <summary>
-/// Mewakili Change.
-/// </summary>
+        /// <summary>
+        /// Mewakili Change.
+        /// </summary>
 
         [JsonPropertyName("change")]
         public decimal Change { get; set; }
     }
-/// <summary>
-/// Model data Market Indicator Dto.
-/// </summary>
+    /// <summary>
+    /// Model data Market Indicator Dto.
+    /// </summary>
 
     public class MarketIndicatorDto
     {
@@ -63,9 +63,9 @@ namespace AumoBackend.DTOs.Home
         /// Mewakili Symbol.
         /// </summary>
         public string Symbol { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Name.
-/// </summary>
+        /// <summary>
+        /// Mewakili Name.
+        /// </summary>
 
         public string Name { get; set; } = string.Empty;
 
@@ -131,9 +131,9 @@ namespace AumoBackend.DTOs.Home
             set => this.isUp = value;
         }
     }
-/// <summary>
-/// Model data Kurs Data Dto.
-/// </summary>
+    /// <summary>
+    /// Model data Kurs Data Dto.
+    /// </summary>
 
     public class KursDataDto
     {
@@ -141,25 +141,25 @@ namespace AumoBackend.DTOs.Home
         /// Mewakili Base.
         /// </summary>
         public string Base { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Target.
-/// </summary>
+        /// <summary>
+        /// Mewakili Target.
+        /// </summary>
 
         public string Target { get; set; } = string.Empty;
-/// <summary>
-/// Mewakili Rate.
-/// </summary>
+        /// <summary>
+        /// Mewakili Rate.
+        /// </summary>
 
         public decimal Rate { get; set; }
-/// <summary>
-/// Mewakili Change.
-/// </summary>
+        /// <summary>
+        /// Mewakili Change.
+        /// </summary>
 
         public decimal Change { get; set; }
     }
-/// <summary>
-/// Model data Api Response Dto.
-/// </summary>
+    /// <summary>
+    /// Model data Api Response Dto.
+    /// </summary>
 
     public class ApiResponseDto<T>
     {
@@ -167,19 +167,19 @@ namespace AumoBackend.DTOs.Home
         /// Mewakili Success.
         /// </summary>
         public bool Success { get; set; }
-/// <summary>
-/// Mewakili Data.
-/// </summary>
+        /// <summary>
+        /// Mewakili Data.
+        /// </summary>
 
         public T? Data { get; set; }
-/// <summary>
-/// Mewakili Error.
-/// </summary>
+        /// <summary>
+        /// Mewakili Error.
+        /// </summary>
 
         public string? Error { get; set; }
-/// <summary>
-/// Mewakili Message.
-/// </summary>
+        /// <summary>
+        /// Mewakili Message.
+        /// </summary>
 
         public string? Message { get; set; }
     }

@@ -14,9 +14,9 @@ using AumoBackend.DTOs.Home;
 public class HomeService : IHomeService
 {
     private readonly IHttpClientFactory? httpClientFactory;
-/// <summary>
-/// Mengambil data  Market Indicators Async.
-/// </summary>
+    /// <summary>
+    /// Mengambil data  Market Indicators Async.
+    /// </summary>
 
     public async Task<List<MarketIndicatorDto>> GetMarketIndicatorsAsync()
     {

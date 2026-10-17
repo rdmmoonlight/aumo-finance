@@ -16,60 +16,60 @@ public partial class ChartOfAccount
     /// Mewakili Id.
     /// </summary>
     public int Id { get; set; }
-/// <summary>
-/// Mewakili Reference Number.
-/// </summary>
+    /// <summary>
+    /// Mewakili Reference Number.
+    /// </summary>
 
     public int ReferenceNumber { get; set; }
-/// <summary>
-/// Mewakili Account Name.
-/// </summary>
+    /// <summary>
+    /// Mewakili Account Name.
+    /// </summary>
 
     public string AccountName { get; set; } = null!;
-/// <summary>
-/// Mewakili Type.
-/// </summary>
+    /// <summary>
+    /// Mewakili Type.
+    /// </summary>
 
     public string Type { get; set; } = null!;
-/// <summary>
-/// Mewakili Role.
-/// </summary>
+    /// <summary>
+    /// Mewakili Role.
+    /// </summary>
 
     public string Role { get; set; } = null!;
-/// <summary>
-/// Mewakili Is Active.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Active.
+    /// </summary>
 
     public bool IsActive { get; set; }
-/// <summary>
-/// Mewakili User Id.
-/// </summary>
+    /// <summary>
+    /// Mewakili User Id.
+    /// </summary>
 
     public Guid UserId { get; set; }
-/// <summary>
-/// Mewakili General Journals.
-/// </summary>
+    /// <summary>
+    /// Mewakili General Journals.
+    /// </summary>
 
     public virtual ICollection<GeneralJournal> GeneralJournals { get; set; } = new List<GeneralJournal>();
-/// <summary>
-/// Mewakili General Ledger Permanent Accounts.
-/// </summary>
+    /// <summary>
+    /// Mewakili General Ledger Permanent Accounts.
+    /// </summary>
 
     public virtual ICollection<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = new List<GeneralLedgerPermanentAccount>();
-/// <summary>
-/// Mewakili General Ledger Temporary Accounts.
-/// </summary>
+    /// <summary>
+    /// Mewakili General Ledger Temporary Accounts.
+    /// </summary>
 
     public virtual ICollection<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; } = new List<GeneralLedgerTemporaryAccount>();
-/// <summary>
-/// Mewakili Balance.
-/// </summary>
+    /// <summary>
+    /// Mewakili Balance.
+    /// </summary>
 
     // Jika Balance dihitung dari posisi Debit/Kredit atau disimpan di DTO
     public decimal Balance { get; set; }
-/// <summary>
-/// Mewakili Display Label.
-/// </summary>
+    /// <summary>
+    /// Mewakili Display Label.
+    /// </summary>
 
     // DisplayLabel helper untuk tampilan UI/Dropdown
     public string DisplayLabel => $"{this.ReferenceNumber} - {this.AccountName}";

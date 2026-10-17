@@ -15,9 +15,9 @@ using FluentValidation;
 public class CreatePeriodRequestValidator : AbstractValidator<CreatePeriodRequest>
 {
     private const int MaxAccountNameLength = 100; // selaras HasMaxLength(100) di AppDbContext
-/// <summary>
-/// Validator untuk Create Period Request Validator.
-/// </summary>
+    /// <summary>
+    /// Validator untuk Create Period Request Validator.
+    /// </summary>
 
     public CreatePeriodRequestValidator()
     {

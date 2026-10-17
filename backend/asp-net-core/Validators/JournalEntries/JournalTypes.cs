@@ -13,9 +13,9 @@ public static class JournalTypes
     /// Mewakili Allowed.
     /// </summary>
     public static readonly string[] Allowed = { "General", "Adjusting" };
-/// <summary>
-/// Mewakili Is Valid Or Empty.
-/// </summary>
+    /// <summary>
+    /// Mewakili Is Valid Or Empty.
+    /// </summary>
 
     public static bool IsValidOrEmpty(string? type, bool ignoreCase = false)
         => string.IsNullOrWhiteSpace(type)

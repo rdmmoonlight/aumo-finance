@@ -68,9 +68,9 @@ public class FinancialReportService : IFinancialReportService
             NetIncome = netIncome,
         };
     }
-/// <summary>
-/// Proses eksekusi kalkulasi Build Retained Earnings Async.
-/// </summary>
+    /// <summary>
+    /// Proses eksekusi kalkulasi Build Retained Earnings Async.
+    /// </summary>
 
     public async Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period)
     {
@@ -94,9 +94,9 @@ public class FinancialReportService : IFinancialReportService
             EndingBalance = endingBalance,
         };
     }
-/// <summary>
-/// Proses eksekusi kalkulasi Build Sofp Async.
-/// </summary>
+    /// <summary>
+    /// Proses eksekusi kalkulasi Build Sofp Async.
+    /// </summary>
 
     public async Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing)
     {
