@@ -1,46 +1,59 @@
-// src/app/routes.ts
-import { Routes } from "@angular/router";
+// src/app/routes/index.ts
+import { createRootRoute, createRoute } from '@tanstack/angular-router';
 
-import { authGuard, guestGuard } from "../guards/auth.guard";
+// 1. Root Route
+export const rootRoute = createRootRoute();
 
-export const routes: Routes = [
-  // Rute Root / Beranda Utama
-  {
-    path: "",
-    loadComponent: () => import("../pages/index.page").then((m) => m.default),
+// 2. Beranda Utama (/)
+export const indexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/',
+  component: () => import('../pages/index.page').then((m) => m.default),
+});
+
+// 3. Auth Layout Parent (Guest Guard dilakukan via beforeLoad)
+export const authLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'auth-layout', // Tanpa path (pathless layout)
+  beforeLoad: ({ location }) => {
+    // Pengganti guestGuard
+    guestGuard();
   },
+  component: () => import('../pages/(auth)/(auth).page').then((m) => m.default),
+});
 
-  // Rute Auth (dengan Layout Parent `(auth).page.ts`)
-  {
-    path: "",
-    canActivate: [guestGuard],
-    loadComponent: () =>
-      import("../pages/(auth)/(auth).page").then((m) => m.default),
-    children: [
-      {
-        path: "login",
-        loadComponent: () =>
-          import("../pages/(auth)/login.page").then((m) => m.default),
-      },
-      {
-        path: "register",
-        loadComponent: () =>
-          import("../pages/(auth)/register.page").then((m) => m.default),
-      },
-    ],
-  },
+export const loginRoute = createRoute({
+  getParentRoute: () => authLayoutRoute,
+  path: '/login',
+  component: () => import('../pages/(auth)/login.page').then((m) => m.default),
+});
 
-  // Rute App (dengan Layout Parent `(app).page.ts`)
-  {
-    path: "",
-    canActivate: [authGuard],
-    loadComponent: () => import("../pages/(app).page").then((m) => m.default),
-    children: [
-      {
-        path: "home",
-        loadComponent: () =>
-          import("../pages/(app)/home/index.page").then((m) => m.default),
-      },
-    ],
+export const registerRoute = createRoute({
+  getParentRoute: () => authLayoutRoute,
+  path: '/register',
+  component: () => import('../pages/(auth)/register.page').then((m) => m.default),
+});
+
+// 4. App Layout Parent (Auth Guard)
+export const appLayoutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  id: 'app-layout', // Tanpa path (pathless layout)
+  beforeLoad: ({ location }) => {
+    // Pengganti authGuard
+    authGuard();
   },
-];
+  component: () => import('../pages/(app).page').then((m) => m.default),
+});
+
+export const homeRoute = createRoute({
+  getParentRoute: () => appLayoutRoute,
+  path: '/home',
+  component: () => import('../pages/(app)/home/index.page').then((m) => m.default),
+});
+
+// 5. Gabungkan Semua Rute ke dalam RouteTree
+export const routeTree = rootRoute.addChildren([
+  indexRoute,
+  authLayoutRoute.addChildren([loginRoute, registerRoute]),
+  appLayoutRoute.addChildren([homeRoute]),
+]);
