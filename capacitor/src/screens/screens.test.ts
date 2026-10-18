@@ -11,19 +11,10 @@ describe('mountCatalog', () => {
   it('menampilkan semua bagian katalog dan tidak memuat HTML mentah', () => {
     const root = document.createElement('div');
     document.body.append(root);
-    const cleanup = mountCatalog(root, { onOpenCrashLog: vi.fn(), signIn: vi.fn() });
+    const cleanup = mountCatalog(root, { onOpenCrashLog: vi.fn(), onBack: vi.fn() });
     const headings = [...root.querySelectorAll('h2')].map((el) => el.textContent);
     expect(headings).toEqual(
-      expect.arrayContaining([
-        'Tombol',
-        'Input',
-        'Card',
-        'List',
-        'Skeleton',
-        'Tipografi',
-        'Warna',
-        'Uji Login API (Fase 4)',
-      ])
+      expect.arrayContaining(['Tombol', 'Input', 'Card', 'List', 'Skeleton', 'Tipografi', 'Warna'])
     );
     expect(root.querySelectorAll('svg').length).toBeGreaterThan(0);
     cleanup();
@@ -32,64 +23,18 @@ describe('mountCatalog', () => {
   it('tombol "Buka Log" memanggil onOpenCrashLog', () => {
     const root = document.createElement('div');
     const onOpenCrashLog = vi.fn();
-    mountCatalog(root, { onOpenCrashLog, signIn: vi.fn() });
+    mountCatalog(root, { onOpenCrashLog, onBack: vi.fn() });
     const button = [...root.querySelectorAll('button')].find((b) => b.textContent === 'Buka Log');
     button?.click();
     expect(onOpenCrashLog).toHaveBeenCalledOnce();
   });
 
-  it('uji login: tombol Masuk aktif setelah email dan sandi terisi, hasil ditampilkan', async () => {
+  it('tombol kembali memanggil onBack', () => {
     const root = document.createElement('div');
-    const signIn = vi.fn().mockResolvedValue({ ok: true, fullName: 'Ghofur' });
-    mountCatalog(root, { onOpenCrashLog: vi.fn(), signIn });
-
-    const submit = [...root.querySelectorAll('button')].find((b) => b.textContent === 'Masuk');
-    const email = root.querySelector<HTMLInputElement>('input[type="email"]');
-    const password = root.querySelector<HTMLInputElement>('input[type="password"]');
-    const keep = root.querySelector<HTMLInputElement>('input[type="checkbox"]');
-    if (!submit || !email || !password || !keep)
-      throw new Error('elemen uji login tidak ditemukan');
-
-    expect(submit.disabled).toBe(true);
-    email.value = 'a@b.c';
-    email.dispatchEvent(new Event('input'));
-    password.value = 'rahasia';
-    password.dispatchEvent(new Event('input'));
-    expect(submit.disabled).toBe(false);
-
-    keep.checked = true;
-    submit.click();
-    await vi.waitFor(() => {
-      expect(root.querySelector('[role="status"]:not([aria-live])')?.textContent).toBe(
-        'Berhasil masuk: Ghofur'
-      );
-    });
-    expect(signIn).toHaveBeenCalledWith({
-      email: 'a@b.c',
-      password: 'rahasia',
-      keepSignedIn: true,
-      enableBiometric: false,
-    });
-    expect(submit.textContent).toBe('Masuk');
-  });
-
-  it('pesan gagal dari login ditampilkan sebagai teks biasa', async () => {
-    const root = document.createElement('div');
-    const signIn = vi.fn().mockResolvedValue({ ok: false, message: '<b>salah</b>' });
-    mountCatalog(root, { onOpenCrashLog: vi.fn(), signIn });
-    const submit = [...root.querySelectorAll('button')].find((b) => b.textContent === 'Masuk');
-    const email = root.querySelector<HTMLInputElement>('input[type="email"]');
-    const password = root.querySelector<HTMLInputElement>('input[type="password"]');
-    if (!submit || !email || !password) throw new Error('elemen tidak ditemukan');
-    email.value = 'a';
-    email.dispatchEvent(new Event('input'));
-    password.value = 'b';
-    password.dispatchEvent(new Event('input'));
-    submit.click();
-    await vi.waitFor(() => {
-      expect(root.textContent).toContain('Gagal: <b>salah</b>');
-    });
-    expect(root.querySelector('b')).toBeNull();
+    const onBack = vi.fn();
+    mountCatalog(root, { onOpenCrashLog: vi.fn(), onBack });
+    root.querySelector<HTMLButtonElement>('button[aria-label="Kembali"]')?.click();
+    expect(onBack).toHaveBeenCalledOnce();
   });
 });
 

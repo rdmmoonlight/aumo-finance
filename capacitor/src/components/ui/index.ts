@@ -1,6 +1,8 @@
 export { createButton } from './button';
 export type { ButtonOptions, ButtonVariant } from './button';
 export { createCard } from './card';
+export { createCheckbox } from './checkbox';
+export type { CheckboxField } from './checkbox';
 export { createConfirmDialog, createDialog } from './dialog';
 export type { DialogHandle } from './dialog';
 export { createIcon } from './icon';

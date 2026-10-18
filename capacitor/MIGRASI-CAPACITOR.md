@@ -43,7 +43,7 @@
 | Jetpack Compose Material3 | Komponen fungsi `.ts` + Tailwind | Token dari `docs/typography-scale.md`, `docs/spacing-scale.md` |
 | `AumoDatePickerDialog` | Date picker web (input date / pustaka ringan) | |
 | `CurrencyFormatter` | `Intl.NumberFormat('id-ID')` | Uji paritas angka |
-| `SplashActivity` | `@capacitor/splash-screen` | |
+| `SplashActivity` | Layar splash di dalam app (`/splash`, gambar penuh logo + atribusi) | Bukan plugin `@capacitor/splash-screen`: desain penuh, sama alasannya dengan `SplashActivity.kt` |
 | `AppUpdateService` (APK dari GitHub Releases) | Plugin native kustom (Kotlin) + `@capacitor/filesystem` | Butuh FileProvider + `REQUEST_INSTALL_PACKAGES` |
 | `CrashLogHandler` | `window.onerror` + log file + handler native | Layar CrashLog tetap ada |
 | Tombol Back Android | `@capacitor/app` | |
@@ -74,12 +74,12 @@
 - [x] Penyimpanan token terenkripsi + fitur "Ingat saya".
 - [x] Logger terpusat + layar CrashLog (padanan `AppLogger`, `CrashLogHandler`).
 - [x] Format mata uang dan tanggal (`id-ID`), tanpa pergeseran zona waktu.
-- [ ] **Keluaran:** lapisan data teruji. **Selesai bila:** login API sukses dari perangkat.
+- [x] **Keluaran:** lapisan data teruji. **Selesai bila:** login API sukses dari perangkat.
 
 ### Fase 5 — Splash, Login, Biometrik, Navigasi
-- [ ] Router, guard autentikasi, penanganan tombol Back.
-- [ ] Splash → Login → Home. Biometrik opsional setelah login pertama.
-- [ ] Layar Logout.
+- [x] Router, guard autentikasi, penanganan tombol Back.
+- [x] Splash → Login → Home. Biometrik opsional setelah login pertama.
+- [x] Layar Logout.
 - [ ] **Keluaran:** alur masuk-keluar utuh. **Selesai bila:** sesi bertahan setelah app ditutup.
 
 ### Fase 6 — Home, Dashboard, Periods

@@ -7,6 +7,13 @@ import type { AuthApi } from './authApi';
 
 export type SignInResult = { ok: true; fullName: string } | { ok: false; message: string };
 
+export interface SignInParams {
+  email: string;
+  password: string;
+  keepSignedIn: boolean;
+  enableBiometric: boolean;
+}
+
 interface AuthServiceDeps {
   api: AuthApi;
   session: Session;
@@ -22,12 +29,7 @@ export class AuthService {
     this.deps = deps;
   }
 
-  async signIn(params: {
-    email: string;
-    password: string;
-    keepSignedIn: boolean;
-    enableBiometric: boolean;
-  }): Promise<SignInResult> {
+  async signIn(params: SignInParams): Promise<SignInResult> {
     const { api, session, sessionStore, logger } = this.deps;
     // Biometrik hanya berguna bila sesi tersimpan, jadi biometrik dianggap meminta "Ingat saya".
     const shouldKeepSignedIn = params.keepSignedIn || params.enableBiometric;
