@@ -15,7 +15,7 @@ jobs:
       contents: write
     defaults:
       run:
-        working-directory: mobile-capacitor
+        working-directory: capacitor
     steps:
       - uses: actions/checkout@v4
 
@@ -124,7 +124,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aumo-release-signed-v${{ steps.version.outputs.app_version }}
-          path: mobile-capacitor/aumo-release-signed.apk
+          path: capacitor/aumo-release-signed.apk
           if-no-files-found: error
           retention-days: 3
 
@@ -134,6 +134,6 @@ jobs:
           tag_name: v${{ steps.version.outputs.app_version }}
           name: Aumo Release v${{ steps.version.outputs.app_version }}
           body: "Rilisan otomatis build ke-${{ github.run_number }}."
-          files: mobile-capacitor/aumo-release-signed.apk
+          files: capacitor/aumo-release-signed.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
