@@ -3,7 +3,6 @@ import { defineConfig } from 'drizzle-kit';
 
 export default defineConfig({
   dialect: 'postgresql',
-  // Daftar file eksplisit: menghindari masalah resolusi import ESM saat drizzle-kit memuat folder
   schema: ['./src/db/schema/index.ts'],
   out: './drizzle',
   dbCredentials: {
@@ -11,4 +10,5 @@ export default defineConfig({
   },
   strict: true,
   verbose: true,
+  casing: 'snake_case'
 });
