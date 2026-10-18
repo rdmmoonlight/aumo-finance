@@ -15,12 +15,10 @@ import {
   createSnackbar,
   createTopBar,
 } from '../components/ui';
-import { createLoginTest } from './loginTest';
-import type { SignInFn } from './loginTest';
 
 export interface CatalogDeps {
   onOpenCrashLog: () => void;
-  signIn: SignInFn;
+  onBack: () => void;
 }
 
 function section(title: string, ...children: Child[]): HTMLElement {
@@ -54,7 +52,7 @@ const COLORS: [string, string][] = [
   ['bg-bad', 'Bad'],
 ];
 
-/** Katalog komponen internal (Fase 3). Diganti router pada Fase 5. */
+/** Katalog komponen internal (Fase 3). Rute pengembangan, dibuka dari Home. */
 export function mountCatalog(container: HTMLElement, deps: CatalogDeps): () => void {
   const snackbar = createSnackbar();
 
@@ -156,7 +154,6 @@ export function mountCatalog(container: HTMLElement, deps: CatalogDeps): () => v
         'Buka Log'
       )
     ),
-    section('Uji Login API (Fase 4)', createLoginTest(deps.signIn)),
     section('Tipografi', ...TYPE_SCALE.map(([cls, label]) => h('p', { class: cls }, label))),
     section(
       'Warna',
@@ -173,9 +170,7 @@ export function mountCatalog(container: HTMLElement, deps: CatalogDeps): () => v
   container.replaceChildren(
     createTopBar({
       title: 'Katalog Komponen',
-      onBack: () => {
-        snackbar.show('Tombol kembali ditekan', 'short');
-      },
+      onBack: deps.onBack,
     }),
     main,
     confirm.el,

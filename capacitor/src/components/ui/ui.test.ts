@@ -4,6 +4,7 @@ import { h } from '../../core/dom';
 import {
   createButton,
   createCard,
+  createCheckbox,
   createConfirmDialog,
   createInput,
   createList,
@@ -211,5 +212,19 @@ describe('createConfirmDialog', () => {
     dialog.el.dispatchEvent(event);
     expect(event.defaultPrevented).toBe(true);
     expect(onDismiss).toHaveBeenCalledOnce();
+  });
+});
+
+describe('createCheckbox', () => {
+  it('label bisa disentuh, status awal dan onChange mengikuti input', () => {
+    const onChange = vi.fn();
+    const field = createCheckbox({ label: 'Ingat saya', checked: true, onChange });
+    document.body.append(field.el);
+    expect(field.el.textContent).toBe('Ingat saya');
+    expect(field.input.checked).toBe(true);
+
+    field.input.checked = false;
+    field.input.dispatchEvent(new Event('change'));
+    expect(onChange).toHaveBeenCalledWith(false);
   });
 });
