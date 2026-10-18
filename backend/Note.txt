@@ -1,0 +1,14 @@
+Merapikan dan memperkuat ASP.NET Core dulu.
+Fokus yang Lebih Bernilai Saat Ini
+Rapikan struktur project
+Pemisahan yang jelas antara Domain, Application, Infrastructure, dan API.
+Hindari business logic yang tersebar di Controller atau Service yang terlalu gemuk.
+Perkuat Domain Akuntansi
+Buat aturan bisnis (invariant) lebih ketat dan terpusat.
+Pastikan journal posting, period lock, dan ledger update punya alur yang jelas dan mudah ditest.
+Perbaiki Boundary Internal
+Modul Administrator dan Core Akuntansi sebaiknya punya batasan yang jelas, meskipun masih dalam satu solution.
+Tingkatkan Testability
+Semakin banyak logic yang bisa di-unit test, semakin mudah nanti kalau suatu saat memang perlu dipisah.
+Prinsip yang Bisa Dipegang
+“Jangan pecah sistem yang belum rapi. Rapikan dulu, baru pertimbangkan pemisahan jika memang terpaksa.”
