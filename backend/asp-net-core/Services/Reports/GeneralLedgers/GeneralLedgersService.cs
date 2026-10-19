@@ -17,12 +17,18 @@ using Microsoft.EntityFrameworkCore;
 
 public class GeneralLedgersService : IGeneralLedgersService
 {
-    private readonly AppDbContext? db;
+    private readonly AppDbContext db;
 
     private static readonly string[] PermanentTypes = { "Assets", "Asset", "Liabilities", "Liability", "Equity" };
     private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "Income", "Revenue", "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
     private static readonly string[] RevenueTypes = { "OperatingIncome", "OtherIncome", "Revenue", "Income" };
     private static readonly string[] ExpenseTypes = { "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GeneralLedgersService"/> class.
+    /// </summary>
+    /// <param name="db">Konteks database aplikasi.</param>
+    public GeneralLedgersService(AppDbContext db) => this.db = db;
     /// <summary>
     /// Mengambil data  Permanent Ledgers Async.
     /// </summary>
