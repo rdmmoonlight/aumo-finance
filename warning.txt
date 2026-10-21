@@ -106,7 +106,7 @@ Build succeeded.
 /home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/Services/Reports/TrialBalances/TrialBalancesService.cs(162,57): warning CA1822: Member 'BuildBaseTrialBalanceRowsAsync' does not access instance data and can be marked as static (https://learn.microsoft.com/dotnet/fundamentals/code-analysis/quality-rules/ca1822) [/home/runner/work/aumo-finance/aumo-finance/backend/asp-net-core/AumoBackend.csproj]
 
 --- [RUST AXUM CLIPPY WARNINGS] ---
-Tidak ada warning Rust Clippy.
+Tidak da warning Rust Clippy.
 
 --- [FRONTEND TYPECHECK WARNINGS/ERRORS] ---
 
