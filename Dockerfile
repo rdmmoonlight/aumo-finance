@@ -29,12 +29,10 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY frontend/package.json ./
+# Copy manifest dan workspace config yang sudah ada di repo
+COPY frontend/package.json frontend/pnpm-workspace.yaml ./
 
-# DIBUAT EKSPLISIT: Wajib buat pnpm-workspace.yaml agar dibaca oleh pnpm v10
-RUN printf "onlyBuiltDependencies:\n  - unrs-resolver\n" > pnpm-workspace.yaml
-
-# Generate lockfile baru tanpa hambatan ERR_PNPM_IGNORED_BUILDS
+# Install dependensi (pnpm v10 otomatis membaca pnpm-workspace.yaml)
 RUN pnpm install
 
 COPY frontend/ ./
@@ -55,11 +53,15 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Copy hasil build .NET
 COPY --from=dotnet-builder /app/dotnet-build ./backend
+
+# Copy hasil build Next.js Standalone & Static assets
 COPY --from=next-builder /app/.next/standalone ./frontend
 COPY --from=next-builder /app/.next/static ./frontend/.next/static
 COPY --from=next-builder /app/public ./frontend/public
 
+# Copy konfigurasi Supervisor & Nginx
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 
