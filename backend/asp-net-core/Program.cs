@@ -161,9 +161,11 @@ public partial class Program
                 });
             }
 
-            // ✅ DIKELUARKAN DARI IF DEVELOPMENT AGAR BISA DIAKSES DI PRODUCTION (RENDER)
+            // ✅ Map OpenAPI Document Generator
             app.MapOpenApi();
-            app.MapScalarApiReference(options =>
+
+            // ✅ Map Scalar UI ke Route Custom /reference
+            app.MapScalarApiReference("/reference", options =>
             {
                 options
                     .WithTitle("Aumo Web API Reference")
