@@ -55,8 +55,9 @@ WORKDIR /app
 # Copy hasil build .NET
 COPY --from=dotnet-builder /app/dotnet-build ./backend
 
-# Copy hasil build Next.js Standalone & Static assets
+# Copy hasil build Next.js Standalone
 COPY --from=next-builder /app/.next/standalone ./frontend
+# Copy folder static & public KE DALAM sub-folder frontend
 COPY --from=next-builder /app/.next/static ./frontend/.next/static
 COPY --from=next-builder /app/public ./frontend/public
 
