@@ -1,0 +1,48 @@
+# Node.js / Paket
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store
+
+# Next.js & Build Output
+.next
+out
+build
+dist
+
+# Berkas Lingkungan & Rahasia (Environment Variables)
+.env
+.env*.local
+.env.production
+.env.development
+
+# Version Control & Git
+.git
+.gitignore
+.github
+
+# Docker & CI/CD
+Dockerfile*
+docker-compose*
+.dockerignore
+
+# Testing & Coverage
+coverage
+.nyc_output
+
+# Editor & System Files
+.vscode
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+.DS_Store
+Thumbs.db
+
+# Documentation & Notes
+*.md
+LICENSE
