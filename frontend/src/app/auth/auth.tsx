@@ -122,7 +122,9 @@ function AuthFormInner({
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
   const [isPending, setIsPending] = useState(false);
-  const [isProfileLoading, setIsProfileLoading] = useState(true);
+  
+  // ✅ Pengecekan profil dilakukan secara silent di background
+  const [isCheckingProfile, setIsCheckingProfile] = useState(false);
 
   const {
     register,
@@ -143,14 +145,17 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
-  // Cek profil user saat pertama kali dimuat
+  // ✅ Pengecekan profil user saat pertama kali dimuat (Silent background check)
   useEffect(() => {
     let isMounted = true;
 
     async function checkAuthProfile() {
+      setIsCheckingProfile(true);
       try {
         const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate(),
+          authApi.endpoints.getProfile.initiate(undefined, {
+            subscribe: false,
+          }),
         );
 
         if (isMounted && "data" in result && result.data?.success) {
@@ -162,9 +167,9 @@ function AuthFormInner({
           }
         }
       } catch {
-        // Mengabaikan error jika belum terautentikasi
+        // Mengabaikan error jika belum terautentikasi atau backend unreachable
       } finally {
-        if (isMounted) setIsProfileLoading(false);
+        if (isMounted) setIsCheckingProfile(false);
       }
     }
 
@@ -281,8 +286,6 @@ function AuthFormInner({
     }
   };
 
-  if (isProfileLoading) return <AuthFormSkeleton />;
-
   return (
     <div className="light w-full max-w-sm rounded-2xl border border-zinc-200 bg-white p-6 text-black shadow-sm">
       <div className="mb-6">
@@ -298,7 +301,7 @@ function AuthFormInner({
 
       <div className="space-y-4">
         <GoogleAuthButtonInner
-          isPending={isPending}
+          isPending={isPending || isCheckingProfile}
           onSuccessHandler={handleGoogleSuccess}
           onError={setApiErr}
         />
@@ -396,7 +399,7 @@ function AuthFormInner({
 
         <Button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || isCheckingProfile}
           className="h-11 w-full rounded-xl bg-black text-white hover:bg-zinc-800"
         >
           {isPending
