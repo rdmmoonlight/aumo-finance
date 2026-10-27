@@ -15,29 +15,31 @@ function getCookie(name: string): string | undefined {
   return undefined;
 }
 
-function getBackendTarget(): string {
-  // 1. Konsistensi hirarki env var & hilangkan trailing slash agar aman
+export function getBackendTarget(): string {
+  // 1. Jika kode berjalan di Browser (Client-side)
+  // PAKSA string kosong "" agar browser selalu menggunakan Relative Path
+  // yang ditangani Nginx (misal: https://aumoweb.onrender.com/auth/me)
+  if (typeof window !== "undefined") {
+    return "";
+  }
+
+  // 2. Jika kode berjalan di Node.js Server (Next.js SSR inside container)
   let target =
+    process.env.INTERNAL_API_URL ||
     process.env.NEXT_PUBLIC_BACKEND_URL ||
     process.env.NEXT_PUBLIC__WEB_API_URL ||
     process.env.NEXT_PUBLIC_WEB_API_URL ||
-    "";
+    "http://127.0.0.1:5000";
 
-  // Hapus trailing slash jika ada (misal "https://aumoweb.onrender.com/" -> "https://aumoweb.onrender.com")
-  target = target.replace(/\/+$/, "");
-
-  // 2. Dalam setup Nginx (Single Domain / Reverse Proxy), jika client melakukan request
-  // dari browser ke domain yang sama (relative URL), kosongkan baseUrl agar otomatis menembak Nginx / relative path.
-  return target;
+  return target.replace(/\/+$/, "");
 }
 
-const BASE_URL = getBackendTarget();
-
-export const API_BASE_URL = BASE_URL;
-export const getApiBaseUrl = () => BASE_URL;
+export const API_BASE_URL = getBackendTarget();
+export const getApiBaseUrl = () => getBackendTarget();
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: BASE_URL,
+  // Gunakan fungsi getter dinamis agar tidak terkunci variabel statis
+  baseUrl: getBackendTarget(),
   credentials: "include",
   prepareHeaders: async (headers, { arg }) => {
     // Biarkan browser menentukan Content-Type & boundary secara otomatis jika mengirim FormData
@@ -65,7 +67,8 @@ const baseQueryWithReauth: BaseQueryFn<
   const requestUrl = typeof args === "string" ? args : args.url;
   const requestMethod = typeof args === "string" ? "GET" : args.method || "GET";
 
-  const fullTargetUrl = `${BASE_URL}${requestUrl}`;
+  const currentBaseUrl = getBackendTarget();
+  const fullTargetUrl = `${currentBaseUrl}${requestUrl}`;
 
   if (!requestUrl || !requestUrl.startsWith("/")) {
     console.error(
