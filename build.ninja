@@ -1,0 +1,14 @@
+# Global variables
+builddir = build
+
+# Include sub-project build definitions
+subninja backend/asp-net-core/build.ninja
+subninja backend/axum/build.ninja
+subninja backend/go/build.ninja
+subninja frontend/build.ninja
+subninja mobile/build.ninja
+
+# Default target for all components
+build all: phony backend_aspnet backend_axum backend_go frontend_next mobile_kotlin
+
+default all

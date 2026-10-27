@@ -1,0 +1,7 @@
+rule gradle_build_debug
+  command = cmd /c mobile\gradlew.bat -p mobile assembleDebug
+  description = Building Kotlin Mobile App (Debug)
+
+build mobile/app/build/outputs/apk/debug/app-debug.apk: gradle_build_debug
+
+build mobile_kotlin: phony mobile/app/build/outputs/apk/debug/app-debug.apk

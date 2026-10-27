@@ -1,0 +1,7 @@
+rule go_build
+  command = go build -o $out $in
+  description = Building Go App: $in
+
+build backend/go/bin/app: go_build backend/go/cmd/server/main.go
+
+build backend_go: phony backend/go/bin/app

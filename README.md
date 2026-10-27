@@ -3,24 +3,25 @@ Aumo Finance
 An integrated, precision-driven financial and accounting information system.
 
 /backend
+
 - ada 2 jenis auth. cookie untuk web dan JWT barier untuk mobile.
 - 11 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
 
 /frontend
+
 - deploy pertama di Vercel tanggal 9 September 2026.
 - 10 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
 
 /mobile-capacitor
+
 - dibuat tgl 12 oktober 2026. jam 06.34.
 
-/nest (pioneer yg kembali pulang)
-- dibuat tgl 13 oktober. jam 19.28.
-
-  
 /mobile
+
 - Android native (Kotlin), bukan React Native/Flutter/MAUI. Konsumen REST API `/backend` di repo yang sama, auth pakai JWT Bearer.
 
 Tech stack:
+
 - Bahasa: Kotlin, JDK 17
 - Build: Gradle Kotlin DSL (`build.gradle.kts`), Android Gradle Plugin 8.5.0, Gradle Wrapper (`./gradlew`, tidak butuh Android Studio untuk build)
 - SDK: `minSdk` 28 (Android 9, dikunci — tidak boleh dinaikkan tanpa instruksi eksplisit), `targetSdk`/`compileSdk` 34
@@ -33,6 +34,7 @@ Tech stack:
 - `applicationId`: `com.bnrc.aumofinance` (harus tetap sama dengan app MAUI lama supaya Play Store menganggap ini update, bukan aplikasi baru)
 
 Struktur folder (`app/src/main/java/com/aumofinance/app/`), per fungsi:
+
 - `auth/` — login (screen, viewmodel, API call) + helper biometrik
 - `coa/` — Chart of Accounts (daftar akun)
 - `core/` — kelas `Application`, formatter mata uang, `SyncManager` (placeholder sinkronisasi offline, belum diimplementasikan)

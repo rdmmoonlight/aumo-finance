@@ -1,0 +1,17 @@
+# Compiler / Tools
+cc = clang
+cxx = clang++
+go = go
+
+# Rules
+rule cc
+  command = $cc -c $in -o $out
+  description = CC $out
+
+rule link
+  command = $cxx $in -o $out
+  description = LINK $out
+
+rule go_build
+  command = cd $in_dir && $go build -o $out_path .
+  description = GO BUILD $out
