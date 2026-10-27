@@ -25,7 +25,7 @@ object SessionExpiredHandler {
 
     // Satu-satunya endpoint yang boleh membalas 401 tanpa berarti sesi habis
     // (kredensial salah) — ditangani sendiri oleh LoginViewModel.
-    private const val LOGIN_PATH = "/auth/login"
+    private const val LOGIN_PATH = "/api/v1/auth/login"
 
     private var appContext: Context? = null
 

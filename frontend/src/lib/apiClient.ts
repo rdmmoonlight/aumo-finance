@@ -39,7 +39,7 @@ export const getApiBaseUrl = () => getBackendTarget();
 
 const rawBaseQuery = fetchBaseQuery({
   // Gunakan fungsi getter dinamis agar tidak terkunci variabel statis
-  baseUrl: getBackendTarget(),
+  baseUrl: `${getBackendTarget()}/api/v1`,
   credentials: "include",
   prepareHeaders: async (headers, { arg }) => {
     // Biarkan browser menentukan Content-Type & boundary secara otomatis jika mengirim FormData

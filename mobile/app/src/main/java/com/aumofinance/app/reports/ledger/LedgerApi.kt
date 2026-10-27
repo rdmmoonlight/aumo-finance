@@ -50,9 +50,9 @@ class LedgerApi(private val client: HttpClient = ApiClient.client) {
     // Hanya GET. Backend yang mengisi data staging sendiri bila belum ada.
     suspend fun getLedger(isTemporary: Boolean): HttpResponse =
         if (isTemporary) {
-            client.get("/reports/general-ledgers/temporary")
+            client.get("/api/v1/reports/general-ledgers/temporary")
         } else {
-            client.get("/reports/general-ledgers/permanent")
+            client.get("/api/v1/reports/general-ledgers/permanent")
         }
 
     suspend fun load(isTemporary: Boolean): LedgerResult =

@@ -85,19 +85,19 @@ data class CreatePeriodRequest(
 data class SimpleApiResponse(val success: Boolean, val message: String)
 
 class PeriodsApi(private val client: HttpClient = ApiClient.client) {
-    suspend fun list(): HttpResponse = client.get("/periods")
+    suspend fun list(): HttpResponse = client.get("/api/v1/periods")
 
-    suspend fun openInfo(): HttpResponse = client.get("/periods/open-info")
+    suspend fun openInfo(): HttpResponse = client.get("/api/v1/periods/open-info")
 
     suspend fun open(request: CreatePeriodRequest): HttpResponse =
-        client.post("/periods") {
+        client.post("/api/v1/periods") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
 
-    suspend fun select(id: Int): HttpResponse = client.post("/periods/select/$id")
+    suspend fun select(id: Int): HttpResponse = client.post("/api/v1/periods/select/$id")
 
-    suspend fun clearSelection(): HttpResponse = client.post("/periods/clear-selection")
+    suspend fun clearSelection(): HttpResponse = client.post("/api/v1/periods/clear-selection")
 
-    suspend fun close(id: Int): HttpResponse = client.post("/periods/close/$id")
+    suspend fun close(id: Int): HttpResponse = client.post("/api/v1/periods/close/$id")
 }

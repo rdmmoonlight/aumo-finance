@@ -67,10 +67,10 @@ data class NextTransactionNumberResponse(val success: Boolean, val transactionNu
 
 class JournalApi(private val client: HttpClient = ApiClient.client) {
     // Dipakai oleh halaman Journal Entry (form input/edit satu entri).
-    suspend fun getById(id: Int): HttpResponse = client.get("/journal-entry/$id")
+    suspend fun getById(id: Int): HttpResponse = client.get("/api/v1/journal-entry/$id")
 
     suspend fun create(request: CreateJournalEntryRequest): HttpResponse =
-        client.post("/journal-entry/create") {
+        client.post("/api/v1/journal-entry/create") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
@@ -79,15 +79,15 @@ class JournalApi(private val client: HttpClient = ApiClient.client) {
         id: Int,
         request: UpdateJournalEntryRequest,
     ): HttpResponse =
-        client.put("/journal-entry/edit/$id") {
+        client.put("/api/v1/journal-entry/edit/$id") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }
 
-    suspend fun delete(id: Int): HttpResponse = client.delete("/journal-entry/delete/$id")
+    suspend fun delete(id: Int): HttpResponse = client.delete("/api/v1/journal-entry/delete/$id")
 
     suspend fun searchDescriptions(query: String): HttpResponse =
-        client.get("/journal-entry/search-descriptions") {
+        client.get("/api/v1/journal-entry/search-descriptions") {
             parameter("q", query)
         }
 
@@ -95,7 +95,7 @@ class JournalApi(private val client: HttpClient = ApiClient.client) {
         journalType: String,
         entryDate: String? = null,
     ): HttpResponse =
-        client.get("/journal-entry/next-transaction-number") {
+        client.get("/api/v1/journal-entry/next-transaction-number") {
             parameter("journalType", journalType)
             if (entryDate != null) parameter("entryDate", entryDate)
         }

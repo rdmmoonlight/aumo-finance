@@ -95,13 +95,13 @@ class HomeActivity : ComponentActivity() {
         // Warmup Render cold-start
         lifecycleScope.launch {
             DbConnectionManager.ensureConnected {
-                runCatching { ApiClient.client.get("/periods") }
+                runCatching { ApiClient.client.get("/api/v1/periods") }
             }
         }
 
         // Heartbeat di scope DbConnectionManager sendiri, biar tetep jalan walau pindah Activity
         DbConnectionManager.startHeartbeat {
-            runCatching { ApiClient.client.get("/periods") }
+            runCatching { ApiClient.client.get("/api/v1/periods") }
         }
     }
 

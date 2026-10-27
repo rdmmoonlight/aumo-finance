@@ -98,7 +98,10 @@ public partial class Program
             builder.Services.AddCacheAndInfrastructure(builder.Configuration);
             builder.Services.AddApplicationServices();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Conventions.Add(new AumoBackend.Extensions.ApiVersionPrefixConvention());
+            });
 
             // ✅ OpenAPI Document Generator + Dinamis Server URL & JWT Bearer
             builder.Services.AddOpenApi(options =>
