@@ -4,7 +4,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS dotnet-builder
 WORKDIR /src
 
-# Install Rust & Cargo untuk mengompilasi C-Shared Library (Axum)
+# Install Rust & Cargo untuk mengompilasi Axum/C-Shared Library
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
@@ -29,12 +29,12 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# SUNTIKAN KHUSUS: Paksa pnpm mengizinkan unrs-resolver via variabel lingkungan pnpm
-ENV pnpm_config_only_built_dependencies="unrs-resolver"
-
 COPY frontend/package.json ./
 
-# Install dependensi dan generate lockfile segar
+# DIBUAT EKSPLISIT: Wajib buat pnpm-workspace.yaml agar dibaca oleh pnpm v10
+RUN printf "onlyBuiltDependencies:\n  - unrs-resolver\n" > pnpm-workspace.yaml
+
+# Generate lockfile baru tanpa hambatan ERR_PNPM_IGNORED_BUILDS
 RUN pnpm install
 
 COPY frontend/ ./
