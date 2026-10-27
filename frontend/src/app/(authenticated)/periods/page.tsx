@@ -1,12 +1,12 @@
 "use client";
 
-import { CreatePeriodForm } from "@/app/(authenticated)/periods/open-new-period-form";
-import { getPeriodColumns } from "@/app/(authenticated)/periods/period-columns";
+import { getPeriodColumns } from "#/features/periods/components/columns";
+import { CreatePeriodForm } from "#/features/periods/components/open-new-period-form";
 import type {
   ApiError,
   CreatePeriodValues,
   PeriodItem,
-} from "@/app/(authenticated)/periods/types";
+} from "#/features/periods/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -139,8 +139,8 @@ export default function PeriodsPage() {
         );
         setBankAccountId(
           openInfo.availableCashAndBankAccounts?.[1]?.id?.toString() ||
-            openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
-            "",
+          openInfo.availableCashAndBankAccounts?.[0]?.id?.toString() ||
+          "",
         );
         setRetainedId(
           openInfo.availableRetainedEarningsAccounts?.[0]?.id?.toString() || "",
@@ -417,9 +417,9 @@ export default function PeriodsPage() {
                           {header.isPlaceholder
                             ? null
                             : flexRender(
-                                header.column.columnDef.header,
-                                header.getContext(),
-                              )}
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
                         </TableHead>
                       ))}
                     </TableRow>

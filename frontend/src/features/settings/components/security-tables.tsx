@@ -41,9 +41,9 @@ export interface ActivityItem {
 export const formatDate = (dateStr?: string) =>
   dateStr
     ? new Date(dateStr).toLocaleString("id-ID", {
-        dateStyle: "short",
-        timeStyle: "short",
-      })
+      dateStyle: "short",
+      timeStyle: "short",
+    })
     : "-";
 
 const sessionHelper = createColumnHelper<SessionItem>();

@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import HomeContent from "./home-content";
+import HomeContent from "../../../features/home/components/content";
 
 export default function HomePage() {
   return (

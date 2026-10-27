@@ -37,15 +37,15 @@ import {
   FileSpreadsheet,
   Upload,
 } from "lucide-react";
-import { MONTHS } from "./constants";
-import { MappingStatusTable } from "./mapping-status-table";
-import { PreviewTransactionLinesTable } from "./preview-transaction-lines-table";
+import { MappingStatusTable } from "../../../features/tools/components/mapping-status-table";
+import { PreviewTransactionLinesTable } from "../../../features/tools/components/preview-transaction-lines-table";
+import { MONTHS } from "../../../features/tools/constants";
 import {
   AccountMappingDetail,
   JournalImportResult,
   JournalLineImport,
   JournalTransactionImport,
-} from "./types";
+} from "../../../features/tools/types";
 
 export default function ToolsPage() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -215,11 +215,11 @@ export default function ToolsPage() {
       prev.map((m) =>
         m.excelRef === excelRef && m.excelAccountName === excelName
           ? {
-              ...m,
-              mappedRef: targetRef,
-              mappedAccountName: opt?.accountName || opt?.name || "",
-              status: targetRef ? "REALLOCATED" : "UNMAPPED",
-            }
+            ...m,
+            mappedRef: targetRef,
+            mappedAccountName: opt?.accountName || opt?.name || "",
+            status: targetRef ? "REALLOCATED" : "UNMAPPED",
+          }
           : m,
       ),
     );
@@ -273,8 +273,8 @@ export default function ToolsPage() {
         const err = result.error as any;
         setErrorMessage(
           err?.data?.message ||
-            err?.message ||
-            "Gagal melakukan import jurnal.",
+          err?.message ||
+          "Gagal melakukan import jurnal.",
         );
       }
     } catch (err: any) {

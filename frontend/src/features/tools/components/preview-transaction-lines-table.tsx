@@ -16,8 +16,8 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { formatIDR } from "./constants";
-import { AccountMappingDetail, JournalLineImport } from "./types";
+import { formatIDR } from "../constants";
+import { AccountMappingDetail, JournalLineImport } from "../types";
 
 const helper = createColumnHelper<JournalLineImport>();
 
