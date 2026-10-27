@@ -7,9 +7,11 @@ RUN corepack enable pnpm
 # Copy manifes dependensi
 COPY frontend/package.json ./
 
-# Matikan pengecekan ignore-scripts & izinkan build secara universal
-RUN pnpm config set ignore-scripts false && \
-    pnpm install --unsafe-perm
+# Set environment variable agar pnpm tidak memblokir build scripts (pnpm v12+)
+ENV PNPM_ALLOW_BUILDS=all
+
+# Install dependensi dan jalankan approve-builds otomatis jika diperlukan
+RUN pnpm install || (pnpm approve-builds --all && pnpm install)
 
 # Copy seluruh source code frontend
 COPY frontend .
