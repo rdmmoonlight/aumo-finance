@@ -164,12 +164,18 @@ public partial class Program
             // ✅ Map OpenAPI Document Generator
             app.MapOpenApi();
 
-            // ✅ Map Scalar UI ke Route Custom /reference
-            app.MapScalarApiReference("/reference", options =>
+            // ✅ Membaca Konfigurasi Scalar dari Environment / appsettings.json
+            var scalarTitle = app.Configuration["Scalar:Title"] ?? "Aumo Web API Reference";
+            var scalarRoutePrefix = app.Configuration["Scalar:RoutePrefix"] ?? "/reference";
+            var scalarServerUrl = app.Configuration["Scalar:ServerUrl"] ?? "https://aumoweb.onrender.com";
+
+            // ✅ Map Scalar UI menggunakan Route & Options Dinamis
+            app.MapScalarApiReference(scalarRoutePrefix, options =>
             {
                 options
-                    .WithTitle("Aumo Web API Reference")
+                    .WithTitle(scalarTitle)
                     .WithTheme(ScalarTheme.Moon)
+                    .WithServers(new ScalarServer(scalarServerUrl))
                     .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch);
             });
 
