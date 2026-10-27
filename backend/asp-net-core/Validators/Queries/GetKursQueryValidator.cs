@@ -7,15 +7,9 @@ namespace AumoBackend.Validators.Queries;
 using System.Text.RegularExpressions;
 using AumoBackend.DTOs;
 using FluentValidation;
-/// <summary>
-/// Validator untuk Get Kurs Query Validator.
-/// </summary>
 
 public partial class GetKursQueryValidator : AbstractValidator<GetKursQuery>
 {
-    /// <summary>
-    /// Validator untuk Get Kurs Query Validator.
-    /// </summary>
     public GetKursQueryValidator()
     {
         // Nilai ini disisipkan ke URL layanan eksternal, jadi hanya kode ISO 4217 (3 huruf) yang diterima.

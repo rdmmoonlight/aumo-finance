@@ -9,22 +9,8 @@ namespace AumoBackend.Migrations
 {
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Mewakili Drop Old Journal Tables.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Drop Old Journal Tables.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Drop Old Journal Tables.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Drop Old Journal Tables.
-    /// </summary>
-    /// <inheritdoc />
     public partial class DropOldJournalTables : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Tabel JournalEntries dan JournalEntryLines dihapus manual lewat Neon
@@ -32,7 +18,6 @@ namespace AumoBackend.Migrations
             // jadi Up() di sini dibiarkan kosong agar tidak error saat aplikasi start.
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

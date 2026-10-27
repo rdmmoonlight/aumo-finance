@@ -7,16 +7,10 @@ namespace AumoBackend.Services.Home;
 using System.Globalization;
 using System.Text.Json;
 using AumoBackend.DTOs.Home;
-/// <summary>
-/// Layanan logika bisnis untuk Home Service.
-/// </summary>
 
 public class HomeService : IHomeService
 {
     private readonly IHttpClientFactory? httpClientFactory;
-    /// <summary>
-    /// Mengambil data  Market Indicators Async.
-    /// </summary>
 
     public async Task<List<MarketIndicatorDto>> GetMarketIndicatorsAsync()
     {

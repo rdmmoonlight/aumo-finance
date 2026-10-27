@@ -21,7 +21,6 @@ namespace AumoBackend.Migrations
     [Migration("20260725021900_InitPostgres")]
     partial class InitPostgres
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

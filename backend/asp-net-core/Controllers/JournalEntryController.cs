@@ -24,9 +24,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Controller API untuk mengelola Journal Entry.
-/// </summary>
 
 [ApiController]
 [Route("/journal-entry")]
@@ -40,9 +37,6 @@ public class JournalEntryController : ControllerBase
     private readonly IValidator<UpdateJournalEntryRequest> updateValidator;
     private readonly IValidator<SearchDescriptionsQuery> searchValidator;
     private readonly IValidator<NextTransactionNumberQuery> nextNumberValidator;
-    /// <summary>
-    /// Controller API untuk mengelola Journal Entry.
-    /// </summary>
 
     public JournalEntryController(
         AppDbContext db,
@@ -59,9 +53,6 @@ public class JournalEntryController : ControllerBase
         this.searchValidator = searchValidator;
         this.nextNumberValidator = nextNumberValidator;
     }
-    /// <summary>
-    /// Mengambil data  By Id.
-    /// </summary>
 
     // ==========================================
     // 1. GET: /journal-entry/{id}
@@ -117,9 +108,6 @@ public class JournalEntryController : ControllerBase
 
         return this.Ok(new { success = true, entry = result });
     }
-    /// <summary>
-    /// Membuat data  baru.
-    /// </summary>
 
     // ==========================================
     // 2. POST: /journal-entry/create
@@ -187,9 +175,6 @@ public class JournalEntryController : ControllerBase
             transactionNumber,
         });
     }
-    /// <summary>
-    /// Memperbarui data .
-    /// </summary>
 
     // ==========================================
     // 3. PUT: /journal-entry/edit/{id}
@@ -267,9 +252,6 @@ public class JournalEntryController : ControllerBase
             message = $"Journal entry {header.TransactionNumber} updated successfully.",
         });
     }
-    /// <summary>
-    /// Menghapus data .
-    /// </summary>
 
     // ==========================================
     // 4. DELETE: /journal-entry/delete/{id}
@@ -313,9 +295,6 @@ public class JournalEntryController : ControllerBase
             message = $"Journal entry {transactionNumber} deleted successfully.",
         });
     }
-    /// <summary>
-    /// Mewakili Search Descriptions.
-    /// </summary>
 
     // ==========================================
     // 5. GET: /journal-entry/search-descriptions
@@ -357,9 +336,6 @@ public class JournalEntryController : ControllerBase
 
         return this.Ok(results);
     }
-    /// <summary>
-    /// Mengambil data  Next Transaction Number.
-    /// </summary>
 
     // ==========================================
     // 6. GET: /journal-entry/next-transaction-number

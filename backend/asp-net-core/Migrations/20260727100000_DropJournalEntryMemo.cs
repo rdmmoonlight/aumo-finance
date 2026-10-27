@@ -14,22 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Mewakili Drop Journal Entry Memo.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Drop Journal Entry Memo.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Drop Journal Entry Memo.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Drop Journal Entry Memo.
-    /// </summary>
-    /// <inheritdoc />
     public partial class DropJournalEntryMemo : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
@@ -37,7 +23,6 @@ namespace AumoBackend.Migrations
                 table: "JournalEntries");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(

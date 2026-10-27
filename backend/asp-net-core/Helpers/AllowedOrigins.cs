@@ -3,24 +3,15 @@
 // </copyright>
 
 namespace AumoBackend.Helpers;
-/// <summary>
-/// Mewakili Allowed Origins.
-/// </summary>
 
 public static class AllowedOrigins
 {
-    /// <summary>
-    /// Mewakili All.
-    /// </summary>
     public static readonly string[] All =
     {
         "http://localhost:3000",
         "https://aumoweb.vercel.app",
         "https://aumoweb.onrender.com"
     };
-    /// <summary>
-    /// Mewakili Is Allowed.
-    /// </summary>
 
     public static bool IsAllowed(Uri uri)
     {

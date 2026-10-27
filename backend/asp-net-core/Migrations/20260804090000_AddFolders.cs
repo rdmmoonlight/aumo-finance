@@ -15,22 +15,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Folders baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Folders baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Folders baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Folders baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddFolders : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -84,7 +70,6 @@ namespace AumoBackend.Migrations
                 onDelete: ReferentialAction.Cascade);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(

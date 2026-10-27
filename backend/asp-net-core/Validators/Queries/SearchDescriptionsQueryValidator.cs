@@ -6,16 +6,10 @@ namespace AumoBackend.Validators.Queries;
 
 using AumoBackend.DTOs;
 using FluentValidation;
-/// <summary>
-/// Validator untuk Search Descriptions Query Validator.
-/// </summary>
 
 public class SearchDescriptionsQueryValidator : AbstractValidator<SearchDescriptionsQuery>
 {
     private const int MaxKeywordLength = 100;
-    /// <summary>
-    /// Validator untuk Search Descriptions Query Validator.
-    /// </summary>
 
     public SearchDescriptionsQueryValidator()
     {

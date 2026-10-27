@@ -16,22 +16,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Notification Entity baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Notification Entity baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Notification Entity baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Notification Entity baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddNotificationEntity : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -64,7 +50,6 @@ namespace AumoBackend.Migrations
                 columns: new[] { "UserId", "IsRead", "CreatedAt" });
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

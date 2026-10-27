@@ -16,24 +16,8 @@ namespace AumoBackend.Migrations
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-    /// <summary>
-    /// Membuat data  User Profile Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  User Profile Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  User Profile Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  User Profile Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat atau menambahkan  User Profile Fields baru.
-    /// </summary>
     public partial class AddUserProfileFields : Migration
     {
-        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // 1. Drop Index secara aman (IF EXISTS)
@@ -304,7 +288,6 @@ namespace AumoBackend.Migrations
             migrationBuilder.Sql("CREATE UNIQUE INDEX IF NOT EXISTS \"IX_TransactionCounters_UserId_CounterKey\" ON \"TransactionCounters\" (\"UserId\", \"CounterKey\");");
         }
 
-        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

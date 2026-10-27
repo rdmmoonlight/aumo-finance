@@ -14,22 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  General Journal Table baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  General Journal Table baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  General Journal Table baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  General Journal Table baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddGeneralJournalTable : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Tabel GeneralJournal dibuat dan diisi (backfill) manual lewat Neon
@@ -38,7 +24,6 @@ namespace AumoBackend.Migrations
             // saat aplikasi start.
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

@@ -21,7 +21,6 @@ namespace AumoBackend.Migrations
     [Migration("20260924034620_AddUserProfileFields")]
     partial class AddUserProfileFields
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

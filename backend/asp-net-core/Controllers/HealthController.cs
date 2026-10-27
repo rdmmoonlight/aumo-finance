@@ -17,9 +17,6 @@ using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Controller API untuk mengelola Health.
-/// </summary>
 
 [ApiController]
 [Route("/health")]
@@ -28,17 +25,11 @@ using Microsoft.EntityFrameworkCore;
 public class HealthController : ControllerBase
 {
     private readonly AppDbContext dbContext;
-    /// <summary>
-    /// Controller API untuk mengelola Health.
-    /// </summary>
 
     public HealthController(AppDbContext dbContext)
     {
         this.dbContext = dbContext;
     }
-    /// <summary>
-    /// Mengambil data  Health.
-    /// </summary>
 
     [HttpGet]
     public async Task<IActionResult> GetHealth()
