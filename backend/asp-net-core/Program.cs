@@ -152,7 +152,7 @@ public partial class Program
             builder.Services.AddHealthChecks();
 
             var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-                     ?? ["https://aumoweb.vercel.app"];
+            ?? Array.Empty<string>();
 
             builder.Services.AddCors(options =>
             {
