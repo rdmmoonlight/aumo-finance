@@ -16,22 +16,8 @@ namespace AumoBackend.Migrations
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-    /// <summary>
-    /// Mewakili Init Postgres.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Init Postgres.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Init Postgres.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Init Postgres.
-    /// </summary>
-    /// <inheritdoc />
     public partial class InitPostgres : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -304,7 +290,6 @@ namespace AumoBackend.Migrations
                 column: "JournalEntryId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

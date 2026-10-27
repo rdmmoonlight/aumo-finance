@@ -21,6 +21,7 @@
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <OpenApiGenerateXmlComments>false</OpenApiGenerateXmlComments>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,9 +41,9 @@
     </PackageReference>
 
     <!-- Native OpenAPI Support & Modern UI -->
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0-rc.3.26522.148" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
-    <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" />
+    <PackageReference Include="Microsoft.OpenApi" Version="2.0.0-*" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.0.*" />
 
     <!-- PostgreSQL Provider -->

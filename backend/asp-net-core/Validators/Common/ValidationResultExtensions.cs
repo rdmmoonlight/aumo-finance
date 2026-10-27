@@ -5,15 +5,9 @@
 namespace AumoBackend.Validators.Common;
 
 using FluentValidation.Results;
-/// <summary>
-/// Mewakili Validation Result Extensions.
-/// </summary>
 
 public static class ValidationResultExtensions
 {
-    /// <summary>
-    /// Model data To Error Response.
-    /// </summary>
     public static object ToErrorResponse(this ValidationResult result)
     {
         var errors = result.Errors

@@ -16,22 +16,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Guardian Tables baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Guardian Tables baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Guardian Tables baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Guardian Tables baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddGuardianTables : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -103,7 +89,6 @@ namespace AumoBackend.Migrations
                 columns: new[] { "UserId", "CreatedAt" });
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

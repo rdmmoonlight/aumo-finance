@@ -11,9 +11,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AumoBackend.Controllers.Api
 {
-    /// <summary>
-    /// Controller API untuk mengelola Market Data.
-    /// </summary>
     [ApiController]
     [Route("")]
     public class MarketDataController : ControllerBase
@@ -22,9 +19,6 @@ namespace AumoBackend.Controllers.Api
         private readonly IConfiguration configuration;
         private readonly ILogger<MarketDataController> logger;
         private readonly IValidator<AumoBackend.DTOs.GetKursQuery> kursValidator;
-        /// <summary>
-        /// Controller API untuk mengelola Market Data.
-        /// </summary>
 
         public MarketDataController(
             IHttpClientFactory httpClientFactory,
@@ -37,9 +31,6 @@ namespace AumoBackend.Controllers.Api
             this.configuration = configuration;
             this.logger = logger;
         }
-        /// <summary>
-        /// Mengambil data  Kurs.
-        /// </summary>
 
         [HttpGet("kurs")]
         public async Task<IActionResult> GetKurs([FromQuery] AumoBackend.DTOs.GetKursQuery query)
@@ -123,9 +114,6 @@ namespace AumoBackend.Controllers.Api
         }
     }
 }
-/// <summary>
-/// Controller API untuk mengelola Home Market.
-/// </summary>
 
 [ApiController]
 [Route("/home")]
@@ -135,18 +123,12 @@ public class HomeMarketController : ControllerBase
 {
     private readonly IHomeService homeService;
     private readonly ILogger<HomeMarketController> logger;
-    /// <summary>
-    /// Controller API untuk mengelola Home Market.
-    /// </summary>
 
     public HomeMarketController(IHomeService homeService, ILogger<HomeMarketController> logger)
     {
         this.homeService = homeService;
         this.logger = logger;
     }
-    /// <summary>
-    /// Mengambil data  Market Indicators.
-    /// </summary>
 
     [HttpGet("market-indicators")]
     public async Task<IActionResult> GetMarketIndicators()

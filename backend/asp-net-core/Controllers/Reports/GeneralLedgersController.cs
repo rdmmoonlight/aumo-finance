@@ -10,9 +10,6 @@ using System.Threading.Tasks;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-/// <summary>
-/// Controller API untuk mengelola General Ledgers.
-/// </summary>
 
 [ApiController]
 [Route("/reports/general-ledgers")]
@@ -20,14 +17,8 @@ using Microsoft.AspNetCore.Mvc;
 public class GeneralLedgersController : ControllerBase
 {
     private readonly IGeneralLedgersService glService;
-    /// <summary>
-    /// Controller API untuk mengelola General Ledgers.
-    /// </summary>
 
     public GeneralLedgersController(IGeneralLedgersService glService) => this.glService = glService;
-    /// <summary>
-    /// Mengambil data  Permanent General Ledger.
-    /// </summary>
 
     [HttpGet("permanent")]
     public async Task<IActionResult> GetPermanentGeneralLedger()
@@ -46,9 +37,6 @@ public class GeneralLedgersController : ControllerBase
 
         return this.Ok(new { success = true, hasPeriodSelected = true, selectedPeriodName = result.Data.SelectedPeriodName, isTemporary = false, accounts = result.Data.Accounts });
     }
-    /// <summary>
-    /// Mengambil data  Temporary General Ledger.
-    /// </summary>
 
     [HttpGet("temporary")]
     public async Task<IActionResult> GetTemporaryGeneralLedger()
@@ -75,9 +63,6 @@ public class GeneralLedgersController : ControllerBase
             accounts = result.Data.Accounts,
         });
     }
-    /// <summary>
-    /// Proses eksekusi kalkulasi Refresh Ledger Data.
-    /// </summary>
 
     [HttpPost("refresh")]
     public async Task<IActionResult> RefreshLedgerData()

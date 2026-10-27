@@ -16,22 +16,8 @@ namespace AumoBackend.Migrations
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-    /// <summary>
-    /// Membuat data  Mobile Tables baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Mobile Tables baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Mobile Tables baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Mobile Tables baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddMobileTables : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
@@ -113,7 +99,6 @@ namespace AumoBackend.Migrations
                 column: "MobileJournalEntryId");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

@@ -14,24 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
-    /// </summary>
-    /// <summary>
-    /// Mewakili Rename Journal Entry Reference Number To Transaction Number.
-    /// </summary>
     public partial class RenameJournalEntryReferenceNumberToTransactionNumber : Migration
     {
-        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Kolom JournalEntries.ReferenceNumber di-rename ke TransactionNumber
@@ -40,7 +24,6 @@ namespace AumoBackend.Migrations
             // dibiarkan kosong agar tidak error/duplikat saat aplikasi start.
         }
 
-        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

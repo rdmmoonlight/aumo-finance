@@ -13,18 +13,12 @@ using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Layanan logika bisnis untuk Periods Service.
-/// </summary>
 
 public class PeriodsService : IPeriodsService
 {
     private readonly AppDbContext? db;
     private readonly ITransactionNumberService? txNumberService;
     private readonly IGeneralLedgersService? glService;
-    /// <summary>
-    /// Mengambil data  Periods Async.
-    /// </summary>
 
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)
     {
@@ -68,9 +62,6 @@ public class PeriodsService : IPeriodsService
             Periods = periods,
         };
     }
-    /// <summary>
-    /// Mengambil data  Open Period Info Async.
-    /// </summary>
 
     public async Task<OpenPeriodInfoResponse> GetOpenPeriodInfoAsync(Guid userId)
     {
@@ -124,9 +115,6 @@ public class PeriodsService : IPeriodsService
             PermanentAccounts = permanentAccounts,
         };
     }
-    /// <summary>
-    /// Membuat data  Period Async baru.
-    /// </summary>
 
     public async Task<CreatePeriodResult> CreatePeriodAsync(Guid userId, CreatePeriodRequest request)
     {
@@ -390,9 +378,6 @@ public class PeriodsService : IPeriodsService
 
         return new OpeningResult(balances.Count, null);
     }
-    /// <summary>
-    /// Mewakili Select Period Async.
-    /// </summary>
 
     public async Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId)
     {
@@ -422,9 +407,6 @@ public class PeriodsService : IPeriodsService
             Message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
         };
     }
-    /// <summary>
-    /// Mewakili Clear Selection Async.
-    /// </summary>
 
     public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
     {
@@ -443,9 +425,6 @@ public class PeriodsService : IPeriodsService
             Message = "Period selection cleared.",
         };
     }
-    /// <summary>
-    /// Mewakili Close Period Async.
-    /// </summary>
 
     public async Task<BaseServiceResult> ClosePeriodAsync(Guid userId, int periodId)
     {

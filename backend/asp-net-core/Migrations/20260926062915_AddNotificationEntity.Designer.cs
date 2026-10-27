@@ -21,7 +21,6 @@ namespace AumoBackend.Migrations
     [Migration("20260926062915_AddNotificationEntity")]
     partial class AddNotificationEntity
     {
-        /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

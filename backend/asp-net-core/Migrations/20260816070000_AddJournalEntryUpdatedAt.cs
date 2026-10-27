@@ -14,22 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Journal Entry Updated At baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Journal Entry Updated At baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Journal Entry Updated At baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Journal Entry Updated At baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddJournalEntryUpdatedAt : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Kolom JournalEntries.UpdatedAt ditambahkan manual lewat Neon SQL
@@ -38,7 +24,6 @@ namespace AumoBackend.Migrations
             // saat aplikasi start.
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

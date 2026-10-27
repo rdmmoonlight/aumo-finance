@@ -4,19 +4,10 @@
 
 namespace AumoBackend.Services.Storage
 {
-    /// <summary>
-    /// Mewakili Avatar Object.
-    /// </summary>
     public sealed record AvatarObject(Stream Stream, string ContentType);
-    /// <summary>
-    /// Mewakili I Avatar Storage.
-    /// </summary>
 
     public interface IAvatarStorage
     {
-        /// <summary>
-        /// Mewakili Is Configured.
-        /// </summary>
         bool IsConfigured { get; }
 
         Task<string> UploadAvatarAsync(string fileName, Stream content, CancellationToken cancellationToken = default);
