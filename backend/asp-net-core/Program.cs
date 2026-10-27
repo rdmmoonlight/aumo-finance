@@ -9,6 +9,7 @@ using FluentValidation;
 using Hangfire;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
@@ -47,7 +48,8 @@ public partial class Program
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-                options.KnownNetworks.Clear();
+                // Menggunakan KnownIPNetworks sebagai pengganti KnownNetworks yang deprecated
+                options.KnownIPNetworks.Clear();
                 options.KnownProxies.Clear();
             });
 
@@ -69,7 +71,7 @@ public partial class Program
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins(AllowedOrigins.All)
+                    policy.WithOrigins(allowedOrigins)
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials();
@@ -80,7 +82,7 @@ public partial class Program
 
             var app = builder.Build();
 
-            // 3. Forwarded Headers Middleware MUST be placed at the very top
+            // Forwarded Headers Middleware diletakkan paling atas
             app.UseForwardedHeaders();
 
             app.Use(async (context, next) =>
@@ -133,6 +135,8 @@ public partial class Program
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.MapOpenApi();
+                app.MapScalarApiReference();
             }
             else
             {
@@ -162,7 +166,6 @@ public partial class Program
 
             app.UseSerilogRequestLogging();
 
-            // 4. Proper Pipeline Ordering
             app.UseRouting();
 
             app.UseCors("AllowFrontend");
@@ -171,9 +174,6 @@ public partial class Program
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-            app.MapOpenApi();
-            app.MapScalarApiReference();
 
             app.UseHangfireDashboard("/hangfire", new DashboardOptions
             {
