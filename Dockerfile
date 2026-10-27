@@ -11,10 +11,8 @@ RUN apt-get update && apt-get install -y \
     && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
     && rm -rf /var/lib/apt/lists/*
 
-# Tambahkan Cargo ke PATH lingkungan
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Copy project .NET dan Rust Axum
 COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
 COPY backend/axum/ ./backend/axum/
 
@@ -31,10 +29,10 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+COPY frontend/package.json ./
 
-# Ijinkan unrs-resolver atau jalankan build scripts secara eksplisit
-RUN pnpm config set only-built-dependencies unrs-resolver && pnpm install --frozen-lockfile
+# Generate lockfile baru dari awal tanpa memicu ERR_PNPM_IGNORED_BUILDS
+RUN pnpm install --config.onlyBuiltDependencies=unrs-resolver
 
 COPY frontend/ ./
 RUN pnpm run build
