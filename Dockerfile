@@ -3,36 +3,30 @@
 # ==========================================
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dotnet-builder
 WORKDIR /src
-COPY backend/*.csproj ./backend/
-RUN dotnet restore ./backend/*.csproj
-COPY backend/ ./backend/
-RUN dotnet publish ./backend/*.csproj -c Release -o /app/dotnet-build
+
+# FIX: Sesuaikan path ke folder asp-net-core yang berisi AumoBackend.csproj
+COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
+RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
+
+COPY backend/asp-net-core/ ./backend/asp-net-core/
+RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build
 
 # ==========================================
-# STAGE 2: Build Next.js Frontend (pnpm)
+# STAGE 2: Build Next.js Frontend
 # ==========================================
 FROM node:20-alpine AS next-builder
 WORKDIR /app
 
 # Enable pnpm via Corepack
-RUN corepack enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy manifes dependensi
+# Copy manifest pnpm
 COPY frontend/package.json frontend/pnpm-lock.yaml* ./
 
-# Set environment variable agar pnpm tidak memblokir build scripts
-ENV PNPM_ALLOW_BUILDS=all
+# FIX: Tambahkan flag --unsafe-perm atau ignore-scripts jika diperlukan untuk mengatasi ERR_PNPM_IGNORED_BUILDS
+RUN pnpm install --frozen-lockfile || pnpm install --config.ignore-scripts=false
 
-# Install dependensi dengan pnpm
-RUN pnpm install || (pnpm approve-builds --all && pnpm install)
-
-# Copy seluruh source code frontend
 COPY frontend/ ./
-
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_ENV=production
-
-# Build aplikasi Next.js (pastikan output: 'standalone' di next.config.js)
 RUN pnpm run build
 
 # ==========================================
@@ -40,7 +34,7 @@ RUN pnpm run build
 # ==========================================
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runner
 
-# Install Nginx, Node.js, dan Supervisor di Debian runtime
+# Install Nginx, Node.js, dan Supervisor
 RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
@@ -54,7 +48,7 @@ WORKDIR /app
 # Copy hasil build .NET
 COPY --from=dotnet-builder /app/dotnet-build ./backend
 
-# Copy hasil build Next.js Standalone & Assets
+# Copy hasil build Next.js Standalone & Static assets
 COPY --from=next-builder /app/.next/standalone ./frontend
 COPY --from=next-builder /app/.next/static ./frontend/.next/static
 COPY --from=next-builder /app/public ./frontend/public
