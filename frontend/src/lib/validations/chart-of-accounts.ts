@@ -1,9 +1,8 @@
 import { z } from "zod";
 import {
-  ACCOUNT_TYPES,
   ACCOUNT_RANGES,
-  ChartOfAccount,
-} from "@/app/(authenticated)/chart-of-accounts/coa-types";
+  ChartOfAccount
+} from "../../features/chart-of-accounts/types/types";
 
 export const addAccountSchema = (accounts: ChartOfAccount[]) =>
   z

@@ -2,7 +2,7 @@
 import type {
   AccountBalanceItem,
   TrendItem,
-} from "@/app/(authenticated)/dashboard/dashboard-tables";
+} from "#/features/dashboard/components/tables";
 import {
   Card,
   CardContent,
