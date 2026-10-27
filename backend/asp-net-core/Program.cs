@@ -48,8 +48,7 @@ public partial class Program
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-                // Menggunakan KnownIPNetworks sebagai pengganti KnownNetworks yang deprecated
-                options.KnownIPNetworks.Clear();
+                options.KnownNetworks.Clear();   // ✅ Gunakan KnownNetworks
                 options.KnownProxies.Clear();
             });
 
