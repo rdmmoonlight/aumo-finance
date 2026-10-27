@@ -5,15 +5,12 @@ WORKDIR /app
 # Mengaktifkan pnpm via Corepack
 RUN corepack enable pnpm
 
-# Salin file manifes dependensi dari folder frontend
-COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/package-lock.json* ./
+# Cuma menyalin package.json tanpa lockfile
+COPY frontend/package.json ./
 
-# Install dependensi (dengan konfigurasi mengizinkan build scripts pnpm)
-RUN \
-  if [ -f pnpm-lock.yaml ]; then pnpm config set ignore-scripts false && pnpm i --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  else npm install; \
-  fi
+# Install dependensi dari awal dan izinkan build script paket native (unrs-resolver)
+RUN pnpm config set ignore-scripts false && \
+    pnpm install --config.onlyBuiltDependencies=unrs-resolver
 
 # 2. Stage untuk melakukan build aplikasi Next.js
 FROM node:20-alpine AS builder
@@ -26,10 +23,7 @@ COPY frontend .
 # Nonaktifkan telemetri Next.js saat build
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN \
-  if [ -f pnpm-lock.yaml ]; then pnpm run build; \
-  else npm run build; \
-  fi
+RUN pnpm run build
 
 # 3. Stage untuk runner / production deployment
 FROM node:20-alpine AS runner
