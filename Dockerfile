@@ -24,16 +24,15 @@ RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/
 # ==========================================
 # STAGE 2: Build Next.js Frontend
 # ==========================================
-FROM node:20-alpine AS next-builder
+FROM node:24-alpine AS next-builder
 WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy manifest dan workspace config yang sudah ada di repo
-COPY frontend/package.json frontend/pnpm-workspace.yaml ./
+COPY frontend/package.json ./
 
-# Install dependensi (pnpm v10 otomatis membaca pnpm-workspace.yaml)
-RUN pnpm install
+# pnpm v10 CLI flag eksplisit untuk mengizinkan build script unrs-resolver
+RUN pnpm install --allow-build=unrs-resolver
 
 COPY frontend/ ./
 RUN pnpm run build
@@ -47,7 +46,7 @@ RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
     curl \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
