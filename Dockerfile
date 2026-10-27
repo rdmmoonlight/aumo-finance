@@ -4,15 +4,17 @@ WORKDIR /app
 # Enable pnpm via Corepack
 RUN corepack enable pnpm
 
-# Copy manifes dependensi & install paket
+# Copy manifes dependensi
 COPY frontend/package.json ./
-RUN pnpm config set ignore-scripts false && \
-    pnpm install --config.onlyBuiltDependencies=unrs-resolver
+
+# Daftarkan unrs-resolver ke .npmrc lalu install
+RUN echo "onlyBuiltDependencies=" > .npmrc && \
+    echo "  - unrs-resolver" >> .npmrc && \
+    pnpm install
 
 # Copy seluruh source code frontend
 COPY frontend .
 
-# Set environment variable untuk Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
@@ -24,5 +26,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Jalankan server
 CMD ["pnpm", "start"]
