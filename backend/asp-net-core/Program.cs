@@ -7,10 +7,12 @@ using AumoBackend.Middlewares;
 using AumoBackend.Models;
 using FluentValidation;
 using Hangfire;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Serilog;
 
@@ -59,7 +61,46 @@ public partial class Program
             builder.Services.AddApplicationServices();
 
             builder.Services.AddControllers();
-            builder.Services.AddOpenApi();
+
+            // ✅ OpenAPI + Dinamis JWT Bearer Transformer (Bisa di-toggle lewat config)
+            builder.Services.AddOpenApi(options =>
+            {
+                options.AddDocumentTransformer((document, context, cancellationToken) =>
+                {
+                    var configuration = context.ApplicationServices.GetRequiredService<IConfiguration>();
+                    var enableAuth = configuration.GetValue<bool>("Jwt:EnableScalarAuth", true);
+
+                    if (!enableAuth) return Task.CompletedTask;
+
+                    var schemeName = configuration["Jwt:SchemeName"] ?? JwtBearerDefaults.AuthenticationScheme;
+                    var description = configuration["Jwt:Description"] ?? "Masukkan JWT Token dengan format: Bearer {token}";
+
+                    var securityScheme = new OpenApiSecurityScheme
+                    {
+                        Name = "Authorization",
+                        Description = description,
+                        In = ParameterLocation.Header,
+                        Type = SecuritySchemeType.Http,
+                        Scheme = schemeName.ToLowerInvariant(),
+                        BearerFormat = "JWT",
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = schemeName
+                        }
+                    };
+
+                    document.Components ??= new OpenApiComponents();
+                    document.Components.SecuritySchemes[schemeName] = securityScheme;
+
+                    document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                    {
+                        [securityScheme] = Array.Empty<string>()
+                    });
+
+                    return Task.CompletedTask;
+                });
+            });
 
             builder.Services.AddHealthChecks();
 
