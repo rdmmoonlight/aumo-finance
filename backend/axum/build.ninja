@@ -1,6 +1,7 @@
 rule cargo_build
   command = cargo build --manifest-path $in --release
   description = Building Rust Axum App: $in
+  pool = console
 
 build backend/axum/target/release/axum_app: cargo_build backend/axum/Cargo.toml
 
