@@ -1,10 +1,5 @@
 "use client";
 
-import {
-  ACCOUNT_RANGES,
-  ACCOUNT_TYPES,
-  ChartOfAccount,
-} from "@/app/(authenticated)/chart-of-accounts/coa-types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -44,6 +39,11 @@ import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import {
+  ACCOUNT_RANGES,
+  ACCOUNT_TYPES,
+  ChartOfAccount,
+} from "../types/types";
 
 type AddSchemaType = ReturnType<typeof addAccountSchema>;
 type EditSchemaType = typeof editAccountSchema;

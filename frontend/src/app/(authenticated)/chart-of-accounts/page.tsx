@@ -1,4 +1,4 @@
-import { ChartOfAccountsTable } from "@/app/(authenticated)/chart-of-accounts/coa-table";
+import { ChartOfAccountsTable } from "@/features/chart-of-accounts/components/table";
 import { Suspense } from "react";
 
 export default function ChartOfAccountsPage() {

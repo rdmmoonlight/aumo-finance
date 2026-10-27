@@ -1,11 +1,11 @@
 "use client";
 
-import { DashboardCharts } from "@/app/(authenticated)/dashboard/dashboard-charts";
+import { DashboardCharts } from "#/features/dashboard/components/charts";
 import {
   ExpenseTable,
   formatNumber,
   TrendTable,
-} from "@/app/(authenticated)/dashboard/dashboard-tables";
+} from "#/features/dashboard/components/tables";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,9 +33,9 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 
 export default function DashboardContent() {
   const router = useRouter();
