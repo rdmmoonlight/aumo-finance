@@ -1,11 +1,23 @@
 # ==========================================
-# STAGE 1: Build .NET Core Backend
+# STAGE 1: Build .NET Core & Rust FFI Backend
 # ==========================================
-# Menggunakan SDK .NET 10.0 agar sesuai dengan AumoBackend.csproj
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS dotnet-builder
 WORKDIR /src
 
+# Install Rust & Cargo untuk mengompilasi Axum/C-Shared Library
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
+    && rm -rf /var/lib/apt/lists/*
+
+# Tambahkan Cargo ke PATH lingkungan
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Copy project .NET dan Rust Axum
 COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
+COPY backend/axum/ ./backend/axum/
+
 RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
 
 COPY backend/asp-net-core/ ./backend/asp-net-core/
@@ -21,8 +33,8 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY frontend/package.json frontend/pnpm-lock.yaml* ./
 
-# Izinkan pnpm menjalankan build scripts tanpa memicu ERR_PNPM_IGNORED_BUILDS
-RUN pnpm config set ignore-scripts false && pnpm install --frozen-lockfile
+# Ijinkan unrs-resolver atau jalankan build scripts secara eksplisit
+RUN pnpm config set only-built-dependencies unrs-resolver && pnpm install --frozen-lockfile
 
 COPY frontend/ ./
 RUN pnpm run build
@@ -30,7 +42,6 @@ RUN pnpm run build
 # ==========================================
 # STAGE 3: Runtime Environment
 # ==========================================
-# Gunakan ASP.NET 10.0 Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS runner
 
 RUN apt-get update && apt-get install -y \
