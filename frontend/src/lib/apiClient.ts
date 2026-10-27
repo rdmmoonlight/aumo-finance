@@ -16,8 +16,19 @@ function getCookie(name: string): string | undefined {
 }
 
 function getBackendTarget(): string {
-  // Ambil URL Backend dari environment variable Next.js
-  return process.env.NEXT_PUBLIC_WEB_API_URL || "";
+  // 1. Konsistensi hirarki env var & hilangkan trailing slash agar aman
+  let target =
+    process.env.NEXT_PUBLIC_BACKEND_URL ||
+    process.env.NEXT_PUBLIC__WEB_API_URL ||
+    process.env.NEXT_PUBLIC_WEB_API_URL ||
+    "";
+
+  // Hapus trailing slash jika ada (misal "https://aumoweb.onrender.com/" -> "https://aumoweb.onrender.com")
+  target = target.replace(/\/+$/, "");
+
+  // 2. Dalam setup Nginx (Single Domain / Reverse Proxy), jika client melakukan request
+  // dari browser ke domain yang sama (relative URL), kosongkan baseUrl agar otomatis menembak Nginx / relative path.
+  return target;
 }
 
 const BASE_URL = getBackendTarget();
