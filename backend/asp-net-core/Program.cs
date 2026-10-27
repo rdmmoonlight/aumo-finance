@@ -62,41 +62,50 @@ public partial class Program
 
             builder.Services.AddControllers();
 
-            // ✅ OpenAPI + Dinamis JWT Bearer Transformer (Bisa di-toggle lewat config)
+            // ✅ OpenAPI Document Generator + Dinamis Server URL & JWT Bearer
             builder.Services.AddOpenApi(options =>
             {
                 options.AddDocumentTransformer((document, context, cancellationToken) =>
                 {
                     var configuration = context.ApplicationServices.GetRequiredService<IConfiguration>();
-                    var enableAuth = configuration.GetValue<bool>("Jwt:EnableScalarAuth", true);
-
-                    if (!enableAuth) return Task.CompletedTask;
-
-                    var schemeName = configuration["Jwt:SchemeName"] ?? JwtBearerDefaults.AuthenticationScheme;
-                    var description = configuration["Jwt:Description"] ?? "Masukkan JWT Token dengan format: Bearer {token}";
-
-                    var securityScheme = new OpenApiSecurityScheme
+                    
+                    // 1. Set Server URL Dinamis dari appsettings/Environment Variables
+                    var serverUrl = configuration["Scalar:ServerUrl"] ?? "https://aumoweb.onrender.com";
+                    document.Servers = new List<OpenApiServer>
                     {
-                        Name = "Authorization",
-                        Description = description,
-                        In = ParameterLocation.Header,
-                        Type = SecuritySchemeType.Http,
-                        Scheme = schemeName.ToLowerInvariant(),
-                        BearerFormat = "JWT",
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = schemeName
-                        }
+                        new OpenApiServer { Url = serverUrl, Description = "Production Server" }
                     };
 
-                    document.Components ??= new OpenApiComponents();
-                    document.Components.SecuritySchemes[schemeName] = securityScheme;
-
-                    document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                    // 2. Set JWT Bearer Authentication Dinamis
+                    var enableAuth = configuration.GetValue<bool>("Jwt:EnableScalarAuth", true);
+                    if (enableAuth)
                     {
-                        [securityScheme] = Array.Empty<string>()
-                    });
+                        var schemeName = configuration["Jwt:SchemeName"] ?? JwtBearerDefaults.AuthenticationScheme;
+                        var description = configuration["Jwt:Description"] ?? "Masukkan JWT Token dengan format: Bearer {token}";
+
+                        var securityScheme = new OpenApiSecurityScheme
+                        {
+                            Name = "Authorization",
+                            Description = description,
+                            In = ParameterLocation.Header,
+                            Type = SecuritySchemeType.Http,
+                            Scheme = schemeName.ToLowerInvariant(),
+                            BearerFormat = "JWT",
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = schemeName
+                            }
+                        };
+
+                        document.Components ??= new OpenApiComponents();
+                        document.Components.SecuritySchemes[schemeName] = securityScheme;
+
+                        document.SecurityRequirements.Add(new OpenApiSecurityRequirement
+                        {
+                            [securityScheme] = Array.Empty<string>()
+                        });
+                    }
 
                     return Task.CompletedTask;
                 });
@@ -208,15 +217,13 @@ public partial class Program
             // ✅ Membaca Konfigurasi Scalar dari Environment / appsettings.json
             var scalarTitle = app.Configuration["Scalar:Title"] ?? "Aumo Web API Reference";
             var scalarRoutePrefix = app.Configuration["Scalar:RoutePrefix"] ?? "/reference";
-            var scalarServerUrl = app.Configuration["Scalar:ServerUrl"] ?? "https://aumoweb.onrender.com";
 
-            // ✅ Map Scalar UI menggunakan Route & Options Dinamis
+            // ✅ Map Scalar UI menggunakan Options yang Valid
             app.MapScalarApiReference(scalarRoutePrefix, options =>
             {
                 options
                     .WithTitle(scalarTitle)
                     .WithTheme(ScalarTheme.Moon)
-                    .WithServers(new ScalarServer(scalarServerUrl))
                     .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch);
             });
 
