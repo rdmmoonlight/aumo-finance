@@ -2,30 +2,31 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Salin file manifes dependensi
-COPY package.json package-lock.json* pnpm-lock.yaml* yarn.lock* ./
+# Mengaktifkan pnpm
+RUN corepack enable pnpm
 
-# Install dependensi sesuai package manager yang digunakan
+# Salin file manifes dependensi dari subfolder frontend
+COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/package-lock.json* ./
+
+# Install dependensi
 RUN \
-  if [ -f yarn.lock ]; then yarn install --frozen-lockfile; \
+  if [ -f pnpm-lock.yaml ]; then pnpm i --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && npm install; \
+  else npm install; \
   fi
 
 # 2. Stage untuk melakukan build aplikasi
 FROM node:20-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+RUN corepack enable pnpm
 
-# Nonaktifkan telemetri Next.js saat build
+COPY --from=deps /app/node_modules ./node_modules
+COPY frontend .
+
 ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN \
-  if [ -f yarn.lock ]; then yarn build; \
-  elif [ -f package-lock.json ]; then npm run build; \
-  elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm run build; \
+  if [ -f pnpm-lock.yaml ]; then pnpm run build; \
   else npm run build; \
   fi
 
@@ -36,13 +37,10 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Buat user non-root demi keamanan
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder /app/public ./public
-
-# Salin hasil build Next.js
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
