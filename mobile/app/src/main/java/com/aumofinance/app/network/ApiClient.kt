@@ -37,7 +37,7 @@ object ApiClient {
     // jadi endpoint di setiap ApiX.kt ditulis absolut mulai dari "/"
     // (mis. "/auth/login", "/periods"). Ktor memperlakukan path yang diawali
     // "/" sebagai path ABSOLUT yang menggantikan path bawaan BASE_URL.
-    private const val BASE_URL = "https://aumonext-api.onrender.com"
+    private const val BASE_URL = "https://aumoweb.onrender.com"
 
     // Render free-tier bisa cold start 30-60 detik kalau server sempat tidur.
     // Timeout 10 detik bawaan OkHttp/Ktor terlalu pendek untuk itu — request
