@@ -26,9 +26,9 @@ import {
   User,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import AccountSettings from "./account";
-import { AppearanceSection } from "./appearance";
-import { SecuritySection } from "./security";
+import AccountSettings from "../../../features/settings/components/account";
+import { AppearanceSection } from "../../../features/settings/components/appearance";
+import { SecuritySection } from "../../../features/settings/components/security";
 
 interface SettingModuleItem {
   id: string;

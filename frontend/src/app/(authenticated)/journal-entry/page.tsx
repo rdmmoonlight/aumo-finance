@@ -1,6 +1,6 @@
 "use client";
 
-import JournalEntryContent from "@/app/(authenticated)/journal-entry/journal-entry-content";
+import JournalEntryContent from "#/features/journal-entry/components/content";
 import { Loader2 } from "lucide-react";
 import { Suspense } from "react";
 

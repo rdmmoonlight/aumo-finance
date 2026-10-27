@@ -22,7 +22,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo } from "react";
-import { AccountMappingDetail } from "./types";
+import { AccountMappingDetail } from "../types";
 
 const helper = createColumnHelper<AccountMappingDetail>();
 

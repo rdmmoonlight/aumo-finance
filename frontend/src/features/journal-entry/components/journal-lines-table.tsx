@@ -5,7 +5,7 @@ import {
   columnHelper,
   formatIDR,
   LineItem,
-} from "@/app/(authenticated)/journal-entry/helpers";
+} from "#/features/journal-entry/utils/helpers";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -244,9 +244,9 @@ export function JournalLinesTable({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext(),
+                      )}
                   </TableHead>
                 ))}
               </TableRow>

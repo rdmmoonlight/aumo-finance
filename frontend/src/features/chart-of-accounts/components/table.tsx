@@ -51,7 +51,7 @@ import {
   ACCOUNT_RANGES,
   ACCOUNT_TYPES,
   AccountItem,
-} from "../types/types";
+} from "../types";
 
 export function ChartOfAccountsTable() {
   const searchParams = useSearchParams();

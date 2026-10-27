@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   ACCOUNT_RANGES,
   ChartOfAccount
-} from "../../features/chart-of-accounts/types/types";
+} from "../../features/chart-of-accounts/types";
 
 export const addAccountSchema = (accounts: ChartOfAccount[]) =>
   z

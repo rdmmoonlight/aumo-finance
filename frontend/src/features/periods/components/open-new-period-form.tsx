@@ -4,7 +4,7 @@ import {
   MONTH_NAMES,
   type AccountItem,
   type CreatePeriodFormProps,
-} from "@/app/(authenticated)/periods/types";
+} from "#/features/periods/types";
 import { Button } from "@/components/ui/button";
 import {
   Card,

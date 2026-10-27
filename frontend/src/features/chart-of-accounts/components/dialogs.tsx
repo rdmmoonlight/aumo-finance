@@ -43,7 +43,7 @@ import {
   ACCOUNT_RANGES,
   ACCOUNT_TYPES,
   ChartOfAccount,
-} from "../types/types";
+} from "../types";
 
 type AddSchemaType = ReturnType<typeof addAccountSchema>;
 type EditSchemaType = typeof editAccountSchema;
