@@ -1,7 +1,3 @@
-// <copyright file="AuthService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Auth;
 
 using System.IdentityModel.Tokens.Jwt;
@@ -97,6 +93,7 @@ public class AuthService(
 
         if (!isMobile)
         {
+            // ✅ Gunakan PasswordSignInAsync langsung agar Cookie Identity ter-set sempurna dengan Claims bawaan
             await signInManager.SignInAsync(user, isPersistent: request.RememberMe);
         }
         else
@@ -255,16 +252,20 @@ public class AuthService(
 
     public async Task<UserProfileViewModel?> GetUserProfileAsync(ClaimsPrincipal userPrincipal)
     {
+        // 1. Coba ambil user via SignInManager / ClaimsPrincipal bawaan
         var user = await userManager.GetUserAsync(userPrincipal);
 
+        // 2. Fallback pencarian manual jika claims diparsing beda oleh Jwt/Cookie middleware
         if (user == null)
         {
-            var userId = userPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)
-                         ?? userPrincipal.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            var userIdStr = userPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)
+                         ?? userPrincipal.FindFirstValue(JwtRegisteredClaimNames.Sub)
+                         ?? userPrincipal.FindFirstValue("sub")
+                         ?? userPrincipal.FindFirstValue("id");
 
-            if (!string.IsNullOrEmpty(userId))
+            if (!string.IsNullOrEmpty(userIdStr) && Guid.TryParse(userIdStr, out var userGuid))
             {
-                user = await userManager.FindByIdAsync(userId);
+                user = await userManager.FindByIdAsync(userGuid.ToString());
             }
         }
 
