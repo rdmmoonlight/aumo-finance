@@ -13,15 +13,9 @@ using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Layanan logika bisnis untuk Chart Of Accounts Service.
-/// </summary>
 
 public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
 {
-    /// <summary>
-    /// Mengambil data  Accounts Async.
-    /// </summary>
     public async Task<ChartOfAccountsListResponseDto> GetAccountsAsync(Guid userId, string? search, string? category)
     {
         var query = db.ChartOfAccounts.Where(a => a.UserId == userId);
@@ -117,9 +111,6 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             Accounts = accountsList,
         };
     }
-    /// <summary>
-    /// Membuat data  Account Async baru.
-    /// </summary>
 
     public async Task<ServiceResultDto> CreateAccountAsync(Guid userId, CreateAccountRequestDto request)
     {
@@ -180,9 +171,6 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             return Fail($"A fatal error occurred while saving the account: {ex.Message}", 500);
         }
     }
-    /// <summary>
-    /// Memperbarui data  Account Async.
-    /// </summary>
 
     public async Task<ServiceResultDto> UpdateAccountAsync(Guid userId, int accountId, UpdateAccountRequestDto request)
     {
@@ -233,9 +221,6 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             return Fail($"A fatal error occurred while updating the account: {ex.Message}", 500);
         }
     }
-    /// <summary>
-    /// Menghapus data  Account Async.
-    /// </summary>
 
     public async Task<ServiceResultDto> DeleteAccountAsync(Guid userId, int accountId)
     {

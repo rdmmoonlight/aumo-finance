@@ -7,9 +7,6 @@ namespace AumoBackend.Controllers.Reports
     using AumoBackend.DTOs.Reports;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    /// <summary>
-    /// Controller API untuk mengelola Trial Balance.
-    /// </summary>
 
     [ApiController]
     [Route("/[controller]")]
@@ -17,9 +14,6 @@ namespace AumoBackend.Controllers.Reports
 
     public class TrialBalanceController : ControllerBase
     {
-        /// <summary>
-        /// Proses eksekusi kalkulasi Build Trial Balance Rows Async.
-        /// </summary>
         public static Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
             object dbContext,
             object period = null!,
@@ -28,9 +22,6 @@ namespace AumoBackend.Controllers.Reports
         {
             return Task.FromResult(new List<TrialBalanceRow>());
         }
-        /// <summary>
-        /// Proses eksekusi kalkulasi Build Trial Balance Rows Async.
-        /// </summary>
 
         public static Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
             object dbContext,

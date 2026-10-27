@@ -1,7 +1,3 @@
-// <copyright file="Program.cs" company="rdmmoonlight">
-// Copyright (c) rdmmoonlight. All rights reserved.
-// </copyright>
-
 using System.Globalization;
 using System.Security.Claims;
 using AumoBackend.Data;
@@ -13,16 +9,12 @@ using FluentValidation;
 using Hangfire;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using Serilog;
 
 namespace AumoBackend;
 
-/// <summary>
-/// Provides the application's entry point and configures the web application.
-/// </summary>
 public partial class Program
 {
     private static readonly string[] RootMethods = ["GET", "HEAD"];
@@ -33,10 +25,6 @@ public partial class Program
     [LoggerMessage(EventId = 1002, Level = LogLevel.Error, Message = "Unhandled exception on {Path}")]
     private static partial void LogUnhandledException(Microsoft.Extensions.Logging.ILogger logger, Exception exception, PathString path);
 
-    /// <summary>
-    /// Runs the application.
-    /// </summary>
-    /// <param name="args">Command-line arguments.</param>
     public static async Task Main(string[] args)
     {
         Log.Logger = new LoggerConfiguration()
@@ -71,6 +59,7 @@ public partial class Program
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+
             builder.Services.AddHealthChecks();
 
             var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()

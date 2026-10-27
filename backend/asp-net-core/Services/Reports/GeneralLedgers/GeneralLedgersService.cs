@@ -11,9 +11,6 @@ using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Layanan logika bisnis untuk General Ledgers Service.
-/// </summary>
 
 public class GeneralLedgersService : IGeneralLedgersService
 {
@@ -24,14 +21,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     private static readonly string[] RevenueTypes = { "OperatingIncome", "OtherIncome", "Revenue", "Income" };
     private static readonly string[] ExpenseTypes = { "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="GeneralLedgersService"/> class.
-    /// </summary>
-    /// <param name="db">Konteks database aplikasi.</param>
     public GeneralLedgersService(AppDbContext db) => this.db = db;
-    /// <summary>
-    /// Mengambil data  Permanent Ledgers Async.
-    /// </summary>
 
     public async Task<BaseServiceResult<PermanentLedgerGroupedResponse>> GetPermanentLedgersAsync(Guid userId)
     {
@@ -63,9 +53,6 @@ public class GeneralLedgersService : IGeneralLedgersService
             Data = new PermanentLedgerGroupedResponse { SelectedPeriodName = period.PeriodName, Accounts = grouped },
         };
     }
-    /// <summary>
-    /// Mengambil data  Temporary Ledgers Async.
-    /// </summary>
 
     public async Task<BaseServiceResult<TemporaryLedgerGroupedResponse>> GetTemporaryLedgersAsync(Guid userId)
     {
@@ -105,9 +92,6 @@ public class GeneralLedgersService : IGeneralLedgersService
             },
         };
     }
-    /// <summary>
-    /// Proses eksekusi kalkulasi Refresh General Ledgers Async.
-    /// </summary>
 
     public async Task<BaseServiceResult> RefreshGeneralLedgersAsync(Guid userId)
     {
@@ -192,9 +176,6 @@ public class GeneralLedgersService : IGeneralLedgersService
             }
         });
     }
-    /// <summary>
-    /// Mewakili Clear Selected Period Ledgers Async.
-    /// </summary>
 
     public async Task<BaseServiceResult> ClearSelectedPeriodLedgersAsync(Guid userId)
     {

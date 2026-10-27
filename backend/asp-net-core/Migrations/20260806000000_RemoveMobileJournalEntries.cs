@@ -14,31 +14,14 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Menghapus data  Mobile Journal Entries.
-    /// </summary>
-    /// <summary>
-    /// Menghapus data  Mobile Journal Entries.
-    /// </summary>
-    /// <summary>
-    /// Menghapus data  Mobile Journal Entries.
-    /// </summary>
-    /// <summary>
-    /// Menghapus data  Mobile Journal Entries.
-    /// </summary>
-    /// <summary>
-    /// Menghapus data  Mobile Journal Entries.
-    /// </summary>
     public partial class RemoveMobileJournalEntries : Migration
     {
-        /// <inheritdoc/>
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Karena tabel di PostgreSQL sudah di-drop/backup manual,
             // metode Up dibiarkan kosong agar tidak error saat aplikasi dijalankan.
         }
 
-        /// <inheritdoc/>
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

@@ -9,16 +9,10 @@ using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Layanan logika bisnis untuk Dashboard Service.
-/// </summary>
 
 public class DashboardService : IDashboardService
 {
     private readonly AppDbContext? db;
-    /// <summary>
-    /// Mengambil data  Dashboard Data Async.
-    /// </summary>
 
     public async Task<DashboardDataDto> GetDashboardDataAsync(Guid userId, string period)
     {

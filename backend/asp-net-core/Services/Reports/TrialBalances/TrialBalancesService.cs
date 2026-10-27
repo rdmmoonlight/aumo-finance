@@ -15,14 +15,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Services;
 
-/// <summary>
-/// Layanan logika bisnis untuk kalkulasi 3 jenis Trial Balance.
-/// </summary>
 public class TrialBalancesService : ITrialBalancesService
 {
-    /// <summary>
-    /// Proses eksekusi kalkulasi Unadjusted Trial Balance.
-    /// </summary>
     public async Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(
         AppDbContext db,
         Guid userId,
@@ -58,9 +52,6 @@ public class TrialBalancesService : ITrialBalancesService
         return result;
     }
 
-    /// <summary>
-    /// Proses eksekusi kalkulasi Adjusted Trial Balance.
-    /// </summary>
     public async Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(
         AppDbContext db,
         Guid userId,
@@ -96,9 +87,6 @@ public class TrialBalancesService : ITrialBalancesService
         return result;
     }
 
-    /// <summary>
-    /// Proses eksekusi kalkulasi Post-Closing Trial Balance.
-    /// </summary>
     public async Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(
         AppDbContext db,
         Guid userId,
@@ -135,9 +123,6 @@ public class TrialBalancesService : ITrialBalancesService
 
     }
 
-    /// <summary>
-    /// Proses eksekusi kalkulasi Retained Earnings Ending.
-    /// </summary>
 
     public async Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period)
     {

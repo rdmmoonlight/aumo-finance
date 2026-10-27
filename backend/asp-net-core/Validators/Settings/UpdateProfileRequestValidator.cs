@@ -7,9 +7,6 @@ namespace AumoBackend.Validators.Settings;
 using System.Text.RegularExpressions;
 using AumoBackend.DTOs;
 using FluentValidation;
-/// <summary>
-/// Validator untuk Update Profile Request Validator.
-/// </summary>
 
 public partial class UpdateProfileRequestValidator : AbstractValidator<UpdateProfileRequest>
 {
@@ -17,9 +14,6 @@ public partial class UpdateProfileRequestValidator : AbstractValidator<UpdatePro
     private const int MaxUserNameLength = 256; // batas bawaan ASP.NET Identity
     private const int MaxBioLength = 500;
     private const int MaxAvatarUrlLength = 2048;
-    /// <summary>
-    /// Validator untuk Update Profile Request Validator.
-    /// </summary>
 
     public UpdateProfileRequestValidator()
     {

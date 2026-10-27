@@ -7,9 +7,6 @@ namespace AumoBackend.Controllers
     using AumoBackend.Services.Storage;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
-    /// <summary>
-    /// Controller API untuk mengelola Avatars.
-    /// </summary>
 
     [ApiController]
     [AllowAnonymous]
@@ -17,17 +14,11 @@ namespace AumoBackend.Controllers
     public class AvatarsController : ControllerBase
     {
         private readonly IAvatarStorage avatarStorage;
-        /// <summary>
-        /// Controller API untuk mengelola Avatars.
-        /// </summary>
 
         public AvatarsController(IAvatarStorage avatarStorage)
         {
             this.avatarStorage = avatarStorage;
         }
-        /// <summary>
-        /// Mengambil data .
-        /// </summary>
 
         [HttpGet("{fileName}")]
         public async Task<IActionResult> Get(string fileName, CancellationToken cancellationToken)

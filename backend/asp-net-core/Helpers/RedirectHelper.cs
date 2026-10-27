@@ -3,16 +3,10 @@
 // </copyright>
 
 using Microsoft.AspNetCore.Mvc;
-/// <summary>
-/// Mewakili Redirect Helper.
-/// </summary>
 namespace AumoBackend.Helpers;
 
 public static class RedirectHelper
 {
-    /// <summary>
-    /// Mengambil data  Safe Redirect Url.
-    /// </summary>
     public static string GetSafeRedirectUrl(this IUrlHelper urlHelper, string? targetUrl)
     {
         const string defaultUrl = "/home";

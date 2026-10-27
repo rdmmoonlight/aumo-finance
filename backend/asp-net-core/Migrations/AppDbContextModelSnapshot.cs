@@ -23,7 +23,6 @@ namespace AumoBackend.Migrations
     [DbContext(typeof(AppDbContext))]
     internal partial class AppDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc/>
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

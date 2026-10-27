@@ -13,95 +13,44 @@ using Microsoft.EntityFrameworkCore;
 
 // Gunakan type alias eksplisit untuk menyelesaikan ambiguitas
 using DataProtectionKeyEntity = Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey;
-/// <summary>
-/// Konteks database Entity Framework App Db Context.
-/// </summary>
 
 public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
 {
-    /// <summary>
-    /// Konteks database Entity Framework App Db Context.
-    /// </summary>
     public AppDbContext()
     {
     }
-    /// <summary>
-    /// Konteks database Entity Framework App Db Context.
-    /// </summary>
 
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)
     {
     }
-    /// <summary>
-    /// Mewakili Chart Of Accounts.
-    /// </summary>
 
     public virtual DbSet<ChartOfAccount> ChartOfAccounts { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Data Protection Keys.
-    /// </summary>
 
     // Menggunakan type alias agar tidak bentrok dengan AumoBackend.Models.DataProtectionKey
     public virtual DbSet<DataProtectionKeyEntity> DataProtectionKeys { get; set; } = null!;
-    /// <summary>
-    /// Mewakili General Journals.
-    /// </summary>
 
     public virtual DbSet<GeneralJournal> GeneralJournals { get; set; } = null!;
-    /// <summary>
-    /// Mewakili General Ledger Permanent Accounts.
-    /// </summary>
 
     public virtual DbSet<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = null!;
-    /// <summary>
-    /// Mewakili General Ledger Temporary Accounts.
-    /// </summary>
 
     public virtual DbSet<GeneralLedgerTemporaryAccount> GeneralLedgerTemporaryAccounts { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Login Activities.
-    /// </summary>
 
     public virtual DbSet<LoginActivity> LoginActivities { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Notifications.
-    /// </summary>
 
     public virtual DbSet<Notification> Notifications { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Periods.
-    /// </summary>
 
     public virtual DbSet<Period> Periods { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Recovery Codes.
-    /// </summary>
 
     public virtual DbSet<RecoveryCode> RecoveryCodes { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Security Settings.
-    /// </summary>
 
     public virtual DbSet<SecuritySetting> SecuritySettings { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Transaction Counters.
-    /// </summary>
 
     public virtual DbSet<TransactionCounter> TransactionCounters { get; set; } = null!;
-    /// <summary>
-    /// Mewakili Trusted Devices.
-    /// </summary>
 
     public virtual DbSet<TrustedDevice> TrustedDevices { get; set; } = null!;
-    /// <summary>
-    /// Mewakili User Sessions.
-    /// </summary>
 
     public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
-    /// <summary>
-    /// Konfigurasi hook/event On Configuring.
-    /// </summary>
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -109,9 +58,6 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
         {
         }
     }
-    /// <summary>
-    /// Konfigurasi hook/event On Model Creating.
-    /// </summary>
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

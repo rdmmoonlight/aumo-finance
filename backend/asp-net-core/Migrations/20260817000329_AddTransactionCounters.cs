@@ -14,22 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Transaction Counters baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Transaction Counters baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Transaction Counters baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Transaction Counters baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddTransactionCounters : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Tabel TransactionCounters ditambahkan manual lewat Neon SQL
@@ -38,7 +24,6 @@ namespace AumoBackend.Migrations
             // saat aplikasi start.
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
         }

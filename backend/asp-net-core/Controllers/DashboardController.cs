@@ -24,9 +24,6 @@ using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Controller API untuk mengelola Dashboard.
-/// </summary>
 
 [ApiController]
 [Route("/dashboard")]
@@ -37,18 +34,12 @@ public class DashboardController : ControllerBase
     private readonly AppDbContext db;
 
     private readonly IValidator<GetDashboardQuery> queryValidator;
-    /// <summary>
-    /// Controller API untuk mengelola Dashboard.
-    /// </summary>
 
     public DashboardController(AppDbContext db, IValidator<GetDashboardQuery> queryValidator)
     {
         this.db = db;
         this.queryValidator = queryValidator;
     }
-    /// <summary>
-    /// Mengambil data  Dashboard Data.
-    /// </summary>
 
     [HttpGet]
     public async Task<IActionResult> GetDashboardData([FromQuery] GetDashboardQuery query)

@@ -5,15 +5,9 @@
 namespace AumoBackend.Services.Health
 {
     using AumoBackend.DTOs;
-    /// <summary>
-    /// Layanan logika bisnis untuk Health Service.
-    /// </summary>
 
     public class HealthService : IHealthService
     {
-        /// <summary>
-        /// Mengambil data  Health Status Async.
-        /// </summary>
         public Task<HealthStatusDto> GetHealthStatusAsync()
         {
             return Task.FromResult(new HealthStatusDto

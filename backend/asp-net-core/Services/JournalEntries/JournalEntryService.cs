@@ -9,26 +9,17 @@ using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-/// <summary>
-/// Layanan logika bisnis untuk Journal Entry Service.
-/// </summary>
 
 public class JournalEntryService : IJournalEntryService
 {
     private readonly AppDbContext db;
     private readonly ITransactionNumberService transactionNumberService;
-    /// <summary>
-    /// Layanan logika bisnis untuk Journal Entry Service.
-    /// </summary>
 
     public JournalEntryService(AppDbContext db, ITransactionNumberService transactionNumberService)
     {
         this.db = db;
         this.transactionNumberService = transactionNumberService;
     }
-    /// <summary>
-    /// Mengambil data  By Id Async.
-    /// </summary>
 
     public async Task<GeneralJournalResponseDto?> GetByIdAsync(Guid userId, int id)
     {
@@ -71,9 +62,6 @@ public class JournalEntryService : IJournalEntryService
             }).ToList(),
         };
     }
-    /// <summary>
-    /// Mengambil data  By Transaction Number Async.
-    /// </summary>
 
     public async Task<List<GeneralJournalResponseDto>> GetByTransactionNumberAsync(Guid userId, string transactionNumber)
     {
@@ -118,9 +106,6 @@ public class JournalEntryService : IJournalEntryService
             })
             .ToList();
     }
-    /// <summary>
-    /// Membuat data  Async baru.
-    /// </summary>
 
     public async Task<GeneralJournalResponseDto> CreateAsync(Guid userId, CreateGeneralJournalRequest request)
     {
@@ -172,9 +157,6 @@ public class JournalEntryService : IJournalEntryService
             }).ToList(),
         };
     }
-    /// <summary>
-    /// Memperbarui data  Async.
-    /// </summary>
 
     public async Task UpdateAsync(Guid userId, int id, UpdateGeneralJournalRequest request)
     {
@@ -218,9 +200,6 @@ public class JournalEntryService : IJournalEntryService
         this.db.GeneralJournals.AddRange(newRows);
         await this.db.SaveChangesAsync();
     }
-    /// <summary>
-    /// Menghapus data  By Transaction Number Async.
-    /// </summary>
 
     public async Task DeleteByTransactionNumberAsync(Guid userId, string transactionNumber)
     {
@@ -230,9 +209,6 @@ public class JournalEntryService : IJournalEntryService
 
         await this.DeleteRowsAsync(userId, rows);
     }
-    /// <summary>
-    /// Menghapus data  Async.
-    /// </summary>
 
     public async Task DeleteAsync(Guid userId, int id)
     {
@@ -263,9 +239,6 @@ public class JournalEntryService : IJournalEntryService
         this.db.GeneralJournals.RemoveRange(rows);
         await this.db.SaveChangesAsync();
     }
-    /// <summary>
-    /// Mewakili Search Line Descriptions Async.
-    /// </summary>
 
     public async Task<List<string>> SearchLineDescriptionsAsync(Guid userId, string query)
     {
@@ -288,9 +261,6 @@ public class JournalEntryService : IJournalEntryService
             .Take(8)
             .ToListAsync();
     }
-    /// <summary>
-    /// Mengambil data  Next Transaction Number Async.
-    /// </summary>
 
     public async Task<string> GetNextTransactionNumberAsync(Guid userId, string journalType, DateTime? entryDate)
     {

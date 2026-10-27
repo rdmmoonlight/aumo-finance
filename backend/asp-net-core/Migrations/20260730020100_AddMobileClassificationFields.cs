@@ -14,22 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Mobile Classification Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Mobile Classification Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Mobile Classification Fields baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Mobile Classification Fields baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddMobileClassificationFields : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
@@ -52,7 +38,6 @@ namespace AumoBackend.Migrations
                 nullable: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

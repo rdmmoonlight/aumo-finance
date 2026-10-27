@@ -7,18 +7,12 @@ namespace AumoBackend.Validators.JournalEntries;
 using System.Linq.Expressions;
 using AumoBackend.DTOs;
 using FluentValidation;
-/// <summary>
-/// Validator untuk Journal Entry Validator Base.
-/// </summary>
 
 public abstract class JournalEntryValidatorBase<T> : AbstractValidator<T>
 {
     private const int MaxLines = 200;
     private static readonly DateTime MinEntryDate = new(2000, 1, 1);
     private static readonly DateTime MaxEntryDate = new(2100, 12, 31);
-    /// <summary>
-    /// Validator untuk Journal Entry Validator Base.
-    /// </summary>
 
     protected JournalEntryValidatorBase(
         Expression<Func<T, DateTime>> entryDate,

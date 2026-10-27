@@ -14,22 +14,8 @@ namespace AumoBackend.Migrations
     using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
 
-    /// <summary>
-    /// Membuat data  Unclassified Accounts baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Unclassified Accounts baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Unclassified Accounts baru.
-    /// </summary>
-    /// <summary>
-    /// Membuat data  Unclassified Accounts baru.
-    /// </summary>
-    /// <inheritdoc />
     public partial class AddUnclassifiedAccounts : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Data-only migration: memastikan dua akun sistem "Unclassified"
@@ -53,7 +39,6 @@ namespace AumoBackend.Migrations
             ");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.Sql(@"

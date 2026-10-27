@@ -10,9 +10,6 @@ namespace AumoBackend.Services.Storage
     using Amazon.Runtime;
     using Amazon.S3;
     using Amazon.S3.Model;
-    /// <summary>
-    /// Mewakili Neon Bucket Storage.
-    /// </summary>
 
     public sealed class NeonBucketStorage : IAvatarStorage, IDisposable
     {
@@ -24,14 +21,8 @@ namespace AumoBackend.Services.Storage
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly string bucket;
         private readonly AmazonS3Client? client;
-        /// <summary>
-        /// Mewakili Is Configured.
-        /// </summary>
 
         public bool IsConfigured => this.client != null;
-        /// <summary>
-        /// Mewakili Neon Bucket Storage.
-        /// </summary>
 
         public NeonBucketStorage(
             IConfiguration configuration,
@@ -68,9 +59,6 @@ namespace AumoBackend.Services.Storage
 
             this.client = new AmazonS3Client(new BasicAWSCredentials(accessKey, secretKey), config);
         }
-        /// <summary>
-        /// Mewakili Upload Avatar Async.
-        /// </summary>
 
         public async Task<string> UploadAvatarAsync(string fileName, Stream content, CancellationToken cancellationToken = default)
         {
@@ -88,9 +76,6 @@ namespace AumoBackend.Services.Storage
 
             return this.BuildPublicUrl(fileName);
         }
-        /// <summary>
-        /// Mengambil data  Avatar Async.
-        /// </summary>
 
         public async Task<AvatarObject?> GetAvatarAsync(string fileName, CancellationToken cancellationToken = default)
         {
@@ -150,9 +135,6 @@ namespace AumoBackend.Services.Storage
 
         private AmazonS3Client RequireClient() =>
             this.client ?? throw new InvalidOperationException("Neon bucket belum dikonfigurasi di server.");
-        /// <summary>
-        /// Mewakili Dispose.
-        /// </summary>
 
         public void Dispose() => this.client?.Dispose();
     }

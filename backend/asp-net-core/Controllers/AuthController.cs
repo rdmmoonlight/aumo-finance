@@ -13,9 +13,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-/// <summary>
-/// Controller API untuk mengelola Auth.
-/// </summary>
 
 [ApiController]
 [Route("/auth")]
@@ -25,18 +22,12 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService authService;
     private readonly SignInManager<ApplicationUser> signInManager;
-    /// <summary>
-    /// Controller API untuk mengelola Auth.
-    /// </summary>
 
     public AuthController(IAuthService authService, SignInManager<ApplicationUser> signInManager)
     {
         this.authService = authService;
         this.signInManager = signInManager;
     }
-    /// <summary>
-    /// Mewakili Login.
-    /// </summary>
 
     [HttpPost("login")]
     [AllowAnonymous]
@@ -90,9 +81,6 @@ public class AuthController : ControllerBase
             avatarUrl = result.AvatarUrl,
         });
     }
-    /// <summary>
-    /// Mewakili Google Login.
-    /// </summary>
 
     [HttpPost("google-login")]
     [AllowAnonymous]
@@ -133,9 +121,6 @@ public class AuthController : ControllerBase
             avatarUrl = result.AvatarUrl,
         });
     }
-    /// <summary>
-    /// Mewakili Google Login Redirect.
-    /// </summary>
 
     [HttpGet("google-login")]
     [AllowAnonymous]
@@ -149,9 +134,6 @@ public class AuthController : ControllerBase
 
         return this.Challenge(properties, "Google");
     }
-    /// <summary>
-    /// Mewakili Google Callback.
-    /// </summary>
 
     [HttpGet("google-callback")]
     [AllowAnonymous]
@@ -177,9 +159,6 @@ public class AuthController : ControllerBase
         // Validasi ulang URL sebelum eksekusi Redirect (cegah open redirect)
         return this.Redirect(this.Url.GetSafeRedirectUrl(redirectTo));
     }
-    /// <summary>
-    /// Mengambil data  Profile.
-    /// </summary>
 
     [HttpGet("me")]
     public async Task<IActionResult> GetProfile()
@@ -221,9 +200,6 @@ public class AuthController : ControllerBase
             customClaims = profile.CustomClaims,
         });
     }
-    /// <summary>
-    /// Mewakili Logout.
-    /// </summary>
 
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
