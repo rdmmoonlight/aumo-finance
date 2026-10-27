@@ -5,12 +5,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aumofinance.app.crashlog.AppLogger
 import com.aumofinance.app.data.DbConnectionManager
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
@@ -35,10 +38,30 @@ class PeriodsViewModel : ViewModel() {
     var snackbarMessage: String? by mutableStateOf(null)
         private set
 
+    // Mencegah double-tap pada tombol "Open" yang memicu dua POST sekaligus.
+    var isSubmitting: Boolean by mutableStateOf(false)
+        private set
+
+    /**
+     * Memastikan HttpResponse mengembalikan Content-Type JSON sebelum melakukan deserialization.
+     * Jika server mengembalikan HTML (misal: gateway loading Render saat cold-start),
+     * method ini melemparkan Exception dengan pesan deskriptif.
+     */
+    private suspend inline fun <reified T> HttpResponse.safeBody(): T {
+        val type = this.contentType()?.withoutParameters()
+        if (type != null && type != ContentType.Application.Json) {
+            val text = this.bodyAsText()
+            val shortText = if (text.length > 150) text.take(150) + "..." else text
+            throw IllegalStateException("Server returned non-JSON response (${this.status.value}): $shortText")
+        }
+        return this.body<T>()
+    }
+
     fun load() {
         viewModelScope.launch {
             try {
-                val body = api.list().body<PeriodsResponse>()
+                val response = api.list()
+                val body = response.safeBody<PeriodsResponse>()
                 periods = body.periods
                 selectedPeriodId = body.selectedPeriodId
                 // Request ke backend TERBUKTI berhasil di sini — berarti server Render
@@ -46,7 +69,7 @@ class PeriodsViewModel : ViewModel() {
                 // tanpa harus menunggu ping Home selesai sendiri.
                 DbConnectionManager.markConnected()
             } catch (t: Throwable) {
-                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
+                AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 periods = emptyList()
             }
         }
@@ -58,9 +81,10 @@ class PeriodsViewModel : ViewModel() {
     fun openNewPeriodDialog() {
         viewModelScope.launch {
             try {
-                openPeriodInfo = api.openInfo().body<OpenPeriodInfoResponse>()
+                val response = api.openInfo()
+                openPeriodInfo = response.safeBody<OpenPeriodInfoResponse>()
             } catch (t: Throwable) {
-                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
+                AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             }
         }
@@ -69,10 +93,6 @@ class PeriodsViewModel : ViewModel() {
     fun dismissOpenPeriodDialog() {
         openPeriodInfo = null
     }
-
-    // Mencegah double-tap pada tombol "Open" yang memicu dua POST sekaligus.
-    var isSubmitting: Boolean by mutableStateOf(false)
-        private set
 
     fun open(request: CreatePeriodRequest) {
         if (isSubmitting) return
@@ -87,7 +107,7 @@ class PeriodsViewModel : ViewModel() {
                     load()
                 }
             } catch (t: Throwable) {
-                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
+                AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             } finally {
                 isSubmitting = false
@@ -120,14 +140,14 @@ class PeriodsViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.select(id)
-                val body = response.body<SimpleApiResponse>()
+                val body = response.safeBody<SimpleApiResponse>()
                 if (response.status.isSuccess() && body.success) {
                     load()
                 } else {
                     snackbarMessage = body.message.ifBlank { "Failed to switch period (HTTP ${response.status.value})." }
                 }
             } catch (t: Throwable) {
-                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
+                AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             }
         }
@@ -137,10 +157,11 @@ class PeriodsViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.close(id)
-                snackbarMessage = response.body<SimpleApiResponse>().message
+                val body = response.safeBody<SimpleApiResponse>()
+                snackbarMessage = body.message
                 load()
             } catch (t: Throwable) {
-                com.aumofinance.app.crashlog.AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
+                AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
             }
         }
