@@ -44,11 +44,11 @@ public partial class Program
                 .Enrich.FromLogContext()
                 .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture));
 
-            // 1. Forwarded Headers Configuration (Render.com Proxy)
+            // 1. Forwarded Headers Configuration (Render.com / Nginx Proxy)
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-                options.KnownNetworks.Clear();   // ✅ Gunakan KnownNetworks
+                options.KnownNetworks.Clear();
                 options.KnownProxies.Clear();
             });
 
@@ -134,8 +134,6 @@ public partial class Program
             if (app.Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.MapOpenApi();
-                app.MapScalarApiReference();
             }
             else
             {
@@ -162,6 +160,16 @@ public partial class Program
                     });
                 });
             }
+
+            // ✅ DIKELUARKAN DARI IF DEVELOPMENT AGAR BISA DIAKSES DI PRODUCTION (RENDER)
+            app.MapOpenApi();
+            app.MapScalarApiReference(options =>
+            {
+                options
+                    .WithTitle("Aumo Web API Reference")
+                    .WithTheme(ScalarTheme.Moon)
+                    .WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch);
+            });
 
             app.UseSerilogRequestLogging();
 
