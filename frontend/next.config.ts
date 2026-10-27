@@ -1,17 +1,17 @@
 import type { NextConfig } from "next";
 
 const getBackendTarget = (): string => {
-  // Hirarki penentuan URL backend
+  // Hirarki penentuan URL backend (Render env vars / fallback)
   let target =
     process.env.NEXT_PUBLIC__WEB_API_URL ||
     process.env.WEB_API_URL ||
     process.env.NEXT_PUBLIC_WEB_API_URL ||
     "http://localhost:5000";
 
-  // Hapus trailing slash di akhir URL
+  // Memastikan slash di akhir dihapus agar pemanggilan URL konsisten
   target = target.replace(/\/+$/, "");
 
-  // Paksa HTTPS jika bukan di localhost
+  // Paksa HTTPS di lingkungan non-localhost jika URL masih HTTP
   if (!target.includes("localhost") && target.startsWith("http://")) {
     target = target.replace("http://", "https://");
   }
@@ -22,33 +22,12 @@ const getBackendTarget = (): string => {
 const backendTarget = getBackendTarget();
 
 const nextConfig: NextConfig = {
-  // Mode standalone untuk build Docker yang efisien
+  // Diperlukan agar Dockerfile bisa membungkus Next.js menjadi paket standalone yang ringan
   output: "standalone",
 
-  // Variabel lingkungan runtime
+  // Mengekspos hasil kalkulasi backendTarget ke runtime Next.js (Client & Server)
   env: {
     NEXT_PUBLIC_BACKEND_URL: backendTarget,
-  },
-
-  // Support import file .html di Next.js App Router terbaru (Turbopack)
-  experimental: {
-    turbo: {
-      rules: {
-        "*.html": {
-          loaders: ["raw-loader"],
-          as: "*.js",
-        },
-      },
-    },
-  },
-
-  // Support import file .html saat build produksi (Webpack)
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.html$/,
-      use: "raw-loader",
-    });
-    return config;
   },
 };
 
