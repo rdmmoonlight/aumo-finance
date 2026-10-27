@@ -7,10 +7,9 @@ RUN corepack enable pnpm
 # Copy manifes dependensi
 COPY frontend/package.json ./
 
-# Daftarkan unrs-resolver ke .npmrc lalu install
-RUN echo "onlyBuiltDependencies=" > .npmrc && \
-    echo "  - unrs-resolver" >> .npmrc && \
-    pnpm install
+# Matikan pengecekan ignore-scripts & izinkan build secara universal
+RUN pnpm config set ignore-scripts false && \
+    pnpm install --unsafe-perm
 
 # Copy seluruh source code frontend
 COPY frontend .
