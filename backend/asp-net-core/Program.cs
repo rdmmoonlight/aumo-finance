@@ -49,9 +49,47 @@ public partial class Program
             // 1. Forwarded Headers Configuration (Render.com / Nginx Proxy)
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
                 options.KnownNetworks.Clear();
                 options.KnownProxies.Clear();
+            });
+
+            // 2. Cegah Identity memicu Redirect HTML ber-port :10000 pada request API
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToLogin = context =>
+                {
+                    // Jika request berasal dari API atau Auth endpoint, kembalikan 401 murni tanpa redirect
+                    if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/auth"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return Task.CompletedTask;
+                    }
+
+                    // Untuk navigasi halaman biasa, bersihkan port internal jika ada
+                    var redirectUriBuilder = new UriBuilder(context.RedirectUri)
+                    {
+                        Port = -1
+                    };
+                    context.Response.Redirect(redirectUriBuilder.Uri.ToString());
+                    return Task.CompletedTask;
+                };
+
+                options.Events.OnRedirectToAccessDenied = context =>
+                {
+                    if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/auth"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status403Forbidden;
+                        return Task.CompletedTask;
+                    }
+
+                    var redirectUriBuilder = new UriBuilder(context.RedirectUri)
+                    {
+                        Port = -1
+                    };
+                    context.Response.Redirect(redirectUriBuilder.Uri.ToString());
+                    return Task.CompletedTask;
+                };
             });
 
             builder.Services.AddHttpClient();
