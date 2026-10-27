@@ -1,23 +1,7 @@
 name: Frontend Android CI
 
 on:
-  push:
-    branches: [main, feature/kotlin-native-frontend]
-    paths:
-      - 'app/**'
-      - 'gradle/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'gradlew'
-  pull_request:
-    paths:
-      - 'app/**'
-      - 'gradle/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
-      - 'gradle.properties'
-      - 'gradlew'
+  workflow_dispatch: {}
 
 permissions:
   contents: write # Diperlukan agar bot bisa melakukan push commit baru
