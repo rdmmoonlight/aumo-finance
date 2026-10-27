@@ -33,9 +33,9 @@ private val AuthPlugin =
     }
 
 object ApiClient {
-    // HANYA scheme+host, TANPA path. Backend tidak memakai prefix apa pun,
-    // jadi endpoint di setiap ApiX.kt ditulis absolut mulai dari "/"
-    // (mis. "/auth/login", "/periods"). Ktor memperlakukan path yang diawali
+    // HANYA scheme+host, TANPA path. Seluruh endpoint backend berada di bawah
+    // prefix "/api/v1", jadi endpoint di setiap ApiX.kt ditulis absolut mulai dari "/"
+    // (mis. "/api/v1/auth/login", "/api/v1/periods"). Ktor memperlakukan path yang diawali
     // "/" sebagai path ABSOLUT yang menggantikan path bawaan BASE_URL.
     private const val BASE_URL = "https://aumoweb.onrender.com"
 

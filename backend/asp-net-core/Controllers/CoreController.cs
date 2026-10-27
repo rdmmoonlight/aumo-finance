@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AumoBackend.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class CoreController : ControllerBase
 {
     private static readonly Action<ILogger, Exception?> FfiResponseError =

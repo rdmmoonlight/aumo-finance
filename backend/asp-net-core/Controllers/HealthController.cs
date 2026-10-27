@@ -20,6 +20,8 @@ using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("/health")]
+[Route("/api/v1/health")]
+[AumoBackend.Extensions.NoApiPrefix]
 [AllowAnonymous]
 
 public class HealthController : ControllerBase
