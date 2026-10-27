@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  gateway:
+    build:
+      context: ./gateway
+    ports:
+      - "80:80"
+    depends_on:
+      - frontend
+      - backend-dotnet
+      - backend-axum
+      - backend-go
+
+  frontend:
+    build:
+      context: ./frontend
+
+  backend-dotnet:
+    build:
+      context: ./backend/asp-net-core
+
+  backend-axum:
+    build:
+      context: ./backend/axum
+
+  backend-go:
+    build:
+      context: ./backend/go

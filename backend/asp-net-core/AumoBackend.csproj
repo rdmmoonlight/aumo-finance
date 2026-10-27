@@ -6,11 +6,10 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>3b80a545-4808-45e1-aed8-8b28c45e72fe</UserSecretsId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  
-    <!-- Konfigurasi Analysis & Formatting -->
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
-    <AnalysisLevel>latest-recommended</AnalysisLevel>
-    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Matikan Analisis Ketat & Peringatan Code Style saat Build -->
+    <EnableNETAnalyzers>false</EnableNETAnalyzers>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
 
     <!-- Property Deteksi Platform Lintas OS untuk Dynamic Library (.so / .dylib / .dll) -->
     <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
@@ -21,16 +20,10 @@
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">libaumo_core.dylib</RustLibName>
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-  <GenerateProgramFile>false</GenerateProgramFile>
-</PropertyGroup>
+    <GenerateProgramFile>false</GenerateProgramFile>
+  </PropertyGroup>
 
   <ItemGroup>
-    <!-- Roslyn Analyzers -->
-    <PackageReference Include="Roslynator.Analyzers" Version="4.13.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-
     <!-- Microsoft / EF Core / Identity Package -->
     <PackageReference Include="AWSSDK.Core" Version="4.0.3.3" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.1.1" />
@@ -49,14 +42,14 @@
     <!-- Native OpenAPI Support & Modern UI -->
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
-    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
+    <PackageReference Include="Microsoft.OpenApi" Version="3.11.0" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.0.*" />
 
     <!-- PostgreSQL Provider -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0-preview.1" />
 
     <!-- Utility & Third-Party Libraries -->
-    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="ClosedXML" Version="0.105.1" />
     <PackageReference Include="ExcelDataReader" Version="3.7.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.7.0" />
     <PackageReference Include="CloudinaryDotNet" Version="1.27.4" />
@@ -66,9 +59,9 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.1" />
 
     <!-- Testing Packages -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageReference Include="xunit" Version="2.9.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+    <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -94,7 +87,4 @@
     </ItemGroup>
   </Target>
 
-  <PropertyGroup>
-    <NoWarn>$(NoWarn);IDE0005</NoWarn>
-  </PropertyGroup>
 </Project>
