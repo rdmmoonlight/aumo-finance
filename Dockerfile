@@ -5,8 +5,8 @@ WORKDIR /app
 # Mengaktifkan pnpm via Corepack
 RUN corepack enable pnpm
 
-# Salin file manifes dependensi dari folder apps/frontend
-COPY apps/frontend/package.json apps/frontend/pnpm-lock.yaml* apps/frontend/package-lock.json* ./
+# Salin file manifes dependensi dari folder frontend
+COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/package-lock.json* ./
 
 # Install dependensi (dengan konfigurasi mengizinkan build scripts pnpm)
 RUN \
@@ -21,7 +21,7 @@ WORKDIR /app
 RUN corepack enable pnpm
 
 COPY --from=deps /app/node_modules ./node_modules
-COPY apps/frontend .
+COPY frontend .
 
 # Nonaktifkan telemetri Next.js saat build
 ENV NEXT_TELEMETRY_DISABLED=1
