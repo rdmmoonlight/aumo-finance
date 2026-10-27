@@ -1,0 +1,8 @@
+rule pnpm_build
+  command = cmd /c pnpm --prefix $dir run build
+  description = Building Next.js Frontend
+
+build frontend/.next: pnpm_build
+  dir = frontend
+
+build frontend_next: phony frontend/.next
