@@ -1,13 +1,9 @@
-// <copyright file="SummaryService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Reports.Summary;
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AumoBackend.Data;
-using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
