@@ -75,7 +75,7 @@ export function GeneralJournalTable({
                     size="icon"
                     className="h-6 w-6"
                   >
-                    <Link to={`/journal-entry?id=${item.entryId}`}>
+                    <Link to="/journal-entry" search={{ id: item.entryId }}>
                       <Pencil className="h-3 w-3" />
                     </Link>
                   </Button>

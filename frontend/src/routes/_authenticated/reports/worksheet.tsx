@@ -166,7 +166,7 @@ function WorksheetPage() {
               </p>
             </div>
             <Button asChild variant="outline" size="sm" className="gap-1.5">
-              <Link to="/reports/income-statement">
+              <Link to="/reports/financial-statements/income-statement">
                 <TrendingUp size={14} /> Income Statement
               </Link>
             </Button>

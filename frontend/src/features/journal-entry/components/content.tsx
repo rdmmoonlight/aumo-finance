@@ -1,4 +1,5 @@
-import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { useAppRouter, useSearchParams } from "@/lib/router-compat";
 "use client";
 
 import { JournalLinesTable } from "#/features/journal-entry/components/journal-lines-table";
@@ -45,7 +46,7 @@ import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 export default function JournalEntryContent() {
-  const router = useNavigate();
+  const router = useAppRouter();
   const navigate = useNavigate();
   const searchParams = useSearchParams();
   const entryIdParam = searchParams.get("id");
@@ -345,7 +346,7 @@ export default function JournalEntryContent() {
           setSuccessMessage(
             `Updated ${res?.transactionNumber || displayedTxNumber}`,
           );
-          setTimeout(() => router.push("/reports/general-journal"), 1200);
+          setTimeout(() => router.push("/reports/journals/general"), 1200);
         } else if ("error" in result) {
           const err: any = result.error;
           setApiError(
@@ -416,7 +417,7 @@ export default function JournalEntryContent() {
           </p>
         </div>
         <Button variant="outline" size="sm" asChild className="text-sm">
-          <Link to="/reports/general-journal" className="gap-1.5">
+          <Link to="/reports/journals/general" className="gap-1.5">
             <ArrowLeft size={14} /> Back to Journal
           </Link>
         </Button>
@@ -450,7 +451,7 @@ export default function JournalEntryContent() {
           <Lock size={16} />
           <AlertDescription className="text-xs">
             Journal {displayedTxNumber} is in closed period.{" "}
-            <Link to="/reports/general-journal" className="underline">
+            <Link to="/reports/journals/general" className="underline">
               Back
             </Link>
           </AlertDescription>

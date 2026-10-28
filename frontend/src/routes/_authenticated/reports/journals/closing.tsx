@@ -119,7 +119,7 @@ function ClosingJournalReportPage() {
           </h1>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link to="/reports/post-closing-trial-balance">
+          <Link to="/reports/trial-balances/post-closing">
             <ArrowRight size={14} /> Post-Closing
           </Link>
         </Button>

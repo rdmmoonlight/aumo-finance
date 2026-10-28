@@ -34,6 +34,12 @@ COPY frontend/package.json frontend/pnpm-lock.yaml* ./
 RUN pnpm install --frozen-lockfile --allow-build=unrs-resolver
 
 COPY frontend/ ./
+
+# Client ID Google bersifat publik dan harus tersedia saat build (SPA statis).
+# Render meneruskan env var ke build hanya jika dideklarasikan lewat ARG.
+ARG PUBLIC_GOOGLE_CLIENT_ID
+ARG NEXT_PUBLIC__GOOGLE_CLIENT_ID
+ENV PUBLIC_GOOGLE_CLIENT_ID=${PUBLIC_GOOGLE_CLIENT_ID:-$NEXT_PUBLIC__GOOGLE_CLIENT_ID}
 RUN pnpm run build
 
 # ==========================================
