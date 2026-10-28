@@ -1,11 +1,7 @@
-// <copyright file="ISummaryService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Reports.Summary;
 
 using System.Security.Claims;
-using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 
 public interface ISummaryService
 {
