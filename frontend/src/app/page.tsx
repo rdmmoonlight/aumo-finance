@@ -1,8 +1,8 @@
 "use client";
 
-import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "@/app/auth/auth";
-import LoginPage from "@/app/auth/login";
-import RegisterPage from "@/app/auth/register";
+import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "#/features/auth/auth";
+import LoginPage from "#/features/auth/login-page";
+import RegisterPage from "#/features/auth/register-page";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

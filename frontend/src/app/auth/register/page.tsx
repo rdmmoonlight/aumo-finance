@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import RegisterPage from "./index";
-import { AuthFormSkeleton } from "../auth";
+import { AuthFormSkeleton } from "../../../features/auth/auth";
+import RegisterPage from "../../../features/auth/register-page";
 
 export default function Page(): React.JSX.Element {
   return (

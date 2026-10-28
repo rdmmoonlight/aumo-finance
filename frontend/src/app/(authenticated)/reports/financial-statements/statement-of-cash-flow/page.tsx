@@ -6,14 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Banknote, Info } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { CashFlowSectionTable } from "../_components/cash-flow/CashFlowSectionTable";
-import { ErrorAlert } from "../_components/common/ErrorAlert";
-import { LoadingState } from "../_components/common/LoadingState";
-import { NoPeriodCard } from "../_components/common/NoPeriodCard";
-import { formatNumber } from "../_lib/formatters";
-import { CashFlowLine } from "../_types";
+import { useEffect, useMemo, useState } from "react";
+import { CashFlowSectionTable } from "../../../../../features/reports/financial-statements/_components/cash-flow/CashFlowSectionTable";
+import { ErrorAlert } from "../../../../../features/reports/financial-statements/_components/common/ErrorAlert";
+import { LoadingState } from "../../../../../features/reports/financial-statements/_components/common/LoadingState";
+import { NoPeriodCard } from "../../../../../features/reports/financial-statements/_components/common/NoPeriodCard";
+import { formatNumber } from "../../../../../features/reports/financial-statements/_lib/formatters";
+import { CashFlowLine } from "../../../../../features/reports/financial-statements/_types";
 
 export default function StatementOfCashFlowPage() {
   const [data, setData] = useState<any>(null);
@@ -144,9 +144,8 @@ export default function StatementOfCashFlowPage() {
                 <div className="flex justify-between font-bold text-body px-4">
                   <span>Net Increase (Decrease) in Cash</span>
                   <span
-                    className={`font-mono ${
-                      netChange < 0 ? "text-red-500" : "text-emerald-500"
-                    }`}
+                    className={`font-mono ${netChange < 0 ? "text-red-500" : "text-emerald-500"
+                      }`}
                   >
                     {formatNumber(netChange)}
                   </span>

@@ -11,14 +11,14 @@ import {
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, TrendingUp } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ErrorAlert } from "../_components/common/ErrorAlert";
-import { LoadingState } from "../_components/common/LoadingState";
-import { NoPeriodCard } from "../_components/common/NoPeriodCard";
-import { IncomeStatementSectionTable } from "../_components/income-statement/IncomeStatementSectionTable";
-import { formatDateDisplay, formatNumber } from "../_lib/formatters";
-import { IncomeStatementLine } from "../_types";
+import { useEffect, useMemo, useState } from "react";
+import { ErrorAlert } from "../../../../../features/reports/financial-statements/_components/common/ErrorAlert";
+import { LoadingState } from "../../../../../features/reports/financial-statements/_components/common/LoadingState";
+import { NoPeriodCard } from "../../../../../features/reports/financial-statements/_components/common/NoPeriodCard";
+import { IncomeStatementSectionTable } from "../../../../../features/reports/financial-statements/_components/income-statement/IncomeStatementSectionTable";
+import { formatDateDisplay, formatNumber } from "../../../../../features/reports/financial-statements/_lib/formatters";
+import { IncomeStatementLine } from "../../../../../features/reports/financial-statements/_types";
 
 export default function IncomeStatementPage() {
   const [data, setData] = useState<any>(null);

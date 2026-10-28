@@ -5,10 +5,10 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { BalanceAlert } from "../_components/balance-alert";
-import { NoPeriodCard } from "../_components/no-period-card";
-import { TrialTable } from "../_components/trial-table";
-import { TrialRow } from "../_lib/types";
+import { BalanceAlert } from "../../../../../features/reports/trial-balances/_components/balance-alert";
+import { NoPeriodCard } from "../../../../../features/reports/trial-balances/_components/no-period-card";
+import { TrialTable } from "../../../../../features/reports/trial-balances/_components/trial-table";
+import { TrialRow } from "../../../../../features/reports/trial-balances/_lib/types";
 
 export default function PostClosingTrialBalancePage() {
   const [data, setData] = useState<any>(null);

@@ -11,14 +11,14 @@ import {
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, PiggyBank } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ErrorAlert } from "../_components/common/ErrorAlert";
-import { LoadingState } from "../_components/common/LoadingState";
-import { NoPeriodCard } from "../_components/common/NoPeriodCard";
-import { RetainedEarningsTable } from "../_components/retained-earnings/RetainedEarningsTable";
-import { formatDateDisplay } from "../_lib/formatters";
-import { RetainedEarningsViewModel, StatementRow } from "../_types";
+import { useEffect, useMemo, useState } from "react";
+import { ErrorAlert } from "../../../../../features/reports/financial-statements/_components/common/ErrorAlert";
+import { LoadingState } from "../../../../../features/reports/financial-statements/_components/common/LoadingState";
+import { NoPeriodCard } from "../../../../../features/reports/financial-statements/_components/common/NoPeriodCard";
+import { RetainedEarningsTable } from "../../../../../features/reports/financial-statements/_components/retained-earnings/RetainedEarningsTable";
+import { formatDateDisplay } from "../../../../../features/reports/financial-statements/_lib/formatters";
+import { RetainedEarningsViewModel, StatementRow } from "../../../../../features/reports/financial-statements/_types";
 
 export default function RetainedEarningsPage() {
   const [data, setData] = useState<any>(null);
