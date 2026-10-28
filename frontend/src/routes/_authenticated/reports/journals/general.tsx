@@ -137,7 +137,7 @@ function GeneralJournalPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild size="sm">
-            <Link to="/journal-entry?type=general">
+            <Link to="/journal-entry" search={{ type: "general" }}>
               <Plus className="h-3.5 w-3.5" /> Add General
             </Link>
           </Button>

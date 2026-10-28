@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
+import { useAppRouter } from "@/lib/router-compat";
 import { AuthFormSkeleton, GOOGLE_CLIENT_ID } from "#/features/auth/auth";
 import LoginPage from "#/features/auth/login-page";
 import RegisterPage from "#/features/auth/register-page";
@@ -20,7 +21,7 @@ import { Suspense, useEffect, useState } from "react";
 "use client";
 
 function LandingPage(): React.JSX.Element {
-  const router = useNavigate();
+  const router = useAppRouter();
   const [open, setOpen] = useState(false);
   const [authMode, setAuthMode] = useState<"login" | "register">("login");
 

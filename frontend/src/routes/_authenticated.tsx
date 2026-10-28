@@ -1,4 +1,5 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { useAppRouter } from "@/lib/router-compat";
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
@@ -14,12 +15,8 @@ import { useDispatch, useSelector } from "react-redux";
 
 "use client";
 
-function AuthenticatedLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const router = useNavigate();
+function AuthenticatedLayout() {
+  const router = useAppRouter();
   const dispatch = useDispatch<AppDispatch>();
 
   // State lokal untuk melacak status fetching
@@ -118,7 +115,7 @@ function AuthenticatedLayout({
                 </p>
               </div>
             )}
-            {children}
+            <Outlet />
           </main>
           <AppFooter />
         </SidebarInset>

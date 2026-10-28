@@ -135,7 +135,7 @@ function StatementOfFinancialPositionPage() {
                 Refresh
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link to="/financial-statements/income-statement">
+                <Link to="/reports/financial-statements/income-statement">
                   <ArrowRight size={14} /> Income Statement
                 </Link>
               </Button>

@@ -123,12 +123,12 @@ function IncomeStatementPage() {
             </div>
             <div className="flex gap-2">
               <Button asChild variant="outline" size="sm">
-                <Link to="/financial-statements/retained-earnings">
+                <Link to="/reports/financial-statements/retained-earnings">
                   Retained Earnings
                 </Link>
               </Button>
               <Button asChild variant="outline" size="sm" className="gap-1.5">
-                <Link to="/financial-statements/statement-of-cash-flow">
+                <Link to="/reports/financial-statements/statement-of-cash-flow">
                   <ArrowRight size={14} /> Cash Flow
                 </Link>
               </Button>

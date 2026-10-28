@@ -1,4 +1,5 @@
-import { Link, useSearch } from '@tanstack/react-router';
+import { Link } from '@tanstack/react-router';
+import { useSearchParams } from "@/lib/router-compat";
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -274,7 +275,8 @@ export function ChartOfAccountsTable() {
               </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
                 <Link
-                  to={`/reports/general-ledger/permanent#account-${acc.id}`}
+                  to="/reports/general-ledgers/permanent"
+                  hash={`account-${acc.id}`}
                 >
                   <BookOpen size={14} />
                 </Link>
