@@ -2,7 +2,6 @@ using System.Globalization;
 using System.Security.Claims;
 using AumoBackend.Data;
 using AumoBackend.Extensions;
-using AumoBackend.Helpers;
 using AumoBackend.Middlewares;
 using AumoBackend.Models;
 using FluentValidation;
@@ -10,7 +9,6 @@ using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.OpenApi;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
@@ -109,7 +107,7 @@ public partial class Program
                 options.AddDocumentTransformer((document, context, cancellationToken) =>
                 {
                     var configuration = context.ApplicationServices.GetRequiredService<IConfiguration>();
-                    
+
                     // 1. Set Server URL Dinamis dari appsettings/Environment Variables
                     var serverUrl = configuration["Scalar:ServerUrl"] ?? "https://aumoweb.onrender.com";
                     document.Servers = new List<OpenApiServer>
