@@ -1,7 +1,3 @@
-// <copyright file="AllowedOrigins.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Helpers;
 
 public static class AllowedOrigins
