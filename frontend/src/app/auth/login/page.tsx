@@ -1,6 +1,6 @@
 import { Suspense } from "react";
-import LoginPage from "./index";
-import { AuthFormSkeleton } from "../auth";
+import { AuthFormSkeleton } from "../../../features/auth/auth";
+import LoginPage from "../../../features/auth/login-page";
 
 export default function Page(): React.JSX.Element {
   return (

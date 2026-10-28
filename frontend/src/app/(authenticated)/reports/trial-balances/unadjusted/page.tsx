@@ -5,10 +5,10 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, List, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BalanceAlert } from "../_components/balance-alert";
-import { NoPeriodCard } from "../_components/no-period-card";
-import { TrialTable } from "../_components/trial-table";
-import { normalizeTrialRows } from "../_lib/normalize";
+import { BalanceAlert } from "../../../../../features/reports/trial-balances/_components/balance-alert";
+import { NoPeriodCard } from "../../../../../features/reports/trial-balances/_components/no-period-card";
+import { TrialTable } from "../../../../../features/reports/trial-balances/_components/trial-table";
+import { normalizeTrialRows } from "../../../../../features/reports/trial-balances/_lib/normalize";
 
 export default function UnadjustedTrialBalancePage() {
   const [data, setData] = useState<any>(null);

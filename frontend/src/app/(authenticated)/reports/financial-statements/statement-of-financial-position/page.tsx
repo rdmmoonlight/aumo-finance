@@ -6,14 +6,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertCircle, ArrowRight, CheckCircle2, Landmark } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ErrorAlert } from "../_components/common/ErrorAlert";
-import { LoadingState } from "../_components/common/LoadingState";
-import { NoPeriodCard } from "../_components/common/NoPeriodCard";
-import { FinancialPositionSectionTable } from "../_components/financial-position/FinancialPositionSectionTable";
-import { formatDateDisplay, formatNumber } from "../_lib/formatters";
-import { FinancialPositionLine } from "../_types";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ErrorAlert } from "../../../../../features/reports/financial-statements/_components/common/ErrorAlert";
+import { LoadingState } from "../../../../../features/reports/financial-statements/_components/common/LoadingState";
+import { NoPeriodCard } from "../../../../../features/reports/financial-statements/_components/common/NoPeriodCard";
+import { FinancialPositionSectionTable } from "../../../../../features/reports/financial-statements/_components/financial-position/FinancialPositionSectionTable";
+import { formatDateDisplay, formatNumber } from "../../../../../features/reports/financial-statements/_lib/formatters";
+import { FinancialPositionLine } from "../../../../../features/reports/financial-statements/_types";
 
 export default function StatementOfFinancialPositionPage() {
   const [raw, setRaw] = useState<any>(null);
