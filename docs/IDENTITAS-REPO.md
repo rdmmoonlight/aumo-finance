@@ -7,7 +7,11 @@
 | Pemilik | `rdmmoonlight` |
 | Repo | `rdmmoonlight/aumo-finance` |
 | Cabang utama | `main` |
-| Dibuat | 25 Mei 2026 |
+| Proyek dimulai | 25 Mei 2026 (menurut README) |
+| Commit pertama | 18 Juli 2026 (`274ad7cf`) |
+| Commit fungsional terakhir | 28 Oktober 2026 (`e685ce1c`) |
+| Pembaruan terakhir | 28 Oktober 2026 (dokumentasi, `f0989a5a`) |
+| Jumlah commit | 3.664 (per 28 Oktober 2026) |
 | Tipe repo | Monorepo (backend, frontend, mobile dalam satu repo) |
 | Bahasa dokumentasi | Indonesia |
 
@@ -70,10 +74,12 @@ Alamat API produksi untuk mobile: `https://aumonext-api.onrender.com`.
 
 | Tanggal | Peristiwa |
 |---|---|
-| 25 Mei 2026 | Repo dibuat |
+| 25 Mei 2026 | Proyek dimulai (menurut README) |
+| 18 Juli 2026 | Commit pertama di riwayat git repo ini |
 | 9 September 2026 | Deploy frontend pertama (Vercel) |
 | 10–11 Oktober 2026 | Deploy frontend dan backend pertama dengan Dockerfile di Render.com |
 | 12 Oktober 2026 | Folder `mobile-capacitor` dibuat (belum ada di cabang `main` saat dokumen ini ditulis) |
+| 28 Oktober 2026 | Perbaikan service TrialBalances dan Worksheet; dokumen identitas dan peta repo ditambahkan |
 
 ## Dokumen Terkait
 
