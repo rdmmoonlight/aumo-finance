@@ -62,7 +62,7 @@ public class FinancialReportService : IFinancialReportService
 
     public async Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period)
     {
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
+        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, true);
         var incomeStatement = this.BuildIncomeStatement(rows, period);
         var reAccount = rows.Find(r => r.Role == "RetainedEarnings");
 
@@ -85,7 +85,7 @@ public class FinancialReportService : IFinancialReportService
 
     public async Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing)
     {
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
+        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, true);
         var re = await this.BuildRetainedEarningsAsync(db, userId, period);
 
         FinancialPositionLineApiResponse ToLine(TrialBalanceRow r) => new()
