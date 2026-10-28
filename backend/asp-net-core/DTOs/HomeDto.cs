@@ -1,11 +1,7 @@
-// <copyright file="HomeDto.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+using System.Text.Json.Serialization;
 
 namespace AumoBackend.DTOs.Home
 {
-    using System.Text.Json.Serialization;
-
     public class ApiIndonesiaKursResponse
     {
         [JsonPropertyName("success")]

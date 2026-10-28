@@ -1,15 +1,4 @@
-// <copyright file="ToolsDto.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.DTOs;
-
-using AumoBackend.Controllers.Reports;
-using AumoBackend.DTOs;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 
 public class MarketDataResponse
 {

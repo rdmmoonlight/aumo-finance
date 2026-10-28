@@ -1,7 +1,3 @@
-// <copyright file="GeneralLedgersDto.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.DTOs.Reports;
 
 public class LedgerAccountResponse

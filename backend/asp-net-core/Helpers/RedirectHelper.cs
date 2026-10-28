@@ -1,8 +1,5 @@
-// <copyright file="RedirectHelper.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using Microsoft.AspNetCore.Mvc;
+
 namespace AumoBackend.Helpers;
 
 public static class RedirectHelper

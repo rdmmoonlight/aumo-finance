@@ -2,13 +2,6 @@ using Microsoft.AspNetCore.Mvc.ApplicationModels;
 
 namespace AumoBackend.Extensions;
 
-/// <summary>
-/// Aturan prefix tunggal: seluruh endpoint controller berada di bawah "/api/v1".
-/// Controller cukup menulis rute relatif (mis. [Route("periods")]); prefix
-/// ditambahkan di sini sehingga tidak ada rute yang lolos tanpa versi.
-/// Pengecualian: controller yang sudah berawalan "api/v1" atau ditandai
-/// <see cref="NoApiPrefixAttribute"/>.
-/// </summary>
 public sealed class ApiVersionPrefixConvention : IApplicationModelConvention
 {
     public const string Prefix = "api/v1";
@@ -43,7 +36,6 @@ public sealed class ApiVersionPrefixConvention : IApplicationModelConvention
     }
 }
 
-/// <summary>Menandai controller yang sengaja berada di luar prefix "/api/v1" (mis. health check).</summary>
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class NoApiPrefixAttribute : Attribute
 {

@@ -1,16 +1,4 @@
-// <copyright file="WorksheetDto.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.DTOs.Reports;
-
-using AumoBackend.Controllers.Reports;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 
 public class WorksheetRowApiResponse
 {
