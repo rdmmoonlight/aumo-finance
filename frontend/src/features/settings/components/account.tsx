@@ -181,7 +181,7 @@ export default function AccountSettings() {
     setDeleting(true);
     try {
       await dispatch(settingsApi.endpoints.deleteAccount.initiate()).unwrap();
-      window.location.href = "/auth";
+      window.location.href = "/auth/login";
     } catch (err: any) {
       notify(err?.data?.message || "Gagal menghapus akun", true);
     } finally {
