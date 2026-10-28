@@ -22,6 +22,7 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <GenerateProgramFile>false</GenerateProgramFile>
     <OpenApiGenerateXmlComments>false</OpenApiGenerateXmlComments>
+    <NoWarn>$(NoWarn);NU1903;CS1030</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,3 +1,4 @@
+using AumoBackend.Controllers.Reports;
 // <copyright file="FinancialStatementsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -60,7 +61,7 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+        var rows = await BuildTrialBalanceRowsAsync(this.db, userId, period, true);
         var statementData = this.reportService.BuildIncomeStatement(rows, period);
 
         return this.Ok(new
@@ -163,7 +164,7 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+        var rows = await BuildTrialBalanceRowsAsync(this.db, userId, period, true);
         var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
 
         var cashRows = rows.Where(r => r.Role == "CashAndEquivalents").ToList();

@@ -18,12 +18,12 @@ public class TrialBalanceController : ControllerBase
 {
     private readonly AppDbContext _db;
     private readonly NeondbContext _neonDb;
-    private readonly ITrialBalancesService _trialBalanceService;
+    private readonly ITrialBalanceService _trialBalanceService;
 
     public TrialBalanceController(
         AppDbContext db,
         NeondbContext neonDb,
-        ITrialBalancesService trialBalanceService)
+        ITrialBalanceService trialBalanceService)
     {
         _db = db;
         _neonDb = neonDb;

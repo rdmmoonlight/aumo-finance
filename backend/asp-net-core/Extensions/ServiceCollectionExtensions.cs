@@ -121,7 +121,7 @@ public static class ServiceCollectionExtensions
         services.Configure<ForwardedHeadersOptions>(options =>
         {
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            options.KnownNetworks.Clear();
+            options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
         });
 
@@ -147,7 +147,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IFinancialReportService, FinancialReportService>();
         services.AddScoped<IGeneralLedgersService, GeneralLedgersService>();
         services.AddScoped<IJournalService, JournalService>();
-        services.AddScoped<ITrialBalancesService, TrialBalancesService>();
+        services.AddScoped<ITrialBalanceService, TrialBalancesService>();
         services.AddScoped<IWorksheetService, WorksheetService>();
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<ISummaryService, SummaryService>();

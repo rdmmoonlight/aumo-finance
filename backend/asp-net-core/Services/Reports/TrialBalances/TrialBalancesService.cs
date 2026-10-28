@@ -3,19 +3,19 @@ namespace AumoBackend.Services.Reports.TrialBalances;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 
-public class TrialBalancesService : ITrialBalanceService, ITrialBalancesService
+public class TrialBalancesService : ITrialBalanceService
 {
     public async Task<List<TrialBalanceRowDto>> BuildTrialBalanceRowsAsync(NeondbContext db, Guid userId, Period period, bool includeAdjusting)
     {
         if (includeAdjusting)
         {
             var adj = await BuildAdjustedTrialBalanceAsync(db, userId, period);
-            return adj.Select(x => new TrialBalanceRowDto { AccountId = x.AccountId, Debit = x.Debit, Credit = x.Credit }).ToList();
+            return adj.Select(x => new TrialBalanceRowDto { AccountId = x.AccountCode, Debit = x.Debit, Credit = x.Credit }).ToList();
         }
         else
         {
             var unadj = await BuildUnadjustedTrialBalanceAsync(db, userId, period);
-            return unadj.Select(x => new TrialBalanceRowDto { AccountId = x.AccountId, Debit = x.Debit, Credit = x.Credit }).ToList();
+            return unadj.Select(x => new TrialBalanceRowDto { AccountId = x.AccountCode, Debit = x.Debit, Credit = x.Credit }).ToList();
         }
     }
 
