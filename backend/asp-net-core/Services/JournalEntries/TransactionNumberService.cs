@@ -1,4 +1,3 @@
-using System.Globalization;
 // <copyright file="TransactionNumberService.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>

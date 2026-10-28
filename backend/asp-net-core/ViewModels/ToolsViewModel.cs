@@ -5,12 +5,7 @@
 namespace AumoBackend.ViewModels;
 
 using System.Collections.Generic;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 
 public class PreviewJournalImportViewModel
 {

@@ -6,17 +6,9 @@ namespace AumoBackend.Controllers;
 
 using System;
 using System.Threading.Tasks;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
-using AumoBackend.DTOs;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("/health")]
