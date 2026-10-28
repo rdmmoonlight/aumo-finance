@@ -59,4 +59,5 @@ cd mobile
 
 - [Identitas repo](docs/IDENTITAS-REPO.md)
 - [Peta repo](docs/PETA-REPO.md)
+- [Fase 2: rapikan ASP.NET Core](docs/FASE-2-RAPIKAN-ASPNET-CORE.md)
 - [Detail aplikasi Android](mobile/README.md)

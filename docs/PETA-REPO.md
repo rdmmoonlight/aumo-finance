@@ -142,6 +142,7 @@ Semua workflow dipicu manual (`workflow_dispatch`).
 | `typography-scale.md` | Skala tipografi (mobile) |
 | `ukuran-font-web.md` | Ukuran font web |
 | `IDENTITAS-REPO.md` | Identitas repo |
+| `FASE-2-RAPIKAN-ASPNET-CORE.md` | Rencana fase 2: rapikan dan perkuat ASP.NET Core |
 | `PETA-REPO.md` | Dokumen ini |
 
 ## 8. Catatan Status
