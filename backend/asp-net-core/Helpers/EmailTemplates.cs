@@ -2,13 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
-
 namespace AumoBackend.Helpers;
 
 public static class EmailTemplates

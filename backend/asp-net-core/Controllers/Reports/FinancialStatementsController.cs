@@ -9,15 +9,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
-using AumoBackend.DTOs;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

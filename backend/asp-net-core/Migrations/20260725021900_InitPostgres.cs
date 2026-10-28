@@ -8,11 +8,6 @@
 namespace AumoBackend.Migrations
 {
     using System;
-    using AumoBackend.Controllers.Reports;
-    using AumoBackend.Helpers;
-    using AumoBackend.Models;
-    using AumoBackend.Services.Auth;
-    using AumoBackend.Services.Identity;
     using Microsoft.EntityFrameworkCore.Migrations;
     using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
