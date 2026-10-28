@@ -1,3 +1,4 @@
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
@@ -6,8 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { AppDispatch, RootState } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-import { createFileRoute } from '@tanstack/react-router';
-import { useRouter } from "next/navigation";
+
+
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -18,7 +19,7 @@ function AuthenticatedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const router = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
   // State lokal untuk melacak status fetching

@@ -1,3 +1,4 @@
+import { Link, useSearch } from '@tanstack/react-router';
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -39,8 +40,8 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AddAccountDialog,
@@ -273,7 +274,7 @@ export function ChartOfAccountsTable() {
               </Button>
               <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
                 <Link
-                  href={`/reports/general-ledger/permanent#account-${acc.id}`}
+                  to={`/reports/general-ledger/permanent#account-${acc.id}`}
                 >
                   <BookOpen size={14} />
                 </Link>

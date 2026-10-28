@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 // general-journal-table.tsx
 "use client";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +25,7 @@ import {
 } from "@tanstack/react-table";
 import { Calendar, Clock, Pencil, Trash2 } from "lucide-react";
 import { Fragment, useMemo } from "react";
-import Link from "next/link";
+
 import { formatDateTimeDisplay, formatNumber } from "../_lib/format";
 import { FlatJournalRow } from "../_lib/types";
 
@@ -74,7 +75,7 @@ export function GeneralJournalTable({
                     size="icon"
                     className="h-6 w-6"
                   >
-                    <Link href={`/journal-entry?id=${item.entryId}`}>
+                    <Link to={`/journal-entry?id=${item.entryId}`}>
                       <Pencil className="h-3 w-3" />
                     </Link>
                   </Button>

@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link } from '@tanstack/react-router';
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Banknote, Info } from "lucide-react";
-import Link from "next/link";
+
 import { useEffect, useMemo, useState } from "react";
 import { CashFlowSectionTable } from "../../../../features/reports/financial-statements/_components/cash-flow/CashFlowSectionTable";
 import { ErrorAlert } from "../../../../features/reports/financial-statements/_components/common/ErrorAlert";
@@ -113,7 +112,7 @@ function StatementOfCashFlowPage() {
               size="sm"
               className="gap-1.5 text-caption"
             >
-              <Link href="/financial-statements/income-statement">
+              <Link to="/financial-statements/income-statement">
                 <ArrowRight size={14} /> Income Statement
               </Link>
             </Button>

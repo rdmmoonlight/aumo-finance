@@ -52,8 +52,8 @@ export interface CommonActionResponse {
 
 // --- Inject Endpoints ke baseApi ---
 export const authApi = baseApi.injectEndpoints({
-  // Mencegah error 'overrideExisting' saat Next.js Turbopack HMR / Fast Refresh
-  overrideExisting: !process.env.PROD,
+  // ✅ Menggunakan import.meta.env.PROD khas Rsbuild / Vite SPA
+  overrideExisting: !import.meta.env.PROD,
   endpoints: (builder) => ({
     // 1. POST /auth/login
     login: builder.mutation<AuthResponse, LoginRequest>({
@@ -81,7 +81,7 @@ export const authApi = baseApi.injectEndpoints({
       providesTags: ["Auth"],
     }),
 
-    // 4. POST /auth/logout (Digabung & disederhanakan)
+    // 4. POST /auth/logout
     logout: builder.mutation<CommonActionResponse, void>({
       query: () => ({
         url: "/auth/logout",

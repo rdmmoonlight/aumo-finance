@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link } from '@tanstack/react-router';
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -7,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Info, Loader2, Lock } from "lucide-react";
-import Link from "next/link";
+
 import { useEffect, useMemo, useState } from "react";
 import { ClosingGroupTable } from "../../../../features/reports/journals/_components/closing-group-table";
 import { NoPeriodState } from "../../../../features/reports/journals/_components/no-period-state";
@@ -120,7 +119,7 @@ function ClosingJournalReportPage() {
           </h1>
         </div>
         <Button asChild variant="outline" size="sm">
-          <Link href="/reports/post-closing-trial-balance">
+          <Link to="/reports/post-closing-trial-balance">
             <ArrowRight size={14} /> Post-Closing
           </Link>
         </Button>

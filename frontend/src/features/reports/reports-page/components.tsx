@@ -1,6 +1,7 @@
+import { Link } from '@tanstack/react-router';
 "use client";
 
-import Link from "next/link";
+
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Activity, BarChart2, CalendarCheck2, Layers, Receipt, Search } from "lucide-react";
@@ -66,7 +67,7 @@ export function ReportsSummary({ summary, isLoading, isError }: any) {
 export function ReportCard({ report }: { report: ReportItem }) {
   const Icon = report.icon;
   return (
-    <Link href={report.href} className="group flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]">
+    <Link to={report.href} className="group flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-slate-900/80 text-white/80 group-hover:text-white"><Icon className="h-4 w-4" /></div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">

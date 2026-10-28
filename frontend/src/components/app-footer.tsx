@@ -1,5 +1,4 @@
-import Link from "next/link";
-
+import { Link } from '@tanstack/react-router';
 export function AppFooter() {
   return (
     <footer className="w-full border-t border-border/40 py-3">
@@ -12,7 +11,7 @@ export function AppFooter() {
         {/* Link Navigasi About & API Reference */}
         <div className="flex items-center gap-3 text-[11px] text-muted-foreground my-0.5">
           <Link 
-            href="/about" 
+            to="/about" 
             className="hover:text-foreground transition-colors underline-offset-4 hover:underline"
           >
             About

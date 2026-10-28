@@ -1,3 +1,4 @@
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 "use client";
 
 import { JournalLinesTable } from "#/features/journal-entry/components/journal-lines-table";
@@ -37,15 +38,15 @@ import {
   Lock,
   Save,
 } from "lucide-react";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+
+
 import { useEffect, useMemo, useState } from "react";
 import { SubmitHandler, useFieldArray, useForm } from "react-hook-form";
 import { z } from "zod";
 
 export default function JournalEntryContent() {
-  const router = useRouter();
-  const navigate = useRouter();
+  const router = useNavigate();
+  const navigate = useNavigate();
   const searchParams = useSearchParams();
   const entryIdParam = searchParams.get("id");
   const isEdit = Boolean(entryIdParam);
@@ -415,7 +416,7 @@ export default function JournalEntryContent() {
           </p>
         </div>
         <Button variant="outline" size="sm" asChild className="text-sm">
-          <Link href="/reports/general-journal" className="gap-1.5">
+          <Link to="/reports/general-journal" className="gap-1.5">
             <ArrowLeft size={14} /> Back to Journal
           </Link>
         </Button>
@@ -449,7 +450,7 @@ export default function JournalEntryContent() {
           <Lock size={16} />
           <AlertDescription className="text-xs">
             Journal {displayedTxNumber} is in closed period.{" "}
-            <Link href="/reports/general-journal" className="underline">
+            <Link to="/reports/general-journal" className="underline">
               Back
             </Link>
           </AlertDescription>

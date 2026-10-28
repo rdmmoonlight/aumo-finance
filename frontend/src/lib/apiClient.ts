@@ -26,9 +26,8 @@ export function getBackendTarget(): string {
   // 2. Jika kode berjalan di Node.js Server (Next.js SSR inside container)
   let target =
     process.env.INTERNAL_API_URL ||
-    process.env.NEXT_PUBLIC_BACKEND_URL ||
-    process.env.NEXT_PUBLIC__WEB_API_URL ||
-    process.env.NEXT_PUBLIC_WEB_API_URL ||
+    process.env.BACKEND_URL ||
+    process.env.WEB_API_URL ||
     "http://127.0.0.1:5000";
 
   return target.replace(/\/+$/, "");
