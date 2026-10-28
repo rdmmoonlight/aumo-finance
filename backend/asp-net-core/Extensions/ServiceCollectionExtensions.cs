@@ -1,14 +1,10 @@
-using System.Globalization;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using AumoBackend.Data;
-using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.ChartOfAccounts;
-using AumoBackend.Services.Core;
 using AumoBackend.Services.Dashboard;
 using AumoBackend.Services.Health;
 using AumoBackend.Services.Home;
@@ -21,7 +17,6 @@ using AumoBackend.Services.Reports.Summary;
 using AumoBackend.Services.Settings;
 using AumoBackend.Services.Storage;
 using AumoBackend.Services.Tools;
-using FluentValidation;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication.Google;
@@ -259,6 +254,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         services.AddHttpContextAccessor();
+
         services.AddSingleton<IAvatarStorage, NeonBucketStorage>();
 
         services.AddScoped<IGuardianService, GuardianService>();
@@ -279,7 +275,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<ISummaryService, SummaryService>();
         services.AddScoped<IToolsService, ToolsService>();
-        services.AddScoped<IRustCoreService, RustCoreService>();
 
         services.AddHttpClient<IMarketDataService, MarketDataService>();
 
