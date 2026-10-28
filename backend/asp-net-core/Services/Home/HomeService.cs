@@ -10,7 +10,13 @@ using AumoBackend.DTOs.Home;
 
 public class HomeService : IHomeService
 {
-    private readonly IHttpClientFactory? httpClientFactory;
+    private readonly IHttpClientFactory httpClientFactory;
+
+    // Fix: Inject IHttpClientFactory lewat constructor
+    public HomeService(IHttpClientFactory httpClientFactory)
+    {
+        this.httpClientFactory = httpClientFactory ?? throw new ArgumentNullException(nameof(httpClientFactory));
+    }
 
     public async Task<List<MarketIndicatorDto>> GetMarketIndicatorsAsync()
     {
