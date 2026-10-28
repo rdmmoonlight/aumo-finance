@@ -5,17 +5,9 @@
 namespace AumoBackend.Controllers;
 
 using System.Security.Claims;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using AumoBackend.Validators.Common;
-using AumoBackend.Validators.Common;
-using FluentValidation;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

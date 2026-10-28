@@ -5,20 +5,13 @@
 namespace AumoBackend.Controllers;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using AumoBackend.Services.JournalEntries;
-using AumoBackend.Services.Periods;
 using AumoBackend.Validators.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;

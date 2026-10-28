@@ -7,11 +7,6 @@ namespace AumoBackend.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
-using AumoBackend.Controllers.Reports;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 
 public class UserProfileViewModel
 {

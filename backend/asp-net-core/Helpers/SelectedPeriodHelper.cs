@@ -2,11 +2,8 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System;
-using System.Threading.Tasks;
 using AumoBackend.Data;
 using AumoBackend.Models;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Helpers
 {

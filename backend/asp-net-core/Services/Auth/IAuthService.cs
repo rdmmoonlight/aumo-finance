@@ -6,12 +6,7 @@ namespace AumoBackend.Services.Auth;
 
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using AumoBackend.ViewModels;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authentication;

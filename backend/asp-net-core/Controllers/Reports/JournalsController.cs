@@ -1,4 +1,3 @@
-using System.Globalization;
 // <copyright file="JournalsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -6,19 +5,12 @@ using System.Globalization;
 namespace AumoBackend.Controllers.Reports;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
-using AumoBackend.DTOs;
-using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
-using AumoBackend.Models;
 using AumoBackend.Services;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

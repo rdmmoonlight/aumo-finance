@@ -8,7 +8,6 @@ namespace AumoBackend.Services.Settings
     using System.Security.Claims;
     using AumoBackend.DTOs;
     using AumoBackend.Models;
-    using AumoBackend.Services.Auth;
     using AumoBackend.Services.Storage;
     using AumoBackend.ViewModels;
     using Microsoft.AspNetCore.Identity;

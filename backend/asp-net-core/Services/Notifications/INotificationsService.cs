@@ -4,12 +4,7 @@
 
 namespace AumoBackend.Services.Notifications;
 
-using AumoBackend.Controllers.Reports;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 
 public interface INotificationsService
 {

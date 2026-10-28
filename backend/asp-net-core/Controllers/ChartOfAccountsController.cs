@@ -1,7 +1,6 @@
 #pragma warning disable CA1862
 #pragma warning disable CA1304
 #pragma warning disable CA1311
-using System.Globalization;
 // <copyright file="ChartOfAccountsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -9,18 +8,13 @@ using System.Globalization;
 namespace AumoBackend.Controllers;
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services;
-using AumoBackend.Services.Auth;
-using AumoBackend.Services.Identity;
 using AumoBackend.Validators.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;

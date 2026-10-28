@@ -2,8 +2,6 @@
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
 
-using System.Globalization;
-
 namespace AumoBackend.Validators;
 
 using AumoBackend.DTOs;

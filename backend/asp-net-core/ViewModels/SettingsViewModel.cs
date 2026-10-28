@@ -7,12 +7,6 @@ namespace AumoBackend.ViewModels
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
-    using AumoBackend.Controllers.Reports;
-    using AumoBackend.Helpers;
-    using AumoBackend.Models;
-    using AumoBackend.Services.Auth;
-    using AumoBackend.Services.Identity;
-    using AumoBackend.ViewModels;
 
     public class GuardianDashboardViewModel
     {
