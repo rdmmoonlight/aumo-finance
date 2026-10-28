@@ -53,10 +53,3 @@ public class TrialBalanceAdjustedRow : TrialBalancesRow
 public class TrialBalancePostClosingRow : TrialBalancesRow
 {
 }
-
-public class TrialBalanceRowDto
-{
-    public Guid AccountId { get; set; }
-    public decimal Debit { get; set; }
-    public decimal Credit { get; set; }
-}
