@@ -4,5 +4,5 @@ using AumoBackend.DTOs.Reports;
 
 public interface IWorksheetService
 {
-    Task<WorksheetResponseDto> GetWorksheetAsync(Guid userId);
+    Task<WorksheetResult> GetWorksheetAsync(Guid userId);
 }
