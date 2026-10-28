@@ -1,65 +1,62 @@
-Aumo Finance
+# Aumo Finance
 
-An integrated, precision-driven financial and accounting information system.
+Sistem informasi keuangan dan akuntansi terintegrasi, berorientasi presisi.
 
-/backend
+## Fitur
 
-- ada 2 jenis auth. cookie untuk web dan JWT barier untuk mobile.
-- 11 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
+- Bagan Akun (Chart of Accounts)
+- Jurnal Umum, Jurnal Penyesuaian, Jurnal Penutup
+- Buku Besar (akun riil dan nominal)
+- Neraca Saldo (belum disesuaikan, disesuaikan, setelah penutupan)
+- Kertas Kerja
+- Laporan Keuangan (posisi keuangan, laba rugi, perubahan modal, arus kas)
+- Manajemen Periode Akuntansi
 
-/frontend
+## Struktur
 
-- deploy pertama di Vercel tanggal 9 September 2026.
-- 10 oktober 2026. Deploy pertama dg Dockerfile dan di Reder.com
+| Folder | Isi | Teknologi |
+|---|---|---|
+| `backend/asp-net-core` | REST API utama | ASP.NET Core (.NET 10), EF Core, PostgreSQL |
+| `frontend` | Aplikasi web | React 19, TypeScript, Rsbuild, TanStack Router, Tailwind |
+| `mobile` | Aplikasi Android native | Kotlin, Jetpack Compose |
+| `backend/axum`, `backend/go` | Eksperimen (belum dipakai produksi) | Rust, Go |
+| `docs` | Dokumentasi | Markdown |
 
-/mobile-capacitor
+## Autentikasi
 
-- dibuat tgl 12 oktober 2026. jam 06.34.
+- Web: cookie
+- Mobile: JWT Bearer
 
-/mobile
+## Menjalankan
 
-- Android native (Kotlin), bukan React Native/Flutter/MAUI. Konsumen REST API `/backend` di repo yang sama, auth pakai JWT Bearer.
+Backend:
 
-Tech stack:
+```bash
+dotnet run --project backend/asp-net-core
+```
 
-- Bahasa: Kotlin, JDK 17
-- Build: Gradle Kotlin DSL (`build.gradle.kts`), Android Gradle Plugin 8.5.0, Gradle Wrapper (`./gradlew`, tidak butuh Android Studio untuk build)
-- SDK: `minSdk` 28 (Android 9, dikunci — tidak boleh dinaikkan tanpa instruksi eksplisit), `targetSdk`/`compileSdk` 34
-- UI: 100% Jetpack Compose (Material3) — tidak ada layout XML, View, RecyclerView, maupun Material Components. Seluruh Activity adalah host tipis (`setContent`). Pesan singkat memakai Snackbar, dialog memakai `AlertDialog`/`DatePickerDialog` Compose. Tema XML (`Theme.AumoFinance`) hanya mengatur latar window, dan `FragmentActivity` (Login, Splash) hanya dipakai karena `BiometricPrompt` mewajibkannya
-- Networking: Ktor Client (engine OkHttp) + Gson sebagai serializer. Base URL backend: `https://aumonext-api.onrender.com`
-- Sesi: `EncryptedSharedPreferences` (AES256-GCM via Android Keystore) untuk "ingat saya", `BiometricPrompt` untuk login sidik jari/wajah
-- Async: Kotlinx Coroutines
-- Lint: ktlint (plugin `org.jlleitschuh.gradle.ktlint`)
-- CI/CD: GitHub Actions (`.github/workflows/android-build.yml`) — build, sign (keystore dari secret), dan publish APK ke GitHub Releases, trigger manual (`workflow_dispatch`)
-- `applicationId`: `com.bnrc.aumofinance` (harus tetap sama dengan app MAUI lama supaya Play Store menganggap ini update, bukan aplikasi baru)
+Frontend:
 
-Struktur folder (`app/src/main/java/com/aumofinance/app/`), per fungsi:
+```bash
+cd frontend
+pnpm install
+pnpm dev
+```
 
-- `auth/` — login (screen, viewmodel, API call) + helper biometrik
-- `coa/` — Chart of Accounts (daftar akun)
-- `core/` — kelas `Application`, formatter mata uang, `SyncManager` (placeholder sinkronisasi offline, belum diimplementasikan)
-- `crashlog/` — penangkap crash kustom (uncaught exception handler) + layar untuk melihat log crash tersimpan
-- `dashboard/` — layar dashboard/ringkasan setelah login
-- `data/` — `DbConnectionManager`, pemantau status koneksi ke backend (heartbeat, karena Render free-tier bisa sleep)
-- `home/` — menu utama aplikasi
-- `journal/` — input jurnal (journal entry): screen, viewmodel, API
-- `logout/` — proses logout
-- `network/` — `ApiClient` (konfigurasi Ktor + base URL + header Authorization), `SessionManager` (sesi in-memory selama app berjalan), `SessionStore` (persist sesi terenkripsi)
-- `periods/` — manajemen periode akuntansi (buka/tutup periode)
-- `reports/` — seluruh laporan, dipecah per jenis:
-  - `financials/` — Laporan Posisi Keuangan, Laba Rugi, Perubahan Modal, Arus Kas, Jurnal Penutup
-  - `journal/` — laporan Jurnal Umum & Jurnal Penyesuaian
-  - `ledger/` — Buku Besar (permanent/akun riil dan temporary/akun nominal)
-  - `trialbalance/` — Neraca Saldo (unadjusted, adjusted, post-closing)
-  - `worksheet/` — Kertas Kerja (worksheet)
-  - `menu/` — menu navigasi ke semua laporan di atas
-- `settings/` — pengaturan aplikasi
-- `splash/` — splash screen, titik pemulihan sesi tersimpan saat app dibuka
-- `ui/components/` — komponen Compose bersama (`SnackbarMessageHost`, `ConfirmDialog`, `AumoDatePickerDialog`)
-- `ui/icons/`, `ui/theme/` — ikon (Tabler, via font glyph) dan tema Compose
-- `update/` — `AppUpdateService`, pengecekan & pemasangan APK versi baru otomatis lewat GitHub Releases
+Mobile (Android):
 
-Di luar `app/`: `gradle/` (Gradle Wrapper), `build.gradle.kts` & `settings.gradle.kts` (konfigurasi level proyek), `gradlew`/`gradlew.bat` (wrapper script).
+```bash
+cd mobile
+./gradlew assembleDebug
+```
 
-About:
-Dibuat tanggal 25 Mei 2026 16:49.
+## Deploy
+
+- Web dan API: satu kontainer (Nginx + ASP.NET Core) lewat `Dockerfile`, di Render.com.
+- Android: APK dibangun dan dirilis lewat GitHub Actions (`.github/workflows/android-build.yml`) ke GitHub Releases.
+
+## Dokumentasi
+
+- [Identitas repo](docs/IDENTITAS-REPO.md)
+- [Peta repo](docs/PETA-REPO.md)
+- [Detail aplikasi Android](mobile/README.md)
