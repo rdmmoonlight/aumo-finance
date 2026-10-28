@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -8,8 +7,8 @@ import { store } from "@/lib/store";
 import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DeleteEntryDialog } from "../../../../features/reports/journals/_components/delete-entry-dialog";
 import { GeneralJournalTable } from "../../../../features/reports/journals/_components/general-journal-table";
@@ -18,7 +17,7 @@ import { formatDateDisplay } from "../../../../features/reports/journals/_lib/fo
 import { JournalEntry } from "../../../../features/reports/journals/_lib/types";
 
 function GeneralJournalPage() {
-  const navigate = useRouter();
+  const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
@@ -138,7 +137,7 @@ function GeneralJournalPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild size="sm">
-            <Link href="/journal-entry?type=general">
+            <Link to="/journal-entry?type=general">
               <Plus className="h-3.5 w-3.5" /> Add General
             </Link>
           </Button>

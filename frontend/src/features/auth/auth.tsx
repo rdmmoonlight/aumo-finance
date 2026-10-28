@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
-import { useSearchParams } from "next/navigation";
+
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -30,8 +30,8 @@ export interface AuthPageProps {
 }
 
 export const GOOGLE_CLIENT_ID: string =
-  process.env.NEXT_PUBLIC__GOOGLE_CLIENT_ID ||
-  process.env.NEXT_PUBLIC__NEXT_PUBLIC_GOOGLE_CLIENT_ID ||
+  process.env._GOOGLE_CLIENT_ID ||
+  process.env._GOOGLE_CLIENT_ID ||
   "";
 
 export function GoogleIcon(
@@ -90,7 +90,7 @@ export function GoogleAuthButtonInner({
       disabled={isPending}
       onClick={() => {
         if (!GOOGLE_CLIENT_ID) {
-          onError("NEXT_PUBLIC__GOOGLE_CLIENT_ID belum diset");
+          onError("_GOOGLE_CLIENT_ID belum diset");
           return;
         }
         googleLogin();
@@ -122,7 +122,7 @@ function AuthFormInner({
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
   const [isPending, setIsPending] = useState(false);
-  
+
   // ✅ Pengecekan profil dilakukan secara silent di background
   const [isCheckingProfile, setIsCheckingProfile] = useState(false);
 

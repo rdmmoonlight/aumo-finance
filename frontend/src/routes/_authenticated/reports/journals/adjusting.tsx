@@ -1,10 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 "use client";
 
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+
+
 import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +19,7 @@ import { formatDateDisplay } from "../../../../features/reports/journals/_lib/fo
 import { JournalEntry } from "../../../../features/reports/journals/_lib/types";
 
 function AdjustingJournalPage() {
-  const navigate = useRouter();
+  const navigate = useNavigate();
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
 
@@ -135,7 +134,7 @@ function AdjustingJournalPage() {
         </div>
         <div className="flex gap-2">
           <Button asChild size="sm">
-            <Link href="/journal-entry?type=adjusting">
+            <Link to="/journal-entry?type=adjusting">
               <Plus className="h-3.5 w-3.5" /> Add Adjusting
             </Link>
           </Button>
