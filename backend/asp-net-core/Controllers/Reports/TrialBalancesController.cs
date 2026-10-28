@@ -1,4 +1,3 @@
-using System.Globalization;
 using System.Security.Claims;
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
@@ -17,17 +16,17 @@ namespace AumoBackend.Controllers.Reports;
 public class TrialBalanceController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly NeondbContext _neonDb;
     private readonly ITrialBalanceService _trialBalanceService;
+    private readonly ILogger<TrialBalanceController> _logger;
 
     public TrialBalanceController(
         AppDbContext db,
-        NeondbContext neonDb,
-        ITrialBalanceService trialBalanceService)
+        ITrialBalanceService trialBalanceService,
+        ILogger<TrialBalanceController> logger)
     {
         _db = db;
-        _neonDb = neonDb;
         _trialBalanceService = trialBalanceService;
+        _logger = logger;
     }
 
     // GET /reports/trial-balance?type=unadjusted|adjusted|post-closing
@@ -76,15 +75,21 @@ public class TrialBalanceController : ControllerBase
             });
         }
 
-        var rows = await BuildTrialBalanceRowsAsync(
-            _db,
+        var rows = await _trialBalanceService.BuildTrialBalanceRowsAsync(
+            userId,
             period,
             includeAdjusting: reportType != "unadjusted",
-            extra: reportType);
+            reportType: reportType);
 
-        if (reportType == "post-closing")
+        // Snapshot ke tabel TrialBalance* bersifat pelengkap: kegagalan menyimpan tidak boleh
+        // menggagalkan laporan yang sudah berhasil dihitung.
+        try
         {
-            await ApplyClosingToRetainedEarningsAsync(userId, period, rows);
+            await _trialBalanceService.SaveSnapshotAsync(reportType, userId, period, rows);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Gagal menyimpan snapshot neraca saldo {ReportType} periode {PeriodId}.", reportType, period.Id);
         }
 
         var totalDebit = rows.Sum(r => r.Debit);
@@ -115,49 +120,6 @@ public class TrialBalanceController : ControllerBase
         });
     }
 
-    // Pasca-penutupan: akun temporer sudah dikeluarkan oleh service; saldo
-    // Laba Ditahan harus memuat efek Closing (saldo awal + laba bersih),
-    // kalau tidak kolom debit/kredit tidak seimbang.
-    private async Task ApplyClosingToRetainedEarningsAsync(Guid userId, Period period, List<TrialBalanceRow> rows)
-    {
-        var endingRe = await _trialBalanceService.ComputeRetainedEarningsEndingAsync(_neonDb, userId, period);
-
-        var reRow = rows.FirstOrDefault(r => string.Equals(r.Role, "RetainedEarnings", StringComparison.OrdinalIgnoreCase));
-        if (reRow == null)
-        {
-            if (endingRe == 0m)
-            {
-                return;
-            }
-
-            var account = await _db.ChartOfAccounts.AsNoTracking()
-                .Where(a => a.UserId == userId && a.IsActive && a.Role == "RetainedEarnings")
-                .OrderBy(a => a.ReferenceNumber)
-                .FirstOrDefaultAsync();
-
-            if (account == null)
-            {
-                return;
-            }
-
-            reRow = new TrialBalanceRow
-            {
-                AccountId = account.Id,
-                ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
-                AccountName = account.AccountName,
-                Type = account.Type,
-                Role = account.Role,
-                NormalBalanceIsDebit = false
-            };
-            rows.Add(reRow);
-            rows.Sort((a, b) => string.CompareOrdinal(a.ReferenceNumber.PadLeft(10, '0'), b.ReferenceNumber.PadLeft(10, '0')));
-        }
-
-        reRow.NetBalance = endingRe;
-        reRow.Debit = endingRe < 0m ? -endingRe : 0m;
-        reRow.Credit = endingRe > 0m ? endingRe : 0m;
-    }
-
     private async Task<Period?> ResolveSelectedPeriodAsync(Guid userId)
     {
         var selected = await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId && x.IsSelected);
@@ -179,14 +141,5 @@ public class TrialBalanceController : ControllerBase
     {
         var id = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? User.FindFirstValue("sub");
         return Guid.TryParse(id, out var guid) ? guid : Guid.Empty;
-    }
-
-    private static Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
-        object dbContext,
-        object period = null!,
-        bool includeAdjusting = false,
-        object extra = null!)
-    {
-        return Task.FromResult(new List<TrialBalanceRow>());
     }
 }
