@@ -127,11 +127,16 @@ const baseQueryWithReauth: BaseQueryFn<
   ) {
     const currentPath = window.location.pathname;
 
+    // Halaman publik (landing & about) menangani status belum login sendiri.
+    const isPublicPath = currentPath === "/" || currentPath === "/about";
+
     // Cegah loop jika sedang berada di halaman login/auth
-    if (!currentPath.startsWith("/auth") && !isRedirecting) {
+    if (!isPublicPath && !currentPath.startsWith("/auth") && !isRedirecting) {
       isRedirecting = true;
+      // Tujuan memakai "/auth/login" (bukan "/auth?...") agar tidak terkena 301
+      // lama dari nginx yang tersimpan permanen di cache browser (berujung :10000).
       window.location.replace(
-        `/auth?redirectTo=${encodeURIComponent(currentPath)}`,
+        `/auth/login?redirectTo=${encodeURIComponent(currentPath)}`,
       );
     }
   }
