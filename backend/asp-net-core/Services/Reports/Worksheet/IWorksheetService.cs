@@ -1,4 +1,8 @@
-// <copyright file="IWorksheetService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+namespace AumoBackend.Services.Reports.Worksheet;
 
+using AumoBackend.DTOs.Reports;
+
+public interface IWorksheetService
+{
+    Task<WorksheetResponseDto> GetWorksheetAsync(Guid userId);
+}

@@ -1,97 +1,89 @@
-// <copyright file="WorksheetService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+namespace AumoBackend.Services.Reports.Worksheet;
 
-namespace AumoBackend.Services;
-
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
+using AumoBackend.Helpers;
 using AumoBackend.Models;
+using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
-
-public interface IWorksheetService
-{
-    Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
-        AppDbContext db,
-        Guid userId,
-        Period period,
-        ITrialBalanceService trialBalanceService);
-}
 
 public class WorksheetService : IWorksheetService
 {
-    public async Task<List<WorksheetRowApiResponse>> BuildWorksheetRowsAsync(
-        AppDbContext db,
-        Guid userId,
-        Period period,
-        ITrialBalanceService trialBalanceService)
+    private readonly NeondbContext _db;
+    private readonly ITrialBalanceService _trialBalanceService;
+
+    public WorksheetService(NeondbContext db, ITrialBalanceService trialBalanceService)
     {
-        var unadjusted = await trialBalanceService.BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: false);
-        var adjusted = await trialBalanceService.BuildTrialBalanceRowsAsync(db, userId, period, includeAdjusting: true);
+        _db = db;
+        _trialBalanceService = trialBalanceService;
+    }
 
-        var accounts = await db.ChartOfAccounts
-            .Where(a => a.IsActive && a.UserId == userId)
-            .OrderBy(a => a.ReferenceNumber)
-            .ToListAsync();
-
-        var worksheetRows = new List<WorksheetRowApiResponse>();
-        var allAccountIds = unadjusted.Select(r => r.AccountId)
-            .Union(adjusted.Select(r => r.AccountId))
-            .ToList();
-
-        foreach (var accountId in allAccountIds)
+    public async Task<WorksheetResponseDto> GetWorksheetAsync(Guid userId)
+    {
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        if (period == null)
         {
-            var account = accounts.FirstOrDefault(a => a.Id == accountId);
-            if (account == null)
+            return new WorksheetResponseDto
             {
-                continue;
-            }
-
-            var u = unadjusted.FirstOrDefault(r => r.AccountId == accountId);
-            var a = adjusted.FirstOrDefault(r => r.AccountId == accountId);
-            var normalDebit = AccountClassificationHelper.NormalBalanceIsDebit(account.Type);
-
-            var uDebit = u?.Debit ?? 0m;
-            var uCredit = u?.Credit ?? 0m;
-            var aDebit = a?.Debit ?? 0m;
-            var aCredit = a?.Credit ?? 0m;
-
-            var adjNet = (aDebit - aCredit) - (uDebit - uCredit);
-
-            var row = new WorksheetRowApiResponse
-            {
-                AccountId = accountId,
-                ReferenceNumber = account.ReferenceNumber,
-                AccountName = account.AccountName,
-                Type = account.Type,
-                NormalBalanceIsDebit = normalDebit,
-                UnadjustedDebit = uDebit,
-                UnadjustedCredit = uCredit,
-                AdjustmentDebit = adjNet > 0 ? adjNet : 0m,
-                AdjustmentCredit = adjNet < 0 ? -adjNet : 0m,
-                AdjustedDebit = aDebit,
-                AdjustedCredit = aCredit,
+                Success = true,
+                HasPeriodSelected = false,
+                Message = "No accounting period selected.",
+                Rows = [],
+                Totals = WorksheetTotalsDto.Empty
             };
-
-            var isTemporary = AccountClassificationHelper.IsTemporary(account.Type);
-            if (isTemporary)
-            {
-                row.IncomeStatementDebit = aDebit;
-                row.IncomeStatementCredit = aCredit;
-            }
-            else
-            {
-                row.FinancialPositionDebit = aDebit;
-                row.FinancialPositionCredit = aCredit;
-            }
-
-            worksheetRows.Add(row);
         }
 
-        return worksheetRows.OrderBy(r => r.ReferenceNumber).ToList();
+        var rows = await BuildWorksheetRowsAsync(userId, period);
+        return new WorksheetResponseDto
+        {
+            Success = true,
+            HasPeriodSelected = true,
+            SelectedPeriodName = period.PeriodName,
+            Rows = rows.OrderBy(r => r.ReferenceNumber).ToList(),
+            Totals = WorksheetTotalsDto.FromRows(rows)
+        };
+    }
+
+    private async Task<List<WorksheetRowDto>> BuildWorksheetRowsAsync(Guid userId, Period period)
+    {
+        var unadjusted = await _trialBalanceService.BuildTrialBalanceRowsAsync(_db, userId, period, false);
+        var adjusted = await _trialBalanceService.BuildTrialBalanceRowsAsync(_db, userId, period, true);
+
+        var accounts = await _db.ChartOfAccounts
+            .Where(a => a.IsActive && a.UserId == userId)
+            .ToDictionaryAsync(a => a.Id);
+
+        var allIds = unadjusted.Select(r => r.AccountId).Union(adjusted.Select(r => r.AccountId));
+        var uDict = unadjusted.ToDictionary(x => x.AccountId);
+        var aDict = adjusted.ToDictionary(x => x.AccountId);
+
+        var result = new List<WorksheetRowDto>();
+        foreach (var id in allIds)
+        {
+            if (!accounts.TryGetValue(id, out var acc)) continue;
+            uDict.TryGetValue(id, out var u);
+            aDict.TryGetValue(id, out var a);
+
+            var adjNet = (a?.Debit - a?.Credit ?? 0) - (u?.Debit - u?.Credit ?? 0);
+
+            result.Add(new WorksheetRowDto
+            {
+                AccountId = id,
+                ReferenceNumber = acc.ReferenceNumber,
+                AccountName = acc.AccountName,
+                Type = acc.Type,
+                NormalBalanceIsDebit = AccountClassificationHelper.NormalBalanceIsDebit(acc.Type),
+                UnadjustedDebit = u?.Debit ?? 0,
+                UnadjustedCredit = u?.Credit ?? 0,
+                AdjustmentDebit = adjNet > 0 ? adjNet : 0,
+                AdjustmentCredit = adjNet < 0 ? -adjNet : 0,
+                AdjustedDebit = a?.Debit ?? 0,
+                AdjustedCredit = a?.Credit ?? 0,
+                IncomeStatementDebit = AccountClassificationHelper.IsTemporary(acc.Type) ? a?.Debit ?? 0 : 0,
+                IncomeStatementCredit = AccountClassificationHelper.IsTemporary(acc.Type) ? a?.Credit ?? 0 : 0,
+                FinancialPositionDebit = !AccountClassificationHelper.IsTemporary(acc.Type) ? a?.Debit ?? 0 : 0,
+                FinancialPositionCredit = !AccountClassificationHelper.IsTemporary(acc.Type) ? a?.Credit ?? 0 : 0,
+            });
+        }
+        return result;
     }
 }

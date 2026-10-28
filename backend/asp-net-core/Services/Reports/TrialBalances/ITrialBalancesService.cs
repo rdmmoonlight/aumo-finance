@@ -1,20 +1,17 @@
-// <copyright file="ITrialBalancesService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+namespace AumoBackend.Services.Reports.TrialBalances;
 
-using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
+using AumoBackend.Models; // NeondbContext ada disini
 
-namespace AumoBackend.Services;
-
-public interface ITrialBalancesService
+public interface ITrialBalanceService
 {
-    Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(AppDbContext db, Guid userId, Period period);
-
-    Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(AppDbContext db, Guid userId, Period period);
-
-    Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(AppDbContext db, Guid userId, Period period);
-
-    Task<decimal> ComputeRetainedEarningsEndingAsync(AppDbContext db, Guid userId, Period period);
+    Task<List<TrialBalanceRowDto>> BuildTrialBalanceRowsAsync(NeondbContext db, Guid userId, Period period, bool includeAdjusting);
+    Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(NeondbContext db, Guid userId, Period period);
+    Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(NeondbContext db, Guid userId, Period period);
+    Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(NeondbContext db, Guid userId, Period period);
+    Task<decimal> ComputeRetainedEarningsEndingAsync(NeondbContext db, Guid userId, Period period);
 }
+
+// Alias biar controller lama yang masih pakai plural gak error
+[Obsolete("Use ITrialBalanceService")]
+public interface ITrialBalancesService : ITrialBalanceService { }
