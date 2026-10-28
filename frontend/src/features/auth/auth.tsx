@@ -6,6 +6,7 @@ import { useGoogleLogin } from "@react-oauth/google";
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
+import { useSearchParams } from "@/lib/router-compat";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -29,10 +30,9 @@ export interface AuthPageProps {
   onSuccess?: () => void;
 }
 
+// Disuntikkan saat build oleh Rsbuild (variabel berawalan PUBLIC_).
 export const GOOGLE_CLIENT_ID: string =
-  process.env._GOOGLE_CLIENT_ID ||
-  process.env._GOOGLE_CLIENT_ID ||
-  "";
+  import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || "";
 
 export function GoogleIcon(
   props: React.ComponentProps<"svg">,

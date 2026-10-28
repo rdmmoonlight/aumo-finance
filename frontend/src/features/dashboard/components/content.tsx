@@ -1,4 +1,5 @@
-import { Link, useNavigate, useSearch } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
+import { useAppRouter, useSearchParams } from "@/lib/router-compat";
 "use client";
 
 import { DashboardCharts } from "#/features/dashboard/components/charts";
@@ -39,7 +40,7 @@ import {
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 export default function DashboardContent() {
-  const router = useNavigate();
+  const router = useAppRouter();
   const navigate = useNavigate();
   const searchParams = useSearchParams();
 
@@ -254,7 +255,7 @@ export default function DashboardContent() {
             size="sm"
             className="h-8 gap-1 text-caption"
           >
-            <Link to="/reports/income-statement">
+            <Link to="/reports/financial-statements/income-statement">
               <FileText size={14} /> Report
             </Link>
           </Button>

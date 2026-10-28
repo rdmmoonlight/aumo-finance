@@ -112,7 +112,7 @@ function StatementOfCashFlowPage() {
               size="sm"
               className="gap-1.5 text-caption"
             >
-              <Link to="/financial-statements/income-statement">
+              <Link to="/reports/financial-statements/income-statement">
                 <ArrowRight size={14} /> Income Statement
               </Link>
             </Button>

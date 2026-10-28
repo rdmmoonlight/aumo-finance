@@ -134,7 +134,7 @@ function RetainedEarningsPage() {
               </p>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link to="/reports/statement-of-financial-position">
+              <Link to="/reports/financial-statements/statement-of-financial-position">
                 <ArrowRight size={14} /> Balance Sheet
               </Link>
             </Button>
