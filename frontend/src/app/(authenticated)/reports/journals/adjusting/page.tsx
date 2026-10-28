@@ -1,9 +1,9 @@
 "use client";
 
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,11 +11,11 @@ import { store } from "@/lib/store";
 import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 
-import { DeleteEntryDialog } from "../_components/delete-entry-dialog";
-import { GeneralJournalTable } from "../_components/general-journal-table";
-import { JournalEmptyState } from "../_components/journal-empty-state";
-import { formatDateDisplay } from "../_lib/format";
-import { JournalEntry } from "../_lib/types";
+import { DeleteEntryDialog } from "../../../../../features/reports/journals/_components/delete-entry-dialog";
+import { GeneralJournalTable } from "../../../../../features/reports/journals/_components/general-journal-table";
+import { JournalEmptyState } from "../../../../../features/reports/journals/_components/journal-empty-state";
+import { formatDateDisplay } from "../../../../../features/reports/journals/_lib/format";
+import { JournalEntry } from "../../../../../features/reports/journals/_lib/types";
 
 export default function AdjustingJournalPage() {
   const navigate = useRouter();

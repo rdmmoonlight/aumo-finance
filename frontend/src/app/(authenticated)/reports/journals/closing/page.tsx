@@ -5,12 +5,12 @@ import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, Info, Loader2, Lock } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { ClosingGroupTable } from "../_components/closing-group-table";
-import { NoPeriodState } from "../_components/no-period-state";
-import { formatNumberWithParen } from "../_lib/format";
-import { ClosingJournalViewModel } from "../_lib/types";
+import { useEffect, useMemo, useState } from "react";
+import { ClosingGroupTable } from "../../../../../features/reports/journals/_components/closing-group-table";
+import { NoPeriodState } from "../../../../../features/reports/journals/_components/no-period-state";
+import { formatNumberWithParen } from "../../../../../features/reports/journals/_lib/format";
+import { ClosingJournalViewModel } from "../../../../../features/reports/journals/_lib/types";
 
 export default function ClosingJournalReportPage() {
   const [data, setData] = useState<any>(null);

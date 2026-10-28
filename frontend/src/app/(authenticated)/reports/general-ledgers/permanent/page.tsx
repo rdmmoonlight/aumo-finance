@@ -5,9 +5,9 @@ import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { LedgerCard } from "../_components/ledger-card";
-import { NoPeriodState } from "../_components/no-period-state";
-import { PageHeader } from "../_components/page-header";
+import { LedgerCard } from "../../../../../features/reports/general-ledgers/_components/ledger-card";
+import { NoPeriodState } from "../../../../../features/reports/general-ledgers/_components/no-period-state";
+import { PageHeader } from "../../../../../features/reports/general-ledgers/_components/page-header";
 
 export default function GeneralLedgerPermanentPage() {
   const [data, setData] = useState<any>(null);

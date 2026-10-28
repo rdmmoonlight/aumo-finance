@@ -8,10 +8,10 @@ import {
 } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { LedgerCard } from "../_components/ledger-card";
-import { NetIncomeCard } from "../_components/net-income-card";
-import { NoPeriodState } from "../_components/no-period-state";
-import { PageHeader } from "../_components/page-header";
+import { LedgerCard } from "../../../../../features/reports/general-ledgers/_components/ledger-card";
+import { NetIncomeCard } from "../../../../../features/reports/general-ledgers/_components/net-income-card";
+import { NoPeriodState } from "../../../../../features/reports/general-ledgers/_components/no-period-state";
+import { PageHeader } from "../../../../../features/reports/general-ledgers/_components/page-header";
 
 export default function GeneralLedgerTemporaryPage() {
   const [data, setData] = useState<GeneralLedgerTemporaryResponse | null>(null);
@@ -39,8 +39,8 @@ export default function GeneralLedgerTemporaryPage() {
         const err = result.error as any;
         setErrorMessage(
           err?.data?.message ||
-            err?.message ||
-            "Failed to load temporary ledger.",
+          err?.message ||
+          "Failed to load temporary ledger.",
         );
       }
 

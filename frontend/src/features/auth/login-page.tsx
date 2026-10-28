@@ -1,13 +1,13 @@
 "use client";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import AuthForm, { GOOGLE_CLIENT_ID, AuthPageProps } from "../auth";
+import AuthForm, { AuthPageProps, GOOGLE_CLIENT_ID } from "./auth";
 
-export default function RegisterPage({
-  initialMode = "register",
+export default function LoginPage({
+  initialMode = "login",
   onSuccess,
 }: AuthPageProps): React.JSX.Element {
   const content = <AuthForm initialMode={initialMode} onSuccess={onSuccess} />;
-  if (onSuccess) return content;
+  if (onSuccess) return content; // dipake sebagai modal
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
       <main className="flex min-h-screen items-center justify-center p-4 bg-zinc-50">
