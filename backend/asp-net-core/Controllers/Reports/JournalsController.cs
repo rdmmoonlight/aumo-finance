@@ -1,3 +1,4 @@
+using AumoBackend.Controllers.Reports;
 // <copyright file="JournalsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
@@ -250,7 +251,7 @@ public class JournalController : ControllerBase
         }
 
         var groups = await this.journalService.BuildClosingJournalGroupsAsync(this.db, userId, period, this.reportService);
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+        var rows = await BuildTrialBalanceRowsAsync(this.db, userId, period, true);
         var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
         var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
 

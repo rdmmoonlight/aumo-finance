@@ -39,7 +39,7 @@ public class WorksheetService : IWorksheetService
             HasPeriodSelected = true,
             SelectedPeriodName = period.PeriodName,
             Rows = rows.OrderBy(r => r.ReferenceNumber).ToList(),
-            Totals = WorksheetTotalsDto.FromRows(rows)
+            Totals = new WorksheetTotalsDto()
         };
     }
 
@@ -48,7 +48,7 @@ public class WorksheetService : IWorksheetService
         var unadjusted = await _trialBalanceService.BuildTrialBalanceRowsAsync(_db, userId, period, false);
         var adjusted = await _trialBalanceService.BuildTrialBalanceRowsAsync(_db, userId, period, true);
 
-        var accounts = await _db.ChartOfAccounts
+        var accounts = await _db.Accounts
             .Where(a => a.IsActive && a.UserId == userId)
             .ToDictionaryAsync(a => a.Id);
 

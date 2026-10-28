@@ -18,7 +18,7 @@ public class JournalService : IJournalService
 {
     public async Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(AppDbContext db, Guid userId, Period period, IFinancialReportService reportService)
     {
-        var rows = await TrialBalanceController.BuildTrialBalanceRowsAsync(db, userId, period, true);
+        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, true);
         var incomeStatement = reportService.BuildIncomeStatement(rows, period);
         var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
         const string incomeSummaryName = "Income Summary";
