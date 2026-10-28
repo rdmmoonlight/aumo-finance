@@ -4,7 +4,6 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS dotnet-builder
 WORKDIR /src
 
-# Install Rust & Cargo untuk mengompilasi Axum/C-Shared Library
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
@@ -22,17 +21,16 @@ COPY backend/asp-net-core/ ./backend/asp-net-core/
 RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build
 
 # ==========================================
-# STAGE 2: Build Next.js Frontend
+# STAGE 2: Build Rsbuild + TanStack Router Frontend (SPA)
 # ==========================================
-FROM node:24-alpine AS next-builder
+FROM node:24-alpine AS frontend-builder
 WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY frontend/package.json ./
+COPY frontend/package.json frontend/pnpm-lock.yaml* ./
 
-# pnpm v10 CLI flag eksplisit untuk mengizinkan build script unrs-resolver
-RUN pnpm install --allow-build=unrs-resolver
+RUN pnpm install --frozen-lockfile
 
 COPY frontend/ ./
 RUN pnpm run build
@@ -46,20 +44,15 @@ RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
     curl \
-    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
-    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy hasil build .NET
+# Copy hasil build .NET Core API
 COPY --from=dotnet-builder /app/dotnet-build ./backend
 
-# Copy hasil build Next.js Standalone
-COPY --from=next-builder /app/.next/standalone ./frontend
-# Copy folder static & public KE DALAM sub-folder frontend
-COPY --from=next-builder /app/.next/static ./frontend/.next/static
-COPY --from=next-builder /app/public ./frontend/public
+# Copy hasil build Rsbuild SPA (folder dist)
+COPY --from=frontend-builder /app/dist ./frontend-dist
 
 # Copy konfigurasi Supervisor & Nginx
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
