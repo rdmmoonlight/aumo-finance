@@ -1,5 +1,6 @@
+import { useLocation, Link } from '@tanstack/react-router';
 "use client";
-import { usePathname } from "next/navigation";
+
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -44,7 +45,7 @@ import {
 } from "lucide-react";
 
 import * as React from "react";
-import Link from "next/link";
+
 
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();
@@ -78,7 +79,7 @@ const navigation = [
 ];
 
 export function AppSidebar() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
@@ -182,7 +183,7 @@ export function AppSidebar() {
                       className="text-sm h-8 font-normal px-2"
                     >
                       <Link
-                        href={item.url}
+                        to={item.url}
                         className="flex items-center gap-2.5"
                       >
                         <Icon className={ICON_CLASS} />
@@ -267,7 +268,7 @@ export function AppSidebar() {
                 className="w-56"
               >
                 <DropdownMenuItem asChild className="text-sm">
-                  <Link href="/settings">
+                  <Link to="/settings">
                     <Settings className="mr-2 h-4 w-4" />
                     Settings
                   </Link>

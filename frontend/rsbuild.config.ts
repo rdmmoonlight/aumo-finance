@@ -1,16 +1,16 @@
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
-import { tanstackRouter } from '@tanstack/router-plugin/rspack';
+import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 
 const getBackendTarget = (): string => {
-  // Hirarki penentuan URL backend
+  // Hirarki penentuan URL backend dari environment variabel (Node.js level saat build/dev)
   let target =
     process.env.PUBLIC_WEB_API_URL ||
     process.env.WEB_API_URL ||
-    process.env.NEXT_PUBLIC_WEB_API_URL ||
+    process.env.PUBLIC_BACKEND_URL ||
     "http://localhost:5000";
 
-  // Memastikan slash di akhir dihapus agar pemanggilan URL konsisten
+  // Memastikan slash di akhir dihapus
   target = target.replace(/\/+$/, "");
 
   // Paksa HTTPS di lingkungan non-localhost jika URL masih HTTP
@@ -27,35 +27,33 @@ export default defineConfig({
   plugins: [pluginReact()],
   tools: {
     rspack: {
-      node: {
-        __dirname: false,
-      },
       plugins: [
-        tanstackRouter({
-          target: 'react',
+        TanStackRouterRspack({
+          target: "react",
           autoCodeSplitting: true,
-          routesDirectory: './src/routes',
-          generatedRouteTree: './src/routeTree.gen.ts',
+          routesDirectory: "./src/routes",
+          generatedRouteTree: "./src/routeTree.gen.ts",
         }),
       ],
     },
   },
 
-  // Menyuntikkan variabel runtime ke kode Client (bisa diakses via process.env.PUBLIC_BACKEND_URL)
   source: {
+    // Menyuntikkan variabel runtime & fallback process ke kode Client (Browser)
     define: {
+      "process.env": JSON.stringify({}),
       "process.env.PUBLIC_BACKEND_URL": JSON.stringify(backendTarget),
+      "import.meta.env.PUBLIC_BACKEND_URL": JSON.stringify(backendTarget),
     },
   },
 
-  // Pengganti output: "standalone" (Rsbuild menghasilkan build statis murni di folder dist/)
   output: {
     distPath: {
       root: "dist",
     },
   },
 
-  // Opsional: Setup Proxy untuk Dev Server agar menghindari CORS saat development lokal
+  // Setup Proxy untuk Dev Server lokal (menghindari masalah CORS)
   server: {
     proxy: {
       "/api": {

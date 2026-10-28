@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link } from '@tanstack/react-router';
 "use client";
 
 import { Badge } from "@/components/ui/badge";
@@ -39,7 +38,7 @@ import {
   Table as TableIcon,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+
 
 type ReportItem = {
   href: string;
@@ -242,7 +241,7 @@ function ReportsPage() {
           const Icon = report.icon;
           return (
             <Link
-              href={report.href}
+              to={report.href}
               className="group relative flex items-start gap-3 rounded-xl border border-white/10 bg-black/40 p-4 transition-all hover:border-indigo-500/30 hover:bg-white/[0.06]"
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-slate-900/80 text-white/80 group-hover:border-indigo-400/30 group-hover:text-white">

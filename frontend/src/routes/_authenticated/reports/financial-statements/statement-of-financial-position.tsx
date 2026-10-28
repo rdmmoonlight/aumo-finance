@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link } from '@tanstack/react-router';
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -8,7 +7,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertCircle, ArrowRight, CheckCircle2, Landmark } from "lucide-react";
-import Link from "next/link";
+
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorAlert } from "../../../../features/reports/financial-statements/_components/common/ErrorAlert";
 import { LoadingState } from "../../../../features/reports/financial-statements/_components/common/LoadingState";
@@ -136,7 +135,7 @@ function StatementOfFinancialPositionPage() {
                 Refresh
               </Button>
               <Button asChild variant="outline" size="sm">
-                <Link href="/financial-statements/income-statement">
+                <Link to="/financial-statements/income-statement">
                   <ArrowRight size={14} /> Income Statement
                 </Link>
               </Button>

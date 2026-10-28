@@ -1,5 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
-
+import { createFileRoute, Link } from '@tanstack/react-router';
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +12,7 @@ import {
 import { store } from "@/lib/store";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { ArrowRight, PiggyBank } from "lucide-react";
-import Link from "next/link";
+
 import { useEffect, useMemo, useState } from "react";
 import { ErrorAlert } from "../../../../features/reports/financial-statements/_components/common/ErrorAlert";
 import { LoadingState } from "../../../../features/reports/financial-statements/_components/common/LoadingState";
@@ -135,7 +134,7 @@ function RetainedEarningsPage() {
               </p>
             </div>
             <Button asChild variant="outline" size="sm">
-              <Link href="/reports/statement-of-financial-position">
+              <Link to="/reports/statement-of-financial-position">
                 <ArrowRight size={14} /> Balance Sheet
               </Link>
             </Button>

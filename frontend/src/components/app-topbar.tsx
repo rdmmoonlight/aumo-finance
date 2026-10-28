@@ -1,5 +1,6 @@
+import { useLocation } from '@tanstack/react-router';
 "use client";
-import { usePathname } from "next/navigation";
+
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -52,7 +53,7 @@ interface NotificationItem {
 }
 
 export function AppTopBar() {
-  const pathname = usePathname();
+  const pathname = useLocation().pathname;
 
   // State internal pengganti Auto-Generated Hooks
   const [userProfile, setUserProfile] = React.useState<any>(null);
