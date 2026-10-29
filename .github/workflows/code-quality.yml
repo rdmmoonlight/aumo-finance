@@ -1,8 +1,9 @@
 name: Quality & Formatting Workflow
 
 on:
-  branches: [ main ]
-  paths:
+  push:
+    branches: [ main ]
+    paths:
       - 'frontend/**'
   pull_request:
     branches: [ main ]
