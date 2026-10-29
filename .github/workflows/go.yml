@@ -16,6 +16,8 @@ jobs:
         with:
           go-version: '1.22'
           cache: true
+          cache-dependency-path: backend/go/go.sum
 
       - name: Build Go Project
+        working-directory: backend/go
         run: go build ./...
