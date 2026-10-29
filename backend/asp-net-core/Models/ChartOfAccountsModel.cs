@@ -1,7 +1,3 @@
-// <copyright file="ChartOfAccountsModel.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Models
 {
     public enum AccountClassification
@@ -47,7 +43,7 @@ namespace AumoBackend.Models
             {
                 "Assets" or "OperatingExpenses" or "OtherExpenses" => true,
                 "Liabilities" or "Equity" or "OperatingIncome" or "OtherIncome" => false,
-                _ => true, // Default fallback jika tipe tidak dikenali
+                _ => true,
             };
         }
 
@@ -82,7 +78,6 @@ namespace AumoBackend.Models
             throw new NotImplementedException();
         }
 
-        // Rentang kode akun per kategori (selaras ACCOUNT_RANGES di frontend/coa-types.ts)
         private static readonly Dictionary<string, (int Start, int End)> ReferenceRanges = new()
         {
             ["Assets"] = (100, 199),
@@ -96,7 +91,6 @@ namespace AumoBackend.Models
 
         public static IReadOnlyCollection<string> AccountTypes => ReferenceRanges.Keys;
 
-        // Role akun yang dikenal sistem (dipakai Periods, laporan keuangan)
         public static readonly string[] AccountRoles = { "Default", "CashAndEquivalents", "RetainedEarnings" };
 
         public static bool IsKnownAccountType(string? type)
@@ -107,54 +101,6 @@ namespace AumoBackend.Models
             return ReferenceRanges.TryGetValue(type ?? string.Empty, out var range)
                 && referenceNumber >= range.Start
                 && referenceNumber <= range.End;
-        }
-    }
-
-    public static class PeriodLock
-    {
-        public static bool IsLocked(Period? period)
-        {
-            if (period == null)
-            {
-                return false;
-            }
-
-            return period.GetType().GetProperties()
-                .FirstOrDefault(property => property.Name == "IsClosed")?
-                .GetValue(period) is true;
-        }
-
-        public static bool IsLocked(bool isClosed) => isClosed;
-
-        public static bool IsDateLocked(DateTime date, IEnumerable<Period>? periods)
-        {
-            if (periods == null)
-            {
-                return false;
-            }
-
-            // Memeriksa apakah tanggal masuk dalam rentang periode yang sudah ditutup (IsClosed = true)
-            foreach (var period in periods)
-            {
-                var properties = period?.GetType().GetProperties();
-                var startDate = properties?
-                    .FirstOrDefault(property => property.Name == "StartDate")?
-                    .GetValue(period);
-                var endDate = properties?
-                    .FirstOrDefault(property => property.Name == "EndDate")?
-                    .GetValue(period);
-
-                if (IsLocked(period)
-                    && startDate is DateTime start
-                    && endDate is DateTime end
-                    && date >= start
-                    && date <= end)
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
     }
 }
