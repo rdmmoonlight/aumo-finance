@@ -35,7 +35,7 @@ public static class DatabaseServiceExtensions
         services.AddScoped(p => p.GetRequiredService<IDbContextFactory<AppDbContext>>().CreateDbContext());
 
         // Tiga tabel neraca saldo (unadjusted, adjusted, post-closing).
-        services.AddDbContext<NeondbContext>(options =>
+        services.AddDbContext<AppDbContext>(options =>
         {
             options.UseNpgsql(connectionString, npgsqlOptions =>
             {
