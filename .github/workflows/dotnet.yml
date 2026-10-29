@@ -8,7 +8,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - 'backend/dotnet/**'
+      - 'backend/asp-net-core/**'
   workflow_dispatch: {}
 
 jobs:
