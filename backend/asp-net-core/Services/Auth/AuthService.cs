@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using AumoBackend.DTOs;
+using AumoBackend.Extensions;
 using AumoBackend.Models;
 using AumoBackend.Services.Settings;
 using AumoBackend.ViewModels;
@@ -299,10 +300,7 @@ public class AuthService(
 
     private async Task<string> GenerateJwtTokenAsync(ApplicationUser user)
     {
-        var jwtSigningKey = configuration["Jwt:SigningKey"]
-            ?? throw new InvalidOperationException("Jwt:SigningKey is missing.");
-
-        var jwtIssuer = configuration["Jwt:Issuer"] ?? "AumoFinanceApp";
+        var jwt = JwtSettings.From(configuration);
 
         var claims = new List<Claim>
         {
@@ -322,12 +320,12 @@ public class AuthService(
         var userClaims = await userManager.GetClaimsAsync(user);
         claims.AddRange(userClaims);
 
-        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey));
+        var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey));
         var credentials = new SigningCredentials(signingKey, SecurityAlgorithms.HmacSha256);
 
         var token = new JwtSecurityToken(
-            issuer: jwtIssuer,
-            audience: jwtIssuer,
+            issuer: jwt.Issuer,
+            audience: jwt.Audience,
             claims: claims,
             expires: DateTime.UtcNow.AddDays(30),
             signingCredentials: credentials);

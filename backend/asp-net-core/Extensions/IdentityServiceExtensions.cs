@@ -21,11 +21,8 @@ public static class IdentityServiceExtensions
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
-        // 2. Ambil Config JWT dengan Fallback Key agar tidak crash/dilewati jika Envar kosong
-        var jwtKey = configuration["Jwt:Key"] 
-            ?? "DEFAULT_SUPER_SECRET_KEY_FOR_AUMO_FINANCE_BEARER_TOKEN_32_CHARS_MIN!";
-        var issuer = configuration["Jwt:Issuer"] ?? "AumoBackend";
-        var audience = configuration["Jwt:Audience"] ?? "AumoClients";
+        // 2. Pengaturan JWT: sumber yang sama dengan pembuat token (AuthService). Tanpa kunci bawaan.
+        var jwt = JwtSettings.From(configuration);
 
         // 3. Konfigurasi Authentication Schemes (Cookie default + JwtBearer)
         services.AddAuthentication(options =>
@@ -46,9 +43,9 @@ public static class IdentityServiceExtensions
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = issuer,
-                ValidAudience = audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                ValidIssuer = jwt.Issuer,
+                ValidAudiences = new[] { jwt.Audience, jwt.Issuer }.Distinct().ToArray(),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.SigningKey))
             };
         });
 
