@@ -1,5 +1,4 @@
 using System.Text;
-using AumoBackend.Data;
 using AumoBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

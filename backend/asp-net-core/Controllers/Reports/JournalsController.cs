@@ -1,4 +1,3 @@
-using AumoBackend.Controllers.Reports;
 // <copyright file="JournalsController.cs" company="PlaceholderCompany">
 // Copyright (c) PlaceholderCompany. All rights reserved.
 // </copyright>
