@@ -21,7 +21,6 @@ export interface AuthResponse {
   userId?: string;
   fullName?: string;
   avatarUrl?: string;
-  token?: string;
   lockoutEnd?: string;
   errors?: string[];
 }
@@ -52,7 +51,6 @@ export interface CommonActionResponse {
 
 // --- Inject Endpoints ke baseApi ---
 export const authApi = baseApi.injectEndpoints({
-  // ✅ Menggunakan import.meta.env.PROD khas Rsbuild / Vite SPA
   overrideExisting: !import.meta.env.PROD,
   endpoints: (builder) => ({
     // 1. POST /auth/login
