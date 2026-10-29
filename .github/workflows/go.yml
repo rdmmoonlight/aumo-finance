@@ -1,0 +1,29 @@
+name: Go Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/go/**' # sesuaikan path folder Go
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'backend/go/**'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go & Cache
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+          cache: true
+
+      - name: Build Go Project
+        run: go build ./...
