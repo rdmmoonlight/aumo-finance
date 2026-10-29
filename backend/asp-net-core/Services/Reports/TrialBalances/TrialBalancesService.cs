@@ -14,12 +14,10 @@ public class TrialBalancesService : ITrialBalancesService
     private const string PostClosing = "post-closing";
 
     private readonly AppDbContext _db;
-    private readonly AppDbContext _neonDb;
 
-    public TrialBalancesService(AppDbContext db, AppDbContext neonDb)
+    public TrialBalancesService(AppDbContext db)
     {
         _db = db;
-        _neonDb = neonDb;
     }
 
     public async Task<List<TrialBalancesRow>> BuildTrialBalancesRowsAsync(
@@ -74,7 +72,7 @@ public class TrialBalancesService : ITrialBalancesService
         {
             case Adjusted:
                 await ReplaceSnapshotAsync(
-                    _neonDb.TrialBalanceAdjusteds,
+                    _db.TrialBalanceAdjusteds,
                     x => x.UserId == userId && x.PeriodId == periodId,
                     lines.Select(l => new TrialBalanceAdjusted
                     {
@@ -90,7 +88,7 @@ public class TrialBalancesService : ITrialBalancesService
 
             case PostClosing:
                 await ReplaceSnapshotAsync(
-                    _neonDb.TrialBalancePostClosings,
+                    _db.TrialBalancePostClosings,
                     x => x.UserId == userId && x.PeriodId == periodId,
                     lines.Select(l => new TrialBalancePostClosing
                     {
@@ -106,7 +104,7 @@ public class TrialBalancesService : ITrialBalancesService
 
             default:
                 await ReplaceSnapshotAsync(
-                    _neonDb.TrialBalanceUnadjusteds,
+                    _db.TrialBalanceUnadjusteds,
                     x => x.UserId == userId && x.PeriodId == periodId,
                     lines.Select(l => new TrialBalanceUnadjusted
                     {
@@ -313,7 +311,7 @@ public class TrialBalancesService : ITrialBalancesService
         var old = await set.Where(predicate).ToListAsync();
         set.RemoveRange(old);
         await set.AddRangeAsync(fresh);
-        await _neonDb.SaveChangesAsync();
+        await _db.SaveChangesAsync();
     }
 
     // ------------------------------------------------------------------
