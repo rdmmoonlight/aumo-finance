@@ -1,19 +1,17 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { useAppRouter } from "@/lib/router-compat";
+"use client";
+
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { useAppRouter } from "@/lib/router-compat";
 import type { AppDispatch, RootState } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { authApi } from "@/lib/store/auth/authApi";
-
-
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
-"use client";
 
 function AuthenticatedLayout() {
   const router = useAppRouter();
