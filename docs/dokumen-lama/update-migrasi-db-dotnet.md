@@ -17,14 +17,14 @@ Sebelum menjalankan perintah EF Core CLI, pastikan variabel lingkungan `Connecti
 ### Git Bash (Windows)
 
 ```bash
-export ConnectionStrings__DefaultConnection="Host=ep-wandering-bread-ao1sazxn.c-2.ap-southeast-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_SIwmzB1AdMk4;SSL Mode=Require;Trust Server Certificate=true;"
+export ConnectionStrings__DefaultConnection="URL_DB_NEON"
 
 ```
 
 ### PowerShell
 
 ```powershell
-$env:ConnectionStrings__DefaultConnection="Host=ep-wandering-bread-ao1sazxn.c-2.ap-southeast-1.aws.neon.tech;Port=5432;Database=neondb;Username=neondb_owner;Password=npg_SIwmzB1AdMk4;SSL Mode=Require;Trust Server Certificate=true;"
+$env:ConnectionStrings__DefaultConnection="URL_DB_NEON"
 
 ```
 
