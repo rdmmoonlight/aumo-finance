@@ -1,14 +1,6 @@
 name: Rust Build
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'native/rust/**' # sesuaikan path folder Rust
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'native/rust/**'
   workflow_dispatch: {}
 
 jobs:
