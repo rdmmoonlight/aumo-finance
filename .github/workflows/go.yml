@@ -1,14 +1,6 @@
 name: Go Build
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - 'backend/go/**' # sesuaikan path folder Go
-  pull_request:
-    branches: [ main ]
-    paths:
-      - 'backend/go/**'
   workflow_dispatch: {}
 
 jobs:
