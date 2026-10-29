@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - 'backend/dotnet/**' # sesuaikan path folder .NET
+      - 'backend/asp-net-core/**' # sesuaikan path folder .NET
   pull_request:
     branches: [ main ]
     paths:
