@@ -1,294 +1,97 @@
-using System.Security.Claims;
-using AumoBackend.Data;
-using AumoBackend.Helpers;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Extensions;
 using AumoBackend.Services.Reports.Journals;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("/reports/journals")]
+[Route("reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class JournalsController : ControllerBase
 {
-    private readonly AppDbContext db;
-    private readonly IJournalsService journalService;
+    private readonly IJournalsService _journalsService;
 
-    public JournalsController(AppDbContext db, IJournalsService journalsService)
+    public JournalsController(IJournalsService journalsService)
     {
-        this.db = db;
-        this.journalService = journalsService;
+        _journalsService = journalsService;
     }
 
-    // ==========================================
-    // 1. GENERAL JOURNAL
-    // GET: /reports/journals/general
-    // ==========================================
+    // GET /api/v1/reports/journals/general
     [HttpGet("general")]
     public async Task<IActionResult> GetGeneralJournal()
-    {
-        var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        => await GetJournalAsync("General", "entries");
 
-        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
-
-        if (selectedPeriod == null)
-        {
-            return this.Ok(new
-            {
-                success = true,
-                hasPeriodSelected = false,
-                message = "No accounting period selected.",
-                selectedPeriodName = (string?)null,
-                isPeriodClosed = false,
-                entries = Array.Empty<object>(),
-            });
-        }
-
-        var startUtc = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
-        var endUtc = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-
-        var rows = await this.db.GeneralJournals
-            .AsNoTracking()
-            .Include(g => g.Account)
-            .Where(g => g.UserId == userId
-                     && g.JournalType == "General"
-                     && g.EntryDate >= startUtc
-                     && g.EntryDate <= endUtc)
-            .ToListAsync();
-
-        var entries = rows
-            .GroupBy(g => g.JournalEntryId)
-            .Select(grp => new { Header = grp.First(), Lines = grp })
-            .OrderBy(x => x.Header.EntryDate)
-            .ThenBy(x => x.Header.CreatedAt)
-            .ThenBy(x => x.Header.JournalEntryId)
-            .Select(x => new
-            {
-                Id = x.Header.JournalEntryId,
-                x.Header.TransactionNumber,
-                x.Header.JournalType,
-                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
-                x.Header.CreatedAt,
-                x.Header.UpdatedAt,
-                lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
-                {
-                    Id = l.LineId,
-                    l.AccountId,
-                    AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
-                    l.LineDescription,
-                    l.Debit,
-                    l.Credit,
-                    l.LineOrder
-                }).ToList(),
-            })
-            .ToList();
-
-        return this.Ok(new
-        {
-            success = true,
-            hasPeriodSelected = true,
-            selectedPeriodName = selectedPeriod.PeriodName,
-            isPeriodClosed = selectedPeriod.IsClosed,
-            entries = entries,
-        });
-    }
-
-    // ==========================================
-    // 2. ADJUSTING JOURNAL
-    // GET: /reports/journals/adjusting
-    // ==========================================
+    // GET /api/v1/reports/journals/adjusting
     [HttpGet("adjusting")]
     public async Task<IActionResult> GetAdjustingJournal()
-    {
-        var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        => await GetJournalAsync("Adjusting", "entries");
 
-        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
-        if (selectedPeriod == null)
-        {
-            return this.Ok(new
-            {
-                success = true,
-                hasPeriodSelected = false,
-                message = "No accounting period selected.",
-                selectedPeriodName = (string?)null,
-                isPeriodClosed = false,
-                entries = Array.Empty<object>(),
-            });
-        }
+    // GET /api/v1/reports/journals/closing
+    [HttpGet("closing")]
+    public async Task<IActionResult> GetClosingJournal()
+        => await GetJournalAsync("Closing", "closingJournal");
 
-        var startUtc = DateTime.SpecifyKind(selectedPeriod.StartDate.Date, DateTimeKind.Utc);
-        var endUtc = DateTime.SpecifyKind(selectedPeriod.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-
-        var rows = await this.db.GeneralJournals
-            .AsNoTracking()
-            .Include(g => g.Account)
-            .Where(g => g.UserId == userId
-                     && g.JournalType == "Adjusting"
-                     && g.EntryDate >= startUtc
-                     && g.EntryDate <= endUtc)
-            .ToListAsync();
-
-        var entries = rows
-            .GroupBy(g => g.JournalEntryId)
-            .Select(grp => new { Header = grp.First(), Lines = grp })
-            .OrderBy(x => x.Header.EntryDate)
-            .ThenBy(x => x.Header.CreatedAt)
-            .ThenBy(x => x.Header.JournalEntryId)
-            .Select(x => new
-            {
-                Id = x.Header.JournalEntryId,
-                x.Header.TransactionNumber,
-                x.Header.JournalType,
-                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
-                x.Header.CreatedAt,
-                x.Header.UpdatedAt,
-                lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
-                {
-                    Id = l.LineId,
-                    l.AccountId,
-                    AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
-                    l.LineDescription,
-                    l.Debit,
-                    l.Credit,
-                    l.LineOrder
-                }).ToList(),
-            })
-            .ToList();
-
-        return this.Ok(new
-        {
-            success = true,
-            hasPeriodSelected = true,
-            selectedPeriodName = selectedPeriod.PeriodName,
-            isPeriodClosed = selectedPeriod.IsClosed,
-            entries = entries,
-        });
-    }
-
-    // DELETE: /reports/journals/adjusting/{id}
+    // DELETE /api/v1/reports/journals/adjusting/{id}
     [HttpDelete("adjusting/{id:int}")]
     public async Task<IActionResult> DeleteAdjustingJournal(int id)
     {
-        var userId = this.GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var rows = await this.db.GeneralJournals
-            .Where(g => g.JournalEntryId == id && g.UserId == userId && g.JournalType == "Adjusting")
-            .ToListAsync();
-
-        if (rows.Count == 0)
+        try
         {
-            return this.NotFound(new { success = false, message = "Adjusting journal entry not found." });
+            await _journalsService.DeleteAdjustingAsync(userId, id);
+            return Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
         }
-
-        var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
-        if (selectedPeriod != null && selectedPeriod.IsClosed)
+        catch (KeyNotFoundException ex)
         {
-            return this.BadRequest(new { success = false, message = "Cannot delete entry in a closed accounting period." });
+            return NotFound(new { success = false, message = ex.Message });
         }
-
-        this.db.GeneralJournals.RemoveRange(rows);
-        await this.db.SaveChangesAsync();
-
-        return this.Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
     }
 
-    // ==========================================
-    // 3. CLOSING JOURNAL
-    // GET: /reports/journals/closing
-    // ==========================================
-    [HttpGet("closing")]
-    public async Task<IActionResult> GetClosingJournal()
+    // Kontrak respons dipertahankan: jurnal umum dan penyesuaian memakai "entries", penutup "closingJournal".
+    private async Task<IActionResult> GetJournalAsync(string journalType, string listKey)
     {
-        var userId = this.GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
-        if (period == null)
+        JournalReportResult result = await _journalsService.GetJournalAsync(userId, journalType);
+
+        var body = new Dictionary<string, object?>
         {
-            return this.Ok(new
-            {
-                success = true,
-                hasPeriodSelected = false,
-                message = "No accounting period selected.",
-                selectedPeriodName = (string?)null,
-                closingJournal = Array.Empty<object>(),
-            });
+            ["success"] = true,
+            ["hasPeriodSelected"] = result.HasPeriodSelected,
+            ["selectedPeriodName"] = result.SelectedPeriodName,
+        };
+
+        if (!result.HasPeriodSelected)
+        {
+            body["message"] = "No accounting period selected.";
         }
 
-        var startUtc = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);
-        var endUtc = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
-
-        var rows = await this.db.GeneralJournals
-            .AsNoTracking()
-            .Include(g => g.Account)
-            .Where(g => g.UserId == userId
-                     && g.JournalType == "Closing"
-                     && g.EntryDate >= startUtc
-                     && g.EntryDate <= endUtc)
-            .ToListAsync();
-
-        var closingJournal = rows
-            .GroupBy(g => g.JournalEntryId)
-            .Select(grp => new { Header = grp.First(), Lines = grp })
-            .OrderBy(x => x.Header.EntryDate)
-            .ThenBy(x => x.Header.CreatedAt)
-            .ThenBy(x => x.Header.JournalEntryId)
-            .Select(x => new
-            {
-                Id = x.Header.JournalEntryId,
-                x.Header.TransactionNumber,
-                x.Header.JournalType,
-                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
-                x.Header.CreatedAt,
-                x.Header.UpdatedAt,
-                lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
-                {
-                    Id = l.LineId,
-                    l.AccountId,
-                    AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
-                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
-                    l.LineDescription,
-                    l.Debit,
-                    l.Credit,
-                    l.LineOrder
-                }).ToList(),
-            })
-            .ToList();
-
-        return this.Ok(new
+        if (listKey == "entries")
         {
-            success = true,
-            hasPeriodSelected = true,
-            selectedPeriodName = period.PeriodName,
-            isPeriodClosed = period.IsClosed,
-            closingJournal = closingJournal,
-        });
-    }
+            body["isPeriodClosed"] = result.IsPeriodClosed;
+        }
 
-    private Guid GetCurrentUserId()
-    {
-        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? this.User.FindFirstValue("sub");
+        body[listKey] = result.Entries;
+        if (listKey != "entries")
+        {
+            body["isPeriodClosed"] = result.IsPeriodClosed;
+        }
 
-        return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
+        return Ok(body);
     }
 }
