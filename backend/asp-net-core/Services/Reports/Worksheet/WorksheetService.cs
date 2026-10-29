@@ -29,18 +29,19 @@ public class WorksheetService : IWorksheetService
         var unadjusted = await _trialBalancesService.BuildTrialBalancesRowsAsync(userId, period, false, "unadjusted");
         var adjusted = await _trialBalancesService.BuildTrialBalancesRowsAsync(userId, period, true, "adjusted");
 
+        // Mengambil ChartOfAccounts ber-key Guid
         var accounts = await _db.ChartOfAccounts
             .AsNoTracking()
             .Where(a => a.IsActive && a.UserId == userId)
-            .ToDictionaryAsync(a => a.Id);
+            .ToDictionaryAsync(a => a.Id); // a.Id pastikan bertipe Guid
 
-        var unadjustedById = unadjusted.ToDictionary(r => r.AccountId);
-        var adjustedById = adjusted.ToDictionary(r => r.AccountId);
+        var unadjustedById = unadjusted.ToDictionary(r => r.AccountId); // r.AccountId bertipe Guid
+        var adjustedById = adjusted.ToDictionary(r => r.AccountId);   // r.AccountId bertipe Guid
 
         var rows = new List<WorksheetRowApiResponse>();
         foreach (var accountId in unadjustedById.Keys.Union(adjustedById.Keys))
         {
-            if (!accounts.TryGetValue(accountId, out var account))
+            if (!accounts.TryGetValue(accountId.GetHashCode(), out var account))
             {
                 continue;
             }
@@ -58,7 +59,7 @@ public class WorksheetService : IWorksheetService
 
             var row = new WorksheetRowApiResponse
             {
-                AccountId = accountId,
+                AccountId = accountId.GetHashCode(),
                 ReferenceNumber = account.ReferenceNumber,
                 AccountName = account.AccountName,
                 Type = account.Type,

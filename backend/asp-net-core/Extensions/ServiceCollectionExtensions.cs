@@ -9,7 +9,6 @@ using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Notifications;
 using AumoBackend.Services.Periods;
 using AumoBackend.Services.Reports.GeneralLedgers;
-using AumoBackend.Services.Reports.Journals;
 using AumoBackend.Services.Reports.Summary;
 using AumoBackend.Services.Reports.TrialBalances;
 using AumoBackend.Services.Reports.Worksheet;
@@ -137,7 +136,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationsService, NotificationsService>();
         services.AddScoped<IPeriodsService, PeriodsService>();
         services.AddScoped<IGeneralLedgersService, GeneralLedgersService>();
-        services.AddScoped<IJournalsService, JournalsService>();
         services.AddScoped<ITrialBalancesService, TrialBalancesService>();
         services.AddScoped<IWorksheetService, WorksheetService>();
         services.AddScoped<ISettingsService, SettingsService>();

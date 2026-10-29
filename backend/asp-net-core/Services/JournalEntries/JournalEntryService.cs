@@ -1,8 +1,3 @@
-#pragma warning disable CA1725
-// <copyright file="JournalEntryService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.JournalEntries;
 
 using AumoBackend.Data;
@@ -23,7 +18,6 @@ public class JournalEntryService : IJournalEntryService
 
     public async Task<GeneralJournalResponseDto?> GetByIdAsync(Guid userId, int id)
     {
-        // Membaca baris-baris detail dari tabel GeneralJournal berdasarkan JournalEntryId
         var rows = await this.db.GeneralJournals
             .Where(gj => gj.JournalEntryId == id && gj.UserId == userId)
             .OrderBy(gj => gj.LineOrder)
@@ -160,7 +154,6 @@ public class JournalEntryService : IJournalEntryService
 
     public async Task UpdateAsync(Guid userId, int id, UpdateGeneralJournalRequest request)
     {
-        // id = JournalEntryId (id kelompok jurnal)
         var existingRows = await this.db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId)
             .ToListAsync();
@@ -195,7 +188,6 @@ public class JournalEntryService : IJournalEntryService
             effectiveLines.Select(l => new GeneralJournalWriter.Line(l.AccountId, l.LineDescription, l.Debit, l.Credit)),
             header.Status ?? GeneralJournalWriter.PostedStatus);
 
-        // Hapus baris lama + tambah baris baru dalam satu SaveChanges (satu transaksi).
         this.db.GeneralJournals.RemoveRange(existingRows);
         this.db.GeneralJournals.AddRange(newRows);
         await this.db.SaveChangesAsync();
@@ -212,7 +204,6 @@ public class JournalEntryService : IJournalEntryService
 
     public async Task DeleteAsync(Guid userId, int id)
     {
-        // id = JournalEntryId (id kelompok jurnal)
         var rows = await this.db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId)
             .ToListAsync();
@@ -249,7 +240,6 @@ public class JournalEntryService : IJournalEntryService
 
         var keyword = query.Trim();
 
-        // Membaca langsung dari GeneralJournals tanpa butuh .Include()
         return await this.db.GeneralJournals
             .Where(gj => gj.UserId == userId
                       && gj.LineDescription != null && gj.LineDescription != string.Empty

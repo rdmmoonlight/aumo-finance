@@ -1,3 +1,5 @@
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
 using AumoBackend.Services.Reports.TrialBalances;
 
 namespace AumoBackend.Services.Reports.Journals;
