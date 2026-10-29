@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Security.Claims;
+using AumoBackend.Data;
 using AumoBackend.Extensions;
 using AumoBackend.Middlewares;
 using AumoBackend.Models;
@@ -45,8 +46,7 @@ public partial class Program
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
-                // Diganti dari KnownIPNetworks menjadi KnownNetworks
-                options.KnownNetworks.Clear();
+                options.KnownIPNetworks.Clear();
                 options.KnownProxies.Clear();
             });
 
@@ -146,7 +146,7 @@ public partial class Program
                 var services = scope.ServiceProvider;
                 try
                 {
-                    var context = services.GetRequiredService<NeondbContext>();
+                    var context = services.GetRequiredService<AppDbContext>();
                     await context.Database.MigrateAsync();
 
                     var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();

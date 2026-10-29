@@ -46,6 +46,12 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
 
+    public virtual DbSet<TrialBalanceAdjusted> TrialBalanceAdjusteds { get; set; } = null!;
+
+    public virtual DbSet<TrialBalancePostClosing> TrialBalancePostClosings { get; set; } = null!;
+
+    public virtual DbSet<TrialBalanceUnadjusted> TrialBalanceUnadjusteds { get; set; } = null!;
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -56,6 +62,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+        builder.HasPostgresExtension("postgres_fdw");
 
         builder.Entity<ChartOfAccount>(entity =>
         {
@@ -249,10 +256,56 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
+
+        builder.Entity<TrialBalanceAdjusted>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("TrialBalanceAdjusted_pkey");
+
+            entity.ToTable("TrialBalanceAdjusted");
+
+            entity.Property(e => e.Id).UseIdentityAlwaysColumn();
+            entity.Property(e => e.AccountName).HasMaxLength(255);
+            entity.Property(e => e.AccountNumber).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.CreditBalance).HasPrecision(15, 2);
+            entity.Property(e => e.DebitBalance).HasPrecision(15, 2);
+            entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
+        });
+
+        builder.Entity<TrialBalancePostClosing>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("TrialBalancePostClosing_pkey");
+
+            entity.ToTable("TrialBalancePostClosing");
+
+            entity.Property(e => e.Id).UseIdentityAlwaysColumn();
+            entity.Property(e => e.AccountName).HasMaxLength(255);
+            entity.Property(e => e.AccountNumber).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.CreditBalance).HasPrecision(15, 2);
+            entity.Property(e => e.DebitBalance).HasPrecision(15, 2);
+            entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
+        });
+
+        builder.Entity<TrialBalanceUnadjusted>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("TrialBalanceUnadjusted_pkey");
+
+            entity.ToTable("TrialBalanceUnadjusted");
+
+            entity.Property(e => e.Id).UseIdentityAlwaysColumn();
+            entity.Property(e => e.AccountName).HasMaxLength(255);
+            entity.Property(e => e.AccountNumber).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.CreditBalance).HasPrecision(15, 2);
+            entity.Property(e => e.DebitBalance).HasPrecision(15, 2);
+            entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
+        });
         builder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 
-        this.OnModelCreatingPartial(builder);
+        OnModelCreatingPartial(builder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder builder);
+
 }

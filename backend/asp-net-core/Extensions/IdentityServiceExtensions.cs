@@ -1,4 +1,5 @@
 using System.Text;
+using AumoBackend.Data;
 using AumoBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +17,7 @@ public static class IdentityServiceExtensions
             options.Password.RequiredLength = 8;
             options.User.RequireUniqueEmail = true;
         })
-        .AddEntityFrameworkStores<NeondbContext>() // <-- tadinya AppDbContext
+        .AddEntityFrameworkStores<AppDbContext>() // <-- tadinya AppDbContext
         .AddDefaultTokenProviders();
 
         var jwtKey = configuration["Jwt:Key"];
