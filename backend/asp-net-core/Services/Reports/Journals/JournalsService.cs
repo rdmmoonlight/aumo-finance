@@ -1,36 +1,47 @@
-// <copyright file="JournalsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+using AumoBackend.Services.Reports.TrialBalances;
 
-namespace AumoBackend.Services;
+namespace AumoBackend.Services.Reports.Journals;
 
-using AumoBackend.Data;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
-
-public interface IJournalService
+public class JournalsService : IJournalsService
 {
-    Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(AppDbContext db, Guid userId, Period period, IFinancialReportService reportService);
-}
+    private readonly ITrialBalancesService _trialBalancesService;
 
-public class JournalService : IJournalService
-{
-    public async Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(AppDbContext db, Guid userId, Period period, IFinancialReportService reportService)
+    public JournalsService(ITrialBalancesService trialBalancesService)
     {
-        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, true);
-        var incomeStatement = reportService.BuildIncomeStatement(rows, period);
+        _trialBalancesService = trialBalancesService;
+    }
+
+    public async Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(
+        Guid userId,
+        Period period)
+    {
+        var rows = await _trialBalancesService.BuildTrialBalancesRowsAsync(userId, period, true);
         var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
         const string incomeSummaryName = "Income Summary";
 
         var groups = new List<ClosingJournalEntryGroupApiResponse>();
 
-        var incomeRows = rows.Where(r => r.Type == "OperatingIncome" || r.Type == "OtherIncome").Where(r => r.NetBalance != 0).ToList();
-        var expenseRows = rows.Where(r => r.Type == "OperatingExpenses" || r.Type == "OtherExpenses").Where(r => r.NetBalance != 0).ToList();
+        var incomeRows = rows
+            .Where(r => r.Type == "OperatingIncome" || r.Type == "OtherIncome")
+            .Where(r => r.NetBalance != 0)
+            .ToList();
+
+        var expenseRows = rows
+            .Where(r => r.Type == "OperatingExpenses" || r.Type == "OtherExpenses")
+            .Where(r => r.NetBalance != 0)
+            .ToList();
+
+        var totalIncome = incomeRows.Sum(r => r.NetBalance);
+        var totalExpenses = expenseRows.Sum(r => r.NetBalance);
 
         // BLOCK 1: Closing Revenues to Income Summary
         if (incomeRows.Count > 0)
         {
-            var group1 = new ClosingJournalEntryGroupApiResponse { Description = "Closing Revenue Accounts to Income Summary" };
+            var group1 = new ClosingJournalEntryGroupApiResponse
+            {
+                Description = "Closing Revenue Accounts to Income Summary"
+            };
+
             foreach (var r in incomeRows)
             {
                 group1.Lines.Add(new ClosingJournalLineApiResponse
@@ -47,22 +58,28 @@ public class JournalService : IJournalService
                 ReferenceNumber = "0",
                 AccountName = incomeSummaryName,
                 Debit = 0m,
-                Credit = incomeRows.Sum(r => r.NetBalance),
+                Credit = totalIncome,
             });
+
             groups.Add(group1);
         }
 
         // BLOCK 2: Closing Expenses to Income Summary
         if (expenseRows.Count > 0)
         {
-            var group2 = new ClosingJournalEntryGroupApiResponse { Description = "Closing Expense Accounts to Income Summary" };
+            var group2 = new ClosingJournalEntryGroupApiResponse
+            {
+                Description = "Closing Expense Accounts to Income Summary"
+            };
+
             group2.Lines.Add(new ClosingJournalLineApiResponse
             {
                 ReferenceNumber = "0",
                 AccountName = incomeSummaryName,
-                Debit = expenseRows.Sum(r => r.NetBalance),
+                Debit = totalExpenses,
                 Credit = 0m,
             });
+
             foreach (var r in expenseRows)
             {
                 group2.Lines.Add(new ClosingJournalLineApiResponse
@@ -78,17 +95,22 @@ public class JournalService : IJournalService
         }
 
         // BLOCK 3: Closing Income Summary to Retained Earnings
-        if (incomeStatement.NetIncome != 0)
-        {
-            var group3 = new ClosingJournalEntryGroupApiResponse { Description = "Closing Income Summary to Retained Earnings" };
+        var netIncome = totalIncome - totalExpenses;
 
-            if (incomeStatement.NetIncome > 0)
+        if (netIncome != 0)
+        {
+            var group3 = new ClosingJournalEntryGroupApiResponse
+            {
+                Description = "Closing Income Summary to Retained Earnings"
+            };
+
+            if (netIncome > 0)
             {
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
                     ReferenceNumber = "0",
                     AccountName = incomeSummaryName,
-                    Debit = incomeStatement.NetIncome,
+                    Debit = netIncome,
                     Credit = 0m,
                 });
                 group3.Lines.Add(new ClosingJournalLineApiResponse
@@ -96,12 +118,12 @@ public class JournalService : IJournalService
                     ReferenceNumber = "0",
                     AccountName = reAccountName,
                     Debit = 0m,
-                    Credit = incomeStatement.NetIncome,
+                    Credit = netIncome,
                 });
             }
             else
             {
-                var netLoss = Math.Abs(incomeStatement.NetIncome);
+                var netLoss = Math.Abs(netIncome);
                 group3.Lines.Add(new ClosingJournalLineApiResponse
                 {
                     ReferenceNumber = "0",
