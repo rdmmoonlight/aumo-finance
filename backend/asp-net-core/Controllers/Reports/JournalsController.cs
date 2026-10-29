@@ -1,9 +1,3 @@
-// <copyright file="JournalsController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace AumoBackend.Controllers.Reports;
-
 using System;
 using System.Linq;
 using System.Security.Claims;
@@ -11,21 +5,24 @@ using System.Threading.Tasks;
 using AumoBackend.Data;
 using AumoBackend.Helpers;
 using AumoBackend.Services;
+using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+namespace AumoBackend.Controllers.Reports;
+
+
 [ApiController]
 [Route("/reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class JournalController : ControllerBase
 {
     private readonly AppDbContext db;
-    private readonly IJournalService journalService;
+    private readonly IJournalsService journalService;
     private readonly IFinancialReportService reportService;
 
-    public JournalController(AppDbContext db, IJournalService journalService, IFinancialReportService reportService)
+    public JournalController(AppDbContext db, IJournalsService journalService, IFinancialReportService reportService)
     {
         this.db = db;
         this.journalService = journalService;
@@ -47,8 +44,6 @@ public class JournalController : ControllerBase
 
         var selectedPeriod = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
 
-        // FIX 1: Ubah dari NotFound(404) menjadi Ok(200) agar RTK Query Frontend
-        // bisa membaca payload { selectedPeriodName = null } dengan wajar tanpa melempar isError.
         if (selectedPeriod == null)
         {
             return this.Ok(new
@@ -74,7 +69,6 @@ public class JournalController : ControllerBase
                      && g.EntryDate <= endUtc)
             .ToListAsync();
 
-        // 1 baris GeneralJournal = 1 baris jurnal; kelompokkan per JournalEntryId menjadi header + lines.
         var entries = rows
             .GroupBy(g => g.JournalEntryId)
             .Select(grp => new { Header = grp.First(), Lines = grp })
@@ -152,7 +146,6 @@ public class JournalController : ControllerBase
                      && g.EntryDate <= endUtc)
             .ToListAsync();
 
-        // 1 baris GeneralJournal = 1 baris jurnal; kelompokkan per JournalEntryId menjadi header + lines.
         var entries = rows
             .GroupBy(g => g.JournalEntryId)
             .Select(grp => new { Header = grp.First(), Lines = grp })
@@ -201,7 +194,6 @@ public class JournalController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        // id = JournalEntryId (id kelompok jurnal)
         var rows = await this.db.GeneralJournals
             .Where(g => g.JournalEntryId == id && g.UserId == userId && g.JournalType == "Adjusting")
             .ToListAsync();
@@ -250,7 +242,9 @@ public class JournalController : ControllerBase
         }
 
         var groups = await this.journalService.BuildClosingJournalGroupsAsync(this.db, userId, period, this.reportService);
-        var rows = await BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+
+        var rows = await this.reportService.BuildTrialBalancesRowsAsync(this.db, userId, period, true);
+
         var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
         var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
 

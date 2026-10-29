@@ -1,8 +1,4 @@
-// <copyright file="FinancialStatementsController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace AumoBackend.Controllers.Reports;
+#if !BUILD_WORKSHEET_ONLY
 
 using System;
 using System.Collections.Generic;
@@ -14,13 +10,15 @@ using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services;
+using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+
+namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
 [Route("/reports")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class FinancialStatementsController : ControllerBase
 {
     private readonly AppDbContext db;
@@ -60,7 +58,8 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var rows = await BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+        // PERBAIKAN CS0103: Panggil melalui reportService
+        var rows = await this.reportService.BuildTrialBalancesRowsAsync(this.db, userId, period, true);
         var statementData = this.reportService.BuildIncomeStatement(rows, period);
 
         return this.Ok(new
@@ -163,7 +162,8 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var rows = await BuildTrialBalanceRowsAsync(this.db, userId, period, true);
+        // PERBAIKAN CS0103: Panggil melalui reportService
+        var rows = await this.reportService.BuildTrialBalancesRowsAsync(this.db, userId, period, true);
         var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
 
         var cashRows = rows.Where(r => r.Role == "CashAndEquivalents").ToList();

@@ -6,7 +6,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
 
-data class TrialBalanceRow(
+data class TrialBalancesRow(
     val accountId: Int,
     val referenceNumber: Int,
     val accountName: String,
@@ -27,7 +27,7 @@ data class TrialBalanceReport(
     val totalDebit: Double,
     val totalCredit: Double,
     val isBalanced: Boolean,
-    val rows: List<TrialBalanceRow>,
+    val rows: List<TrialBalancesRow>,
 )
 
 class TrialBalanceApi(private val client: HttpClient = ApiClient.client) {

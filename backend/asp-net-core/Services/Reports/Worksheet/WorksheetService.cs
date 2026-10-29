@@ -10,12 +10,12 @@ using Microsoft.EntityFrameworkCore;
 public class WorksheetService : IWorksheetService
 {
     private readonly AppDbContext _db;
-    private readonly ITrialBalanceService _trialBalanceService;
+    private readonly ITrialBalancesService _trialBalancesService;
 
-    public WorksheetService(AppDbContext db, ITrialBalanceService trialBalanceService)
+    public WorksheetService(AppDbContext db, ITrialBalancesService trialBalancesService)
     {
         _db = db;
-        _trialBalanceService = trialBalanceService;
+        _trialBalancesService = trialBalancesService;
     }
 
     public async Task<WorksheetResult> GetWorksheetAsync(Guid userId)
@@ -26,8 +26,8 @@ public class WorksheetService : IWorksheetService
             return new WorksheetResult { HasPeriodSelected = false };
         }
 
-        var unadjusted = await _trialBalanceService.BuildTrialBalanceRowsAsync(userId, period, false, "unadjusted");
-        var adjusted = await _trialBalanceService.BuildTrialBalanceRowsAsync(userId, period, true, "adjusted");
+        var unadjusted = await _trialBalancesService.BuildTrialBalancesRowsAsync(userId, period, false, "unadjusted");
+        var adjusted = await _trialBalancesService.BuildTrialBalancesRowsAsync(userId, period, true, "adjusted");
 
         var accounts = await _db.ChartOfAccounts
             .AsNoTracking()

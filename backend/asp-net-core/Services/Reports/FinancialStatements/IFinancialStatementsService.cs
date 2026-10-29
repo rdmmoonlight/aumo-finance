@@ -1,4 +1,1 @@
-// <copyright file="IFinancialStatementsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
+#if !BUILD_WORKSHEET_ONLY

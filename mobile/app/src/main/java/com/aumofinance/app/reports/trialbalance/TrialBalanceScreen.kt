@@ -41,7 +41,7 @@ fun TrialBalanceScreen(
             )
 
             LazyColumn(modifier = Modifier.weight(1f).padding(top = AumoDimens.SpacingSmall)) {
-                items(report?.rows ?: emptyList()) { row -> TrialBalanceRowItem(row) }
+                items(report?.rows ?: emptyList()) { row -> TrialBalancesRowItem(row) }
             }
 
             if (report != null) {
@@ -67,7 +67,7 @@ fun TrialBalanceScreen(
 }
 
 @Composable
-private fun TrialBalanceRowItem(row: TrialBalanceRow) {
+private fun TrialBalancesRowItem(row: TrialBalancesRow) {
     Row(modifier = Modifier.fillMaxWidth().padding(vertical = AumoDimens.SpacingSmall)) {
         Text(
             text = "${row.referenceNumber} - ${row.accountName}",

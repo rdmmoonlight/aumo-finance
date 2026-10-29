@@ -12,19 +12,19 @@ namespace AumoBackend.Controllers.Reports;
 [ApiController]
 [Route("reports/trial-balance")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-public class TrialBalanceController : ControllerBase
+public class TrialBalancesController : ControllerBase
 {
     private readonly AppDbContext _db;
-    private readonly ITrialBalanceService _trialBalanceService;
-    private readonly ILogger<TrialBalanceController> _logger;
+    private readonly ITrialBalancesService _trialBalancesService;
+    private readonly ILogger<TrialBalancesController> _logger;
 
-    public TrialBalanceController(
+    public TrialBalancesController(
         AppDbContext db,
-        ITrialBalanceService trialBalanceService,
-        ILogger<TrialBalanceController> logger)
+        ITrialBalancesService trialBalancesService,
+        ILogger<TrialBalancesController> logger)
     {
         _db = db;
-        _trialBalanceService = trialBalanceService;
+        _trialBalancesService = trialBalancesService;
         _logger = logger;
     }
 
@@ -74,7 +74,7 @@ public class TrialBalanceController : ControllerBase
             });
         }
 
-        var rows = await _trialBalanceService.BuildTrialBalanceRowsAsync(
+        var rows = await _trialBalancesService.BuildTrialBalancesRowsAsync(
             userId,
             period,
             includeAdjusting: reportType != "unadjusted",
@@ -84,7 +84,7 @@ public class TrialBalanceController : ControllerBase
         // menggagalkan laporan yang sudah berhasil dihitung.
         try
         {
-            await _trialBalanceService.SaveSnapshotAsync(reportType, userId, period, rows);
+            await _trialBalancesService.SaveSnapshotAsync(reportType, userId, period, rows);
         }
         catch (Exception ex)
         {

@@ -8,7 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-public class TrialBalanceRow
+public class TrialBalancesRow
 {
     public int AccountId { get; set; }
 
@@ -33,7 +33,7 @@ public class TrialBalanceViewModel
 {
     public string Title { get; set; } = string.Empty;
 
-    public List<TrialBalanceRow> Rows { get; set; } = new();
+    public List<TrialBalancesRow> Rows { get; set; } = new();
 
     public decimal TotalDebit => this.Rows.Sum(r => r.Debit);
 
