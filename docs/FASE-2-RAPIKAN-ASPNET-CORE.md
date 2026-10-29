@@ -47,7 +47,7 @@ Lingkup: `backend/asp-net-core` (±12.450 baris C# di luar migrasi). Perilaku AP
 
 Tujuan: mengurangi kebisingan sebelum perubahan struktur.
 
-- [ ] Hapus `fix-build.js`, `fix-build-step2.js`, `fix-build-v2.js` sampai `v5.js`, `fix-build-final.js` (pastikan tidak dirujuk `build.ninja` atau workflow).
+- [x] Hapus `fix-build.js`, `fix-build-step2.js`, `fix-build-v2.js` sampai `v5.js`, `fix-build-final.js` (pastikan tidak dirujuk `build.ninja` atau workflow).
 - [ ] Ganti header `PlaceholderCompany` (atau hapus header; atur lewat `.editorconfig`/`stylecop` bila dipakai).
 - [ ] Tinjau `#pragma warning disable CA1725`; perbaiki penamaan parameter atau pertahankan dengan alasan tertulis.
 - [ ] Pindahkan `PeriodLock` dari `Models/ChartOfAccountsModel.cs` ke berkas sendiri (belum mengubah isi).
