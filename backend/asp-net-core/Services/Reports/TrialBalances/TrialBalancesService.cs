@@ -14,9 +14,9 @@ public class TrialBalancesService : ITrialBalancesService
     private const string PostClosing = "post-closing";
 
     private readonly AppDbContext _db;
-    private readonly NeondbContext _neonDb;
+    private readonly AppDbContext _neonDb;
 
-    public TrialBalancesService(AppDbContext db, NeondbContext neonDb)
+    public TrialBalancesService(AppDbContext db, AppDbContext neonDb)
     {
         _db = db;
         _neonDb = neonDb;
