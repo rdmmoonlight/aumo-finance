@@ -4,7 +4,6 @@
 
 namespace AumoBackend.Services;
 
-using AumoBackend.Controllers.Reports;
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
