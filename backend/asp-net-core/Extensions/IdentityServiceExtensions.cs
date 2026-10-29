@@ -11,7 +11,7 @@ public static class IdentityServiceExtensions
 {
     public static IServiceCollection AddIdentityAndAuthServices(this IServiceCollection services, IConfiguration configuration)
     {
-        // 1. Registrasi ASP.NET Core Identity (Default berbasis Cookie)
+        // 1. Registrasi ASP.NET Core Identity
         services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
         {
             options.Password.RequireDigit = true;
@@ -21,47 +21,45 @@ public static class IdentityServiceExtensions
         .AddEntityFrameworkStores<AppDbContext>()
         .AddDefaultTokenProviders();
 
-        // 2. Konfigurasi Autentikasi Dual (Cookie untuk Web + JwtBearer untuk Mobile)
-        var authBuilder = services.AddAuthentication(options =>
+        // 2. Ambil Config JWT dengan Fallback Key agar tidak crash/dilewati jika Envar kosong
+        var jwtKey = configuration["Jwt:Key"] 
+            ?? "DEFAULT_SUPER_SECRET_KEY_FOR_AUMO_FINANCE_BEARER_TOKEN_32_CHARS_MIN!";
+        var issuer = configuration["Jwt:Issuer"] ?? "AumoBackend";
+        var audience = configuration["Jwt:Audience"] ?? "AumoClients";
+
+        // 3. Konfigurasi Authentication Schemes (Cookie default + JwtBearer)
+        services.AddAuthentication(options =>
         {
-            // 🔑 PENTING: Default scheme diatur ke Cookie (Identity.Application)
-            // Agar request Web tidak error melacak skema 'Bearer'
+            // Set Cookie sebagai skema default untuk browser/web
             options.DefaultAuthenticateScheme = IdentityConstants.ApplicationScheme;
             options.DefaultChallengeScheme = IdentityConstants.ApplicationScheme;
             options.DefaultSignInScheme = IdentityConstants.ApplicationScheme;
+        })
+        // 🔑 DAFTARKAN HANDLER 'Bearer' SECARA EKSPLISIT DAN SELALU DILAKUKAN
+        .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+        {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = issuer,
+                ValidAudience = audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            };
         });
 
-        // 3. Tambahkan Handler JWT Bearer Khusus untuk Mobile Client
-        var jwtKey = configuration["Jwt:Key"];
-        var issuer = configuration["Jwt:Issuer"];
-        var audience = configuration["Jwt:Audience"];
-
-        if (!string.IsNullOrWhiteSpace(jwtKey))
-        {
-            authBuilder.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
-            {
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
-                    ValidIssuer = issuer,
-                    ValidAudience = audience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                };
-            });
-        }
-
-        // 4. Konfigurasi Cookie Cookie HTTP-Only untuk Web Client
+        // 4. Konfigurasi Cookie HTTP-Only untuk Web Client
         services.ConfigureApplicationCookie(options =>
         {
             options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.None; // Wajib jika Web SPA & API beda origin/domain
-            options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Wajib HTTPS di Production
+            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             options.Events.OnRedirectToLogin = context =>
             {
-                // Mencegah redirect HTML 302 saat request API Web tidak terautentikasi
                 context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                 return Task.CompletedTask;
             };
