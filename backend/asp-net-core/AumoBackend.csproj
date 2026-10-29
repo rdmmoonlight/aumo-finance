@@ -18,7 +18,7 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <OpenApiGenerateXmlComments>false</OpenApiGenerateXmlComments>
     <NoWarn>$(NoWarn);NU1903;CS1030</NoWarn>
-    <DefaultItemExcludes>$(DefaultItemExcludes);Controllers/Reports/FinancialStatementsController.cs;Services/Reports/FinancialStatements/**/*.cs;Controllers/Reports/JournalsController.cs;Services/Reports/Journals/**/*.cs</DefaultItemExcludes>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Controllers/Reports/FinancialStatementsController.cs;Services/Reports/FinancialStatements/**/*.cs;</DefaultItemExcludes>
   </PropertyGroup>
 
   <!-- Isolasi Build: Exclude modul Financial Statements & Journals yang belum siap -->

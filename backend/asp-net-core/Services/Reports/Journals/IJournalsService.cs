@@ -1,8 +1,9 @@
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
+
 namespace AumoBackend.Services.Reports.Journals;
 
 public interface IJournalsService
 {
-    Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(
-        Guid userId,
-        Period period);
+    Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(Guid userId, Period period);
 }
