@@ -1,5 +1,3 @@
-namespace AumoBackend.Services.Reports.TrialBalances;
-
 using System.Globalization;
 using System.Linq.Expressions;
 using AumoBackend.Data;
@@ -7,7 +5,9 @@ using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
-public class TrialBalancesService : ITrialBalanceService
+namespace AumoBackend.Services.Reports.TrialBalances;
+
+public class TrialBalancesService : ITrialBalancesService
 {
     private const string Unadjusted = "unadjusted";
     private const string Adjusted = "adjusted";
@@ -22,7 +22,7 @@ public class TrialBalancesService : ITrialBalanceService
         _neonDb = neonDb;
     }
 
-    public async Task<List<TrialBalanceRow>> BuildTrialBalanceRowsAsync(
+    public async Task<List<TrialBalancesRow>> BuildTrialBalancesRowsAsync(
         Guid userId,
         Period period,
         bool includeAdjusting = false,
@@ -64,7 +64,7 @@ public class TrialBalancesService : ITrialBalanceService
         return initialRe + netIncome;
     }
 
-    public async Task SaveSnapshotAsync(string reportType, Guid userId, Period period, IReadOnlyList<TrialBalanceRow> rows)
+    public async Task SaveSnapshotAsync(string reportType, Guid userId, Period period, IReadOnlyList<TrialBalancesRow> rows)
     {
         var type = NormalizeType(reportType);
         var periodId = period.Id;
@@ -124,21 +124,21 @@ public class TrialBalancesService : ITrialBalanceService
 
     public async Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(Guid userId, Period period)
     {
-        var rows = await BuildTrialBalanceRowsAsync(userId, period, false, Unadjusted);
+        var rows = await BuildTrialBalancesRowsAsync(userId, period, false, Unadjusted);
         await SaveSnapshotAsync(Unadjusted, userId, period, rows);
         return ToSnapshotRows<TrialBalanceUnadjustedRow>(userId, period, rows);
     }
 
     public async Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(Guid userId, Period period)
     {
-        var rows = await BuildTrialBalanceRowsAsync(userId, period, true, Adjusted);
+        var rows = await BuildTrialBalancesRowsAsync(userId, period, true, Adjusted);
         await SaveSnapshotAsync(Adjusted, userId, period, rows);
         return ToSnapshotRows<TrialBalanceAdjustedRow>(userId, period, rows);
     }
 
     public async Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(Guid userId, Period period)
     {
-        var rows = await BuildTrialBalanceRowsAsync(userId, period, true, PostClosing);
+        var rows = await BuildTrialBalancesRowsAsync(userId, period, true, PostClosing);
         await SaveSnapshotAsync(PostClosing, userId, period, rows);
         return ToSnapshotRows<TrialBalancePostClosingRow>(userId, period, rows);
     }
@@ -146,7 +146,7 @@ public class TrialBalancesService : ITrialBalanceService
     // ------------------------------------------------------------------
     // Perhitungan saldo dari jurnal umum
     // ------------------------------------------------------------------
-    private async Task<List<TrialBalanceRow>> ComputeRowsAsync(
+    private async Task<List<TrialBalancesRow>> ComputeRowsAsync(
         Guid userId,
         Period period,
         bool includeAdjustingLines,
@@ -178,7 +178,7 @@ public class TrialBalancesService : ITrialBalanceService
             .GroupBy(l => l.AccountId)
             .ToDictionary(g => g.Key, g => (Debit: g.Sum(x => x.Debit), Credit: g.Sum(x => x.Credit)));
 
-        var rows = new List<TrialBalanceRow>();
+        var rows = new List<TrialBalancesRow>();
         foreach (var account in accounts)
         {
             var isPermanent = !string.IsNullOrEmpty(account.Type) && AccountClassificationHelper.IsPermanent(account.Type);
@@ -201,7 +201,7 @@ public class TrialBalancesService : ITrialBalanceService
             var debit = totals.Debit >= totals.Credit ? totals.Debit - totals.Credit : 0m;
             var credit = totals.Debit < totals.Credit ? totals.Credit - totals.Debit : 0m;
 
-            rows.Add(new TrialBalanceRow
+            rows.Add(new TrialBalancesRow
             {
                 AccountId = account.Id,
                 ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
@@ -220,7 +220,7 @@ public class TrialBalancesService : ITrialBalanceService
 
     // Pasca-penutupan: akun temporer sudah dikeluarkan; saldo Laba Ditahan harus memuat
     // efek Closing (saldo awal + laba bersih), kalau tidak debit dan kredit tidak seimbang.
-    private async Task ApplyClosingToRetainedEarningsAsync(Guid userId, Period period, List<TrialBalanceRow> rows)
+    private async Task ApplyClosingToRetainedEarningsAsync(Guid userId, Period period, List<TrialBalancesRow> rows)
     {
         var endingRe = await ComputeRetainedEarningsEndingAsync(userId, period);
 
@@ -243,7 +243,7 @@ public class TrialBalancesService : ITrialBalanceService
                 return;
             }
 
-            reRow = new TrialBalanceRow
+            reRow = new TrialBalancesRow
             {
                 AccountId = account.Id,
                 ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
@@ -266,7 +266,7 @@ public class TrialBalancesService : ITrialBalanceService
     // ------------------------------------------------------------------
     private readonly record struct SnapshotLine(string Number, string Name, decimal Debit, decimal Credit, bool IsTotal);
 
-    private static List<SnapshotLine> BuildSnapshotLines(IReadOnlyList<TrialBalanceRow> rows)
+    private static List<SnapshotLine> BuildSnapshotLines(IReadOnlyList<TrialBalancesRow> rows)
     {
         var lines = rows
             .Select(r => new SnapshotLine(
@@ -287,7 +287,7 @@ public class TrialBalancesService : ITrialBalanceService
         return lines;
     }
 
-    private static List<T> ToSnapshotRows<T>(Guid userId, Period period, IReadOnlyList<TrialBalanceRow> rows)
+    private static List<T> ToSnapshotRows<T>(Guid userId, Period period, IReadOnlyList<TrialBalancesRow> rows)
         where T : TrialBalancesRow, new()
     {
         var now = DateTimeOffset.UtcNow;

@@ -1,28 +1,26 @@
-// <copyright file="FinancialStatementsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace AumoBackend.Services;
+#if !BUILD_WORKSHEET_ONLY
 
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
-using TrialBalanceRow = AumoBackend.DTOs.Reports.TrialBalanceRow;
+using AumoBackend.Services.Reports.TrialBalances;
 
-public interface IFinancialReportService
+namespace AumoBackend.Services;
+
+public interface IFinancialStatementsService
 {
-    IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period);
+    IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalancesRow> rows, Period period);
 
     Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period);
 
     Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing);
 }
 
-public class FinancialReportService : IFinancialReportService
+public class FinancialStatementsServiceService : IFinancialStatementsService
 {
-    public IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalanceRow> rows, Period period)
+    public IncomeStatementApiResponse BuildIncomeStatement(List<TrialBalancesRow> rows, Period period)
     {
-        IncomeStatementLineApiResponse ToLine(TrialBalanceRow r) => new()
+        IncomeStatementLineApiResponse ToLine(TrialBalancesRow r) => new()
         {
             ReferenceNumber = r.ReferenceNumber ?? string.Empty,
             AccountName = r.AccountName,
@@ -61,7 +59,7 @@ public class FinancialReportService : IFinancialReportService
 
     public async Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(AppDbContext db, Guid userId, Period period)
     {
-        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, true);
+        var rows = await BuildTrialBalancesRowsAsync(db, userId, period, true);
         var incomeStatement = this.BuildIncomeStatement(rows, period);
         var reAccount = rows.Find(r => r.Role == "RetainedEarnings");
 
@@ -84,10 +82,10 @@ public class FinancialReportService : IFinancialReportService
 
     public async Task<StatementOfFinancialPositionApiResponse> BuildSofpAsync(AppDbContext db, Guid userId, Period period, bool isPostClosing)
     {
-        var rows = await BuildTrialBalanceRowsAsync(db, userId, period, true);
+        var rows = await BuildTrialBalancesRowsAsync(db, userId, period, true);
         var re = await this.BuildRetainedEarningsAsync(db, userId, period);
 
-        FinancialPositionLineApiResponse ToLine(TrialBalanceRow r) => new()
+        FinancialPositionLineApiResponse ToLine(TrialBalancesRow r) => new()
         {
             ReferenceNumber = r.ReferenceNumber ?? string.Empty,
             AccountName = r.AccountName ?? string.Empty,

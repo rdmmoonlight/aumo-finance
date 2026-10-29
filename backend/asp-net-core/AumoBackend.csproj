@@ -6,16 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>3b80a545-4808-45e1-aed8-8b28c45e72fe</UserSecretsId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-
-    <!-- Matikan Analisis Ketat & Peringatan Code Style saat Build -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
-
-    <!-- Property Deteksi Platform Lintas OS untuk Dynamic Library (.so / .dylib / .dll) -->
     <RustBuildMode Condition="'$(Configuration)' == 'Release'">--release</RustBuildMode>
     <RustTargetDir Condition="'$(Configuration)' == 'Release'">release</RustTargetDir>
     <RustTargetDir Condition="'$(Configuration)' != 'Release'">debug</RustTargetDir>
-
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))">aumo_core.dll</RustLibName>
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))">libaumo_core.dylib</RustLibName>
     <RustLibName Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">libaumo_core.so</RustLibName>
@@ -23,8 +18,10 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <OpenApiGenerateXmlComments>false</OpenApiGenerateXmlComments>
     <NoWarn>$(NoWarn);NU1903;CS1030</NoWarn>
+    <DefaultItemExcludes>$(DefaultItemExcludes);Controllers/Reports/FinancialStatementsController.cs;Services/Reports/FinancialStatements/**/*.cs;Controllers/Reports/JournalsController.cs;Services/Reports/Journals/**/*.cs</DefaultItemExcludes>
   </PropertyGroup>
 
+  <!-- Isolasi Build: Exclude modul Financial Statements & Journals yang belum siap -->
   <ItemGroup>
     <!-- Microsoft / EF Core / Identity Package -->
     <PackageReference Include="AWSSDK.Core" Version="4.0.3.3" />
