@@ -1,4 +1,4 @@
-name: C#, Rust & TypeScript Quality, Formatting & Test Workflow
+name: Quality & Formatting Workflow
 
 on:
   workflow_dispatch: {}
@@ -11,149 +11,43 @@ permissions:
   contents: write
 
 jobs:
-  lint-analyze-test:
+  lint-format-frontend:
     runs-on: ubuntu-latest
 
     steps:
-      # 0. JEDA / SLEEP 60 DETIK
-      - name: Sleep for 60 seconds
-        run: sleep 60
-
       # 1. CHECKOUT REPOSITORY
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      # 2. SETUP ENVIRONMENT (.NET, RUST, PNPM, & NODE.JS)
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      # Mengaktifkan Problem Matcher agar error/warning .NET otomatis memunculkan penanda (annotation) di UI GitHub
-      - name: Register .NET Problem Matcher
-        run: echo "::add-matcher::.github/workflows/csc.json" || true
-
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - name: Rust Cache
-        uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: "backend/axum -> target"
-
+      # 2. SETUP ENVIRONMENT (PNPM & NODE.JS)
       - name: Install pnpm
         uses: pnpm/action-setup@v4
         with:
           version: latest
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      # 3. SETUP BIOME CLI
+      - name: Setup Biome
+        uses: biomejs/setup-biome@v2
         with:
-          node-version: '24'
-          cache: 'pnpm'
-          cache-dependency-path: |
-            frontend/pnpm-lock.yaml
-            analog/pnpm-lock.yaml
+          version: latest
 
-      # Inisialisasi/Bersihkan file log warning di root repository
-      - name: Initialize Warning Log File
-        run: |
-          echo "=================================================" > warning.txt
-          echo "   WORKFLOW WARNING LOG ($(date -u))" >> warning.txt
-          echo "=================================================" >> warning.txt
-          echo "" >> warning.txt
-
-      # 3. BACKEND (.NET C#)
-      - name: Restore .NET Dependencies
-        run: dotnet restore
-        working-directory: backend/asp-net-core
-
-      # Merapikan whitespace & style aman
-      - name: Auto-Format C# Code (Whitespace & Basic Style)
-        run: |
-          dotnet format whitespace || true
-          dotnet format style --severity error || true
-        working-directory: backend/asp-net-core
-
-      # Build & tangkap SELURUH baris warning .NET ke warning.txt
-      - name: Build & Typecheck (.NET)
-        run: |
-          dotnet build --configuration Release /p:TreatWarningsAsErrors=false /p:ReportAnalyzer=true > dotnet_build.log 2>&1 || true
-          cat dotnet_build.log
-          
-          echo "--- [.NET BUILD WARNINGS] ---" >> ../../warning.txt
-          # Mengambil baris ringkasan "succeeded with X warning(s)" dan baris individual "warning CS/CA/etc."
-          grep -E "warning|succeeded with|Build succeeded" dotnet_build.log >> ../../warning.txt || echo "Tidak ada warning .NET." >> ../../warning.txt
-          echo "" >> ../../warning.txt
-        working-directory: backend/asp-net-core
-
-      # 4. BACKEND RUST (AXUM)
-      - name: Auto-Format Rust Code (Axum)
-        run: cargo fmt
-        working-directory: backend/axum
-
-      - name: Run Clippy & Build (Axum)
-        run: |
-          cargo clippy -- -D warnings > clippy.log 2>&1 || true
-          cat clippy.log
-          
-          echo "--- [RUST AXUM CLIPPY WARNINGS] ---" >> ../../warning.txt
-          grep -i "warning" clippy.log >> ../../warning.txt || echo "Tidak ada warning Rust Clippy." >> ../../warning.txt
-          echo "" >> ../../warning.txt
-          
-          cargo build --release
-        working-directory: backend/axum
-
-      # 5. FRONTEND (Next.js)
+      # 4. INSTALL DEPENDENCIES & RUN BIOME
       - name: Install Frontend Dependencies
         run: pnpm install
         working-directory: frontend
 
-      - name: Typecheck (Frontend)
-        run: |
-          pnpm exec tsc --noEmit --incremental false > tsc_frontend.log 2>&1 || true
-          cat tsc_frontend.log
-          
-          echo "--- [FRONTEND TYPECHECK WARNINGS/ERRORS] ---" >> ../warning.txt
-          cat tsc_frontend.log >> ../warning.txt
-          echo "" >> ../warning.txt
+      - name: Run Biome Check & Format (Frontend)
+        run: biome check --write .
         working-directory: frontend
 
-      - name: Run ESLint Auto-Fix (Frontend)
-        run: pnpm exec eslint --fix . || true
-        working-directory: frontend
-
-      - name: Run Prettier Check/Write (Frontend)
-        run: pnpm exec prettier --write .
-        working-directory: frontend
-
-      # 6. ANALOG FRAMEWORK SERVICE (analog)
-      - name: Install Analog Dependencies
-        run: pnpm install
-        working-directory: analog
-
-      - name: Run ESLint Auto-Fix (Analog)
-        run: pnpm exec eslint --fix . || true
-        working-directory: analog
-
-      - name: Typecheck & Build (Analog)
-        run: pnpm run build || true
-        working-directory: analog
-
-      - name: Run Prettier (Analog)
-        run: pnpm exec prettier --write .
-        working-directory: analog
-
-      # 7. COMMIT AUTO-FORMATTED CHANGES, UPDATED LOCKFILES & WARNING LOG
-      - name: Commit Formatted Changes & Warning Logs
+      # 5. COMMIT CHANGES
+      - name: Commit Formatted Changes
         id: auto_commit
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "style: auto-correct formatting, sync lockfiles & update warning logs [skip ci]"
+          commit_message: "style: auto-correct formatting & linting with Biome [skip ci]"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          file_pattern: "backend/* frontend/* analog/* warning.txt"
+          file_pattern: "frontend/*"
