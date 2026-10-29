@@ -1,9 +1,16 @@
+using System.Text.Json.Serialization;
+
 namespace AumoBackend.DTOs.Reports;
+
+// ==========================================
+// RESPONSE DTOs
+// ==========================================
 
 public class GeneralJournalResponseDto
 {
     public int Id { get; set; }
 
+    [JsonIgnore]
     public int JournalEntryId
     {
         get => this.Id;
@@ -41,6 +48,7 @@ public class GeneralJournalLineDto
 {
     public int Id { get; set; }
 
+    [JsonIgnore]
     public int LineId
     {
         get => this.Id;
@@ -49,8 +57,13 @@ public class GeneralJournalLineDto
 
     public int AccountId { get; set; }
 
+    public string AccountName { get; set; } = string.Empty;
+
+    public string ReferenceNumber { get; set; } = "0";
+
     public string? LineDescription { get; set; }
 
+    [JsonIgnore]
     public string? Description
     {
         get => this.LineDescription;
@@ -86,6 +99,10 @@ public class FlatGeneralJournalResponseDto
 
     public int AccountId { get; set; }
 
+    public string AccountName { get; set; } = string.Empty;
+
+    public string ReferenceNumber { get; set; } = "0";
+
     public string? LineDescription { get; set; }
 
     public decimal Debit { get; set; }
@@ -98,6 +115,7 @@ public class FlatGeneralJournalResponseDto
 // ==========================================
 // CLOSING JOURNAL DTOs
 // ==========================================
+
 public class ClosingJournalEntryGroupApiResponse
 {
     public string Title { get; set; } = string.Empty;
@@ -113,6 +131,8 @@ public class ClosingJournalEntryGroupApiResponse
 
 public class ClosingJournalLineApiResponse
 {
+    public int AccountId { get; set; }
+
     public string ReferenceNumber { get; set; } = "0";
 
     public string AccountName { get; set; } = string.Empty;
@@ -128,7 +148,7 @@ public class ClosingJournalLineApiResponse
 
 public class CreateGeneralJournalRequest
 {
-    public string JournalType { get; set; } = string.Empty;
+    public string JournalType { get; set; } = "General";
 
     public DateTime EntryDate { get; set; }
 
@@ -147,6 +167,7 @@ public class CreateGeneralJournalLineRequest
 
     public string? LineDescription { get; set; }
 
+    [JsonIgnore]
     public string? Description
     {
         get => this.LineDescription;

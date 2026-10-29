@@ -1,32 +1,25 @@
-using System;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using AumoBackend.Data;
 using AumoBackend.Helpers;
-using AumoBackend.Services;
-using AumoBackend.Services.Reports.TrialBalances;
+using AumoBackend.Services.Reports.Journals;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Controllers.Reports;
 
-
 [ApiController]
 [Route("/reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-public class JournalController : ControllerBase
+public class JournalsController : ControllerBase
 {
     private readonly AppDbContext db;
     private readonly IJournalsService journalService;
-    private readonly IFinancialReportService reportService;
 
-    public JournalController(AppDbContext db, IJournalsService journalService, IFinancialReportService reportService)
+    public JournalsController(AppDbContext db, IJournalsService journalsService)
     {
         this.db = db;
-        this.journalService = journalService;
-        this.reportService = reportService;
+        this.journalService = journalsService;
     }
 
     // ==========================================
@@ -237,40 +230,57 @@ public class JournalController : ControllerBase
                 hasPeriodSelected = false,
                 message = "No accounting period selected.",
                 selectedPeriodName = (string?)null,
-                closingJournal = (object?)null,
+                closingJournal = Array.Empty<object>(),
             });
         }
 
-        var groups = await this.journalService.BuildClosingJournalGroupsAsync(this.db, userId, period, this.reportService);
+        var startUtc = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);
+        var endUtc = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
-        var rows = await this.reportService.BuildTrialBalancesRowsAsync(this.db, userId, period, true);
+        var rows = await this.db.GeneralJournals
+            .AsNoTracking()
+            .Include(g => g.Account)
+            .Where(g => g.UserId == userId
+                     && g.JournalType == "Closing"
+                     && g.EntryDate >= startUtc
+                     && g.EntryDate <= endUtc)
+            .ToListAsync();
 
-        var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
-        var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
+        var closingJournal = rows
+            .GroupBy(g => g.JournalEntryId)
+            .Select(grp => new { Header = grp.First(), Lines = grp })
+            .OrderBy(x => x.Header.EntryDate)
+            .ThenBy(x => x.Header.CreatedAt)
+            .ThenBy(x => x.Header.JournalEntryId)
+            .Select(x => new
+            {
+                Id = x.Header.JournalEntryId,
+                x.Header.TransactionNumber,
+                x.Header.JournalType,
+                EntryDate = x.Header.EntryDate.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
+                x.Header.CreatedAt,
+                x.Header.UpdatedAt,
+                lines = x.Lines.OrderBy(l => l.LineOrder).Select(l => new
+                {
+                    Id = l.LineId,
+                    l.AccountId,
+                    AccountName = l.Account != null ? l.Account.AccountName : "Unknown",
+                    ReferenceNumber = l.Account != null ? l.Account.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
+                    l.LineDescription,
+                    l.Debit,
+                    l.Credit,
+                    l.LineOrder
+                }).ToList(),
+            })
+            .ToList();
 
         return this.Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = period.PeriodName,
-            closingJournal = new
-            {
-                netIncome = incomeStatement.NetIncome,
-                retainedEarningsAccountName = reAccountName,
-                groups = groups.Select(g => new
-                {
-                    description = g.Description,
-                    totalDebit = g.TotalDebit,
-                    totalCredit = g.TotalCredit,
-                    lines = g.Lines.Select(l => new
-                    {
-                        referenceNumber = l.ReferenceNumber,
-                        accountName = l.AccountName,
-                        debit = l.Debit,
-                        credit = l.Credit
-                    })
-                })
-            },
+            isPeriodClosed = period.IsClosed,
+            closingJournal = closingJournal,
         });
     }
 

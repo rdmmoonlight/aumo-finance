@@ -203,7 +203,7 @@ public class TrialBalancesService : ITrialBalancesService
 
             rows.Add(new TrialBalancesRow
             {
-                AccountId = account.Id,
+                AccountId = new Guid(account.Id, 0, 0, new byte[8]),
                 ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
                 AccountName = account.AccountName,
                 Type = account.Type,
@@ -245,7 +245,7 @@ public class TrialBalancesService : ITrialBalancesService
 
             reRow = new TrialBalancesRow
             {
-                AccountId = account.Id,
+                AccountId = new Guid(account.Id, 0, 0, new byte[8]),
                 ReferenceNumber = account.ReferenceNumber.ToString(CultureInfo.InvariantCulture),
                 AccountName = account.AccountName,
                 Type = account.Type,
