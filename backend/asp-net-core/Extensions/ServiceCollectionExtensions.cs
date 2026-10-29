@@ -1,14 +1,10 @@
-using System.Text;
 using System.Threading.RateLimiting;
-using AumoBackend.Data;
-using AumoBackend.Models;
 using AumoBackend.Services;
 using AumoBackend.Services.Auth;
 using AumoBackend.Services.ChartOfAccounts;
 using AumoBackend.Services.Dashboard;
 using AumoBackend.Services.Health;
 using AumoBackend.Services.Home;
-using AumoBackend.Services.Identity;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Notifications;
 using AumoBackend.Services.Periods;
@@ -21,13 +17,8 @@ using AumoBackend.Services.Storage;
 using AumoBackend.Services.Tools;
 using Hangfire;
 using Hangfire.PostgreSql;
-using Microsoft.AspNetCore.Authentication.Google;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using StackExchange.Redis;
 
