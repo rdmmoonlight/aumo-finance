@@ -1,0 +1,32 @@
+name: Rust Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'native/rust/**' # sesuaikan path folder Rust
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'native/rust/**'
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Rust Toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust Build (sccache)
+        uses: mozilla-actions/sccache-action@v2
+
+      - name: Set Environment Variables
+        run: echo "RUSTC_WRAPPER=sccache" >> $env:GITHUB_ENV
+
+      - name: Build Rust Project
+        run: cargo build --release
