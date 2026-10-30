@@ -35,7 +35,7 @@ class TrialBalanceApi(private val client: HttpClient = ApiClient.client) {
     // atau "post-closing" (Retained Earnings sudah termasuk efek Closing,
     // walau baris Closing itu sendiri tidak pernah tersimpan sebagai entri).
     suspend fun getTrialBalance(type: String): HttpResponse =
-        client.get("/api/v1/reports/trial-balance") {
+        client.get("/api/v1/reports/trial-balances") {
             parameter("type", type)
         }
 }
