@@ -7,8 +7,9 @@ import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpResponse
 
 data class TrialBalancesRow(
-    val accountId: Int,
-    val referenceNumber: Int,
+    // Backend mengirim accountId sebagai Guid (string) dan nomor akun sebagai string.
+    val accountId: String,
+    val referenceNumber: String,
     val accountName: String,
     val type: String,
     val role: String,
