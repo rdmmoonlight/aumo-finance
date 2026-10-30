@@ -1,0 +1,62 @@
+# ==========================================
+# Rust / Cargo Output
+# ==========================================
+/target/
+**/*.rs.bk
+*.rs.bk
+
+# Cargo.lock wajib di-commit jika proyek ini berupa binary/application (bukan library).
+# Jika proyek ini murni library, hapus tanda komentar (#) pada baris di bawah:
+# Cargo.lock
+
+# ==========================================
+# Environment & Secrets (dotenvy, db, keys)
+# ==========================================
+# File variabel lingkungan lokal (koneksi PostgreSQL & Redis)
+.env
+.env.*
+!.env.example
+
+# Sertifikat / Kunci SSL (rustls / rustls-pki-types)
+*.pem
+*.crt
+*.key
+*.p12
+*.pfx
+
+# ==========================================
+# Logs & Tracing Output
+# ==========================================
+*.log
+/logs/
+
+# ==========================================
+# IDEs & Code Editors
+# ==========================================
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (CLion / RustRover)
+.idea/
+*.iml
+
+# Visual Studio / SubLime / Vim
+.vs/
+*.swp
+*.swo
+
+# ==========================================
+# Operating System Files
+# ==========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
