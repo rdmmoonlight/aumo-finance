@@ -1,7 +1,7 @@
 name: Rust Build
 
 on:
-   push:
+  push:
     branches: [ main ]
     paths:
       - 'backend/rust/**'
@@ -14,6 +14,10 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+
+    defaults:
+      run:
+        working-directory: backend/rust
 
     steps:
       - name: Checkout Repository
