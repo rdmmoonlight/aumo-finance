@@ -4,6 +4,7 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS dotnet-builder
 WORKDIR /src
 
+# Install dependensi dasar untuk kompilasi Rust
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
@@ -12,12 +13,17 @@ RUN apt-get update && apt-get install -y \
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
+# Copy source code backend & rust
 COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
-COPY backend/axum/ ./backend/axum/
+COPY backend/rust/ ./backend/rust/
 
 RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
 
 COPY backend/asp-net-core/ ./backend/asp-net-core/
+
+# Opsional: Jika Rust perlu di-build manual sebelum .NET, jalankan di sini:
+# RUN cd backend/rust && cargo build --release
+
 RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build
 
 # ==========================================
@@ -35,11 +41,11 @@ RUN pnpm install --frozen-lockfile --allow-build=unrs-resolver
 
 COPY frontend/ ./
 
-# Client ID Google bersifat publik dan harus tersedia saat build (SPA statis).
-# Render meneruskan env var ke build hanya jika dideklarasikan lewat ARG.
+# Environmental variables untuk Client-Side Build
 ARG PUBLIC_GOOGLE_CLIENT_ID
 ARG NEXT_PUBLIC__GOOGLE_CLIENT_ID
 ENV PUBLIC_GOOGLE_CLIENT_ID=${PUBLIC_GOOGLE_CLIENT_ID:-$NEXT_PUBLIC__GOOGLE_CLIENT_ID}
+
 RUN pnpm run build
 
 # ==========================================
