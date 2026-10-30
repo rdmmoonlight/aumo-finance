@@ -27,6 +27,25 @@ export interface AuthPageProps {
   onSuccess?: () => void;
 }
 
+// Helper untuk membaca pesan error secara aman dari `unknown`
+function getErrorMessage(err: unknown, fallbackMessage: string): string {
+  if (typeof err === "object" && err !== null) {
+    const errorObj = err as Record<string, unknown>;
+    if (
+      typeof errorObj.data === "object" &&
+      errorObj.data !== null &&
+      "message" in errorObj.data &&
+      typeof (errorObj.data as Record<string, unknown>).message === "string"
+    ) {
+      return (errorObj.data as { message: string }).message;
+    }
+    if ("message" in errorObj && typeof errorObj.message === "string") {
+      return errorObj.message;
+    }
+  }
+  return fallbackMessage;
+}
+
 // Disuntikkan saat build oleh Rsbuild (variabel berawalan PUBLIC_).
 export const GOOGLE_CLIENT_ID: string =
   import.meta.env.PUBLIC_GOOGLE_CLIENT_ID || "";
@@ -215,12 +234,8 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch (err: any) {
-      const msg =
-        err?.data?.message ||
-        err?.message ||
-        "Gagal terhubung ke server backend.";
-      setApiErr(msg);
+    } catch (err: unknown) {
+      setApiErr(getErrorMessage(err, "Gagal terhubung ke server backend."));
     }
   };
 
@@ -245,8 +260,8 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch (err: any) {
-      setApiErr(err?.data?.message || "Gagal verifikasi Google.");
+    } catch (err: unknown) {
+      setApiErr(getErrorMessage(err, "Gagal verifikasi Google."));
     }
   };
 
