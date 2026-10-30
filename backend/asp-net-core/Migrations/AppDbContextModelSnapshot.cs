@@ -25,6 +25,54 @@ namespace AumoBackend.Migrations
 
             modelBuilder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 
+            modelBuilder.Entity("AumoBackend.Models.AdjustedTrialBalance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<decimal>("CreditBalance")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<decimal>("DebitBalance")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<bool>("IsTotalRow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("PeriodId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id")
+                        .HasName("TrialBalanceAdjusted_pkey");
+
+                    b.ToTable("TrialBalanceAdjusted", (string)null);
+                });
+
             modelBuilder.Entity("AumoBackend.Models.ApplicationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -458,6 +506,54 @@ namespace AumoBackend.Migrations
                     b.ToTable("Periods");
                 });
 
+            modelBuilder.Entity("AumoBackend.Models.PostClosingTrialBalance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<decimal>("CreditBalance")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<decimal>("DebitBalance")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<bool>("IsTotalRow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("PeriodId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id")
+                        .HasName("TrialBalancePostClosing_pkey");
+
+                    b.ToTable("TrialBalancePostClosing", (string)null);
+                });
+
             modelBuilder.Entity("AumoBackend.Models.RecoveryCode", b =>
                 {
                     b.Property<Guid>("Id")
@@ -552,150 +648,6 @@ namespace AumoBackend.Migrations
                     b.ToTable("TransactionCounters");
                 });
 
-            modelBuilder.Entity("AumoBackend.Models.AdjustedTrialBalance", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<decimal>("CreditBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
-
-                    b.Property<decimal>("DebitBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
-
-                    b.Property<bool>("IsTotalRow")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("PeriodId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id")
-                        .HasName("TrialBalanceAdjusted_pkey");
-
-                    b.ToTable("TrialBalanceAdjusted", (string)null);
-                });
-
-            modelBuilder.Entity("AumoBackend.Models.PostClosingTrialBalance", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<decimal>("CreditBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
-
-                    b.Property<decimal>("DebitBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
-
-                    b.Property<bool>("IsTotalRow")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("PeriodId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id")
-                        .HasName("TrialBalancePostClosing_pkey");
-
-                    b.ToTable("TrialBalancePostClosing", (string)null);
-                });
-
-            modelBuilder.Entity("AumoBackend.Models.UnadjustedTrialBalance", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
-
-                    b.Property<string>("AccountName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("AccountNumber")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-                    b.Property<decimal>("CreditBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
-
-                    b.Property<decimal>("DebitBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
-
-                    b.Property<bool>("IsTotalRow")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false);
-
-                    b.Property<int>("PeriodId")
-                        .HasColumnType("integer");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid");
-
-                    b.HasKey("Id")
-                        .HasName("TrialBalanceUnadjusted_pkey");
-
-                    b.ToTable("TrialBalanceUnadjusted", (string)null);
-                });
-
             modelBuilder.Entity("AumoBackend.Models.TrustedDevice", b =>
                 {
                     b.Property<Guid>("Id")
@@ -744,6 +696,54 @@ namespace AumoBackend.Migrations
                         .IsUnique();
 
                     b.ToTable("TrustedDevices");
+                });
+
+            modelBuilder.Entity("AumoBackend.Models.UnadjustedTrialBalance", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("AccountNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<decimal>("CreditBalance")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<decimal>("DebitBalance")
+                        .HasPrecision(15, 2)
+                        .HasColumnType("numeric(15,2)");
+
+                    b.Property<bool>("IsTotalRow")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<int>("PeriodId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id")
+                        .HasName("TrialBalanceUnadjusted_pkey");
+
+                    b.ToTable("TrialBalanceUnadjusted", (string)null);
                 });
 
             modelBuilder.Entity("AumoBackend.Models.UserSession", b =>
