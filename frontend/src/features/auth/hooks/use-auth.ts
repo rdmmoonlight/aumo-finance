@@ -50,30 +50,30 @@ export interface CommonActionResponse {
     message: string;
 }
 
-// --- Query Keys Constant ---
+// --- Query Keys ---
 export const authKeys = {
     all: ["auth"] as const,
     profile: () => [...authKeys.all, "profile"] as const,
 };
 
-// --- TanStack Query Hooks ---
+// ============================================================================
+// --- MAIN WRAPPER HOOK ---
+// ============================================================================
 
-// 1. GET /auth/me (Get Profile Query)
-export function useGetProfile() {
-    return useQuery({
+export function useAuth() {
+    const queryClient = useQueryClient();
+
+    // 1. Get Profile Query
+    const profileQuery = useQuery({
         queryKey: authKeys.profile(),
         queryFn: async () => {
             const { data } = await apiClient.get<ProfileResponse>("/auth/me");
             return data;
         },
     });
-}
 
-// 2. POST /auth/login (Login Mutation)
-export function useLogin() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
+    // 2. Login Mutation
+    const loginMutation = useMutation({
         mutationFn: async (payload: LoginRequest) => {
             const { data } = await apiClient.post<AuthResponse>("/auth/login", payload);
             return data;
@@ -82,13 +82,9 @@ export function useLogin() {
             queryClient.invalidateQueries({ queryKey: authKeys.all });
         },
     });
-}
 
-// 3. POST /auth/google-login (Google Login Mutation)
-export function useGoogleLogin() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
+    // 3. Google Login Mutation
+    const googleLoginMutation = useMutation({
         mutationFn: async (payload: GoogleLoginRequest) => {
             const { data } = await apiClient.post<AuthResponse>("/auth/google-login", payload);
             return data;
@@ -97,21 +93,36 @@ export function useGoogleLogin() {
             queryClient.invalidateQueries({ queryKey: authKeys.all });
         },
     });
-}
 
-// 4. POST /auth/logout (Logout Mutation)
-export function useLogout() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
+    // 4. Logout Mutation
+    const logoutMutation = useMutation({
         mutationFn: async () => {
             const { data } = await apiClient.post<CommonActionResponse>("/auth/logout");
             return data;
         },
         onSuccess: () => {
-            // Invalidate cache dan reset query data user saat logout
             queryClient.invalidateQueries({ queryKey: authKeys.all });
             queryClient.resetQueries({ queryKey: authKeys.all });
         },
     });
+
+    return {
+        // Data & Profile States
+        user: profileQuery.data?.data,
+        profile: profileQuery.data,
+        isLoadingProfile: profileQuery.isPending,
+        isProfileError: profileQuery.isError,
+        refetchProfile: profileQuery.refetch,
+
+        // Actions (Mutations)
+        login: loginMutation.mutateAsync,
+        isLoggingIn: loginMutation.isPending,
+        loginError: loginMutation.error,
+
+        googleLogin: googleLoginMutation.mutateAsync,
+        isGoogleLoggingIn: googleLoginMutation.isPending,
+
+        logout: logoutMutation.mutateAsync,
+        isLoggingOut: logoutMutation.isPending,
+    };
 }
