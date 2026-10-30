@@ -1,4 +1,3 @@
-// src/routes/auth.tsx (atau src/routes/auth/route.tsx)
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/auth')({
