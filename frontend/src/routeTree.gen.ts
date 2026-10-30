@@ -11,8 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedAboutRouteImport } from './routes/_authenticated/about'
 import { Route as AuthenticatedAiAssistantRouteImport } from './routes/_authenticated/ai-assistant'
 import { Route as AuthenticatedChartOfAccountsRouteImport } from './routes/_authenticated/chart-of-accounts'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -21,6 +20,7 @@ import { Route as AuthenticatedJournalEntryRouteImport } from './routes/_authent
 import { Route as AuthenticatedPeriodsRouteImport } from './routes/_authenticated/periods'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
+import { Route as AuthAuthRouteImport } from './routes/auth/auth'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports/index'
@@ -51,15 +51,10 @@ const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AboutRoute = AboutRouteImport.update({
+const AuthenticatedAboutRoute = AuthenticatedAboutRouteImport.update({
   id: '/about',
   path: '/about',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedAiAssistantRoute =
   AuthenticatedAiAssistantRouteImport.update({
@@ -104,15 +99,20 @@ const AuthenticatedToolsRoute = AuthenticatedToolsRouteImport.update({
   path: '/tools',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthAuthRoute = AuthAuthRouteImport.update({
+  id: '/auth/auth',
+  path: '/auth/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthLoginRoute = AuthLoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => AuthRoute,
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => AuthRoute,
+  id: '/auth/register',
+  path: '/auth/register',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedReportsIndexRoute =
   AuthenticatedReportsIndexRouteImport.update({
@@ -227,8 +227,7 @@ const AuthenticatedReportsTrialBalancesUnadjustedRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/about': typeof AuthenticatedAboutRoute
   '/ai-assistant': typeof AuthenticatedAiAssistantRoute
   '/chart-of-accounts': typeof AuthenticatedChartOfAccountsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -237,6 +236,7 @@ export interface FileRoutesByFullPath {
   '/periods': typeof AuthenticatedPeriodsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/tools': typeof AuthenticatedToolsRoute
+  '/auth/auth': typeof AuthAuthRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
@@ -260,8 +260,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/about': typeof AboutRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/about': typeof AuthenticatedAboutRoute
   '/ai-assistant': typeof AuthenticatedAiAssistantRoute
   '/chart-of-accounts': typeof AuthenticatedChartOfAccountsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
@@ -270,6 +269,7 @@ export interface FileRoutesByTo {
   '/periods': typeof AuthenticatedPeriodsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/tools': typeof AuthenticatedToolsRoute
+  '/auth/auth': typeof AuthAuthRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
@@ -295,8 +295,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
-  '/about': typeof AboutRoute
-  '/auth': typeof AuthRouteWithChildren
+  '/_authenticated/about': typeof AuthenticatedAboutRoute
   '/_authenticated/ai-assistant': typeof AuthenticatedAiAssistantRoute
   '/_authenticated/chart-of-accounts': typeof AuthenticatedChartOfAccountsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
@@ -305,6 +304,7 @@ export interface FileRoutesById {
   '/_authenticated/periods': typeof AuthenticatedPeriodsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tools': typeof AuthenticatedToolsRoute
+  '/auth/auth': typeof AuthAuthRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
   '/_authenticated/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
@@ -331,7 +331,6 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/auth'
     | '/ai-assistant'
     | '/chart-of-accounts'
     | '/dashboard'
@@ -340,6 +339,7 @@ export interface FileRouteTypes {
     | '/periods'
     | '/settings'
     | '/tools'
+    | '/auth/auth'
     | '/auth/login'
     | '/auth/register'
     | '/reports/worksheet'
@@ -364,7 +364,6 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
-    | '/auth'
     | '/ai-assistant'
     | '/chart-of-accounts'
     | '/dashboard'
@@ -373,6 +372,7 @@ export interface FileRouteTypes {
     | '/periods'
     | '/settings'
     | '/tools'
+    | '/auth/auth'
     | '/auth/login'
     | '/auth/register'
     | '/reports/worksheet'
@@ -397,8 +397,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
-    | '/about'
-    | '/auth'
+    | '/_authenticated/about'
     | '/_authenticated/ai-assistant'
     | '/_authenticated/chart-of-accounts'
     | '/_authenticated/dashboard'
@@ -407,6 +406,7 @@ export interface FileRouteTypes {
     | '/_authenticated/periods'
     | '/_authenticated/settings'
     | '/_authenticated/tools'
+    | '/auth/auth'
     | '/auth/login'
     | '/auth/register'
     | '/_authenticated/reports/worksheet'
@@ -432,8 +432,9 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
-  AboutRoute: typeof AboutRoute
-  AuthRoute: typeof AuthRouteWithChildren
+  AuthAuthRoute: typeof AuthAuthRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthRegisterRoute: typeof AuthRegisterRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -452,19 +453,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/about': {
-      id: '/about'
+    '/_authenticated/about': {
+      id: '/_authenticated/about'
       path: '/about'
       fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AuthenticatedAboutRouteImport
+      parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/ai-assistant': {
       id: '/_authenticated/ai-assistant'
@@ -522,19 +516,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedToolsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/auth/auth': {
+      id: '/auth/auth'
+      path: '/auth/auth'
+      fullPath: '/auth/auth'
+      preLoaderRoute: typeof AuthAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/login': {
       id: '/auth/login'
-      path: '/login'
+      path: '/auth/login'
       fullPath: '/auth/login'
       preLoaderRoute: typeof AuthLoginRouteImport
-      parentRoute: typeof AuthRoute
+      parentRoute: typeof rootRouteImport
     }
     '/auth/register': {
       id: '/auth/register'
-      path: '/register'
+      path: '/auth/register'
       fullPath: '/auth/register'
       preLoaderRoute: typeof AuthRegisterRouteImport
-      parentRoute: typeof AuthRoute
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/reports/': {
       id: '/_authenticated/reports/'
@@ -666,6 +667,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedAboutRoute: typeof AuthenticatedAboutRoute
   AuthenticatedAiAssistantRoute: typeof AuthenticatedAiAssistantRoute
   AuthenticatedChartOfAccountsRoute: typeof AuthenticatedChartOfAccountsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
@@ -695,6 +697,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedAboutRoute: AuthenticatedAboutRoute,
   AuthenticatedAiAssistantRoute: AuthenticatedAiAssistantRoute,
   AuthenticatedChartOfAccountsRoute: AuthenticatedChartOfAccountsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
@@ -743,23 +746,12 @@ const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
   AuthenticatedRouteChildren,
 )
 
-interface AuthRouteChildren {
-  AuthLoginRoute: typeof AuthLoginRoute
-  AuthRegisterRoute: typeof AuthRegisterRoute
-}
-
-const AuthRouteChildren: AuthRouteChildren = {
-  AuthLoginRoute: AuthLoginRoute,
-  AuthRegisterRoute: AuthRegisterRoute,
-}
-
-const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
-  AboutRoute: AboutRoute,
-  AuthRoute: AuthRouteWithChildren,
+  AuthAuthRoute: AuthAuthRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthRegisterRoute: AuthRegisterRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

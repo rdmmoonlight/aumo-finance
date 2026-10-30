@@ -25,6 +25,15 @@ const backendTarget = getBackendTarget();
 
 export default defineConfig({
   plugins: [pluginReact()],
+  module: {
+    rules: [
+      {
+        test: /\.css$/,
+        use: ["postcss-loader"],
+        type: "css",
+      },
+    ],
+  },
   tools: {
     rspack: {
       plugins: [
@@ -39,7 +48,6 @@ export default defineConfig({
   },
 
   source: {
-    // Menyuntikkan variabel runtime & fallback process ke kode Client (Browser)
     define: {
       "process.env": JSON.stringify({}),
       "process.env.PUBLIC_BACKEND_URL": JSON.stringify(backendTarget),
@@ -53,7 +61,6 @@ export default defineConfig({
     },
   },
 
-  // Setup Proxy untuk Dev Server lokal (menghindari masalah CORS)
   server: {
     proxy: {
       "/api": {
