@@ -3,19 +3,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
 
+import { useSearchParams } from "@/lib/router-compat";
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { useSearchParams } from "@/lib/router-compat";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { baseApi } from "@/lib/apiClient";
-import { store } from "@/lib/store";
-import { authApi } from "@/lib/store/auth/authApi";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
+import { useAuth } from "./hooks/use-auth";
 
 // ===== TYPES =====
 export type AuthFormData = {
@@ -90,7 +87,7 @@ export function GoogleAuthButtonInner({
       disabled={isPending}
       onClick={() => {
         if (!GOOGLE_CLIENT_ID) {
-          onError("_GOOGLE_CLIENT_ID belum diset");
+          onError("GOOGLE_CLIENT_ID belum diset");
           return;
         }
         googleLogin();
@@ -115,16 +112,24 @@ function AuthFormInner({
   onSuccess,
 }: AuthPageProps): React.JSX.Element {
   const searchParams = useSearchParams();
-  const dispatch = useDispatch();
+
+  // ✅ Menggunakan Hook TanStack Query Wrapper useAuth()
+  const {
+    user,
+    profile,
+    isLoadingProfile,
+    login,
+    isLoggingIn,
+    googleLogin,
+    isGoogleLoggingIn,
+  } = useAuth();
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
-  const [isPending, setIsPending] = useState(false);
 
-  // ✅ Pengecekan profil dilakukan secara silent di background
-  const [isCheckingProfile, setIsCheckingProfile] = useState(false);
+  const isPending = isLoggingIn || isGoogleLoggingIn;
 
   const {
     register,
@@ -145,40 +150,17 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
-  // ✅ Pengecekan profil user saat pertama kali dimuat (Silent background check)
+  // ✅ Pengecekan profil user (Otomatis ditangani via TanStack Query profile state)
   useEffect(() => {
-    let isMounted = true;
-
-    async function checkAuthProfile() {
-      setIsCheckingProfile(true);
-      try {
-        const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate(undefined, {
-            subscribe: false,
-          }),
-        );
-
-        if (isMounted && "data" in result && result.data?.success) {
-          if (onSuccess) {
-            onSuccess();
-          } else {
-            const target = searchParams.get("redirectTo") || "/home";
-            window.location.replace(target);
-          }
-        }
-      } catch {
-        // Mengabaikan error jika belum terautentikasi atau backend unreachable
-      } finally {
-        if (isMounted) setIsCheckingProfile(false);
+    if (profile?.success || user) {
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        const target = searchParams.get("redirectTo") || "/home";
+        window.location.replace(target);
       }
     }
-
-    checkAuthProfile();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [searchParams, onSuccess]);
+  }, [profile, user, searchParams, onSuccess]);
 
   useEffect(() => {
     setMode(initialMode);
@@ -206,31 +188,18 @@ function AuthFormInner({
 
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
-    setIsPending(true);
 
     try {
-      // Reset cache RTK Query
-      dispatch(baseApi.util.resetApiState());
+      // ✅ Eksekusi mutation TanStack Query
+      const res = await login({
+        email: values.email,
+        password: values.password,
+        rememberMe: values.keepMe ?? false,
+        isMobileClient: false,
+      });
 
-      // Panggil endpoint /auth/login via initiate
-      const result = await store.dispatch(
-        authApi.endpoints.login.initiate({
-          email: values.email,
-          password: values.password,
-          rememberMe: values.keepMe ?? false,
-          isMobileClient: false,
-        }),
-      );
-
-      if ("error" in result) {
-        const errorData = result.error as any;
-        const msg =
-          errorData?.data?.message ||
-          errorData?.data?.title ||
-          (errorData?.status === "FETCH_ERROR"
-            ? "Gagal terhubung ke server backend."
-            : "Email atau password salah.");
-        setApiErr(msg);
+      if (!res.success) {
+        setApiErr(res.message || "Email atau password salah.");
         return;
       }
 
@@ -246,30 +215,27 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch {
-      setApiErr("Terjadi kesalahan sistem saat mencoba masuk.");
-    } finally {
-      setIsPending(false);
+    } catch (err: any) {
+      const msg =
+        err?.data?.message ||
+        err?.message ||
+        "Gagal terhubung ke server backend.";
+      setApiErr(msg);
     }
   };
 
   const handleGoogleSuccess = async (idToken: string): Promise<void> => {
     setApiErr("");
-    setIsPending(true);
 
     try {
-      dispatch(baseApi.util.resetApiState());
+      // ✅ Eksekusi mutation Google Login TanStack Query
+      const res = await googleLogin({
+        idToken,
+        isMobileClient: false,
+      });
 
-      const result = await store.dispatch(
-        authApi.endpoints.googleLogin.initiate({
-          idToken,
-          isMobileClient: false,
-        }),
-      );
-
-      if ("error" in result) {
-        const errorData = result.error as any;
-        setApiErr(errorData?.data?.message || "Gagal verifikasi Google.");
+      if (!res.success) {
+        setApiErr(res.message || "Gagal verifikasi Google.");
         return;
       }
 
@@ -279,10 +245,8 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch {
-      setApiErr("Gagal verifikasi Google.");
-    } finally {
-      setIsPending(false);
+    } catch (err: any) {
+      setApiErr(err?.data?.message || "Gagal verifikasi Google.");
     }
   };
 
@@ -301,7 +265,7 @@ function AuthFormInner({
 
       <div className="space-y-4">
         <GoogleAuthButtonInner
-          isPending={isPending || isCheckingProfile}
+          isPending={isPending || isLoadingProfile}
           onSuccessHandler={handleGoogleSuccess}
           onError={setApiErr}
         />
@@ -399,7 +363,7 @@ function AuthFormInner({
 
         <Button
           type="submit"
-          disabled={isPending || isCheckingProfile}
+          disabled={isPending || isLoadingProfile}
           className="h-11 w-full rounded-xl bg-black text-white hover:bg-zinc-800"
         >
           {isPending
