@@ -1,6 +1,6 @@
-import { Link } from '@tanstack/react-router';
 "use client";
 
+import { Link } from '@tanstack/react-router';
 import { EyeOff } from "lucide-react";
 
 
