@@ -12,8 +12,8 @@ import com.aumofinance.app.reports.financials.retainedearnings.RetainedEarningsA
 import com.aumofinance.app.reports.journal.AdjustingJournalReportActivity
 import com.aumofinance.app.reports.ledger.permanent.GeneralLedgerPermanentActivity
 import com.aumofinance.app.reports.ledger.temporary.GeneralLedgerTemporaryActivity
-import com.aumofinance.app.reports.trialbalances.adjusted.AdjustedTrialBalancesActivity
-import com.aumofinance.app.reports.trialbalances.postclosing.PostClosingTrialBalancesActivity
+import com.aumofinance.app.reports.trialbalances.adjusted.AdjustedTrialBalanceActivity
+import com.aumofinance.app.reports.trialbalances.postclosing.PostClosingTrialBalanceActivity
 import com.aumofinance.app.reports.trialbalances.unadjusted.TrialBalancesActivity
 import com.aumofinance.app.reports.worksheet.WorksheetActivity
 import com.aumofinance.app.ui.theme.AumoTheme
@@ -98,7 +98,7 @@ class ReportsMenuActivity : ComponentActivity() {
                             open(ClosingJournalActivity::class.java)
                         },
                         ReportMenuItem("Post-Closing Trial Balance", ReportMenuIcons.TrialBalances) {
-                            open(PostClosingTrialBalancesActivity::class.java)
+                            open(PostClosingTrialBalanceActivity::class.java)
                         },
                     ),
             ),
