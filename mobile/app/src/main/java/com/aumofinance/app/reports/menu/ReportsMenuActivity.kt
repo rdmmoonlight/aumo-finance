@@ -59,7 +59,7 @@ class ReportsMenuActivity : ComponentActivity() {
                             open(AdjustingJournalReportActivity::class.java)
                         },
                         ReportMenuItem("Adjusted Trial Balance", ReportMenuIcons.TrialBalances) {
-                            open(AdjustedTrialBalancesActivity::class.java)
+                            open(AdjustedTrialBalanceActivity::class.java)
                         },
                     ),
             ),
