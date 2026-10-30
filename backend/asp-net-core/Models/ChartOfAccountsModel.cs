@@ -63,19 +63,16 @@ namespace AumoBackend.Models
             return int.TryParse(refNum, out _);
         }
 
-        internal static bool ValidateReferenceNumber(AccountClassification classification)
-        {
-            throw new NotImplementedException();
-        }
-
+        // Akun temporer = akun laba rugi (pendapatan dan beban); ditutup ke Laba Ditahan saat closing.
+        // Akun permanen = akun posisi keuangan (aset, liabilitas, ekuitas).
         internal static bool IsTemporary(string type)
         {
-            throw new NotImplementedException();
+            return type is "OperatingIncome" or "OtherIncome" or "OperatingExpenses" or "OtherExpenses";
         }
 
         internal static bool IsPermanent(string type)
         {
-            throw new NotImplementedException();
+            return !IsTemporary(type);
         }
 
         private static readonly Dictionary<string, (int Start, int End)> ReferenceRanges = new()
