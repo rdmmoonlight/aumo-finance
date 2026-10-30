@@ -1,10 +1,10 @@
 import { useAppRouter } from "@/lib/router-compat";
-import { store } from "@/lib/store";
-import { authApi } from "@/lib/store/auth/authApi";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../auth/hooks/use-auth";
 
 export function useAuthCheck() {
     const router = useAppRouter();
+    const { refetchProfile } = useAuth();
     const [checkingAuth, setCheckingAuth] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -14,9 +14,7 @@ export function useAuthCheck() {
         async function checkAuthStatus() {
             try {
                 setCheckingAuth(true);
-                const result = await store.dispatch(
-                    authApi.endpoints.getProfile.initiate()
-                );
+                const result = await refetchProfile();
                 if (result.isSuccess && result.data?.success) {
                     setIsAuthenticated(true);
                     router.replace("/home");
@@ -31,7 +29,7 @@ export function useAuthCheck() {
         }
 
         checkAuthStatus();
-    }, [router]);
+    }, [refetchProfile, router]);
 
     return { router, checkingAuth, isAuthenticated };
 }
