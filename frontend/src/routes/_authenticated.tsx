@@ -1,19 +1,20 @@
 "use client";
 
+import { useAuth } from "#/features/auth/hooks/use-auth";
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAppRouter } from "@/lib/router-compat";
-import type { AppDispatch, RootState } from "@/lib/store";
+import type { AppDispatch } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
-import { authApi } from "@/lib/store/auth/authApi";
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 
 function AuthenticatedLayout() {
+  const { refetchProfile } = useAuth();
   const router = useAppRouter();
   const dispatch = useDispatch<AppDispatch>();
 
@@ -22,21 +23,12 @@ function AuthenticatedLayout() {
   const [isAuthError, setIsAuthError] = useState(false);
   const [isPeriodsLoading, setIsPeriodsLoading] = useState(false);
 
-  // Ambil data cache langsung dari Redux Store jika ada
-  const authState = useSelector((state: RootState) =>
-    authApi.endpoints.getProfile.select()(state),
-  );
-
   const verifySessionAndLoadData = useCallback(async () => {
     try {
       setIsAuthLoading(true);
 
-      // 1. Eksekusi request GET /auth/me langsung via initiate
-      const authResult = await dispatch(
-        authApi.endpoints.getProfile.initiate(undefined, {
-          forceRefetch: false,
-        }),
-      );
+      // 1. Verifikasi sesi melalui hook profil autentikasi
+      const authResult = await refetchProfile();
 
       if (authResult.isError || !authResult.data) {
         setIsAuthError(true);
@@ -60,7 +52,7 @@ function AuthenticatedLayout() {
       setIsAuthLoading(false);
       setIsPeriodsLoading(false);
     }
-  }, [dispatch]);
+  }, [dispatch, refetchProfile]);
 
   useEffect(() => {
     verifySessionAndLoadData();

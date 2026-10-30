@@ -16,7 +16,6 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import type { AppDispatch } from "@/lib/store";
 import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
-import { authApi } from "@/lib/store/auth/authApi";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -28,10 +27,12 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useAuth } from "../../auth/hooks/use-auth";
 import { AccountDetailsTable, UserProfileField } from "./account-table";
 
 export default function AccountSettings() {
   const dispatch = useDispatch<AppDispatch>();
+  const { user: authUser } = useAuth();
 
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,10 +56,7 @@ export default function AccountSettings() {
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await dispatch(
-        authApi.endpoints.getProfile.initiate(),
-      ).unwrap();
-      const userData = res?.data || res;
+      const userData = authUser;
       setUser(userData);
       if (userData) {
         setFullName(userData.fullName || "");
@@ -72,7 +70,7 @@ export default function AccountSettings() {
     } finally {
       setIsLoading(false);
     }
-  }, [dispatch]);
+  }, [authUser]);
 
   useEffect(() => {
     fetchProfile();

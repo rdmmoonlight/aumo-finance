@@ -1,6 +1,6 @@
-import { useLocation, Link } from '@tanstack/react-router';
 "use client";
 
+import { Link, useLocation } from '@tanstack/react-router';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/sidebar";
 import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
-import { authApi, UserProfileData } from "@/lib/store/auth/authApi";
 import {
   BookOpen,
   Bot,
@@ -43,8 +42,8 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-
 import * as React from "react";
+import { useAuth } from "../features/auth/hooks/use-auth";
 
 
 export function DashboardSidebarCollapse() {
@@ -81,38 +80,17 @@ const navigation = [
 export function AppSidebar() {
   const pathname = useLocation().pathname;
   const { state } = useSidebar();
+  const { user, isLoadingProfile: isUserLoading, logout } = useAuth();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
-  const [user, setUser] = React.useState<UserProfileData | null>(null);
-  const [isUserLoading, setIsUserLoading] = React.useState(true);
 
   React.useEffect(() => {
     setIsMounted(true);
-
-    async function fetchUser() {
-      try {
-        setIsUserLoading(true);
-        const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate(),
-        );
-
-        if (result.isSuccess && result.data) {
-          const profileData = (result.data as any).data || result.data;
-          setUser(profileData);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil data profil:", error);
-      } finally {
-        setIsUserLoading(false);
-      }
-    }
-
-    fetchUser();
   }, []);
 
   const handleSignOut = async () => {
     try {
-      await store.dispatch(authApi.endpoints.logout.initiate());
+      await logout();
     } catch (e) {
       console.error(e);
     } finally {
@@ -137,11 +115,10 @@ export function AppSidebar() {
       }
     >
       <SidebarHeader
-        className={`border-b shrink-0 flex items-center gap-2 ${
-          isCollapsed
-            ? "flex-col justify-center p-2.5 gap-3"
-            : "flex-row justify-between p-3.5"
-        }`}
+        className={`border-b shrink-0 flex items-center gap-2 ${isCollapsed
+          ? "flex-col justify-center p-2.5 gap-3"
+          : "flex-row justify-between p-3.5"
+          }`}
       >
         {isCollapsed ? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
@@ -201,9 +178,8 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter
-        className={`border-t shrink-0 ${
-          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
-        }`}
+        className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+          }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
