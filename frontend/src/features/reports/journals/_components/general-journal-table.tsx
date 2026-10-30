@@ -1,4 +1,3 @@
-// general-journal-table.tsx
 "use client";
 
 import { Link } from '@tanstack/react-router';
