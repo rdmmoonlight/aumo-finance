@@ -132,7 +132,6 @@ function AuthFormInner({
 }: AuthPageProps): React.JSX.Element {
   const searchParams = useSearchParams();
 
-  // ✅ Menggunakan Hook TanStack Query Wrapper useAuth()
   const {
     user,
     profile,
@@ -169,7 +168,6 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
-  // ✅ Pengecekan profil user (Otomatis ditangani via TanStack Query profile state)
   useEffect(() => {
     if (profile?.success || user) {
       if (onSuccess) {
@@ -209,7 +207,6 @@ function AuthFormInner({
     setApiErr("");
 
     try {
-      // ✅ Eksekusi mutation TanStack Query
       const res = await login({
         email: values.email,
         password: values.password,
@@ -243,7 +240,6 @@ function AuthFormInner({
     setApiErr("");
 
     try {
-      // ✅ Eksekusi mutation Google Login TanStack Query
       const res = await googleLogin({
         idToken,
         isMobileClient: false,
@@ -364,9 +360,9 @@ function AuthFormInner({
               />
               <Label className="text-xs">Keep me signed in</Label>
             </div>
-            <a href="#" className="text-xs underline">
+            <button type="button" className="text-xs underline text-zinc-600 hover:text-black">
               Forgot?
-            </a>
+            </button>
           </div>
         )}
 
@@ -394,6 +390,7 @@ function AuthFormInner({
           <>
             Belum punya akun?{" "}
             <button
+              type="button"
               onClick={() => handleSwitchMode("register")}
               className="font-semibold underline"
             >
@@ -404,6 +401,7 @@ function AuthFormInner({
           <>
             Sudah punya akun?{" "}
             <button
+              type="button"
               onClick={() => handleSwitchMode("login")}
               className="font-semibold underline"
             >
