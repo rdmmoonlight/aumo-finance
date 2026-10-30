@@ -1,17 +1,18 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "files": {
-    "ignore": [
-      "**/routeTree.gen.ts",
-      "node_modules",
-      "dist",
-      ".tanstack"
+    "includes": [
+      "**",
+      "!**/routeTree.gen.ts",
+      "!node_modules",
+      "!dist",
+      "!.tanstack"
     ]
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
+      "preset": "recommended",
       "suspicious": {
         "noDocumentCookie": "off"
       }
