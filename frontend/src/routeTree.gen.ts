@@ -23,17 +23,21 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedToolsRouteImport } from './routes/_authenticated/tools'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
-import { Route as AuthenticatedReportsReportsPageRouteImport } from './routes/_authenticated/reports/reports-page'
+import { Route as AuthenticatedReportsIndexRouteImport } from './routes/_authenticated/reports/index'
 import { Route as AuthenticatedReportsWorksheetRouteImport } from './routes/_authenticated/reports/worksheet'
+import { Route as AuthenticatedReportsFinancialStatementsIndexRouteImport } from './routes/_authenticated/reports/financial-statements/index'
 import { Route as AuthenticatedReportsFinancialStatementsIncomeStatementRouteImport } from './routes/_authenticated/reports/financial-statements/income-statement'
 import { Route as AuthenticatedReportsFinancialStatementsRetainedEarningsRouteImport } from './routes/_authenticated/reports/financial-statements/retained-earnings'
 import { Route as AuthenticatedReportsFinancialStatementsStatementOfCashFlowRouteImport } from './routes/_authenticated/reports/financial-statements/statement-of-cash-flow'
 import { Route as AuthenticatedReportsFinancialStatementsStatementOfFinancialPositionRouteImport } from './routes/_authenticated/reports/financial-statements/statement-of-financial-position'
+import { Route as AuthenticatedReportsGeneralLedgersIndexRouteImport } from './routes/_authenticated/reports/general-ledgers/index'
 import { Route as AuthenticatedReportsGeneralLedgersPermanentRouteImport } from './routes/_authenticated/reports/general-ledgers/permanent'
 import { Route as AuthenticatedReportsGeneralLedgersTemporaryRouteImport } from './routes/_authenticated/reports/general-ledgers/temporary'
+import { Route as AuthenticatedReportsJournalsIndexRouteImport } from './routes/_authenticated/reports/journals/index'
 import { Route as AuthenticatedReportsJournalsAdjustingRouteImport } from './routes/_authenticated/reports/journals/adjusting'
 import { Route as AuthenticatedReportsJournalsClosingRouteImport } from './routes/_authenticated/reports/journals/closing'
 import { Route as AuthenticatedReportsJournalsGeneralRouteImport } from './routes/_authenticated/reports/journals/general'
+import { Route as AuthenticatedReportsTrialBalancesIndexRouteImport } from './routes/_authenticated/reports/trial-balances/index'
 import { Route as AuthenticatedReportsTrialBalancesAdjustedRouteImport } from './routes/_authenticated/reports/trial-balances/adjusted'
 import { Route as AuthenticatedReportsTrialBalancesPostClosingRouteImport } from './routes/_authenticated/reports/trial-balances/post-closing'
 import { Route as AuthenticatedReportsTrialBalancesUnadjustedRouteImport } from './routes/_authenticated/reports/trial-balances/unadjusted'
@@ -110,16 +114,22 @@ const AuthRegisterRoute = AuthRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthenticatedReportsReportsPageRoute =
-  AuthenticatedReportsReportsPageRouteImport.update({
-    id: '/reports/reports-page',
-    path: '/reports/reports-page',
+const AuthenticatedReportsIndexRoute =
+  AuthenticatedReportsIndexRouteImport.update({
+    id: '/reports/',
+    path: '/reports/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedReportsWorksheetRoute =
   AuthenticatedReportsWorksheetRouteImport.update({
     id: '/reports/worksheet',
     path: '/reports/worksheet',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsFinancialStatementsIndexRoute =
+  AuthenticatedReportsFinancialStatementsIndexRouteImport.update({
+    id: '/reports/financial-statements/',
+    path: '/reports/financial-statements/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedReportsFinancialStatementsIncomeStatementRoute =
@@ -148,6 +158,12 @@ const AuthenticatedReportsFinancialStatementsStatementOfFinancialPositionRoute =
       getParentRoute: () => AuthenticatedRoute,
     } as any,
   )
+const AuthenticatedReportsGeneralLedgersIndexRoute =
+  AuthenticatedReportsGeneralLedgersIndexRouteImport.update({
+    id: '/reports/general-ledgers/',
+    path: '/reports/general-ledgers/',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedReportsGeneralLedgersPermanentRoute =
   AuthenticatedReportsGeneralLedgersPermanentRouteImport.update({
     id: '/reports/general-ledgers/permanent',
@@ -158,6 +174,12 @@ const AuthenticatedReportsGeneralLedgersTemporaryRoute =
   AuthenticatedReportsGeneralLedgersTemporaryRouteImport.update({
     id: '/reports/general-ledgers/temporary',
     path: '/reports/general-ledgers/temporary',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsJournalsIndexRoute =
+  AuthenticatedReportsJournalsIndexRouteImport.update({
+    id: '/reports/journals/',
+    path: '/reports/journals/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedReportsJournalsAdjustingRoute =
@@ -176,6 +198,12 @@ const AuthenticatedReportsJournalsGeneralRoute =
   AuthenticatedReportsJournalsGeneralRouteImport.update({
     id: '/reports/journals/general',
     path: '/reports/journals/general',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedReportsTrialBalancesIndexRoute =
+  AuthenticatedReportsTrialBalancesIndexRouteImport.update({
+    id: '/reports/trial-balances/',
+    path: '/reports/trial-balances/',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedReportsTrialBalancesAdjustedRoute =
@@ -211,8 +239,8 @@ export interface FileRoutesByFullPath {
   '/tools': typeof AuthenticatedToolsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/reports/reports-page': typeof AuthenticatedReportsReportsPageRoute
   '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
+  '/reports/': typeof AuthenticatedReportsIndexRoute
   '/reports/financial-statements/income-statement': typeof AuthenticatedReportsFinancialStatementsIncomeStatementRoute
   '/reports/financial-statements/retained-earnings': typeof AuthenticatedReportsFinancialStatementsRetainedEarningsRoute
   '/reports/financial-statements/statement-of-cash-flow': typeof AuthenticatedReportsFinancialStatementsStatementOfCashFlowRoute
@@ -225,6 +253,10 @@ export interface FileRoutesByFullPath {
   '/reports/trial-balances/adjusted': typeof AuthenticatedReportsTrialBalancesAdjustedRoute
   '/reports/trial-balances/post-closing': typeof AuthenticatedReportsTrialBalancesPostClosingRoute
   '/reports/trial-balances/unadjusted': typeof AuthenticatedReportsTrialBalancesUnadjustedRoute
+  '/reports/financial-statements/': typeof AuthenticatedReportsFinancialStatementsIndexRoute
+  '/reports/general-ledgers/': typeof AuthenticatedReportsGeneralLedgersIndexRoute
+  '/reports/journals/': typeof AuthenticatedReportsJournalsIndexRoute
+  '/reports/trial-balances/': typeof AuthenticatedReportsTrialBalancesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -240,8 +272,8 @@ export interface FileRoutesByTo {
   '/tools': typeof AuthenticatedToolsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/reports/reports-page': typeof AuthenticatedReportsReportsPageRoute
   '/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
+  '/reports': typeof AuthenticatedReportsIndexRoute
   '/reports/financial-statements/income-statement': typeof AuthenticatedReportsFinancialStatementsIncomeStatementRoute
   '/reports/financial-statements/retained-earnings': typeof AuthenticatedReportsFinancialStatementsRetainedEarningsRoute
   '/reports/financial-statements/statement-of-cash-flow': typeof AuthenticatedReportsFinancialStatementsStatementOfCashFlowRoute
@@ -254,6 +286,10 @@ export interface FileRoutesByTo {
   '/reports/trial-balances/adjusted': typeof AuthenticatedReportsTrialBalancesAdjustedRoute
   '/reports/trial-balances/post-closing': typeof AuthenticatedReportsTrialBalancesPostClosingRoute
   '/reports/trial-balances/unadjusted': typeof AuthenticatedReportsTrialBalancesUnadjustedRoute
+  '/reports/financial-statements': typeof AuthenticatedReportsFinancialStatementsIndexRoute
+  '/reports/general-ledgers': typeof AuthenticatedReportsGeneralLedgersIndexRoute
+  '/reports/journals': typeof AuthenticatedReportsJournalsIndexRoute
+  '/reports/trial-balances': typeof AuthenticatedReportsTrialBalancesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -271,8 +307,8 @@ export interface FileRoutesById {
   '/_authenticated/tools': typeof AuthenticatedToolsRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
-  '/_authenticated/reports/reports-page': typeof AuthenticatedReportsReportsPageRoute
   '/_authenticated/reports/worksheet': typeof AuthenticatedReportsWorksheetRoute
+  '/_authenticated/reports/': typeof AuthenticatedReportsIndexRoute
   '/_authenticated/reports/financial-statements/income-statement': typeof AuthenticatedReportsFinancialStatementsIncomeStatementRoute
   '/_authenticated/reports/financial-statements/retained-earnings': typeof AuthenticatedReportsFinancialStatementsRetainedEarningsRoute
   '/_authenticated/reports/financial-statements/statement-of-cash-flow': typeof AuthenticatedReportsFinancialStatementsStatementOfCashFlowRoute
@@ -285,6 +321,10 @@ export interface FileRoutesById {
   '/_authenticated/reports/trial-balances/adjusted': typeof AuthenticatedReportsTrialBalancesAdjustedRoute
   '/_authenticated/reports/trial-balances/post-closing': typeof AuthenticatedReportsTrialBalancesPostClosingRoute
   '/_authenticated/reports/trial-balances/unadjusted': typeof AuthenticatedReportsTrialBalancesUnadjustedRoute
+  '/_authenticated/reports/financial-statements/': typeof AuthenticatedReportsFinancialStatementsIndexRoute
+  '/_authenticated/reports/general-ledgers/': typeof AuthenticatedReportsGeneralLedgersIndexRoute
+  '/_authenticated/reports/journals/': typeof AuthenticatedReportsJournalsIndexRoute
+  '/_authenticated/reports/trial-balances/': typeof AuthenticatedReportsTrialBalancesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -302,8 +342,8 @@ export interface FileRouteTypes {
     | '/tools'
     | '/auth/login'
     | '/auth/register'
-    | '/reports/reports-page'
     | '/reports/worksheet'
+    | '/reports/'
     | '/reports/financial-statements/income-statement'
     | '/reports/financial-statements/retained-earnings'
     | '/reports/financial-statements/statement-of-cash-flow'
@@ -316,6 +356,10 @@ export interface FileRouteTypes {
     | '/reports/trial-balances/adjusted'
     | '/reports/trial-balances/post-closing'
     | '/reports/trial-balances/unadjusted'
+    | '/reports/financial-statements/'
+    | '/reports/general-ledgers/'
+    | '/reports/journals/'
+    | '/reports/trial-balances/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -331,8 +375,8 @@ export interface FileRouteTypes {
     | '/tools'
     | '/auth/login'
     | '/auth/register'
-    | '/reports/reports-page'
     | '/reports/worksheet'
+    | '/reports'
     | '/reports/financial-statements/income-statement'
     | '/reports/financial-statements/retained-earnings'
     | '/reports/financial-statements/statement-of-cash-flow'
@@ -345,6 +389,10 @@ export interface FileRouteTypes {
     | '/reports/trial-balances/adjusted'
     | '/reports/trial-balances/post-closing'
     | '/reports/trial-balances/unadjusted'
+    | '/reports/financial-statements'
+    | '/reports/general-ledgers'
+    | '/reports/journals'
+    | '/reports/trial-balances'
   id:
     | '__root__'
     | '/'
@@ -361,8 +409,8 @@ export interface FileRouteTypes {
     | '/_authenticated/tools'
     | '/auth/login'
     | '/auth/register'
-    | '/_authenticated/reports/reports-page'
     | '/_authenticated/reports/worksheet'
+    | '/_authenticated/reports/'
     | '/_authenticated/reports/financial-statements/income-statement'
     | '/_authenticated/reports/financial-statements/retained-earnings'
     | '/_authenticated/reports/financial-statements/statement-of-cash-flow'
@@ -375,6 +423,10 @@ export interface FileRouteTypes {
     | '/_authenticated/reports/trial-balances/adjusted'
     | '/_authenticated/reports/trial-balances/post-closing'
     | '/_authenticated/reports/trial-balances/unadjusted'
+    | '/_authenticated/reports/financial-statements/'
+    | '/_authenticated/reports/general-ledgers/'
+    | '/_authenticated/reports/journals/'
+    | '/_authenticated/reports/trial-balances/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -484,11 +536,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRegisterRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_authenticated/reports/reports-page': {
-      id: '/_authenticated/reports/reports-page'
-      path: '/reports/reports-page'
-      fullPath: '/reports/reports-page'
-      preLoaderRoute: typeof AuthenticatedReportsReportsPageRouteImport
+    '/_authenticated/reports/': {
+      id: '/_authenticated/reports/'
+      path: '/reports'
+      fullPath: '/reports/'
+      preLoaderRoute: typeof AuthenticatedReportsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/reports/worksheet': {
@@ -496,6 +548,13 @@ declare module '@tanstack/react-router' {
       path: '/reports/worksheet'
       fullPath: '/reports/worksheet'
       preLoaderRoute: typeof AuthenticatedReportsWorksheetRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/financial-statements/': {
+      id: '/_authenticated/reports/financial-statements/'
+      path: '/reports/financial-statements'
+      fullPath: '/reports/financial-statements/'
+      preLoaderRoute: typeof AuthenticatedReportsFinancialStatementsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/reports/financial-statements/income-statement': {
@@ -526,6 +585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedReportsFinancialStatementsStatementOfFinancialPositionRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/reports/general-ledgers/': {
+      id: '/_authenticated/reports/general-ledgers/'
+      path: '/reports/general-ledgers'
+      fullPath: '/reports/general-ledgers/'
+      preLoaderRoute: typeof AuthenticatedReportsGeneralLedgersIndexRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/reports/general-ledgers/permanent': {
       id: '/_authenticated/reports/general-ledgers/permanent'
       path: '/reports/general-ledgers/permanent'
@@ -538,6 +604,13 @@ declare module '@tanstack/react-router' {
       path: '/reports/general-ledgers/temporary'
       fullPath: '/reports/general-ledgers/temporary'
       preLoaderRoute: typeof AuthenticatedReportsGeneralLedgersTemporaryRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/journals/': {
+      id: '/_authenticated/reports/journals/'
+      path: '/reports/journals'
+      fullPath: '/reports/journals/'
+      preLoaderRoute: typeof AuthenticatedReportsJournalsIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/reports/journals/adjusting': {
@@ -559,6 +632,13 @@ declare module '@tanstack/react-router' {
       path: '/reports/journals/general'
       fullPath: '/reports/journals/general'
       preLoaderRoute: typeof AuthenticatedReportsJournalsGeneralRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/reports/trial-balances/': {
+      id: '/_authenticated/reports/trial-balances/'
+      path: '/reports/trial-balances'
+      fullPath: '/reports/trial-balances/'
+      preLoaderRoute: typeof AuthenticatedReportsTrialBalancesIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/reports/trial-balances/adjusted': {
@@ -594,8 +674,8 @@ interface AuthenticatedRouteChildren {
   AuthenticatedPeriodsRoute: typeof AuthenticatedPeriodsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedToolsRoute: typeof AuthenticatedToolsRoute
-  AuthenticatedReportsReportsPageRoute: typeof AuthenticatedReportsReportsPageRoute
   AuthenticatedReportsWorksheetRoute: typeof AuthenticatedReportsWorksheetRoute
+  AuthenticatedReportsIndexRoute: typeof AuthenticatedReportsIndexRoute
   AuthenticatedReportsFinancialStatementsIncomeStatementRoute: typeof AuthenticatedReportsFinancialStatementsIncomeStatementRoute
   AuthenticatedReportsFinancialStatementsRetainedEarningsRoute: typeof AuthenticatedReportsFinancialStatementsRetainedEarningsRoute
   AuthenticatedReportsFinancialStatementsStatementOfCashFlowRoute: typeof AuthenticatedReportsFinancialStatementsStatementOfCashFlowRoute
@@ -608,6 +688,10 @@ interface AuthenticatedRouteChildren {
   AuthenticatedReportsTrialBalancesAdjustedRoute: typeof AuthenticatedReportsTrialBalancesAdjustedRoute
   AuthenticatedReportsTrialBalancesPostClosingRoute: typeof AuthenticatedReportsTrialBalancesPostClosingRoute
   AuthenticatedReportsTrialBalancesUnadjustedRoute: typeof AuthenticatedReportsTrialBalancesUnadjustedRoute
+  AuthenticatedReportsFinancialStatementsIndexRoute: typeof AuthenticatedReportsFinancialStatementsIndexRoute
+  AuthenticatedReportsGeneralLedgersIndexRoute: typeof AuthenticatedReportsGeneralLedgersIndexRoute
+  AuthenticatedReportsJournalsIndexRoute: typeof AuthenticatedReportsJournalsIndexRoute
+  AuthenticatedReportsTrialBalancesIndexRoute: typeof AuthenticatedReportsTrialBalancesIndexRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -619,8 +703,8 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedPeriodsRoute: AuthenticatedPeriodsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedToolsRoute: AuthenticatedToolsRoute,
-  AuthenticatedReportsReportsPageRoute: AuthenticatedReportsReportsPageRoute,
   AuthenticatedReportsWorksheetRoute: AuthenticatedReportsWorksheetRoute,
+  AuthenticatedReportsIndexRoute: AuthenticatedReportsIndexRoute,
   AuthenticatedReportsFinancialStatementsIncomeStatementRoute:
     AuthenticatedReportsFinancialStatementsIncomeStatementRoute,
   AuthenticatedReportsFinancialStatementsRetainedEarningsRoute:
@@ -645,6 +729,14 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
     AuthenticatedReportsTrialBalancesPostClosingRoute,
   AuthenticatedReportsTrialBalancesUnadjustedRoute:
     AuthenticatedReportsTrialBalancesUnadjustedRoute,
+  AuthenticatedReportsFinancialStatementsIndexRoute:
+    AuthenticatedReportsFinancialStatementsIndexRoute,
+  AuthenticatedReportsGeneralLedgersIndexRoute:
+    AuthenticatedReportsGeneralLedgersIndexRoute,
+  AuthenticatedReportsJournalsIndexRoute:
+    AuthenticatedReportsJournalsIndexRoute,
+  AuthenticatedReportsTrialBalancesIndexRoute:
+    AuthenticatedReportsTrialBalancesIndexRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
