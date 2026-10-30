@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
-[Route("reports/trial-balance")]
+[Route("reports/trial-balances")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class TrialBalancesController : ControllerBase
 {
@@ -28,7 +28,7 @@ public class TrialBalancesController : ControllerBase
         _logger = logger;
     }
 
-    // GET /reports/trial-balance?type=unadjusted|adjusted|post-closing
+    // GET /reports/trial-balances?type=unadjusted|adjusted|post-closing
     [HttpGet]
     public async Task<IActionResult> Get([FromQuery] string? type = "unadjusted")
     {
