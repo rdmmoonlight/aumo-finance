@@ -1,6 +1,6 @@
 ﻿namespace AumoBackend.Models;
 
-public partial class TrialBalanceAdjusted
+public partial class AdjustedTrialBalance
 {
     public long Id { get; set; }
 

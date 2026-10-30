@@ -46,11 +46,11 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
 
-    public virtual DbSet<TrialBalanceAdjusted> TrialBalanceAdjusteds { get; set; } = null!;
+    public virtual DbSet<AdjustedTrialBalance> AdjustedTrialBalances { get; set; } = null!;
 
-    public virtual DbSet<TrialBalancePostClosing> TrialBalancePostClosings { get; set; } = null!;
+    public virtual DbSet<PostClosingTrialBalance> PostClosingTrialBalances { get; set; } = null!;
 
-    public virtual DbSet<TrialBalanceUnadjusted> TrialBalanceUnadjusteds { get; set; } = null!;
+    public virtual DbSet<UnadjustedTrialBalance> UnadjustedTrialBalances { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -257,7 +257,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
         });
 
-        builder.Entity<TrialBalanceAdjusted>(entity =>
+        builder.Entity<AdjustedTrialBalance>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrialBalanceAdjusted_pkey");
 
@@ -272,7 +272,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
         });
 
-        builder.Entity<TrialBalancePostClosing>(entity =>
+        builder.Entity<PostClosingTrialBalance>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrialBalancePostClosing_pkey");
 
@@ -287,7 +287,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
         });
 
-        builder.Entity<TrialBalanceUnadjusted>(entity =>
+        builder.Entity<UnadjustedTrialBalance>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrialBalanceUnadjusted_pkey");
 

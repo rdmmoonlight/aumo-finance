@@ -552,7 +552,7 @@ namespace AumoBackend.Migrations
                     b.ToTable("TransactionCounters");
                 });
 
-            modelBuilder.Entity("AumoBackend.Models.TrialBalanceAdjusted", b =>
+            modelBuilder.Entity("AumoBackend.Models.AdjustedTrialBalance", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -600,7 +600,7 @@ namespace AumoBackend.Migrations
                     b.ToTable("TrialBalanceAdjusted", (string)null);
                 });
 
-            modelBuilder.Entity("AumoBackend.Models.TrialBalancePostClosing", b =>
+            modelBuilder.Entity("AumoBackend.Models.PostClosingTrialBalance", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -648,7 +648,7 @@ namespace AumoBackend.Migrations
                     b.ToTable("TrialBalancePostClosing", (string)null);
                 });
 
-            modelBuilder.Entity("AumoBackend.Models.TrialBalanceUnadjusted", b =>
+            modelBuilder.Entity("AumoBackend.Models.UnadjustedTrialBalance", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
