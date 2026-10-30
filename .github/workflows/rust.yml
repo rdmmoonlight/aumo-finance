@@ -27,7 +27,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Rust Build (sccache)
-        uses: mozilla-actions/sccache-action@v2
+        uses: mozilla-actions/sccache-action@v0.0.5
 
       - name: Set Environment Variables
         run: echo "RUSTC_WRAPPER=sccache" >> $env:GITHUB_ENV
