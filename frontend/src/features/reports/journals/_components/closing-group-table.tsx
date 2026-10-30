@@ -1,4 +1,5 @@
 "use client";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -10,17 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useMemo } from "react";
 import { formatNumberWithParen } from "../_lib/format";
 import { ClosingJournalEntryGroup, ClosingJournalLine } from "../_lib/types";
-
-const helper = createColumnHelper<ClosingJournalLine>();
 
 export function ClosingGroupTable({
   group,
@@ -29,58 +21,7 @@ export function ClosingGroupTable({
   group: ClosingJournalEntryGroup;
   totals: { totalDebit: number; totalCredit: number };
 }) {
-  const columns = useMemo(
-    () => [
-      helper.accessor("referenceNumber", {
-        header: () => <div className="text-center text-caption">Ref.</div>,
-        cell: (info) => (
-          <div className="text-center pl-6">
-            <Badge
-              variant="outline"
-              className="font-mono text-amber-500 text-label-small"
-            >
-              {info.getValue() || "-"}
-            </Badge>
-          </div>
-        ),
-      }),
-      helper.accessor("accountName", {
-        header: "Account",
-        cell: ({ row }) => (
-          <div
-            className={`text-caption ${row.original.credit > 0 ? "pl-6 text-muted-foreground" : "font-medium"}`}
-          >
-            {row.original.accountName}
-          </div>
-        ),
-      }),
-      helper.accessor("debit", {
-        header: () => <div className="text-right text-caption">Debit</div>,
-        cell: (info) => (
-          <div className="text-right font-mono text-caption text-emerald-500">
-            {info.getValue() > 0 ? formatNumberWithParen(info.getValue()) : "-"}
-          </div>
-        ),
-      }),
-      helper.accessor("credit", {
-        header: () => (
-          <div className="text-right pr-6 text-caption">Credit</div>
-        ),
-        cell: (info) => (
-          <div className="text-right pr-6 font-mono text-caption text-red-500">
-            {info.getValue() > 0 ? formatNumberWithParen(info.getValue()) : "-"}
-          </div>
-        ),
-      }),
-    ],
-    [],
-  );
-
-  const table = useReactTable({
-    data: group.lines || [],
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+  const lines: ClosingJournalLine[] = group.lines || [];
 
   return (
     <Card className="w-full overflow-hidden">
@@ -90,24 +31,56 @@ export function ClosingGroupTable({
       <CardContent className="p-0">
         <Table className="min-w-">
           <TableHeader>
-            {table.getHeaderGroups().map((hg) => (
-              <TableRow key={hg.id}>
-                {hg.headers.map((h) => (
-                  <TableHead key={h.id}>
-                    {flexRender(h.column.columnDef.header, h.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
+            <TableRow>
+              <TableHead>
+                <div className="text-center text-caption">Ref.</div>
+              </TableHead>
+              <TableHead>Account</TableHead>
+              <TableHead>
+                <div className="text-right text-caption">Debit</div>
+              </TableHead>
+              <TableHead>
+                <div className="text-right pr-6 text-caption">Credit</div>
+              </TableHead>
+            </TableRow>
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
+            {lines.map((line, idx) => (
+              <TableRow key={`${line.referenceNumber}-${line.accountName}-${idx}`}>
+                {/* Ref. */}
+                <TableCell>
+                  <div className="text-center pl-6">
+                    <Badge
+                      variant="outline"
+                      className="font-mono text-amber-500 text-label-small"
+                    >
+                      {line.referenceNumber || "-"}
+                    </Badge>
+                  </div>
+                </TableCell>
+
+                {/* Account */}
+                <TableCell>
+                  <div
+                    className={`text-caption ${line.credit > 0 ? "pl-6 text-muted-foreground" : "font-medium"}`}
+                  >
+                    {line.accountName}
+                  </div>
+                </TableCell>
+
+                {/* Debit */}
+                <TableCell>
+                  <div className="text-right font-mono text-caption text-emerald-500">
+                    {line.debit > 0 ? formatNumberWithParen(line.debit) : "-"}
+                  </div>
+                </TableCell>
+
+                {/* Credit */}
+                <TableCell>
+                  <div className="text-right pr-6 font-mono text-caption text-red-500">
+                    {line.credit > 0 ? formatNumberWithParen(line.credit) : "-"}
+                  </div>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
