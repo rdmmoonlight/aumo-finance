@@ -1,6 +1,4 @@
-import { useLocation } from '@tanstack/react-router';
 "use client";
-
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -19,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useLocation } from '@tanstack/react-router';
 import {
   AlertTriangle,
   Bell,
@@ -32,8 +31,8 @@ import * as React from "react";
 
 import { store } from "@/lib/store";
 import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
-import { authApi } from "@/lib/store/auth/authApi";
 import { commonApi } from "@/lib/store/commonApi";
+import { useAuth } from "../features/auth/hooks/use-auth";
 
 interface PeriodItem {
   id: number;
@@ -54,11 +53,13 @@ interface NotificationItem {
 
 export function AppTopBar() {
   const pathname = useLocation().pathname;
+  const {
+    user: userProfile,
+    isLoadingProfile: isProfileLoading,
+    refetchProfile,
+  } = useAuth();
 
   // State internal pengganti Auto-Generated Hooks
-  const [userProfile, setUserProfile] = React.useState<any>(null);
-  const [isProfileLoading, setIsProfileLoading] = React.useState(true);
-
   const [rawPeriodsData, setRawPeriodsData] = React.useState<any>(null);
   const [isPeriodLoading, setIsPeriodLoading] = React.useState(false);
 
@@ -78,22 +79,12 @@ export function AppTopBar() {
 
   // 1. Fetch Profil User (/auth/me)
   const fetchUserProfile = React.useCallback(async () => {
-    setIsProfileLoading(true);
     try {
-      const result = await store.dispatch(
-        authApi.endpoints.getProfile.initiate(),
-      );
-      if ("data" in result && result.data) {
-        setUserProfile(result.data);
-      } else {
-        setUserProfile(null);
-      }
+      await refetchProfile();
     } catch {
-      setUserProfile(null);
-    } finally {
-      setIsProfileLoading(false);
+      // Profile state and loading status are managed by the auth hook.
     }
-  }, []);
+  }, [refetchProfile]);
 
   // 2. Fetch Periods
   const fetchPeriods = React.useCallback(async () => {
@@ -304,9 +295,8 @@ export function AppTopBar() {
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
-                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
-                        !item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
-                      }`}
+                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${!item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
+                        }`}
                     >
                       <div className="mt-0.5">
                         {item.type === "warning" ? (
@@ -323,9 +313,9 @@ export function AppTopBar() {
                           <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
-                                  [],
-                                  { hour: "2-digit", minute: "2-digit" },
-                                )
+                                [],
+                                { hour: "2-digit", minute: "2-digit" },
+                              )
                               : ""}
                           </span>
                         </div>
@@ -388,18 +378,16 @@ export function AppTopBar() {
           {selectedPeriod ? (
             <Badge
               variant="outline"
-              className={`gap-1.5 font-medium text-xs ${
-                selectedPeriod.isClosed
-                  ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
-                  : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-              }`}
+              className={`gap-1.5 font-medium text-xs ${selectedPeriod.isClosed
+                ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+                }`}
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full ${
-                  selectedPeriod.isClosed
-                    ? "bg-amber-500"
-                    : "bg-emerald-500 animate-pulse"
-                }`}
+                className={`h-1.5 w-1.5 rounded-full ${selectedPeriod.isClosed
+                  ? "bg-amber-500"
+                  : "bg-emerald-500 animate-pulse"
+                  }`}
               />
               Periode: {selectedPeriod.periodName || selectedPeriod.name}
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
