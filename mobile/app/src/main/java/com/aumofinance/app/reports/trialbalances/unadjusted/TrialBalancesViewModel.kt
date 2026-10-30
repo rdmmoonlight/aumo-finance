@@ -1,4 +1,4 @@
-package com.aumofinance.app.reports.trialbalance.unadjusted
+package com.aumofinance.app.reports.trialbalances.unadjusted
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -9,18 +9,18 @@ public partial class NeondbContext : DbContext
     {
     }
 
-    public virtual DbSet<TrialBalanceAdjusted> TrialBalanceAdjusteds { get; set; } = null!;
+    public virtual DbSet<AdjustedTrialBalance> AdjustedTrialBalances { get; set; } = null!;
 
-    public virtual DbSet<TrialBalancePostClosing> TrialBalancePostClosings { get; set; } = null!;
+    public virtual DbSet<PostClosingTrialBalance> PostClosingTrialBalances { get; set; } = null!;
 
-    public virtual DbSet<TrialBalanceUnadjusted> TrialBalanceUnadjusteds { get; set; } = null!;
+    public virtual DbSet<UnadjustedTrialBalance> UnadjustedTrialBalances { get; set; } = null!;
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.HasPostgresExtension("postgres_fdw");
 
-        modelBuilder.Entity<TrialBalanceAdjusted>(entity =>
+        modelBuilder.Entity<AdjustedTrialBalance>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrialBalanceAdjusted_pkey");
 
@@ -35,7 +35,7 @@ public partial class NeondbContext : DbContext
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
         });
 
-        modelBuilder.Entity<TrialBalancePostClosing>(entity =>
+        modelBuilder.Entity<PostClosingTrialBalance>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrialBalancePostClosing_pkey");
 
@@ -50,7 +50,7 @@ public partial class NeondbContext : DbContext
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
         });
 
-        modelBuilder.Entity<TrialBalanceUnadjusted>(entity =>
+        modelBuilder.Entity<UnadjustedTrialBalance>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("TrialBalanceUnadjusted_pkey");
 

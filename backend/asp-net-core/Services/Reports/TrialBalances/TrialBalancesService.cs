@@ -72,9 +72,9 @@ public class TrialBalancesService : ITrialBalancesService
         {
             case Adjusted:
                 await ReplaceSnapshotAsync(
-                    _db.TrialBalanceAdjusteds,
+                    _db.AdjustedTrialBalances,
                     x => x.UserId == userId && x.PeriodId == periodId,
-                    lines.Select(l => new TrialBalanceAdjusted
+                    lines.Select(l => new AdjustedTrialBalance
                     {
                         UserId = userId,
                         PeriodId = periodId,
@@ -88,9 +88,9 @@ public class TrialBalancesService : ITrialBalancesService
 
             case PostClosing:
                 await ReplaceSnapshotAsync(
-                    _db.TrialBalancePostClosings,
+                    _db.PostClosingTrialBalances,
                     x => x.UserId == userId && x.PeriodId == periodId,
-                    lines.Select(l => new TrialBalancePostClosing
+                    lines.Select(l => new PostClosingTrialBalance
                     {
                         UserId = userId,
                         PeriodId = periodId,
@@ -104,9 +104,9 @@ public class TrialBalancesService : ITrialBalancesService
 
             default:
                 await ReplaceSnapshotAsync(
-                    _db.TrialBalanceUnadjusteds,
+                    _db.UnadjustedTrialBalances,
                     x => x.UserId == userId && x.PeriodId == periodId,
-                    lines.Select(l => new TrialBalanceUnadjusted
+                    lines.Select(l => new UnadjustedTrialBalance
                     {
                         UserId = userId,
                         PeriodId = periodId,
@@ -120,25 +120,25 @@ public class TrialBalancesService : ITrialBalancesService
         }
     }
 
-    public async Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(Guid userId, Period period)
+    public async Task<List<UnadjustedTrialBalanceRow>> BuildUnadjustedTrialBalanceAsync(Guid userId, Period period)
     {
         var rows = await BuildTrialBalancesRowsAsync(userId, period, false, Unadjusted);
         await SaveSnapshotAsync(Unadjusted, userId, period, rows);
-        return ToSnapshotRows<TrialBalanceUnadjustedRow>(userId, period, rows);
+        return ToSnapshotRows<UnadjustedTrialBalanceRow>(userId, period, rows);
     }
 
-    public async Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(Guid userId, Period period)
+    public async Task<List<AdjustedTrialBalanceRow>> BuildAdjustedTrialBalanceAsync(Guid userId, Period period)
     {
         var rows = await BuildTrialBalancesRowsAsync(userId, period, true, Adjusted);
         await SaveSnapshotAsync(Adjusted, userId, period, rows);
-        return ToSnapshotRows<TrialBalanceAdjustedRow>(userId, period, rows);
+        return ToSnapshotRows<AdjustedTrialBalanceRow>(userId, period, rows);
     }
 
-    public async Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(Guid userId, Period period)
+    public async Task<List<PostClosingTrialBalanceRow>> BuildPostClosingTrialBalanceAsync(Guid userId, Period period)
     {
         var rows = await BuildTrialBalancesRowsAsync(userId, period, true, PostClosing);
         await SaveSnapshotAsync(PostClosing, userId, period, rows);
-        return ToSnapshotRows<TrialBalancePostClosingRow>(userId, period, rows);
+        return ToSnapshotRows<PostClosingTrialBalanceRow>(userId, period, rows);
     }
 
     // ------------------------------------------------------------------

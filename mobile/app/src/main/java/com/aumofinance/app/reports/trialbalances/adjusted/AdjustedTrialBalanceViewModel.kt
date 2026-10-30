@@ -1,4 +1,4 @@
-package com.aumofinance.app.reports.trialbalance.adjusted
+package com.aumofinance.app.reports.trialbalances.adjusted
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -11,7 +11,7 @@ import io.ktor.client.call.body
 import kotlinx.coroutines.launch
 
 // Neraca Saldo Disesuaikan: type="adjusted", jurnal General + Adjusting.
-class AdjustedTrialBalancesViewModel : ViewModel() {
+class AdjustedTrialBalanceViewModel : ViewModel() {
     private val api = TrialBalancesApi()
 
     var report: TrialBalancesReport? by mutableStateOf(null)
@@ -23,7 +23,7 @@ class AdjustedTrialBalancesViewModel : ViewModel() {
                 try {
                     api.getTrialBalances("adjusted").body<TrialBalancesReport>()
                 } catch (t: Throwable) {
-                    com.aumofinance.app.crashlog.AppLogger.error("AdjustedTrialBalancesViewModel", "Error tertangkap", t)
+                    com.aumofinance.app.crashlog.AppLogger.error("AdjustedTrialBalanceViewModel", "Error tertangkap", t)
                     null
                 }
         }

@@ -39,14 +39,14 @@ public class TrialBalancesRow
     public DateTimeOffset CreatedAt { get; set; }
 }
 
-public class TrialBalanceUnadjustedRow : TrialBalancesRow
+public class UnadjustedTrialBalanceRow : TrialBalancesRow
 {
 }
 
-public class TrialBalanceAdjustedRow : TrialBalancesRow
+public class AdjustedTrialBalanceRow : TrialBalancesRow
 {
 }
 
-public class TrialBalancePostClosingRow : TrialBalancesRow
+public class PostClosingTrialBalanceRow : TrialBalancesRow
 {
 }

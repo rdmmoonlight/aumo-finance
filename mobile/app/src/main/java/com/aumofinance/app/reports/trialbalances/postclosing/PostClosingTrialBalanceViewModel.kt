@@ -1,4 +1,4 @@
-package com.aumofinance.app.reports.trialbalance.postclosing
+package com.aumofinance.app.reports.trialbalances.postclosing
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -13,7 +13,7 @@ import kotlinx.coroutines.launch
 // Neraca Saldo Pasca-Penutupan: type="post-closing". Retained Earnings sudah
 // termasuk efek Closing (walau baris Closing itu sendiri tidak pernah
 // tersimpan sebagai entri jurnal).
-class PostClosingTrialBalancesViewModel : ViewModel() {
+class PostClosingTrialBalanceViewModel : ViewModel() {
     private val api = TrialBalancesApi()
 
     var report: TrialBalancesReport? by mutableStateOf(null)
@@ -25,7 +25,7 @@ class PostClosingTrialBalancesViewModel : ViewModel() {
                 try {
                     api.getTrialBalances("post-closing").body<TrialBalancesReport>()
                 } catch (t: Throwable) {
-                    com.aumofinance.app.crashlog.AppLogger.error("PostClosingTrialBalancesViewModel", "Error tertangkap", t)
+                    com.aumofinance.app.crashlog.AppLogger.error("PostClosingTrialBalanceViewModel", "Error tertangkap", t)
                     null
                 }
         }

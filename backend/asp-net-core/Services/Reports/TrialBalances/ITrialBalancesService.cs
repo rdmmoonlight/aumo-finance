@@ -16,9 +16,9 @@ public interface ITrialBalancesService
     /// <summary>Mengganti snapshot periode tersebut di tabel sesuai reportType.</summary>
     Task SaveSnapshotAsync(string reportType, Guid userId, Period period, IReadOnlyList<TrialBalancesRow> rows);
 
-    Task<List<TrialBalanceUnadjustedRow>> BuildUnadjustedTrialBalanceAsync(Guid userId, Period period);
+    Task<List<UnadjustedTrialBalanceRow>> BuildUnadjustedTrialBalanceAsync(Guid userId, Period period);
 
-    Task<List<TrialBalanceAdjustedRow>> BuildAdjustedTrialBalanceAsync(Guid userId, Period period);
+    Task<List<AdjustedTrialBalanceRow>> BuildAdjustedTrialBalanceAsync(Guid userId, Period period);
 
-    Task<List<TrialBalancePostClosingRow>> BuildPostClosingTrialBalanceAsync(Guid userId, Period period);
+    Task<List<PostClosingTrialBalanceRow>> BuildPostClosingTrialBalanceAsync(Guid userId, Period period);
 }

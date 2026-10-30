@@ -7,7 +7,7 @@ import androidx.activity.viewModels
 import com.aumofinance.app.reports.trialbalances.TrialBalancesScreen
 import com.aumofinance.app.ui.theme.AumoTheme
 
-class AdjustedTrialBalancesActivity : ComponentActivity() {
+class AdjustedTrialBalanceActivity : ComponentActivity() {
     private val viewModel: AdjustedTrialBalanceViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {

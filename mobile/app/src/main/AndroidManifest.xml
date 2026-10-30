@@ -60,10 +60,10 @@
             android:name=".reports.trialbalances.unadjusted.TrialBalancesActivity"
             android:exported="false" />
         <activity
-            android:name=".reports.trialbalances.adjusted.AdjustedTrialBalancesActivity"
+            android:name=".reports.trialbalances.adjusted.AdjustedTrialBalanceActivity"
             android:exported="false" />
         <activity
-            android:name=".reports.trialbalances.postclosing.PostClosingTrialBalancesActivity"
+            android:name=".reports.trialbalances.postclosing.PostClosingTrialBalanceActivity"
             android:exported="false" />
         <activity
             android:name=".reports.worksheet.WorksheetActivity"
