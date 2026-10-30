@@ -45,7 +45,6 @@ import {
 import * as React from "react";
 import { useAuth } from "../features/auth/hooks/use-auth";
 
-
 export function DashboardSidebarCollapse() {
   const { toggleSidebar, state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -95,8 +94,19 @@ export function AppSidebar() {
       console.error(e);
     } finally {
       store.dispatch(baseApi.util.resetApiState());
-      document.cookie =
-        "AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      
+      // Menghapus cookie menggunakan Cookie Store API jika tersedia
+      if ("cookieStore" in window && typeof window.cookieStore?.delete === "function") {
+        await window.cookieStore.delete({ name: "AumoFinance.Session", path: "/" });
+      } else {
+        // Fallback untuk browser yang tidak mendukung Cookie Store API
+        const expireCookie = (name: string) => {
+          // biome-ignore lint/suspicious/noDocumentCookie: Fallback untuk browser lama
+          document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        };
+        expireCookie("AumoFinance.Session");
+      }
+
       window.location.replace("/");
     }
   };
@@ -115,10 +125,11 @@ export function AppSidebar() {
       }
     >
       <SidebarHeader
-        className={`border-b shrink-0 flex items-center gap-2 ${isCollapsed
-          ? "flex-col justify-center p-2.5 gap-3"
-          : "flex-row justify-between p-3.5"
-          }`}
+        className={`border-b shrink-0 flex items-center gap-2 ${
+          isCollapsed
+            ? "flex-col justify-center p-2.5 gap-3"
+            : "flex-row justify-between p-3.5"
+        }`}
       >
         {isCollapsed ? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
@@ -149,7 +160,7 @@ export function AppSidebar() {
                 const Icon = item.icon;
                 const isActive =
                   pathname === item.url ||
-                  (item.url !== "/home" && pathname.startsWith(item.url + "/"));
+                  (item.url !== "/home" && pathname.startsWith(`${item.url}/`));
 
                 return (
                   <SidebarMenuItem key={item.title}>
@@ -178,8 +189,9 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter
-        className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"
-          }`}
+        className={`border-t shrink-0 ${
+          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+        }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
