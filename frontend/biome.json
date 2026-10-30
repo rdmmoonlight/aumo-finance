@@ -6,7 +6,8 @@
       "!**/routeTree.gen.ts",
       "!node_modules",
       "!dist",
-      "!.tanstack"
+      "!.tanstack",
+      "!src/components/ui/**"
     ]
   },
   "linter": {
