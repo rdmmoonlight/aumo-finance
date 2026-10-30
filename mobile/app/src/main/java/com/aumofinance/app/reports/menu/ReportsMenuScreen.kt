@@ -159,7 +159,7 @@ object ReportMenuIcons {
     val AdjustingJournal = Icons.AutoMirrored.Outlined.MenuBook
     val LedgerPermanent = Icons.Outlined.AccountBalance
     val LedgerTemporary = Icons.Outlined.AccountBalance
-    val TrialBalance = Icons.Outlined.Balance
+    val TrialBalances = Icons.Outlined.Balance
     val Worksheet = Icons.Outlined.TableChart
     val IncomeStatement = Icons.AutoMirrored.Outlined.TrendingUp
     val RetainedEarnings = Icons.Outlined.Savings
