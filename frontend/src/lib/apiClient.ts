@@ -173,3 +173,116 @@ export const baseApi = createApi({
   ],
   endpoints: () => ({}),
 });
+
+// ============================================================================
+// --- TANSTACK QUERY CLIENT (TAMBAHAN BARU / DAPAT BERJALAN BERIRINGAN) ---
+// ============================================================================
+
+export interface ApiRequestOptions extends RequestInit {
+  params?: Record<string, string | number | boolean | undefined | null>;
+}
+
+async function customFetch<T>(
+  endpoint: string,
+  options: ApiRequestOptions = {},
+): Promise<{ data: T; status: number; headers: Headers }> {
+  if (!endpoint.startsWith("/")) {
+    console.error(
+      `❌ [apiClient Route Error]: Route "${endpoint}" tidak diawali slash '/'.`,
+    );
+    throw new Error(
+      `[apiClient Route Error]: Route "${endpoint}" wajib diawali dengan slash '/'.`,
+    );
+  }
+
+  const baseUrl = `${getBackendTarget()}/api/v1`;
+  const { params, headers: customHeaders, body, ...restOptions } = options;
+
+  // Formatting Query Parameters
+  let url = `${baseUrl}${endpoint}`;
+  if (params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        searchParams.append(key, String(value));
+      }
+    });
+    const queryString = searchParams.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+  }
+
+  const headers = new Headers(customHeaders);
+
+  // Set default JSON Content-Type jika bukan FormData
+  if (!(body instanceof FormData) && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
+
+  // Jika FormData, biarkan browser menentukan Content-Type & boundary secara otomatis
+  if (body instanceof FormData) {
+    headers.delete("Content-Type");
+    headers.delete("content-type");
+  }
+
+  const config: RequestInit = {
+    ...restOptions,
+    headers,
+    credentials: "include",
+    body: body instanceof FormData || typeof body === "string" ? body : JSON.stringify(body),
+  };
+
+  const response = await fetch(url, config);
+
+  // Penanganan Error 401 (Unauthenticated) di Client
+  if (response.status === 401 && typeof window !== "undefined") {
+    const currentPath = window.location.pathname;
+    const isPublicPath = currentPath === "/" || currentPath === "/about";
+
+    if (!isPublicPath && !currentPath.startsWith("/auth") && !isRedirecting) {
+      isRedirecting = true;
+      window.location.replace(
+        `/auth/login?redirectTo=${encodeURIComponent(currentPath)}`,
+      );
+    }
+  }
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    const error = new Error(
+      errorData?.message || `HTTP Error ${response.status}: ${response.statusText}`,
+    );
+    (error as any).status = response.status;
+    (error as any).data = errorData;
+    throw error;
+  }
+
+  // Handle Response Kosong (misal HTTP 204 No Content)
+  let data: T;
+  const contentType = response.headers.get("content-type");
+  if (contentType && contentType.includes("application/json")) {
+    data = await response.json();
+  } else {
+    data = (await response.text()) as unknown as T;
+  }
+
+  return { data, status: response.status, headers: response.headers };
+}
+
+export const apiClient = {
+  get: <T>(endpoint: string, options?: ApiRequestOptions) =>
+    customFetch<T>(endpoint, { ...options, method: "GET" }),
+
+  post: <T>(endpoint: string, body?: any, options?: ApiRequestOptions) =>
+    customFetch<T>(endpoint, { ...options, method: "POST", body }),
+
+  put: <T>(endpoint: string, body?: any, options?: ApiRequestOptions) =>
+    customFetch<T>(endpoint, { ...options, method: "PUT", body }),
+
+  patch: <T>(endpoint: string, body?: any, options?: ApiRequestOptions) =>
+    customFetch<T>(endpoint, { ...options, method: "PATCH", body }),
+
+  delete: <T>(endpoint: string, options?: ApiRequestOptions) =>
+    customFetch<T>(endpoint, { ...options, method: "DELETE" }),
+};
