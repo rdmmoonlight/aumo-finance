@@ -11,8 +11,6 @@ import (
 	"github.com/lib/pq"
 )
 
-// Skema "auth" terpisah dari "public" agar tidak bersinggungan dengan
-// migrasi Drizzle milik apps/nest.
 const migrateSQL = `
 CREATE SCHEMA IF NOT EXISTS auth;
 CREATE TABLE IF NOT EXISTS auth.users (
