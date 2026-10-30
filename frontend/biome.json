@@ -13,11 +13,12 @@
   "css": {
     "parser": {
       "tailwindDirectives": true
-    },
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
-      "preset": "recommended",
+      "recommended": true,
       "suspicious": {
         "noDocumentCookie": "off"
       }
