@@ -51,6 +51,16 @@ interface NotificationItem {
   createdAt?: string;
 }
 
+interface PeriodsResponse {
+  items?: PeriodItem[];
+  periods?: PeriodItem[];
+}
+
+interface HealthResponse {
+  status?: string;
+  [key: string]: unknown;
+}
+
 export function AppTopBar() {
   const pathname = useLocation().pathname;
   const {
@@ -59,11 +69,15 @@ export function AppTopBar() {
     refetchProfile,
   } = useAuth();
 
-  // State internal pengganti Auto-Generated Hooks
-  const [rawPeriodsData, setRawPeriodsData] = React.useState<any>(null);
+  // State internal pengganti Auto-Generated Hooks dengan type spesifik
+  const [rawPeriodsData, setRawPeriodsData] = React.useState<
+    PeriodItem[] | PeriodsResponse | null
+  >(null);
   const [isPeriodLoading, setIsPeriodLoading] = React.useState(false);
 
-  const [healthData, setHealthData] = React.useState<any>(null);
+  const [healthData, setHealthData] = React.useState<HealthResponse | null>(
+    null,
+  );
   const [isHealthLoading, setIsHealthLoading] = React.useState(false);
   const [isHealthFetching, setIsHealthFetching] = React.useState(false);
   const [isHealthError, setIsHealthError] = React.useState(false);
@@ -95,7 +109,7 @@ export function AppTopBar() {
         periodsApi.endpoints.getPeriods.initiate(),
       );
       if ("data" in result) {
-        setRawPeriodsData(result.data);
+        setRawPeriodsData(result.data as PeriodItem[] | PeriodsResponse);
       }
     } catch {
       setRawPeriodsData(null);
@@ -113,7 +127,7 @@ export function AppTopBar() {
         commonApi.endpoints.getHealth.initiate(),
       );
       if ("data" in result && result.data) {
-        setHealthData(result.data);
+        setHealthData(result.data as HealthResponse);
         setIsHealthError(false);
       } else {
         setIsHealthError(true);
@@ -208,10 +222,10 @@ export function AppTopBar() {
         ? "online"
         : "offline";
 
-  // Parsing array periods
+  // Parsing array periods tanpa type casting `as any`
   const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
     ? rawPeriodsData
-    : (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
+    : rawPeriodsData?.items || rawPeriodsData?.periods || [];
 
   const selectedPeriod = periods.find((p) => p.isSelected);
   const pathSegments = pathname.split("/").filter(Boolean);
@@ -295,8 +309,9 @@ export function AppTopBar() {
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
-                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${!item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
-                        }`}
+                      className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${
+                        !item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
+                      }`}
                     >
                       <div className="mt-0.5">
                         {item.type === "warning" ? (
@@ -313,9 +328,9 @@ export function AppTopBar() {
                           <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleTimeString(
-                                [],
-                                { hour: "2-digit", minute: "2-digit" },
-                              )
+                                  [],
+                                  { hour: "2-digit", minute: "2-digit" },
+                                )
                               : ""}
                           </span>
                         </div>
@@ -378,16 +393,18 @@ export function AppTopBar() {
           {selectedPeriod ? (
             <Badge
               variant="outline"
-              className={`gap-1.5 font-medium text-xs ${selectedPeriod.isClosed
-                ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
-                : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
-                }`}
+              className={`gap-1.5 font-medium text-xs ${
+                selectedPeriod.isClosed
+                  ? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+                  : "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+              }`}
             >
               <span
-                className={`h-1.5 w-1.5 rounded-full ${selectedPeriod.isClosed
-                  ? "bg-amber-500"
-                  : "bg-emerald-500 animate-pulse"
-                  }`}
+                className={`h-1.5 w-1.5 rounded-full ${
+                  selectedPeriod.isClosed
+                    ? "bg-amber-500"
+                    : "bg-emerald-500 animate-pulse"
+                }`}
               />
               Periode: {selectedPeriod.periodName || selectedPeriod.name}
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
