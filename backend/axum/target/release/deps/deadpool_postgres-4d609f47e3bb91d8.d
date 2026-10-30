@@ -1,0 +1,10 @@
+E:\Github\aumo-typescript\native\workers\target\release\deps\deadpool_postgres-4d609f47e3bb91d8.d: C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\lib.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\config.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\generic_client.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\../README.md
+
+E:\Github\aumo-typescript\native\workers\target\release\deps\libdeadpool_postgres-4d609f47e3bb91d8.rlib: C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\lib.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\config.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\generic_client.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\../README.md
+
+E:\Github\aumo-typescript\native\workers\target\release\deps\libdeadpool_postgres-4d609f47e3bb91d8.rmeta: C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\lib.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\config.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\generic_client.rs C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\../README.md
+
+C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\lib.rs:
+C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\config.rs:
+C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\generic_client.rs:
+C:\Users\lepo\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\deadpool-postgres-0.12.1\src\../README.md:

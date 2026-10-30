@@ -1,0 +1,1 @@
+E:\Github\aumo-typescript\native\workers\target\release\analytics-workers.exe: E:\Github\aumo-typescript\native\workers\src\analytics\mod.rs E:\Github\aumo-typescript\native\workers\src\analytics\transaction.rs E:\Github\aumo-typescript\native\workers\src\config.rs E:\Github\aumo-typescript\native\workers\src\main.rs E:\Github\aumo-typescript\native\workers\src\queue.rs
