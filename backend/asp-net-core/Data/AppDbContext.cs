@@ -46,11 +46,11 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public virtual DbSet<UserSession> UserSessions { get; set; } = null!;
 
-    public virtual DbSet<AdjustedTrialBalance> AdjustedTrialBalances { get; set; } = null!;
+    public virtual DbSet<AdjustedTrialBalance> AdjustedTrialBalance { get; set; } = null!;
 
-    public virtual DbSet<PostClosingTrialBalance> PostClosingTrialBalances { get; set; } = null!;
+    public virtual DbSet<PostClosingTrialBalance> PostClosingTrialBalance { get; set; } = null!;
 
-    public virtual DbSet<UnadjustedTrialBalance> UnadjustedTrialBalances { get; set; } = null!;
+    public virtual DbSet<UnadjustedTrialBalance> UnadjustedTrialBalance { get; set; } = null!;
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

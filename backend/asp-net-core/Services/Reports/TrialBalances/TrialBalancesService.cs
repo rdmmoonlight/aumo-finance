@@ -72,7 +72,7 @@ public class TrialBalancesService : ITrialBalancesService
         {
             case Adjusted:
                 await ReplaceSnapshotAsync(
-                    _db.AdjustedTrialBalances,
+                    _db.AdjustedTrialBalance,
                     x => x.UserId == userId && x.PeriodId == periodId,
                     lines.Select(l => new AdjustedTrialBalance
                     {
@@ -88,7 +88,7 @@ public class TrialBalancesService : ITrialBalancesService
 
             case PostClosing:
                 await ReplaceSnapshotAsync(
-                    _db.PostClosingTrialBalances,
+                    _db.PostClosingTrialBalance,
                     x => x.UserId == userId && x.PeriodId == periodId,
                     lines.Select(l => new PostClosingTrialBalance
                     {
@@ -104,7 +104,7 @@ public class TrialBalancesService : ITrialBalancesService
 
             default:
                 await ReplaceSnapshotAsync(
-                    _db.UnadjustedTrialBalances,
+                    _db.UnadjustedTrialBalance,
                     x => x.UserId == userId && x.PeriodId == periodId,
                     lines.Select(l => new UnadjustedTrialBalance
                     {
