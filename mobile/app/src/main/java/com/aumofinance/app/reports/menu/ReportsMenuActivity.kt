@@ -12,9 +12,9 @@ import com.aumofinance.app.reports.financials.retainedearnings.RetainedEarningsA
 import com.aumofinance.app.reports.journal.AdjustingJournalReportActivity
 import com.aumofinance.app.reports.ledger.permanent.GeneralLedgerPermanentActivity
 import com.aumofinance.app.reports.ledger.temporary.GeneralLedgerTemporaryActivity
-import com.aumofinance.app.reports.trialbalance.adjusted.AdjustedTrialBalanceActivity
-import com.aumofinance.app.reports.trialbalance.postclosing.PostClosingTrialBalanceActivity
-import com.aumofinance.app.reports.trialbalance.unadjusted.TrialBalanceActivity
+import com.aumofinance.app.reports.trialbalances.adjusted.AdjustedTrialBalancesActivity
+import com.aumofinance.app.reports.trialbalances.postclosing.PostClosingTrialBalancesActivity
+import com.aumofinance.app.reports.trialbalances.unadjusted.TrialBalancesActivity
 import com.aumofinance.app.reports.worksheet.WorksheetActivity
 import com.aumofinance.app.ui.theme.AumoTheme
 
@@ -52,14 +52,14 @@ class ReportsMenuActivity : ComponentActivity() {
                 title = "Trial Balance & Adjustments",
                 items =
                     listOf(
-                        ReportMenuItem("Trial Balance", ReportMenuIcons.TrialBalance) {
-                            open(TrialBalanceActivity::class.java)
+                        ReportMenuItem("Trial Balance", ReportMenuIcons.TrialBalances) {
+                            open(TrialBalancesActivity::class.java)
                         },
                         ReportMenuItem("Adjusting Journal", ReportMenuIcons.AdjustingJournal) {
                             open(AdjustingJournalReportActivity::class.java)
                         },
-                        ReportMenuItem("Adjusted Trial Balance", ReportMenuIcons.TrialBalance) {
-                            open(AdjustedTrialBalanceActivity::class.java)
+                        ReportMenuItem("Adjusted Trial Balance", ReportMenuIcons.TrialBalances) {
+                            open(AdjustedTrialBalancesActivity::class.java)
                         },
                     ),
             ),
@@ -97,8 +97,8 @@ class ReportsMenuActivity : ComponentActivity() {
                         ReportMenuItem("Closing Journal", ReportMenuIcons.ClosingJournal) {
                             open(ClosingJournalActivity::class.java)
                         },
-                        ReportMenuItem("Post-Closing Trial Balance", ReportMenuIcons.TrialBalance) {
-                            open(PostClosingTrialBalanceActivity::class.java)
+                        ReportMenuItem("Post-Closing Trial Balance", ReportMenuIcons.TrialBalances) {
+                            open(PostClosingTrialBalancesActivity::class.java)
                         },
                     ),
             ),

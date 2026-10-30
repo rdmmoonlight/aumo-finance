@@ -5,25 +5,25 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aumofinance.app.reports.trialbalance.TrialBalanceApi
-import com.aumofinance.app.reports.trialbalance.TrialBalanceReport
+import com.aumofinance.app.reports.trialbalances.TrialBalancesApi
+import com.aumofinance.app.reports.trialbalances.TrialBalancesReport
 import io.ktor.client.call.body
 import kotlinx.coroutines.launch
 
 // Neraca Saldo (belum disesuaikan): type="unadjusted", hanya jurnal General.
-class TrialBalanceViewModel : ViewModel() {
-    private val api = TrialBalanceApi()
+class TrialBalancesViewModel : ViewModel() {
+    private val api = TrialBalancesApi()
 
-    var report: TrialBalanceReport? by mutableStateOf(null)
+    var report: TrialBalancesReport? by mutableStateOf(null)
         private set
 
     fun load() {
         viewModelScope.launch {
             report =
                 try {
-                    api.getTrialBalance("unadjusted").body<TrialBalanceReport>()
+                    api.getTrialBalances("unadjusted").body<TrialBalancesReport>()
                 } catch (t: Throwable) {
-                    com.aumofinance.app.crashlog.AppLogger.error("TrialBalanceViewModel", "Error tertangkap", t)
+                    com.aumofinance.app.crashlog.AppLogger.error("TrialBalancesViewModel", "Error tertangkap", t)
                     null
                 }
         }

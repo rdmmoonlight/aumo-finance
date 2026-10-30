@@ -13,7 +13,7 @@ mengembalikan token, dikirim di setiap request berikutnya lewat header
 ## Tech stack
 
 | Bagian | Pilihan |
-|---|---|
+| --- | --- |
 | Bahasa | Kotlin, JDK 17 |
 | Build | Gradle Kotlin DSL (`build.gradle.kts`), AGP 8.5.0, Gradle Wrapper (`./gradlew`, tidak butuh Android Studio) |
 | SDK | `minSdk` 28 / Android 9 — **dikunci**, jangan dinaikkan tanpa instruksi eksplisit. `compileSdk`/`targetSdk` 34 |
@@ -49,7 +49,7 @@ di repo.
 Package: `app/src/main/java/com/aumofinance/app/`
 
 | Folder | Fungsi |
-|---|---|
+| --- | --- |
 | `auth/` | Login (screen, viewmodel, API) + helper biometrik |
 | `coa/` | Chart of Accounts (daftar akun) |
 | `core/` | Kelas `Application`, formatter mata uang, `SyncManager` (placeholder sinkronisasi offline, belum diimplementasikan) |
@@ -61,7 +61,7 @@ Package: `app/src/main/java/com/aumofinance/app/`
 | `logout/` | Proses logout |
 | `network/` | `ApiClient` (konfigurasi Ktor + base URL + header Authorization), `SessionManager` (sesi in-memory), `SessionStore` (persist sesi terenkripsi) |
 | `periods/` | Manajemen periode akuntansi (buka/tutup periode) |
-| `reports/` | Seluruh laporan, dipecah per jenis: `financials/` (Posisi Keuangan, Laba Rugi, Perubahan Modal, Arus Kas, Jurnal Penutup), `journal/` (Jurnal Umum & Penyesuaian), `ledger/` (Buku Besar permanent/temporary), `trialbalance/` (Neraca Saldo unadjusted/adjusted/post-closing), `worksheet/` (Kertas Kerja), `menu/` (navigasi ke semua laporan) |
+| `reports/` | Seluruh laporan, dipecah per jenis: `financials/` (Posisi Keuangan, Laba Rugi, Perubahan Modal, Arus Kas, Jurnal Penutup), `journal/` (Jurnal Umum & Penyesuaian), `ledger/` (Buku Besar permanent/temporary), `trialbalances/` (Neraca Saldo unadjusted/adjusted/post-closing), `worksheet/` (Kertas Kerja), `menu/` (navigasi ke semua laporan) |
 | `settings/` | Pengaturan aplikasi |
 | `splash/` | Splash screen, titik pemulihan sesi tersimpan saat app dibuka |
 | `ui/components/` | Komponen Compose bersama: `SnackbarMessageHost`, `ConfirmDialog`, `AumoDatePickerDialog` |

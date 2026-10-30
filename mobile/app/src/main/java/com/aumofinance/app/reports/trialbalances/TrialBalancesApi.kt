@@ -1,4 +1,4 @@
-package com.aumofinance.app.reports.trialbalance
+package com.aumofinance.app.reports.trialbalances
 
 import com.aumofinance.app.network.ApiClient
 import io.ktor.client.HttpClient
@@ -18,7 +18,7 @@ data class TrialBalancesRow(
     val credit: Double,
 )
 
-data class TrialBalanceReport(
+data class TrialBalancesReport(
     val success: Boolean,
     val hasPeriodSelected: Boolean,
     val selectedPeriodName: String?,
@@ -30,11 +30,11 @@ data class TrialBalanceReport(
     val rows: List<TrialBalancesRow>,
 )
 
-class TrialBalanceApi(private val client: HttpClient = ApiClient.client) {
+class TrialBalancesApi(private val client: HttpClient = ApiClient.client) {
     // type: "unadjusted" (hanya General), "adjusted" (General+Adjusting),
     // atau "post-closing" (Retained Earnings sudah termasuk efek Closing,
     // walau baris Closing itu sendiri tidak pernah tersimpan sebagai entri).
-    suspend fun getTrialBalance(type: String): HttpResponse =
+    suspend fun getTrialBalances(type: String): HttpResponse =
         client.get("/api/v1/reports/trial-balances") {
             parameter("type", type)
         }

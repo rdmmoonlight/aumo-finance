@@ -1,4 +1,4 @@
-package com.aumofinance.app.reports.trialbalance
+package com.aumofinance.app.reports.trialbalances
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -21,8 +21,8 @@ import com.aumofinance.app.ui.theme.AumoDimens
 // Tabel Neraca Saldo. Dipakai bareng oleh 3 varian: Unadjusted, Adjusted, Post-Closing (beda cuma
 // parameter "type" saat load() di masing-masing ViewModel).
 @Composable
-fun TrialBalanceScreen(
-    report: TrialBalanceReport?,
+fun TrialBalancesScreen(
+    report: TrialBalancesReport?,
     fallbackTitle: String,
 ) {
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->

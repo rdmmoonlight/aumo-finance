@@ -57,13 +57,13 @@
             android:name=".reports.ledger.temporary.GeneralLedgerTemporaryActivity"
             android:exported="false" />
         <activity
-            android:name=".reports.trialbalance.unadjusted.TrialBalanceActivity"
+            android:name=".reports.trialbalances.unadjusted.TrialBalancesActivity"
             android:exported="false" />
         <activity
-            android:name=".reports.trialbalance.adjusted.AdjustedTrialBalanceActivity"
+            android:name=".reports.trialbalances.adjusted.AdjustedTrialBalancesActivity"
             android:exported="false" />
         <activity
-            android:name=".reports.trialbalance.postclosing.PostClosingTrialBalanceActivity"
+            android:name=".reports.trialbalances.postclosing.PostClosingTrialBalancesActivity"
             android:exported="false" />
         <activity
             android:name=".reports.worksheet.WorksheetActivity"
