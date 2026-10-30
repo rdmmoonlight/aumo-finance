@@ -99,9 +99,7 @@ export function AppSidebar() {
       if ("cookieStore" in window && typeof window.cookieStore?.delete === "function") {
         await window.cookieStore.delete({ name: "AumoFinance.Session", path: "/" });
       } else {
-        // Fallback untuk browser yang tidak mendukung Cookie Store API
         const expireCookie = (name: string) => {
-          // biome-ignore lint/suspicious/noDocumentCookie: Fallback untuk browser lama
           document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
         };
         expireCookie("AumoFinance.Session");
