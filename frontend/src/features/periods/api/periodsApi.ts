@@ -97,3 +97,13 @@ export const periodsApi = baseApi.injectEndpoints({
     }),
   }),
 });
+
+// --- Export Auto-Generated Hooks ---
+export const {
+  useGetPeriodsQuery,
+  useGetPeriodsOpenInfoQuery,
+  useCreatePeriodMutation,
+  useSelectPeriodMutation,
+  useClearSelectionMutation,
+  useClosePeriodMutation,
+} = periodsApi;
