@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { store } from "@/lib/store";
 import {
   addAccountSchema,
   editAccountSchema,
@@ -37,7 +38,7 @@ import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useCreateChartOfAccount, useDeleteChartOfAccount, useUpdateChartOfAccount } from "../hooks/useChartOfAccounts";
+import { chartOfAccountsApi } from "../api/chartOfAccountsApi";
 import {
   ACCOUNT_RANGES,
   ACCOUNT_TYPES,
@@ -83,19 +84,28 @@ export function AddAccountDialog({
   });
 
   const selectedType = watch("type");
-  const { mutateAsync: createChartOfAccount } = useCreateChartOfAccount();
 
   const onSubmit = async (values: z.output<AddSchemaType>) => {
     setApiError(null);
     setIsCreating(true);
 
     try {
-      await createChartOfAccount({
-        referenceNumber: Number(values.referenceNumber),
-        accountName: values.accountName,
-        type: values.type,
-        role: values.role ?? "Default",
-      });
+      // Direct call ke endpoint RTK Query tanpa hook
+      const result = await store.dispatch(
+        chartOfAccountsApi.endpoints.createChartOfAccount.initiate({
+          referenceNumber: Number(values.referenceNumber),
+          accountName: values.accountName,
+          type: values.type,
+          role: values.role ?? "Default",
+        }),
+      );
+
+      if ("error" in result) {
+        const err = result.error as any;
+        throw new Error(
+          err?.data?.message || err?.message || "Failed to create account",
+        );
+      }
 
       onSuccess(`Account '${values.accountName}' created`);
       onOpenChange(false);
@@ -254,23 +264,31 @@ export function EditAccountDialog({
     });
   }, [account, reset]);
 
-  const { mutateAsync: updateChartOfAccount } = useUpdateChartOfAccount();
-
   const onSubmit = async (values: z.output<EditSchemaType>) => {
     setApiError(null);
     setIsUpdating(true);
 
     try {
-      await updateChartOfAccount({
-        id: values.id,
-        updateAccountRequest: {
-          referenceNumber: Number(values.referenceNumber),
-          accountName: values.accountName,
-          type: values.type,
-          role: values.role ?? "Default",
-          isActive: values.isActive ?? true,
-        },
-      });
+      // Direct call ke endpoint RTK Query tanpa hook
+      const result = await store.dispatch(
+        chartOfAccountsApi.endpoints.updateChartOfAccount.initiate({
+          id: values.id,
+          updateAccountRequest: {
+            referenceNumber: Number(values.referenceNumber),
+            accountName: values.accountName,
+            type: values.type,
+            role: values.role ?? "Default",
+            isActive: values.isActive ?? true,
+          },
+        }),
+      );
+
+      if ("error" in result) {
+        const err = result.error as any;
+        throw new Error(
+          err?.data?.message || err?.message || "Failed to update account",
+        );
+      }
 
       onSuccess(`Account '${values.accountName}' updated`);
       onOpenChange(false);
@@ -359,14 +377,14 @@ export function DeleteAccountAlertDialog({
     setIsDeleting(true);
 
     try {
+      // Direct call ke endpoint RTK Query tanpa hook
+      const result = await store.dispatch(
+        chartOfAccountsApi.endpoints.deleteChartOfAccount.initiate({
+          id: Number(account.id),
+        }),
+      );
 
-      // Use the mutation trigger directly
-      const deleteChartOfAccount = useDeleteChartOfAccount();
-      const result = await deleteChartOfAccount.mutateAsync({
-        id: Number(account.id),
-      });
-
-      if (result && typeof result === "object" && "error" in result) {
+      if ("error" in result) {
         const err = result.error as any;
         throw new Error(
           err?.data?.message || err?.message || "Failed to delete account",

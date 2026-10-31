@@ -6,13 +6,16 @@ import { useGoogleLogin } from "@react-oauth/google";
 import { useSearchParams } from "@/lib/router-compat";
 import React, { Suspense, useEffect, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { baseApi } from "@/lib/apiClient";
+import { store } from "@/lib/store";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
-import { useAuth } from "./hooks/use-auth";
+import { authApi } from "./api/authApi";
 
 // ===== TYPES =====
 export type AuthFormData = {
@@ -25,25 +28,6 @@ export type AuthFormData = {
 export interface AuthPageProps {
   initialMode?: "login" | "register";
   onSuccess?: () => void;
-}
-
-// Helper untuk membaca pesan error secara aman dari `unknown`
-function getErrorMessage(err: unknown, fallbackMessage: string): string {
-  if (typeof err === "object" && err !== null) {
-    const errorObj = err as Record<string, unknown>;
-    if (
-      typeof errorObj.data === "object" &&
-      errorObj.data !== null &&
-      "message" in errorObj.data &&
-      typeof (errorObj.data as Record<string, unknown>).message === "string"
-    ) {
-      return (errorObj.data as { message: string }).message;
-    }
-    if ("message" in errorObj && typeof errorObj.message === "string") {
-      return errorObj.message;
-    }
-  }
-  return fallbackMessage;
 }
 
 // Disuntikkan saat build oleh Rsbuild (variabel berawalan PUBLIC_).
@@ -106,7 +90,7 @@ export function GoogleAuthButtonInner({
       disabled={isPending}
       onClick={() => {
         if (!GOOGLE_CLIENT_ID) {
-          onError("GOOGLE_CLIENT_ID belum diset");
+          onError("_GOOGLE_CLIENT_ID belum diset");
           return;
         }
         googleLogin();
@@ -131,23 +115,16 @@ function AuthFormInner({
   onSuccess,
 }: AuthPageProps): React.JSX.Element {
   const searchParams = useSearchParams();
-
-  const {
-    user,
-    profile,
-    isLoadingProfile,
-    login,
-    isLoggingIn,
-    googleLogin,
-    isGoogleLoggingIn,
-  } = useAuth();
+  const dispatch = useDispatch();
 
   const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [showPass, setShowPass] = useState(false);
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
+  const [isPending, setIsPending] = useState(false);
 
-  const isPending = isLoggingIn || isGoogleLoggingIn;
+  // ✅ Pengecekan profil dilakukan secara silent di background
+  const [isCheckingProfile, setIsCheckingProfile] = useState(false);
 
   const {
     register,
@@ -168,16 +145,40 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
+  // ✅ Pengecekan profil user saat pertama kali dimuat (Silent background check)
   useEffect(() => {
-    if (profile?.success || user) {
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        const target = searchParams.get("redirectTo") || "/home";
-        window.location.replace(target);
+    let isMounted = true;
+
+    async function checkAuthProfile() {
+      setIsCheckingProfile(true);
+      try {
+        const result = await store.dispatch(
+          authApi.endpoints.getProfile.initiate(undefined, {
+            subscribe: false,
+          }),
+        );
+
+        if (isMounted && "data" in result && result.data?.success) {
+          if (onSuccess) {
+            onSuccess();
+          } else {
+            const target = searchParams.get("redirectTo") || "/home";
+            window.location.replace(target);
+          }
+        }
+      } catch {
+        // Mengabaikan error jika belum terautentikasi atau backend unreachable
+      } finally {
+        if (isMounted) setIsCheckingProfile(false);
       }
     }
-  }, [profile, user, searchParams, onSuccess]);
+
+    checkAuthProfile();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [searchParams, onSuccess]);
 
   useEffect(() => {
     setMode(initialMode);
@@ -205,17 +206,31 @@ function AuthFormInner({
 
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
     setApiErr("");
+    setIsPending(true);
 
     try {
-      const res = await login({
-        email: values.email,
-        password: values.password,
-        rememberMe: values.keepMe ?? false,
-        isMobileClient: false,
-      });
+      // Reset cache RTK Query
+      dispatch(baseApi.util.resetApiState());
 
-      if (!res.success) {
-        setApiErr(res.message || "Email atau password salah.");
+      // Panggil endpoint /auth/login via initiate
+      const result = await store.dispatch(
+        authApi.endpoints.login.initiate({
+          email: values.email,
+          password: values.password,
+          rememberMe: values.keepMe ?? false,
+          isMobileClient: false,
+        }),
+      );
+
+      if ("error" in result) {
+        const errorData = result.error as any;
+        const msg =
+          errorData?.data?.message ||
+          errorData?.data?.title ||
+          (errorData?.status === "FETCH_ERROR"
+            ? "Gagal terhubung ke server backend."
+            : "Email atau password salah.");
+        setApiErr(msg);
         return;
       }
 
@@ -231,22 +246,30 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch (err: unknown) {
-      setApiErr(getErrorMessage(err, "Gagal terhubung ke server backend."));
+    } catch {
+      setApiErr("Terjadi kesalahan sistem saat mencoba masuk.");
+    } finally {
+      setIsPending(false);
     }
   };
 
   const handleGoogleSuccess = async (idToken: string): Promise<void> => {
     setApiErr("");
+    setIsPending(true);
 
     try {
-      const res = await googleLogin({
-        idToken,
-        isMobileClient: false,
-      });
+      dispatch(baseApi.util.resetApiState());
 
-      if (!res.success) {
-        setApiErr(res.message || "Gagal verifikasi Google.");
+      const result = await store.dispatch(
+        authApi.endpoints.googleLogin.initiate({
+          idToken,
+          isMobileClient: false,
+        }),
+      );
+
+      if ("error" in result) {
+        const errorData = result.error as any;
+        setApiErr(errorData?.data?.message || "Gagal verifikasi Google.");
         return;
       }
 
@@ -256,8 +279,10 @@ function AuthFormInner({
         const target = searchParams.get("redirectTo") || "/home";
         window.location.replace(target);
       }
-    } catch (err: unknown) {
-      setApiErr(getErrorMessage(err, "Gagal verifikasi Google."));
+    } catch {
+      setApiErr("Gagal verifikasi Google.");
+    } finally {
+      setIsPending(false);
     }
   };
 
@@ -276,7 +301,7 @@ function AuthFormInner({
 
       <div className="space-y-4">
         <GoogleAuthButtonInner
-          isPending={isPending || isLoadingProfile}
+          isPending={isPending || isCheckingProfile}
           onSuccessHandler={handleGoogleSuccess}
           onError={setApiErr}
         />
@@ -360,9 +385,9 @@ function AuthFormInner({
               />
               <Label className="text-xs">Keep me signed in</Label>
             </div>
-            <button type="button" className="text-xs underline text-zinc-600 hover:text-black">
+            <a href="#" className="text-xs underline">
               Forgot?
-            </button>
+            </a>
           </div>
         )}
 
@@ -374,7 +399,7 @@ function AuthFormInner({
 
         <Button
           type="submit"
-          disabled={isPending || isLoadingProfile}
+          disabled={isPending || isCheckingProfile}
           className="h-11 w-full rounded-xl bg-black text-white hover:bg-zinc-800"
         >
           {isPending
@@ -390,7 +415,6 @@ function AuthFormInner({
           <>
             Belum punya akun?{" "}
             <button
-              type="button"
               onClick={() => handleSwitchMode("register")}
               className="font-semibold underline"
             >
@@ -401,7 +425,6 @@ function AuthFormInner({
           <>
             Sudah punya akun?{" "}
             <button
-              type="button"
               onClick={() => handleSwitchMode("login")}
               className="font-semibold underline"
             >
