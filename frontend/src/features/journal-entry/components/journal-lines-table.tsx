@@ -58,7 +58,13 @@ export function JournalLinesTable({
     <Card className="overflow-hidden">
       <CardHeader className="py-3 flex-row items-center justify-between space-y-0">
         <CardTitle className="text-sm font-semibold">Journal Lines</CardTitle>
-        <Button type="button" variant="outline" size="sm" className="h-7 gap-1 text-xs" onClick={onAddLine}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="h-7 gap-1 text-xs"
+          onClick={onAddLine}
+        >
           <Plus size={12} /> Add Line
         </Button>
       </CardHeader>
@@ -66,18 +72,35 @@ export function JournalLinesTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[10%] font-semibold uppercase tracking-wider text-muted-foreground">Ref</TableHead>
-              <TableHead className="w-[28%] font-semibold uppercase tracking-wider text-muted-foreground">Account</TableHead>
-              <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground">Description</TableHead>
-              <TableHead className="w-[15%] text-right font-semibold uppercase tracking-wider text-muted-foreground">Debit</TableHead>
-              <TableHead className="w-[15%] text-right font-semibold uppercase tracking-wider text-muted-foreground">Credit</TableHead>
-              <TableHead className="w-[5%] text-center font-semibold uppercase tracking-wider text-muted-foreground">Action</TableHead>
+              <TableHead className="w-[10%] font-semibold uppercase tracking-wider text-muted-foreground">
+                Ref
+              </TableHead>
+              <TableHead className="w-[28%] font-semibold uppercase tracking-wider text-muted-foreground">
+                Account
+              </TableHead>
+              <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground">
+                Description
+              </TableHead>
+              <TableHead className="w-[15%] text-right font-semibold uppercase tracking-wider text-muted-foreground">
+                Debit
+              </TableHead>
+              <TableHead className="w-[15%] text-right font-semibold uppercase tracking-wider text-muted-foreground">
+                Credit
+              </TableHead>
+              <TableHead className="w-[5%] text-center font-semibold uppercase tracking-wider text-muted-foreground">
+                Action
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {fields.map((field, index) => {
               const currentAccountId = watchedLines?.[index]?.accountId;
-              const ref = availableAccounts.find((a) => a.id === currentAccountId)?.referenceNumber;
+
+              // Menggunakan perbandingan string agar aman dari perbedaan tipe data (string vs number)
+              const selectedAccount = availableAccounts.find(
+                (a) => String(a.id) === String(currentAccountId)
+              );
+              const ref = selectedAccount?.referenceNumber;
 
               return (
                 <TableRow key={field.id}>
@@ -91,19 +114,35 @@ export function JournalLinesTable({
                   </TableCell>
                   <TableCell>
                     <Select
-                      value={currentAccountId ? String(currentAccountId) : ""}
-                      onValueChange={(v) =>
-                        setValue(`lines.${index}.accountId`, Number(v), {
-                          shouldValidate: true,
-                        })
+                      value={
+                        currentAccountId !== undefined && currentAccountId !== null
+                          ? String(currentAccountId)
+                          : ""
                       }
+                      onValueChange={(v) => {
+                        // Mencari account sesuai tipe ID aslinya
+                        const matched = availableAccounts.find(
+                          (a) => String(a.id) === v
+                        );
+                        setValue(
+                          `lines.${index}.accountId`,
+                          matched ? matched.id : v,
+                          {
+                            shouldValidate: true,
+                          }
+                        );
+                      }}
                     >
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue placeholder="Select Account" />
                       </SelectTrigger>
                       <SelectContent className="text-xs">
                         {availableAccounts.map((acc) => (
-                          <SelectItem key={acc.id} value={String(acc.id)} className="text-xs">
+                          <SelectItem
+                            key={acc.id}
+                            value={String(acc.id)}
+                            className="text-xs"
+                          >
                             {acc.referenceNumber} - {acc.accountName}
                           </SelectItem>
                         ))}
@@ -122,7 +161,9 @@ export function JournalLinesTable({
                       className="h-8 text-xs text-right font-mono"
                       placeholder="0"
                       value={watchedLines?.[index]?.debit || ""}
-                      onChange={(e) => onAmountChange(index, "debit", e.target.value)}
+                      onChange={(e) =>
+                        onAmountChange(index, "debit", e.target.value)
+                      }
                     />
                   </TableCell>
                   <TableCell>
@@ -130,7 +171,9 @@ export function JournalLinesTable({
                       className="h-8 text-xs text-right font-mono"
                       placeholder="0"
                       value={watchedLines?.[index]?.credit || ""}
-                      onChange={(e) => onAmountChange(index, "credit", e.target.value)}
+                      onChange={(e) =>
+                        onAmountChange(index, "credit", e.target.value)
+                      }
                     />
                   </TableCell>
                   <TableCell className="text-center">
@@ -171,8 +214,12 @@ export function JournalLinesTable({
                     <CheckCircle2 size={12} /> Balanced
                   </Badge>
                 ) : (
-                  <Badge variant="destructive" className="gap-1 bg-red-500/15 text-red-500 border-red-500/20">
-                    <AlertTriangle size={12} /> Unbalanced Rp {formatIDR(Math.abs(totalDebit - totalCredit))}
+                  <Badge
+                    variant="destructive"
+                    className="gap-1 bg-red-500/15 text-red-500 border-red-500/20"
+                  >
+                    <AlertTriangle size={12} /> Unbalanced Rp{" "}
+                    {formatIDR(Math.abs(totalDebit - totalCredit))}
                   </Badge>
                 )}
               </TableCell>
