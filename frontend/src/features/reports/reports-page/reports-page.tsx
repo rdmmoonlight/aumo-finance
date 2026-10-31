@@ -3,9 +3,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { store } from "@/lib/store";
-import { reportsApi, SummaryResponse } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { createColumnHelper, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
+import { reportsApi, SummaryResponse } from "../api/reportsApi";
 import { ReportCard, ReportsGrid, ReportsHeader, ReportsSearch, ReportsSummary } from "./components";
 import { ReportItem, REPORTS } from "./data";
 

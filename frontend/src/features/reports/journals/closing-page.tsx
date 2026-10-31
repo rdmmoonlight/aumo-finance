@@ -3,10 +3,10 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
-import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, Info, Loader2, Lock } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { reportsApi } from "../api/reportsApi";
 import { ClosingGroupTable } from "./_components/closing-group-table";
 import { NoPeriodState } from "./_components/no-period-state";
 import { formatNumberWithParen } from "./_lib/format";
