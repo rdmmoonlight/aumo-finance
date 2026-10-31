@@ -64,6 +64,8 @@ public class WorksheetResult
 {
     public bool HasPeriodSelected { get; set; }
 
+    public int PeriodId { get; set; }
+
     public string? SelectedPeriodName { get; set; }
 
     public List<WorksheetRowApiResponse> Rows { get; set; } = new();

@@ -6,6 +6,7 @@ using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
+using WorksheetEntity = AumoBackend.Models.Worksheet; // alias: "Worksheet" juga nama namespace service ini
 
 public class WorksheetService : IWorksheetService
 {
@@ -107,9 +108,80 @@ public class WorksheetService : IWorksheetService
         return new WorksheetResult
         {
             HasPeriodSelected = true,
+            PeriodId = period.Id,
             SelectedPeriodName = period.PeriodName,
             Rows = rows,
             Totals = totals,
         };
+    }
+
+    public async Task SaveSnapshotAsync(Guid userId, WorksheetResult result)
+    {
+        if (!result.HasPeriodSelected)
+        {
+            return;
+        }
+
+        var periodId = result.PeriodId;
+        var fresh = result.Rows
+            .Select(r => new WorksheetEntity
+            {
+                UserId = userId,
+                PeriodId = periodId,
+                AccountId = r.AccountId,
+                AccountNumber = Truncate(r.ReferenceNumber.ToString(System.Globalization.CultureInfo.InvariantCulture), 50),
+                AccountName = Truncate(r.AccountName, 255),
+                AccountType = Truncate(r.Type, 50),
+                NormalBalanceIsDebit = r.NormalBalanceIsDebit,
+                UnadjustedDebit = Math.Round(r.UnadjustedDebit, 2),
+                UnadjustedCredit = Math.Round(r.UnadjustedCredit, 2),
+                AdjustmentDebit = Math.Round(r.AdjustmentDebit, 2),
+                AdjustmentCredit = Math.Round(r.AdjustmentCredit, 2),
+                AdjustedDebit = Math.Round(r.AdjustedDebit, 2),
+                AdjustedCredit = Math.Round(r.AdjustedCredit, 2),
+                IncomeStatementDebit = Math.Round(r.IncomeStatementDebit, 2),
+                IncomeStatementCredit = Math.Round(r.IncomeStatementCredit, 2),
+                FinancialPositionDebit = Math.Round(r.FinancialPositionDebit, 2),
+                FinancialPositionCredit = Math.Round(r.FinancialPositionCredit, 2),
+                IsTotalRow = false,
+            })
+            .ToList();
+
+        var t = result.Totals;
+        fresh.Add(new WorksheetEntity
+        {
+            UserId = userId,
+            PeriodId = periodId,
+            AccountId = null,
+            AccountNumber = string.Empty,
+            AccountName = "Total",
+            AccountType = string.Empty,
+            NormalBalanceIsDebit = false,
+            UnadjustedDebit = Math.Round(t.UnadjustedDebit, 2),
+            UnadjustedCredit = Math.Round(t.UnadjustedCredit, 2),
+            AdjustmentDebit = Math.Round(t.AdjustmentDebit, 2),
+            AdjustmentCredit = Math.Round(t.AdjustmentCredit, 2),
+            AdjustedDebit = Math.Round(t.AdjustedDebit, 2),
+            AdjustedCredit = Math.Round(t.AdjustedCredit, 2),
+            IncomeStatementDebit = Math.Round(t.IncomeStatementDebit, 2),
+            IncomeStatementCredit = Math.Round(t.IncomeStatementCredit, 2),
+            FinancialPositionDebit = Math.Round(t.FinancialPositionDebit, 2),
+            FinancialPositionCredit = Math.Round(t.FinancialPositionCredit, 2),
+            IsTotalRow = true,
+        });
+
+        var old = await _db.Worksheet
+            .Where(x => x.UserId == userId && x.PeriodId == periodId)
+            .ToListAsync();
+
+        _db.Worksheet.RemoveRange(old);
+        await _db.Worksheet.AddRangeAsync(fresh);
+        await _db.SaveChangesAsync();
+    }
+
+    private static string Truncate(string? value, int max)
+    {
+        value ??= string.Empty;
+        return value.Length <= max ? value : value[..max];
     }
 }
