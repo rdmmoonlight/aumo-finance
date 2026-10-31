@@ -3,14 +3,14 @@
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Link } from '@tanstack/react-router';
 import { AlertTriangle, Calendar, EyeOff, Grid, Info, Loader2, TrendingUp } from "lucide-react";
+import { useGetWorksheet } from "../worksheet/hooks/useWorksheet";
 import { formatNumber } from "./utils";
 import { WorksheetTable } from "./worksheet-table";
 
 export default function WorksheetPage() {
-    const { data, isLoading, isError, error } = reportsApi.useGetWorksheetQuery();
+    const { data, isLoading, isError, error } = useGetWorksheet();
 
     if (isLoading) {
         return (
