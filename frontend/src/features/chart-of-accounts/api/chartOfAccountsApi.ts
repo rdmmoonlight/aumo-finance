@@ -77,3 +77,12 @@ export const chartOfAccountsApi = baseApi.injectEndpoints({
     }),
   }),
 });
+
+// --- Export Auto-Generated Hooks ---
+export const {
+  useGetChartOfAccountsQuery,
+  useLazyGetChartOfAccountsQuery,
+  useCreateChartOfAccountMutation,
+  useUpdateChartOfAccountMutation,
+  useDeleteChartOfAccountMutation,
+} = chartOfAccountsApi;
