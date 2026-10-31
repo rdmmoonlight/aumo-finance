@@ -31,9 +31,9 @@ import {
 import * as React from "react";
 
 import { store } from "@/lib/store";
-import { commonApi } from "../features/api/commonApi";
 import { authApi } from "../features/auth/api/authApi";
 import { periodsApi } from "../features/periods/api/periodsApi";
+import { commonApi } from "../lib/commonApi";
 
 interface PeriodItem {
 	id: number;
@@ -388,14 +388,14 @@ export function AppTopBar() {
 						<Badge
 							variant="outline"
 							className={`gap-1.5 font-medium text-xs ${selectedPeriod.isClosed
-									? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
-									: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+								? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+								: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
 								}`}
 						>
 							<span
 								className={`h-1.5 w-1.5 rounded-full ${selectedPeriod.isClosed
-										? "bg-amber-500"
-										: "bg-emerald-500 animate-pulse"
+									? "bg-amber-500"
+									: "bg-emerald-500 animate-pulse"
 									}`}
 							/>
 							Periode: {selectedPeriod.periodName || selectedPeriod.name}

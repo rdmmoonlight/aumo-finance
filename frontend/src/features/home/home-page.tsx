@@ -34,7 +34,7 @@ export default function HomeContent() {
         isFetching,
         isError,
         refetch,
-    } = homeApi.useGetMarketIndicators();
+    } = homeApi.useGetMarketIndicatorsQuery();
 
     useEffect(() => {
         if (rawResponse) {
