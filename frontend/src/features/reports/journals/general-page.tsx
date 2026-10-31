@@ -5,8 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link, useNavigate } from '@tanstack/react-router';
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { useDeleteJournalEntry } from "../../journal-entry/hooks/useJournalEntry";
-import { useGetJournalsGeneral } from "../journals/hooks/useJournals";
+import { reportsApi } from "../api/reportsApi";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
 import { JournalEmptyState } from "./_components/journal-empty-state";
@@ -15,8 +14,8 @@ import { JournalEntry } from "./_lib/types";
 
 export default function GeneralJournalPage() {
     const navigate = useNavigate();
-    const deleteJournalEntry = useDeleteJournalEntry();
-    const { data, isLoading, refetch } = useGetJournalsGeneral();
+    const [deleteJournalEntry] = (reportsApi.endpoints as any).deleteJournalEntry.useMutation();
+    const { data, isLoading, refetch } = (reportsApi.endpoints as any).getGeneralJournal.useQuery();
     const [editMode, setEditMode] = useState(false);
     const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -25,7 +24,7 @@ export default function GeneralJournalPage() {
         if (!entryToDelete) return;
         setIsDeleting(true);
         try {
-            await deleteJournalEntry.mutateAsync(entryToDelete.id);
+            await deleteJournalEntry(entryToDelete.id).unwrap();
             await refetch();
         } catch (err) { console.error(err); }
         finally { setIsDeleting(false); setEntryToDelete(null); }

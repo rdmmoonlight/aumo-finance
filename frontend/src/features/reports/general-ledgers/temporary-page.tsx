@@ -2,9 +2,9 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { store } from "@/lib/store";
-import { reportsApi, type GetGeneralLedgerTemporaryApiResponse as GeneralLedgerTemporaryResponse } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { reportsApi, type GetGeneralLedgerTemporaryApiResponse as GeneralLedgerTemporaryResponse } from "../api/reportsApi";
 import { LedgerCard } from "./_components/ledger-card";
 import { NetIncomeCard } from "./_components/net-income-card";
 import { NoPeriodState } from "./_components/no-period-state";

@@ -3,11 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
-import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Link, useNavigate } from '@tanstack/react-router';
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useDeleteJournalEntry } from "../../journal-entry/hooks/useJournalEntry";
+import { reportsApi } from "../api/reportsApi";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
 import { JournalEmptyState } from "./_components/journal-empty-state";
@@ -16,7 +15,6 @@ import { JournalEntry } from "./_lib/types";
 
 export default function AdjustingJournalPage() {
     const navigate = useNavigate();
-    const { mutateAsync: deleteJournalEntry } = useDeleteJournalEntry();
     const [editMode, setEditMode] = useState(false);
     const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
     const [data, setData] = useState<any>(null);
@@ -38,7 +36,7 @@ export default function AdjustingJournalPage() {
         if (!entryToDelete) return;
         setIsDeleting(true);
         try {
-            await deleteJournalEntry(entryToDelete.id);
+            await store.dispatch((reportsApi.endpoints as any).deleteJournalEntry.initiate(entryToDelete.id)).unwrap();
             await fetchAdjustingJournal();
         } catch (error) { console.error(error); }
         finally { setIsDeleting(false); setEntryToDelete(null); }
