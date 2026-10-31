@@ -3,12 +3,6 @@
 import { useAppRouter, useSearchParams } from "@/lib/router-compat";
 import { Link, useNavigate } from '@tanstack/react-router';
 
-import { DashboardCharts } from "#/features/dashboard/components/charts";
-import {
-  ExpenseTable,
-  formatNumber,
-  TrendTable,
-} from "#/features/dashboard/components/tables";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -36,6 +30,12 @@ import {
   X,
 } from "lucide-react";
 import { dashboardApi } from "../api/dashboardApi";
+import { DashboardCharts } from "./charts";
+import {
+  ExpenseTable,
+  formatNumber,
+  TrendTable,
+} from "./tables";
 
 
 import { useCallback, useEffect, useMemo, useState } from "react";
