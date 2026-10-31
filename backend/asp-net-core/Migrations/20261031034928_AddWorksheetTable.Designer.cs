@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AumoBackend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261031031553_AddWorksheetTable")]
+    [Migration("20261031034928_AddWorksheetTable")]
     partial class AddWorksheetTable
     {
         /// <inheritdoc />
@@ -834,20 +834,20 @@ namespace AumoBackend.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<decimal>("AdjustedCredit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("AdjustedDebit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("AdjustmentCredit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("AdjustmentDebit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<DateTime?>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -855,20 +855,20 @@ namespace AumoBackend.Migrations
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
                     b.Property<decimal>("FinancialPositionCredit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("FinancialPositionDebit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("IncomeStatementCredit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("IncomeStatementDebit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<bool>("IsTotalRow")
                         .ValueGeneratedOnAdd()
@@ -884,12 +884,12 @@ namespace AumoBackend.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("UnadjustedCredit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<decimal>("UnadjustedDebit")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)");
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
