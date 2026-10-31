@@ -7,10 +7,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { store } from "@/lib/store";
+import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import { AlertTriangle, Calendar, Check, Download, Eye, FileSpreadsheet, Upload } from "lucide-react";
-import { useState } from "react";
-import { useGetChartOfAccounts } from "../chart-of-accounts/hooks/useChartOfAccounts";
-import { AccountMappingDetailDto, useImportJournalEntries } from "../tools/hooks/useTools";
+import { useEffect, useState } from "react";
+import { AccountMappingDetailDto, toolsApi } from "../tools/api/toolsApi";
 import { MappingStatusTable } from "./components/mapping-status-table";
 import { PreviewTransactionLinesTable } from "./components/preview-transaction-lines-table";
 import { MONTHS } from "./constants";
@@ -21,16 +22,31 @@ export default function ToolsPage() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [isParsing, setIsParsing] = useState(false);
     const [isImporting, setIsImporting] = useState(false);
+    const [isLoadingCoa, setIsLoadingCoa] = useState(false);
     const [targetMonth, setTargetMonth] = useState(new Date().getMonth() + 1);
     const [targetYear, setTargetYear] = useState(new Date().getFullYear());
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [parseResult, setParseResult] = useState<JournalImportResult | null>(null);
     const [accountMappings, setAccountMappings] = useState<AccountMappingDetail[]>([]);
+    const [dbAccounts, setDbAccounts] = useState<any[]>([]);
     const isBusy = isParsing || isImporting;
-    const importJournalEntries = useImportJournalEntries();
-    const { data: chartOfAccountsData, isLoading: isLoadingCoa } = useGetChartOfAccounts();
-    const rawAccounts = chartOfAccountsData as any;
-    const dbAccounts = Array.isArray(rawAccounts) ? rawAccounts : rawAccounts?.accounts || rawAccounts?.data || [];
+
+    useEffect(() => {
+        let isMounted = true;
+        async function fetchCoa() {
+            setIsLoadingCoa(true);
+            try {
+                const result = await store.dispatch(chartOfAccountsApi.endpoints.getChartOfAccounts.initiate());
+                if (isMounted && result.data) {
+                    const raw = result.data as any;
+                    setDbAccounts(Array.isArray(raw) ? raw : raw?.accounts || raw?.data || []);
+                }
+            } catch { }
+            finally { if (isMounted) setIsLoadingCoa(false); }
+        }
+        fetchCoa();
+        return () => { isMounted = false; };
+    }, []);
 
     const handlePreview = async () => {
         if (!selectedFile) { setErrorMessage("Select Excel first"); return; }
@@ -100,9 +116,14 @@ export default function ToolsPage() {
                     lines: tx.lines.map((l) => ({ accountReferenceNumber: l.refNumber, accountName: l.accountName, description: l.description, debit: l.debit, credit: l.credit })),
                 })),
             };
-            await importJournalEntries.mutateAsync(payload as any);
-            setSuccessMessage(`Imported ${parseResult.totalTransactionsRead} entries for ${targetMonth}/${targetYear}`);
-            setParseResult(null); setSelectedFile(null); setAccountMappings([]);
+            const result = await store.dispatch(toolsApi.endpoints.importJournalEntries.initiate(payload as any));
+            if ("data" in result) {
+                setSuccessMessage(`Imported ${parseResult.totalTransactionsRead} entries for ${targetMonth}/${targetYear}`);
+                setParseResult(null); setSelectedFile(null); setAccountMappings([]);
+            } else if ("error" in result) {
+                const err = result.error as any;
+                setErrorMessage(err?.data?.message || err?.message || "Gagal melakukan import jurnal.");
+            }
         } catch (err: any) { setErrorMessage(err?.message || "Gagal melakukan import jurnal."); }
         finally { setIsImporting(false); }
     };

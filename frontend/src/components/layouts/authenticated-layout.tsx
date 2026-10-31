@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "#/features/auth/hooks/use-auth";
 import { AppFooter } from "@/components/app-footer";
 import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
@@ -9,10 +8,11 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAppRouter } from "@/lib/router-compat";
 import { Outlet } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from "react";
-import { periodsApi } from "../../features/periods/hooks/usePeriods";
+import { authApi } from "../../features/auth/api/authApi";
+import { periodsApi } from "../../features/periods/api/periodsApi";
 
 function PeriodsLoadingOverlay() {
-    const { isLoading } = periodsApi.useGetPeriodsOpenInfo();
+    const { isLoading } = periodsApi.useGetPeriodsOpenInfoQuery();
 
     if (!isLoading) return null;
 
@@ -24,7 +24,7 @@ function PeriodsLoadingOverlay() {
 }
 
 export default function AuthenticatedLayout() {
-    const { refetchProfile } = useAuth();
+    const [refetchProfile] = authApi.useLazyGetProfileQuery();
     const router = useAppRouter();
 
     const [isAuthLoading, setIsAuthLoading] = useState(true);

@@ -23,7 +23,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import {
+  ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+} from "@tanstack/react-table";
 import {
   BookOpen,
   Check,
@@ -34,9 +41,10 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { useGetChartOfAccounts } from "../hooks/useChartOfAccounts";
+import { chartOfAccountsApi } from "../api/chartOfAccountsApi";
 
-import { useMemo, useState } from "react";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AddAccountDialog,
   DeleteAccountAlertDialog,
@@ -58,15 +66,41 @@ export function ChartOfAccountsTable() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const {
-    data: rawAccountsData,
-    isLoading,
-    isError,
-    refetch: fetchAccounts,
-  } = useGetChartOfAccounts({
-    search: searchText || undefined,
-    category: categoryFilter || undefined,
-  });
+  // State untuk penanganan data fetch manual
+  const [rawAccountsData, setRawAccountsData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
+
+  // Fungsi fetch data langsung via store.dispatch (tanpa React Hooks RTK)
+  const fetchAccounts = useCallback(async () => {
+    setIsLoading(true);
+    setIsError(false);
+
+    try {
+      const result = await store.dispatch(
+        chartOfAccountsApi.endpoints.getChartOfAccounts.initiate({
+          search: searchText || undefined,
+          category: categoryFilter || undefined,
+        }),
+      );
+
+      if ("data" in result) {
+        setRawAccountsData(result.data);
+      } else if ("error" in result) {
+        setIsError(true);
+        setErrorMessage("Gagal mengambil data Chart of Accounts dari server.");
+      }
+    } catch {
+      setIsError(true);
+      setErrorMessage("Terjadi kesalahan sistem saat mengambil data.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [searchText, categoryFilter]);
+
+  useEffect(() => {
+    fetchAccounts();
+  }, [fetchAccounts]);
 
   const rawAccounts = useMemo<AccountItem[]>(() => {
     if (!rawAccountsData) return [];
@@ -92,7 +126,9 @@ export function ChartOfAccountsTable() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
-  const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
+    null,
+  );
 
   const filteredAccounts = useMemo(() => {
     if (!Array.isArray(rawAccounts)) return [];
@@ -106,12 +142,172 @@ export function ChartOfAccountsTable() {
     });
   }, [rawAccounts, searchText, categoryFilter]);
 
+  const columns = useMemo<ColumnDef<AccountItem>[]>(() => {
+    const cols: ColumnDef<AccountItem>[] = [
+      {
+        accessorKey: "referenceNumber",
+        header: () => (
+          <span className="pl-6 font-semibold uppercase tracking-wider text-muted-foreground">
+            Ref
+          </span>
+        ),
+        meta: { headerClassName: "w-24 pl-6", cellClassName: "pl-6" },
+        cell: ({ getValue }) => (
+          <span className="font-mono text-primary text-sm font-medium">
+            {String(getValue() ?? "")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "accountName",
+        header: () => (
+          <span className="font-semibold uppercase tracking-wider text-muted-foreground">
+            Name
+          </span>
+        ),
+        cell: ({ getValue }) => (
+          <span className="text-sm font-medium">
+            {String(getValue() ?? "")}
+          </span>
+        ),
+      },
+      {
+        accessorKey: "type",
+        header: () => (
+          <span className="font-semibold uppercase tracking-wider text-muted-foreground">
+            Category
+          </span>
+        ),
+        cell: ({ getValue }) => (
+          <Badge variant="outline" className="text-xs">
+            {String(getValue() ?? "")}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: "role",
+        header: () => (
+          <span className="font-semibold uppercase tracking-wider text-muted-foreground">
+            Role
+          </span>
+        ),
+        cell: ({ getValue }) => {
+          const role = getValue<string | undefined>();
+          return role && role !== "Default" ? (
+            <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
+              {role}
+            </Badge>
+          ) : (
+            <span className="text-xs text-muted-foreground">Standard</span>
+          );
+        },
+      },
+      {
+        accessorKey: "balance",
+        header: () => (
+          <div className="text-right font-semibold uppercase tracking-wider text-muted-foreground">
+            Balance
+          </div>
+        ),
+        meta: { cellClassName: "text-right" },
+        cell: ({ getValue }) => {
+          const balance = Number(getValue() || 0);
+          return (
+            <span
+              className={cn(
+                "font-medium font-mono text-sm",
+                balance >= 0 ? "text-emerald-500" : "text-red-500",
+              )}
+            >
+              {balance.toLocaleString("id-ID")}
+            </span>
+          );
+        },
+      },
+      {
+        accessorKey: "isActive",
+        header: () => (
+          <div className="text-center font-semibold uppercase tracking-wider text-muted-foreground">
+            Status
+          </div>
+        ),
+        meta: { cellClassName: "text-center" },
+        cell: ({ getValue }) => {
+          const isActive = Boolean(getValue());
+          return (
+            <Badge
+              variant={isActive ? "default" : "secondary"}
+              className={cn(
+                "text-xs",
+                isActive &&
+                "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
+              )}
+            >
+              {isActive ? "Active" : "Inactive"}
+            </Badge>
+          );
+        },
+      },
+    ];
+
+    if (isEditMode) {
+      cols.push({
+        id: "actions",
+        header: () => (
+          <div className="text-center pr-6 font-semibold uppercase tracking-wider text-muted-foreground">
+            Action
+          </div>
+        ),
+        meta: { cellClassName: "pr-6" },
+        cell: ({ row }) => {
+          const acc = row.original;
+          return (
+            <div className="flex justify-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7"
+                onClick={() => {
+                  setEditAccount({ ...acc });
+                  setIsEditModalOpen(true);
+                }}
+              >
+                <Pencil size={14} />
+              </Button>
+              <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
+                <Link
+                  to="/reports/general-ledgers/permanent"
+                  hash={`account-${acc.id}`}
+                >
+                  <BookOpen size={14} />
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 text-destructive hover:text-destructive"
+                onClick={() => setAccountToDelete(acc)}
+              >
+                <Trash2 size={14} />
+              </Button>
+            </div>
+          );
+        },
+      });
+    }
+    return cols;
+  }, [isEditMode]);
+
+  const table = useReactTable({
+    data: filteredAccounts,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
   const handleSuccessAction = (msg: string) => {
     setSuccessMessage(msg);
-    fetchAccounts();
+    fetchAccounts(); // Re-fetch data setelah mutasi berhasil
   };
-
-  const colCount = isEditMode ? 7 : 6;
 
   return (
     <div className="space-y-6 max-w-7xl">
@@ -122,7 +318,10 @@ export function ChartOfAccountsTable() {
           </h1>
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-3 text-muted-foreground" />
+              <Search
+                size={14}
+                className="absolute left-3 top-3 text-muted-foreground"
+              />
               <Input
                 className="pl-8 h-9 w-52 text-sm"
                 placeholder="Search..."
@@ -143,12 +342,20 @@ export function ChartOfAccountsTable() {
               </SelectContent>
             </Select>
             {categoryFilter && (
-              <Button variant="ghost" size="sm" onClick={() => setCategoryFilter("")} className="h-9 px-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCategoryFilter("")}
+                className="h-9 px-2"
+              >
                 <X size={14} />
               </Button>
             )}
             <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
-            <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 text-sm font-medium h-9">
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="gap-2 text-sm font-medium h-9"
+            >
               <Plus size={16} /> New Account
             </Button>
             <Button
@@ -168,24 +375,42 @@ export function ChartOfAccountsTable() {
             {filteredAccounts.length} accounts
           </Badge>
           <span>•</span>
-          <span className="text-xs text-muted-foreground font-medium">in IDR (Rp)</span>
+          <span className="text-xs text-muted-foreground font-medium">
+            in IDR (Rp)
+          </span>
         </p>
       </div>
 
       {(errorMessage || isError) && (
-        <Alert variant="destructive" className="flex justify-between items-center py-2">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center py-2"
+        >
           <AlertDescription className="text-xs">
-            {errorMessage || "Gagal mengambil data Chart of Accounts dari server."}
+            {errorMessage ||
+              "Gagal mengambil data Chart of Accounts dari server."}
           </AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive-foreground hover:bg-destructive/20" onClick={() => setErrorMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-destructive-foreground hover:bg-destructive/20"
+            onClick={() => setErrorMessage(null)}
+          >
             <X size={14} />
           </Button>
         </Alert>
       )}
       {successMessage && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex justify-between items-center py-2">
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-emerald-500/20" onClick={() => setSuccessMessage(null)}>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-emerald-500/20"
+            onClick={() => setSuccessMessage(null)}
+          >
             <X size={14} />
           </Button>
         </Alert>
@@ -195,79 +420,72 @@ export function ChartOfAccountsTable() {
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-24 pl-6 font-semibold uppercase tracking-wider text-muted-foreground">Ref</TableHead>
-                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground">Name</TableHead>
-                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground">Category</TableHead>
-                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground">Role</TableHead>
-                <TableHead className="text-right font-semibold uppercase tracking-wider text-muted-foreground">Balance</TableHead>
-                <TableHead className="text-center font-semibold uppercase tracking-wider text-muted-foreground">Status</TableHead>
-                {isEditMode && (
-                  <TableHead className="text-center pr-6 font-semibold uppercase tracking-wider text-muted-foreground">Action</TableHead>
-                )}
-              </TableRow>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    const meta = header.column.columnDef.meta as
+                      { headerClassName?: string } | undefined;
+                    return (
+                      <TableHead
+                        key={header.id}
+                        className={meta?.headerClassName}
+                      >
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
+                      </TableHead>
+                    );
+                  })}
+                </TableRow>
+              ))}
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={colCount} className="text-center py-10 text-xs text-muted-foreground">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center py-10 text-xs text-muted-foreground"
+                  >
                     Loading...
                   </TableCell>
                 </TableRow>
-              ) : filteredAccounts.length > 0 ? (
-                filteredAccounts.map((acc) => (
-                  <TableRow key={acc.id} className={cn(highlightId === String(acc.id) && "bg-primary/10")}>
-                    <TableCell className="pl-6">
-                      <span className="font-mono text-primary text-sm font-medium">{acc.referenceNumber}</span>
-                    </TableCell>
-                    <TableCell>
-                      <span className="text-sm font-medium">{acc.accountName}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">{acc.type}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {acc.role && acc.role !== "Default" ? (
-                        <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">{acc.role}</Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Standard</span>
+              ) : table.getRowModel().rows.length > 0 ? (
+                table.getRowModel().rows.map((row) => {
+                  const acc = row.original;
+                  return (
+                    <TableRow
+                      key={row.id}
+                      className={cn(
+                        highlightId === String(acc.id) && "bg-primary/10",
                       )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <span className={cn("font-medium font-mono text-sm", Number(acc.balance || 0) >= 0 ? "text-emerald-500" : "text-red-500")}>
-                        {Number(acc.balance || 0).toLocaleString("id-ID")}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant={acc.isActive ? "default" : "secondary"}
-                        className={cn("text-xs", acc.isActive && "bg-emerald-500/15 text-emerald-600 border-emerald-500/20")}
-                      >
-                        {acc.isActive ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    {isEditMode && (
-                      <TableCell className="pr-6">
-                        <div className="flex justify-center gap-1">
-                          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => { setEditAccount({ ...acc }); setIsEditModalOpen(true); }}>
-                            <Pencil size={14} />
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                            <Link to="/reports/general-ledgers/permanent" hash={`account-${acc.id}`}>
-                              <BookOpen size={14} />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-destructive hover:text-destructive" onClick={() => setAccountToDelete(acc)}>
-                            <Trash2 size={14} />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))
+                    >
+                      {row.getVisibleCells().map((cell) => {
+                        const meta = cell.column.columnDef.meta as
+                          { cellClassName?: string } | undefined;
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            className={meta?.cellClassName}
+                          >
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
-                  <TableCell colSpan={colCount} className="text-center py-12 text-xs text-muted-foreground">
+                  <TableCell
+                    colSpan={columns.length}
+                    className="text-center py-12 text-xs text-muted-foreground"
+                  >
                     No accounts found
                   </TableCell>
                 </TableRow>
@@ -277,9 +495,26 @@ export function ChartOfAccountsTable() {
         </CardContent>
       </Card>
 
-      <AddAccountDialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen} accounts={rawAccounts as any} onSuccess={handleSuccessAction} />
-      {editAccount && <EditAccountDialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen} account={editAccount as any} onSuccess={handleSuccessAction} />}
-      <DeleteAccountAlertDialog account={accountToDelete as any} onOpenChange={(open) => !open && setAccountToDelete(null)} onSuccess={handleSuccessAction} onError={(msg) => setErrorMessage(msg)} />
+      <AddAccountDialog
+        open={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+        accounts={rawAccounts as any}
+        onSuccess={handleSuccessAction}
+      />
+      {editAccount && (
+        <EditAccountDialog
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          account={editAccount as any}
+          onSuccess={handleSuccessAction}
+        />
+      )}
+      <DeleteAccountAlertDialog
+        account={accountToDelete as any}
+        onOpenChange={(open) => !open && setAccountToDelete(null)}
+        onSuccess={handleSuccessAction}
+        onError={(msg) => setErrorMessage(msg)}
+      />
     </div>
   );
 }
