@@ -3,11 +3,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { store } from "@/lib/store";
-import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Link, useNavigate } from '@tanstack/react-router';
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDeleteJournalEntry } from "../../journal-entry/hooks/useJournalEntry";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
 import { JournalEmptyState } from "./_components/journal-empty-state";
@@ -16,6 +16,7 @@ import { JournalEntry } from "./_lib/types";
 
 export default function GeneralJournalPage() {
     const navigate = useNavigate();
+    const deleteJournalEntry = useDeleteJournalEntry();
     const [editMode, setEditMode] = useState(false);
     const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
     const [data, setData] = useState<any>(null);
@@ -38,8 +39,8 @@ export default function GeneralJournalPage() {
         if (!entryToDelete) return;
         setIsDeleting(true);
         try {
-            const result = await store.dispatch(journalEntryApi.endpoints.deleteJournalEntry.initiate(entryToDelete.id));
-            if ("data" in result || !("error" in result)) await fetchGeneralJournal();
+            await deleteJournalEntry.mutateAsync(entryToDelete.id);
+            await fetchGeneralJournal();
         } catch (err) { console.error(err); }
         finally { setIsDeleting(false); setEntryToDelete(null); }
     };

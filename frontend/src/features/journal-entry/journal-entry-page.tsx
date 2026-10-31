@@ -16,13 +16,12 @@ import { toast } from "sonner";
 import { z } from "zod";
 
 import { useAppRouter, useSearchParams } from "@/lib/router-compat";
-import { store } from "@/lib/store";
-import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
-import { journalEntryApi } from "@/lib/store/(authenticated)/journal-entry/journalEntryApi";
 import {
     journalEntrySchema,
     parseFormattedNumber,
 } from "@/lib/validations/journal-entry";
+import { useGetChartOfAccounts } from "../chart-of-accounts/hooks/useChartOfAccounts";
+import { useCreateJournalEntry, useEditJournalEntry, useGetJournalEntryById, useGetNextTransactionNumber } from "../journal-entry/hooks/useJournalEntry";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +57,7 @@ function JournalEntryContent() {
     // Manual State untuk menggantikan React Hooks bawaan RTK Query
     const [isAccountsLoading, setIsAccountsLoading] = useState<boolean>(true);
     const [availableAccounts, setAvailableAccounts] = useState<AccountOption[]>([]);
+    const accountsQuery = useGetChartOfAccounts();
 
     const [isTxLoading, setIsTxLoading] = useState<boolean>(false);
     const [nextTxNumber, setNextTxNumber] = useState<string | null>(null);
@@ -95,129 +95,105 @@ function JournalEntryContent() {
     const journalType = watch("journalType");
     const entryDate = watch("entryDate");
     const watchedLines = watch("lines");
+    const nextTransactionNumberQuery = useGetNextTransactionNumber(
+        isEdit ? undefined : { journalType, entryDate }
+    );
+    const journalEntryQuery = useGetJournalEntryById(entryId);
+    const createJournalEntryMutation = useCreateJournalEntry();
+    const editJournalEntryMutation = useEditJournalEntry();
 
-    // 1. Fetch Chart of Accounts langsung via store.dispatch
+    // 1. Fetch Chart of Accounts
     useEffect(() => {
-        let isMounted = true;
-        const fetchAccounts = async () => {
-            setIsAccountsLoading(true);
-            try {
-                const result: any = await store.dispatch(
-                    chartOfAccountsApi.endpoints.getChartOfAccounts.initiate()
-                );
-                if (isMounted && result.data) {
-                    let list: any[] = [];
-                    const res = result.data;
-                    if (Array.isArray(res.accounts)) list = res.accounts;
-                    else if (Array.isArray(res.data)) list = res.data;
-                    else if (Array.isArray(res)) list = res;
+        setIsAccountsLoading(accountsQuery.isLoading);
+        if (accountsQuery.error) {
+            console.error("Failed to load accounts:", accountsQuery.error);
+            toast.error("Gagal memuat Chart of Accounts");
+            return;
+        }
 
-                    const mapped = list.map((a: any) => ({
-                        ...a,
-                        id: Number(a.id || 0),
-                        referenceNumber: a.referenceNumber ?? "",
-                        accountName: a.accountName ?? "",
-                    }));
-                    setAvailableAccounts(mapped);
-                }
-            } catch (err) {
-                console.error("Failed to load accounts:", err);
-                toast.error("Gagal memuat Chart of Accounts");
-            } finally {
-                if (isMounted) setIsAccountsLoading(false);
-            }
-        };
+        if (accountsQuery.data) {
+            const res: any = accountsQuery.data;
+            let list: any[] = [];
+            if (Array.isArray(res.accounts)) list = res.accounts;
+            else if (Array.isArray(res.data)) list = res.data;
+            else if (Array.isArray(res)) list = res;
 
-        fetchAccounts();
-        return () => {
-            isMounted = false;
-        };
-    }, []);
+            setAvailableAccounts(
+                list.map((a: any) => ({
+                    ...a,
+                    id: Number(a.id || 0),
+                    referenceNumber: a.referenceNumber ?? "",
+                    accountName: a.accountName ?? "",
+                }))
+            );
+        }
+    }, [accountsQuery.data, accountsQuery.error, accountsQuery.isLoading]);
 
     // 2. Fetch Next Transaction Number (Untuk mode Create)
     useEffect(() => {
+        setIsTxLoading(!isEdit && nextTransactionNumberQuery.isLoading);
         if (isEdit) return;
-        let isMounted = true;
-        const fetchNextNumber = async () => {
-            setIsTxLoading(true);
-            try {
-                const result: any = await store.dispatch(
-                    journalEntryApi.endpoints.getNextTransactionNumber.initiate({
-                        journalType,
-                        entryDate,
-                    })
-                );
-                if (isMounted && result.data) {
-                    const raw = result.data;
-                    const txNo =
-                        typeof raw === "string"
-                            ? raw
-                            : raw.transactionNumber ||
-                            raw.nextTransactionNumber ||
-                            raw.data ||
-                            "";
-                    setNextTxNumber(txNo);
-                }
-            } catch (err) {
-                console.error("Failed to fetch next transaction number:", err);
-            } finally {
-                if (isMounted) setIsTxLoading(false);
-            }
-        };
 
-        fetchNextNumber();
-        return () => {
-            isMounted = false;
-        };
-    }, [journalType, entryDate, isEdit]);
+        if (nextTransactionNumberQuery.error) {
+            console.error(
+                "Failed to fetch next transaction number:",
+                nextTransactionNumberQuery.error
+            );
+            return;
+        }
+
+        if (nextTransactionNumberQuery.data) {
+            const raw: any = nextTransactionNumberQuery.data;
+            const txNo =
+                typeof raw === "string"
+                    ? raw
+                    : raw.transactionNumber ||
+                    raw.nextTransactionNumber ||
+                    raw.data ||
+                    "";
+            setNextTxNumber(txNo);
+        }
+    }, [isEdit, nextTransactionNumberQuery.data, nextTransactionNumberQuery.error, nextTransactionNumberQuery.isLoading]);
 
     // 3. Fetch Detail Journal Entry (Untuk mode Edit)
     useEffect(() => {
         if (!isEdit || isNaN(entryId)) return;
-        let isMounted = true;
-        const fetchJournalById = async () => {
-            setIsEditLoading(true);
-            try {
-                const result: any = await store.dispatch(
-                    journalEntryApi.endpoints.getJournalEntryById.initiate({
-                        id: entryId,
-                    })
-                );
-                if (isMounted && result.data) {
-                    const resData = result.data;
-                    setEditData(resData);
-                    const jData = resData.entry || resData.data || resData;
-                    if (jData && typeof jData === "object") {
-                        if (jData.journalType) setValue("journalType", jData.journalType);
-                        if (jData.entryDate)
-                            setValue("entryDate", jData.entryDate.split("T")[0]);
-                        if (Array.isArray(jData.lines) && jData.lines.length > 0) {
-                            setValue(
-                                "lines",
-                                jData.lines.map((l: any, i: number) => ({
-                                    id: l.id?.toString() || `${Date.now()}-${i}`,
-                                    accountId: Number(l.accountId || 0),
-                                    lineDescription: l.lineDescription || "",
-                                    debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
-                                    credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-                                }))
-                            );
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to load journal entry:", err);
-                toast.error("Gagal memuat detail jurnal");
-            } finally {
-                if (isMounted) setIsEditLoading(false);
-            }
-        };
+        setIsEditLoading(journalEntryQuery.isLoading);
+        if (journalEntryQuery.error) {
+            console.error("Failed to load journal entry:", journalEntryQuery.error);
+            toast.error("Gagal memuat detail jurnal");
+            return;
+        }
+        if (!journalEntryQuery.data) return;
 
-        fetchJournalById();
-        return () => {
-            isMounted = false;
-        };
-    }, [isEdit, entryId, setValue]);
+        const resData: any = journalEntryQuery.data;
+        setEditData(resData);
+        const jData = resData.entry || resData.data || resData;
+        if (jData && typeof jData === "object") {
+            if (jData.journalType) setValue("journalType", jData.journalType);
+            if (jData.entryDate)
+                setValue("entryDate", jData.entryDate.split("T")[0]);
+            if (Array.isArray(jData.lines) && jData.lines.length > 0) {
+                setValue(
+                    "lines",
+                    jData.lines.map((l: any, i: number) => ({
+                        id: l.id?.toString() || `${Date.now()}-${i}`,
+                        accountId: Number(l.accountId || 0),
+                        lineDescription: l.lineDescription || "",
+                        debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
+                        credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
+                    }))
+                );
+            }
+        }
+    }, [
+        isEdit,
+        entryId,
+        journalEntryQuery.data,
+        journalEntryQuery.error,
+        journalEntryQuery.isLoading,
+        setValue,
+    ]);
 
     const displayedTxNumber = useMemo(() => {
         if (isEdit)
@@ -331,51 +307,27 @@ function JournalEntryContent() {
 
         try {
             if (isEdit) {
-                const result: any = await store.dispatch(
-                    journalEntryApi.endpoints.editJournalEntry.initiate({
-                        id: entryId,
-                        body: {
-                            entryDate: data.entryDate,
-                            journalType: data.journalType,
-                            transactionNumber: displayedTxNumber,
-                            lines: payloadLines,
-                        },
-                    })
-                );
-
-                if ("data" in result) {
-                    const res = result.data;
-                    toast.success(`Updated ${res?.transactionNumber || displayedTxNumber}`);
-                    setTimeout(() => router.push("/reports/journals/general"), 1200);
-                } else if ("error" in result) {
-                    const err: any = result.error;
-                    const msg =
-                        err?.data?.message || err?.message || "Failed to update journal entry";
-                    setApiError(msg);
-                    toast.error(msg);
-                }
-            } else {
-                const result: any = await store.dispatch(
-                    journalEntryApi.endpoints.createJournalEntry.initiate({
-                        journalType: data.journalType,
+                const res: any = await editJournalEntryMutation.mutateAsync({
+                    id: entryId,
+                    body: {
                         entryDate: data.entryDate,
+                        journalType: data.journalType,
+                        transactionNumber: displayedTxNumber,
                         lines: payloadLines,
-                    })
+                    },
+                });
+                toast.success(`Updated ${res?.transactionNumber || displayedTxNumber}`);
+                setTimeout(() => router.push("/reports/journals/general"), 1200);
+            } else {
+                const res: any = await createJournalEntryMutation.mutateAsync({
+                    journalType: data.journalType,
+                    entryDate: data.entryDate,
+                    lines: payloadLines,
+                });
+                toast.success(
+                    `Posted ${res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber}`
                 );
-
-                if ("data" in result) {
-                    const res = result.data;
-                    toast.success(
-                        `Posted ${res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber}`
-                    );
-                    resetForm();
-                } else if ("error" in result) {
-                    const err: any = result.error;
-                    const msg =
-                        err?.data?.message || err?.message || "Failed to post journal entry";
-                    setApiError(msg);
-                    toast.error(msg);
-                }
+                resetForm();
             }
         } catch (err: any) {
             const msg = err?.message || "An unexpected error occurred";
