@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import type { AppDispatch } from "@/lib/store";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -24,16 +25,13 @@ import {
   Upload,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useAuth } from "../../auth/hooks/use-auth";
-import { useChangePassword, useDeleteAccount, useUpdateProfile, useUploadAvatar } from "../hooks/useSettings";
+import { useDispatch } from "react-redux";
+import { authApi } from "../../auth/api/authApi";
+import { settingsApi } from "../api/settingsApi";
 import { AccountDetailsTable, UserProfileField } from "./account-table";
 
 export default function AccountSettings() {
-  const { user: authUser } = useAuth();
-  const changePassword = useChangePassword();
-  const deleteAccount = useDeleteAccount();
-  const updateProfile = useUpdateProfile();
-  const uploadAvatar = useUploadAvatar();
+  const dispatch = useDispatch<AppDispatch>();
 
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -57,7 +55,10 @@ export default function AccountSettings() {
   const fetchProfile = useCallback(async () => {
     setIsLoading(true);
     try {
-      const userData = authUser;
+      const res = await dispatch(
+        authApi.endpoints.getProfile.initiate(),
+      ).unwrap();
+      const userData = res?.data || res;
       setUser(userData);
       if (userData) {
         setFullName(userData.fullName || "");
@@ -71,7 +72,7 @@ export default function AccountSettings() {
     } finally {
       setIsLoading(false);
     }
-  }, [authUser]);
+  }, [dispatch]);
 
   useEffect(() => {
     fetchProfile();
@@ -106,7 +107,14 @@ export default function AccountSettings() {
     e.preventDefault();
     setSaving(true);
     try {
-      await updateProfile.mutateAsync({ fullName, userName, phoneNumber, bio });
+      await dispatch(
+        settingsApi.endpoints.updateProfile.initiate({
+          fullName,
+          userName,
+          phoneNumber,
+          bio,
+        }),
+      ).unwrap();
       notify("Profile updated!");
       fetchProfile();
     } catch (err: any) {
@@ -129,7 +137,9 @@ export default function AccountSettings() {
 
     setUploading(true);
     try {
-      const res: any = await uploadAvatar.mutateAsync(fd);
+      const res: any = await dispatch(
+        settingsApi.endpoints.uploadAvatar.initiate(fd),
+      ).unwrap();
       const newUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
       if (newUrl) setAvatarPreview(newUrl);
       notify("Avatar berhasil diunggah!");
@@ -150,7 +160,12 @@ export default function AccountSettings() {
     e.preventDefault();
     setChanging(true);
     try {
-      await changePassword.mutateAsync({ currentPassword, newPassword });
+      await dispatch(
+        settingsApi.endpoints.changePassword.initiate({
+          currentPassword,
+          newPassword,
+        }),
+      ).unwrap();
       notify("Password updated!");
       setCurrentPassword("");
       setNewPassword("");
@@ -165,7 +180,7 @@ export default function AccountSettings() {
     if (!confirm("Hapus permanen akun Anda?")) return;
     setDeleting(true);
     try {
-      await deleteAccount.mutateAsync();
+      await dispatch(settingsApi.endpoints.deleteAccount.initiate()).unwrap();
       window.location.href = "/auth/login";
     } catch (err: any) {
       notify(err?.data?.message || "Gagal menghapus akun", true);

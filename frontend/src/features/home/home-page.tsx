@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { homeApi } from "../home/hooks/useHome";
+import { homeApi } from "../home/api/homeApi";
 
 interface MarketItem {
     symbol: string;

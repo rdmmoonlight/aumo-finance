@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocation } from '@tanstack/react-router';
+
 import { Badge } from "@/components/ui/badge";
 import {
 	Breadcrumb,
@@ -17,7 +19,6 @@ import {
 	PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { useLocation } from "@tanstack/react-router";
 import {
 	AlertTriangle,
 	Bell,
@@ -28,12 +29,11 @@ import {
 	Search,
 } from "lucide-react";
 import * as React from "react";
-import { toast } from "sonner";
 
-import { useAuth } from "../features/auth/hooks/use-auth";
-import { periodsApi } from "../features/periods/hooks/usePeriods";
-import { useGetHealth } from "../lib/useHealth";
-import { useGetNotifications, useMarkNotificationAsRead } from "../lib/useNotifications";
+import { store } from "@/lib/store";
+import { commonApi } from "../features/api/commonApi";
+import { authApi } from "../features/auth/api/authApi";
+import { periodsApi } from "../features/periods/api/periodsApi";
 
 interface PeriodItem {
 	id: number;
@@ -52,92 +52,77 @@ interface NotificationItem {
 	createdAt?: string;
 }
 
-interface PeriodsResponse {
-	items?: PeriodItem[];
-	periods?: PeriodItem[];
-}
-
-interface HealthResponse {
-	status?: string;
-	[key: string]: unknown;
-}
-
 export function AppTopBar() {
 	const pathname = useLocation().pathname;
-	const { refetch: refetchPeriods } = periodsApi.useGetPeriods();
-	const { refetch: refetchHealth } = useGetHealth();
-	const { refetch: refetchNotifications } = useGetNotifications({ limit: 20 });
-	const { mutateAsync: markNotificationAsRead } = useMarkNotificationAsRead();
-	const {
-		user: userProfile,
-		isLoadingProfile: isProfileLoading,
-		refetchProfile,
-	} = useAuth();
 
-	// State internal
-	const [rawPeriodsData, setRawPeriodsData] = React.useState<
-		PeriodItem[] | PeriodsResponse | null
-	>(null);
+	// State internal pengganti Auto-Generated Hooks
+	const [userProfile, setUserProfile] = React.useState<any>(null);
+	const [isProfileLoading, setIsProfileLoading] = React.useState(true);
+
+	const [rawPeriodsData, setRawPeriodsData] = React.useState<any>(null);
 	const [isPeriodLoading, setIsPeriodLoading] = React.useState(false);
 
-	const [healthData, setHealthData] = React.useState<HealthResponse | null>(null);
+	const [healthData, setHealthData] = React.useState<any>(null);
 	const [isHealthLoading, setIsHealthLoading] = React.useState(false);
 	const [isHealthFetching, setIsHealthFetching] = React.useState(false);
 	const [isHealthError, setIsHealthError] = React.useState(false);
 
-	const [notifications, setNotifications] = React.useState<NotificationItem[]>([]);
-	const [isNotificationsLoading, setIsNotificationsLoading] = React.useState(false);
+	const [notifications, setNotifications] = React.useState<NotificationItem[]>(
+		[],
+	);
+	const [isNotificationsLoading, setIsNotificationsLoading] =
+		React.useState(false);
 	const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
-
-	// Ref untuk melacak notifikasi yang sudah dibuatkan toast agar tidak duplikat
-	const notifiedIdsRef = React.useRef<Set<string>>(new Set());
 
 	const isAuthenticated = !isProfileLoading && !!userProfile;
 
-	// Helper untuk memicu Toast dari Notifikasi
-	const triggerNotificationToast = React.useCallback((item: NotificationItem) => {
-		const toastFn = item.type === "warning" ? toast.warning : toast.info;
-		toastFn(item.title, {
-			description: item.message,
-			icon: item.type === "warning" ? (
-				<AlertTriangle className="h-4 w-4 text-amber-500" />
-			) : (
-				<Info className="h-4 w-4 text-blue-500" />
-			),
-		});
-	}, []);
-
 	// 1. Fetch Profil User (/auth/me)
 	const fetchUserProfile = React.useCallback(async () => {
+		setIsProfileLoading(true);
 		try {
-			await refetchProfile();
+			const result = await store.dispatch(
+				authApi.endpoints.getProfile.initiate(),
+			);
+			if ("data" in result && result.data) {
+				setUserProfile(result.data);
+			} else {
+				setUserProfile(null);
+			}
 		} catch {
-			// Managed by auth hook
+			setUserProfile(null);
+		} finally {
+			setIsProfileLoading(false);
 		}
-	}, [refetchProfile]);
+	}, []);
 
 	// 2. Fetch Periods
 	const fetchPeriods = React.useCallback(async () => {
 		if (!isAuthenticated) return;
 		setIsPeriodLoading(true);
 		try {
-			const result = await refetchPeriods();
-			setRawPeriodsData(result.data ?? null);
+			const result = await store.dispatch(
+				periodsApi.endpoints.getPeriods.initiate(),
+			);
+			if ("data" in result) {
+				setRawPeriodsData(result.data);
+			}
 		} catch {
 			setRawPeriodsData(null);
 		} finally {
 			setIsPeriodLoading(false);
 		}
-	}, [isAuthenticated, refetchPeriods]);
+	}, [isAuthenticated]);
 
 	// 3. Database Health Check
 	const checkDb = React.useCallback(async () => {
 		if (!isAuthenticated) return;
 		setIsHealthFetching(true);
 		try {
-			const result = await refetchHealth();
-			if (result.data) {
-				setHealthData(result.data as HealthResponse);
+			const result = await store.dispatch(
+				commonApi.endpoints.getHealth.initiate(),
+			);
+			if ("data" in result && result.data) {
+				setHealthData(result.data);
 				setIsHealthError(false);
 			} else {
 				setIsHealthError(true);
@@ -148,35 +133,27 @@ export function AppTopBar() {
 			setIsHealthLoading(false);
 			setIsHealthFetching(false);
 		}
-	}, [isAuthenticated, refetchHealth]);
+	}, [isAuthenticated]);
 
-	// 4. Fetch Notifikasi & Pemicu Toast Otomatis
+	// 4. Fetch Notifikasi
 	const fetchNotifications = React.useCallback(async () => {
 		if (!isAuthenticated) return;
 		setIsNotificationsLoading(true);
 		try {
-			const result = await refetchNotifications();
-			if (Array.isArray(result.data)) {
-				const newNotifs = result.data as NotificationItem[];
-
-				// Deteksi notifikasi baru yang belum dibaca dan belum pernah diposisikan ke Toast
-				newNotifs.forEach((item) => {
-					if (!item.isRead && !notifiedIdsRef.current.has(item.id)) {
-						triggerNotificationToast(item);
-						notifiedIdsRef.current.add(item.id);
-					}
-				});
-
-				setNotifications(newNotifs);
+			const result = await store.dispatch(
+				commonApi.endpoints.getNotifications.initiate({ limit: 20 }),
+			);
+			if ("data" in result && Array.isArray(result.data)) {
+				setNotifications(result.data as NotificationItem[]);
 			}
 		} catch {
 			setNotifications([]);
 		} finally {
 			setIsNotificationsLoading(false);
 		}
-	}, [isAuthenticated, refetchNotifications, triggerNotificationToast]);
+	}, [isAuthenticated]);
 
-	// Initial Load & Polling
+	// Initial Load & Polling setup
 	React.useEffect(() => {
 		fetchUserProfile();
 	}, [fetchUserProfile]);
@@ -187,6 +164,7 @@ export function AppTopBar() {
 			checkDb();
 			fetchNotifications();
 
+			// Setup Polling Interval Manual
 			const healthInterval = setInterval(checkDb, 30000);
 			const notifInterval = setInterval(fetchNotifications, 15000);
 
@@ -197,20 +175,18 @@ export function AppTopBar() {
 		}
 	}, [isAuthenticated, fetchPeriods, checkDb, fetchNotifications]);
 
-	// Handlers Notifikasi
+	// Handlers untuk Notifikasi
 	const handleMarkAllAsRead = async () => {
 		setIsMarkingAllRead(true);
 		try {
-			await Promise.all(
-				notifications
-					.filter((notification) => !notification.isRead)
-					.map(({ id }) => markNotificationAsRead({ id })),
+			const result = await store.dispatch(
+				commonApi.endpoints.markAllNotificationsAsRead.initiate(),
 			);
-			toast.success("Semua notifikasi telah ditandai dibaca");
-			fetchNotifications();
+			if ("data" in result) {
+				fetchNotifications();
+			}
 		} catch (error) {
 			console.error("Gagal menandai semua dibaca:", error);
-			toast.error("Gagal menandai semua notifikasi");
 		} finally {
 			setIsMarkingAllRead(false);
 		}
@@ -219,16 +195,20 @@ export function AppTopBar() {
 	const handleMarkAsRead = async (id: string, isRead?: boolean) => {
 		if (isRead || !id) return;
 		try {
-			await markNotificationAsRead({ id });
-			fetchNotifications();
+			const result = await store.dispatch(
+				commonApi.endpoints.markNotificationAsRead.initiate({ id }),
+			);
+			if ("data" in result) {
+				fetchNotifications();
+			}
 		} catch (error) {
 			console.error("Gagal menandai dibaca:", error);
-			toast.error("Gagal memperbarui status notifikasi");
 		}
 	};
 
 	const unreadCount = notifications.filter((n) => !n.isRead).length;
 
+	// Penentuan status database
 	const dbStatus = isHealthError
 		? "offline"
 		: isHealthLoading
@@ -237,18 +217,19 @@ export function AppTopBar() {
 				? "online"
 				: "offline";
 
+	// Parsing array periods
 	const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
 		? rawPeriodsData
-		: rawPeriodsData?.items || rawPeriodsData?.periods || [];
+		: (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
 
 	const selectedPeriod = periods.find((p) => p.isSelected);
 	const pathSegments = pathname.split("/").filter(Boolean);
 
 	return (
 		<header className="flex flex-col w-full border-b bg-background sticky top-0 z-10 shadow-sm">
-			{/* KELOMPOK 1: Bar Utama */}
+			{/* KELOMPOK 1: Bar Utama (Search & Notifications) */}
 			<div className="flex h-16 items-center justify-between pl-3 pr-4 gap-4">
-				{/* Search Bar */}
+				{/* Sisi Kiri: Search Bar */}
 				<div className="flex items-center flex-1 max-w-md">
 					<div className="relative w-full">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -260,7 +241,7 @@ export function AppTopBar() {
 					</div>
 				</div>
 
-				{/* Notifikasi Popover */}
+				{/* Sisi Kanan: Notifikasi */}
 				<div className="flex items-center">
 					<Popover>
 						<PopoverTrigger asChild>
@@ -272,15 +253,14 @@ export function AppTopBar() {
 							>
 								<Bell className="h-5 w-5" />
 								{unreadCount > 0 && (
-									<span className="absolute top-2 right-2 h-2.5 w-2.5 rounded-full bg-destructive animate-pulse ring-2 ring-background" />
+									<span className="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive animate-pulse" />
 								)}
 							</Button>
 						</PopoverTrigger>
 						<PopoverContent className="w-80 p-0 mr-4" align="end">
-							{/* Header */}
+							{/* Header Popover */}
 							<div className="flex items-center justify-between p-4 border-b">
 								<div className="flex items-center gap-2">
-									<Bell className="h-4 w-4 text-muted-foreground" />
 									<h4 className="font-semibold text-sm">Notifikasi</h4>
 									{unreadCount > 0 && (
 										<Badge
@@ -323,32 +303,28 @@ export function AppTopBar() {
 									notifications.map((item) => (
 										<div
 											key={item.id}
-											className={`w-full text-left p-3 text-[13px] transition-colors hover:bg-muted/50 flex gap-3 ${!item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
+											onClick={() => handleMarkAsRead(item.id, item.isRead)}
+											className={`p-3 text-[13px] cursor-pointer transition-colors hover:bg-muted/50 flex gap-3 ${!item.isRead ? "bg-muted/20 font-medium" : "opacity-70"
 												}`}
 										>
-											<div className="mt-0.5 shrink-0">
+											<div className="mt-0.5">
 												{item.type === "warning" ? (
 													<AlertTriangle className="h-4 w-4 text-amber-500" />
 												) : (
 													<Info className="h-4 w-4 text-blue-500" />
 												)}
 											</div>
-											<div
-												className="flex-1 space-y-1 cursor-pointer"
-												onClick={() => handleMarkAsRead(item.id, item.isRead)}
-											>
+											<div className="flex-1 space-y-1">
 												<div className="flex items-center justify-between">
 													<p className="font-semibold text-foreground text-sm">
 														{item.title}
 													</p>
 													<span className="text-[11px] text-muted-foreground">
 														{item.createdAt
-															? new Date(
-																item.createdAt,
-															).toLocaleTimeString([], {
-																hour: "2-digit",
-																minute: "2-digit",
-															})
+															? new Date(item.createdAt).toLocaleTimeString(
+																[],
+																{ hour: "2-digit", minute: "2-digit" },
+															)
 															: ""}
 													</span>
 												</div>
@@ -356,17 +332,6 @@ export function AppTopBar() {
 													{item.message}
 												</p>
 											</div>
-											<Button
-												variant="ghost"
-												size="xs"
-												className="h-6 px-1.5 text-[10px] self-start"
-												onClick={(e) => {
-													e.stopPropagation();
-													triggerNotificationToast(item);
-												}}
-											>
-												Toast
-											</Button>
 										</div>
 									))
 								)}
@@ -380,7 +345,7 @@ export function AppTopBar() {
 
 			{/* KELOMPOK 2: Bar Sekunder */}
 			<div className="flex h-10 items-center justify-between pl-3 pr-4 bg-muted/20 text-xs">
-				{/* Breadcrumbs */}
+				{/* Dynamic Breadcrumbs */}
 				<Breadcrumb>
 					<BreadcrumbList>
 						<BreadcrumbItem>
@@ -423,14 +388,14 @@ export function AppTopBar() {
 						<Badge
 							variant="outline"
 							className={`gap-1.5 font-medium text-xs ${selectedPeriod.isClosed
-								? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
-								: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
+									? "border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
+									: "border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10"
 								}`}
 						>
 							<span
 								className={`h-1.5 w-1.5 rounded-full ${selectedPeriod.isClosed
-									? "bg-amber-500"
-									: "bg-emerald-500 animate-pulse"
+										? "bg-amber-500"
+										: "bg-emerald-500 animate-pulse"
 									}`}
 							/>
 							Periode: {selectedPeriod.periodName || selectedPeriod.name}
