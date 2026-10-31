@@ -4,6 +4,7 @@ import type {
   AccountBalanceItem,
   TrendItem,
 } from "#/features/dashboard/components/tables";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -11,39 +12,15 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  ArcElement,
-  BarElement,
-  CategoryScale,
-  Chart as ChartJS,
-  Filler,
-  Legend,
-  LinearScale,
-  LineElement,
-  PointElement,
-  Title,
-  Tooltip,
-} from "chart.js";
+import "chart.js/auto";
 import { PieChart, TrendingUp } from "lucide-react";
 import { useMemo } from "react";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-  Filler,
-);
-
 const chartOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  interaction: { mode: "index" as const, intersect: false },
   plugins: {
     legend: {
       position: "bottom" as const,
@@ -55,13 +32,15 @@ const chartOptions = {
     x: { grid: { display: false } },
   },
 };
+
 const doughnutOptions = {
   responsive: true,
   maintainAspectRatio: false,
+  cutout: "68%",
   plugins: {
     legend: {
       position: "bottom" as const,
-      labels: { boxWidth: 10, usePointStyle: true },
+      labels: { boxWidth: 10, usePointStyle: true, padding: 16 },
     },
   },
 };
@@ -79,6 +58,9 @@ export function DashboardCharts({
   totalBankBalance: number;
   periodType: "monthly" | "annual";
 }) {
+  const hasCashData = totalCashOnHand > 0 || totalBankBalance > 0;
+  const hasExpenseData = expenseAccountsList?.length > 0;
+
   const barTrendData = useMemo(
     () => ({
       labels: chartTrend?.map((t) => t.label) || [],
@@ -88,16 +70,18 @@ export function DashboardCharts({
           data: chartTrend?.map((t) => t.revenue) || [],
           backgroundColor: "#10b981",
           borderRadius: 4,
+          borderSkipped: false,
         },
         {
           label: "Expenses",
           data: chartTrend?.map((t) => t.expense) || [],
           backgroundColor: "#ef4444",
           borderRadius: 4,
+          borderSkipped: false,
         },
       ],
     }),
-    [chartTrend],
+    [chartTrend]
   );
 
   const lineNetData = useMemo(
@@ -116,7 +100,7 @@ export function DashboardCharts({
         },
       ],
     }),
-    [chartTrend],
+    [chartTrend]
   );
 
   const doughnutCashData = useMemo(
@@ -131,17 +115,17 @@ export function DashboardCharts({
         },
       ],
     }),
-    [totalCashOnHand, totalBankBalance],
+    [totalCashOnHand, totalBankBalance]
   );
 
   const expenseChartData = useMemo(
     () => ({
-      labels: expenseAccountsList?.length
+      labels: hasExpenseData
         ? expenseAccountsList.map((i) => i.accountName)
         : ["No Expenses"],
       datasets: [
         {
-          data: expenseAccountsList?.length
+          data: hasExpenseData
             ? expenseAccountsList.map((i) => i.balance)
             : [1],
           backgroundColor: [
@@ -154,21 +138,20 @@ export function DashboardCharts({
             "#ec4899",
           ],
           borderWidth: 0,
+          hoverOffset: 8,
         },
       ],
     }),
-    [expenseAccountsList],
+    [expenseAccountsList, hasExpenseData]
   );
 
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-ui">
-                Revenue vs Expense Trend
-              </CardTitle>
+              <CardTitle className="text-ui">Revenue vs Expense Trend</CardTitle>
               <CardDescription className="text-caption">
                 {periodType === "annual" ? "Jan - Dec" : "Daily in period"}
               </CardDescription>
@@ -176,57 +159,62 @@ export function DashboardCharts({
             <PieChart size={18} className="text-muted-foreground" />
           </CardHeader>
           <CardContent className="h-64">
-            <Bar data={barTrendData} options={chartOptions as any} />
+            <Bar data={barTrendData} options={chartOptions} />
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-ui">Net Income Trend</CardTitle>
-              <CardDescription className="text-caption">
-                Profitability over time
-              </CardDescription>
+              <CardDescription className="text-caption">Profitability over time</CardDescription>
             </div>
             <TrendingUp size={18} className="text-muted-foreground" />
           </CardHeader>
           <CardContent className="h-64">
-            <Line data={lineNetData} options={chartOptions as any} />
+            <Line data={lineNetData} options={chartOptions} />
           </CardContent>
         </Card>
       </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-ui">Asset Composition</CardTitle>
-              <CardDescription className="text-caption">
-                Cash vs Bank
-              </CardDescription>
+              <CardDescription className="text-caption">Cash vs Bank</CardDescription>
             </div>
             <PieChart size={18} className="text-muted-foreground" />
           </CardHeader>
           <CardContent className="h-64 flex justify-center">
-            <Doughnut
-              data={doughnutCashData}
-              options={doughnutOptions as any}
-            />
+            {hasCashData ? (
+              <Doughnut data={doughnutCashData} options={doughnutOptions} />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2">
+                <Badge variant="outline">No Asset Data</Badge>
+                <span className="text-xs text-muted-foreground">Cash & Bank masih 0</span>
+              </div>
+            )}
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="flex-row items-center justify-between">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-ui">Expense Composition</CardTitle>
-              <CardDescription className="text-caption">
-                Operating Breakdown
-              </CardDescription>
+              <CardDescription className="text-caption">Operating Breakdown</CardDescription>
             </div>
             <PieChart size={18} className="text-muted-foreground" />
           </CardHeader>
           <CardContent className="h-64 flex justify-center">
-            <Doughnut
-              data={expenseChartData}
-              options={doughnutOptions as any}
-            />
+            {hasExpenseData ? (
+              <Doughnut data={expenseChartData} options={doughnutOptions} />
+            ) : (
+              <div className="flex flex-col items-center justify-center gap-2">
+                <Badge variant="secondary">No Expenses</Badge>
+                <span className="text-xs text-muted-foreground">Belum ada data expense</span>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
