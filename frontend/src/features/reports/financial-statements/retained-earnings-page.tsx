@@ -3,10 +3,10 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { store } from "@/lib/store";
-import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { Link } from '@tanstack/react-router';
 import { ArrowRight, PiggyBank } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { reportsApi } from "../api/reportsApi";
 import { ErrorAlert } from "./_components/common/ErrorAlert";
 import { LoadingState } from "./_components/common/LoadingState";
 import { NoPeriodCard } from "./_components/common/NoPeriodCard";

@@ -2,9 +2,9 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { store } from "@/lib/store";
-import { reportsApi } from "@/lib/store/(authenticated)/reports/reportsApi";
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { reportsApi } from "../api/reportsApi";
 import { LedgerCard } from "./_components/ledger-card";
 import { NoPeriodState } from "./_components/no-period-state";
 import { PageHeader } from "./_components/page-header";
