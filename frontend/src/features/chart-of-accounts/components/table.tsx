@@ -1,6 +1,7 @@
+"use client";
+
 import { useSearchParams } from "@/lib/router-compat";
 import { Link } from '@tanstack/react-router';
-"use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -22,7 +23,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { store } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import {
   ColumnDef,
@@ -40,10 +40,9 @@ import {
   Trash2,
   X,
 } from "lucide-react";
-import { chartOfAccountsApi } from "../hooks/useChartOfAccounts";
+import { useGetChartOfAccounts } from "../hooks/useChartOfAccounts";
 
-
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   AddAccountDialog,
   DeleteAccountAlertDialog,
@@ -65,41 +64,15 @@ export function ChartOfAccountsTable() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // State untuk penanganan data fetch manual
-  const [rawAccountsData, setRawAccountsData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-
-  // Fungsi fetch data langsung via store.dispatch (tanpa React Hooks RTK)
-  const fetchAccounts = useCallback(async () => {
-    setIsLoading(true);
-    setIsError(false);
-
-    try {
-      const result = await store.dispatch(
-        chartOfAccountsApi.endpoints.getChartOfAccounts.initiate({
-          search: searchText || undefined,
-          category: categoryFilter || undefined,
-        }),
-      );
-
-      if ("data" in result) {
-        setRawAccountsData(result.data);
-      } else if ("error" in result) {
-        setIsError(true);
-        setErrorMessage("Gagal mengambil data Chart of Accounts dari server.");
-      }
-    } catch {
-      setIsError(true);
-      setErrorMessage("Terjadi kesalahan sistem saat mengambil data.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [searchText, categoryFilter]);
-
-  useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
+  const {
+    data: rawAccountsData,
+    isLoading,
+    isError,
+    refetch: fetchAccounts,
+  } = useGetChartOfAccounts({
+    search: searchText || undefined,
+    category: categoryFilter || undefined,
+  });
 
   const rawAccounts = useMemo<AccountItem[]>(() => {
     if (!rawAccountsData) return [];
