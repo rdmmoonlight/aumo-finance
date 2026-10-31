@@ -274,16 +274,16 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
             entity.Property(e => e.NormalBalanceIsDebit).HasDefaultValue(false);
-            entity.Property(e => e.UnadjustedDebit).HasPrecision(15, 2);
-            entity.Property(e => e.UnadjustedCredit).HasPrecision(15, 2);
-            entity.Property(e => e.AdjustmentDebit).HasPrecision(15, 2);
-            entity.Property(e => e.AdjustmentCredit).HasPrecision(15, 2);
-            entity.Property(e => e.AdjustedDebit).HasPrecision(15, 2);
-            entity.Property(e => e.AdjustedCredit).HasPrecision(15, 2);
-            entity.Property(e => e.IncomeStatementDebit).HasPrecision(15, 2);
-            entity.Property(e => e.IncomeStatementCredit).HasPrecision(15, 2);
-            entity.Property(e => e.FinancialPositionDebit).HasPrecision(15, 2);
-            entity.Property(e => e.FinancialPositionCredit).HasPrecision(15, 2);
+            entity.Property(e => e.UnadjustedDebit).HasPrecision(18, 2);
+            entity.Property(e => e.UnadjustedCredit).HasPrecision(18, 2);
+            entity.Property(e => e.AdjustmentDebit).HasPrecision(18, 2);
+            entity.Property(e => e.AdjustmentCredit).HasPrecision(18, 2);
+            entity.Property(e => e.AdjustedDebit).HasPrecision(18, 2);
+            entity.Property(e => e.AdjustedCredit).HasPrecision(18, 2);
+            entity.Property(e => e.IncomeStatementDebit).HasPrecision(18, 2);
+            entity.Property(e => e.IncomeStatementCredit).HasPrecision(18, 2);
+            entity.Property(e => e.FinancialPositionDebit).HasPrecision(18, 2);
+            entity.Property(e => e.FinancialPositionCredit).HasPrecision(18, 2);
         });
 
         builder.Entity<AdjustedTrialBalance>(entity =>
@@ -330,11 +330,11 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.DebitBalance).HasPrecision(15, 2);
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
         });
+
         builder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 
         OnModelCreatingPartial(builder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder builder);
-
 }
