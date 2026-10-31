@@ -1,5 +1,3 @@
-import { createColumnHelper } from "@tanstack/react-table";
-
 export interface LineItem {
   id: string;
   accountId: number;
@@ -24,5 +22,3 @@ export const formatNumberWithDots = (val: string | number): string => {
   if (!clean) return "";
   return new Intl.NumberFormat("id-ID").format(parseInt(clean, 10));
 };
-
-export const columnHelper = createColumnHelper<LineItem>();
