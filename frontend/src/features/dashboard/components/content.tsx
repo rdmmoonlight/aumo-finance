@@ -1,6 +1,7 @@
-import { Link, useNavigate } from '@tanstack/react-router';
-import { useAppRouter, useSearchParams } from "@/lib/router-compat";
 "use client";
+
+import { useAppRouter, useSearchParams } from "@/lib/router-compat";
+import { Link, useNavigate } from '@tanstack/react-router';
 
 import { DashboardCharts } from "#/features/dashboard/components/charts";
 import {
@@ -17,8 +18,6 @@ import {
   CardHeader,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { store } from "@/lib/store";
-import { dashboardApi } from "@/lib/store/(authenticated)/dashboard/dashboardApi";
 import { cn } from "@/lib/utils";
 import {
   Activity,
@@ -35,9 +34,10 @@ import {
   Wallet,
   X,
 } from "lucide-react";
+import { dashboardApi } from "../hooks/useDashboard";
 
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 export default function DashboardContent() {
   const router = useAppRouter();
@@ -50,46 +50,8 @@ export default function DashboardContent() {
       : "monthly",
   );
   const [dismissError, setDismissError] = useState(false);
-
-  // Manual state management pengganti auto-generated RTK Query Hook
-  const [resData, setResData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isFetching, setIsFetching] = useState(false);
-  const [error, setError] = useState<any>(null);
-
-  // Fungsi pengambil data langsung menembak Controller ASP.NET via endpoint initiate
-  const fetchDashboardData = useCallback(
-    async (period: "monthly" | "annual", initial = false) => {
-      if (initial) {
-        setIsLoading(true);
-      } else {
-        setIsFetching(true);
-      }
-      setError(null);
-
-      try {
-        const result = await store.dispatch(
-          dashboardApi.endpoints.getDashboard.initiate({ period }),
-        );
-
-        if ("data" in result && result.data) {
-          setResData(result.data);
-        } else if ("error" in result) {
-          setError(result.error);
-        }
-      } catch (err) {
-        setError({ message: "Terjadi kesalahan jaringan." });
-      } finally {
-        setIsLoading(false);
-        setIsFetching(false);
-      }
-    },
-    [],
-  );
-
-  useEffect(() => {
-    fetchDashboardData(periodType, true);
-  }, [periodType, fetchDashboardData]);
+  const { data: resData, isLoading, isFetching, error } =
+    dashboardApi.useGetDashboard({ period: periodType });
 
   const handlePeriodSwitch = (type: "monthly" | "annual") => {
     if (periodType === type || isFetching) return;
@@ -99,10 +61,18 @@ export default function DashboardContent() {
   };
 
   const healthScore = useMemo(() => {
-    if (!resData || resData.hasPeriodSelected === false) return 0;
-    const totalRev = Number(resData.totalRevenue) || 0;
-    const totalExp = Number(resData.totalExpenses) || 0;
-    const net = Number(resData.netIncome) || 0;
+    if (
+      !resData ||
+      (typeof resData === "object" &&
+        resData !== null &&
+        "hasPeriodSelected" in resData &&
+        resData.hasPeriodSelected === false)
+    )
+      return 0;
+    const dashboardData = resData as Record<string, unknown>;
+    const totalRev = Number(dashboardData.totalRevenue) || 0;
+    const totalExp = Number(dashboardData.totalExpenses) || 0;
+    const net = Number(dashboardData.netIncome) || 0;
     if (totalRev === 0 && totalExp === 0) return 100;
     const margin = totalRev > 0 ? (net / totalRev) * 100 : 0;
     if (margin >= 20) return 90;
@@ -115,11 +85,14 @@ export default function DashboardContent() {
     if (!resData) return { cash: 0, bank: 0, assets: 0, liabilities: 0 };
     const suffix = periodType === "monthly" ? "Monthly" : "Annual";
     const get = (base: string) => {
-      const direct = resData[`${base}${suffix}`];
+      const direct = (resData as Record<string, unknown>)[`${base}${suffix}`];
       if (direct !== undefined && direct !== null) return Number(direct) || 0;
-      if (resData[periodType]?.[base] !== undefined)
-        return Number(resData[periodType][base]) || 0;
-      return Number(resData[base]) || 0;
+      const periodData = (
+        resData as unknown as Record<string, Record<string, unknown> | undefined>
+      )[periodType];
+      if (periodData?.[base] !== undefined)
+        return Number(periodData[base]) || 0;
+      return Number((resData as Record<string, unknown>)[base]) || 0;
     };
     return {
       cash: get("totalCashOnHand"),
@@ -148,7 +121,13 @@ export default function DashboardContent() {
     );
   }
 
-  if (!resData || resData.hasPeriodSelected === false) {
+  if (
+    !resData ||
+    (typeof resData === "object" &&
+      resData !== null &&
+      "hasPeriodSelected" in resData &&
+      resData.hasPeriodSelected === false)
+  ) {
     return (
       <Card className="py-16 text-center border-dashed m-6">
         <CardContent className="space-y-3">
@@ -167,15 +146,21 @@ export default function DashboardContent() {
     );
   }
 
+  const dashboardChartsData = resData as {
+    chartTrend?: Parameters<typeof DashboardCharts>[0]["chartTrend"];
+    expenseAccountsList?: Parameters<typeof DashboardCharts>[0]["expenseAccountsList"];
+  };
+
   const {
     cash: totalCashOnHand,
     bank: totalBankBalance,
     assets: totalAssets,
     liabilities: totalLiabilities,
   } = periodTotals;
-  const totalRevenue = Number(resData?.totalRevenue) || 0;
-  const totalExpenses = Number(resData?.totalExpenses) || 0;
-  const netIncome = Number(resData?.netIncome) || 0;
+  const dashboardData = resData as Record<string, unknown>;
+  const totalRevenue = Number(dashboardData.totalRevenue) || 0;
+  const totalExpenses = Number(dashboardData.totalExpenses) || 0;
+  const netIncome = Number(dashboardData.netIncome) || 0;
   const periodLabel = periodType === "monthly" ? "Monthly" : "Annual";
   const periodLabelReal =
     periodType === "monthly" ? "Monthly Real" : "Annual Real";
@@ -205,7 +190,8 @@ export default function DashboardContent() {
           <p className="text-ui text-muted-foreground mt-1">
             Active Period:{" "}
             <span className="font-semibold text-foreground">
-              {resData.selectedPeriodName || "Current Period"}
+              {(resData as { selectedPeriodName?: string | null })
+                .selectedPeriodName || "Current Period"}
             </span>{" "}
             • In IDR{" "}
             {isFetching && (
@@ -402,8 +388,8 @@ export default function DashboardContent() {
       </div>
 
       <DashboardCharts
-        chartTrend={resData?.chartTrend || []}
-        expenseAccountsList={resData?.expenseAccountsList || []}
+        chartTrend={dashboardChartsData.chartTrend || []}
+        expenseAccountsList={dashboardChartsData.expenseAccountsList || []}
         totalCashOnHand={totalCashOnHand}
         totalBankBalance={totalBankBalance}
         periodType={periodType}
@@ -423,7 +409,7 @@ export default function DashboardContent() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <ExpenseTable data={resData?.expenseAccountsList || []} />
+            <ExpenseTable data={dashboardChartsData.expenseAccountsList || []} />
           </CardContent>
         </Card>
 
@@ -440,7 +426,7 @@ export default function DashboardContent() {
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <TrendTable data={resData?.chartTrend || []} />
+            <TrendTable data={dashboardChartsData.chartTrend || []} />
           </CardContent>
         </Card>
       </div>

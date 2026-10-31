@@ -7,20 +7,28 @@ import { AppTopBar } from "@/components/app-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAppRouter } from "@/lib/router-compat";
-import type { AppDispatch } from "@/lib/store";
-import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
 import { Outlet } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { periodsApi } from "../../features/periods/hooks/usePeriods";
+
+function PeriodsLoadingOverlay() {
+    const { isLoading } = periodsApi.useGetPeriodsOpenInfo();
+
+    if (!isLoading) return null;
+
+    return (
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-">
+            <p className="text-sm text-muted-foreground">Memuat periode...</p>
+        </div>
+    );
+}
 
 export default function AuthenticatedLayout() {
     const { refetchProfile } = useAuth();
     const router = useAppRouter();
-    const dispatch = useDispatch<AppDispatch>();
 
     const [isAuthLoading, setIsAuthLoading] = useState(true);
     const [isAuthError, setIsAuthError] = useState(false);
-    const [isPeriodsLoading, setIsPeriodsLoading] = useState(false);
 
     const verifySessionAndLoadData = useCallback(async () => {
         try {
@@ -33,15 +41,12 @@ export default function AuthenticatedLayout() {
             }
             setIsAuthError(false);
             setIsAuthLoading(false);
-            setIsPeriodsLoading(true);
-            await dispatch(periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, { forceRefetch: false }));
         } catch {
             setIsAuthError(true);
         } finally {
             setIsAuthLoading(false);
-            setIsPeriodsLoading(false);
         }
-    }, [dispatch, refetchProfile]);
+    }, [refetchProfile]);
 
     useEffect(() => { verifySessionAndLoadData(); }, [verifySessionAndLoadData]);
 
@@ -67,11 +72,7 @@ export default function AuthenticatedLayout() {
                 <SidebarInset className="flex flex-1 flex-col min-w-0">
                     <AppTopBar />
                     <main className="relative flex-1 p-6">
-                        {isPeriodsLoading && (
-                            <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-">
-                                <p className="text-sm text-muted-foreground">Memuat periode...</p>
-                            </div>
-                        )}
+                        <PeriodsLoadingOverlay />
                         <Outlet />
                     </main>
                     <AppFooter />
