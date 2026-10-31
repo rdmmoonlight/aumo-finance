@@ -20,8 +20,8 @@ import {
     journalEntrySchema,
     parseFormattedNumber,
 } from "@/lib/validations/journal-entry";
-import { useGetChartOfAccounts } from "../chart-of-accounts/hooks/useChartOfAccounts";
-import { useCreateJournalEntry, useEditJournalEntry, useGetJournalEntryById, useGetNextTransactionNumber } from "../journal-entry/hooks/useJournalEntry";
+import { chartOfAccountsApi } from "../chart-of-accounts/api/chartOfAccountsApi";
+import { journalEntryApi } from "../journal-entry/api/journalEntryApi";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -57,7 +57,8 @@ function JournalEntryContent() {
     // Manual State untuk menggantikan React Hooks bawaan RTK Query
     const [isAccountsLoading, setIsAccountsLoading] = useState<boolean>(true);
     const [availableAccounts, setAvailableAccounts] = useState<AccountOption[]>([]);
-    const accountsQuery = useGetChartOfAccounts();
+    const accountsQuery =
+        chartOfAccountsApi.endpoints.getChartOfAccounts.useQuery();
 
     const [isTxLoading, setIsTxLoading] = useState<boolean>(false);
     const [nextTxNumber, setNextTxNumber] = useState<string | null>(null);
@@ -95,12 +96,20 @@ function JournalEntryContent() {
     const journalType = watch("journalType");
     const entryDate = watch("entryDate");
     const watchedLines = watch("lines");
-    const nextTransactionNumberQuery = useGetNextTransactionNumber(
-        isEdit ? undefined : { journalType, entryDate }
-    );
-    const journalEntryQuery = useGetJournalEntryById(entryId);
-    const createJournalEntryMutation = useCreateJournalEntry();
-    const editJournalEntryMutation = useEditJournalEntry();
+    const nextTransactionNumberQuery =
+        journalEntryApi.endpoints.getNextTransactionNumber.useQuery(
+            { journalType, entryDate },
+            { skip: isEdit }
+        );
+    const journalEntryQuery =
+        journalEntryApi.endpoints.getJournalEntryById.useQuery(
+            { id: entryId },
+            { skip: !isEdit }
+        );
+    const [createJournalEntry] =
+        journalEntryApi.endpoints.createJournalEntry.useMutation();
+    const [updateJournalEntry] =
+        (journalEntryApi.endpoints as any).updateJournalEntry.useMutation();
 
     // 1. Fetch Chart of Accounts
     useEffect(() => {
@@ -307,7 +316,7 @@ function JournalEntryContent() {
 
         try {
             if (isEdit) {
-                const res: any = await editJournalEntryMutation.mutateAsync({
+                const res: any = await updateJournalEntry({
                     id: entryId,
                     body: {
                         entryDate: data.entryDate,
@@ -315,15 +324,15 @@ function JournalEntryContent() {
                         transactionNumber: displayedTxNumber,
                         lines: payloadLines,
                     },
-                });
+                }).unwrap();
                 toast.success(`Updated ${res?.transactionNumber || displayedTxNumber}`);
                 setTimeout(() => router.push("/reports/journals/general"), 1200);
             } else {
-                const res: any = await createJournalEntryMutation.mutateAsync({
+                const res: any = await createJournalEntry({
                     journalType: data.journalType,
                     entryDate: data.entryDate,
                     lines: payloadLines,
-                });
+                }).unwrap();
                 toast.success(
                     `Posted ${res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber}`
                 );
