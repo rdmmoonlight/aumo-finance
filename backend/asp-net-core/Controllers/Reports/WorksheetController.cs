@@ -11,10 +11,12 @@ using Microsoft.AspNetCore.Mvc;
 public class WorksheetController : ControllerBase
 {
     private readonly IWorksheetService _worksheetService;
+    private readonly ILogger<WorksheetController> _logger;
 
-    public WorksheetController(IWorksheetService worksheetService)
+    public WorksheetController(IWorksheetService worksheetService, ILogger<WorksheetController> logger)
     {
         _worksheetService = worksheetService;
+        _logger = logger;
     }
 
     // GET /api/v1/reports/worksheet
@@ -39,6 +41,17 @@ public class WorksheetController : ControllerBase
                 rows = Array.Empty<object>(),
                 totals = new { },
             });
+        }
+
+        // Snapshot ke tabel Worksheet bersifat pelengkap: kegagalan menyimpan tidak boleh
+        // menggagalkan kertas kerja yang sudah berhasil dihitung.
+        try
+        {
+            await _worksheetService.SaveSnapshotAsync(userId, result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Gagal menyimpan snapshot worksheet periode {PeriodId}.", result.PeriodId);
         }
 
         var t = result.Totals;

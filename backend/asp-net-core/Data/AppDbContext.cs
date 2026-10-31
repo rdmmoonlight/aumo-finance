@@ -52,6 +52,8 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
     public virtual DbSet<UnadjustedTrialBalance> UnadjustedTrialBalance { get; set; } = null!;
 
+    public virtual DbSet<Worksheet> Worksheet { get; set; } = null!;
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)
@@ -255,6 +257,33 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.Id).ValueGeneratedNever();
 
             entity.HasOne(d => d.User).WithMany().HasForeignKey(d => d.UserId);
+        });
+
+        builder.Entity<Worksheet>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("Worksheet_pkey");
+
+            entity.ToTable("Worksheet");
+
+            entity.HasIndex(e => new { e.UserId, e.PeriodId }, "IX_Worksheet_UserId_PeriodId");
+
+            entity.Property(e => e.Id).UseIdentityAlwaysColumn();
+            entity.Property(e => e.AccountName).HasMaxLength(255);
+            entity.Property(e => e.AccountNumber).HasMaxLength(50);
+            entity.Property(e => e.AccountType).HasMaxLength(50);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
+            entity.Property(e => e.NormalBalanceIsDebit).HasDefaultValue(false);
+            entity.Property(e => e.UnadjustedDebit).HasPrecision(15, 2);
+            entity.Property(e => e.UnadjustedCredit).HasPrecision(15, 2);
+            entity.Property(e => e.AdjustmentDebit).HasPrecision(15, 2);
+            entity.Property(e => e.AdjustmentCredit).HasPrecision(15, 2);
+            entity.Property(e => e.AdjustedDebit).HasPrecision(15, 2);
+            entity.Property(e => e.AdjustedCredit).HasPrecision(15, 2);
+            entity.Property(e => e.IncomeStatementDebit).HasPrecision(15, 2);
+            entity.Property(e => e.IncomeStatementCredit).HasPrecision(15, 2);
+            entity.Property(e => e.FinancialPositionDebit).HasPrecision(15, 2);
+            entity.Property(e => e.FinancialPositionCredit).HasPrecision(15, 2);
         });
 
         builder.Entity<AdjustedTrialBalance>(entity =>
