@@ -14,8 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import type { AppDispatch } from "@/lib/store";
-import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -26,13 +24,16 @@ import {
   Upload,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
 import { useAuth } from "../../auth/hooks/use-auth";
+import { useChangePassword, useDeleteAccount, useUpdateProfile, useUploadAvatar } from "../hooks/useSettings";
 import { AccountDetailsTable, UserProfileField } from "./account-table";
 
 export default function AccountSettings() {
-  const dispatch = useDispatch<AppDispatch>();
   const { user: authUser } = useAuth();
+  const changePassword = useChangePassword();
+  const deleteAccount = useDeleteAccount();
+  const updateProfile = useUpdateProfile();
+  const uploadAvatar = useUploadAvatar();
 
   const [user, setUser] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -105,14 +106,7 @@ export default function AccountSettings() {
     e.preventDefault();
     setSaving(true);
     try {
-      await dispatch(
-        settingsApi.endpoints.updateProfile.initiate({
-          fullName,
-          userName,
-          phoneNumber,
-          bio,
-        }),
-      ).unwrap();
+      await updateProfile.mutateAsync({ fullName, userName, phoneNumber, bio });
       notify("Profile updated!");
       fetchProfile();
     } catch (err: any) {
@@ -135,9 +129,7 @@ export default function AccountSettings() {
 
     setUploading(true);
     try {
-      const res: any = await dispatch(
-        settingsApi.endpoints.uploadAvatar.initiate(fd),
-      ).unwrap();
+      const res: any = await uploadAvatar.mutateAsync(fd);
       const newUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
       if (newUrl) setAvatarPreview(newUrl);
       notify("Avatar berhasil diunggah!");
@@ -158,12 +150,7 @@ export default function AccountSettings() {
     e.preventDefault();
     setChanging(true);
     try {
-      await dispatch(
-        settingsApi.endpoints.changePassword.initiate({
-          currentPassword,
-          newPassword,
-        }),
-      ).unwrap();
+      await changePassword.mutateAsync({ currentPassword, newPassword });
       notify("Password updated!");
       setCurrentPassword("");
       setNewPassword("");
@@ -178,7 +165,7 @@ export default function AccountSettings() {
     if (!confirm("Hapus permanen akun Anda?")) return;
     setDeleting(true);
     try {
-      await dispatch(settingsApi.endpoints.deleteAccount.initiate()).unwrap();
+      await deleteAccount.mutateAsync();
       window.location.href = "/auth/login";
     } catch (err: any) {
       notify(err?.data?.message || "Gagal menghapus akun", true);

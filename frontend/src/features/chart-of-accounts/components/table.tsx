@@ -1,5 +1,5 @@
-import { Link } from '@tanstack/react-router';
 import { useSearchParams } from "@/lib/router-compat";
+import { Link } from '@tanstack/react-router';
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -23,7 +23,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { store } from "@/lib/store";
-import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import { cn } from "@/lib/utils";
 import {
   ColumnDef,
@@ -41,6 +40,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { chartOfAccountsApi } from "../hooks/useChartOfAccounts";
 
 
 import { useCallback, useEffect, useMemo, useState } from "react";

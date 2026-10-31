@@ -29,7 +29,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { store } from "@/lib/store";
-import { chartOfAccountsApi } from "@/lib/store/(authenticated)/chart-of-accounts/chartOfAccountsApi";
 import {
   addAccountSchema,
   editAccountSchema,
@@ -39,6 +38,7 @@ import { Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { chartOfAccountsApi } from "../hooks/useChartOfAccounts";
 import {
   ACCOUNT_RANGES,
   ACCOUNT_TYPES,

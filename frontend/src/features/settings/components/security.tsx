@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { store } from "@/lib/store";
-import { settingsApi } from "@/lib/store/(authenticated)/settings/settingsApi";
 import { cn } from "@/lib/utils";
 import {
   Activity,
@@ -20,6 +18,7 @@ import {
   OctagonX,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { useRevokeAllSessions, useRevokeSessionById } from "../hooks/useSettings";
 import {
   ActiveSessionsTable,
   ActivityItem,
@@ -33,6 +32,8 @@ interface ApiCustomError {
 }
 
 export function SecuritySection() {
+  const revokeAllSessions = useRevokeAllSessions();
+  const revokeSessionById = useRevokeSessionById();
   const [guardianTab, setGuardianTab] = useState("health");
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -51,20 +52,19 @@ export function SecuritySection() {
     setIsError(false);
     setError(null);
 
-    const result = await store.dispatch(
-      settingsApi.endpoints.getGuardianDashboard.initiate(undefined, {
-        forceRefetch: true,
-      }),
-    );
-
-    if (result.isSuccess) {
-      const resp = result.data;
+    try {
+      const response = await fetch("/api/security/dashboard");
+      const resp = await response.json();
+      if (!response.ok) {
+        throw { data: resp };
+      }
       setDashboardData((resp as Record<string, any>)?.data || resp);
-    } else if (result.isError) {
+    } catch (fetchError) {
       setIsError(true);
-      setFetchError(result.error);
+      setFetchError(fetchError);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, []);
 
   useEffect(() => {
@@ -96,18 +96,9 @@ export function SecuritySection() {
     if (!id || !confirm(`Akhiri sesi "${device}"?`)) return;
     setIsRevoking(true);
     try {
-      const result = await store.dispatch(
-        settingsApi.endpoints.revokeSessionById.initiate({
-          sessionId: id,
-        }),
-      );
-
-      if ("data" in result) {
-        notify("Sesi diakhiri");
-        await loadDashboard();
-      } else {
-        throw result.error;
-      }
+      await revokeSessionById.mutateAsync({ sessionId: id });
+      notify("Sesi diakhiri");
+      await loadDashboard();
     } catch (e) {
       const err = e as ApiCustomError;
       notify(err?.data?.message || "Gagal mengakhiri sesi", true);
@@ -120,16 +111,9 @@ export function SecuritySection() {
     if (!confirm("Lockout semua device lain?")) return;
     setIsRevokingAll(true);
     try {
-      const result = await store.dispatch(
-        settingsApi.endpoints.revokeAllSessions.initiate(),
-      );
-
-      if ("data" in result) {
-        notify("Semua sesi lain diakhiri");
-        await loadDashboard();
-      } else {
-        throw result.error;
-      }
+      await revokeAllSessions.mutateAsync();
+      notify("Semua sesi lain diakhiri");
+      await loadDashboard();
     } catch (e) {
       const err = e as ApiCustomError;
       notify(err?.data?.message || "Gagal mengakhiri semua sesi", true);

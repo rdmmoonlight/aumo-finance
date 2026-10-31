@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { store } from "@/lib/store";
-import { periodsApi } from "@/lib/store/(authenticated)/periods/periodsApi";
+import { periodsApi } from "./hooks/usePeriods";
 
 export default function PeriodsPage() {
     const [periods, setPeriods] = useState<PeriodItem[]>([]);

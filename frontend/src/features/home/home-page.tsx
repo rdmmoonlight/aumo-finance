@@ -11,14 +11,12 @@ import {
     TrendingUp,
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AppDispatch, RootState } from "@/lib/store";
-import { homeApi } from "@/lib/store/(authenticated)/home/homeApi";
+import { homeApi } from "../home/hooks/useHome";
 
 interface MarketItem {
     symbol: string;
@@ -29,33 +27,34 @@ interface MarketItem {
 }
 
 export default function HomeContent() {
-    const dispatch = useDispatch<AppDispatch>();
-
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [isFetching, setIsFetching] = useState<boolean>(false);
-    const [isError, setIsError] = useState<boolean>(false);
     const [lastUpdated, setLastUpdated] = useState<string>("");
+    const {
+        data: rawResponse,
+        isLoading,
+        isFetching,
+        isError,
+        refetch,
+    } = homeApi.useGetMarketIndicators();
 
-    const rawResponse = useSelector(
-        (state: RootState) =>
-            homeApi.endpoints.getMarketIndicators.select()(state)?.data
-    );
-
-    const fetchMarketData = useCallback(async (isManualRefresh = false) => {
-        setIsFetching(true);
-        try {
-            const result = await dispatch(
-                homeApi.endpoints.getMarketIndicators.initiate(undefined, {
-                    subscribe: false,
-                    forceRefetch: true,
+    useEffect(() => {
+        if (rawResponse) {
+            setLastUpdated(
+                new Date().toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit",
                 })
             );
+        }
+    }, [rawResponse]);
 
-            if ("error" in result) {
-                setIsError(true);
+    const fetchMarketData = useCallback(async (isManualRefresh = false) => {
+        try {
+            const result = await refetch();
+
+            if (result.isError) {
                 toast.error("Gagal memperbarui indikator pasar");
             } else {
-                setIsError(false);
                 setLastUpdated(
                     new Date().toLocaleTimeString("id-ID", {
                         hour: "2-digit",
@@ -68,17 +67,9 @@ export default function HomeContent() {
                 }
             }
         } catch {
-            setIsError(true);
             toast.error("Terjadi kesalahan saat memuat indikator pasar");
-        } finally {
-            setIsLoading(false);
-            setIsFetching(false);
         }
-    }, [dispatch]);
-
-    useEffect(() => {
-        fetchMarketData(false);
-    }, [fetchMarketData]);
+    }, [refetch]);
 
     const extractRawItems = (res: unknown): Record<string, unknown>[] => {
         if (!res) return [];
@@ -193,8 +184,8 @@ export default function HomeContent() {
                                             </span>
                                             <Badge
                                                 className={`flex items-center border-0 px-1.5 py-0.5 text-[11px] ${item.isUp
-                                                        ? "bg-emerald-500/15 text-emerald-400"
-                                                        : "bg-red-500/15 text-red-400"
+                                                    ? "bg-emerald-500/15 text-emerald-400"
+                                                    : "bg-red-500/15 text-red-400"
                                                     }`}
                                             >
                                                 {item.isUp ? (
