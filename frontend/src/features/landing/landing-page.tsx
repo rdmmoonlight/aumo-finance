@@ -1,20 +1,15 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { authApi } from "../auth/api/authApi";
 import { AuthDialog } from "./components/auth-dialog";
 import { LandingLeft } from "./components/landing-left";
 import { LandingRight } from "./components/landing-right";
 
-// Jika file ini adalah file rute TanStack Router (misal: routes/index.tsx)
-export const Route = createFileRoute("/")({
-    component: LandingPage,
-});
-
 export default function LandingPage(): React.JSX.Element {
     const navigate = useNavigate();
     const { data: profile, isLoading: checkingAuth } = authApi.useGetProfileQuery();
     const isAuthenticated = Boolean(profile);
+
     const [open, setOpen] = useState(false);
     const [authMode, setAuthMode] = useState<"login" | "register">("login");
 
@@ -28,15 +23,9 @@ export default function LandingPage(): React.JSX.Element {
         navigate({ to: "/home", replace: true });
     };
 
+    // Redirect otomatis jika user sudah login
     if (isAuthenticated) {
-        return (
-            <div className="flex min-h-screen w-full items-center justify-center bg-black text-white">
-                <div className="flex items-center gap-3 text-sm text-zinc-400">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Redirecting to dashboard...</span>
-                </div>
-            </div>
-        );
+        return <Navigate to="/home" replace />;
     }
 
     return (
