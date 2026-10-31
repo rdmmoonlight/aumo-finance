@@ -102,3 +102,13 @@ export const journalEntryApi = baseApi.injectEndpoints({
     }),
   }),
 });
+
+// --- Export Auto-Generated Hooks ---
+export const {
+  useGetJournalEntryByIdQuery,
+  useCreateJournalEntryMutation,
+  useEditJournalEntryMutation,
+  useDeleteJournalEntryMutation,
+  useSearchDescriptionsQuery,
+  useGetNextTransactionNumberQuery,
+} = journalEntryApi;
