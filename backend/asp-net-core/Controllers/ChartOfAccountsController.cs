@@ -1,10 +1,3 @@
-#pragma warning disable CA1862
-#pragma warning disable CA1304
-#pragma warning disable CA1311
-// <copyright file="ChartOfAccountsController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Controllers;
 
 using System;
