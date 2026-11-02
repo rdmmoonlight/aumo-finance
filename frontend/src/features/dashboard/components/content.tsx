@@ -240,7 +240,12 @@ export default function DashboardContent() {
               Annual
             </Button>
           </div>
-          <Button asChild size="sm" className="h-8 gap-1 text-caption">
+          <Button
+            asChild
+            variant="outline"
+            size="sm"
+            className="h-8 gap-1 text-caption"
+          >
             <Link to="/journal-entry">
               <Plus size={14} /> New Entry
             </Link>
@@ -251,8 +256,8 @@ export default function DashboardContent() {
             size="sm"
             className="h-8 gap-1 text-caption"
           >
-            <Link to="/reports/financial-statements/income-statement">
-              <FileText size={14} /> Report
+            <Link to="/reports">
+              <FileText size={14} /> Reports
             </Link>
           </Button>
         </div>
