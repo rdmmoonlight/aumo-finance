@@ -28,7 +28,51 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { authApi } from "../../auth/api/authApi";
 import { settingsApi } from "../api/settingsApi";
-import { AccountDetailsTable, UserProfileField } from "./account-table";
+
+type UserProfileField = {
+  label: string;
+  value: string;
+  status: string;
+};
+
+function AccountDetailsTable({ data }: { data: UserProfileField[] }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left">
+        <thead className="bg-muted/30">
+          <tr className="border-b border-border">
+            <th className="px-4 py-2 text-left text-caption text-muted-foreground">
+              Field
+            </th>
+            <th className="px-4 py-2 text-left text-caption text-muted-foreground">
+              Value
+            </th>
+            <th className="px-4 py-2 text-left text-caption text-muted-foreground">
+              Status
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {data.map((item) => (
+            <tr key={item.label} className="border-b border-border last:border-b-0">
+              <td className="px-4 py-2 text-caption text-foreground">
+                {item.label}
+              </td>
+              <td className="px-4 py-2 text-caption text-foreground">
+                {item.value || "-"}
+              </td>
+              <td className="px-4 py-2 text-caption">
+                <span className="inline-flex rounded-full border border-border px-2 py-0.5 text-[10px] uppercase tracking-wide text-foreground">
+                  {item.status}
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
 
 export default function AccountSettings() {
   const dispatch = useDispatch<AppDispatch>();

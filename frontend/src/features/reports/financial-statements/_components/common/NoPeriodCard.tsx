@@ -1,5 +1,7 @@
-import { Link } from '@tanstack/react-router';
 "use client";
+
+import { Link } from '@tanstack/react-router';
+
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, EyeOff } from "lucide-react";

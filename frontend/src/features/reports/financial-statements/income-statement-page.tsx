@@ -10,7 +10,7 @@ import { reportsApi } from "../api/reportsApi";
 import { ErrorAlert } from "./_components/common/ErrorAlert";
 import { LoadingState } from "./_components/common/LoadingState";
 import { NoPeriodCard } from "./_components/common/NoPeriodCard";
-import { IncomeStatementSectionTable } from "./_components/income-statement/IncomeStatementSectionTable";
+import { IncomeStatementSectionTable } from "./_components/income-statement/income-statement-table";
 import { formatDateDisplay, formatNumber } from "./_lib/formatters";
 import { IncomeStatementLine } from "./_types";
 
