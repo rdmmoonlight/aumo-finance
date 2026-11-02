@@ -17,8 +17,6 @@ using AumoBackend.Services.Reports.Worksheet;
 using AumoBackend.Services.Settings;
 using AumoBackend.Services.Storage;
 using AumoBackend.Services.Tools;
-using Hangfire;
-using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -97,19 +95,6 @@ public static class ServiceCollectionExtensions
         });
 
         var connectionString = configuration.GetConnectionString("DefaultConnection")!;
-        services.AddHangfire(config => config
-            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
-            .UseSimpleAssemblyNameTypeSerializer()
-            .UseRecommendedSerializerSettings()
-            .UsePostgreSqlStorage(options =>
-            {
-                options.UseNpgsqlConnection(connectionString);
-            }));
-
-        services.AddHangfireServer(options =>
-        {
-            options.WorkerCount = Environment.ProcessorCount * 2;
-        });
 
         services.Configure<ForwardedHeadersOptions>(options =>
         {
