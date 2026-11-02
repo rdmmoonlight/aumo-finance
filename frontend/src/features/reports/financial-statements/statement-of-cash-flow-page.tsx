@@ -8,7 +8,7 @@ import { Link } from '@tanstack/react-router';
 import { ArrowRight, Banknote, Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { reportsApi } from "../api/reportsApi";
-import { CashFlowSectionTable } from "./_components/cash-flow/CashFlowSectionTable";
+import { CashFlowSectionTable } from "./_components/cash-flow/cash-flow-table";
 import { ErrorAlert } from "./_components/common/ErrorAlert";
 import { LoadingState } from "./_components/common/LoadingState";
 import { NoPeriodCard } from "./_components/common/NoPeriodCard";

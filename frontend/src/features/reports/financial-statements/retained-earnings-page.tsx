@@ -10,7 +10,7 @@ import { reportsApi } from "../api/reportsApi";
 import { ErrorAlert } from "./_components/common/ErrorAlert";
 import { LoadingState } from "./_components/common/LoadingState";
 import { NoPeriodCard } from "./_components/common/NoPeriodCard";
-import { RetainedEarningsTable } from "./_components/retained-earnings/RetainedEarningsTable";
+import { RetainedEarningsTable } from "./_components/retained-earnings/retained-earnings-table";
 import { formatDateDisplay } from "./_lib/formatters";
 import { RetainedEarningsViewModel, StatementRow } from "./_types";
 

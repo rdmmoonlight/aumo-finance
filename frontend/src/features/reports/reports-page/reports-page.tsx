@@ -3,13 +3,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { store } from "@/lib/store";
-import { createColumnHelper, getCoreRowModel, getFilteredRowModel, useReactTable } from "@tanstack/react-table";
 import { useEffect, useMemo, useState } from "react";
 import { reportsApi, SummaryResponse } from "../api/reportsApi";
-import { ReportCard, ReportsGrid, ReportsHeader, ReportsSearch, ReportsSummary } from "./components";
-import { ReportItem, REPORTS } from "./data";
-
-const columnHelper = createColumnHelper<ReportItem>();
+import { ReportsGrid, ReportsHeader, ReportsSearch, ReportsSummary } from "./components";
+import { REPORTS } from "./data";
 
 export default function ReportsPage() {
   const [globalFilter, setGlobalFilter] = useState("");
@@ -25,8 +22,11 @@ export default function ReportsPage() {
         const result = await store.dispatch(reportsApi.endpoints.getSummary.initiate());
         if (isMounted && "data" in result && result.data) setSummaryData(result.data);
         else if (isMounted) setIsError(true);
-      } catch { if (isMounted) setIsError(true); }
-      finally { if (isMounted) setSummaryLoading(false); }
+      } catch {
+        if (isMounted) setIsError(true);
+      } finally {
+        if (isMounted) setSummaryLoading(false);
+      }
     }
     fetchSummary();
     return () => { isMounted = false; };
@@ -34,26 +34,14 @@ export default function ReportsPage() {
 
   const summary = (summaryData as any)?.data ?? summaryData;
 
-  const columns = useMemo(() => [
-    columnHelper.accessor("title", {
-      header: "Report Card",
-      cell: (info) => <ReportCard report={info.row.original} />,
-    }),
-  ], []);
-
-  const table = useReactTable({
-    data: REPORTS,
-    columns,
-    state: { globalFilter },
-    onGlobalFilterChange: setGlobalFilter,
-    getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    globalFilterFn: (row, _, filterValue) => {
-      const s = filterValue.toLowerCase();
-      const { title, desc, href } = row.original;
-      return `${title} ${desc} ${href}`.toLowerCase().includes(s);
-    },
-  });
+  // ganti getFilteredRowModel dari tanstack jadi filter biasa
+  const filteredReports = useMemo(() => {
+    if (!globalFilter) return REPORTS;
+    const s = globalFilter.toLowerCase();
+    return REPORTS.filter(({ title, desc, href }) =>
+      `${title} ${desc} ${href}`.toLowerCase().includes(s)
+    );
+  }, [globalFilter]);
 
   return (
     <div className="grid w-full place-items-center py-6">
@@ -63,7 +51,7 @@ export default function ReportsPage() {
           <ReportsSummary summary={summary} isLoading={summaryLoading} isError={isError} />
           <ReportsSearch value={globalFilter} onChange={setGlobalFilter} />
           <Separator className="my-6 bg-white/10" />
-          <ReportsGrid filteredRows={table.getFilteredRowModel().rows} />
+          <ReportsGrid filteredReports={filteredReports} />
         </CardContent>
       </Card>
     </div>

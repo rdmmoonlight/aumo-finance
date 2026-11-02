@@ -11,7 +11,7 @@ import { reportsApi } from "../api/reportsApi";
 import { ErrorAlert } from "./_components/common/ErrorAlert";
 import { LoadingState } from "./_components/common/LoadingState";
 import { NoPeriodCard } from "./_components/common/NoPeriodCard";
-import { FinancialPositionSectionTable } from "./_components/financial-position/FinancialPositionSectionTable";
+import { FinancialPositionSectionTable } from "./_components/financial-position/financial-position-table";
 import { formatDateDisplay, formatNumber } from "./_lib/formatters";
 import { FinancialPositionLine } from "./_types";
 

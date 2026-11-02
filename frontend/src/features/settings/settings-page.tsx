@@ -6,55 +6,79 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { ArrowRight, LucideIcon, Palette, ShieldCheck, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import AccountSettings from "./components/account";
 import { AppearanceSection } from "./components/appearance";
 import { SecuritySection } from "./components/security";
 
-interface SettingModuleItem { id: string; name: string; icon: LucideIcon; description: string; status: string; }
-const columnHelper = createColumnHelper<SettingModuleItem>();
+interface SettingModuleItem {
+    id: string;
+    name: string;
+    icon: LucideIcon;
+    description: string;
+    status: string;
+}
 
-function SettingsOverviewTable({ data, activeTab, onSelectTab }: { data: SettingModuleItem[]; activeTab: string; onSelectTab: (tabId: string) => void; }) {
-    const columns = useMemo(() => [
-        columnHelper.accessor("name", {
-            header: "Modul Pengaturan",
-            cell: ({ row }) => {
-                const Icon = row.original.icon;
-                return <div className="flex items-center gap-2"><Icon size={15} className="text-foreground" /><span className="font-semibold text-caption text-foreground">{row.original.name}</span></div>;
-            },
-        }),
-        columnHelper.accessor("description", { header: "Cakupan Modul", cell: (info) => <span className="text-caption text-muted-foreground">{info.getValue()}</span> }),
-        columnHelper.accessor("status", {
-            header: "Status",
-            cell: ({ row }) => {
-                const isActive = row.original.id === activeTab;
-                return <Badge variant={isActive ? "default" : "outline"} className="text-label-small py-0 px-1.5 border-border text-foreground data-[variant=default]:bg-white data-[variant=default]:text-black">{isActive ? "Aktif Diampu" : row.original.status}</Badge>;
-            },
-        }),
-        columnHelper.display({
-            id: "action", header: () => <div className="text-right text-foreground">Aksi</div>,
-            cell: ({ row }) => <div className="text-right"><Button variant="ghost" size="sm" className="h-6 text-caption gap-1 px-2 text-foreground hover:bg-white hover:text-black" onClick={() => onSelectTab(row.original.id)}>Buka <ArrowRight size={12} /></Button></div>,
-        }),
-    ], [activeTab, onSelectTab]);
-
-    const table = useReactTable({ data, columns, getCoreRowModel: getCoreRowModel() });
+function SettingsOverviewTable({
+    data,
+    activeTab,
+    onSelectTab
+}: {
+    data: SettingModuleItem[];
+    activeTab: string;
+    onSelectTab: (tabId: string) => void;
+}) {
     return (
         <Table>
             <TableHeader>
-                {table.getHeaderGroups().map((hg) => (
-                    <TableRow key={hg.id} className="text-caption h-8 border-border hover:bg-transparent">
-                        {hg.headers.map((h) => <TableHead key={h.id} className="h-8 text-caption text-muted-foreground">{h.isPlaceholder ? null : flexRender(h.column.columnDef.header, h.getContext())}</TableHead>)}
-                    </TableRow>
-                ))}
+                <TableRow className="text-caption h-8 border-border hover:bg-transparent">
+                    <TableHead className="h-8 text-caption text-muted-foreground">Modul Pengaturan</TableHead>
+                    <TableHead className="h-8 text-caption text-muted-foreground">Cakupan Modul</TableHead>
+                    <TableHead className="h-8 text-caption text-muted-foreground">Status</TableHead>
+                    <TableHead className="h-8 text-caption text-muted-foreground">
+                        <div className="text-right text-foreground">Aksi</div>
+                    </TableHead>
+                </TableRow>
             </TableHeader>
             <TableBody>
-                {table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id} className="border-border hover:bg-muted/50">
-                        {row.getVisibleCells().map((cell) => <TableCell key={cell.id} className="py-2 text-foreground">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>)}
-                    </TableRow>
-                ))}
+                {data.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = item.id === activeTab;
+                    return (
+                        <TableRow key={item.id} className="border-border hover:bg-muted/50">
+                            <TableCell className="py-2 text-foreground">
+                                <div className="flex items-center gap-2">
+                                    <Icon size={15} className="text-foreground" />
+                                    <span className="font-semibold text-caption text-foreground">{item.name}</span>
+                                </div>
+                            </TableCell>
+                            <TableCell className="py-2 text-foreground">
+                                <span className="text-caption text-muted-foreground">{item.description}</span>
+                            </TableCell>
+                            <TableCell className="py-2 text-foreground">
+                                <Badge
+                                    variant={isActive ? "default" : "outline"}
+                                    className="text-label-small py-0 px-1.5 border-border text-foreground data-[variant=default]:bg-white data-[variant=default]:text-black"
+                                >
+                                    {isActive ? "Aktif Diampu" : item.status}
+                                </Badge>
+                            </TableCell>
+                            <TableCell className="py-2 text-foreground">
+                                <div className="text-right">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        className="h-6 text-caption gap-1 px-2 text-foreground hover:bg-white hover:text-black"
+                                        onClick={() => onSelectTab(item.id)}
+                                    >
+                                        Buka <ArrowRight size={12} />
+                                    </Button>
+                                </div>
+                            </TableCell>
+                        </TableRow>
+                    );
+                })}
             </TableBody>
         </Table>
     );

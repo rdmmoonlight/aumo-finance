@@ -1,14 +1,13 @@
 "use client";
 
-import { getPeriodColumns } from "#/features/periods/components/columns";
 import { CreatePeriodForm } from "#/features/periods/components/open-new-period-form";
 import type { ApiError, CreatePeriodValues, PeriodItem } from "#/features/periods/types";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { store } from "@/lib/store";
-import { flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import { AlertTriangle, Calendar, EyeOff, Loader2, Plus, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { periodsApi } from "../periods/api/periodsApi";
@@ -60,8 +59,7 @@ export default function PeriodsPage() {
         try {
             const result = await store.dispatch(periodsApi.endpoints.getPeriodsOpenInfo.initiate(undefined, { forceRefetch: true }));
             if ("data" in result && result.data) setOpenInfo(result.data);
-        } catch { }
-        finally { setIsLoadingOpenInfo(false); }
+        } catch { } finally { setIsLoadingOpenInfo(false); }
     }, []);
 
     useEffect(() => {
@@ -158,9 +156,6 @@ export default function PeriodsPage() {
         } finally { setIsCreating(false); }
     };
 
-    const columns = useMemo(() => getPeriodColumns({ selectedPeriod, selectingId, closingId, onSelectPeriod: handleSelectPeriod, onClosePeriod: handleClosePeriod }), [selectedPeriod, selectingId, closingId]);
-    const table = useReactTable({ data: periods, columns, getCoreRowModel: getCoreRowModel() });
-
     return (
         <div className="space-y-6 max-w-5xl">
             {errorMessage && (
@@ -196,23 +191,48 @@ export default function PeriodsPage() {
                         <div className="border-t border-white/[0.07]">
                             <Table>
                                 <TableHeader className="bg-[#0e0e10]">
-                                    {table.getHeaderGroups().map((hg) => (
-                                        <TableRow key={hg.id} className="border-b border-white/[0.07] hover:bg-transparent">
-                                            {hg.headers.map((h) => (<TableHead key={h.id} className="h-10 text-xs">{h.isPlaceholder ? null : flexRender(h.column.columnDef.header, h.getContext())}</TableHead>))}
-                                        </TableRow>
-                                    ))}
+                                    <TableRow className="border-b border-white/[0.07] hover:bg-transparent">
+                                        <TableHead className="h-10 text-xs text-zinc-400">Period</TableHead>
+                                        <TableHead className="h-10 text-xs text-zinc-400">Status</TableHead>
+                                        <TableHead className="h-10 text-xs text-zinc-400">Selected</TableHead>
+                                        <TableHead className="h-10 text-xs text-zinc-400 text-right">Actions</TableHead>
+                                    </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {isLoading ? (
-                                        <TableRow><TableCell colSpan={columns.length} className="h-24 text-center text-xs text-zinc-500"><Loader2 className="animate-spin inline mr-1" size={16} /> Loading periods...</TableCell></TableRow>
-                                    ) : table.getRowModel().rows.length > 0 ? (
-                                        table.getRowModel().rows.map((row) => (
-                                            <TableRow key={row.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
-                                                {row.getVisibleCells().map((cell) => (<TableCell key={cell.id} className="py-3 text-xs">{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>))}
+                                        <TableRow className="border-b border-white/[0.05]">
+                                            <TableCell colSpan={4} className="h-24 text-center text-xs text-zinc-500">
+                                                <Loader2 className="animate-spin inline mr-2" size={16} /> Loading periods...
+                                            </TableCell>
+                                        </TableRow>
+                                    ) : periods.length > 0 ? (
+                                        periods.map((p) => (
+                                            <TableRow key={p.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
+                                                <TableCell className="py-3 text-xs font-medium text-white">{p.periodName}</TableCell>
+                                                <TableCell className="py-3 text-xs">
+                                                    <Badge variant="outline" className={p.isClosed ? "border-red-500/30 text-red-300 text-" : "border-emerald-500/30 text-emerald-300 text-"}>
+                                                        {p.isClosed ? "Closed" : "Open"}
+                                                    </Badge>
+                                                </TableCell>
+                                                <TableCell className="py-3 text-xs">
+                                                    {p.isSelected ? <Badge className="bg-white text-black text-">Active</Badge> : <span className="text-zinc-500">-</span>}
+                                                </TableCell>
+                                                <TableCell className="py-3 text-xs">
+                                                    <div className="flex justify-end gap-1.5">
+                                                        <Button size="sm" variant="outline" disabled={!!selectingId || p.isSelected} onClick={() => handleSelectPeriod(p)} className="h-7 text- bg-transparent border-white/10 text-zinc-300 hover:bg-white/10">
+                                                            {selectingId === p.id ? <Loader2 size={12} className="animate-spin" /> : "Select"}
+                                                        </Button>
+                                                        <Button size="sm" variant="outline" disabled={!!closingId || p.isClosed} onClick={() => handleClosePeriod(p)} className="h-7 text- bg-transparent border-white/10 text-zinc-300 hover:bg-red-500/10 hover:text-red-300">
+                                                            {closingId === p.id ? <Loader2 size={12} className="animate-spin" /> : "Close"}
+                                                        </Button>
+                                                    </div>
+                                                </TableCell>
                                             </TableRow>
                                         ))
                                     ) : (
-                                        <TableRow><TableCell colSpan={columns.length} className="h-24 text-center text-xs text-zinc-500">No financial periods found.</TableCell></TableRow>
+                                        <TableRow>
+                                            <TableCell colSpan={4} className="h-24 text-center text-xs text-zinc-500">No financial periods found.</TableCell>
+                                        </TableRow>
                                     )}
                                 </TableBody>
                             </Table>

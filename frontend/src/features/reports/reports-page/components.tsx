@@ -1,12 +1,10 @@
-import { Link } from '@tanstack/react-router';
 "use client";
-
 
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Activity, BarChart2, CalendarCheck2, Layers, Receipt, Search } from "lucide-react";
-import { ReportItem, ReportCategory } from "./data";
-import { flexRender, Row } from "@tanstack/react-table";
+import { Link } from '@tanstack/react-router';
+import { Activity, ArrowRight, BarChart2, CalendarCheck2, Layers, Receipt, Search } from "lucide-react";
+import { CATEGORIES, ReportCategory, ReportItem } from "./data";
 
 export function ReportsHeader({ total }: { total: number }) {
   return (
@@ -72,10 +70,10 @@ export function ReportCard({ report }: { report: ReportItem }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <span className="truncate text-sm font-semibold text-white">{report.title}</span>
-          <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-[10px] text-white/40">{report.step}</span>
+          <span className="rounded bg-white/10 px-1.5 py-0.5 font-mono text- text-white/40">{report.step}</span>
         </div>
         <p className="mt-0.5 line-clamp-1 text-xs text-white/50">{report.desc}</p>
-        <div className="mt-2 flex items-center gap-1 text-[11px] text-white/30 group-hover:text-indigo-300">
+        <div className="mt-2 flex items-center gap-1 text- text-white/30 group-hover:text-indigo-300">
           <span className="truncate">{report.href}</span><ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100" />
         </div>
       </div>
@@ -92,14 +90,12 @@ export function ReportsSearch({ value, onChange }: { value: string; onChange: (v
   );
 }
 
-export function ReportsGrid({ filteredRows }: { filteredRows: Row<ReportItem>[] }) {
-  // import categories inside to keep simple
-  const { CATEGORIES } = require("./data");
+export function ReportsGrid({ filteredReports }: { filteredReports: ReportItem[] }) {
   return (
     <div className="space-y-8">
       {CATEGORIES.map((cat: ReportCategory) => {
-        const rows = filteredRows.filter((r) => r.original.category === cat.id);
-        if (rows.length === 0) return null;
+        const items = filteredReports.filter((r) => r.category === cat.id);
+        if (items.length === 0) return null;
         return (
           <div key={cat.id}>
             <div className="mb-3 flex items-baseline justify-between">
@@ -107,8 +103,8 @@ export function ReportsGrid({ filteredRows }: { filteredRows: Row<ReportItem>[] 
               <span className="text-xs text-white/40">{cat.hint}</span>
             </div>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              {rows.map((row) => (
-                <div key={row.id}>{flexRender(row.getVisibleCells()[0].column.columnDef.cell, row.getVisibleCells()[0].getContext())}</div>
+              {items.map((report) => (
+                <ReportCard key={report.href} report={report} />
               ))}
             </div>
           </div>

@@ -1,4 +1,5 @@
 "use client";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Select,
@@ -15,16 +16,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
-import { useMemo } from "react";
 import { AccountMappingDetail } from "../types";
-
-const helper = createColumnHelper<AccountMappingDetail>();
 
 export function MappingStatusTable({
   mappings,
@@ -41,93 +33,60 @@ export function MappingStatusTable({
     targetRef: number,
   ) => void;
 }) {
-  const columns = useMemo(
-    () => [
-      helper.accessor("excelAccountName", {
-        header: "Excel Input",
-        cell: ({ row }) => (
-          <div className="text-caption">
-            <Badge
-              variant="outline"
-              className="font-mono text-label-small mr-1"
-            >
-              {row.original.excelRef}
-            </Badge>
-            {row.original.excelAccountName}
-          </div>
-        ),
-      }),
-      helper.accessor("mappedRef", {
-        header: "Target COA",
-        cell: ({ row }) => (
-          <Select
-            value={String(row.original.mappedRef || 0)}
-            onValueChange={(v) =>
-              onMappingChange(
-                row.original.excelRef,
-                row.original.excelAccountName,
-                Number(v),
-              )
-            }
-            disabled={isLoadingCoa}
-          >
-            <SelectTrigger className="h-7 text-caption">
-              <SelectValue placeholder="Pilih COA" />
-            </SelectTrigger>
-            <SelectContent>
-              {dbAccounts.map((o: any) => {
-                const refNum = o.referenceNumber || o.code;
-                const accName = o.accountName || o.name;
-                return (
-                  <SelectItem
-                    key={o.id || refNum}
-                    value={String(refNum)}
-                    className="text-caption"
-                  >
-                    [{refNum}] {accName}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-        ),
-      }),
-    ],
-    [dbAccounts, isLoadingCoa, onMappingChange],
-  );
-
-  const table = useReactTable({
-    data: mappings,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
-
   return (
     <Table>
       <TableHeader>
-        {table.getHeaderGroups().map((hg) => (
-          <TableRow key={hg.id} className="text-caption">
-            {hg.headers.map((h) => (
-              <TableHead key={h.id}>
-                {h.isPlaceholder
-                  ? null
-                  : flexRender(h.column.columnDef.header, h.getContext())}
-              </TableHead>
-            ))}
-          </TableRow>
-        ))}
+        <TableRow className="text-caption">
+          <TableHead>Excel Input</TableHead>
+          <TableHead>Target COA</TableHead>
+        </TableRow>
       </TableHeader>
       <TableBody>
-        {table.getRowModel().rows.map((row) => (
+        {mappings.map((row) => (
           <TableRow
-            key={row.id}
-            className={row.original.mappedRef ? "bg-amber-500/10" : ""}
+            key={`${row.excelRef}-${row.excelAccountName}`}
+            className={row.mappedRef ? "bg-amber-500/10" : ""}
           >
-            {row.getVisibleCells().map((cell) => (
-              <TableCell key={cell.id}>
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </TableCell>
-            ))}
+            <TableCell>
+              <div className="text-caption">
+                <Badge variant="outline" className="font-mono text-label-small mr-1">
+                  {row.excelRef}
+                </Badge>
+                {row.excelAccountName}
+              </div>
+            </TableCell>
+            <TableCell>
+              <Select
+                value={String(row.mappedRef || 0)}
+                onValueChange={(v) =>
+                  onMappingChange(
+                    row.excelRef,
+                    row.excelAccountName,
+                    Number(v),
+                  )
+                }
+                disabled={isLoadingCoa}
+              >
+                <SelectTrigger className="h-7 text-caption">
+                  <SelectValue placeholder="Pilih COA" />
+                </SelectTrigger>
+                <SelectContent>
+                  {dbAccounts.map((o: any) => {
+                    const refNum = o.referenceNumber || o.code;
+                    const accName = o.accountName || o.name;
+                    return (
+                      <SelectItem
+                        key={o.id || refNum}
+                        value={String(refNum)}
+                        className="text-caption"
+                      >
+                        [{refNum}] {accName}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
