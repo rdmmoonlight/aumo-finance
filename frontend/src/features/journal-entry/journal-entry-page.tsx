@@ -436,8 +436,9 @@ function JournalEntryContent() {
 
             <Button
               type="button"
+              disabled={isSubmitting}
               onClick={(e) => {
-                // 1. Cek validasi akun & nominal terlebih dahulu
+                // 1. Cek validasi Akun & Balance secara manual lebih dulu
                 const lines = watchedLines || [];
                 const hasInvalidAccount = lines.some(
                   (l) =>
@@ -468,10 +469,27 @@ function JournalEntryContent() {
                   return;
                 }
 
-                // 2. Jika semua aman, jalankan form submit bawaan React Hook Form
-                handleSubmit(onSubmit)(e);
+                // 2. Jalankan handleSubmit dengan error callback untuk menangkap kegagalan Zod Schema
+                handleSubmit(
+                  (data) => {
+                    // Callback jika Zod VALID -> kirim ke API backend
+                    onSubmit(data);
+                  },
+                  (invalidErrors) => {
+                    // Callback jika Zod INVALID -> Tampilkan Toast error dari Schema Validation
+                    console.error("Form validation errors:", invalidErrors);
+
+                    const firstErrorKey = Object.keys(invalidErrors)[0];
+                    const firstErrorMsg = invalidErrors[firstErrorKey]?.message;
+
+                    if (firstErrorMsg) {
+                      toast.error(`Validasi Form Gagal: ${String(firstErrorMsg)}`);
+                    } else {
+                      toast.error("Format data form belum sesuai. Periksa kembali isian Anda.");
+                    }
+                  }
+                )(e);
               }}
-              disabled={isSubmitting}
               className="gap-2 text-sm font-medium"
             >
               {isSubmitting ? (
