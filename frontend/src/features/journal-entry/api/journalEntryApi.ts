@@ -1,4 +1,3 @@
-// src/lib/store/(authenticated)/journal-entry/journalEntryApi.ts
 import { baseApi } from "@/lib/apiClient";
 
 // --- Types Request & Response ---
