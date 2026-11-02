@@ -6,8 +6,8 @@ import { Link } from "@tanstack/react-router";
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
-  useDeleteJournalsGeneralByIdMutation, // Gunakan hook hasil export
-  useGetJournalsGeneralQuery, // Gunakan hook hasil export
+  useDeleteJournalsAdjustingByIdMutation,
+  useGetJournalsGeneralQuery,
 } from "../api/reportsApi";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
@@ -16,9 +16,8 @@ import { formatDateDisplay } from "./_lib/format";
 import { JournalEntry } from "./_lib/types";
 
 export default function GeneralJournalPage() {
-  // 1. Menggunakan RTK Query hooks bertipe resmi
   const { data, isLoading, refetch } = useGetJournalsGeneralQuery();
-  const [deleteJournalEntry] = useDeleteJournalsGeneralByIdMutation();
+  const [deleteJournalEntry] = useDeleteJournalsAdjustingByIdMutation();
 
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
