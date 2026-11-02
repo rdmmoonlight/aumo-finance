@@ -48,7 +48,7 @@ const baseQueryWithReauth: BaseQueryFn<
 
   if (!requestUrl || !requestUrl.startsWith("/")) {
     throw new Error(
-      `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'.`
+      `[RTK Query Route Error]: Route "${requestUrl}" wajib diawali dengan slash '/'.`,
     );
   }
 
@@ -58,7 +58,7 @@ const baseQueryWithReauth: BaseQueryFn<
     const method = typeof args === "string" ? "GET" : args.method || "GET";
     console.warn(
       `⚠ [RTK Query ${result.error.status}]: ${method} ${requestUrl}`,
-      result.error
+      result.error,
     );
   }
 
@@ -74,7 +74,7 @@ const baseQueryWithReauth: BaseQueryFn<
     if (!isPublicPath) {
       isRedirecting = true;
       window.location.replace(
-        `/auth/login?redirectTo=${encodeURIComponent(currentPath)}`
+        `/auth/login?redirectTo=${encodeURIComponent(currentPath)}`,
       );
     }
   }

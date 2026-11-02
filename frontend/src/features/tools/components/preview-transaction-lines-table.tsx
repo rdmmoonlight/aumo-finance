@@ -51,12 +51,18 @@ export function PreviewTransactionLinesTable({
           const isUnmapped = !mapping?.mappedRef;
 
           return (
-            <TableRow key={`${line.rowIndex}-${idx}`} className={isUnmapped ? "bg-destructive/10" : ""}>
+            <TableRow
+              key={`${line.rowIndex}-${idx}`}
+              className={isUnmapped ? "bg-destructive/10" : ""}
+            >
               <TableCell>
                 <span className="text-caption">{line.rowIndex}</span>
               </TableCell>
               <TableCell>
-                <Badge variant="secondary" className="font-mono text-label-small">
+                <Badge
+                  variant="secondary"
+                  className="font-mono text-label-small"
+                >
                   {line.refNumber}
                 </Badge>
               </TableCell>
@@ -71,7 +77,10 @@ export function PreviewTransactionLinesTable({
                       → [{mapping.mappedRef}] {mapping.mappedAccountName}
                     </Badge>
                   ) : (
-                    <Badge variant="destructive" className="mt-1 text-label-small">
+                    <Badge
+                      variant="destructive"
+                      className="mt-1 text-label-small"
+                    >
                       Unmapped
                     </Badge>
                   )}
@@ -93,7 +102,10 @@ export function PreviewTransactionLinesTable({
       </TableBody>
       <TableFooter>
         <TableRow>
-          <TableCell colSpan={3} className="text-right font-medium text-caption">
+          <TableCell
+            colSpan={3}
+            className="text-right font-medium text-caption"
+          >
             Total
           </TableCell>
           <TableCell className="text-right font-mono text-caption font-bold">

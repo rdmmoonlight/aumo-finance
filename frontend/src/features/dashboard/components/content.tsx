@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppRouter, useSearchParams } from "@/lib/router-compat";
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate } from "@tanstack/react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -31,12 +31,7 @@ import {
 } from "lucide-react";
 import { dashboardApi } from "../api/dashboardApi";
 import { DashboardCharts } from "./charts";
-import {
-  ExpenseTable,
-  formatNumber,
-  TrendTable,
-} from "./tables";
-
+import { ExpenseTable, formatNumber, TrendTable } from "./tables";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 

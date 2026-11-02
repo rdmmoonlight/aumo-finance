@@ -49,7 +49,10 @@ export function MappingStatusTable({
           >
             <TableCell>
               <div className="text-caption">
-                <Badge variant="outline" className="font-mono text-label-small mr-1">
+                <Badge
+                  variant="outline"
+                  className="font-mono text-label-small mr-1"
+                >
                   {row.excelRef}
                 </Badge>
                 {row.excelAccountName}
@@ -59,11 +62,7 @@ export function MappingStatusTable({
               <Select
                 value={String(row.mappedRef || 0)}
                 onValueChange={(v) =>
-                  onMappingChange(
-                    row.excelRef,
-                    row.excelAccountName,
-                    Number(v),
-                  )
+                  onMappingChange(row.excelRef, row.excelAccountName, Number(v))
                 }
                 disabled={isLoadingCoa}
               >

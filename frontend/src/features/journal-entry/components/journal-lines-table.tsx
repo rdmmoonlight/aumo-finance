@@ -38,7 +38,11 @@ type Props = {
   isBalanced: boolean;
   onAddLine: () => void;
   onRemoveLine: (index: number) => void;
-  onAmountChange: (index: number, field: "debit" | "credit", value: string) => void;
+  onAmountChange: (
+    index: number,
+    field: "debit" | "credit",
+    value: string,
+  ) => void;
 };
 
 export function JournalLinesTable({
@@ -98,7 +102,7 @@ export function JournalLinesTable({
 
               // Menggunakan perbandingan string agar aman dari perbedaan tipe data (string vs number)
               const selectedAccount = availableAccounts.find(
-                (a) => String(a.id) === String(currentAccountId)
+                (a) => String(a.id) === String(currentAccountId),
               );
               const ref = selectedAccount?.referenceNumber;
 
@@ -115,21 +119,22 @@ export function JournalLinesTable({
                   <TableCell>
                     <Select
                       value={
-                        currentAccountId !== undefined && currentAccountId !== null
+                        currentAccountId !== undefined &&
+                        currentAccountId !== null
                           ? String(currentAccountId)
                           : ""
                       }
                       onValueChange={(v) => {
                         // Mencari account sesuai tipe ID aslinya
                         const matched = availableAccounts.find(
-                          (a) => String(a.id) === v
+                          (a) => String(a.id) === v,
                         );
                         setValue(
                           `lines.${index}.accountId`,
                           matched ? matched.id : v,
                           {
                             shouldValidate: true,
-                          }
+                          },
                         );
                       }}
                     >

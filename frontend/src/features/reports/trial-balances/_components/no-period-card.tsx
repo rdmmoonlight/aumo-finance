@@ -1,9 +1,8 @@
-import { Link } from '@tanstack/react-router';
-"use client";
+import { Link } from "@tanstack/react-router";
+("use client");
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, EyeOff } from "lucide-react";
-
 
 export function NoPeriodCard({
   message = "Select a period to view trial balance.",

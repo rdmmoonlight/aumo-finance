@@ -81,7 +81,7 @@ export function DashboardCharts({
         },
       ],
     }),
-    [chartTrend]
+    [chartTrend],
   );
 
   const lineNetData = useMemo(
@@ -100,7 +100,7 @@ export function DashboardCharts({
         },
       ],
     }),
-    [chartTrend]
+    [chartTrend],
   );
 
   const doughnutCashData = useMemo(
@@ -115,7 +115,7 @@ export function DashboardCharts({
         },
       ],
     }),
-    [totalCashOnHand, totalBankBalance]
+    [totalCashOnHand, totalBankBalance],
   );
 
   const expenseChartData = useMemo(
@@ -142,7 +142,7 @@ export function DashboardCharts({
         },
       ],
     }),
-    [expenseAccountsList, hasExpenseData]
+    [expenseAccountsList, hasExpenseData],
   );
 
   return (
@@ -151,7 +151,9 @@ export function DashboardCharts({
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle className="text-ui">Revenue vs Expense Trend</CardTitle>
+              <CardTitle className="text-ui">
+                Revenue vs Expense Trend
+              </CardTitle>
               <CardDescription className="text-caption">
                 {periodType === "annual" ? "Jan - Dec" : "Daily in period"}
               </CardDescription>
@@ -167,7 +169,9 @@ export function DashboardCharts({
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-ui">Net Income Trend</CardTitle>
-              <CardDescription className="text-caption">Profitability over time</CardDescription>
+              <CardDescription className="text-caption">
+                Profitability over time
+              </CardDescription>
             </div>
             <TrendingUp size={18} className="text-muted-foreground" />
           </CardHeader>
@@ -182,7 +186,9 @@ export function DashboardCharts({
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-ui">Asset Composition</CardTitle>
-              <CardDescription className="text-caption">Cash vs Bank</CardDescription>
+              <CardDescription className="text-caption">
+                Cash vs Bank
+              </CardDescription>
             </div>
             <PieChart size={18} className="text-muted-foreground" />
           </CardHeader>
@@ -192,7 +198,9 @@ export function DashboardCharts({
             ) : (
               <div className="flex flex-col items-center justify-center gap-2">
                 <Badge variant="outline">No Asset Data</Badge>
-                <span className="text-xs text-muted-foreground">Cash & Bank masih 0</span>
+                <span className="text-xs text-muted-foreground">
+                  Cash & Bank masih 0
+                </span>
               </div>
             )}
           </CardContent>
@@ -202,7 +210,9 @@ export function DashboardCharts({
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle className="text-ui">Expense Composition</CardTitle>
-              <CardDescription className="text-caption">Operating Breakdown</CardDescription>
+              <CardDescription className="text-caption">
+                Operating Breakdown
+              </CardDescription>
             </div>
             <PieChart size={18} className="text-muted-foreground" />
           </CardHeader>
@@ -212,7 +222,9 @@ export function DashboardCharts({
             ) : (
               <div className="flex flex-col items-center justify-center gap-2">
                 <Badge variant="secondary">No Expenses</Badge>
-                <span className="text-xs text-muted-foreground">Belum ada data expense</span>
+                <span className="text-xs text-muted-foreground">
+                  Belum ada data expense
+                </span>
               </div>
             )}
           </CardContent>

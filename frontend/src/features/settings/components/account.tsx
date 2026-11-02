@@ -54,7 +54,10 @@ function AccountDetailsTable({ data }: { data: UserProfileField[] }) {
         </thead>
         <tbody>
           {data.map((item) => (
-            <tr key={item.label} className="border-b border-border last:border-b-0">
+            <tr
+              key={item.label}
+              className="border-b border-border last:border-b-0"
+            >
               <td className="px-4 py-2 text-caption text-foreground">
                 {item.label}
               </td>

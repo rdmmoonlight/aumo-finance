@@ -49,7 +49,9 @@ export function FinancialPositionSectionTable({
               <TableRow>
                 <TableHead className="text-caption">Ref</TableHead>
                 <TableHead className="text-caption">Account</TableHead>
-                <TableHead className="text-right text-caption">Amount</TableHead>
+                <TableHead className="text-right text-caption">
+                  Amount
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -57,13 +59,18 @@ export function FinancialPositionSectionTable({
                 <TableRow key={`${line.referenceNumber}-${idx}`}>
                   <TableCell className="w-[15%] p-3 px-4">
                     {line.referenceNumber ? (
-                      <Badge variant="outline" className="font-mono text-label-small">
+                      <Badge
+                        variant="outline"
+                        className="font-mono text-label-small"
+                      >
                         {line.referenceNumber}
                       </Badge>
                     ) : null}
                   </TableCell>
                   <TableCell className="p-3 px-4">
-                    <span className="text-ui font-medium">{line.accountName || "-"}</span>
+                    <span className="text-ui font-medium">
+                      {line.accountName || "-"}
+                    </span>
                   </TableCell>
                   <TableCell className="w-[30%] p-3 px-4">
                     <div className="text-right font-mono text-caption">
@@ -78,7 +85,9 @@ export function FinancialPositionSectionTable({
                 <TableCell colSpan={2} className="p-4">
                   {totalLabel}
                 </TableCell>
-                <TableCell className={`p-4 text-right font-mono ${totalColorClass}`}>
+                <TableCell
+                  className={`p-4 text-right font-mono ${totalColorClass}`}
+                >
                   {formatNumber(totalAmount)}
                 </TableCell>
               </TableRow>

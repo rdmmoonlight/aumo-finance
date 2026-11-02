@@ -1,6 +1,6 @@
-import ReportsPage from '#/features/reports/reports-page/reports-page';
-import { createFileRoute } from '@tanstack/react-router';
+import ReportsPage from "#/features/reports/reports-page/reports-page";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_authenticated/reports/')({
+export const Route = createFileRoute("/_authenticated/reports/")({
   component: ReportsPage,
 });
