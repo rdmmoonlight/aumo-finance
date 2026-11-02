@@ -207,6 +207,7 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
         try
         {
             await db.SaveChangesAsync();
+            await WorksheetSnapshot.InvalidateAsync(db, userId);
             return Success($"Account '{account.AccountName}' successfully updated.");
         }
         catch (Exception ex)
@@ -235,6 +236,7 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
         {
             db.ChartOfAccounts.Remove(entity);
             await db.SaveChangesAsync();
+            await WorksheetSnapshot.InvalidateAsync(db, userId);
             return Success($"Account '{entity.AccountName}' successfully deleted.");
         }
         catch (Exception ex)

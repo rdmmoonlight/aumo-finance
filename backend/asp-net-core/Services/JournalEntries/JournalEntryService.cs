@@ -229,6 +229,8 @@ public class JournalEntryService : IJournalEntryService
 
         this.db.GeneralJournals.RemoveRange(rows);
         await this.db.SaveChangesAsync();
+
+        await AumoBackend.Helpers.WorksheetSnapshot.InvalidateAsync(this.db, userId);
     }
 
     public async Task<List<string>> SearchLineDescriptionsAsync(Guid userId, string query)

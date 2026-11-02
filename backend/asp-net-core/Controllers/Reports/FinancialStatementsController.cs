@@ -1,55 +1,46 @@
-#if !BUILD_WORKSHEET_ONLY
+namespace AumoBackend.Controllers.Reports;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using AumoBackend.Data;
-using AumoBackend.DTOs.Reports;
+using AumoBackend.Extensions;
 using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services;
-using AumoBackend.Services.Reports.TrialBalances;
+using AumoBackend.Services.Reports.FinancialStatements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AumoBackend.Controllers.Reports;
-
 [ApiController]
-[Route("/reports")]
+[Route("reports")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class FinancialStatementsController : ControllerBase
 {
-    private readonly AppDbContext db;
-    private readonly IFinancialReportService reportService;
+    private const string NoPeriodMessage = "No accounting period selected.";
 
-    public FinancialStatementsController(AppDbContext db, IFinancialReportService reportService)
+    private readonly AppDbContext _db;
+    private readonly IFinancialStatementsService _statements;
+
+    public FinancialStatementsController(AppDbContext db, IFinancialStatementsService statements)
     {
-        this.db = db;
-        this.reportService = reportService;
+        _db = db;
+        _statements = statements;
     }
 
-    // ==========================================
-    // 1. GET: /reports/income-statement
-    // ==========================================
+    // GET /api/v1/reports/income-statement
     [HttpGet("income-statement")]
     public async Task<IActionResult> GetIncomeStatement()
     {
-        var userId = this.GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
         if (period == null)
         {
-            return this.Ok(new
+            return Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
-                message = "No accounting period selected.",
+                message = NoPeriodMessage,
                 selectedPeriodName = (string?)null,
                 revenueAccounts = Array.Empty<object>(),
                 expenseAccounts = Array.Empty<object>(),
@@ -58,49 +49,45 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        // PERBAIKAN CS0103: Panggil melalui reportService
-        var rows = await this.reportService.BuildTrialBalancesRowsAsync(this.db, userId, period, true);
-        var statementData = this.reportService.BuildIncomeStatement(rows, period);
+        var statement = await _statements.BuildIncomeStatementAsync(userId, period);
 
-        return this.Ok(new
+        return Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = period.PeriodName,
-            asOfDate = statementData.AsOfDate,
-            revenueAccounts = statementData.Revenues,
-            totalRevenue = statementData.TotalRevenue,
-            expenseAccounts = statementData.OperatingExpenses,
-            totalExpenses = statementData.TotalOperatingExpenses,
-            operatingIncome = statementData.OperatingIncome,
-            otherIncomeAccounts = statementData.OtherIncome,
-            otherExpenseAccounts = statementData.OtherExpenses,
-            totalOtherIncome = statementData.TotalOtherIncome,
-            totalOtherExpenses = statementData.TotalOtherExpenses,
-            netIncome = statementData.NetIncome,
+            asOfDate = statement.AsOfDate,
+            revenueAccounts = statement.Revenues,
+            totalRevenue = statement.TotalRevenue,
+            expenseAccounts = statement.OperatingExpenses,
+            totalExpenses = statement.TotalOperatingExpenses,
+            operatingIncome = statement.OperatingIncome,
+            otherIncomeAccounts = statement.OtherIncome,
+            otherExpenseAccounts = statement.OtherExpenses,
+            totalOtherIncome = statement.TotalOtherIncome,
+            totalOtherExpenses = statement.TotalOtherExpenses,
+            netIncome = statement.NetIncome,
         });
     }
 
-    // ==========================================
-    // 2. GET: /reports/retained-earnings
-    // ==========================================
+    // GET /api/v1/reports/retained-earnings
     [HttpGet("retained-earnings")]
     public async Task<IActionResult> GetRetainedEarnings()
     {
-        var userId = this.GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
         if (period == null)
         {
-            return this.Ok(new
+            return Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
-                message = "No accounting period selected.",
+                message = NoPeriodMessage,
                 selectedPeriodName = (string?)null,
                 accountName = "Retained Earnings",
                 startDate = (DateTime?)null,
@@ -112,49 +99,47 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        var statementData = await this.reportService.BuildRetainedEarningsAsync(this.db, userId, period);
+        var statement = await _statements.BuildRetainedEarningsAsync(userId, period);
 
-        return this.Ok(new
+        return Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = period.PeriodName,
-            accountName = statementData.AccountName,
-            startDate = statementData.StartDate,
-            endDate = statementData.EndDate,
-            beginningRetainedEarnings = statementData.BeginningBalance,
-            netIncome = statementData.NetIncome,
-            dividendsOrDraws = statementData.Dividends,
-            endingRetainedEarnings = statementData.EndingBalance,
+            accountName = statement.AccountName,
+            startDate = statement.StartDate,
+            endDate = statement.EndDate,
+            beginningRetainedEarnings = statement.BeginningBalance,
+            netIncome = statement.NetIncome,
+            dividendsOrDraws = statement.Dividends,
+            endingRetainedEarnings = statement.EndingBalance,
         });
     }
 
-    // ==========================================
-    // 3. GET: /reports/statement-of-cash-flow
-    // ==========================================
+    // GET /api/v1/reports/statement-of-cash-flow
     [HttpGet("statement-of-cash-flow")]
     public async Task<IActionResult> GetCashFlowStatement()
     {
-        var userId = this.GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
         if (period == null)
         {
-            return this.Ok(new
+            return Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
-                message = "No accounting period selected.",
+                message = NoPeriodMessage,
                 selectedPeriodName = (string?)null,
-                operatingActivities = new List<StatementOfCashFlowLineResponse>(),
+                operatingActivities = Array.Empty<object>(),
                 netCashFromOperating = 0m,
-                investingActivities = new List<StatementOfCashFlowLineResponse>(),
+                investingActivities = Array.Empty<object>(),
                 netCashFromInvesting = 0m,
-                financingActivities = new List<StatementOfCashFlowLineResponse>(),
+                financingActivities = Array.Empty<object>(),
                 netCashFromFinancing = 0m,
                 netChangeInCash = 0m,
                 beginningCash = 0m,
@@ -162,166 +147,77 @@ public class FinancialStatementsController : ControllerBase
             });
         }
 
-        // PERBAIKAN CS0103: Panggil melalui reportService
-        var rows = await this.reportService.BuildTrialBalancesRowsAsync(this.db, userId, period, true);
-        var incomeStatement = this.reportService.BuildIncomeStatement(rows, period);
+        var statement = await _statements.BuildCashFlowAsync(userId, period);
 
-        var cashRows = rows.Where(r => r.Role == "CashAndEquivalents").ToList();
-        decimal endingCash = cashRows.Sum(r => r.NetBalance);
-
-        var operatingActivities = new List<StatementOfCashFlowLineResponse>
-        {
-            new StatementOfCashFlowLineResponse
-            {
-                Description = "Net Income per Income Statement",
-                Amount = incomeStatement.NetIncome
-            },
-        };
-
-        var investingActivities = new List<StatementOfCashFlowLineResponse>();
-        var financingActivities = new List<StatementOfCashFlowLineResponse>();
-
-        foreach (var r in rows)
-        {
-            if (r.NetBalance == 0 || r.Role == "CashAndEquivalents" || r.Role == "RetainedEarnings")
-            {
-                continue;
-            }
-
-            if (int.TryParse(r.ReferenceNumber, out int refNum)) { }
-
-            if (AccountClassificationHelper.IsTemporary(r.Type ?? string.Empty) || refNum >= 400)
-            {
-                continue;
-            }
-
-            if (r.Type == "Assets" || (refNum >= 100 && refNum <= 199))
-            {
-                bool isFixedAsset = refNum >= 150 ||
-                                    r.AccountName.Contains("Equipment", StringComparison.OrdinalIgnoreCase) ||
-                                    r.AccountName.Contains("Depreciation", StringComparison.OrdinalIgnoreCase) ||
-                                    r.AccountName.Contains("Asset", StringComparison.OrdinalIgnoreCase);
-
-                if (isFixedAsset)
-                {
-                    investingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Capital expenditure / Sale of {r.AccountName}", Amount = -r.NetBalance });
-                }
-                else
-                {
-                    operatingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = -r.NetBalance });
-                }
-            }
-            else if (r.Type == "Liabilities" || (refNum >= 200 && refNum <= 299))
-            {
-                bool isLongTermDebt = refNum >= 250 ||
-                                      r.AccountName.Contains("Bank Loan", StringComparison.OrdinalIgnoreCase) ||
-                                      r.AccountName.Contains("Long Term", StringComparison.OrdinalIgnoreCase);
-
-                if (isLongTermDebt)
-                {
-                    financingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = r.NetBalance });
-                }
-                else
-                {
-                    operatingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = r.NetBalance });
-                }
-            }
-            else if (r.Type == "Equity" || (refNum >= 300 && refNum <= 399))
-            {
-                financingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Change in {r.AccountName}", Amount = r.NetBalance });
-            }
-            else
-            {
-                operatingActivities.Add(new StatementOfCashFlowLineResponse { Description = $"Adjustment for {r.AccountName}", Amount = -r.NetBalance });
-            }
-        }
-
-        decimal netOperating = operatingActivities.Sum(a => a.Amount);
-        decimal netInvesting = investingActivities.Sum(a => a.Amount);
-        decimal netFinancing = financingActivities.Sum(a => a.Amount);
-
-        decimal netChangeInCash = netOperating + netInvesting + netFinancing;
-        decimal beginningCash = endingCash - netChangeInCash;
-
-        return this.Ok(new
+        return Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = period.PeriodName,
-            operatingActivities = operatingActivities,
-            netCashFromOperating = netOperating,
-            investingActivities = investingActivities,
-            netCashFromInvesting = netInvesting,
-            financingActivities = financingActivities,
-            netCashFromFinancing = netFinancing,
-            netChangeInCash = netChangeInCash,
-            beginningCash = beginningCash,
-            endingCash = endingCash,
+            operatingActivities = statement.OperatingActivities,
+            netCashFromOperating = statement.NetCashFromOperating,
+            investingActivities = statement.InvestingActivities,
+            netCashFromInvesting = statement.NetCashFromInvesting,
+            financingActivities = statement.FinancingActivities,
+            netCashFromFinancing = statement.NetCashFromFinancing,
+            netChangeInCash = statement.NetChangeInCash,
+            beginningCash = statement.BeginningCash,
+            endingCash = statement.EndingCash,
         });
     }
 
-    // ==========================================
-    // 4. GET: /reports/statement-of-financial-position
-    // ==========================================
+    // GET /api/v1/reports/statement-of-financial-position
     [HttpGet("statement-of-financial-position")]
     public async Task<IActionResult> GetStatementOfFinancialPosition([FromQuery] bool isPostClosing = false)
     {
-        var userId = this.GetCurrentUserId();
+        var userId = User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
         if (period == null)
         {
-            return this.Ok(new
+            return Ok(new
             {
                 success = true,
                 hasPeriodSelected = false,
-                message = "No accounting period selected.",
+                message = NoPeriodMessage,
                 selectedPeriodName = (string?)null,
-                assetAccounts = new List<object>(),
+                assetAccounts = Array.Empty<object>(),
                 totalAssets = 0m,
-                liabilityAccounts = new List<object>(),
+                liabilityAccounts = Array.Empty<object>(),
                 totalLiabilities = 0m,
-                equityAccounts = new List<object>(),
+                equityAccounts = Array.Empty<object>(),
                 totalEquity = 0m,
                 totalLiabilitiesAndEquity = 0m,
                 isBalanced = true,
             });
         }
 
-        var balanceSheetData = await this.reportService.BuildSofpAsync(this.db, userId, period, isPostClosing);
+        var sofp = await _statements.BuildSofpAsync(userId, period, isPostClosing);
 
-        var equityAccountsWithRe = balanceSheetData.EquityExcludingRetainedEarnings
-            .Select(e => new { accountId = 0, referenceNumber = e.ReferenceNumber ?? string.Empty, accountName = e.AccountName, amount = e.Amount })
-            .Append(new { accountId = 0, referenceNumber = "0", accountName = "Retained Earnings", amount = balanceSheetData.RetainedEarningsEnding })
+        var equityAccounts = sofp.EquityExcludingRetainedEarnings
+            .Select(e => new { accountId = 0, referenceNumber = e.ReferenceNumber, accountName = e.AccountName, amount = e.Amount })
+            .Append(new { accountId = 0, referenceNumber = "0", accountName = "Retained Earnings", amount = sofp.RetainedEarningsEnding })
             .ToList();
 
-        return this.Ok(new
+        return Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = period.PeriodName,
-            asOfDate = balanceSheetData.AsOfDate,
-            isPostClosing = balanceSheetData.IsPostClosing,
-            assetAccounts = balanceSheetData.Assets.Select(a => new { accountId = 0, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, amount = a.Amount }),
-            totalAssets = balanceSheetData.TotalAssets,
-            liabilityAccounts = balanceSheetData.Liabilities.Select(l => new { accountId = 0, referenceNumber = l.ReferenceNumber, accountName = l.AccountName, amount = l.Amount }),
-            totalLiabilities = balanceSheetData.TotalLiabilities,
-            equityAccounts = equityAccountsWithRe,
-            totalEquity = balanceSheetData.TotalEquity,
-            totalLiabilitiesAndEquity = balanceSheetData.TotalLiabilitiesAndEquity,
-            isBalanced = balanceSheetData.IsBalanced,
+            asOfDate = sofp.AsOfDate,
+            isPostClosing = sofp.IsPostClosing,
+            assetAccounts = sofp.Assets.Select(a => new { accountId = 0, referenceNumber = a.ReferenceNumber, accountName = a.AccountName, amount = a.Amount }),
+            totalAssets = sofp.TotalAssets,
+            liabilityAccounts = sofp.Liabilities.Select(l => new { accountId = 0, referenceNumber = l.ReferenceNumber, accountName = l.AccountName, amount = l.Amount }),
+            totalLiabilities = sofp.TotalLiabilities,
+            equityAccounts,
+            totalEquity = sofp.TotalEquity,
+            totalLiabilitiesAndEquity = sofp.TotalLiabilitiesAndEquity,
+            isBalanced = sofp.IsBalanced,
         });
-    }
-
-    private Guid GetCurrentUserId()
-    {
-        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? this.User.FindFirstValue("sub");
-
-        return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 }
