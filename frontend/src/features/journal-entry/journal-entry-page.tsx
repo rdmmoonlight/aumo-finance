@@ -45,7 +45,7 @@ function JournalEntryContent() {
   // Accounts state
   const [isAccountsLoading, setIsAccountsLoading] = useState<boolean>(true);
   const [availableAccounts, setAvailableAccounts] = useState<AccountOption[]>(
-    [],
+    []
   );
   const accountsQuery =
     chartOfAccountsApi.endpoints.getChartOfAccounts.useQuery();
@@ -88,11 +88,11 @@ function JournalEntryContent() {
   // RTK Query Hooks
   const nextTransactionNumberQuery = useGetNextTransactionNumberQuery(
     { journalType, entryDate },
-    { skip: isEdit },
+    { skip: isEdit }
   );
   const journalEntryQuery = useGetJournalEntryByIdQuery(
     { id: entryId },
-    { skip: !isEdit },
+    { skip: !isEdit }
   );
   const [createJournalEntry] = useCreateJournalEntryMutation();
   const [editJournalEntry] = useEditJournalEntryMutation();
@@ -119,7 +119,7 @@ function JournalEntryContent() {
           id: Number(a.id || 0),
           referenceNumber: a.referenceNumber ?? "",
           accountName: a.accountName ?? "",
-        })),
+        }))
       );
     }
   }, [accountsQuery.data, accountsQuery.error, accountsQuery.isLoading]);
@@ -166,7 +166,7 @@ function JournalEntryContent() {
             lineDescription: l.lineDescription || "",
             debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
             credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-          })),
+          }))
         );
       }
     }
@@ -189,30 +189,30 @@ function JournalEntryContent() {
   }, [isEdit, editData, nextTxNumber]);
 
   const isLocked = Boolean(
-    isEdit && (editData?.isLocked || editData?.entry?.isLocked),
+    isEdit && (editData?.isLocked || editData?.entry?.isLocked)
   );
 
   const totalDebit = useMemo(
     () =>
       (watchedLines || []).reduce(
         (s, l) => s + parseFormattedNumber(l?.debit || ""),
-        0,
+        0
       ),
-    [watchedLines],
+    [watchedLines]
   );
 
   const totalCredit = useMemo(
     () =>
       (watchedLines || []).reduce(
         (s, l) => s + parseFormattedNumber(l?.credit || ""),
-        0,
+        0
       ),
-    [watchedLines],
+    [watchedLines]
   );
 
   const isBalanced = useMemo(
     () => totalDebit > 0 && totalDebit === totalCredit,
-    [totalDebit, totalCredit],
+    [totalDebit, totalCredit]
   );
 
   const addLine = () =>
@@ -236,7 +236,7 @@ function JournalEntryContent() {
   const handleAmountChange = (
     index: number,
     field: "debit" | "credit",
-    value: string,
+    value: string
   ) => {
     const formatted = formatNumberWithDots(value);
     setValue(`lines.${index}.${field}`, formatted, { shouldValidate: true });
@@ -271,8 +271,40 @@ function JournalEntryContent() {
     setApiError(null);
   };
 
+  // Toast feedback jika pengguna mengklik tombol Submit yang sedang ter-disabled
+  const handleDisabledSubmitClick = () => {
+    if (isSubmitting) return;
+
+    const lines = watchedLines || [];
+    const hasInvalidAccount = lines.some(
+      (l) =>
+        (parseFormattedNumber(l?.debit || "") > 0 ||
+          parseFormattedNumber(l?.credit || "") > 0) &&
+        Number(l?.accountId || 0) <= 0
+    );
+
+    if (hasInvalidAccount) {
+      toast.error("Ada baris jurnal yang nominalnya terisi tetapi Akun belum dipilih!");
+      return;
+    }
+
+    if (totalDebit === 0 && totalCredit === 0) {
+      toast.error("Gagal menyimpan: Nominal debit dan kredit masih kosong.");
+      return;
+    }
+
+    if (!isBalanced) {
+      const diff = Math.abs(totalDebit - totalCredit).toLocaleString("id-ID");
+      toast.error(
+        `Jurnal tidak balance! Selisih: Rp ${diff}. (Debit: Rp ${totalDebit.toLocaleString(
+          "id-ID"
+        )} vs Kredit: Rp ${totalCredit.toLocaleString("id-ID")})`
+      );
+    }
+  };
+
   const onSubmit: SubmitHandler<z.output<typeof journalEntrySchema>> = async (
-    data,
+    data
   ) => {
     setApiError(null);
     setIsSubmitting(true);
@@ -281,7 +313,7 @@ function JournalEntryContent() {
       (l) =>
         Number(l.accountId) > 0 &&
         (parseFormattedNumber(l.debit || "") > 0 ||
-          parseFormattedNumber(l.credit || "") > 0),
+          parseFormattedNumber(l.credit || "") > 0)
     );
     const payloadLines = effective.map((l) => ({
       accountId: Number(l.accountId),
@@ -310,7 +342,10 @@ function JournalEntryContent() {
           lines: payloadLines,
         }).unwrap();
         toast.success(
-          `Posted ${res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber}`,
+          `Posted ${res?.transactionNumber ||
+          res?.data?.transactionNumber ||
+          displayedTxNumber
+          }`
         );
         resetForm();
       }
@@ -394,21 +429,26 @@ function JournalEntryContent() {
               variant="outline"
               onClick={resetForm}
               className="text-sm"
+              disabled={isSubmitting}
             >
               Reset
             </Button>
-            <Button
-              type="submit"
-              disabled={!isBalanced || isSubmitting}
-              className="gap-2 text-sm font-medium"
-            >
-              {isSubmitting ? (
-                <Loader2 className="animate-spin" size={16} />
-              ) : (
-                <Save size={16} />
-              )}
-              {isEdit ? "Save Changes" : "Post Journal Entry"}
-            </Button>
+
+            {/* Wrapper div untuk menangkap event klik ketika Button dalam keadaan disabled */}
+            <div onClick={handleDisabledSubmitClick} className="inline-block">
+              <Button
+                type="submit"
+                disabled={!isBalanced || isSubmitting}
+                className="gap-2 text-sm font-medium pointer-events-auto disabled:pointer-events-none"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <Save size={16} />
+                )}
+                {isEdit ? "Save Changes" : "Post Journal Entry"}
+              </Button>
+            </div>
           </div>
         </form>
       )}
