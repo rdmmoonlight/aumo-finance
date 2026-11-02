@@ -1,28 +1,15 @@
 # ==========================================
-# STAGE 1: Build .NET Core & Rust FFI Backend
+# STAGE 1: Build ASP.NET Core Backend
 # ==========================================
-FROM mcr.microsoft.com/dotnet/sdk:10.0-preview AS dotnet-builder
+FROM mcr.microsoft.com/dotnet/sdk:10.0.100-preview.1-noble AS dotnet-builder
 WORKDIR /src
 
-# Install dependensi dasar untuk kompilasi Rust
-RUN apt-get update && apt-get install -y \
-    curl \
-    build-essential \
-    && curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV PATH="/root/.cargo/bin:${PATH}"
-
-# Copy source code backend
+# Copy project file dan restore dependensi
 COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
-
 RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
 
+# Copy seluruh source code backend & publish
 COPY backend/asp-net-core/ ./backend/asp-net-core/
-
-# Opsional: Jika Rust perlu di-build manual sebelum .NET, jalankan di sini:
-# RUN cd backend/rust && cargo build --release
-
 RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build
 
 # ==========================================
@@ -40,7 +27,7 @@ RUN pnpm install --frozen-lockfile --allow-build=unrs-resolver
 
 COPY frontend/ ./
 
-# Environmental variables untuk Client-Side Build
+# Environment variables untuk Client-Side Build
 ARG PUBLIC_GOOGLE_CLIENT_ID
 ARG NEXT_PUBLIC__GOOGLE_CLIENT_ID
 ENV PUBLIC_GOOGLE_CLIENT_ID=${PUBLIC_GOOGLE_CLIENT_ID:-$NEXT_PUBLIC__GOOGLE_CLIENT_ID}
@@ -50,7 +37,7 @@ RUN pnpm run build
 # ==========================================
 # STAGE 3: Runtime Environment
 # ==========================================
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-preview AS runner
+FROM mcr.microsoft.com/dotnet/aspnet:10.0.100-preview.1-noble AS runner
 
 RUN apt-get update && apt-get install -y \
     nginx \
