@@ -12,10 +12,8 @@
     <GenerateProgramFile>false</GenerateProgramFile>
     <OpenApiGenerateXmlComments>false</OpenApiGenerateXmlComments>
     <NoWarn>$(NoWarn);NU1903;CS1030</NoWarn>
-    <DefaultItemExcludes>$(DefaultItemExcludes);Controllers/Reports/FinancialStatementsController.cs;Services/Reports/FinancialStatements/**/*.cs;</DefaultItemExcludes>
   </PropertyGroup>
 
-  <!-- Isolasi Build: Exclude modul Financial Statements & Journals yang belum siap -->
   <ItemGroup>
     <!-- Microsoft / EF Core / Identity Package -->
     <PackageReference Include="AWSSDK.Core" Version="4.0.3.3" />
