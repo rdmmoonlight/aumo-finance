@@ -1,47 +1,24 @@
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { store } from "@/lib/store";
 import { AlertTriangle, ListChecks, Loader2 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { reportsApi } from "../api/reportsApi";
+import { useMemo } from "react";
+import { useGetTrialBalanceQuery } from "../api/reportsApi";
 import { BalanceAlert } from "./_components/balance-alert";
 import { NoPeriodCard } from "./_components/no-period-card";
 import { TrialTable } from "./_components/trial-table";
 import { normalizeTrialRows } from "./_lib/normalize";
 
 export default function AdjustedTrialBalancePage() {
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<any>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchWorksheet() {
-      setIsLoading(true);
-      setIsError(false);
-      const result = await store.dispatch(
-        reportsApi.endpoints.getWorksheet.initiate(),
-      );
-      if (!isMounted) return;
-      if ("data" in result) setData(result.data);
-      else if ("error" in result) {
-        setIsError(true);
-        setError(result.error);
-      }
-      setIsLoading(false);
-    }
-    fetchWorksheet();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { data, isLoading, isError, error } = useGetTrialBalanceQuery({
+    type: "adjusted",
+  });
 
   const noPeriod =
     (data as any)?.hasPeriodSelected === false ||
     (error as any)?.status === 404;
 
+  // 2. Normalisasi baris data
   const rows = useMemo(() => {
     if (!data || noPeriod) return [];
     const raw: any[] = Array.isArray(data)
@@ -50,6 +27,7 @@ export default function AdjustedTrialBalancePage() {
     return normalizeTrialRows(raw);
   }, [data, noPeriod]);
 
+  // 3. Kalkulasi total Debet & Kredit
   const totalDebit = useMemo(
     () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
     [rows],
@@ -63,8 +41,7 @@ export default function AdjustedTrialBalancePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-16 text-caption text-muted-foreground">
-        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial
-        balance...
+        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial balance...
       </div>
     );
   }
@@ -73,8 +50,7 @@ export default function AdjustedTrialBalancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="flex items-center gap-2 text-h3 font-bold">
-          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial
-          Balance
+          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial Balance
         </h1>
         <p className="mt-1 text-ui text-muted-foreground">
           After adjusting entries • IDR
