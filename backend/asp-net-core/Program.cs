@@ -2,10 +2,8 @@ using System.Globalization;
 using System.Security.Claims;
 using AumoBackend.Data;
 using AumoBackend.Extensions;
-using AumoBackend.Middlewares;
 using AumoBackend.Models;
 using FluentValidation;
-using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -54,7 +52,9 @@ public partial class Program
             {
                 options.Events.OnRedirectToLogin = context =>
                 {
-                    if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/auth"))
+                    if (context.Request.Path.StartsWithSegments("/api") ||
+                        context.Request.Path.StartsWithSegments("/auth") ||
+                        context.Request.Path.StartsWithSegments("/hangfire"))
                     {
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         return Task.CompletedTask;
@@ -65,7 +65,9 @@ public partial class Program
                 };
                 options.Events.OnRedirectToAccessDenied = context =>
                 {
-                    if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/auth"))
+                    if (context.Request.Path.StartsWithSegments("/api") ||
+                        context.Request.Path.StartsWithSegments("/auth") ||
+                        context.Request.Path.StartsWithSegments("/hangfire"))
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
                         return Task.CompletedTask;
@@ -166,10 +168,14 @@ public partial class Program
                             }
                         }
                     }
-                    var adminUser = await userManager.FindByEmailAsync("ndopoer@gmail.com");
-                    if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+                    var initialAdminEmail = app.Configuration["AdminSettings:InitialAdminEmail"];
+                    if (!string.IsNullOrWhiteSpace(initialAdminEmail))
                     {
-                        await userManager.AddToRoleAsync(adminUser, "Admin");
+                        var adminUser = await userManager.FindByEmailAsync(initialAdminEmail);
+                        if (adminUser != null && !await userManager.IsInRoleAsync(adminUser, "Admin"))
+                        {
+                            await userManager.AddToRoleAsync(adminUser, "Admin");
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -197,22 +203,26 @@ public partial class Program
                 });
             }
 
-            app.MapOpenApi();
-            var scalarTitle = app.Configuration["Scalar:Title"] ?? "Aumo Web API Reference";
-            var scalarRoutePrefix = app.Configuration["Scalar:RoutePrefix"] ?? "/reference";
-            app.MapScalarApiReference(scalarRoutePrefix, options => { options.WithTitle(scalarTitle).WithTheme(ScalarTheme.Moon).WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch); });
-
+            app.UseStaticFiles(); // Mengizinkan browser memuat file statis dashboard
             app.UseSerilogRequestLogging();
             app.UseRouting();
             app.UseCors("AllowFrontend");
             app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseHangfireDashboard("/hangfire", new DashboardOptions { Authorization = [new HangfireCustomAuthorizationFilter()] });
+
+            // Panggil Extension Method Hangfire Dashboard di sini
+            app.UseCustomHangfireDashboard();
+
+            app.MapOpenApi();
+            var scalarTitle = app.Configuration["Scalar:Title"] ?? "Aumo Web API Reference";
+            var scalarRoutePrefix = app.Configuration["Scalar:RoutePrefix"] ?? "/reference";
+            app.MapScalarApiReference(scalarRoutePrefix, options => { options.WithTitle(scalarTitle).WithTheme(ScalarTheme.Moon).WithDefaultHttpClient(ScalarTarget.JavaScript, ScalarClient.Fetch); });
 
             app.MapMethods("/", RootMethods, () => Results.Ok(new { service = "AumoFinance API", status = "Online", timestamp = DateTime.UtcNow })).RequireRateLimiting("global");
             app.MapHealthChecks("/health");
             app.MapControllers();
+
             await app.RunAsync();
         }
         catch (Exception ex) { Serilog.Log.Fatal(ex, "AumoBackend terminated unexpectedly!"); }
