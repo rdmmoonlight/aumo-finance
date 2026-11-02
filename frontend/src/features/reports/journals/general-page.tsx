@@ -2,10 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import { reportsApi } from "../api/reportsApi";
+import {
+  useDeleteJournalsGeneralByIdMutation, // Gunakan hook hasil export
+  useGetJournalsGeneralQuery, // Gunakan hook hasil export
+} from "../api/reportsApi";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
 import { JournalEmptyState } from "./_components/journal-empty-state";
@@ -13,13 +16,10 @@ import { formatDateDisplay } from "./_lib/format";
 import { JournalEntry } from "./_lib/types";
 
 export default function GeneralJournalPage() {
-  const navigate = useNavigate();
-  const [deleteJournalEntry] = (
-    reportsApi.endpoints as any
-  ).deleteJournalEntry.useMutation();
-  const { data, isLoading, refetch } = (
-    reportsApi.endpoints as any
-  ).getGeneralJournal.useQuery();
+  // 1. Menggunakan RTK Query hooks bertipe resmi
+  const { data, isLoading, refetch } = useGetJournalsGeneralQuery();
+  const [deleteJournalEntry] = useDeleteJournalsGeneralByIdMutation();
+
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -28,10 +28,11 @@ export default function GeneralJournalPage() {
     if (!entryToDelete) return;
     setIsDeleting(true);
     try {
-      await deleteJournalEntry(entryToDelete.id).unwrap();
+      // 2. Memanggil fungsi delete mutation
+      await deleteJournalEntry({ id: entryToDelete.id }).unwrap();
       await refetch();
     } catch (err) {
-      console.error(err);
+      console.error("Failed to delete journal entry:", err);
     } finally {
       setIsDeleting(false);
       setEntryToDelete(null);
@@ -93,7 +94,7 @@ export default function GeneralJournalPage() {
           </h1>
           <p className="text-sm text-muted-foreground">
             General entries{" "}
-            {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} • IDR
+            {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} IDR
           </p>
         </div>
         <div className="flex gap-2">
