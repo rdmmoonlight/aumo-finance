@@ -123,6 +123,7 @@ public class WorksheetService : IWorksheetService
         }
 
         var periodId = result.PeriodId;
+        var savedAt = DateTime.UtcNow; // jam aplikasi, sama dengan CreatedAt/UpdatedAt jurnal
         var fresh = result.Rows
             .Select(r => new WorksheetEntity
             {
@@ -144,6 +145,7 @@ public class WorksheetService : IWorksheetService
                 FinancialPositionDebit = Math.Round(r.FinancialPositionDebit, 2),
                 FinancialPositionCredit = Math.Round(r.FinancialPositionCredit, 2),
                 IsTotalRow = false,
+                CreatedAt = savedAt,
             })
             .ToList();
 
@@ -168,6 +170,7 @@ public class WorksheetService : IWorksheetService
             FinancialPositionDebit = Math.Round(t.FinancialPositionDebit, 2),
             FinancialPositionCredit = Math.Round(t.FinancialPositionCredit, 2),
             IsTotalRow = true,
+            CreatedAt = savedAt,
         });
 
         var old = await _db.Worksheet

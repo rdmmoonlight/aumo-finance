@@ -74,6 +74,27 @@ public class StatementOfCashFlowLineResponse
     public decimal Amount { get; set; }
 }
 
+public class StatementOfCashFlowApiResponse
+{
+    public List<StatementOfCashFlowLineResponse> OperatingActivities { get; set; } = new();
+
+    public decimal NetCashFromOperating { get; set; }
+
+    public List<StatementOfCashFlowLineResponse> InvestingActivities { get; set; } = new();
+
+    public decimal NetCashFromInvesting { get; set; }
+
+    public List<StatementOfCashFlowLineResponse> FinancingActivities { get; set; } = new();
+
+    public decimal NetCashFromFinancing { get; set; }
+
+    public decimal NetChangeInCash { get; set; }
+
+    public decimal BeginningCash { get; set; }
+
+    public decimal EndingCash { get; set; }
+}
+
 public class StatementOfFinancialPositionApiResponse
 {
     public string PeriodName { get; set; } = string.Empty;
