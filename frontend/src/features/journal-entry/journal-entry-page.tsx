@@ -434,21 +434,53 @@ function JournalEntryContent() {
               Reset
             </Button>
 
-            {/* Wrapper div untuk menangkap event klik ketika Button dalam keadaan disabled */}
-            <div onClick={handleDisabledSubmitClick} className="inline-block">
-              <Button
-                type="submit"
-                disabled={!isBalanced || isSubmitting}
-                className="gap-2 text-sm font-medium pointer-events-auto disabled:pointer-events-none"
-              >
-                {isSubmitting ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <Save size={16} />
-                )}
-                {isEdit ? "Save Changes" : "Post Journal Entry"}
-              </Button>
-            </div>
+            <Button
+              type="button"
+              onClick={(e) => {
+                // 1. Cek validasi akun & nominal terlebih dahulu
+                const lines = watchedLines || [];
+                const hasInvalidAccount = lines.some(
+                  (l) =>
+                    (parseFormattedNumber(l?.debit || "") > 0 ||
+                      parseFormattedNumber(l?.credit || "") > 0) &&
+                    Number(l?.accountId || 0) <= 0
+                );
+
+                if (hasInvalidAccount) {
+                  toast.error(
+                    "Ada baris jurnal yang nominalnya terisi tetapi Akun belum dipilih!"
+                  );
+                  return;
+                }
+
+                if (totalDebit === 0 && totalCredit === 0) {
+                  toast.error("Gagal menyimpan: Nominal debit dan kredit masih kosong.");
+                  return;
+                }
+
+                if (!isBalanced) {
+                  const diff = Math.abs(totalDebit - totalCredit).toLocaleString("id-ID");
+                  toast.error(
+                    `Jurnal tidak balance! Selisih: Rp ${diff}. (Debit: Rp ${totalDebit.toLocaleString(
+                      "id-ID"
+                    )} vs Kredit: Rp ${totalCredit.toLocaleString("id-ID")})`
+                  );
+                  return;
+                }
+
+                // 2. Jika semua aman, jalankan form submit bawaan React Hook Form
+                handleSubmit(onSubmit)(e);
+              }}
+              disabled={isSubmitting}
+              className="gap-2 text-sm font-medium"
+            >
+              {isSubmitting ? (
+                <Loader2 className="animate-spin" size={16} />
+              ) : (
+                <Save size={16} />
+              )}
+              {isEdit ? "Save Changes" : "Post Journal Entry"}
+            </Button>
           </div>
         </form>
       )}
