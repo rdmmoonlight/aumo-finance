@@ -13,9 +13,8 @@ RUN apt-get update && apt-get install -y \
 
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Copy source code backend & rust
+# Copy source code backend
 COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
-COPY backend/rust/ ./backend/rust/
 
 RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
 

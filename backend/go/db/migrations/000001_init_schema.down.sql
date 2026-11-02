@@ -1,2 +1,0 @@
-DROP SCHEMA IF EXISTS auth;
-DROP TABLE IF EXISTS auth.users;
