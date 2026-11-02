@@ -98,7 +98,19 @@ export const reportsApi = baseApi
         GetJournalsGeneralApiArg
       >({
         query: () => "/reports/journals/general",
-        providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
+        providesTags: ["Journals"],
+      }),
+
+      // DELETE /reports/journals/general/{id}
+      deleteJournalsGeneralById: build.mutation<
+        DeleteJournalsGeneralByIdApiResponse,
+        DeleteJournalsGeneralByIdApiArg
+      >({
+        query: (queryArg) => ({
+          url: `/reports/journals/general/${queryArg.id}`,
+          method: "DELETE",
+        }),
+        invalidatesTags: ["Journals"],
       }),
 
       // GET /reports/journals/adjusting
@@ -107,7 +119,7 @@ export const reportsApi = baseApi
         GetJournalsAdjustingApiArg
       >({
         query: () => "/reports/journals/adjusting",
-        providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
+        providesTags: ["Journals"],
       }),
 
       // DELETE /reports/journals/adjusting/{id}
@@ -119,7 +131,7 @@ export const reportsApi = baseApi
           url: `/reports/journals/adjusting/${queryArg.id}`,
           method: "DELETE",
         }),
-        invalidatesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
+        invalidatesTags: ["Journals"],
       }),
 
       // GET /reports/journals/closing
@@ -128,7 +140,7 @@ export const reportsApi = baseApi
         GetJournalsClosingApiArg
       >({
         query: () => "/reports/journals/closing",
-        providesTags: ["Journals"], // Disesuaikan dari "Journal" -> "Journals"
+        providesTags: ["Journals"],
       }),
 
       // GET /reports/trial-balances?type=unadjusted|adjusted|post-closing
@@ -163,6 +175,7 @@ export const {
   useGetGeneralLedgerTemporaryQuery,
   useRefreshGeneralLedgerMutation,
   useGetJournalsGeneralQuery,
+  useDeleteJournalsGeneralByIdMutation,
   useGetJournalsAdjustingQuery,
   useDeleteJournalsAdjustingByIdMutation,
   useGetJournalsClosingQuery,
@@ -188,18 +201,16 @@ export type GetStatementOfFinancialPositionApiArg = {
   isPostClosing?: boolean;
 };
 
-// Disesuaikan: ledgers -> accounts (sesuai C# Controller JSON output)
 export type GetGeneralLedgerPermanentApiResponse = {
   success: boolean;
   hasPeriodSelected: boolean;
   selectedPeriodName?: string;
   isTemporary: boolean;
   message?: string;
-  accounts?: Array<any>; // Sesuai C# JSON output property 'accounts'
+  accounts?: Array<any>;
 };
 export type GetGeneralLedgerPermanentApiArg = void;
 
-// Disesuaikan: ledgers -> accounts (sesuai C# Controller JSON output)
 export type GetGeneralLedgerTemporaryApiResponse = {
   success: boolean;
   hasPeriodSelected: boolean;
@@ -207,7 +218,7 @@ export type GetGeneralLedgerTemporaryApiResponse = {
   isTemporary: boolean;
   netIncomeBeforeClosing?: number;
   message?: string;
-  accounts?: Array<any>; // Sesuai C# JSON output property 'accounts'
+  accounts?: Array<any>;
 };
 export type GetGeneralLedgerTemporaryApiArg = void;
 
@@ -221,6 +232,11 @@ export type RefreshGeneralLedgerApiArg = void;
 export type GetJournalsGeneralApiResponse = any;
 export type GetJournalsGeneralApiArg = void;
 
+export type DeleteJournalsGeneralByIdApiResponse = any;
+export type DeleteJournalsGeneralByIdApiArg = {
+  id: number | string;
+};
+
 export type GetJournalsAdjustingApiResponse = any;
 export type GetJournalsAdjustingApiArg = void;
 
@@ -233,11 +249,12 @@ export type GetJournalsClosingApiResponse = any;
 export type GetJournalsClosingApiArg = void;
 
 export type GetTrialBalanceApiResponse = any;
-export type GetTrialBalanceApiArg = {
-  type?: "unadjusted" | "adjusted" | "post-closing";
-} | void;
+export type GetTrialBalanceApiArg =
+  | {
+    type?: "unadjusted" | "adjusted" | "post-closing";
+  }
+  | void;
 
-// Alias nama lama
 export type SummaryResponse = GetSummaryApiResponse;
 export type GeneralLedgerTemporaryResponse =
   GetGeneralLedgerTemporaryApiResponse;
