@@ -52,9 +52,7 @@ public partial class Program
             {
                 options.Events.OnRedirectToLogin = context =>
                 {
-                    if (context.Request.Path.StartsWithSegments("/api") ||
-                        context.Request.Path.StartsWithSegments("/auth") ||
-                        context.Request.Path.StartsWithSegments("/hangfire"))
+                    if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/auth"))
                     {
                         context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         return Task.CompletedTask;
@@ -65,9 +63,7 @@ public partial class Program
                 };
                 options.Events.OnRedirectToAccessDenied = context =>
                 {
-                    if (context.Request.Path.StartsWithSegments("/api") ||
-                        context.Request.Path.StartsWithSegments("/auth") ||
-                        context.Request.Path.StartsWithSegments("/hangfire"))
+                    if (context.Request.Path.StartsWithSegments("/api") || context.Request.Path.StartsWithSegments("/auth"))
                     {
                         context.Response.StatusCode = StatusCodes.Status403Forbidden;
                         return Task.CompletedTask;
@@ -203,16 +199,13 @@ public partial class Program
                 });
             }
 
-            app.UseStaticFiles(); // Mengizinkan browser memuat file statis dashboard
+            app.UseStaticFiles();
             app.UseSerilogRequestLogging();
             app.UseRouting();
             app.UseCors("AllowFrontend");
             app.UseRateLimiter();
             app.UseAuthentication();
             app.UseAuthorization();
-
-            // Panggil Extension Method Hangfire Dashboard di sini
-            app.UseCustomHangfireDashboard();
 
             app.MapOpenApi();
             var scalarTitle = app.Configuration["Scalar:Title"] ?? "Aumo Web API Reference";
