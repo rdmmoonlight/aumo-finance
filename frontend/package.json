@@ -52,6 +52,7 @@
     "@playwright/test": "^1.50.0",
     "@rsbuild/core": "^2.2.14",
     "@rsbuild/plugin-react": "^2.1.1",
+    "@rsbuild/plugin-type-check": "^1.6.1",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.16",
     "@tanstack/router-plugin": "^1.168.48",

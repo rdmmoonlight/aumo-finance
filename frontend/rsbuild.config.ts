@@ -1,5 +1,6 @@
 import { defineConfig } from "@rsbuild/core";
 import { pluginReact } from "@rsbuild/plugin-react";
+import { pluginTypeCheck } from '@rsbuild/plugin-type-check';
 import { TanStackRouterRspack } from "@tanstack/router-plugin/rspack";
 
 const getBackendTarget = (): string => {
@@ -24,7 +25,7 @@ const getBackendTarget = (): string => {
 const backendTarget = getBackendTarget();
 
 export default defineConfig({
-  plugins: [pluginReact()],
+  plugins: [pluginReact(), pluginTypeCheck()],
   module: {
     rules: [
       {

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import type { GetPeriodsOpenInfoResponse } from "../api/periodsApi";
+import type { PeriodsOpenInfo } from "../api/periodsApi";
 
-export function usePeriodFormState(openInfo?: GetPeriodsOpenInfoResponse) {
+export function usePeriodFormState(openInfo?: PeriodsOpenInfo) {
     const [month, setMonth] = useState(new Date().getMonth() + 1);
     const [year, setYear] = useState(new Date().getFullYear());
     const [setupMode, setSetupMode] = useState<"LoadExisting" | "CreateNew">("LoadExisting");
