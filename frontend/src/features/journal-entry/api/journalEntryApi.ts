@@ -2,26 +2,24 @@ import { baseApi } from "@/lib/apiClient";
 
 // --- Types Request & Response ---
 export interface JournalEntryLineDto {
-  accountId?: number | string;
+  accountId: number;
   lineDescription?: string;
-  debit?: number | string;
-  credit?: number | string;
-  lineOrder?: number | string;
+  debit: number;
+  credit: number;
+  lineOrder?: number;
 }
 
 export interface CreateJournalEntryRequest {
-  journalType?: string;
-  entryDate?: string;
-  createdAt?: string;
-  lines?: JournalEntryLineDto[];
+  journalType: string;
+  entryDate: string;
+  lines: JournalEntryLineDto[];
 }
 
 export interface UpdateJournalEntryRequest {
   transactionNumber?: string;
-  journalType?: string;
-  entryDate?: string;
-  updatedAt?: string;
-  lines?: JournalEntryLineDto[];
+  journalType: string;
+  entryDate: string;
+  lines: JournalEntryLineDto[];
 }
 
 export interface GetJournalEntryByIdArg {
@@ -50,7 +48,7 @@ export const journalEntryApi = baseApi.injectEndpoints({
       query: ({ id }) => ({
         url: `/journal-entry/${id}`,
       }),
-      providesTags: ["JournalEntry"],
+      providesTags: (result, error, { id }) => [{ type: "JournalEntry", id }],
     }),
 
     // POST /journal-entry/create
@@ -70,7 +68,10 @@ export const journalEntryApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["JournalEntry"],
+      invalidatesTags: (result, error, { id }) => [
+        "JournalEntry",
+        { type: "JournalEntry", id },
+      ],
     }),
 
     // DELETE /journal-entry/delete/{id}
