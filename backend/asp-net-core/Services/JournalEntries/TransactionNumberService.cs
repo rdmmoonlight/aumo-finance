@@ -1,7 +1,3 @@
-// <copyright file="TransactionNumberService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.JournalEntries;
 
 using System.Data;
