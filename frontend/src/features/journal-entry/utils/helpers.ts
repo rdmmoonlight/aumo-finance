@@ -2,7 +2,7 @@ import { FieldErrors, Resolver } from "react-hook-form";
 import { z } from "zod";
 
 export function zodResolver<T extends z.ZodType<any, any, any>>(
-  schema: T
+  schema: T,
 ): Resolver<z.input<T>, any, z.output<T>> {
   return async (values) => {
     const result = await schema.safeParseAsync(values);

@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link } from "@tanstack/react-router";
 // no-period-state.tsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

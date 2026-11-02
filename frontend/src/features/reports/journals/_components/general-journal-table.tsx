@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from '@tanstack/react-router';
+import { Link } from "@tanstack/react-router";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -121,7 +121,10 @@ export function GeneralJournalTable({
                           size="icon"
                           className="h-6 w-6"
                         >
-                          <Link to="/journal-entry" search={{ id: item.entryId }}>
+                          <Link
+                            to="/journal-entry"
+                            search={{ id: item.entryId }}
+                          >
                             <Pencil className="h-3 w-3" />
                           </Link>
                         </Button>

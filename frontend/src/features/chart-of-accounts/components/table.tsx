@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "@/lib/router-compat";
-import { Link } from '@tanstack/react-router';
+import { Link } from "@tanstack/react-router";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -42,11 +42,7 @@ import {
   DeleteAccountAlertDialog,
   EditAccountDialog,
 } from "../components/dialogs";
-import {
-  ACCOUNT_RANGES,
-  ACCOUNT_TYPES,
-  AccountItem,
-} from "../types";
+import { ACCOUNT_RANGES, ACCOUNT_TYPES, AccountItem } from "../types";
 
 export function ChartOfAccountsTable() {
   const searchParams = useSearchParams();
@@ -114,7 +110,9 @@ export function ChartOfAccountsTable() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<AccountItem | null>(null);
-  const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(null);
+  const [accountToDelete, setAccountToDelete] = useState<AccountItem | null>(
+    null,
+  );
 
   const filteredAccounts = useMemo(() => {
     if (!Array.isArray(rawAccounts)) return [];
@@ -144,7 +142,10 @@ export function ChartOfAccountsTable() {
           </h1>
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-3 text-muted-foreground" />
+              <Search
+                size={14}
+                className="absolute left-3 top-3 text-muted-foreground"
+              />
               <Input
                 className="pl-8 h-9 w-52 text-sm"
                 placeholder="Search..."
@@ -165,12 +166,20 @@ export function ChartOfAccountsTable() {
               </SelectContent>
             </Select>
             {categoryFilter && (
-              <Button variant="ghost" size="sm" onClick={() => setCategoryFilter("")} className="h-9 px-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCategoryFilter("")}
+                className="h-9 px-2"
+              >
                 <X size={14} />
               </Button>
             )}
             <div className="h-4 w-px bg-border mx-1 hidden sm:block" />
-            <Button onClick={() => setIsAddModalOpen(true)} className="gap-2 text-sm font-medium h-9">
+            <Button
+              onClick={() => setIsAddModalOpen(true)}
+              className="gap-2 text-sm font-medium h-9"
+            >
               <Plus size={16} /> New Account
             </Button>
             <Button
@@ -190,24 +199,42 @@ export function ChartOfAccountsTable() {
             {filteredAccounts.length} accounts
           </Badge>
           <span>•</span>
-          <span className="text-xs text-muted-foreground font-medium">in IDR (Rp)</span>
+          <span className="text-xs text-muted-foreground font-medium">
+            in IDR (Rp)
+          </span>
         </p>
       </div>
 
       {(errorMessage || isError) && (
-        <Alert variant="destructive" className="flex justify-between items-center py-2">
+        <Alert
+          variant="destructive"
+          className="flex justify-between items-center py-2"
+        >
           <AlertDescription className="text-xs">
-            {errorMessage || "Gagal mengambil data Chart of Accounts dari server."}
+            {errorMessage ||
+              "Gagal mengambil data Chart of Accounts dari server."}
           </AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive-foreground hover:bg-destructive/20" onClick={() => setErrorMessage(null)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-destructive-foreground hover:bg-destructive/20"
+            onClick={() => setErrorMessage(null)}
+          >
             <X size={14} />
           </Button>
         </Alert>
       )}
       {successMessage && (
         <Alert className="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-300 flex justify-between items-center py-2">
-          <AlertDescription className="text-xs">{successMessage}</AlertDescription>
-          <Button variant="ghost" size="icon" className="h-6 w-6 hover:bg-emerald-500/20" onClick={() => setSuccessMessage(null)}>
+          <AlertDescription className="text-xs">
+            {successMessage}
+          </AlertDescription>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 hover:bg-emerald-500/20"
+            onClick={() => setSuccessMessage(null)}
+          >
             <X size={14} />
           </Button>
         </Alert>
@@ -218,21 +245,38 @@ export function ChartOfAccountsTable() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-24 pl-6 font-semibold uppercase tracking-wider text-muted-foreground text-xs">Ref</TableHead>
-                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground text-xs">Name</TableHead>
-                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground text-xs">Category</TableHead>
-                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground text-xs">Role</TableHead>
-                <TableHead className="text-right font-semibold uppercase tracking-wider text-muted-foreground text-xs">Balance</TableHead>
-                <TableHead className="text-center font-semibold uppercase tracking-wider text-muted-foreground text-xs">Status</TableHead>
+                <TableHead className="w-24 pl-6 font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                  Ref
+                </TableHead>
+                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                  Name
+                </TableHead>
+                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                  Category
+                </TableHead>
+                <TableHead className="font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                  Role
+                </TableHead>
+                <TableHead className="text-right font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                  Balance
+                </TableHead>
+                <TableHead className="text-center font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                  Status
+                </TableHead>
                 {isEditMode && (
-                  <TableHead className="text-center pr-6 font-semibold uppercase tracking-wider text-muted-foreground text-xs">Action</TableHead>
+                  <TableHead className="text-center pr-6 font-semibold uppercase tracking-wider text-muted-foreground text-xs">
+                    Action
+                  </TableHead>
                 )}
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={colSpan} className="text-center py-10 text-xs text-muted-foreground">
+                  <TableCell
+                    colSpan={colSpan}
+                    className="text-center py-10 text-xs text-muted-foreground"
+                  >
                     Loading...
                   </TableCell>
                 </TableRow>
@@ -240,31 +284,54 @@ export function ChartOfAccountsTable() {
                 filteredAccounts.map((acc) => (
                   <TableRow
                     key={acc.id}
-                    className={cn(highlightId === String(acc.id) && "bg-primary/10")}
+                    className={cn(
+                      highlightId === String(acc.id) && "bg-primary/10",
+                    )}
                   >
                     <TableCell className="pl-6">
-                      <span className="font-mono text-primary text-sm font-medium">{acc.referenceNumber}</span>
+                      <span className="font-mono text-primary text-sm font-medium">
+                        {acc.referenceNumber}
+                      </span>
                     </TableCell>
-                    <TableCell className="text-sm font-medium">{acc.accountName}</TableCell>
+                    <TableCell className="text-sm font-medium">
+                      {acc.accountName}
+                    </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="text-xs">{acc.type}</Badge>
+                      <Badge variant="outline" className="text-xs">
+                        {acc.type}
+                      </Badge>
                     </TableCell>
                     <TableCell>
                       {acc.role && acc.role !== "Default" ? (
-                        <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">{acc.role}</Badge>
+                        <Badge className="bg-sky-500/10 text-sky-600 border-sky-500/20 text-xs">
+                          {acc.role}
+                        </Badge>
                       ) : (
-                        <span className="text-xs text-muted-foreground">Standard</span>
+                        <span className="text-xs text-muted-foreground">
+                          Standard
+                        </span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <span className={cn("font-medium font-mono text-sm", Number(acc.balance) >= 0 ? "text-emerald-500" : "text-red-500")}>
+                      <span
+                        className={cn(
+                          "font-medium font-mono text-sm",
+                          Number(acc.balance) >= 0
+                            ? "text-emerald-500"
+                            : "text-red-500",
+                        )}
+                      >
                         {Number(acc.balance || 0).toLocaleString("id-ID")}
                       </span>
                     </TableCell>
                     <TableCell className="text-center">
                       <Badge
                         variant={acc.isActive ? "default" : "secondary"}
-                        className={cn("text-xs", acc.isActive && "bg-emerald-500/15 text-emerald-600 border-emerald-500/20")}
+                        className={cn(
+                          "text-xs",
+                          acc.isActive &&
+                            "bg-emerald-500/15 text-emerald-600 border-emerald-500/20",
+                        )}
                       >
                         {acc.isActive ? "Active" : "Inactive"}
                       </Badge>
@@ -283,8 +350,16 @@ export function ChartOfAccountsTable() {
                           >
                             <Pencil size={14} />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7" asChild>
-                            <Link to="/reports/general-ledgers/permanent" hash={`account-${acc.id}`}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7"
+                            asChild
+                          >
+                            <Link
+                              to="/reports/general-ledgers/permanent"
+                              hash={`account-${acc.id}`}
+                            >
                               <BookOpen size={14} />
                             </Link>
                           </Button>
@@ -303,7 +378,10 @@ export function ChartOfAccountsTable() {
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={colSpan} className="text-center py-12 text-xs text-muted-foreground">
+                  <TableCell
+                    colSpan={colSpan}
+                    className="text-center py-12 text-xs text-muted-foreground"
+                  >
                     No accounts found
                   </TableCell>
                 </TableRow>

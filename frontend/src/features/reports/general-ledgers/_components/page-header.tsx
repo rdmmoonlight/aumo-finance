@@ -1,7 +1,6 @@
-import { Link } from '@tanstack/react-router';
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
-
 
 export function PageHeader({
   title,

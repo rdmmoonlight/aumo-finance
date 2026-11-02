@@ -35,9 +35,9 @@ export interface ActivityItem {
 export const formatDate = (dateStr?: string) =>
   dateStr
     ? new Date(dateStr).toLocaleString("id-ID", {
-      dateStyle: "short",
-      timeStyle: "short",
-    })
+        dateStyle: "short",
+        timeStyle: "short",
+      })
     : "-";
 
 export function ActiveSessionsTable({
@@ -149,10 +149,14 @@ export function ActivityLogsTable({
               </div>
             </TableCell>
             <TableCell className="p-0 px-4">
-              <div className="py-1.5 font-mono text-caption">{act.ipAddress}</div>
+              <div className="py-1.5 font-mono text-caption">
+                {act.ipAddress}
+              </div>
             </TableCell>
             <TableCell className="p-0 px-4">
-              <div className="py-1.5 text-caption">{formatDate(act.createdAt)}</div>
+              <div className="py-1.5 text-caption">
+                {formatDate(act.createdAt)}
+              </div>
             </TableCell>
             <TableCell className="p-0 px-4">
               <div className="py-1.5 text-right">

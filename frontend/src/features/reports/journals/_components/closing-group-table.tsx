@@ -46,7 +46,9 @@ export function ClosingGroupTable({
           </TableHeader>
           <TableBody>
             {lines.map((line, idx) => (
-              <TableRow key={`${line.referenceNumber}-${line.accountName}-${idx}`}>
+              <TableRow
+                key={`${line.referenceNumber}-${line.accountName}-${idx}`}
+              >
                 {/* Ref. */}
                 <TableCell>
                   <div className="text-center pl-6">

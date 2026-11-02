@@ -34,16 +34,18 @@ export function RetainedEarningsTable({ data }: { data: StatementRow[] }) {
           >
             <TableCell className="w-[65%] p-4">
               <span
-                className={`${item.isIndent ? "pl-8 text-muted-foreground text-caption" : ""} ${item.isTotal ? "font-bold text-body" : "font-medium text-ui"
-                  }`}
+                className={`${item.isIndent ? "pl-8 text-muted-foreground text-caption" : ""} ${
+                  item.isTotal ? "font-bold text-body" : "font-medium text-ui"
+                }`}
               >
                 {item.label}
               </span>
             </TableCell>
             <TableCell className="w-[35%] p-4">
               <div
-                className={`text-right pr-4 font-mono font-medium text-ui ${item.isTotal ? "text-emerald-500 font-bold text-body" : ""
-                  } ${item.valueColorClass || ""}`}
+                className={`text-right pr-4 font-mono font-medium text-ui ${
+                  item.isTotal ? "text-emerald-500 font-bold text-body" : ""
+                } ${item.valueColorClass || ""}`}
               >
                 {item.isNegativeFormat
                   ? `(${formatNumber(item.amount)})`

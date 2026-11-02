@@ -39,11 +39,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { chartOfAccountsApi } from "../api/chartOfAccountsApi";
-import {
-  ACCOUNT_RANGES,
-  ACCOUNT_TYPES,
-  ChartOfAccount,
-} from "../types";
+import { ACCOUNT_RANGES, ACCOUNT_TYPES, ChartOfAccount } from "../types";
 
 type AddSchemaType = ReturnType<typeof addAccountSchema>;
 type EditSchemaType = typeof editAccountSchema;

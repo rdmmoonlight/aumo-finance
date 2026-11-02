@@ -94,8 +94,12 @@ export function TrendTable({ data }: { data: TrendItem[] }) {
         <TableRow>
           <TableHead className="text-caption h-8">Period</TableHead>
           <TableHead className="text-caption h-8 text-right">Revenue</TableHead>
-          <TableHead className="text-caption h-8 text-right">Expenses</TableHead>
-          <TableHead className="text-caption h-8 text-right">Net Income</TableHead>
+          <TableHead className="text-caption h-8 text-right">
+            Expenses
+          </TableHead>
+          <TableHead className="text-caption h-8 text-right">
+            Net Income
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -118,7 +122,7 @@ export function TrendTable({ data }: { data: TrendItem[] }) {
               <div
                 className={cn(
                   "text-right font-mono text-caption font-semibold",
-                  item.net >= 0 ? "text-emerald-600" : "text-red-600"
+                  item.net >= 0 ? "text-emerald-600" : "text-red-600",
                 )}
               >
                 {formatNumber(item.net)}

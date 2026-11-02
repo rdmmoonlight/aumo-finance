@@ -55,13 +55,18 @@ export function IncomeStatementSectionTable({
                 <TableRow key={`${line.referenceNumber}-${idx}`}>
                   <TableCell className="w-[15%] p-3">
                     {line.referenceNumber ? (
-                      <Badge variant="outline" className="font-mono text-label-small">
+                      <Badge
+                        variant="outline"
+                        className="font-mono text-label-small"
+                      >
                         {line.referenceNumber}
                       </Badge>
                     ) : null}
                   </TableCell>
                   <TableCell className="p-3">
-                    <span className="text-ui font-medium">{displayName || "-"}</span>
+                    <span className="text-ui font-medium">
+                      {displayName || "-"}
+                    </span>
                   </TableCell>
                   <TableCell className="w-[30%] p-3">
                     <div

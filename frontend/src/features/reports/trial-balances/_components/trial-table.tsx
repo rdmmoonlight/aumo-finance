@@ -29,25 +29,40 @@ export function TrialTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[10%] pl-6 text-center text-caption">Ref.</TableHead>
+              <TableHead className="w-[10%] pl-6 text-center text-caption">
+                Ref.
+              </TableHead>
               <TableHead className="w-[50%] text-caption">Account</TableHead>
               <TableHead className="w-[15%] text-caption">Type</TableHead>
-              <TableHead className="w-[12%] text-right text-caption">Debit</TableHead>
-              <TableHead className="w-[13%] pr-6 text-right text-caption">Credit</TableHead>
+              <TableHead className="w-[12%] text-right text-caption">
+                Debit
+              </TableHead>
+              <TableHead className="w-[13%] pr-6 text-right text-caption">
+                Credit
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {rows.length ? (
               rows.map((row) => (
-                <TableRow key={String(row.accountId || `${row.type}-${row.accountName}`)}>
+                <TableRow
+                  key={String(
+                    row.accountId || `${row.type}-${row.accountName}`,
+                  )}
+                >
                   <TableCell className="pl-6">
                     <div className="text-center">
-                      <Badge variant="outline" className="font-mono text-amber-500 text-label-small">
+                      <Badge
+                        variant="outline"
+                        className="font-mono text-amber-500 text-label-small"
+                      >
                         {row.referenceNumber || "-"}
                       </Badge>
                     </div>
                   </TableCell>
-                  <TableCell className="text-caption font-medium">{row.accountName}</TableCell>
+                  <TableCell className="text-caption font-medium">
+                    {row.accountName}
+                  </TableCell>
                   <TableCell>
                     <Badge variant="secondary" className="text-label-small">
                       {row.type}
@@ -55,19 +70,26 @@ export function TrialTable({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="font-mono text-caption text-emerald-500 text-right">
-                      {(row.debit ?? 0) > 0 ? formatNumber(row.debit ?? 0) : "-"}
+                      {(row.debit ?? 0) > 0
+                        ? formatNumber(row.debit ?? 0)
+                        : "-"}
                     </div>
                   </TableCell>
                   <TableCell className="pr-6">
                     <div className="font-mono text-caption text-red-500 text-right">
-                      {(row.credit ?? 0) > 0 ? formatNumber(row.credit ?? 0) : "-"}
+                      {(row.credit ?? 0) > 0
+                        ? formatNumber(row.credit ?? 0)
+                        : "-"}
                     </div>
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="py-8 text-center text-caption text-muted-foreground">
+                <TableCell
+                  colSpan={5}
+                  className="py-8 text-center text-caption text-muted-foreground"
+                >
                   No accounts found.
                 </TableCell>
               </TableRow>
