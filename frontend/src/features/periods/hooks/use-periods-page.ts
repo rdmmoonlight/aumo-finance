@@ -33,7 +33,8 @@ export function usePeriodsPage() {
     const periods: PeriodItem[] = useMemo(() => {
         if (!periodsData) return [];
         if (Array.isArray(periodsData)) return periodsData;
-        if ("items" in periodsData && Array.isArray((periodsData as any).items)) return (periodsData as any).items;
+        if ("periods" in periodsData && Array.isArray(periodsData.periods)) return periodsData.periods;
+        if ("items" in periodsData && Array.isArray(periodsData.items)) return periodsData.items;
         return [];
     }, [periodsData]);
 

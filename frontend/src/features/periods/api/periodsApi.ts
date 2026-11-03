@@ -7,8 +7,15 @@ export interface PeriodItem {
   year: number;
   startDate: string;
   endDate: string;
-  status: "Open" | "Closed" | string;
+  status?: "Open" | "Closed" | string;
+  isClosed?: boolean;
   isSelected: boolean;
+}
+
+export interface GetPeriodsResponse {
+  success?: boolean;
+  selectedPeriodId?: number | null;
+  periods: PeriodItem[];
 }
 
 export interface PeriodsOpenInfo {
@@ -45,7 +52,10 @@ export interface CreatePeriodRequest {
 export const periodsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // GET /periods
-    getPeriods: builder.query<PeriodItem[] | { items: PeriodItem[] }, void>({
+    getPeriods: builder.query<
+      PeriodItem[] | { items: PeriodItem[] } | GetPeriodsResponse,
+      void
+    >({
       query: () => "/periods",
       providesTags: ["Periods"],
     }),
