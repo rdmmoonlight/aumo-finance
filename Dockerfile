@@ -20,7 +20,7 @@ WORKDIR /app
 
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY frontend/package.json frontend/pnpm-lock.yaml* ./
+COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/pnpm-workspace.yaml* ./
 
 # Izinkan eksekusi script native unrs-resolver untuk pnpm v10
 RUN pnpm install --frozen-lockfile --allow-build=unrs-resolver
