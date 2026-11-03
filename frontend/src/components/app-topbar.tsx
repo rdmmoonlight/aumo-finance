@@ -29,9 +29,11 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
+// Import RTK Query Hooks
 import { useGetProfileQuery } from "../features/auth/api/authApi";
 import { PeriodItem, useGetPeriodsQuery } from "../features/periods/api/periodsApi";
 import {
+  NotificationItem,
   useGetHealthQuery,
   useGetNotificationsQuery,
   useMarkAllNotificationsAsReadMutation,
@@ -45,12 +47,12 @@ export function AppTopBar() {
   const { data: profileResponse, isLoading: isProfileLoading } = useGetProfileQuery();
   const isAuthenticated = !isProfileLoading && !!profileResponse?.data;
 
-  // 2. Fetch Periods (otomatis ter-refetch saat invalidatesTags: ["Periods"])
+  // 2. Fetch Periods
   const { data: rawPeriodsData, isLoading: isPeriodLoading } = useGetPeriodsQuery(undefined, {
     skip: !isAuthenticated,
   });
 
-  // 3. Database Health Check (polling setiap 30 detik)
+  // 3. Database Health Check (polling 30s)
   const {
     data: healthData,
     isLoading: isHealthLoading,
@@ -62,9 +64,11 @@ export function AppTopBar() {
     pollingInterval: 30000,
   });
 
-  // 4. Fetch Notifikasi (polling setiap 15 detik)
-  const { data: notificationsData = [], isLoading: isNotificationsLoading } =
+  // 4. Fetch Notifikasi (polling 15s)
+  const { data: rawNotifications = [], isLoading: isNotificationsLoading } =
     useGetNotificationsQuery({ limit: 20 }, { skip: !isAuthenticated, pollingInterval: 15000 });
+
+  const notificationsData = (rawNotifications as NotificationItem[]) || [];
 
   // 5. Mutations Notifikasi
   const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
@@ -89,7 +93,7 @@ export function AppTopBar() {
     }
   };
 
-  const unreadCount = notificationsData.filter((n) => !n.isRead).length;
+  const unreadCount = notificationsData.filter((n: NotificationItem) => !n.isRead).length;
 
   // Penentuan status database
   const dbStatus = isHealthError
@@ -100,7 +104,7 @@ export function AppTopBar() {
         ? "online"
         : "offline";
 
-  // Parsing array periods dari format response API
+  // Parsing array periods
   const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
     ? rawPeriodsData
     : (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
@@ -179,7 +183,7 @@ export function AppTopBar() {
                     Tidak ada notifikasi saat ini.
                   </div>
                 ) : (
-                  notificationsData.map((item) => (
+                  notificationsData.map((item: NotificationItem) => (
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
@@ -280,7 +284,7 @@ export function AppTopBar() {
                     : "bg-emerald-500 animate-pulse"
                 }`}
               />
-              Periode: {selectedPeriod.periodName || selectedPeriod.name}
+              Periode: {selectedPeriod.periodName}
               {selectedPeriod.isClosed ? " (Closed)" : " (Aktif)"}
             </Badge>
           ) : (
