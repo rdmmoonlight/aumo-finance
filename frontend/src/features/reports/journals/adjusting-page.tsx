@@ -2,11 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { store } from "@/lib/store";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { reportsApi } from "../api/reportsApi";
+import { useMemo, useState } from "react";
+import { useDeleteJournalEntryMutation } from "../../journal-entry/api/journalEntryApi";
+import { useGetJournalsAdjustingQuery } from "../api/reportsApi";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
 import { JournalEmptyState } from "./_components/journal-empty-state";
@@ -14,45 +14,21 @@ import { formatDateDisplay } from "./_lib/format";
 import { JournalEntry } from "./_lib/types";
 
 export default function AdjustingJournalPage() {
-  const navigate = useNavigate();
+  const { data, isLoading, refetch } = useGetJournalsAdjustingQuery();
+  const [deleteJournalEntry] = useDeleteJournalEntryMutation();
+
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const fetchAdjustingJournal = async () => {
-    setIsLoading(true);
-    try {
-      const result = await store.dispatch(
-        reportsApi.endpoints.getJournalsAdjusting.initiate(),
-      );
-      if ("data" in result) setData(result.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAdjustingJournal();
-  }, []);
 
   const handleDeleteConfirm = async () => {
     if (!entryToDelete) return;
     setIsDeleting(true);
     try {
-      await store
-        .dispatch(
-          (reportsApi.endpoints as any).deleteJournalEntry.initiate(
-            entryToDelete.id,
-          ),
-        )
-        .unwrap();
-      await fetchAdjustingJournal();
+      await deleteJournalEntry(entryToDelete.id).unwrap();
+      await refetch();
     } catch (error) {
-      console.error(error);
+      console.error("Failed to delete journal entry:", error);
     } finally {
       setIsDeleting(false);
       setEntryToDelete(null);
@@ -115,7 +91,7 @@ export default function AdjustingJournalPage() {
           </h1>
           <p className="text-sm text-muted-foreground">
             Adjusting entries{" "}
-            {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} • IDR
+            {d?.selectedPeriodName ? `(${d.selectedPeriodName})` : ""} IDR
           </p>
         </div>
         <div className="flex gap-2">

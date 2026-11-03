@@ -5,10 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
 import { FilePen, Loader2, Pencil, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
-import {
-  useDeleteJournalsAdjustingByIdMutation,
-  useGetJournalsGeneralQuery,
-} from "../api/reportsApi";
+import { useDeleteJournalEntryMutation } from "../../journal-entry/api/journalEntryApi";
+import { useGetJournalsGeneralQuery } from "../api/reportsApi";
 import { DeleteEntryDialog } from "./_components/delete-entry-dialog";
 import { GeneralJournalTable } from "./_components/general-journal-table";
 import { JournalEmptyState } from "./_components/journal-empty-state";
@@ -17,7 +15,7 @@ import { JournalEntry } from "./_lib/types";
 
 export default function GeneralJournalPage() {
   const { data, isLoading, refetch } = useGetJournalsGeneralQuery();
-  const [deleteJournalEntry] = useDeleteJournalsAdjustingByIdMutation();
+  const [deleteJournalEntry] = useDeleteJournalEntryMutation();
 
   const [editMode, setEditMode] = useState(false);
   const [entryToDelete, setEntryToDelete] = useState<JournalEntry | null>(null);
@@ -27,8 +25,7 @@ export default function GeneralJournalPage() {
     if (!entryToDelete) return;
     setIsDeleting(true);
     try {
-      // 2. Memanggil fungsi delete mutation
-      await deleteJournalEntry({ id: entryToDelete.id }).unwrap();
+      await deleteJournalEntry(entryToDelete.id).unwrap();
       await refetch();
     } catch (err) {
       console.error("Failed to delete journal entry:", err);
