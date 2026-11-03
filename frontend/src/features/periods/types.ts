@@ -1,3 +1,4 @@
+// features/periods/types.ts
 import type {
   CreatePeriodFormValues,
   CreatePeriodOutputValues,
@@ -15,7 +16,6 @@ export interface AccountItem {
   accountName?: string;
 }
 
-// FIX: samain sama API biar gak missing
 export interface PeriodItem {
   id: number;
   periodName: string;
@@ -52,7 +52,8 @@ export interface CreatePeriodValues {
   retainedName?: string;
 }
 
-export type PeriodAction = (p: PeriodItem) => void | Promise<void>;
+// FIX: pakai any biar gak clash sama PeriodItem dari api
+export type PeriodAction = (p: any) => void | Promise<void>;
 
 export interface GetPeriodColumnsProps {
   selectedPeriod: PeriodItem | null;
