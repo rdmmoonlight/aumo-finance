@@ -206,7 +206,7 @@ function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any;
                   value="LoadExisting"
                   id="load"
                   disabled={!hasExisting}
-                  className="border-white/20 text-white data-[state=checked]:border-white data-[state=checked]:bg-white"
+                  className="border-white/20 text-white data-[state=checked]:border-white"
                 />
                 <Label htmlFor="load" className={`flex items-center gap-1 text-xs ${!hasExisting ? "text-zinc-600 cursor-not-allowed" : "text-zinc-300 cursor-pointer"}`}>
                   <RefreshCw size={12} /> Use Existing
@@ -216,7 +216,7 @@ function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any;
                 <RadioGroupItem
                   value="CreateNew"
                   id="create"
-                  className="border-white/20 text-white data-[state=checked]:border-white data-[state=checked]:bg-white"
+                  className="border-white/20 text-white data-[state=checked]:border-white"
                 />
                 <Label htmlFor="create" className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer">
                   <PlusCircle size={12} /> Register New
