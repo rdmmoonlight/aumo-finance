@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useGetGeneralLedgerPermanentQuery } from "@/lib/api/reportsApi";
 import { createPeriodSchema, type CreatePeriodFormValues, type CreatePeriodOutputValues } from "@/lib/validations/period";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CalendarPlus, Loader2, PlusCircle, RefreshCw } from "lucide-react";
@@ -45,7 +46,7 @@ function PeriodCard() {
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-sm text-zinc-300">Month</Label>
-          <Select value={month ? String(month) : ""} onValueChange={(v) => setValue("month", Number(v))}>
+          <Select value={month ? String(month) : ""} onValueChange={(v) => setValue("month", Number(v), { shouldValidate: true })}>
             <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
               <SelectValue placeholder="Pilih Bulan" />
             </SelectTrigger>
@@ -70,6 +71,9 @@ function PeriodCard() {
 function ExistingAccounts({ openInfo }: { openInfo: any }) {
   const { watch, setValue, formState: { errors } } = useFormContext();
 
+  // Ambil data General Ledger akun permanen
+  const { data: glData, isLoading: isLoadingGL } = useGetGeneralLedgerPermanentQuery();
+
   const fields = [
     { key: "cashAccountId", label: "Cash Account", ph: "Pilih Akun Kas", opts: openInfo?.availableCashAndBankAccounts },
     { key: "bankAccountId", label: "Bank Account", ph: "Pilih Akun Bank", opts: openInfo?.availableCashAndBankAccounts },
@@ -79,13 +83,21 @@ function ExistingAccounts({ openInfo }: { openInfo: any }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {fields.map((f) => {
-        const selectedId = watch(f.key);
-        const selectedAccount = f.opts?.find((a: any) => String(a.id) === String(selectedId));
+        const rawValue = watch(f.key);
+        const selectedIdStr = rawValue !== undefined && rawValue !== null && rawValue !== "" ? String(rawValue) : "";
+
+        // Cari data akun di GL Permanent
+        const glAccount = glData?.accounts?.find(
+          (acc: any) => String(acc.accountId ?? acc.id) === selectedIdStr
+        );
+
+        // Ambil saldo akhir dari GL
+        const endingBalance = glAccount?.endingBalance ?? glAccount?.balance ?? glAccount?.currentBalance;
 
         return (
           <div key={f.key} className="space-y-1.5">
             <Label className="text-sm text-zinc-300">{f.label}</Label>
-            <Select value={selectedId ? String(selectedId) : ""} onValueChange={(v) => setValue(f.key, v)}>
+            <Select value={selectedIdStr} onValueChange={(v) => setValue(f.key, v, { shouldValidate: true })}>
               <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
                 <SelectValue placeholder={f.ph} />
               </SelectTrigger>
@@ -101,10 +113,14 @@ function ExistingAccounts({ openInfo }: { openInfo: any }) {
               </SelectContent>
             </Select>
 
-            {/* Menampilkan saldo akhir/berjalan periode sebelumnya jika ada */}
-            {selectedAccount && selectedAccount.balance !== undefined && (
-              <p className="text-xs text-emerald-400 font-mono">
-                Ending Balance: Rp {Number(selectedAccount.balance).toLocaleString("id-ID")}
+            {/* Display Saldo Akhir GL Permanent */}
+            {isLoadingGL && selectedIdStr && (
+              <p className="text-xs text-zinc-500 mt-1">Memuat saldo akhir GL...</p>
+            )}
+
+            {!isLoadingGL && glAccount && endingBalance !== undefined && endingBalance !== null && (
+              <p className="text-xs text-emerald-400 font-mono mt-1 font-medium">
+                Ending Balance: Rp {Number(endingBalance).toLocaleString("id-ID")}
               </p>
             )}
 
@@ -155,7 +171,7 @@ function NewAccounts() {
 
 function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any; isLoadingOpenInfo?: boolean }) {
   const { watch, setValue } = useFormContext();
-  const setupMode = watch("setupMode");
+  const setupMode = watch("setupMode") || "CreateNew";
   const hasExisting = Boolean(openInfo?.hasExistingPermanentAccounts);
 
   return (
@@ -171,7 +187,11 @@ function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any;
           </div>
         ) : (
           <>
-            <RadioGroup value={setupMode} onValueChange={(v) => setValue("setupMode", v)} className="flex gap-4">
+            <RadioGroup
+              value={String(setupMode)}
+              onValueChange={(v) => setValue("setupMode", v, { shouldValidate: true, shouldDirty: true, shouldTouch: true })}
+              className="flex gap-4"
+            >
               <div className="flex items-center gap-2">
                 <RadioGroupItem
                   value="LoadExisting"
@@ -184,7 +204,11 @@ function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any;
                 </Label>
               </div>
               <div className="flex items-center gap-2">
-                <RadioGroupItem value="CreateNew" id="create" className="border-white/20 text-white" />
+                <RadioGroupItem
+                  value="CreateNew"
+                  id="create"
+                  className="border-white/20 text-white"
+                />
                 <Label htmlFor="create" className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer">
                   <PlusCircle size={12} /> Register New
                 </Label>
@@ -218,14 +242,11 @@ export function CreatePeriodForm({ openInfo, isLoadingOpenInfo, isCreating, isLo
     defaultValues: mergedDefaults,
   });
 
-  // Sinkronkan mode setup ketika data openInfo selesai dimuat dari backend
+  // Sync state setupMode dengan data openInfo saat selesai di-load
   useEffect(() => {
     if (openInfo) {
-      if (openInfo.hasExistingPermanentAccounts) {
-        methods.setValue("setupMode", "LoadExisting");
-      } else {
-        methods.setValue("setupMode", "CreateNew");
-      }
+      const mode = openInfo.hasExistingPermanentAccounts ? "LoadExisting" : "CreateNew";
+      methods.setValue("setupMode", mode, { shouldValidate: true });
     }
   }, [openInfo, methods]);
 
