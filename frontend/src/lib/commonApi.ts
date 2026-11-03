@@ -89,3 +89,12 @@ export const commonApi = baseApi.injectEndpoints({
     }),
   }),
 });
+
+export const {
+  useGetRootQuery,
+  useCheckRootHeadMutation,
+  useGetHealthQuery,
+  useGetNotificationsQuery,
+  useMarkNotificationAsReadMutation,
+  useMarkAllNotificationsAsReadMutation,
+} = commonApi;
