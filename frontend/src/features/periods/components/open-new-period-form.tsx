@@ -10,17 +10,26 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createPeriodSchema, type CreatePeriodFormValues, type CreatePeriodOutputValues } from "@/lib/validations/period";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, CalendarPlus, Loader2, PlusCircle, RefreshCw } from "lucide-react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { FormProvider, useForm, useFormContext } from "react-hook-form";
 
 function FormHeader({ onCancel }: { onCancel?: () => void }) {
   return (
     <div className="flex items-center justify-between">
       <div>
-        <h1 className="text-xl font-bold flex items-center gap-2 text-white"><CalendarPlus size={22} /> Open New Period</h1>
+        <h1 className="text-xl font-bold flex items-center gap-2 text-white">
+          <CalendarPlus size={22} /> Open New Period
+        </h1>
         <p className="text-xs text-zinc-400 mt-1">Start monthly cycle. Opening balance posted on day 1.</p>
       </div>
-      <Button variant="outline" size="sm" onClick={onCancel} className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10"><ArrowLeft size={14} /> Back</Button>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onCancel}
+        className="gap-1.5 bg-transparent border-white/10 text-xs text-zinc-300 hover:bg-white/10"
+      >
+        <ArrowLeft size={14} /> Back
+      </Button>
     </div>
   );
 }
@@ -30,14 +39,20 @@ function PeriodCard() {
   const month = watch("month");
   return (
     <Card className="bg-[#151519] border-white/[0.07]">
-      <CardHeader className="pb-3"><CardTitle className="text-sm font-semibold text-white">Period</CardTitle></CardHeader>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-semibold text-white">Period</CardTitle>
+      </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-sm text-zinc-300">Month</Label>
           <Select value={month ? String(month) : ""} onValueChange={(v) => setValue("month", Number(v))}>
-            <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm"><SelectValue placeholder="Pilih Bulan" /></SelectTrigger>
+            <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
+              <SelectValue placeholder="Pilih Bulan" />
+            </SelectTrigger>
             <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
-              {MONTH_NAMES.map((n, i) => <SelectItem key={i + 1} value={String(i + 1)}>{n}</SelectItem>)}
+              {MONTH_NAMES.map((n, i) => (
+                <SelectItem key={i + 1} value={String(i + 1)}>{n}</SelectItem>
+              ))}
             </SelectContent>
           </Select>
           {errors.month && <p className="text-xs text-red-500">{errors.month.message}</p>}
@@ -54,25 +69,51 @@ function PeriodCard() {
 
 function ExistingAccounts({ openInfo }: { openInfo: any }) {
   const { watch, setValue, formState: { errors } } = useFormContext();
+
   const fields = [
     { key: "cashAccountId", label: "Cash Account", ph: "Pilih Akun Kas", opts: openInfo?.availableCashAndBankAccounts },
     { key: "bankAccountId", label: "Bank Account", ph: "Pilih Akun Bank", opts: openInfo?.availableCashAndBankAccounts },
     { key: "retainedId", label: "Retained Earnings", ph: "Pilih Retained Earnings", opts: openInfo?.availableRetainedEarningsAccounts },
   ];
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      {fields.map(f => (
-        <div key={f.key} className="space-y-1.5">
-          <Label className="text-sm text-zinc-300">{f.label}</Label>
-          <Select value={watch(f.key) || ""} onValueChange={v => setValue(f.key, v)}>
-            <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm"><SelectValue placeholder={f.ph} /></SelectTrigger>
-            <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
-              {f.opts?.map((a: AccountItem) => <SelectItem key={a.id} value={a.id?.toString() || ""}>{a.displayLabel || `${a.referenceNumber} - ${a.accountName}`}</SelectItem>)}
-            </SelectContent>
-          </Select>
-          {(errors as any)[f.key] && <p className="text-xs text-red-500">{(errors as any)[f.key].message}</p>}
-        </div>
-      ))}
+      {fields.map((f) => {
+        const selectedId = watch(f.key);
+        const selectedAccount = f.opts?.find((a: any) => String(a.id) === String(selectedId));
+
+        return (
+          <div key={f.key} className="space-y-1.5">
+            <Label className="text-sm text-zinc-300">{f.label}</Label>
+            <Select value={selectedId ? String(selectedId) : ""} onValueChange={(v) => setValue(f.key, v)}>
+              <SelectTrigger className="bg-[#0e0e10] border-white/10 text-white text-sm">
+                <SelectValue placeholder={f.ph} />
+              </SelectTrigger>
+              <SelectContent className="bg-[#1e1e22] border-white/10 text-white text-sm">
+                {f.opts?.map((a: any) => {
+                  const label = a.displayLabel || (a.code && a.name ? `${a.code} - ${a.name}` : a.name || a.accountName);
+                  return (
+                    <SelectItem key={a.id} value={String(a.id)}>
+                      {label}
+                    </SelectItem>
+                  );
+                })}
+              </SelectContent>
+            </Select>
+
+            {/* Menampilkan saldo akhir/berjalan periode sebelumnya jika ada */}
+            {selectedAccount && selectedAccount.balance !== undefined && (
+              <p className="text-xs text-emerald-400 font-mono">
+                Ending Balance: Rp {Number(selectedAccount.balance).toLocaleString("id-ID")}
+              </p>
+            )}
+
+            {(errors as any)[f.key] && (
+              <p className="text-xs text-red-500">{(errors as any)[f.key].message}</p>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -93,7 +134,7 @@ function NewAccounts() {
         <F name="cashAccountName" label="Cash Name" />
         <div className="space-y-1.5">
           <Label className="text-sm text-zinc-300">Cash Balance</Label>
-          <Input type="number" {...register("cashBalance", { setValueAs: v => v === "" ? "" : Number(v) })} className="bg-[#0e0e10] border-white/10 text-white text-sm" />
+          <Input type="number" {...register("cashBalance", { setValueAs: (v) => (v === "" ? "" : Number(v)) })} className="bg-[#0e0e10] border-white/10 text-white text-sm" />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -101,7 +142,7 @@ function NewAccounts() {
         <F name="bankAccountName" label="Bank Name" />
         <div className="space-y-1.5">
           <Label className="text-sm text-zinc-300">Bank Balance</Label>
-          <Input type="number" {...register("bankBalance", { setValueAs: v => v === "" ? "" : Number(v) })} className="bg-[#0e0e10] border-white/10 text-white text-sm" />
+          <Input type="number" {...register("bankBalance", { setValueAs: (v) => (v === "" ? "" : Number(v)) })} className="bg-[#0e0e10] border-white/10 text-white text-sm" />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -115,6 +156,8 @@ function NewAccounts() {
 function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any; isLoadingOpenInfo?: boolean }) {
   const { watch, setValue } = useFormContext();
   const setupMode = watch("setupMode");
+  const hasExisting = Boolean(openInfo?.hasExistingPermanentAccounts);
+
   return (
     <Card className="bg-[#151519] border-white/[0.07]">
       <CardHeader className="pb-3">
@@ -123,17 +166,28 @@ function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any;
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoadingOpenInfo ? (
-          <div className="text-center py-4 text-xs text-zinc-500"><Loader2 className="animate-spin inline mr-1" size={14} /> Memuat informasi akun...</div>
+          <div className="text-center py-4 text-xs text-zinc-500">
+            <Loader2 className="animate-spin inline mr-1" size={14} /> Memuat informasi akun...
+          </div>
         ) : (
           <>
-            <RadioGroup value={setupMode} onValueChange={v => setValue("setupMode", v)} className="flex gap-4">
+            <RadioGroup value={setupMode} onValueChange={(v) => setValue("setupMode", v)} className="flex gap-4">
               <div className="flex items-center gap-2">
-                <RadioGroupItem value="LoadExisting" id="load" disabled={!openInfo?.hasExistingPermanentAccounts} className="border-white/20 text-white" />
-                <Label htmlFor="load" className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer"><RefreshCw size={12} /> Use Existing</Label>
+                <RadioGroupItem
+                  value="LoadExisting"
+                  id="load"
+                  disabled={!hasExisting}
+                  className="border-white/20 text-white"
+                />
+                <Label htmlFor="load" className={`flex items-center gap-1 text-xs ${!hasExisting ? "text-zinc-600 cursor-not-allowed" : "text-zinc-300 cursor-pointer"}`}>
+                  <RefreshCw size={12} /> Use Existing
+                </Label>
               </div>
               <div className="flex items-center gap-2">
                 <RadioGroupItem value="CreateNew" id="create" className="border-white/20 text-white" />
-                <Label htmlFor="create" className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer"><PlusCircle size={12} /> Register New</Label>
+                <Label htmlFor="create" className="flex items-center gap-1 text-xs text-zinc-300 cursor-pointer">
+                  <PlusCircle size={12} /> Register New
+                </Label>
               </div>
             </RadioGroup>
             {setupMode === "LoadExisting" ? <ExistingAccounts openInfo={openInfo} /> : <NewAccounts />}
@@ -144,7 +198,7 @@ function PermanentAccountsCard({ openInfo, isLoadingOpenInfo }: { openInfo: any;
   );
 }
 
-// --- Main Export (1 file) ---
+// --- Main Export ---
 
 export function CreatePeriodForm({ openInfo, isLoadingOpenInfo, isCreating, isLoading, initialValues, defaultValues, onSubmit, onCancel }: CreatePeriodFormProps) {
   const mergedDefaults = useMemo(() => ({
@@ -164,6 +218,17 @@ export function CreatePeriodForm({ openInfo, isLoadingOpenInfo, isCreating, isLo
     defaultValues: mergedDefaults,
   });
 
+  // Sinkronkan mode setup ketika data openInfo selesai dimuat dari backend
+  useEffect(() => {
+    if (openInfo) {
+      if (openInfo.hasExistingPermanentAccounts) {
+        methods.setValue("setupMode", "LoadExisting");
+      } else {
+        methods.setValue("setupMode", "CreateNew");
+      }
+    }
+  }, [openInfo, methods]);
+
   const submitting = isCreating || isLoading;
 
   return (
@@ -174,8 +239,12 @@ export function CreatePeriodForm({ openInfo, isLoadingOpenInfo, isCreating, isLo
           <PeriodCard />
           <PermanentAccountsCard openInfo={openInfo} isLoadingOpenInfo={isLoadingOpenInfo} />
           <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel} className="bg-transparent border-white/10 text-sm text-zinc-300 hover:bg-white/10">Cancel</Button>
-            <Button type="submit" disabled={submitting} className="bg-white text-black text-sm font-medium hover:bg-zinc-200">{submitting ? "Creating..." : "Submit Period"}</Button>
+            <Button type="button" variant="outline" onClick={onCancel} className="bg-transparent border-white/10 text-sm text-zinc-300 hover:bg-white/10">
+              Cancel
+            </Button>
+            <Button type="submit" disabled={submitting} className="bg-white text-black text-sm font-medium hover:bg-zinc-200">
+              {submitting ? "Creating..." : "Submit Period"}
+            </Button>
           </div>
         </form>
       </FormProvider>
