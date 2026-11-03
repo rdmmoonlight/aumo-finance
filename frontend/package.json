@@ -22,7 +22,7 @@
     "test:e2e": "playwright test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "api:generate": "tsx node_modules/@rtk-query/codegen-openapi/dist/bin/rtk-query-codegen.js openapi-config.ts"
+    "api:generate": "rtk-query-codegen-openapi openapi-config.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -62,6 +62,8 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "cross-env": "^10.1.0",
+    "esbuild": "^0.28.2",
+    "esbuild-runner": "^2.2.2",
     "eslint": "^9.20.0",
     "eslint-config-next": "^16.0.0",
     "fs-extra": "^11.4.1",
