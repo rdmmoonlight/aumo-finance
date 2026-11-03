@@ -1,7 +1,6 @@
 "use client";
 
 import { useLocation } from "@tanstack/react-router";
-
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -30,183 +29,67 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import { store } from "@/lib/store";
-import { authApi } from "../features/auth/api/authApi";
-import { periodsApi } from "../features/periods/api/periodsApi";
-import { commonApi } from "../lib/commonApi";
-
-interface PeriodItem {
-  id: number;
-  periodName?: string;
-  name?: string;
-  isClosed?: boolean;
-  isSelected?: boolean;
-}
-
-interface NotificationItem {
-  id: string;
-  title: string;
-  message: string;
-  type?: "info" | "warning" | string;
-  isRead: boolean;
-  createdAt?: string;
-}
+import { useGetProfileQuery } from "../features/auth/api/authApi";
+import { PeriodItem, useGetPeriodsQuery } from "../features/periods/api/periodsApi";
+import {
+  useGetHealthQuery,
+  useGetNotificationsQuery,
+  useMarkAllNotificationsAsReadMutation,
+  useMarkNotificationAsReadMutation,
+} from "../lib/commonApi";
 
 export function AppTopBar() {
   const pathname = useLocation().pathname;
 
-  // State internal pengganti Auto-Generated Hooks
-  const [userProfile, setUserProfile] = React.useState<any>(null);
-  const [isProfileLoading, setIsProfileLoading] = React.useState(true);
+  // 1. Profil User (/auth/me)
+  const { data: profileResponse, isLoading: isProfileLoading } = useGetProfileQuery();
+  const isAuthenticated = !isProfileLoading && !!profileResponse?.data;
 
-  const [rawPeriodsData, setRawPeriodsData] = React.useState<any>(null);
-  const [isPeriodLoading, setIsPeriodLoading] = React.useState(false);
+  // 2. Fetch Periods (otomatis ter-refetch saat invalidatesTags: ["Periods"])
+  const { data: rawPeriodsData, isLoading: isPeriodLoading } = useGetPeriodsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
 
-  const [healthData, setHealthData] = React.useState<any>(null);
-  const [isHealthLoading, setIsHealthLoading] = React.useState(false);
-  const [isHealthFetching, setIsHealthFetching] = React.useState(false);
-  const [isHealthError, setIsHealthError] = React.useState(false);
+  // 3. Database Health Check (polling setiap 30 detik)
+  const {
+    data: healthData,
+    isLoading: isHealthLoading,
+    isFetching: isHealthFetching,
+    isError: isHealthError,
+    refetch: refetchHealth,
+  } = useGetHealthQuery(undefined, {
+    skip: !isAuthenticated,
+    pollingInterval: 30000,
+  });
 
-  const [notifications, setNotifications] = React.useState<NotificationItem[]>(
-    [],
-  );
-  const [isNotificationsLoading, setIsNotificationsLoading] =
-    React.useState(false);
-  const [isMarkingAllRead, setIsMarkingAllRead] = React.useState(false);
+  // 4. Fetch Notifikasi (polling setiap 15 detik)
+  const { data: notificationsData = [], isLoading: isNotificationsLoading } =
+    useGetNotificationsQuery({ limit: 20 }, { skip: !isAuthenticated, pollingInterval: 15000 });
 
-  const isAuthenticated = !isProfileLoading && !!userProfile;
+  // 5. Mutations Notifikasi
+  const [markAllNotificationsAsRead, { isLoading: isMarkingAllRead }] =
+    useMarkAllNotificationsAsReadMutation();
+  const [markNotificationAsRead] = useMarkNotificationAsReadMutation();
 
-  // 1. Fetch Profil User (/auth/me)
-  const fetchUserProfile = React.useCallback(async () => {
-    setIsProfileLoading(true);
-    try {
-      const result = await store.dispatch(
-        authApi.endpoints.getProfile.initiate(),
-      );
-      if ("data" in result && result.data) {
-        setUserProfile(result.data);
-      } else {
-        setUserProfile(null);
-      }
-    } catch {
-      setUserProfile(null);
-    } finally {
-      setIsProfileLoading(false);
-    }
-  }, []);
-
-  // 2. Fetch Periods
-  const fetchPeriods = React.useCallback(async () => {
-    if (!isAuthenticated) return;
-    setIsPeriodLoading(true);
-    try {
-      const result = await store.dispatch(
-        periodsApi.endpoints.getPeriods.initiate(),
-      );
-      if ("data" in result) {
-        setRawPeriodsData(result.data);
-      }
-    } catch {
-      setRawPeriodsData(null);
-    } finally {
-      setIsPeriodLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  // 3. Database Health Check
-  const checkDb = React.useCallback(async () => {
-    if (!isAuthenticated) return;
-    setIsHealthFetching(true);
-    try {
-      const result = await store.dispatch(
-        commonApi.endpoints.getHealth.initiate(),
-      );
-      if ("data" in result && result.data) {
-        setHealthData(result.data);
-        setIsHealthError(false);
-      } else {
-        setIsHealthError(true);
-      }
-    } catch {
-      setIsHealthError(true);
-    } finally {
-      setIsHealthLoading(false);
-      setIsHealthFetching(false);
-    }
-  }, [isAuthenticated]);
-
-  // 4. Fetch Notifikasi
-  const fetchNotifications = React.useCallback(async () => {
-    if (!isAuthenticated) return;
-    setIsNotificationsLoading(true);
-    try {
-      const result = await store.dispatch(
-        commonApi.endpoints.getNotifications.initiate({ limit: 20 }),
-      );
-      if ("data" in result && Array.isArray(result.data)) {
-        setNotifications(result.data as NotificationItem[]);
-      }
-    } catch {
-      setNotifications([]);
-    } finally {
-      setIsNotificationsLoading(false);
-    }
-  }, [isAuthenticated]);
-
-  // Initial Load & Polling setup
-  React.useEffect(() => {
-    fetchUserProfile();
-  }, [fetchUserProfile]);
-
-  React.useEffect(() => {
-    if (isAuthenticated) {
-      fetchPeriods();
-      checkDb();
-      fetchNotifications();
-
-      // Setup Polling Interval Manual
-      const healthInterval = setInterval(checkDb, 30000);
-      const notifInterval = setInterval(fetchNotifications, 15000);
-
-      return () => {
-        clearInterval(healthInterval);
-        clearInterval(notifInterval);
-      };
-    }
-  }, [isAuthenticated, fetchPeriods, checkDb, fetchNotifications]);
-
-  // Handlers untuk Notifikasi
+  // Handlers Notifikasi
   const handleMarkAllAsRead = async () => {
-    setIsMarkingAllRead(true);
     try {
-      const result = await store.dispatch(
-        commonApi.endpoints.markAllNotificationsAsRead.initiate(),
-      );
-      if ("data" in result) {
-        fetchNotifications();
-      }
+      await markAllNotificationsAsRead().unwrap();
     } catch (error) {
       console.error("Gagal menandai semua dibaca:", error);
-    } finally {
-      setIsMarkingAllRead(false);
     }
   };
 
   const handleMarkAsRead = async (id: string, isRead?: boolean) => {
     if (isRead || !id) return;
     try {
-      const result = await store.dispatch(
-        commonApi.endpoints.markNotificationAsRead.initiate({ id }),
-      );
-      if ("data" in result) {
-        fetchNotifications();
-      }
+      await markNotificationAsRead({ id }).unwrap();
     } catch (error) {
       console.error("Gagal menandai dibaca:", error);
     }
   };
 
-  const unreadCount = notifications.filter((n) => !n.isRead).length;
+  const unreadCount = notificationsData.filter((n) => !n.isRead).length;
 
   // Penentuan status database
   const dbStatus = isHealthError
@@ -217,7 +100,7 @@ export function AppTopBar() {
         ? "online"
         : "offline";
 
-  // Parsing array periods
+  // Parsing array periods dari format response API
   const periods: PeriodItem[] = Array.isArray(rawPeriodsData)
     ? rawPeriodsData
     : (rawPeriodsData as any)?.items || (rawPeriodsData as any)?.periods || [];
@@ -263,10 +146,7 @@ export function AppTopBar() {
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold text-sm">Notifikasi</h4>
                   {unreadCount > 0 && (
-                    <Badge
-                      variant="secondary"
-                      className="text-xs px-1.5 py-0.5"
-                    >
+                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
                       {unreadCount} baru
                     </Badge>
                   )}
@@ -292,15 +172,14 @@ export function AppTopBar() {
               <div className="max-h-[300px] overflow-y-auto divide-y">
                 {isNotificationsLoading ? (
                   <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat
-                    notifikasi...
+                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat notifikasi...
                   </div>
-                ) : notifications.length === 0 ? (
+                ) : notificationsData.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground">
                     Tidak ada notifikasi saat ini.
                   </div>
                 ) : (
-                  notifications.map((item) => (
+                  notificationsData.map((item) => (
                     <div
                       key={item.id}
                       onClick={() => handleMarkAsRead(item.id, item.isRead)}
@@ -322,10 +201,10 @@ export function AppTopBar() {
                           </p>
                           <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
-                              ? new Date(item.createdAt).toLocaleTimeString(
-                                  [],
-                                  { hour: "2-digit", minute: "2-digit" },
-                                )
+                              ? new Date(item.createdAt).toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
                               : ""}
                           </span>
                         </div>
@@ -410,9 +289,7 @@ export function AppTopBar() {
               className="gap-1.5 font-medium text-xs text-muted-foreground"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-              {isPeriodLoading
-                ? "Memuat periode..."
-                : "Belum Ada Periode Dipilih"}
+              {isPeriodLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
             </Badge>
           )}
 
@@ -444,17 +321,14 @@ export function AppTopBar() {
 
             {dbStatus === "offline" && (
               <div className="flex items-center gap-1.5">
-                <Badge
-                  variant="destructive"
-                  className="gap-1.5 font-medium text-xs"
-                >
+                <Badge variant="destructive" className="gap-1.5 font-medium text-xs">
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
                   DB: Disconnected
                 </Badge>
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => checkDb()}
+                  onClick={() => refetchHealth()}
                   disabled={isHealthFetching}
                   className="h-6 w-6 text-muted-foreground hover:text-foreground"
                   title="Coba hubungkan ulang"
