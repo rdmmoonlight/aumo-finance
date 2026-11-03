@@ -91,9 +91,8 @@ export const baseApi = createApi({
   keepUnusedDataFor: 300,
   tagTypes: [
     "Auth",
-    "Coa",
     "ChartOfAccounts",
-    "Journal",
+    "Journals",
     "JournalEntry",
     "Periods",
     "Dashboard",
