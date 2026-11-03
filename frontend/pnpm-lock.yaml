@@ -114,9 +114,6 @@ importers:
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
-      esbuild:
-        specifier: ^0.28.2
-        version: 0.28.2
       esbuild-runner:
         specifier: ^2.2.2
         version: 2.2.2(esbuild@0.28.2)
