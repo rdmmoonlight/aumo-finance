@@ -27,8 +27,13 @@ public partial class Program
 
     public static async Task Main(string[] args)
     {
+        // Bootstrap Logger dengan ANSI Theme agar log saat startup di Render langsung berwarna
         Serilog.Log.Logger = new LoggerConfiguration()
-            .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+            .WriteTo.Console(
+                theme: AnsiConsoleTheme.Code,
+                applyThemeToRedirectedOutput: true,
+                formatProvider: CultureInfo.InvariantCulture,
+                outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}")
             .CreateBootstrapLogger();
 
         try
@@ -36,6 +41,7 @@ public partial class Program
             Serilog.Log.Information("Starting AumoBackend web application...");
             var builder = WebApplication.CreateBuilder(args);
 
+            // Konfigurasi Host Serilog Utama
             builder.Host.UseSerilog((context, services, configuration) => configuration
                 .ReadFrom.Configuration(context.Configuration)
                 .ReadFrom.Services(services)
@@ -43,7 +49,7 @@ public partial class Program
                 .WriteTo.Console(
                     theme: AnsiConsoleTheme.Code,
                     applyThemeToRedirectedOutput: true,
-                    outputTemplate:"[{Level:u3}] {Message:lj}{NewLine}{Exception}"));
+                    outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}"));
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
@@ -204,7 +210,13 @@ public partial class Program
             }
 
             app.UseStaticFiles();
-            app.UseSerilogRequestLogging();
+
+            // Request Logging dengan Template Token terstruktur agar RequestMethod & StatusCode diwarnai ANSI
+            app.UseSerilogRequestLogging(options =>
+            {
+                options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
+            });
+
             app.UseRouting();
             app.UseCors("AllowFrontend");
             app.UseRateLimiter();
