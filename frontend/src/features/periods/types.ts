@@ -15,13 +15,14 @@ export interface AccountItem {
   accountName?: string;
 }
 
+// FIX: samain sama API biar gak missing
 export interface PeriodItem {
   id: number;
   periodName: string;
-  month?: number;
-  year?: number;
-  startDate?: string;
-  endDate?: string;
+  month: number;
+  year: number;
+  startDate: string;
+  endDate: string;
   isClosed?: boolean;
   isSelected?: boolean;
   status?: string;
@@ -105,16 +106,6 @@ export interface CreatePeriodFormProps {
 }
 
 export const MONTH_NAMES = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December",
 ] as const;
