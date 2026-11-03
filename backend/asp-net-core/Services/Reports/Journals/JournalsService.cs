@@ -111,6 +111,17 @@ public class JournalsService : IJournalsService
             return new ClosingJournalReportResult { HasPeriodSelected = false };
         }
 
+        // Jurnal penutup baru ada setelah periode ditutup: sebelum itu tidak dihitung sama sekali.
+        if (!period.IsClosed)
+        {
+            return new ClosingJournalReportResult
+            {
+                HasPeriodSelected = true,
+                SelectedPeriodName = period.PeriodName,
+                IsPeriodClosed = false,
+            };
+        }
+
         var (groups, netIncome, reAccountName) = await ComputeClosingAsync(userId, period);
 
         return new ClosingJournalReportResult

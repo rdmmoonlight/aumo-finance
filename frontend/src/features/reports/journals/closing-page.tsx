@@ -42,11 +42,23 @@ export default function ClosingJournalReportPage() {
     };
   }, []);
 
-  const { noPeriod, vm } = useMemo(() => {
+  const { noPeriod, notClosed, vm } = useMemo(() => {
     const d = data as any;
     if (!d || d?.hasPeriodSelected === false) {
       return {
         noPeriod: true,
+        notClosed: false,
+        vm: {
+          netIncome: 0,
+          retainedEarningsAccountName: "Retained Earnings",
+          groups: [],
+        } as ClosingJournalViewModel,
+      };
+    }
+    if (d?.isPeriodClosed === false) {
+      return {
+        noPeriod: false,
+        notClosed: true,
         vm: {
           netIncome: 0,
           retainedEarningsAccountName: "Retained Earnings",
@@ -57,6 +69,7 @@ export default function ClosingJournalReportPage() {
     const cj = d?.closingJournal || d;
     return {
       noPeriod: false,
+      notClosed: false,
       vm: {
         netIncome: Number(cj?.netIncome) || 0,
         retainedEarningsAccountName:
@@ -91,6 +104,28 @@ export default function ClosingJournalReportPage() {
       </div>
     );
   if (noPeriod) return <NoPeriodState />;
+  if (notClosed)
+    return (
+      <div className="space-y-6">
+        <h1 className="text-xl font-bold flex items-center gap-2">
+          <Lock className="text-amber-500" size={22} /> Closing Journal
+        </h1>
+        <Alert className="bg-amber-500/10">
+          <Info size={16} />
+          <AlertDescription className="text-xs space-y-3">
+            <p>
+              Periode ini belum ditutup (closed). Jurnal penutup baru dapat
+              ditampilkan setelah periode ditutup.
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/periods">
+                <ArrowRight size={14} /> Ke halaman Periods
+              </Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
 
   return (
     <div className="space-y-6">
