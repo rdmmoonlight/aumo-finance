@@ -1,6 +1,6 @@
 // Closing
 export interface ClosingJournalLine {
-  referenceNumber?: number;
+  referenceNumber?: number | string;
   accountName: string;
   debit: number;
   credit: number;

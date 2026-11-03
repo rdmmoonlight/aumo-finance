@@ -31,7 +31,43 @@ public class JournalsController : ControllerBase
     // GET /api/v1/reports/journals/closing
     [HttpGet("closing")]
     public async Task<IActionResult> GetClosingJournal()
-        => await GetJournalAsync("Closing", "closingJournal");
+    {
+        var userId = User.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
+
+        // Jurnal penutup tidak punya tabel fisik: dihitung dari GeneralJournals periode terpilih.
+        ClosingJournalReportResult result = await _journalsService.GetClosingJournalAsync(userId);
+
+        if (!result.HasPeriodSelected)
+        {
+            return Ok(new
+            {
+                success = true,
+                hasPeriodSelected = false,
+                selectedPeriodName = (string?)null,
+                message = "No accounting period selected.",
+                isPeriodClosed = false,
+                closingJournal = (object?)null,
+            });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            hasPeriodSelected = true,
+            selectedPeriodName = result.SelectedPeriodName,
+            isPeriodClosed = result.IsPeriodClosed,
+            closingJournal = new
+            {
+                netIncome = result.NetIncome,
+                retainedEarningsAccountName = result.RetainedEarningsAccountName,
+                groups = result.Groups,
+            },
+        });
+    }
 
     // DELETE /api/v1/reports/journals/adjusting/{id}
     [HttpDelete("adjusting/{id:int}")]
@@ -58,7 +94,7 @@ public class JournalsController : ControllerBase
         }
     }
 
-    // Kontrak respons dipertahankan: jurnal umum dan penyesuaian memakai "entries", penutup "closingJournal".
+    // Kontrak respons: jurnal umum dan penyesuaian memakai "entries".
     private async Task<IActionResult> GetJournalAsync(string journalType, string listKey)
     {
         var userId = User.GetCurrentUserId();

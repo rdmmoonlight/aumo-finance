@@ -47,3 +47,22 @@ public class JournalReportLineDto
 
     public int LineOrder { get; set; }
 }
+
+/// <summary>
+/// Hasil jurnal penutup. Tidak ada tabel fisik: seluruh isinya dihitung dari GeneralJournals
+/// (General + Adjusting) periode terpilih melalui trial balance.
+/// </summary>
+public class ClosingJournalReportResult
+{
+    public bool HasPeriodSelected { get; set; }
+
+    public string? SelectedPeriodName { get; set; }
+
+    public bool IsPeriodClosed { get; set; }
+
+    public decimal NetIncome { get; set; }
+
+    public string RetainedEarningsAccountName { get; set; } = "Retained Earnings";
+
+    public List<ClosingJournalEntryGroupApiResponse> Groups { get; set; } = new();
+}

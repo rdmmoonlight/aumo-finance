@@ -103,12 +103,51 @@ public class JournalsService : IJournalsService
         await _journalEntryService.DeleteAsync(userId, journalEntryId);
     }
 
+    public async Task<ClosingJournalReportResult> GetClosingJournalAsync(Guid userId)
+    {
+        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        if (period == null)
+        {
+            return new ClosingJournalReportResult { HasPeriodSelected = false };
+        }
+
+        var (groups, netIncome, reAccountName) = await ComputeClosingAsync(userId, period);
+
+        return new ClosingJournalReportResult
+        {
+            HasPeriodSelected = true,
+            SelectedPeriodName = period.PeriodName,
+            IsPeriodClosed = period.IsClosed,
+            NetIncome = netIncome,
+            RetainedEarningsAccountName = reAccountName,
+            Groups = groups,
+        };
+    }
+
     public async Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(
         Guid userId,
         Period period)
     {
+        var (groups, _, _) = await ComputeClosingAsync(userId, period);
+        return groups;
+    }
+
+    private async Task<(List<ClosingJournalEntryGroupApiResponse> Groups, decimal NetIncome, string ReAccountName)> ComputeClosingAsync(
+        Guid userId,
+        Period period)
+    {
         var rows = await _trialBalancesService.BuildTrialBalancesRowsAsync(userId, period, true);
-        var reAccountName = rows.Find(r => r.Role == "RetainedEarnings")?.AccountName ?? "Retained Earnings";
+
+        // Baris trial balance hanya memuat akun yang bergerak pada periode ini, jadi nama Laba Ditahan
+        // diambil langsung dari bagan akun agar tetap benar walau akun itu belum bertransaksi.
+        var reAccountName = await _db.ChartOfAccounts
+            .AsNoTracking()
+            .Where(a => a.UserId == userId && a.IsActive && a.Role == "RetainedEarnings")
+            .OrderBy(a => a.ReferenceNumber)
+            .Select(a => a.AccountName)
+            .FirstOrDefaultAsync()
+            ?? rows.Find(r => r.Role == "RetainedEarnings")?.AccountName
+            ?? "Retained Earnings";
         const string incomeSummaryName = "Income Summary";
 
         var groups = new List<ClosingJournalEntryGroupApiResponse>();
@@ -235,6 +274,6 @@ public class JournalsService : IJournalsService
             groups.Add(group3);
         }
 
-        return groups;
+        return (groups, netIncome, reAccountName);
     }
 }

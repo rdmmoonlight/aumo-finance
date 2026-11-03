@@ -15,5 +15,10 @@ public interface IJournalsService
     /// </summary>
     Task DeleteAdjustingAsync(Guid userId, int journalEntryId);
 
+    /// <summary>
+    /// Jurnal penutup periode terpilih. Dihitung on-the-fly dari GeneralJournals (tidak pernah disimpan).
+    /// </summary>
+    Task<ClosingJournalReportResult> GetClosingJournalAsync(Guid userId);
+
     Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(Guid userId, Period period);
 }
