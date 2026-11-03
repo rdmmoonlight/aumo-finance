@@ -1,7 +1,7 @@
 # ==========================================
 # STAGE 1: Build ASP.NET Core Backend
 # ==========================================
-FROM mcr.microsoft.com/dotnet/sdk:10.0.100-preview.1-noble AS dotnet-builder
+FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS dotnet-builder
 WORKDIR /src
 
 # Copy project file dan restore dependensi
@@ -37,7 +37,7 @@ RUN pnpm run build
 # ==========================================
 # STAGE 3: Runtime Environment
 # ==========================================
-FROM mcr.microsoft.com/dotnet/aspnet:10.0.100-preview.1-noble AS runner
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
 RUN apt-get update && apt-get install -y \
     nginx \

@@ -12,7 +12,7 @@ export function PeriodsTable({ periods, isLoading, selectingId, closingId, isSel
     onSelect: (p: PeriodItem) => void; onClose: (p: PeriodItem) => void;
 }) {
     if (isLoading) {
-        return <TableCell colSpan={4} className="h-24 text-center text-xs text-zinc-500"><Loader2 className="animate-spin inline mr-2" size={16} />Loading periods...</TableCell>;
+        return <div className="h-24 flex items-center justify-center text-xs text-zinc-500"><Loader2 className="animate-spin inline mr-2" size={16} />Loading periods...</div>;
     }
     return (
         <Table>
@@ -26,11 +26,11 @@ export function PeriodsTable({ periods, isLoading, selectingId, closingId, isSel
             </TableHeader>
             <TableBody>
                 {periods.length > 0 ? periods.map((p) => {
-                    const isClosed = p.status === "Closed";
+                    const isClosed = p.isClosed ?? p.status === "Closed";
                     return (
                         <TableRow key={p.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
                             <TableCell className="py-3 text-xs font-medium text-white">{p.periodName}</TableCell>
-                            <TableCell className="py-3 text-xs"><Badge variant="outline" className={isClosed ? "border-red-500/30 text-red-300" : "border-emerald-500/30 text-emerald-300"}>{p.status || (isClosed ? "Closed" : "Open")}</Badge></TableCell>
+                            <TableCell className="py-3 text-xs"><Badge variant="outline" className={isClosed ? "border-red-500/30 text-red-300" : "border-emerald-500/30 text-emerald-300"}>{isClosed ? "Closed" : "Open"}</Badge></TableCell>
                             <TableCell className="py-3 text-xs">{p.isSelected ? <Badge className="bg-white text-black">Active</Badge> : <span className="text-zinc-500">-</span>}</TableCell>
                             <TableCell className="py-3 text-xs">
                                 <div className="flex justify-end gap-1.5">
