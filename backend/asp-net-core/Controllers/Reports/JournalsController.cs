@@ -54,12 +54,25 @@ public class JournalsController : ControllerBase
             });
         }
 
+        if (!result.IsPeriodClosed)
+        {
+            return Ok(new
+            {
+                success = true,
+                hasPeriodSelected = true,
+                selectedPeriodName = result.SelectedPeriodName,
+                message = "Accounting period is not closed yet.",
+                isPeriodClosed = false,
+                closingJournal = (object?)null,
+            });
+        }
+
         return Ok(new
         {
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = result.SelectedPeriodName,
-            isPeriodClosed = result.IsPeriodClosed,
+            isPeriodClosed = true,
             closingJournal = new
             {
                 netIncome = result.NetIncome,
