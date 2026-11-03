@@ -28,7 +28,6 @@ export default function PeriodsPage() {
 
       {viewMode === "list" ? (
         <div className="grid grid-cols-12 gap-5 items-start">
-          {/* KIRI - DILEBARIN 3CM */}
           <div className="col-span-12 lg:col-span-6 xl:col-span-5 w-full lg:w-[calc(100%+3cm)]">
             <PeriodsListCard
               periods={periods}
@@ -45,13 +44,11 @@ export default function PeriodsPage() {
               onOpenCreate={() => setViewMode("create")}
             />
           </div>
-
-          {/* KANAN - EMPTY SPACE */}
           <div className="col-span-12 lg:col-span-6 xl:col-span-7 lg:pl-">
             <div className="min-h- rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] flex flex-col items-center justify-center gap-2 p-8 text-center">
               <span className="text- uppercase tracking-widest text-zinc-500">Empty space</span>
               <p className="text-xs text-zinc-600 max-w- leading-relaxed">
-                Buat detail / chart nanti. Tabel udah gue lebarin 3cm ke kanan.
+                Buat detail / chart nanti. Tabel udah dilebarin 3cm ke kanan.
               </p>
             </div>
           </div>
