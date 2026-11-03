@@ -105,6 +105,13 @@ export default function ClosingJournalReportPage() {
         </Button>
       </div>
 
+      {vm.groups.length === 0 && (
+        <div className="py-12 text-center text-xs text-muted-foreground">
+          Belum ada akun pendapatan atau beban yang bersaldo pada periode ini,
+          sehingga tidak ada jurnal penutup.
+        </div>
+      )}
+
       {vm.groups.map((g, i) => (
         <ClosingGroupTable key={i} group={g} totals={totals[i]} />
       ))}
