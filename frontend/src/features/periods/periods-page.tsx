@@ -28,7 +28,7 @@ export default function PeriodsPage() {
 
       {viewMode === "list" ? (
         <div className="grid grid-cols-12 gap-5 items-start">
-          <div className="col-span-12 lg:col-span-6 xl:col-span-5 w-full lg:w-[calc(100%+5cm)]">
+          <div className="col-span-12 lg:col-span-6 xl:col-span-5 w-full lg:w-[calc(100%+7cm)]">
             <PeriodsListCard
               periods={periods}
               isLoading={isLoading}
