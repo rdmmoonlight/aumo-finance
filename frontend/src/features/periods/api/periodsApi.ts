@@ -82,7 +82,7 @@ export const periodsApi = baseApi.injectEndpoints({
     // POST /periods/{id}/select
     selectPeriod: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
-        url: `/periods/${id}/select`,
+        url: `/periods/select/${id}`,
         method: "POST",
       }),
       invalidatesTags: ["Periods"],
@@ -100,7 +100,7 @@ export const periodsApi = baseApi.injectEndpoints({
     // POST /periods/{id}/close
     closePeriod: builder.mutation<void, { id: number }>({
       query: ({ id }) => ({
-        url: `/periods/${id}/close`,
+        url: `/periods/close/${id}`,
         method: "POST",
       }),
       invalidatesTags: ["Periods"],
