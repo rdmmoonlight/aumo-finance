@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace AumoBackend;
 
