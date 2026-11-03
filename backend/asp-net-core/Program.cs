@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Security.Claims;
 using AumoBackend.Data;
 using AumoBackend.Extensions;
+using AumoBackend.Middlewares;
 using AumoBackend.Models;
 using FluentValidation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -30,7 +31,7 @@ public partial class Program
         // Bootstrap Logger dengan ANSI Theme agar log saat startup di Render langsung berwarna
         Serilog.Log.Logger = new LoggerConfiguration()
             .WriteTo.Console(
-                theme: AnsiConsoleTheme.Code,
+                theme: CustomLogThemes.VividTheme,
                 applyThemeToRedirectedOutput: true,
                 formatProvider: CultureInfo.InvariantCulture,
                 outputTemplate: "[{Level:u3}] {Message:lj}{NewLine}{Exception}")
@@ -211,11 +212,7 @@ public partial class Program
 
             app.UseStaticFiles();
 
-            // Request Logging dengan Template Token terstruktur agar RequestMethod & StatusCode diwarnai ANSI
-            app.UseSerilogRequestLogging(options =>
-            {
-                options.MessageTemplate = "HTTP {RequestMethod} {RequestPath} responded {StatusCode} in {Elapsed:0.0000} ms";
-            });
+            app.UseCustomRequestLogging();
 
             app.UseRouting();
             app.UseCors("AllowFrontend");
