@@ -28,7 +28,8 @@ export default function PeriodsPage() {
 
       {viewMode === "list" ? (
         <div className="grid grid-cols-12 gap-5 items-start">
-          <div className="col-span-12 lg:col-span-5 xl:col-span-4">
+          {/* KIRI - DILEBARIN 3CM */}
+          <div className="col-span-12 lg:col-span-6 xl:col-span-5 w-full lg:w-[calc(100%+3cm)]">
             <PeriodsListCard
               periods={periods}
               isLoading={isLoading}
@@ -38,44 +39,20 @@ export default function PeriodsPage() {
               isSelecting={isSelecting}
               isClearing={isClearing}
               isClosing={isClosing}
-              onSelectPeriod={(period) =>
-                period.month === undefined ||
-                  period.year === undefined ||
-                  period.startDate === undefined ||
-                  period.endDate === undefined
-                  ? undefined
-                  : handleSelectPeriod({
-                    ...period,
-                    month: period.month,
-                    year: period.year,
-                    startDate: period.startDate,
-                    endDate: period.endDate,
-                    isSelected: period.isSelected ?? false,
-                  })
-              }
-              onClosePeriod={(period) =>
-                period.month === undefined ||
-                  period.year === undefined ||
-                  period.startDate === undefined ||
-                  period.endDate === undefined
-                  ? undefined
-                  : handleClosePeriod({
-                    ...period,
-                    month: period.month,
-                    year: period.year,
-                    startDate: period.startDate,
-                    endDate: period.endDate,
-                    isSelected: period.isSelected ?? false,
-                  })
-              }
+              onSelectPeriod={handleSelectPeriod}
+              onClosePeriod={handleClosePeriod}
               onClearSelection={handleClearSelection}
               onOpenCreate={() => setViewMode("create")}
             />
           </div>
-          <div className="col-span-12 lg:col-span-7 xl:col-span-8">
+
+          {/* KANAN - EMPTY SPACE */}
+          <div className="col-span-12 lg:col-span-6 xl:col-span-7 lg:pl-">
             <div className="min-h- rounded-xl border border-dashed border-white/[0.08] bg-white/[0.02] flex flex-col items-center justify-center gap-2 p-8 text-center">
               <span className="text- uppercase tracking-widest text-zinc-500">Empty space</span>
-              <p className="text-xs text-zinc-600 max-w-">Buat detail / chart nanti. Tabel jadi compact otomatis karena gak full width.</p>
+              <p className="text-xs text-zinc-600 max-w- leading-relaxed">
+                Buat detail / chart nanti. Tabel udah gue lebarin 3cm ke kanan.
+              </p>
             </div>
           </div>
         </div>
