@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using Serilog;
 
 namespace AumoBackend.Middlewares;
 
@@ -33,33 +32,35 @@ public class RequestLoggingMiddleware
         var path = context.Request.Path + context.Request.QueryString;
         var statusCode = context.Response.StatusCode;
 
-        // Reset ANSI
         const string reset = "\x1b[0m";
+        const string bold = "\x1b[1m";
 
-        // Warna HTTP Method: GET (Cyan), POST (Hijau), PUT (Kuning), DELETE (Merah)
+        // Warna HTTP Method
         var methodColor = method switch
         {
-            "GET" => "\x1b[96m",
-            "POST" => "\x1b[92m",
-            "PUT" => "\x1b[93m",
-            "PATCH" => "\x1b[33m",
-            "DELETE" => "\x1b[91m",
+            "GET" => "\x1b[96m",     // Cyan
+            "POST" => "\x1b[92m",    // Hijau
+            "PUT" => "\x1b[93m",     // Kuning
+            "PATCH" => "\x1b[33m",   // Oranye/Kuning Gelap
+            "DELETE" => "\x1b[91m",  // Merah
             _ => "\x1b[97m"
         };
 
-        // Warna Status Code: 2xx (Hijau), 3xx (Cyan), 4xx (Kuning), 5xx (Merah)
+        // Warna Status Code
         var statusColor = statusCode switch
         {
-            >= 200 and < 300 => "\x1b[92m",
-            >= 300 and < 400 => "\x1b[96m",
-            >= 400 and < 500 => "\x1b[93m",
-            >= 500 => "\x1b[91m",
+            >= 200 and < 300 => "\x1b[92m", // Hijau
+            >= 300 and < 400 => "\x1b[96m", // Cyan
+            >= 400 and < 500 => "\x1b[93m", // Kuning
+            >= 500 => "\x1b[91m",           // Merah
             _ => "\x1b[97m"
         };
 
-        Log.Information(
-            "HTTP {MethodColor}{Method}{Reset} {Path} responded {StatusColor}{StatusCode}{Reset} in {Elapsed:0.0000} ms",
-            methodColor, method, reset, path, statusColor, statusCode, reset, elapsedMs);
+        // Format string langsung menyertakan ANSI code agar tidak di-escape Serilog
+        var formattedLog = $"[INF] HTTP {methodColor}{bold}{method}{reset} {path} responded {statusColor}{bold}{statusCode}{reset} in {elapsedMs:0.0000} ms";
+
+        // Tulis langsung ke Console Standard Output
+        Console.WriteLine(formattedLog);
     }
 }
 
