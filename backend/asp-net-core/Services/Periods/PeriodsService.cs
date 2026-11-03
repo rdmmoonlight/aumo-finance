@@ -16,9 +16,19 @@ using Microsoft.EntityFrameworkCore;
 
 public class PeriodsService : IPeriodsService
 {
-    private readonly AppDbContext? db;
-    private readonly ITransactionNumberService? txNumberService;
-    private readonly IGeneralLedgersService? glService;
+    private readonly AppDbContext db;
+    private readonly ITransactionNumberService txNumberService;
+    private readonly IGeneralLedgersService glService;
+
+    public PeriodsService(
+        AppDbContext db,
+        ITransactionNumberService txNumberService,
+        IGeneralLedgersService glService)
+    {
+        this.db = db;
+        this.txNumberService = txNumberService;
+        this.glService = glService;
+    }
 
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)
     {
