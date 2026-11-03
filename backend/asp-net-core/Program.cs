@@ -39,7 +39,7 @@ public partial class Program
                 .ReadFrom.Configuration(context.Configuration)
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext()
-                .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture));
+                .WriteTo.Console(outputTemplate:"[{Level:u3}] {Message:lj}{NewLine}{Exception}"));
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
