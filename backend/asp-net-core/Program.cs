@@ -39,7 +39,10 @@ public partial class Program
                 .ReadFrom.Configuration(context.Configuration)
                 .ReadFrom.Services(services)
                 .Enrich.FromLogContext()
-                .WriteTo.Console(outputTemplate:"[{Level:u3}] {Message:lj}{NewLine}{Exception}"));
+                .WriteTo.Console(
+                    theme: AnsiConsoleTheme.Code,
+                    applyThemeToRedirectedOutput: true,
+                    outputTemplate:"[{Level:u3}] {Message:lj}{NewLine}{Exception}"));
 
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
