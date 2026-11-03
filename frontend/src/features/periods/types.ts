@@ -17,11 +17,15 @@ export interface AccountItem {
 
 export interface PeriodItem {
   id: number;
-  periodName?: string;
+  periodName: string;
+  month?: number;
+  year?: number;
   startDate?: string;
   endDate?: string;
   isClosed?: boolean;
   isSelected?: boolean;
+  status?: string;
+  [key: string]: any;
 }
 
 export interface OpenInfoData {
@@ -47,6 +51,28 @@ export interface CreatePeriodValues {
   retainedName?: string;
 }
 
+export type PeriodAction = (p: PeriodItem) => void | Promise<void>;
+
+export interface GetPeriodColumnsProps {
+  selectedPeriod: PeriodItem | null;
+  selectingId: number | null;
+  closingId: number | null;
+  isSelecting?: boolean;
+  isClosing?: boolean;
+  onSelectPeriod?: PeriodAction;
+  onClosePeriod?: PeriodAction;
+  onSelect?: PeriodAction;
+  onClose?: PeriodAction;
+}
+
+export interface PeriodsTableProps extends GetPeriodColumnsProps {
+  periods: PeriodItem[];
+  isLoading?: boolean;
+  isClearing?: boolean;
+}
+
+export type UnifiedTableProps = PeriodsTableProps;
+
 export interface PeriodListProps {
   periods: PeriodItem[];
   selectedPeriod: PeriodItem | null;
@@ -55,9 +81,15 @@ export interface PeriodListProps {
   selectingId: number | null;
   closingId: number | null;
   onClearSelection: () => void;
-  onSelectPeriod: (p: PeriodItem) => void;
-  onClosePeriod: (p: PeriodItem) => void;
+  onSelectPeriod: PeriodAction;
+  onClosePeriod: PeriodAction;
   onOpenCreateView: () => void;
+}
+
+export interface PeriodListCardProps extends PeriodsTableProps {
+  onClearSelection?: () => void;
+  onOpenCreate?: () => void;
+  onOpenCreateView?: () => void;
 }
 
 export interface CreatePeriodFormProps {
@@ -70,14 +102,6 @@ export interface CreatePeriodFormProps {
   onSubmit: (values: CreatePeriodOutputValues) => void | Promise<void>;
   onCancel: () => void;
   [key: string]: any;
-}
-
-export interface GetPeriodColumnsProps {
-  selectedPeriod: PeriodItem | null;
-  selectingId: number | null;
-  closingId: number | null;
-  onSelectPeriod: (p: PeriodItem) => void;
-  onClosePeriod: (p: PeriodItem) => void;
 }
 
 export const MONTH_NAMES = [
@@ -93,4 +117,4 @@ export const MONTH_NAMES = [
   "October",
   "November",
   "December",
-];
+] as const;
