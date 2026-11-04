@@ -1,11 +1,12 @@
 namespace AumoBackend.Services.Storage
-{
-    using System.Net;
-    using System.Text.RegularExpressions;
-    using Amazon.Runtime;
-    using Amazon.S3;
-    using Amazon.S3.Model;
 
+using System.Net;
+using System.Text.RegularExpressions;
+using Amazon.Runtime;
+using Amazon.S3;
+using Amazon.S3.Model;
+
+{
     public sealed class NeonBucketStorage : IAvatarStorage, IDisposable
     {
         private const string KeyPrefix = "avatars/";
@@ -27,17 +28,17 @@ namespace AumoBackend.Services.Storage
             this.configuration = configuration;
             this.httpContextAccessor = httpContextAccessor;
 
-            var endpoint = configuration["AWS_ENDPOINT_URL_S3"];
-            var accessKey = configuration["AWS_ACCESS_KEY_ID"];
-            var secretKey = configuration["AWS_SECRET_ACCESS_KEY"];
-            var region = configuration["AWS_REGION"] ?? "ap-southeast-1";
-            this.bucket = configuration["S3_BUCKET"] ?? "assets";
+            var endpoint = configuration["AWS:EndpointUrlS3"] ?? configuration["AWS_ENDPOINT_URL_S3"];
+            var accessKey = configuration["AWS:AccessKeyId"] ?? configuration["AWS_ACCESS_KEY_ID"];
+            var secretKey = configuration["AWS:SecretAccessKey"] ?? configuration["AWS_SECRET_ACCESS_KEY"];
+            var region = configuration["AWS:Region"] ?? configuration["AWS_REGION"] ?? "ap-southeast-1";
+            this.bucket = configuration["S3_BUCKET"] ?? configuration["AWS:Bucket"] ?? "assets";
 
             if (string.IsNullOrWhiteSpace(endpoint)
                 || string.IsNullOrWhiteSpace(accessKey)
                 || string.IsNullOrWhiteSpace(secretKey))
             {
-                logger.LogWarning("Peringatan: 'AWS_ENDPOINT_URL_S3', 'AWS_ACCESS_KEY_ID' atau 'AWS_SECRET_ACCESS_KEY' belum dikonfigurasi. Upload avatar dinonaktifkan.");
+                logger.LogWarning("Peringatan: 'AWS__EndpointUrlS3', 'AWS__AccessKeyId' atau 'AWS__SecretAccessKey' belum dikonfigurasi. Upload avatar dinonaktifkan.");
                 return;
             }
 
