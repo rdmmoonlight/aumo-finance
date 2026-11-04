@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import type { AppDispatch } from "@/lib/store";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -24,10 +23,16 @@ import {
   Trash2,
   Upload,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { authApi } from "../../auth/api/authApi";
-import { settingsApi } from "../api/settingsApi";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+
+// Import RTK Query Hooks yang dihasilkan otomatis
+import { useGetProfileQuery } from "../../auth/api/authApi";
+import {
+  useChangePasswordMutation,
+  useDeleteAccountMutation,
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
+} from "../api/settingsApi";
 
 type UserProfileField = {
   label: string;
@@ -78,52 +83,51 @@ function AccountDetailsTable({ data }: { data: UserProfileField[] }) {
 }
 
 export default function AccountSettings() {
-  const dispatch = useDispatch<AppDispatch>();
+  // 1. RTK Query Hooks
+  const { data: profileResponse, isLoading } = useGetProfileQuery();
+  const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
+  const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
+  const [changePassword, { isLoading: isChanging }] = useChangePasswordMutation();
+  const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
 
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [changing, setChanging] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+  // Extract user object dari respons API
+  const user = profileResponse?.data || profileResponse;
 
+  // Local State Form
   const [fullName, setFullName] = useState("");
   const [userName, setUserName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [bio, setBio] = useState("");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+
   const [success, setSuccess] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Load Profil Pengguna via RTK Query Dispatch
-  const fetchProfile = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const res = await dispatch(
-        authApi.endpoints.getProfile.initiate(),
-      ).unwrap();
-      const userData = res?.data || res;
-      setUser(userData);
-      if (userData) {
-        setFullName(userData.fullName || "");
-        setUserName(userData.userName || "");
-        setPhoneNumber(userData.phoneNumber || "");
-        setBio(userData.bio || "");
-        setAvatarPreview(userData.avatarUrl || null);
-      }
-    } catch (err: any) {
-      notify(err?.data?.message || "Gagal memuat profil pengguna", true);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [dispatch]);
-
+  // Sync state lokal ketika data profil dari RTK Query ter-update
   useEffect(() => {
-    fetchProfile();
-  }, [fetchProfile]);
+    if (user) {
+      setFullName(user.fullName || "");
+      setUserName(user.userName || "");
+      setPhoneNumber(user.phoneNumber || "");
+      setBio(user.bio || "");
+      setAvatarPreview(user.avatarUrl || null);
+    }
+  }, [user]);
+
+  const notify = (m: string, e = false) => {
+    if (e) {
+      setError(m);
+      setSuccess(null);
+    } else {
+      setSuccess(m);
+      setError(null);
+      setTimeout(() => setSuccess(null), 3000);
+    }
+  };
 
   const profileSummaryData = useMemo<UserProfileField[]>(
     () => [
@@ -139,100 +143,74 @@ export default function AccountSettings() {
     [user],
   );
 
-  const notify = (m: string, e = false) => {
-    if (e) {
-      setError(m);
-      setSuccess(null);
-    } else {
-      setSuccess(m);
-      setError(null);
-      setTimeout(() => setSuccess(null), 3000);
-    }
-  };
-
+  // Handler Update Profil
   const handleProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true);
     try {
-      await dispatch(
-        settingsApi.endpoints.updateProfile.initiate({
-          fullName,
-          userName,
-          phoneNumber,
-          bio,
-        }),
-      ).unwrap();
+      await updateProfile({
+        fullName,
+        userName,
+        phoneNumber,
+        bio,
+      }).unwrap();
       notify("Profile updated!");
-      fetchProfile();
     } catch (err: any) {
       notify(err?.data?.message || "Gagal update profile", true);
-    } finally {
-      setSaving(false);
     }
   };
 
+  // Handler Upload Avatar
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) return notify("Max 2MB", true);
 
+    // Pratinjau sementara
     const blobUrl = URL.createObjectURL(file);
     setAvatarPreview(blobUrl);
 
     const fd = new FormData();
     fd.append("file", file);
 
-    setUploading(true);
     try {
-      const res: any = await dispatch(
-        settingsApi.endpoints.uploadAvatar.initiate(fd),
-      ).unwrap();
-      const newUrl = res?.avatarUrl || res?.data?.avatarUrl || res?.url;
-      if (newUrl) setAvatarPreview(newUrl);
+      await uploadAvatar(fd).unwrap();
       notify("Avatar berhasil diunggah!");
-      fetchProfile();
+      // RTK Query akan otomatis me-invalidasi tag 'Profile' sehingga me-refetch getProfile() di Topbar & Halaman ini
     } catch (err: any) {
       notify(
         err?.data?.message || err?.data?.errors?.file?.[0] || "Gagal upload",
         true,
       );
       setAvatarPreview(user?.avatarUrl || null);
-    } finally {
-      setUploading(false);
+    } font-sans {
       e.target.value = "";
     }
   };
 
+  // Handler Ganti Password
   const handlePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setChanging(true);
     try {
-      await dispatch(
-        settingsApi.endpoints.changePassword.initiate({
-          currentPassword,
-          newPassword,
-        }),
-      ).unwrap();
+      await changePassword({
+        currentPassword,
+        newPassword,
+      }).unwrap();
       notify("Password updated!");
       setCurrentPassword("");
       setNewPassword("");
     } catch (err: any) {
       notify(err?.data?.message || "Gagal mengubah password", true);
-    } finally {
-      setChanging(false);
     }
   };
 
+  // Handler Hapus Akun
   const handleDelete = async () => {
     if (!confirm("Hapus permanen akun Anda?")) return;
-    setDeleting(true);
     try {
-      await dispatch(settingsApi.endpoints.deleteAccount.initiate()).unwrap();
+      await deleteAccount().unwrap();
       window.location.href = "/auth/login";
     } catch (err: any) {
       notify(err?.data?.message || "Gagal menghapus akun", true);
-    } finally {
-      setDeleting(false);
     }
   };
 
@@ -261,6 +239,7 @@ export default function AccountSettings() {
         </Alert>
       )}
 
+      {/* Status Ringkasan Akun */}
       <Card>
         <CardHeader className="py-3 px-4 flex-row items-center justify-between border-b space-y-0">
           <div>
@@ -278,6 +257,7 @@ export default function AccountSettings() {
         </CardContent>
       </Card>
 
+      {/* Edit Profile & Avatar */}
       <Card>
         <CardHeader className="py-3 px-4">
           <CardTitle className="text-ui">Edit Profile</CardTitle>
@@ -306,10 +286,10 @@ export default function AccountSettings() {
                 variant="outline"
                 size="sm"
                 className="h-8 text-caption"
-                disabled={uploading}
+                disabled={isUploading}
                 onClick={() => fileRef.current?.click()}
               >
-                {uploading ? (
+                {isUploading ? (
                   <Loader2 size={13} className="animate-spin mr-1" />
                 ) : (
                   <Upload size={13} className="mr-1" />
@@ -365,8 +345,8 @@ export default function AccountSettings() {
               />
             </div>
             <div className="md:col-span-2 flex justify-end">
-              <Button size="sm" className="h-8 text-caption" disabled={saving}>
-                {saving && <Loader2 size={13} className="animate-spin mr-1" />}
+              <Button size="sm" className="h-8 text-caption" disabled={isSaving}>
+                {isSaving && <Loader2 size={13} className="animate-spin mr-1" />}
                 Save
               </Button>
             </div>
@@ -374,6 +354,7 @@ export default function AccountSettings() {
         </CardContent>
       </Card>
 
+      {/* Change Password */}
       <Card>
         <CardHeader className="py-3 px-4">
           <CardTitle className="text-ui flex gap-2">
@@ -400,15 +381,16 @@ export default function AccountSettings() {
               size="sm"
               variant="outline"
               className="h-8 text-caption"
-              disabled={changing}
+              disabled={isChanging}
             >
-              {changing && <Loader2 size={13} className="animate-spin mr-1" />}
+              {isChanging && <Loader2 size={13} className="animate-spin mr-1" />}
               Update
             </Button>
           </form>
         </CardContent>
       </Card>
 
+      {/* Delete Account */}
       <Card className="border-destructive/30 bg-destructive/5">
         <CardHeader className="py-3 px-4">
           <CardTitle className="text-ui text-destructive flex gap-2">
@@ -421,9 +403,9 @@ export default function AccountSettings() {
             size="sm"
             className="h-8 text-caption"
             onClick={handleDelete}
-            disabled={deleting}
+            disabled={isDeleting}
           >
-            {deleting && <Loader2 size={13} className="animate-spin mr-1" />}
+            {isDeleting && <Loader2 size={13} className="animate-spin mr-1" />}
             Delete
           </Button>
         </CardContent>
