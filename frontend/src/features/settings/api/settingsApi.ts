@@ -28,7 +28,7 @@ export const settingsApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Settings"],
+      invalidatesTags: ["Settings", "Auth", "Profile"],
     }),
 
     // POST /settings/avatar
@@ -38,7 +38,7 @@ export const settingsApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Settings"],
+      invalidatesTags: ["Settings", "Auth", "Profile"],
     }),
 
     // POST /settings/change-password
@@ -57,7 +57,7 @@ export const settingsApi = baseApi.injectEndpoints({
         url: "/settings/delete-account",
         method: "DELETE",
       }),
-      invalidatesTags: ["Settings"],
+      invalidatesTags: ["Settings", "Auth", "Profile"],
     }),
 
     // GET /settings/guardian/dashboard
@@ -86,3 +86,13 @@ export const settingsApi = baseApi.injectEndpoints({
   }),
   overrideExisting: false,
 });
+
+export const {
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
+  useChangePasswordMutation,
+  useDeleteAccountMutation,
+  useGetGuardianDashboardQuery,
+  useRevokeSessionByIdMutation,
+  useRevokeAllSessionsMutation,
+} = settingsApi;
