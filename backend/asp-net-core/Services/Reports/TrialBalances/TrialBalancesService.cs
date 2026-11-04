@@ -28,8 +28,13 @@ public class TrialBalancesService : ITrialBalancesService
     {
         var type = NormalizeType(reportType);
 
-        // Jika meminta post-closing tetapi periode belum ditutup, jangan hitung post-closing.
-        var isPostClosingRequested = type == PostClosing && period != null && period.IsClosed;
+        // Jika meminta post-closing tetapi periode belum ditutup, jangan generate apa pun.
+        if (type == PostClosing && (period == null || !period.IsClosed))
+        {
+            return new List<TrialBalancesRow>();
+        }
+
+        var isPostClosingRequested = type == PostClosing;
 
         var rows = await ComputeRowsAsync(
             userId,
@@ -68,6 +73,13 @@ public class TrialBalancesService : ITrialBalancesService
     public async Task SaveSnapshotAsync(string reportType, Guid userId, Period period, IReadOnlyList<TrialBalancesRow> rows)
     {
         var type = NormalizeType(reportType);
+
+        // Snapshot post-closing hanya boleh dibuat untuk periode yang sudah ditutup.
+        if (type == PostClosing && !period.IsClosed)
+        {
+            return;
+        }
+
         var periodId = period.Id;
         var lines = BuildSnapshotLines(rows);
 

@@ -114,8 +114,11 @@ export default function ClosingJournalReportPage() {
           <Info size={16} />
           <AlertDescription className="text-xs space-y-3">
             <p>
-              Periode ini belum ditutup (closed). Jurnal penutup baru dapat
-              ditampilkan setelah periode ditutup.
+              Periode{" "}
+              {data?.selectedPeriodName ? `"${data.selectedPeriodName}" ` : "ini "}
+              belum ditutup (closed), sehingga Jurnal Penutup belum dibuat.
+              Jurnal ini baru tersedia setelah periode ditutup melalui halaman
+              Periods.
             </p>
             <Button asChild variant="outline" size="sm">
               <Link to="/periods">
