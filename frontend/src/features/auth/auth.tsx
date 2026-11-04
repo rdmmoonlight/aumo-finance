@@ -16,7 +16,7 @@ import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { authApi } from "./api/authApi";
-import { lockedMessage, useLoginThrottle } from "./use-login-throttle";
+import { lockedMessage, useLoginThrottle } from "./hooks/use-login-throttle";
 
 // ===== TYPES =====
 export type AuthFormData = {
