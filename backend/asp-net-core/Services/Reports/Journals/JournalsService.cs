@@ -139,6 +139,12 @@ public class JournalsService : IJournalsService
         Guid userId,
         Period period)
     {
+        // Pengecekan agar pembentukan grup jurnal penutup hanya diproses saat periode sudah ditutup.
+        if (period == null || !period.IsClosed)
+        {
+            return new List<ClosingJournalEntryGroupApiResponse>();
+        }
+
         var (groups, _, _) = await ComputeClosingAsync(userId, period);
         return groups;
     }
