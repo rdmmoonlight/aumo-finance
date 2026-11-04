@@ -1,8 +1,10 @@
 "use client";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
-import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { AlertTriangle, ArrowRight, Info, Loader2, ShieldCheck } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { reportsApi } from "../api/reportsApi";
 import { BalanceAlert } from "./_components/balance-alert";
@@ -41,15 +43,19 @@ export default function PostClosingTrialBalancePage() {
     };
   }, []);
 
-  const noPeriod = useMemo(
-    () =>
-      (error as any)?.status === 404 ||
-      (data as any)?.hasPeriodSelected === false,
-    [data, error],
-  );
+  const { noPeriod, notClosed } = useMemo(() => {
+    const raw = data as any;
+    const is404 = (error as any)?.status === 404;
+    const noPeriodSelected = raw?.hasPeriodSelected === false;
+
+    return {
+      noPeriod: is404 || noPeriodSelected,
+      notClosed: raw?.isPeriodClosed === false,
+    };
+  }, [data, error]);
 
   const rows = useMemo<TrialRow[]>(() => {
-    if (!data || noPeriod) return [];
+    if (!data || noPeriod || notClosed) return [];
     const raw = data as any;
     const assets = raw?.assetAccounts || raw?.assets || [];
     const liabs = raw?.liabilityAccounts || raw?.liabilities || [];
@@ -102,7 +108,7 @@ export default function PostClosingTrialBalancePage() {
         credit: reEnding >= 0 ? reEnding : 0,
       },
     ];
-  }, [data, noPeriod]);
+  }, [data, noPeriod, notClosed]);
 
   const totalDebit = useMemo(
     () => rows.reduce((s, r) => s + (Number(r.debit) || 0), 0),
@@ -118,6 +124,35 @@ export default function PostClosingTrialBalancePage() {
     return (
       <div className="py-16 text-center text-caption text-muted-foreground flex items-center justify-center gap-2">
         <Loader2 className="animate-spin" size={16} /> Loading post-closing...
+      </div>
+    );
+
+  if (notClosed)
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-h3 font-bold flex items-center gap-2">
+            <ShieldCheck className="text-emerald-500" size={22} /> Post-Closing
+            Trial Balance
+          </h1>
+          <p className="text-ui text-muted-foreground mt-1">
+            After closing entries • Only permanent accounts • IDR
+          </p>
+        </div>
+        <Alert className="bg-amber-500/10">
+          <Info size={16} />
+          <AlertDescription className="text-xs space-y-3">
+            <p>
+              Periode ini belum ditutup (closed). Neraca saldo setelah penutupan baru dapat
+              ditampilkan setelah periode ditutup.
+            </p>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/periods">
+                <ArrowRight size={14} /> Ke halaman Periods
+              </Link>
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     );
 
