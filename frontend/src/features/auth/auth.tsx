@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
-
 import { useSearchParams } from "@/lib/router-compat";
 import React, { Suspense, useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -17,19 +16,7 @@ import { store } from "@/lib/store";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { authApi } from "./api/authApi";
 import { lockedMessage, useLoginThrottle } from "./hooks/use-login-throttle";
-
-// ===== TYPES =====
-export type AuthFormData = {
-  email: string;
-  password: string;
-  confirmPassword?: string;
-  keepMe?: boolean;
-};
-
-export interface AuthPageProps {
-  initialMode?: "login" | "register";
-  onSuccess?: () => void;
-}
+import type { AuthFormData, AuthPageProps, GoogleAuthButtonProps } from "./types";
 
 // Disuntikkan saat build oleh Rsbuild (variabel berawalan PUBLIC_).
 export const GOOGLE_CLIENT_ID: string =
@@ -38,9 +25,7 @@ export const GOOGLE_CLIENT_ID: string =
 export function GoogleIcon(
   props: React.ComponentProps<"svg">,
 ): React.JSX.Element {
-  return (
-    <svg
-      viewBox="0 0 24 24"
+  return[STRIPPED 26 bytes]"0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
       focusable="false"
@@ -71,11 +56,7 @@ export function GoogleAuthButtonInner({
   isPending,
   onSuccessHandler,
   onError,
-}: {
-  isPending: boolean;
-  onSuccessHandler: (idToken: string) => void;
-  onError: (msg: string) => void;
-}): React.JSX.Element {
+}: GoogleAuthButtonProps): React.JSX.Element {
   const googleLogin = useGoogleLogin({
     onSuccess: (res) => {
       if (res.access_token) onSuccessHandler(res.access_token);
@@ -123,15 +104,9 @@ function AuthFormInner({
   const [showConfirmPass, setShowConfirmPass] = useState(false);
   const [apiErr, setApiErr] = useState("");
   const [isPending, setIsPending] = useState(false);
-
-  // ✅ Pengecekan profil dilakukan secara silent di background
   const [isCheckingProfile, setIsCheckingProfile] = useState(false);
 
-  // Batas percobaan login gagal + masa istirahat
   const throttle = useLoginThrottle();
-
-  // Simpan callback & query string di ref agar efek pengecekan profil
-  // tidak berjalan ulang setiap parent render (penyebab loop /auth/me).
   const onSuccessRef = useRef(onSuccess);
   const searchParamsRef = useRef(searchParams);
   onSuccessRef.current = onSuccess;
@@ -156,10 +131,8 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
-  // ✅ Pengecekan profil user SEKALI saat form dimuat (tanpa loop)
   useEffect(() => {
     let isMounted = true;
-
     async function checkAuthProfile() {
       setIsCheckingProfile(true);
       try {
@@ -168,7 +141,6 @@ function AuthFormInner({
             subscribe: false,
           }),
         );
-
         if (isMounted && "data" in result && result.data?.success) {
           if (onSuccessRef.current) {
             onSuccessRef.current();
@@ -178,14 +150,11 @@ function AuthFormInner({
           }
         }
       } catch {
-        // Mengabaikan error jika belum terautentikasi atau backend unreachable
       } finally {
         if (isMounted) setIsCheckingProfile(false);
       }
     }
-
     checkAuthProfile();
-
     return () => {
       isMounted = false;
     };
@@ -220,15 +189,10 @@ function AuthFormInner({
       setApiErr(lockedMessage(throttle.remainingSeconds));
       return;
     }
-
     setApiErr("");
     setIsPending(true);
-
     try {
-      // Reset cache RTK Query
       dispatch(baseApi.util.resetApiState());
-
-      // Panggil endpoint /auth/login via initiate
       const result = await store.dispatch(
         authApi.endpoints.login.initiate({
           email: values.email,
@@ -237,7 +201,6 @@ function AuthFormInner({
           isMobileClient: false,
         }),
       );
-
       if ("error" in result) {
         const errorData = result.error as any;
         const status = errorData?.status;
@@ -247,14 +210,11 @@ function AuthFormInner({
           (status === "FETCH_ERROR"
             ? "Gagal terhubung ke server backend."
             : "Email atau password salah.");
-
         if (mode === "login") {
           if (status === 429) {
-            // Backend membatasi laju request: paksa istirahat.
             throttle.lockNow();
             msg = lockedMessage(60);
           } else if (status !== "FETCH_ERROR") {
-            // Hanya kegagalan kredensial yang dihitung (bukan gangguan jaringan).
             const next = throttle.attemptsLeft - 1;
             throttle.registerFailure(errorData?.data?.lockoutEnd);
             msg =
@@ -263,19 +223,15 @@ function AuthFormInner({
                 : "Terlalu banyak percobaan gagal. Silakan istirahat dulu selama 60 detik.";
           }
         }
-
         setApiErr(msg);
         return;
       }
-
       if (mode === "login") throttle.registerSuccess();
-
       if (values.keepMe) {
         localStorage.setItem("aumo_saved_email", values.email);
       } else {
         localStorage.removeItem("aumo_saved_email");
       }
-
       if (onSuccess) {
         onSuccess();
       } else {
@@ -292,23 +248,19 @@ function AuthFormInner({
   const handleGoogleSuccess = async (idToken: string): Promise<void> => {
     setApiErr("");
     setIsPending(true);
-
     try {
       dispatch(baseApi.util.resetApiState());
-
       const result = await store.dispatch(
         authApi.endpoints.googleLogin.initiate({
           idToken,
           isMobileClient: false,
         }),
       );
-
       if ("error" in result) {
         const errorData = result.error as any;
         setApiErr(errorData?.data?.message || "Gagal verifikasi Google.");
         return;
       }
-
       if (onSuccess) {
         onSuccess();
       } else {
@@ -343,7 +295,7 @@ function AuthFormInner({
         />
         <div className="relative flex items-center justify-center">
           <div className="w-full border-t border-zinc-200" />
-          <span className="absolute bg-white px-2 font-mono text-[10px] uppercase text-zinc-400">
+          <span className="absolute bg-white px-2 font-mono text- uppercase text-zinc-400">
             OR
           </span>
         </div>
