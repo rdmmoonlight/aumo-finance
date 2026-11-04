@@ -42,7 +42,7 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import { authApi, UserProfileData } from "../features/auth/api/authApi";
+import { authApi, useGetProfileQuery, useLogoutMutation } from "../features/auth/api/authApi";
 
 import * as React from "react";
 
@@ -82,36 +82,21 @@ export function AppSidebar() {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const [isMounted, setIsMounted] = React.useState(false);
-  const [user, setUser] = React.useState<UserProfileData | null>(null);
-  const [isUserLoading, setIsUserLoading] = React.useState(true);
+
+  // 1. Hubungkan langsung dengan RTK Query Hook
+  const { data: profileResponse, isLoading: isUserLoading } = useGetProfileQuery();
+  const [logout] = useLogoutMutation();
+
+  // Extract data profil dari response wrapper
+  const user = (profileResponse as any)?.data || profileResponse;
 
   React.useEffect(() => {
     setIsMounted(true);
-
-    async function fetchUser() {
-      try {
-        setIsUserLoading(true);
-        const result = await store.dispatch(
-          authApi.endpoints.getProfile.initiate(),
-        );
-
-        if (result.isSuccess && result.data) {
-          const profileData = (result.data as any).data || result.data;
-          setUser(profileData);
-        }
-      } catch (error) {
-        console.error("Gagal mengambil data profil:", error);
-      } finally {
-        setIsUserLoading(false);
-      }
-    }
-
-    fetchUser();
   }, []);
 
   const handleSignOut = async () => {
     try {
-      await store.dispatch(authApi.endpoints.logout.initiate());
+      await logout(undefined).unwrap();
     } catch (e) {
       console.error(e);
     } finally {
