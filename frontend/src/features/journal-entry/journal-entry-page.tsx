@@ -15,7 +15,10 @@ import { TransactionInfoCard } from "#/features/journal-entry/components/transac
 
 import { useAvailableAccounts } from "#/features/journal-entry/hooks/useAvailableAccounts";
 import { useJournalEntryDetail } from "#/features/journal-entry/hooks/useJournalEntryDetail";
-import { createEmptyLine, useJournalForm } from "#/features/journal-entry/hooks/useJournalForm";
+import {
+  createEmptyLine,
+  useJournalForm,
+} from "#/features/journal-entry/hooks/useJournalForm";
 
 import { formatNumberWithDots } from "#/features/journal-entry/utils/helpers";
 import {
@@ -43,18 +46,20 @@ function JournalEntryContent() {
     entryId,
     form.watch("journalType"),
     form.watch("entryDate"),
-    form.setValue
+    form.setValue,
   );
 
   const [apiError, setApiError] = useState<string | null>(null);
-  const [createJournal, { isLoading: isCreating }] = useCreateJournalEntryMutation();
+  const [createJournal, { isLoading: isCreating }] =
+    useCreateJournalEntryMutation();
   const [editJournal, { isLoading: isEditing }] = useEditJournalEntryMutation();
 
   // Hydration saat edit
   useEffect(() => {
     if (!isEdit || !jData) return;
     if (jData.journalType) form.setValue("journalType", jData.journalType);
-    if (jData.entryDate) form.setValue("entryDate", jData.entryDate.split("T")[0]);
+    if (jData.entryDate)
+      form.setValue("entryDate", jData.entryDate.split("T")[0]);
     if (Array.isArray(jData.lines) && jData.lines.length > 0) {
       form.setValue(
         "lines",
@@ -64,7 +69,7 @@ function JournalEntryContent() {
           lineDescription: l.lineDescription || "",
           debit: l.debit > 0 ? formatNumberWithDots(l.debit) : "",
           credit: l.credit > 0 ? formatNumberWithDots(l.credit) : "",
-        }))
+        })),
       );
     }
   }, [jData, isEdit, form]);
@@ -73,18 +78,34 @@ function JournalEntryContent() {
     setApiError(null);
     const lines = form.watchedLines || [];
 
-    if (lines.some((l: any) => (parseFormattedNumber(l?.debit || "") > 0 || parseFormattedNumber(l?.credit || "") > 0) && Number(l?.accountId || 0) <= 0)) {
-      return toast.error("Ada baris yang nominalnya terisi tapi Akun belum dipilih!");
+    if (
+      lines.some(
+        (l: any) =>
+          (parseFormattedNumber(l?.debit || "") > 0 ||
+            parseFormattedNumber(l?.credit || "") > 0) &&
+          Number(l?.accountId || 0) <= 0,
+      )
+    ) {
+      return toast.error(
+        "Ada baris yang nominalnya terisi tapi Akun belum dipilih!",
+      );
     }
     if (form.totalDebit === 0 && form.totalCredit === 0) {
       return toast.error("Nominal debit dan kredit masih kosong.");
     }
     if (!form.isBalanced) {
-      return toast.error(`Jurnal tidak balance! Selisih: Rp ${Math.abs(form.totalDebit - form.totalCredit).toLocaleString("id-ID")}`);
+      return toast.error(
+        `Jurnal tidak balance! Selisih: Rp ${Math.abs(form.totalDebit - form.totalCredit).toLocaleString("id-ID")}`,
+      );
     }
 
     const payloadLines = data.lines
-      .filter((l: any) => Number(l.accountId) > 0 && (parseFormattedNumber(l.debit || "") > 0 || parseFormattedNumber(l.credit || "") > 0))
+      .filter(
+        (l: any) =>
+          Number(l.accountId) > 0 &&
+          (parseFormattedNumber(l.debit || "") > 0 ||
+            parseFormattedNumber(l.credit || "") > 0),
+      )
       .map((l: any) => ({
         accountId: Number(l.accountId),
         lineDescription: l.lineDescription || "",
@@ -96,7 +117,12 @@ function JournalEntryContent() {
       if (isEdit) {
         const res: any = await editJournal({
           id: entryId,
-          body: { entryDate: data.entryDate, journalType: data.journalType, transactionNumber: displayedTxNumber, lines: payloadLines },
+          body: {
+            entryDate: data.entryDate,
+            journalType: data.journalType,
+            transactionNumber: displayedTxNumber,
+            lines: payloadLines,
+          },
         }).unwrap();
         toast.success(`Updated ${res?.transactionNumber || displayedTxNumber}`);
         setTimeout(() => router.push("/reports/journals/general"), 800);
@@ -106,17 +132,25 @@ function JournalEntryContent() {
           entryDate: data.entryDate,
           lines: payloadLines,
         }).unwrap();
-        toast.success(`Posted ${res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber}`);
-        form.reset({ journalType: "General", entryDate: new Date().toISOString().split("T")[0], lines: [createEmptyLine(), createEmptyLine()] });
+        toast.success(
+          `Posted ${res?.transactionNumber || res?.data?.transactionNumber || displayedTxNumber}`,
+        );
+        form.reset({
+          journalType: "General",
+          entryDate: new Date().toISOString().split("T")[0],
+          lines: [createEmptyLine(), createEmptyLine()],
+        });
       }
     } catch (err: any) {
-      const msg = err?.data?.message || err?.message || "Terjadi kesalahan server";
+      const msg =
+        err?.data?.message || err?.message || "Terjadi kesalahan server";
       setApiError(msg);
       toast.error(msg);
     }
   };
 
-  const onInvalid = () => toast.error("Form tidak valid. Periksa kembali isian jurnal.");
+  const onInvalid = () =>
+    toast.error("Form tidak valid. Periksa kembali isian jurnal.");
 
   if (isAccLoading || (isEdit && isEditLoading)) {
     return (
@@ -128,11 +162,22 @@ function JournalEntryContent() {
 
   return (
     <div className="space-y-6 max-w-7xl">
-      <JournalEntryHeader isEdit={isEdit} displayedTxNumber={displayedTxNumber} />
-      <JournalAlerts errors={form.formState.errors} apiError={apiError} isLocked={isLocked} txNumber={displayedTxNumber} />
+      <JournalEntryHeader
+        isEdit={isEdit}
+        displayedTxNumber={displayedTxNumber}
+      />
+      <JournalAlerts
+        errors={form.formState.errors}
+        apiError={apiError}
+        isLocked={isLocked}
+        txNumber={displayedTxNumber}
+      />
 
       {!isLocked && (
-        <form onSubmit={form.handleSubmit(onSubmit, onInvalid)} className="space-y-6">
+        <form
+          onSubmit={form.handleSubmit(onSubmit, onInvalid)}
+          className="space-y-6"
+        >
           <TransactionInfoCard
             displayedTxNumber={displayedTxNumber}
             isTxLoading={isTxLoading}

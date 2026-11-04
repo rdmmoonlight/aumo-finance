@@ -41,7 +41,8 @@ export default function AdjustedTrialBalancePage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center gap-2 py-16 text-caption text-muted-foreground">
-        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial balance...
+        <Loader2 className="animate-spin" size={16} /> Loading adjusted trial
+        balance...
       </div>
     );
   }
@@ -50,7 +51,8 @@ export default function AdjustedTrialBalancePage() {
     <div className="space-y-6">
       <div>
         <h1 className="flex items-center gap-2 text-h3 font-bold">
-          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial Balance
+          <ListChecks className="text-amber-500" size={22} /> Adjusted Trial
+          Balance
         </h1>
         <p className="mt-1 text-ui text-muted-foreground">
           After adjusting entries • IDR

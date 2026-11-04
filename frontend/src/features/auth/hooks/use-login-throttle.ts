@@ -41,7 +41,10 @@ export function useLoginThrottle() {
   const [state, setState] = useState<ThrottleState>(read);
   const [now, setNow] = useState<number>(() => Date.now());
 
-  const remainingSeconds = Math.max(0, Math.ceil((state.lockedUntil - now) / 1000));
+  const remainingSeconds = Math.max(
+    0,
+    Math.ceil((state.lockedUntil - now) / 1000),
+  );
   const isLocked = remainingSeconds > 0;
   const attemptsLeft = Math.max(0, MAX_FAILED_ATTEMPTS - state.failed);
 

@@ -4,7 +4,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { store } from "@/lib/store";
 import { Link } from "@tanstack/react-router";
-import { AlertTriangle, ArrowRight, Info, Loader2, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowRight,
+  Info,
+  Loader2,
+  ShieldCheck,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { reportsApi } from "../api/reportsApi";
 import { BalanceAlert } from "./_components/balance-alert";
@@ -143,8 +149,8 @@ export default function PostClosingTrialBalancePage() {
           <Info size={16} />
           <AlertDescription className="text-xs space-y-3">
             <p>
-              Periode ini belum ditutup (closed). Neraca saldo setelah penutupan baru dapat
-              ditampilkan setelah periode ditutup.
+              Periode ini belum ditutup (closed). Neraca saldo setelah penutupan
+              baru dapat ditampilkan setelah periode ditutup.
             </p>
             <Button asChild variant="outline" size="sm">
               <Link to="/periods">

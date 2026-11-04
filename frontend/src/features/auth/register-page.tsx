@@ -1,6 +1,8 @@
 "use client";
+
 import { GoogleOAuthProvider } from "@react-oauth/google";
-import AuthForm, { AuthPageProps, GOOGLE_CLIENT_ID } from "./auth";
+import AuthForm, { GOOGLE_CLIENT_ID } from "./auth";
+import type { AuthPageProps } from "./types";
 
 export default function RegisterPage({
   initialMode = "register",

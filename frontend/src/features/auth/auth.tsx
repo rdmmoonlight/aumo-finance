@@ -16,7 +16,11 @@ import { store } from "@/lib/store";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { authApi } from "./api/authApi";
 import { lockedMessage, useLoginThrottle } from "./hooks/use-login-throttle";
-import type { AuthFormData, AuthPageProps, GoogleAuthButtonProps } from "./types";
+import type {
+  AuthFormData,
+  AuthPageProps,
+  GoogleAuthButtonProps,
+} from "./types";
 
 // Disuntikkan saat build oleh Rsbuild (variabel berawalan PUBLIC_).
 export const GOOGLE_CLIENT_ID: string =

@@ -8,7 +8,7 @@ export type AuthFormData = {
 export interface AuthPageProps {
   initialMode?: "login" | "register";
   onSuccess?: () => void;
-};
+}
 
 export interface GoogleAuthButtonProps {
   isPending: boolean;
