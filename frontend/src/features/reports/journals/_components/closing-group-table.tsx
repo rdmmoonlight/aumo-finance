@@ -56,7 +56,9 @@ export function ClosingGroupTable({
                       variant="outline"
                       className="font-mono text-amber-500 text-label-small"
                     >
-                      {Number(line.referenceNumber) ? line.referenceNumber : "-"}
+                      {Number(line.referenceNumber)
+                        ? line.referenceNumber
+                        : "-"}
                     </Badge>
                   </div>
                 </TableCell>

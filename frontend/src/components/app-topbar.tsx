@@ -31,7 +31,10 @@ import * as React from "react";
 
 // Import RTK Query Hooks
 import { useGetProfileQuery } from "../features/auth/api/authApi";
-import { PeriodItem, useGetPeriodsQuery } from "../features/periods/api/periodsApi";
+import {
+  PeriodItem,
+  useGetPeriodsQuery,
+} from "../features/periods/api/periodsApi";
 import {
   NotificationItem,
   useGetHealthQuery,
@@ -44,13 +47,15 @@ export function AppTopBar() {
   const pathname = useLocation().pathname;
 
   // 1. Profil User (/auth/me)
-  const { data: profileResponse, isLoading: isProfileLoading } = useGetProfileQuery();
+  const { data: profileResponse, isLoading: isProfileLoading } =
+    useGetProfileQuery();
   const isAuthenticated = !isProfileLoading && !!profileResponse?.data;
 
   // 2. Fetch Periods
-  const { data: rawPeriodsData, isLoading: isPeriodLoading } = useGetPeriodsQuery(undefined, {
-    skip: !isAuthenticated,
-  });
+  const { data: rawPeriodsData, isLoading: isPeriodLoading } =
+    useGetPeriodsQuery(undefined, {
+      skip: !isAuthenticated,
+    });
 
   // 3. Database Health Check (polling 30s)
   const {
@@ -66,7 +71,10 @@ export function AppTopBar() {
 
   // 4. Fetch Notifikasi (polling 15s)
   const { data: rawNotifications = [], isLoading: isNotificationsLoading } =
-    useGetNotificationsQuery({ limit: 20 }, { skip: !isAuthenticated, pollingInterval: 15000 });
+    useGetNotificationsQuery(
+      { limit: 20 },
+      { skip: !isAuthenticated, pollingInterval: 15000 },
+    );
 
   const notificationsData = (rawNotifications as NotificationItem[]) || [];
 
@@ -93,7 +101,9 @@ export function AppTopBar() {
     }
   };
 
-  const unreadCount = notificationsData.filter((n: NotificationItem) => !n.isRead).length;
+  const unreadCount = notificationsData.filter(
+    (n: NotificationItem) => !n.isRead,
+  ).length;
 
   // Penentuan status database
   const dbStatus = isHealthError
@@ -150,7 +160,10 @@ export function AppTopBar() {
                 <div className="flex items-center gap-2">
                   <h4 className="font-semibold text-sm">Notifikasi</h4>
                   {unreadCount > 0 && (
-                    <Badge variant="secondary" className="text-xs px-1.5 py-0.5">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs px-1.5 py-0.5"
+                    >
                       {unreadCount} baru
                     </Badge>
                   )}
@@ -176,7 +189,8 @@ export function AppTopBar() {
               <div className="max-h-[300px] overflow-y-auto divide-y">
                 {isNotificationsLoading ? (
                   <div className="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat notifikasi...
+                    <Loader2 className="h-4 w-4 animate-spin" /> Memuat
+                    notifikasi...
                   </div>
                 ) : notificationsData.length === 0 ? (
                   <div className="p-4 text-center text-xs text-muted-foreground">
@@ -205,10 +219,13 @@ export function AppTopBar() {
                           </p>
                           <span className="text-[11px] text-muted-foreground">
                             {item.createdAt
-                              ? new Date(item.createdAt).toLocaleTimeString([], {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })
+                              ? new Date(item.createdAt).toLocaleTimeString(
+                                  [],
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )
                               : ""}
                           </span>
                         </div>
@@ -293,7 +310,9 @@ export function AppTopBar() {
               className="gap-1.5 font-medium text-xs text-muted-foreground"
             >
               <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
-              {isPeriodLoading ? "Memuat periode..." : "Belum Ada Periode Dipilih"}
+              {isPeriodLoading
+                ? "Memuat periode..."
+                : "Belum Ada Periode Dipilih"}
             </Badge>
           )}
 
@@ -325,7 +344,10 @@ export function AppTopBar() {
 
             {dbStatus === "offline" && (
               <div className="flex items-center gap-1.5">
-                <Badge variant="destructive" className="gap-1.5 font-medium text-xs">
+                <Badge
+                  variant="destructive"
+                  className="gap-1.5 font-medium text-xs"
+                >
                   <span className="h-1.5 w-1.5 rounded-full bg-destructive-foreground" />
                   DB: Disconnected
                 </Badge>

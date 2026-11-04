@@ -7,13 +7,29 @@ import { usePeriodsPage } from "#/features/periods/hooks/use-periods-page";
 
 export default function PeriodsPage() {
   const {
-    periods, openInfo, selectedPeriod, form,
-    viewMode, setViewMode,
-    errorMessage, setErrorMessage, successMessage, setSuccessMessage,
-    isLoading, isLoadingOpenInfo, isGetPeriodsError,
-    isSelecting, isClearing, isClosing, isCreating,
-    selectingId, closingId,
-    handleSelectPeriod, handleClearSelection, handleClosePeriod, handleCreateSubmit,
+    periods,
+    openInfo,
+    selectedPeriod,
+    form,
+    viewMode,
+    setViewMode,
+    errorMessage,
+    setErrorMessage,
+    successMessage,
+    setSuccessMessage,
+    isLoading,
+    isLoadingOpenInfo,
+    isGetPeriodsError,
+    isSelecting,
+    isClearing,
+    isClosing,
+    isCreating,
+    selectingId,
+    closingId,
+    handleSelectPeriod,
+    handleClearSelection,
+    handleClosePeriod,
+    handleCreateSubmit,
   } = usePeriodsPage();
 
   return (
