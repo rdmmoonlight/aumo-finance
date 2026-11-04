@@ -25,7 +25,9 @@ export const GOOGLE_CLIENT_ID: string =
 export function GoogleIcon(
   props: React.ComponentProps<"svg">,
 ): React.JSX.Element {
-  return[STRIPPED 26 bytes]"0 0 24 24"
+  return (
+    <svg
+      viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
       aria-hidden="true"
       focusable="false"
@@ -295,7 +297,7 @@ function AuthFormInner({
         />
         <div className="relative flex items-center justify-center">
           <div className="w-full border-t border-zinc-200" />
-          <span className="absolute bg-white px-2 font-mono text- uppercase text-zinc-400">
+          <span className="absolute bg-white px-2 font-mono text-xs uppercase text-zinc-400">
             OR
           </span>
         </div>
