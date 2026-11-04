@@ -81,6 +81,8 @@ data class ClosingJournalReport(
     val success: Boolean,
     val hasPeriodSelected: Boolean,
     val selectedPeriodName: String?,
+    // Nullable: Gson tidak memakai nilai default Kotlin, jadi field yang tidak dikirim = null.
+    val isPeriodClosed: Boolean? = null,
     val closingJournal: ClosingJournalData?,
 )
 

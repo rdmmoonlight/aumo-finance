@@ -15,7 +15,11 @@ class PostClosingTrialBalanceActivity : ComponentActivity() {
 
         setContent {
             AumoTheme {
-                TrialBalancesScreen(report = viewModel.report, fallbackTitle = "Neraca Saldo Pasca-Penutupan")
+                TrialBalancesScreen(
+                    report = viewModel.report,
+                    fallbackTitle = "Neraca Saldo Pasca-Penutupan",
+                    requiresClosedPeriod = true,
+                )
             }
         }
 

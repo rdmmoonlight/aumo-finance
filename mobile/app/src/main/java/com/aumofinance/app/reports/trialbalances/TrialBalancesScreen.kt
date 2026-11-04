@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
+import com.aumofinance.app.reports.financials.ReportInfoNote
 import com.aumofinance.app.ui.theme.AumoColors
 import com.aumofinance.app.ui.theme.AumoDimens
 
@@ -24,7 +25,11 @@ import com.aumofinance.app.ui.theme.AumoDimens
 fun TrialBalancesScreen(
     report: TrialBalancesReport?,
     fallbackTitle: String,
+    // true hanya untuk Post-Closing: laporan ini baru ada setelah periode ditutup.
+    requiresClosedPeriod: Boolean = false,
 ) {
+    val notClosed = requiresClosedPeriod && report?.hasPeriodSelected == true && report.isPeriodClosed == false
+
     Scaffold(containerColor = AumoColors.Background) { innerPadding ->
         Column(modifier = Modifier.fillMaxSize().padding(innerPadding).padding(AumoDimens.SpacingLarge)) {
             Text(
@@ -40,11 +45,18 @@ fun TrialBalancesScreen(
                 modifier = Modifier.padding(top = 2.dp),
             )
 
+            if (notClosed) {
+                ReportInfoNote(
+                    "Periode ini belum ditutup (closed), sehingga Post-Closing Trial Balance belum dibuat. " +
+                        "Laporan ini baru tersedia setelah periode ditutup melalui halaman Periods.",
+                )
+            }
+
             LazyColumn(modifier = Modifier.weight(1f).padding(top = AumoDimens.SpacingSmall)) {
                 items(report?.rows ?: emptyList()) { row -> TrialBalancesRowItem(row) }
             }
 
-            if (report != null) {
+            if (report != null && !notClosed) {
                 Text(
                     text = "Debit: ${CurrencyFormatter.format(
                         report.totalDebit,
