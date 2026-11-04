@@ -1,11 +1,10 @@
-namespace AumoBackend.Services.Storage
-
 using System.Net;
 using System.Text.RegularExpressions;
 using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 
+namespace AumoBackend.Services.Storage
 {
     public sealed class NeonBucketStorage : IAvatarStorage, IDisposable
     {
@@ -48,7 +47,6 @@ using Amazon.S3.Model;
                 AuthenticationRegion = region,
                 ForcePathStyle = true,
 
-                // Penyimpanan S3-compatible tidak selalu mendukung checksum tambahan SDK terbaru.
                 RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
                 ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
             };
