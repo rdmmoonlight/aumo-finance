@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -94,5 +95,21 @@ fun ReportDivider() {
                 .padding(top = AumoDimens.SpacingSmall)
                 .height(1.dp)
                 .background(AumoColors.Border),
+    )
+}
+
+/** Kotak informasi singkat, dipakai mis. saat periode belum ditutup. */
+@Composable
+fun ReportInfoNote(text: String) {
+    Text(
+        text = text,
+        color = AumoColors.TextSecondary,
+        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(top = AumoDimens.SpacingLarge)
+                .background(AumoColors.SurfaceElevated, RoundedCornerShape(8.dp))
+                .padding(AumoDimens.SpacingLarge),
     )
 }

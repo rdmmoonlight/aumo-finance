@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.reports.financials.ClosingJournalReport
 import com.aumofinance.app.reports.financials.FinancialReportScaffold
+import com.aumofinance.app.reports.financials.ReportInfoNote
 import com.aumofinance.app.reports.financials.ReportDivider
 import com.aumofinance.app.reports.financials.ReportRow
 import com.aumofinance.app.reports.financials.ReportSectionTitle
@@ -25,7 +26,17 @@ import com.aumofinance.app.ui.theme.AumoDimens
 fun ClosingJournalScreen(report: ClosingJournalReport?) {
     val data = report?.closingJournal
 
+    val notClosed = report?.hasPeriodSelected == true && report.isPeriodClosed == false
+
     FinancialReportScaffold(periodName = report?.selectedPeriodName) {
+        if (notClosed) {
+            ReportInfoNote(
+                "Periode ini belum ditutup (closed), sehingga Jurnal Penutup belum dibuat. " +
+                    "Jurnal ini baru tersedia setelah periode ditutup melalui halaman Periods.",
+            )
+            return@FinancialReportScaffold
+        }
+
         Text(
             text =
                 "Laba Bersih (ditutup ke ${data?.retainedEarningsAccountName ?: "Retained Earnings"}): " +
