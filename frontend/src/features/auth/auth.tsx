@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useGoogleLogin } from "@react-oauth/google";
 
 import { useSearchParams } from "@/lib/router-compat";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 
@@ -16,6 +16,7 @@ import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import { loginSchema, registerSchema } from "@/lib/validations/auth";
 import { authApi } from "./api/authApi";
+import { lockedMessage, useLoginThrottle } from "./use-login-throttle";
 
 // ===== TYPES =====
 export type AuthFormData = {
@@ -126,6 +127,16 @@ function AuthFormInner({
   // ✅ Pengecekan profil dilakukan secara silent di background
   const [isCheckingProfile, setIsCheckingProfile] = useState(false);
 
+  // Batas percobaan login gagal + masa istirahat
+  const throttle = useLoginThrottle();
+
+  // Simpan callback & query string di ref agar efek pengecekan profil
+  // tidak berjalan ulang setiap parent render (penyebab loop /auth/me).
+  const onSuccessRef = useRef(onSuccess);
+  const searchParamsRef = useRef(searchParams);
+  onSuccessRef.current = onSuccess;
+  searchParamsRef.current = searchParams;
+
   const {
     register,
     handleSubmit,
@@ -145,7 +156,7 @@ function AuthFormInner({
 
   const keepMeValue = watch("keepMe");
 
-  // ✅ Pengecekan profil user saat pertama kali dimuat (Silent background check)
+  // ✅ Pengecekan profil user SEKALI saat form dimuat (tanpa loop)
   useEffect(() => {
     let isMounted = true;
 
@@ -159,10 +170,10 @@ function AuthFormInner({
         );
 
         if (isMounted && "data" in result && result.data?.success) {
-          if (onSuccess) {
-            onSuccess();
+          if (onSuccessRef.current) {
+            onSuccessRef.current();
           } else {
-            const target = searchParams.get("redirectTo") || "/home";
+            const target = searchParamsRef.current.get("redirectTo") || "/home";
             window.location.replace(target);
           }
         }
@@ -178,7 +189,7 @@ function AuthFormInner({
     return () => {
       isMounted = false;
     };
-  }, [searchParams, onSuccess]);
+  }, []);
 
   useEffect(() => {
     setMode(initialMode);
@@ -205,6 +216,11 @@ function AuthFormInner({
   };
 
   const onSubmit: SubmitHandler<AuthFormData> = async (values) => {
+    if (mode === "login" && throttle.isLocked) {
+      setApiErr(lockedMessage(throttle.remainingSeconds));
+      return;
+    }
+
     setApiErr("");
     setIsPending(true);
 
@@ -224,15 +240,35 @@ function AuthFormInner({
 
       if ("error" in result) {
         const errorData = result.error as any;
-        const msg =
+        const status = errorData?.status;
+        let msg =
           errorData?.data?.message ||
           errorData?.data?.title ||
-          (errorData?.status === "FETCH_ERROR"
+          (status === "FETCH_ERROR"
             ? "Gagal terhubung ke server backend."
             : "Email atau password salah.");
+
+        if (mode === "login") {
+          if (status === 429) {
+            // Backend membatasi laju request: paksa istirahat.
+            throttle.lockNow();
+            msg = lockedMessage(60);
+          } else if (status !== "FETCH_ERROR") {
+            // Hanya kegagalan kredensial yang dihitung (bukan gangguan jaringan).
+            const next = throttle.attemptsLeft - 1;
+            throttle.registerFailure(errorData?.data?.lockoutEnd);
+            msg =
+              next > 0
+                ? `${msg} Sisa percobaan: ${next}.`
+                : "Terlalu banyak percobaan gagal. Silakan istirahat dulu selama 60 detik.";
+          }
+        }
+
         setApiErr(msg);
         return;
       }
+
+      if (mode === "login") throttle.registerSuccess();
 
       if (values.keepMe) {
         localStorage.setItem("aumo_saved_email", values.email);
@@ -391,7 +427,13 @@ function AuthFormInner({
           </div>
         )}
 
-        {apiErr && (
+        {mode === "login" && throttle.isLocked && (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs text-amber-700">
+            {lockedMessage(throttle.remainingSeconds)}
+          </div>
+        )}
+
+        {apiErr && !(mode === "login" && throttle.isLocked) && (
           <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-3 text-xs text-red-600">
             {apiErr}
           </div>
@@ -399,13 +441,19 @@ function AuthFormInner({
 
         <Button
           type="submit"
-          disabled={isPending || isCheckingProfile}
+          disabled={
+            isPending ||
+            isCheckingProfile ||
+            (mode === "login" && throttle.isLocked)
+          }
           className="h-11 w-full rounded-xl bg-black text-white hover:bg-zinc-800"
         >
           {isPending
             ? "Processing..."
             : mode === "login"
-              ? "Sign In"
+              ? throttle.isLocked
+                ? `Coba lagi dalam ${throttle.remainingSeconds} dtk`
+                : "Sign In"
               : "Create Account"}
         </Button>
       </form>
