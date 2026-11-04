@@ -1,24 +1,25 @@
-// <copyright file="SettingsController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using AumoBackend.DTOs;
+using AumoBackend.Models;
+using AumoBackend.Services.Settings;
+using AumoBackend.Services.Storage;
+using AumoBackend.Validators.Common;
+using AumoBackend.ViewModels;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace AumoBackend.Controllers
 {
-    using AumoBackend.DTOs;
-    using AumoBackend.Models;
-    using AumoBackend.Services.Settings;
-    using AumoBackend.Services.Storage;
-    using AumoBackend.Validators.Common;
-    using AumoBackend.ViewModels;
-    using FluentValidation;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
-
     [ApiController]
     [Route("/settings")]
     [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
     public class SettingsController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> userManager;
@@ -157,6 +158,29 @@ namespace AumoBackend.Controllers
             }
         }
 
+        /// <summary>
+        /// Ambil gambar avatar publik berdasarkan nama file.
+        /// </summary>
+        [HttpGet("avatars/{fileName}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAvatar(string fileName, CancellationToken cancellationToken)
+        {
+            if (!this.avatarStorage.IsConfigured)
+            {
+                return this.NotFound();
+            }
+
+            var avatar = await this.avatarStorage.GetAvatarAsync(fileName, cancellationToken);
+            if (avatar == null)
+            {
+                return this.NotFound();
+            }
+
+            this.Response.Headers["Cache-Control"] = "public, max-age=31536000, immutable";
+            this.Response.Headers["X-Content-Type-Options"] = "nosniff";
+            return this.File(avatar.Stream, avatar.ContentType);
+        }
+
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
@@ -249,7 +273,7 @@ namespace AumoBackend.Controllers
                     IpAddress = s.IpAddress,
                     Country = s.Country,
                     IsCurrent = s.IsCurrent,
-                    LastActivityAt = s.LastActivityAt
+                    LastActivityAt = s.LastActivityAt,
                 }).ToList(),
             };
 
