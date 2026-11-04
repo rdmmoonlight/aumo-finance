@@ -30,6 +30,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dashboardApi } from "./api/dashboardApi";
+import { AiSummaryCard } from "./components/cards/ai-summary-card";
 import { ExpenseDonut } from "./components/charts/expense-donut";
 import { ExpenseRevenueBarStacked } from "./components/charts/expense-revenue-bar";
 import { RevenueLineStep } from "./components/charts/revenue-line";
@@ -250,6 +251,16 @@ export default function DashboardPage() {
           </Button>
         </div>
       </div>
+
+      <AiSummaryCard
+        totalRevenue={totalRevenue}
+        totalExpenses={totalExpenses}
+        netIncome={netIncome}
+        totalLiquid={totalAssets}
+        totalLiabilities={totalLiabilities}
+        periodLabel={periodLabel}
+        periodName={resData.selectedPeriodName}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
