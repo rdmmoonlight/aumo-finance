@@ -28,13 +28,16 @@ public class TrialBalancesService : ITrialBalancesService
     {
         var type = NormalizeType(reportType);
 
+        // Jika meminta post-closing tetapi periode belum ditutup, jangan hitung post-closing.
+        var isPostClosingRequested = type == PostClosing && period != null && period.IsClosed;
+
         var rows = await ComputeRowsAsync(
             userId,
             period,
-            includeAdjustingLines: includeAdjusting || type == Adjusted || type == PostClosing,
-            permanentOnly: type == PostClosing);
+            includeAdjustingLines: includeAdjusting || type == Adjusted || isPostClosingRequested,
+            permanentOnly: isPostClosingRequested);
 
-        if (type == PostClosing)
+        if (isPostClosingRequested)
         {
             await ApplyClosingToRetainedEarningsAsync(userId, period, rows);
         }
@@ -136,6 +139,12 @@ public class TrialBalancesService : ITrialBalancesService
 
     public async Task<List<PostClosingTrialBalanceRow>> BuildPostClosingTrialBalanceAsync(Guid userId, Period period)
     {
+        // Proteksi Opsi 2: Mengembalikan list kosong jika periode belum ditutup
+        if (period == null || !period.IsClosed)
+        {
+            return new List<PostClosingTrialBalanceRow>();
+        }
+
         var rows = await BuildTrialBalancesRowsAsync(userId, period, true, PostClosing);
         await SaveSnapshotAsync(PostClosing, userId, period, rows);
         return ToSnapshotRows<PostClosingTrialBalanceRow>(userId, period, rows);
@@ -335,7 +344,7 @@ public class TrialBalancesService : ITrialBalancesService
         => !string.IsNullOrEmpty(type) && AccountClassificationHelper.IsTemporary(type);
 
     private static string Truncate(string? value, int max)
-    {
+        {
         value ??= string.Empty;
         return value.Length <= max ? value : value[..max];
     }
