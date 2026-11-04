@@ -2,7 +2,6 @@
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { store } from "@/lib/store";
 import { Link } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -11,43 +10,18 @@ import {
   Loader2,
   ShieldCheck,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { reportsApi } from "../api/reportsApi";
+import { useMemo } from "react";
+import { useGetTrialBalanceQuery } from "../api/reportsApi";
 import { BalanceAlert } from "./_components/balance-alert";
 import { NoPeriodCard } from "./_components/no-period-card";
 import { TrialTable } from "./_components/trial-table";
+import { normalizeTrialRows } from "./_lib/normalize";
 import { TrialRow } from "./_lib/types";
 
 export default function PostClosingTrialBalancePage() {
-  const [data, setData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const [error, setError] = useState<any>(null);
-
-  useEffect(() => {
-    let isMounted = true;
-    async function fetchPostClosingData() {
-      setIsLoading(true);
-      setIsError(false);
-      setError(null);
-      const result = await store.dispatch(
-        reportsApi.endpoints.getStatementOfFinancialPosition.initiate({
-          isPostClosing: true,
-        }),
-      );
-      if (!isMounted) return;
-      if (result.isSuccess) setData(result.data);
-      else if (result.isError) {
-        setIsError(true);
-        setError(result.error);
-      }
-      setIsLoading(false);
-    }
-    fetchPostClosingData();
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const { data, isLoading, isError, error } = useGetTrialBalanceQuery({
+    type: "post-closing",
+  });
 
   const { noPeriod, notClosed } = useMemo(() => {
     const raw = data as any;
@@ -56,64 +30,16 @@ export default function PostClosingTrialBalancePage() {
 
     return {
       noPeriod: is404 || noPeriodSelected,
-      notClosed: raw?.isPeriodClosed === false,
+      notClosed: !noPeriodSelected && raw?.isPeriodClosed === false,
     };
   }, [data, error]);
 
   const rows = useMemo<TrialRow[]>(() => {
     if (!data || noPeriod || notClosed) return [];
-    const raw = data as any;
-    const assets = raw?.assetAccounts || raw?.assets || [];
-    const liabs = raw?.liabilityAccounts || raw?.liabilities || [];
-    const rawEquity =
-      raw?.equityAccounts || raw?.equityExcludingRetainedEarnings || [];
-    const reItem = rawEquity.find(
-      (e: any) => e.accountName === "Retained Earnings",
-    );
-    const reEnding = reItem
-      ? Number(reItem.amount)
-      : Number(raw?.retainedEarningsEnding) || 0;
-    const equityEx = rawEquity.filter(
-      (e: any) => e.accountName !== "Retained Earnings",
-    );
-    return [
-      ...assets.map((a: any) => ({
-        accountId: a.accountId || a.referenceNumber,
-        referenceNumber: a.referenceNumber,
-        accountName: a.accountName,
-        type: "Assets",
-        normalBalanceIsDebit: true,
-        debit: Number(a.amount) || 0,
-        credit: 0,
-      })),
-      ...liabs.map((l: any) => ({
-        accountId: l.accountId || l.referenceNumber,
-        referenceNumber: l.referenceNumber,
-        accountName: l.accountName,
-        type: "Liabilities",
-        normalBalanceIsDebit: false,
-        debit: 0,
-        credit: Number(l.amount) || 0,
-      })),
-      ...equityEx.map((e: any) => ({
-        accountId: e.accountId || e.referenceNumber,
-        referenceNumber: e.referenceNumber,
-        accountName: e.accountName,
-        type: "Equity",
-        normalBalanceIsDebit: false,
-        debit: 0,
-        credit: Number(e.amount) || 0,
-      })),
-      {
-        accountId: 0,
-        referenceNumber: 0,
-        accountName: "Retained Earnings",
-        type: "Equity",
-        normalBalanceIsDebit: false,
-        debit: reEnding < 0 ? Math.abs(reEnding) : 0,
-        credit: reEnding >= 0 ? reEnding : 0,
-      },
-    ];
+    const raw: any[] = Array.isArray(data)
+      ? data
+      : (data as any)?.data || (data as any)?.rows || [];
+    return normalizeTrialRows(raw);
   }, [data, noPeriod, notClosed]);
 
   const totalDebit = useMemo(
@@ -149,8 +75,13 @@ export default function PostClosingTrialBalancePage() {
           <Info size={16} />
           <AlertDescription className="text-xs space-y-3">
             <p>
-              Periode ini belum ditutup (closed). Neraca saldo setelah penutupan
-              baru dapat ditampilkan setelah periode ditutup.
+              Periode{" "}
+              {(data as any)?.selectedPeriodName
+                ? `"${(data as any).selectedPeriodName}" `
+                : "ini "}
+              belum ditutup (closed), sehingga Post-Closing Trial Balance belum
+              dibuat. Laporan ini baru tersedia setelah periode ditutup melalui
+              halaman Periods.
             </p>
             <Button asChild variant="outline" size="sm">
               <Link to="/periods">

@@ -74,6 +74,25 @@ public class TrialBalancesController : ControllerBase
             });
         }
 
+        // Post-closing hanya valid untuk periode yang sudah ditutup: jangan generate maupun simpan snapshot.
+        if (reportType == "post-closing" && !period.IsClosed)
+        {
+            return Ok(new
+            {
+                success = true,
+                hasPeriodSelected = true,
+                selectedPeriodName = period.PeriodName,
+                isPeriodClosed = false,
+                message = "Accounting period is not closed yet.",
+                reportTitle = title,
+                type = reportType,
+                totalDebit = 0m,
+                totalCredit = 0m,
+                isBalanced = true,
+                rows = Array.Empty<object>()
+            });
+        }
+
         var rows = await _trialBalancesService.BuildTrialBalancesRowsAsync(
             userId,
             period,
@@ -99,6 +118,7 @@ public class TrialBalancesController : ControllerBase
             success = true,
             hasPeriodSelected = true,
             selectedPeriodName = period.PeriodName,
+            isPeriodClosed = period.IsClosed,
             reportTitle = title,
             type = reportType,
             totalDebit,
