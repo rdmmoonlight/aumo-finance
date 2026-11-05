@@ -1,18 +1,15 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Link } from "@tanstack/react-router";
-import { ArrowRight, Zap } from "lucide-react";
+import { Zap } from "lucide-react";
 import { useMemo } from "react";
 
 export interface AiSummaryCardProps {
   totalRevenue: number;
   totalExpenses: number;
   netIncome: number;
-  /** Kas + Bank */
   totalLiquid: number;
   totalLiabilities: number;
   periodLabel: string;
@@ -83,9 +80,8 @@ export function AiSummaryCard({
 
     const profitText =
       netIncome >= 0
-        ? `Periode ${periodLabel} membukukan laba bersih ${rupiah(netIncome)}${
-            totalRevenue > 0 ? ` (margin ${pct(margin)})` : ""
-          }.`
+        ? `Periode ${periodLabel} membukukan laba bersih ${rupiah(netIncome)}${totalRevenue > 0 ? ` (margin ${pct(margin)})` : ""
+        }.`
         : `Periode ${periodLabel} mencatat rugi bersih ${rupiah(netIncome)}; beban melampaui pendapatan.`;
 
     const expenseText =
@@ -143,17 +139,6 @@ export function AiSummaryCard({
             </div>
           ))}
         </div>
-
-        <Button
-          asChild
-          variant="outline"
-          size="sm"
-          className="h-8 gap-1.5 text-caption"
-        >
-          <Link to="/ai-assistant">
-            Analisis lanjutan <ArrowRight size={14} />
-          </Link>
-        </Button>
       </CardContent>
     </Card>
   );

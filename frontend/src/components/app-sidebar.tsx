@@ -28,7 +28,6 @@ import { baseApi } from "@/lib/apiClient";
 import { store } from "@/lib/store";
 import {
   BookOpen,
-  Bot,
   Calendar,
   ChevronsUpDown,
   FileBarChart,
@@ -43,7 +42,6 @@ import {
   Wrench,
 } from "lucide-react";
 import {
-  authApi,
   useGetProfileQuery,
   useLogoutMutation,
 } from "../features/auth/api/authApi";
@@ -76,7 +74,6 @@ const navigation = [
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
   { title: "Reports", url: "/reports", icon: FileBarChart },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
-  { title: "AI Assistant", url: "/ai-assistant", icon: Bot },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
@@ -126,11 +123,10 @@ export function AppSidebar() {
       }
     >
       <SidebarHeader
-        className={`border-b shrink-0 flex items-center gap-2 ${
-          isCollapsed
+        className={`border-b shrink-0 flex items-center gap-2 ${isCollapsed
             ? "flex-col justify-center p-2.5 gap-3"
             : "flex-row justify-between p-3.5"
-        }`}
+          }`}
       >
         {isCollapsed ? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
@@ -187,9 +183,8 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter
-        className={`border-t shrink-0 ${
-          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
-        }`}
+        className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+          }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
