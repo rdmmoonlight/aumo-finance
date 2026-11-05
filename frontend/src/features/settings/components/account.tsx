@@ -182,7 +182,7 @@ export default function AccountSettings() {
         true,
       );
       setAvatarPreview(user?.avatarUrl || null);
-    } font-sans {
+    } finally {
       e.target.value = "";
     }
   };
