@@ -228,59 +228,7 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, message = "Account successfully deleted." });
         }
 
-        [HttpGet("guardian/dashboard")]
-        public async Task<IActionResult> GetDashboard()
-        {
-            var user = await this.userManager.GetUserAsync(this.User);
-            if (user == null)
-            {
-                return this.Unauthorized();
-            }
-
-            var activeSessions = await this.guardianService.GetActiveSessionsAsync(user.Id);
-            var loginActivities = await this.guardianService.GetLoginActivitiesAsync(user.Id);
-
-            var failedAttempts = loginActivities.Count(a => !a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
-            var lastSuccess = loginActivities.FirstOrDefault(a => a.IsSuccess)?.CreatedAt;
-
-            var dashboard = new GuardianDashboardViewModel
-            {
-                SecurityStatus = new SecurityStatusViewModel
-                {
-                    StatusLevel = failedAttempts > 3 ? "Warning" : "Good",
-                    ActiveSessionsCount = activeSessions.Count,
-                    FailedAttemptsLast24Hours = failedAttempts,
-                    LastSuccessfulLogin = lastSuccess,
-                },
-                RecentActivities = loginActivities.Select(a => new LoginActivityViewModel
-                {
-                    Id = a.Id,
-                    ActivityType = a.ActivityType,
-                    Device = a.Device,
-                    OperatingSystem = a.OperatingSystem,
-                    Browser = a.Browser,
-                    IpAddress = a.IpAddress,
-                    Country = a.Country,
-                    IsSuccess = a.IsSuccess,
-                    CreatedAt = a.CreatedAt,
-                }).ToList(),
-                ActiveSessions = activeSessions.Select(s => new ActiveSessionViewModel
-                {
-                    Id = s.Id,
-                    DeviceName = s.DeviceName,
-                    OperatingSystem = s.OperatingSystem,
-                    Browser = s.Browser,
-                    IpAddress = s.IpAddress,
-                    Country = s.Country,
-                    IsCurrent = s.IsCurrent,
-                    LastActivityAt = s.LastActivityAt,
-                }).ToList(),
-            };
-
-            return this.Ok(new { success = true, data = dashboard });
-        }
-
-        [HttpPost("guardian/revoke-session/{sessionId}")]
+        [HttpPost("revoke-session/{sessionId}")]
         public async Task<IActionResult> RevokeSession(Guid sessionId)
         {
             var user = await this.userManager.GetUserAsync(this.User);
@@ -293,7 +241,7 @@ namespace AumoBackend.Controllers
             return this.Ok(new { success = true, message = "Session revoked." });
         }
 
-        [HttpPost("guardian/revoke-all-sessions")]
+        [HttpPost("revoke-all-sessions")]
         public async Task<IActionResult> RevokeAllSessions()
         {
             var user = await this.userManager.GetUserAsync(this.User);
