@@ -119,22 +119,22 @@ export function PeriodsTable({
                 </TableCell>
                 <TableCell className="py-3 text-center">
                   {closed ? (
-                    <Badge className="h-6 gap-1 bg-white/10 text-zinc-400 border-white/10 text-">
+                    <Badge className="h-6 gap-1 bg-white/10 text-zinc-400 border-white/10">
                       <Lock size={10} /> Closed
                     </Badge>
                   ) : (
-                    <Badge className="h-6 gap-1 bg-emerald-500/15 text-emerald-400 border-emerald-500/20 text-">
+                    <Badge className="h-6 gap-1 bg-emerald-500/15 text-emerald-400 border-emerald-500/20">
                       <LockOpen size={10} /> Active
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell className="pr-6 py-3">
-                  <div className="flex justify-center gap-1.5">
+                  <div className="flex justify-center items-center gap-1.5">
                     <Button
                       type="button"
                       size="sm"
                       className={cn(
-                        "h-7 gap-1.5 font-bold tracking-wide border transition-all text-",
+                        "h-7 w-24 gap-1.5 font-bold tracking-wide border transition-all text-xs justify-center",
                         selected
                           ? "bg-white text-black border-white shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:bg-zinc-200"
                           : "bg-[#1e1e22] text-zinc-400 border-white/10 hover:bg-white hover:text-black hover:border-white",
@@ -151,12 +151,12 @@ export function PeriodsTable({
                       )}
                       {selected ? "Viewing" : "View"}
                     </Button>
-                    {!closed && (
+                    {!closed ? (
                       <Button
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 px-0 bg-transparent border border-transparent text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/10"
+                        className="h-7 w-7 px-0 bg-transparent border border-transparent text-zinc-500 hover:text-white hover:bg-white/10 hover:border-white/10 shrink-0"
                         onClick={() => handleClose?.(p)}
                         disabled={!!isClosing || isClosingThis}
                       >
@@ -166,6 +166,9 @@ export function PeriodsTable({
                           <Lock size={14} />
                         )}
                       </Button>
+                    ) : (
+                      /* Placeholder agar layout tetap seimbang jika period sudah tertutup */
+                      <div className="w-7 h-7" />
                     )}
                   </div>
                 </TableCell>
