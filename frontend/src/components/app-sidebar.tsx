@@ -72,8 +72,8 @@ const navigation = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Periods", url: "/periods", icon: Calendar },
   { title: "Chart of Accounts", url: "/chart-of-accounts", icon: BookOpen },
-  { title: "Reports", url: "/reports", icon: FileBarChart },
   { title: "Journal Entry", url: "/journal-entry", icon: FileSpreadsheet },
+  { title: "Reports", url: "/reports", icon: FileBarChart },
   { title: "Tools", url: "/tools", icon: Wrench },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
