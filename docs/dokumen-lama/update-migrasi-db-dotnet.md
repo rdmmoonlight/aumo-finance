@@ -1,3 +1,6 @@
+Panduan ini bersifat generik untuk database **PostgreSQL**:
+
+```markdown
 Berikut panduan langkah demi langkah (*step-by-step*) pengelolaan database berbasis **EF Core Migrations & Scaffolding** untuk proyek `AumoBackend`.
 
 Anda bisa langsung menyalin dokumen Markdown ini dan menyimpannya di folder proyek Anda di **`/docs/DATABASE_GUIDE.md`**.
@@ -6,7 +9,7 @@ Anda bisa langsung menyalin dokumen Markdown ini dan menyimpannya di folder proy
 
 # Dokumentasi Pengelolaan Database & EF Core Migration
 
-Dokumen ini berisi panduan standar untuk melakukan *scaffolding* (reverse engineering) skema database Neon PostgreSQL serta mengelola *schema migration* menggunakan Entity Framework Core di `AumoBackend`.
+Dokumen ini berisi panduan standar untuk melakukan *scaffolding* (reverse engineering) skema database PostgreSQL serta mengelola *schema migration* menggunakan Entity Framework Core di `AumoBackend`.
 
 ---
 
@@ -17,22 +20,22 @@ Sebelum menjalankan perintah EF Core CLI, pastikan variabel lingkungan `Connecti
 ### Git Bash (Windows)
 
 ```bash
-export ConnectionStrings__DefaultConnection="URL_DB_NEON"
+export ConnectionStrings__DefaultConnection="YOUR_DATABASE_CONNECTION_STRING"
 
 ```
 
 ### PowerShell
 
 ```powershell
-$env:ConnectionStrings__DefaultConnection="URL_DB_NEON"
+$env:ConnectionStrings__DefaultConnection="YOUR_DATABASE_CONNECTION_STRING"
 
 ```
 
 ---
 
-## 2. Scaffolding Tabel dari Database Neon (Reverse Engineering)
+## 2. Scaffolding Tabel dari Database (Reverse Engineering)
 
-Gunakan langkah ini jika terdapat perubahan skema langsung di database Neon yang ingin disinkronkan kembali ke dalam kode C# (`AppDbContext` & `Models`).
+Gunakan langkah ini jika terdapat perubahan skema langsung di database PostgreSQL yang ingin disinkronkan kembali ke dalam kode C# (`AppDbContext` & `Models`).
 
 Jalankan perintah ini dari direktori `/src/backend/asp-net-core`:
 
@@ -56,7 +59,7 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
 ```
 
-1. Pastikan `OnModelCreating` memanggil `base.OnModelCreating(modelBuilder);` di baris pertama.
+2. Pastikan `OnModelCreating` memanggil `base.OnModelCreating(modelBuilder);` di baris pertama.
 
 ---
 
@@ -72,16 +75,17 @@ dotnet ef migrations add <NamaMigration> --context AppDbContext
 ```
 
 *Contoh:* `dotnet ef migrations add AddTransactionCategories --context AppDbContext`
+
 2. Periksa berkas C# yang ter-generate di dalam direktori `Migrations/` untuk memastikan perubahan kolom/tabel sudah sesuai.
 
 ---
 
 ## 4. Menandai Migration Pertama sebagai Baseline (Khusus Database Lama)
 
-Jika database Neon sudah berisi tabel sebelum migration dibuat, tandai migration pertama (`InitialCreate`) sebagai **Baseline** agar EF Core tidak mencoba membuat ulang tabel yang sudah ada:
+Jika database PostgreSQL sudah berisi tabel sebelum migration dibuat, tandai migration pertama (`InitialCreate`) sebagai **Baseline** agar EF Core tidak mencoba membuat ulang tabel yang sudah ada:
 
 1. Dapatkan `MigrationId` dari berkas migration yang dibuat.
-2. Jalankan query SQL berikut langsung di Dashboard Neon Console / DBeaver:
+2. Jalankan query SQL berikut langsung di Query Console database / DBeaver:
 
 ```sql
 CREATE TABLE IF NOT EXISTS "__EFMigrationsHistory" (
@@ -130,5 +134,11 @@ dotnet ef migrations remove --context AppDbContext
 
 ```bash
 dotnet ef database update <NamaMigrationSebelumnya> --context AppDbContext
+
+```
+
+```
+
+<FollowUp label="Ingin saya tambahkan instruksi konfigurasi appsettings.json untuk koneksi PostgreSQL lokal?" query="Bisakah Anda menambahkan contoh konfigurasi ConnectionStrings di appsettings.json dan appsettings.Development.json untuk PostgreSQL?"/>
 
 ```
