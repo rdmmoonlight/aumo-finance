@@ -59,7 +59,8 @@ export function AiSummaryCard({
       {
         label: "Rasio Beban",
         value: totalRevenue > 0 ? pct(expenseRatio) : "-",
-        tone: expenseRatio <= 80 ? "good" : expenseRatio <= 100 ? "warn" : "bad",
+        tone:
+          expenseRatio <= 80 ? "good" : expenseRatio <= 100 ? "warn" : "bad",
       },
       {
         label: "Cakupan Kas",

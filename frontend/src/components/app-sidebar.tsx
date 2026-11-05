@@ -42,7 +42,11 @@ import {
   User,
   Wrench,
 } from "lucide-react";
-import { authApi, useGetProfileQuery, useLogoutMutation } from "../features/auth/api/authApi";
+import {
+  authApi,
+  useGetProfileQuery,
+  useLogoutMutation,
+} from "../features/auth/api/authApi";
 
 import * as React from "react";
 
@@ -84,7 +88,8 @@ export function AppSidebar() {
   const [isMounted, setIsMounted] = React.useState(false);
 
   // 1. Hubungkan langsung dengan RTK Query Hook
-  const { data: profileResponse, isLoading: isUserLoading } = useGetProfileQuery();
+  const { data: profileResponse, isLoading: isUserLoading } =
+    useGetProfileQuery();
   const [logout] = useLogoutMutation();
 
   // Extract data profil dari response wrapper

@@ -87,11 +87,15 @@ export default function AccountSettings() {
   const { data: profileResponse, isLoading } = useGetProfileQuery();
   const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
   const [uploadAvatar, { isLoading: isUploading }] = useUploadAvatarMutation();
-  const [changePassword, { isLoading: isChanging }] = useChangePasswordMutation();
+  const [changePassword, { isLoading: isChanging }] =
+    useChangePasswordMutation();
   const [deleteAccount, { isLoading: isDeleting }] = useDeleteAccountMutation();
 
   // Extract user object dari respons API
-  const user = profileResponse?.data || profileResponse;
+  const user =
+    profileResponse && "data" in profileResponse
+      ? profileResponse.data
+      : profileResponse;
 
   // Local State Form
   const [fullName, setFullName] = useState("");
@@ -345,8 +349,14 @@ export default function AccountSettings() {
               />
             </div>
             <div className="md:col-span-2 flex justify-end">
-              <Button size="sm" className="h-8 text-caption" disabled={isSaving}>
-                {isSaving && <Loader2 size={13} className="animate-spin mr-1" />}
+              <Button
+                size="sm"
+                className="h-8 text-caption"
+                disabled={isSaving}
+              >
+                {isSaving && (
+                  <Loader2 size={13} className="animate-spin mr-1" />
+                )}
                 Save
               </Button>
             </div>
@@ -383,7 +393,9 @@ export default function AccountSettings() {
               className="h-8 text-caption"
               disabled={isChanging}
             >
-              {isChanging && <Loader2 size={13} className="animate-spin mr-1" />}
+              {isChanging && (
+                <Loader2 size={13} className="animate-spin mr-1" />
+              )}
               Update
             </Button>
           </form>

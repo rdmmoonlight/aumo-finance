@@ -115,7 +115,9 @@ export default function ClosingJournalReportPage() {
           <AlertDescription className="text-xs space-y-3">
             <p>
               Periode{" "}
-              {data?.selectedPeriodName ? `"${data.selectedPeriodName}" ` : "ini "}
+              {data?.selectedPeriodName
+                ? `"${data.selectedPeriodName}" `
+                : "ini "}
               belum ditutup (closed), sehingga Jurnal Penutup belum dibuat.
               Jurnal ini baru tersedia setelah periode ditutup melalui halaman
               Periods.
