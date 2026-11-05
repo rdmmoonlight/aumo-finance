@@ -28,7 +28,7 @@ export const settingsApi = baseApi.injectEndpoints({
         method: "PUT",
         body,
       }),
-      invalidatesTags: ["Settings", "Auth", "Profile"],
+      invalidatesTags: ["Settings", "Auth"],
     }),
 
     // POST /settings/avatar
@@ -38,7 +38,7 @@ export const settingsApi = baseApi.injectEndpoints({
         method: "POST",
         body: formData,
       }),
-      invalidatesTags: ["Settings", "Auth", "Profile"],
+      invalidatesTags: ["Settings", "Auth"],
     }),
 
     // POST /settings/change-password
@@ -57,7 +57,7 @@ export const settingsApi = baseApi.injectEndpoints({
         url: "/settings/delete-account",
         method: "DELETE",
       }),
-      invalidatesTags: ["Settings", "Auth", "Profile"],
+      invalidatesTags: ["Settings", "Auth"],
     }),
 
     // GET /settings/guardian/dashboard
