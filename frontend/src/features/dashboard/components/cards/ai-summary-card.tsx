@@ -80,8 +80,9 @@ export function AiSummaryCard({
 
     const profitText =
       netIncome >= 0
-        ? `Periode ${periodLabel} membukukan laba bersih ${rupiah(netIncome)}${totalRevenue > 0 ? ` (margin ${pct(margin)})` : ""
-        }.`
+        ? `Periode ${periodLabel} membukukan laba bersih ${rupiah(netIncome)}${
+            totalRevenue > 0 ? ` (margin ${pct(margin)})` : ""
+          }.`
         : `Periode ${periodLabel} mencatat rugi bersih ${rupiah(netIncome)}; beban melampaui pendapatan.`;
 
     const expenseText =
