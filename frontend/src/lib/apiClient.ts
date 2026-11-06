@@ -12,9 +12,9 @@ export function getBackendTarget(): string {
   }
 
   const target =
-    process.env.INTERNAL_API_URL ||
-    process.env.BACKEND_URL ||
-    process.env.WEB_API_URL ||
+    import.meta.env.INTERNAL_API_URL ||
+    import.meta.env.BACKEND_URL ||
+    import.meta.env.WEB_API_URL ||
     "http://127.0.0.1:5000";
 
   return target.replace(/\/+$/, "");
@@ -27,7 +27,6 @@ const rawBaseQuery = fetchBaseQuery({
   baseUrl: `${getBackendTarget()}/api/v1`,
   credentials: "include",
   prepareHeaders: (headers, { arg }) => {
-    // Penting untuk upload file: biar browser set boundary otomatis
     const body = (arg as FetchArgs)?.body;
     if (body instanceof FormData) {
       headers.delete("Content-Type");
@@ -62,7 +61,6 @@ const baseQueryWithReauth: BaseQueryFn<
     );
   }
 
-  // Handle 401 di client
   if (
     result.error?.status === 401 &&
     typeof window !== "undefined" &&
