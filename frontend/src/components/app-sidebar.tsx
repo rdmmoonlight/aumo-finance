@@ -123,10 +123,11 @@ export function AppSidebar() {
       }
     >
       <SidebarHeader
-        className={`border-b shrink-0 flex items-center gap-2 ${isCollapsed
+        className={`border-b shrink-0 flex items-center gap-2 ${
+          isCollapsed
             ? "flex-col justify-center p-2.5 gap-3"
             : "flex-row justify-between p-3.5"
-          }`}
+        }`}
       >
         {isCollapsed ? (
           <div className="flex size-9 items-center justify-center rounded-xl bg-primary/10">
@@ -183,8 +184,9 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter
-        className={`border-t shrink-0 ${isCollapsed ? "p-2 flex justify-center" : "p-2.5"
-          }`}
+        className={`border-t shrink-0 ${
+          isCollapsed ? "p-2 flex justify-center" : "p-2.5"
+        }`}
       >
         <SidebarMenu>
           <SidebarMenuItem>
