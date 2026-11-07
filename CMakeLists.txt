@@ -5,20 +5,16 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(PQXX REQUIRED libpqxx)
+# Import target PkgConfig::PQXX secara otomatis
+pkg_check_modules(PQXX REQUIRED IMPORTED_TARGET libpqxx)
 
 include_directories(
     archiver_service/include
-    ${PQXX_INCLUDE_DIRS}
 )
 
-# Kumpulkan file source
 file(GLOB_RECURSE SOURCES "archiver_service/*.cpp")
 
 add_executable(archiver_service ${SOURCES})
 
-# Tambahkan link directory jika ada
-link_directories(${PQXX_LIBRARY_DIRS})
-
-# Link library libpqxx beserta seluruh dependensinya (termasuk libpq)
-target_link_libraries(archiver_service PRIVATE ${PQXX_LDFLAGS} ${PQXX_LIBRARIES} pq)
+# Link ke Imported Target PkgConfig dan libpq
+target_link_libraries(archiver_service PRIVATE PkgConfig::PQXX pq)
