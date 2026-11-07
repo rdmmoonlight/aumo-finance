@@ -3,8 +3,12 @@ name: C++ CI Build Check
 on:
   push:
     branches: [ "main", "master", "develop" ]
+    paths:
+      - 'archiver_service/**'
   pull_request:
     branches: [ "main", "master" ]
+    paths:
+      - 'archiver_service/**'
 
 jobs:
   build:
