@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Top Bar - Modular Vanilla</title>
+  <link rel="stylesheet" href="./top-bar.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8f9fa;
+      min-height: 100vh;
+    }
+    main {
+      padding: 2rem;
+    }
+    h1 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+    p { color: #666; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <div id="topbar-root"></div>
+
+  <main>
+    <h1>Contoh Top Bar Modular</h1>
+    <p>Komponen ini tidak menggunakan React. Data diisi melalui parameter dan method update().</p>
+  </main>
+
+  <script type="module">
+    import { createTopBar } from "./top-bar.js";
+
+    const topbar = createTopBar({
+      container: "#topbar-root",
+      currentPath: "/dashboard/reports",
+      periods: [
+        { periodName: "2026-Q4", isSelected: true, isClosed: false },
+      ],
+      dbStatus: "online",
+      notifications: [
+        {
+          id: "1",
+          title: "Periode baru dibuka",
+          message: "Periode 2026-Q4 telah dibuka dan siap digunakan.",
+          type: "info",
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        },
+        {
+          id: "2",
+          title: "Jurnal belum diposting",
+          message: "Terdapat 3 jurnal draft yang belum diposting.",
+          type: "warning",
+          isRead: false,
+          createdAt: new Date(Date.now() - 3600000).toISOString(),
+        },
+        {
+          id: "3",
+          title: "Backup berhasil",
+          message: "Backup database harian telah selesai.",
+          type: "info",
+          isRead: true,
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+        },
+      ],
+      onSearch: (query) => {
+        console.log("Search:", query);
+        alert("Mencari: " + query);
+      },
+      onMarkAsRead: async (id) => {
+        console.log("Mark as read:", id);
+        // Simulasi update
+        const notifs = topbar /* temporary ref */;
+      },
+      onMarkAllAsRead: async () => {
+        console.log("Mark all as read");
+        alert("Semua notifikasi ditandai dibaca (contoh)");
+      },
+      onRefreshHealth: () => {
+        console.log("Refresh health");
+        topbar.setDbStatus("connecting", true);
+        setTimeout(() => {
+          topbar.setDbStatus("online", false);
+        }, 1500);
+      },
+    });
+
+    // Contoh update path
+    // topbar.setPath("/journal-entry");
+
+    // Contoh update periode
+    // topbar.setPeriods([{ periodName: "2026-Q3", isSelected: true, isClosed: true }]);
+  </script>
+</body>
+</html>
