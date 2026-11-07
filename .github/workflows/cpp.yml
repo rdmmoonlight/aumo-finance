@@ -1,0 +1,41 @@
+name: C++ CI Build Check
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          g++ \
+          libpq-dev \
+          libpqxx-dev
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build Project
+      run: |
+        cmake --build build --config Release
+
+    - name: Verify Executable Output
+      run: |
+        if [ -f ./build/archiver_service ]; then
+          echo "Build sukses! Biner archiver_service berhasil dibuat."
+        else
+          echo "Biner tidak ditemukan!" && exit 1
+        fi
