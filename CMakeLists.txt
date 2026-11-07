@@ -4,20 +4,20 @@ project(ArchiverService CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(include)
+# 1. Sertakan folder include jika header ada di dalam archiver_service/
+include_directories(archiver_service)
+include_directories(archiver_service/include)
 
-# 1. Cari PkgConfig
+# 2. Cari PkgConfig & libpqxx
 find_package(PkgConfig REQUIRED)
-
-# 2. Cari libpqxx via PkgConfig
 pkg_check_modules(PQXX REQUIRED libpqxx)
-
-# Include directory dari libpqxx
 include_directories(${PQXX_INCLUDE_DIRS})
 
-# Kumpulkan source code
-file(GLOB SOURCES "src/*.cpp")
+# 3. Kumpulkan semua file .cpp di dalam folder archiver_service (termasuk sub-foldernya)
+file(GLOB_RECURSE SOURCES "archiver_service/*.cpp")
+
+# 4. Target executable
 add_executable(archiver_service ${SOURCES})
 
-# 3. Link library libpqxx
+# 5. Link library libpqxx
 target_link_libraries(archiver_service PRIVATE ${PQXX_LIBRARIES})
