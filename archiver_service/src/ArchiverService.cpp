@@ -29,7 +29,7 @@ bool ArchiverService::archiveMonthlyData(const std::string& source_table,
 
         pqxx::work tx(conn);
 
-        // 1. Salin data berdasar kolom CreatedAt ke schema archive
+        // 1. Salin data dari public."GeneralJournal" ke archive."GeneralJournal"
         std::string copy_query = std::format(
             "INSERT INTO {} SELECT * FROM {} WHERE \"CreatedAt\" >= $1 AND \"CreatedAt\" < $2;",
             target_table, source_table
@@ -37,7 +37,7 @@ bool ArchiverService::archiveMonthlyData(const std::string& source_table,
         pqxx::result res_copy = tx.exec_params(copy_query, start_date, end_date);
         long long rows_archived = res_copy.affected_rows();
 
-        // 2. Hapus data yang sudah dipindah dari tabel utama
+        // 2. Hapus data yang telah berhasil disalin dari public."GeneralJournal"
         std::string delete_query = std::format(
             "DELETE FROM {} WHERE \"CreatedAt\" >= $1 AND \"CreatedAt\" < $2;",
             source_table
