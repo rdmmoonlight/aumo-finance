@@ -21,17 +21,17 @@ bool DatabaseMigrator::runMigrations(const std::string& source_table,
         std::cout << "[Migrator] Memeriksa/Membuat schema 'archive'...\n";
         tx.exec("CREATE SCHEMA IF NOT EXISTS archive;");
 
-        // 2. Buat Tabel 'archive.general_journals' berdasarkan struktur 'public.general_journals'
+        // 2. Buat Tabel 'archive."GeneralJournal"' menduplikasi struktur 'public."GeneralJournal"'
         std::string create_table_query = std::format(
             "CREATE TABLE IF NOT EXISTS archive.{} (LIKE {} INCLUDING ALL);",
             archive_table_name, source_table
         );
 
-        std::cout << std::format("[Migrator] Memeriksa/Membuat tabel 'archive.{}'...\n", archive_table_name);
+        std::cout << std::format("[Migrator] Memeriksa/Membuat tabel archive.{}...\n", archive_table_name);
         tx.exec(create_table_query);
 
         tx.commit();
-        std::cout << "[Migrator] Schema & tabel 'archive." << archive_table_name << "' siap digunakan.\n";
+        std::cout << "[Migrator] Schema & tabel archive." << archive_table_name << " siap digunakan.\n";
         return true;
 
     } catch (const std::exception& e) {
