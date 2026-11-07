@@ -63,27 +63,24 @@ RUN pnpm run build
 # ==========================================
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
-# Install Nginx, Supervisor, Curl, dan runtime shared library PostgreSQL (libpq & libpqxx)
+# Install Nginx, Supervisor, Curl, dan runtime shared library PostgreSQL
 RUN apt-get update && apt-get install -y \
     nginx \
     supervisor \
     curl \
     libpq5 \
-    libpqxx-6.4 \
+    libpqxx-7.8t64 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copy hasil build C++ Archiver
-COPY --from=cpp-builder /src/build/archiver_service ./archiver/archiver_service
+COPY --from=cpp-builder /src/build/archiver_service /usr/local/bin/archiver_service
 
-# Copy hasil build .NET Core API
+# Copy hasil build .NET Core API & Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend
-
-# Copy hasil build Rsbuild SPA (folder dist)
 COPY --from=frontend-builder /app/dist ./frontend-dist
 
-# Copy konfigurasi Supervisor & Nginx
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 
