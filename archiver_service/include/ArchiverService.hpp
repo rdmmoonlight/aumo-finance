@@ -1,7 +1,6 @@
-// include/ArchiverService.hpp
 #pragma once
+
 #include <string>
-#include <pqxx/pqxx>
 
 class ArchiverService {
 private:
@@ -9,7 +8,7 @@ private:
 
 public:
     explicit ArchiverService(std::string db_conn_str);
-    
+
     // Fungsi utama pemindahan data berdasarkan bulan & tahun
     bool archiveMonthlyData(const std::string& source_table, 
                             const std::string& target_table, 
