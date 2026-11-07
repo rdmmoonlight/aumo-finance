@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nav Menu - Modular Vanilla</title>
+  <link rel="stylesheet" href="./nav-menu.css" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      display: flex;
+      min-height: 100vh;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #f8f9fa;
+    }
+    main {
+      flex: 1;
+      padding: 2rem;
+    }
+    h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    p { color: #667; }
+  </style>
+</head>
+<body>
+  <!-- Tempat sidebar akan di-render -->
+  <div id="sidebar-root"></div>
+
+  <main>
+    <h1>Contoh Penggunaan Nav Menu Modular</h1>
+    <p>Sidebar di sebelah kiri dibangun tanpa React/Vue/TSX. Hanya HTML + CSS + JavaScript modul.</p>
+  </main>
+
+  <script type="module">
+    import { createNavMenu } from "./nav-menu.js";
+
+    // Contoh data user (biasanya diambil dari API)
+    const exampleUser = {
+      fullName: "Al Fatih",
+      email: "fatih@aumofinance.com",
+      avatarUrl: null, // atau URL gambar
+    };
+
+    const nav = createNavMenu({
+      container: "#sidebar-root",
+      user: exampleUser,
+      currentPath: "/dashboard",
+      onLogout: async () => {
+        console.log("Logout dipanggil");
+        // Di sini Anda bisa panggil API logout
+        // lalu redirect
+        alert("Logout berhasil (contoh)");
+        // window.location.replace("/");
+      },
+    });
+
+    // Contoh update user nanti (setelah fetch API)
+    // nav.setUser({ fullName: "Nama Baru", email: "baru@email.com" });
+
+    // Contoh ganti active path
+    // nav.setActivePath("/reports");
+  </script>
+</body>
+</html>
