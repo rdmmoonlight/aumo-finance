@@ -1,7 +1,3 @@
-// <copyright file="JournalImportRequestDtoValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using AumoBackend.DTOs;
 using AumoBackend.Validators.JournalEntries;
 using FluentValidation;

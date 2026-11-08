@@ -1,7 +1,4 @@
 using System.Globalization;
-// <copyright file="GeneralLedgersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 namespace AumoBackend.Services.Reports.GeneralLedgers;
 

@@ -2,9 +2,6 @@
 #pragma warning disable CA1304
 #pragma warning disable CA1311
 using System.Globalization;
-// <copyright file="ChartOfAccountsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 namespace AumoBackend.Services.ChartOfAccounts;
 

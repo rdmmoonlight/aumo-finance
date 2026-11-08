@@ -1,7 +1,3 @@
-// <copyright file="ToolsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Tools;
 
 using System.Globalization;

@@ -1,7 +1,4 @@
 #pragma warning disable CA1826
-// <copyright file="SettingsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 namespace AumoBackend.Services.Settings
 {

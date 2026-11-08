@@ -1,7 +1,3 @@
-// <copyright file="SelectedPeriodHelper.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using AumoBackend.Data;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;

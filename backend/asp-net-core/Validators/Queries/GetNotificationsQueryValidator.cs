@@ -1,7 +1,3 @@
-// <copyright file="GetNotificationsQueryValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Validators.Queries;
 
 using AumoBackend.DTOs;

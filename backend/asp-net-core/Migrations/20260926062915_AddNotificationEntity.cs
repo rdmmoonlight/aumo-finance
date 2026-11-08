@@ -1,8 +1,5 @@
 #pragma warning disable CS1591
 #pragma warning disable CA1861
-// <copyright file="20260926062915_AddNotificationEntity.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 #nullable disable
 

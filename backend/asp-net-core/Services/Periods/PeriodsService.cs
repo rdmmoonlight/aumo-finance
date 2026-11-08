@@ -1,7 +1,3 @@
-// <copyright file="PeriodsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using System.Globalization;
 
 namespace AumoBackend.Services.Periods;

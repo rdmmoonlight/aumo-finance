@@ -1,7 +1,4 @@
 #pragma warning disable CS1591
-// <copyright file="20260731050000_AddMobileTables.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 #nullable disable
 

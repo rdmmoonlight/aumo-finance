@@ -1,7 +1,3 @@
-// <copyright file="JournalLineDtoValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Validators.JournalEntries;
 
 using AumoBackend.DTOs;

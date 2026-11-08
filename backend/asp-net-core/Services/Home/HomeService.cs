@@ -1,7 +1,3 @@
-// <copyright file="HomeService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Home;
 
 using System.Globalization;

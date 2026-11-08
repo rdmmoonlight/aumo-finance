@@ -1,7 +1,3 @@
-// <copyright file="UpdateProfileRequestValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Validators.Settings;
 
 using System.Text.RegularExpressions;

@@ -1,7 +1,3 @@
-// <copyright file="JournalTypes.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Validators.JournalEntries;
 
 public static class JournalTypes

@@ -1,7 +1,3 @@
-// <copyright file="NotificationsService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Notifications;
 
 using AumoBackend.Data;

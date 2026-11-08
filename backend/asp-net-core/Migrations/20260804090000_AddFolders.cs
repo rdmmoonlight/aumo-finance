@@ -1,7 +1,4 @@
 #pragma warning disable CS1591
-// <copyright file="20260804090000_AddFolders.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 #nullable disable
 

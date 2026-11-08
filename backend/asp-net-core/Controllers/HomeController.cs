@@ -1,7 +1,3 @@
-// <copyright file="HomeController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 using AumoBackend.DTOs.Home;
 using AumoBackend.Services.Home;
 using AumoBackend.Validators.Common;

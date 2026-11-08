@@ -1,7 +1,3 @@
-// <copyright file="IGeneralLedgersService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Reports.GeneralLedgers;
 
 using AumoBackend.DTOs;

@@ -1,7 +1,3 @@
-// <copyright file="IAuthService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Auth;
 
 using System.Security.Claims;

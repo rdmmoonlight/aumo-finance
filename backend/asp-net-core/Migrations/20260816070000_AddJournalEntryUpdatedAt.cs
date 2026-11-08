@@ -1,7 +1,4 @@
 #pragma warning disable CS1591
-// <copyright file="20260816070000_AddJournalEntryUpdatedAt.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
 
 #nullable disable
 

@@ -1,7 +1,3 @@
-// <copyright file="UserProfileViewModel.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.ViewModels;
 
 using System;

@@ -1,7 +1,3 @@
-// <copyright file="JournalEntryController.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Controllers;
 
 using System;

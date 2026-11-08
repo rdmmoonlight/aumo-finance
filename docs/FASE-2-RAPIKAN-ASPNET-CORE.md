@@ -49,7 +49,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 
 | Fase | Status | Keterangan |
 |---|---|---|
-| 2.1 | Hampir selesai (4 dari 5 butir) | Sisa: header `PlaceholderCompany` di 110 berkas `.cs` |
+| 2.1 | Selesai (5 dari 5 butir) | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs` |
 | 2.2 | Belum dimulai | `backend/AumoBackend.Test` hanya berisi `test.txt` |
 | 2.3 | Belum dimulai | `AppDbContext` masih dipakai di 10 berkas `Controllers/` |
 | 2.4 | Belum dimulai | Folder `Domain/` belum ada |
@@ -58,7 +58,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.7 | Belum dimulai | Batas modul belum ditetapkan |
 | 2.8 | Belum dimulai | |
 
-Langkah berikutnya: selesaikan sisa Fase 2.1, lalu mulai Fase 2.2.
+Langkah berikutnya: mulai Fase 2.2 (proyek uji dan tes pertama).
 
 ---
 
@@ -67,7 +67,7 @@ Langkah berikutnya: selesaikan sisa Fase 2.1, lalu mulai Fase 2.2.
 Tujuan: mengurangi kebisingan sebelum perubahan struktur.
 
 - [x] Hapus `fix-build.js`, `fix-build-step2.js`, `fix-build-v2.js` sampai `v5.js`, `fix-build-final.js` (pastikan tidak dirujuk `build.ninja` atau workflow).
-- [ ] Ganti header `PlaceholderCompany` (atau hapus header; atur lewat `.editorconfig`/`stylecop` bila dipakai). **Belum selesai:** header masih ada di 110 berkas `.cs`; baru berkas yang tersentuh commit Fase 2.1 yang dibersihkan.
+- [x] Ganti header `PlaceholderCompany` (atau hapus header; atur lewat `.editorconfig`/`stylecop` bila dipakai). Header dihapus dari seluruh berkas `.cs` (komentar saja, tanpa perubahan kode); `SA1633` sudah `none` di `.editorconfig`.
 - [x] Tinjau `#pragma warning disable CA1725`; perbaiki penamaan parameter atau pertahankan dengan alasan tertulis.
 - [x] Pindahkan `PeriodLock` dari `Models/ChartOfAccountsModel.cs` ke berkas sendiri (belum mengubah isi).
 - [x] Pindahkan paket `xunit`, `Moq`, `Microsoft.NET.Test.Sdk` keluar dari `AumoBackend.csproj` (ke proyek uji pada fase 2.2).

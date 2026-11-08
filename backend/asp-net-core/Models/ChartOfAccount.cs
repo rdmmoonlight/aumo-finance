@@ -1,8 +1,4 @@
-﻿// <copyright file="ChartOfAccount.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
-namespace AumoBackend.Models;
+﻿namespace AumoBackend.Models;
 
 using System;
 using System.Collections.Generic;

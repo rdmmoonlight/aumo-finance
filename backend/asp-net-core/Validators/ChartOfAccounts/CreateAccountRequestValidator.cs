@@ -1,7 +1,3 @@
-// <copyright file="CreateAccountRequestValidator.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Validators.ChartOfAccounts;
 
 using AumoBackend.DTOs;

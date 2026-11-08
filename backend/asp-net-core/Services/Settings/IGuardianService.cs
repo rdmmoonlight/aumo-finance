@@ -1,7 +1,3 @@
-// <copyright file="IGuardianService.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Settings
 {
     using AumoBackend.DTOs;

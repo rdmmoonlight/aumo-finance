@@ -1,7 +1,3 @@
-// <copyright file="AumoUserClaimsPrincipalFactory.cs" company="PlaceholderCompany">
-// Copyright (c) PlaceholderCompany. All rights reserved.
-// </copyright>
-
 namespace AumoBackend.Services.Identity
 {
     using System.Security.Claims;
