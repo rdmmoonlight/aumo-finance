@@ -260,7 +260,7 @@ public class JournalEntryService : IJournalEntryService
         return await this.transactionNumberService.PeekNextAsync(userId, type, entryDate ?? DateTime.Today);
     }
 
-    private static List<CreateGeneralJournalLineRequest> ValidateAndExtractLines(List<CreateGeneralJournalLineRequest> lines)
+    internal static List<CreateGeneralJournalLineRequest> ValidateAndExtractLines(List<CreateGeneralJournalLineRequest> lines)
     {
         var effectiveLines = lines
             .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))

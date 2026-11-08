@@ -50,7 +50,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | Fase | Status | Keterangan |
 |---|---|---|
 | 2.1 | Selesai (5 dari 5 butir) | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs` |
-| 2.2 | Belum dimulai | `backend/AumoBackend.Test` hanya berisi `test.txt` |
+| 2.2 | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
 | 2.3 | Belum dimulai | `AppDbContext` masih dipakai di 10 berkas `Controllers/` |
 | 2.4 | Belum dimulai | Folder `Domain/` belum ada |
 | 2.5 | Belum dimulai | `IJournalPostingService` belum ada |
@@ -58,7 +58,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.7 | Belum dimulai | Batas modul belum ditetapkan |
 | 2.8 | Belum dimulai | |
 
-Langkah berikutnya: mulai Fase 2.2 (proyek uji dan tes pertama).
+Langkah berikutnya: jalankan workflow `Quality & Formatting Workflow`, perbaiki tes yang gagal, lalu mulai Fase 2.3.
 
 ---
 
@@ -78,15 +78,21 @@ Selesai bila: build bersih, tidak ada berkas skrip sisa, `PeriodLock` punya berk
 
 Tujuan: jaring pengaman sebelum logika dipindahkan.
 
-- [ ] Buat proyek `backend/AumoBackend.Test` (xunit) dan tambahkan ke `Backend.slnx`.
-- [ ] Tes logika murni yang sudah ada:
+- [x] Buat proyek `backend/AumoBackend.Test` (xunit) dan tambahkan ke `Backend.slnx`.
+- [x] Tes logika murni yang sudah ada:
   - `PeriodLock.IsDateLocked` (batas awal dan akhir periode, periode terbuka, daftar kosong)
   - `ValidateAndExtractLines` (kurang dari 2 baris, debit tidak sama kredit, total nol, baris kosong diabaikan)
   - `GeneralJournalWriter.BuildRows` (urutan `LineOrder`, status `Posted`)
   - Rentang nomor akun per tipe (`ValidateReferenceNumber`)
   - Perhitungan saldo berjalan ledger (`IsDebitNormal` dan akumulasi)
-- [ ] Tes layanan dengan database uji (EF Core InMemory tidak cukup untuk fitur PostgreSQL; gunakan Testcontainers PostgreSQL atau SQLite untuk alur sederhana) untuk: buat jurnal, ubah jurnal, hapus jurnal, tutup periode.
-- [ ] Tambahkan langkah `dotnet test` ke `code-quality.yml`.
+- [x] Tes layanan dengan database uji (EF Core InMemory tidak cukup untuk fitur PostgreSQL; gunakan Testcontainers PostgreSQL atau SQLite untuk alur sederhana) untuk: buat jurnal, ubah jurnal, hapus jurnal, tutup periode. Dipakai: Testcontainers PostgreSQL (`Integration/`).
+- [x] Tambahkan langkah `dotnet test` ke `code-quality.yml`.
+
+Catatan pelaksanaan:
+- `Backend.slnx` sebelumnya berisi salinan log PowerShell (bukan XML); sudah diganti dengan solusi valid (backend + proyek uji). `test.txt` dihapus.
+- `ValidateAndExtractLines` dan `GeneralLedgersService.IsDebitNormal` diubah dari `private` menjadi `internal` (tanpa perubahan perilaku) agar bisa diuji; `InternalsVisibleTo` ditambahkan ke `AumoBackend.csproj`.
+- Temuan no. 4, kondisi saat ini: hapus jurnal penyesuaian sudah memakai `JournalEntryService.DeleteAsync` (terkunci per tanggal, ada tesnya); celah yang tersisa adalah import (`ToolsService`), dicatat tes `Import_IntoClosedPeriod_IsNotRejected_CurrentBehavior`.
+- Ketergantungan lingkungan: tes integrasi butuh Docker (tersedia di `ubuntu-latest`).
 
 Selesai bila: `dotnet test` hijau lokal dan di CI; setiap aturan di tabel temuan no. 4 punya tes yang menjelaskan perilaku saat ini (termasuk celahnya).
 

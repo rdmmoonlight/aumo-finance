@@ -329,7 +329,7 @@ public class GeneralLedgersService : IGeneralLedgersService
         }).OrderBy(x => x.ReferenceNumber).ToList();
     }
 
-    private static bool IsDebitNormal(string? type) =>
+    internal static bool IsDebitNormal(string? type) =>
         type != null && (type.Equals("Assets", StringComparison.OrdinalIgnoreCase) || type.Equals("Asset", StringComparison.OrdinalIgnoreCase) || ExpenseTypes.Contains(type, StringComparer.OrdinalIgnoreCase));
 
     private async Task ClearLedgerDataForPeriodAsync(Guid userId, int periodId)
