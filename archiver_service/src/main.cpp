@@ -1,78 +1,110 @@
-#include <iostream>
-#include <thread>
+#include <algorithm>
+#include <cctype>
 #include <chrono>
-#include <ctime>
 #include <cstdlib>
-#include <format>
-#include "DatabaseMigrator.hpp"
+#include <initializer_list>
+#include <iostream>
+#include <map>
+#include <string>
+#include <thread>
 #include "ArchiverService.hpp"
+#include "DatabaseMigrator.hpp"
+#include "TableRef.hpp"
+#include "Str.hpp"
 
-std::chrono::seconds getSecondsUntilNextMonthFirstDay() {
-    auto now = std::chrono::system_clock::now();
-    std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-    
-    std::tm target_tm = *std::localtime(&now_c);
-    target_tm.tm_mday = 1;
-    target_tm.tm_hour = 0;
-    target_tm.tm_min = 0;
-    target_tm.tm_sec = 0;
+namespace {
 
-    if (target_tm.tm_mon == 11) {
-        target_tm.tm_mon = 0;
-        target_tm.tm_year += 1;
-    } else {
-        target_tm.tm_mon += 1;
-    }
-
-    std::time_t target_c = std::mktime(&target_tm);
-    auto target_time = std::chrono::system_clock::from_time_t(target_c);
-
-    return std::chrono::duration_cast<std::chrono::seconds>(target_time - now);
+std::string lower(std::string s) {
+    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+    return s;
 }
 
-int main() {
-    const char* db_env = std::getenv("DATABASE_URL");
-    std::string db_conn = db_env ? db_env : "host=localhost port=5432 dbname=aumo_db user=postgres password=secret";
-
-    // Nama tabel persis sesuai model EF Core (PascalCase)
-    const std::string source_table = "public.\"GeneralJournal\"";
-    const std::string archive_table_name = "\"GeneralJournal\"";
-    const std::string full_archive_table = "archive.\"GeneralJournal\"";
-
-    std::cout << "[Archiver Daemon] Service Archiver C++ siap diawali...\n";
-
-    // Run Migrator (Membuat schema archive & archive.general_journals jika belum ada)
-    DatabaseMigrator migrator(db_conn);
-    if (!migrator.runMigrations(source_table, archive_table_name)) {
-        std::cerr << "[Fatal Error] Migrasi schema gagal. Service dihentikan.\n";
-        return 1;
+// Mengubah connection string gaya Npgsql ("Host=..;Database=..;Username=..;Password=..")
+// menjadi format libpq ("host=.. dbname=.. user=.. password=..").
+std::string npgsqlToLibpq(const std::string& npgsql) {
+    std::map<std::string, std::string> kv;
+    size_t pos = 0;
+    while (pos < npgsql.size()) {
+        size_t end = npgsql.find(';', pos);
+        if (end == std::string::npos) end = npgsql.size();
+        std::string part = npgsql.substr(pos, end - pos);
+        size_t eq = part.find('=');
+        if (eq != std::string::npos) {
+            std::string key = lower(part.substr(0, eq));
+            key.erase(std::remove(key.begin(), key.end(), ' '), key.end());
+            kv[key] = part.substr(eq + 1);
+        }
+        pos = end + 1;
     }
+    auto get = [&](std::initializer_list<const char*> names) -> std::string {
+        for (auto n : names) if (kv.count(n)) return kv[n];
+        return "";
+    };
+    std::string out;
+    auto add = [&](const char* k, const std::string& v) {
+        if (v.empty()) return;
+        std::string esc;
+        for (char c : v) { if (c == '\\' || c == '\'') esc += '\\'; esc += c; }
+        out += cat(k, "='", esc, "' ");
+    };
+    add("host", get({"host", "server"}));
+    add("port", get({"port"}));
+    add("dbname", get({"database", "dbname"}));
+    add("user", get({"username", "userid", "uid", "user"}));
+    add("password", get({"password", "pwd"}));
+    std::string ssl = lower(get({"sslmode"}));
+    if (ssl == "require" || ssl == "verifyfull" || ssl == "verifyca") out += "sslmode=require ";
+    else if (ssl == "disable") out += "sslmode=disable ";
+    return out;
+}
 
+// Prioritas: DATABASE_URL (format libpq/URI) -> ConnectionStrings__DefaultConnection
+// (env yang sama dengan backend .NET) -> default lokal.
+std::string resolveConnectionString() {
+    if (const char* url = std::getenv("DATABASE_URL"); url && *url) return url;
+    if (const char* dn = std::getenv("ConnectionStrings__DefaultConnection"); dn && *dn) {
+        std::string v = dn;
+        if (v.rfind("postgres://", 0) == 0 || v.rfind("postgresql://", 0) == 0) return v;
+        return npgsqlToLibpq(v);
+    }
+    return "host=localhost port=5432 dbname=aumo_db user=postgres password=secret";
+}
+
+int envInt(const char* name, int fallback) {
+    if (const char* v = std::getenv(name); v && *v) {
+        try { return std::max(1, std::stoi(v)); } catch (...) {}
+    }
+    return fallback;
+}
+
+} // namespace
+
+int main() {
+    const std::string db_conn = resolveConnectionString();
+
+    // Nama tabel persis sesuai model EF Core (PascalCase).
+    const TableRef source_table{"public", "GeneralJournal"};
+    const TableRef archive_table{"archive", "GeneralJournal"};
+    const TableRef periods_table{"public", "Periods"};
+
+    const int interval_minutes = envInt("ARCHIVE_INTERVAL_MINUTES", 360);
+
+    std::cout << "[Archiver Daemon] Service Archiver C++ dimulai...\n" << std::flush;
+
+    DatabaseMigrator migrator(db_conn);
     ArchiverService archiver(db_conn);
 
-    while (true) {
-        auto wait_duration = getSecondsUntilNextMonthFirstDay();
-        auto hours_left = std::chrono::duration_cast<std::chrono::hours>(wait_duration).count();
-
-        std::cout << std::format("[Archiver Daemon] Menunggu eksekusi berikutnya (~{} jam lagi pada awal bulan)...\n", hours_left);
-
-        std::this_thread::sleep_for(wait_duration);
-
-        // Eksekusi pada tanggal 1 awal bulan untuk data bulan lalu
-        auto now = std::chrono::system_clock::now();
-        std::time_t now_c = std::chrono::system_clock::to_time_t(now);
-        std::tm current_tm = *std::localtime(&now_c);
-
-        int target_year = current_tm.tm_year + 1900;
-        int target_month = current_tm.tm_mon; 
-
-        if (target_month == 0) {
-            target_month = 12;
-            target_year -= 1;
-        }
-
-        archiver.archiveMonthlyData(source_table, full_archive_table, target_year, target_month);
+    // Tidak pernah keluar dengan error: menunggu DB + migrasi backend selesai,
+    // supaya supervisord tidak crash-loop dan tidak menghambat startup web.
+    migrator.waitForSourceTable(source_table, 15);
+    while (!migrator.runMigrations(source_table, archive_table)) {
+        std::this_thread::sleep_for(std::chrono::seconds(30));
     }
 
-    return 0;
+    while (true) {
+        archiver.archiveClosedPeriods(source_table, archive_table, periods_table);
+        std::cout << cat("[Archiver Daemon] Pemeriksaan berikutnya ", interval_minutes, " menit lagi.\n")
+                  << std::flush;
+        std::this_thread::sleep_for(std::chrono::minutes(interval_minutes));
+    }
 }
