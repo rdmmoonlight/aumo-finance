@@ -2,12 +2,12 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import vue3GoogleLogin from 'vue3-google-login'
 import App from './App.vue'
-import './assets/main.css'
 import { getBackendTarget } from './lib/api'
 import { client } from './lib/generated/client.gen'
 import { createVueQueryPlugin } from './lib/query-client'
 import './lib/theme'
 import router from './router'
+// @ts-expect-error CSS side-effect imports are handled by Vite.
 import './styles/index.css'
 
 const app = createApp(App)

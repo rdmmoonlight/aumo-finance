@@ -34,17 +34,11 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div
-    v-if="!profile"
-    class="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]"
-  >
+  <div v-if="!profile" class="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]">
     <LandingLeft />
 
-    <LandingRight
-      :checking-auth="checkingAuth"
-      @login="handleOpenModal('login')"
-      @register="handleOpenModal('register')"
-    />
+    <LandingRight :checking-auth="checkingAuth" @login="handleOpenModal('login')"
+      @register="handleOpenModal('register')" />
 
     <AuthDialog v-model:open="open" :auth-mode="authMode" @success="handleSuccess" />
   </div>

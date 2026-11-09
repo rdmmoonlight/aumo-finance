@@ -1,4 +1,3 @@
-import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue'
 import { authKeys, getProfileApi } from '@/features/auth/api/auth.api'
 import { queryClient } from '@/lib/query-client'
 import { createRouter, createWebHistory } from 'vue-router'
@@ -6,11 +5,12 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // --- / Landing (publik) ---
+    // 1. Landing Page (Publik)
     {
       path: '/',
       name: 'landing',
       component: () => import('../features/landing/LandingPage.vue'),
+      meta: { requiresAuth: false },
     },
     {
       path: '/_test-auth',
@@ -18,26 +18,20 @@ const router = createRouter({
       component: () => import('../views/_TestAuth.vue'),
     },
 
-    // --- Auth (publik) ---
-    // /auth -> redirect ke /auth/login
+    // 2. Auth Routes (Publik)
     {
       path: '/auth',
       redirect: '/auth/login',
-    },
-
-    // --- _authenticated: route induk ---
-    // Semua anak di bawah ini render di dalam AuthenticatedLayout
-    // dan kena guard requiresAuth
-    {
-      path: '',
-      component: AuthenticatedLayout,
-      meta: { requiresAuth: true },
       children: [
-        // Fitur inti
+        {
+          path: 'login',
+          name: 'login',
+          component: () => import('../features/auth/LoginPage.vue'), // Pastikan file login Anda di-import di sini
+        },
       ],
     },
 
-    // Di luar §6 - showcase lama, tetap publik
+    // 4. Showcase (Publik)
     {
       path: '/_gallery',
       name: 'gallery-showcase',
@@ -46,14 +40,12 @@ const router = createRouter({
   ],
 })
 
-// Guard sesi: hanya untuk route di bawah _authenticated
+// Navigation Guard
 router.beforeEach(async (to) => {
   const needsAuth = to.matched.some((r) => r.meta.requiresAuth)
   if (!needsAuth) return true
 
   try {
-    // Pakai cache yang sama dengan useGetProfileQuery()
-    // Kalau masih fresh, tidak fetch ulang ke /auth/me
     const profile = await queryClient.fetchQuery({
       queryKey: authKeys.profile,
       queryFn: ({ signal }) => getProfileApi(signal),

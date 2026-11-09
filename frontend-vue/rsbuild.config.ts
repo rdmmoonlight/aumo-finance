@@ -29,7 +29,7 @@ export default defineConfig(() => {
     },
     server: {
       port: 5174,
-      open: "chrome",
+      open: true,
       proxy: {
         "/api": {
           target,
@@ -40,4 +40,3 @@ export default defineConfig(() => {
     },
   };
 });
-
