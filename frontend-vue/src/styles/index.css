@@ -1,9 +1,8 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700&display=swap');
 
-@import "tailwindcss";
-@import "./theme.css";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import './theme.css';
+@import 'tw-animate-css';
 
 /* =========================================
       1. VARIANTS & SETUP
@@ -50,10 +49,8 @@
   --color-matte-active-fg: #0e0e10;
 
   /* Shadows */
-  --shadow-soft:
-    0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
-  --shadow-glow:
-    0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  --shadow-glow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 8px 32px rgba(0, 0, 0, 0.5);
 
   /* Sidebar */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -106,7 +103,7 @@
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "ss01", "ss02", "cv01", "cv02";
+    font-feature-settings: 'ss01', 'ss02', 'cv01', 'cv02';
     letter-spacing: -0.011em;
   }
 
@@ -140,35 +137,12 @@
 
   /* 4b. Explicit light islands inside dark mode */
   /* Hanya ubah warna teks hitam jika elemen tersebut berada dalam konteks light mode aktif */
-  .light
-    :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50
-    ) {
+  .light :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) {
     color: #000000;
   }
 
-  :is(
-    .bg-white,
-    .bg-zinc-50,
-    .bg-zinc-100,
-    .bg-gray-50,
-    .bg-gray-100,
-    .bg-slate-50
-  )::selection,
-  :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50
-    )
-    *::selection {
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50)::selection,
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50) *::selection {
     background-color: #ffffff;
     color: #000000;
   }
@@ -181,14 +155,7 @@
     .bg-gray-100,
     .bg-slate-50
   )::-moz-selection,
-  :is(
-      .bg-white,
-      .bg-zinc-50,
-      .bg-zinc-100,
-      .bg-gray-50,
-      .bg-gray-100,
-      .bg-slate-50
-    )
+  :is(.bg-white, .bg-zinc-50, .bg-zinc-100, .bg-gray-50, .bg-gray-100, .bg-slate-50)
     *::-moz-selection {
     background-color: #ffffff;
     color: #000000;
@@ -196,40 +163,14 @@
 
   /* 4c. Light mode selection override */
   .light,
-  .light
-    :is(
-      .bg-card,
-      .bg-popover,
-      .bg-background,
-      .bg-muted,
-      input,
-      textarea,
-      select
-    ) {
+  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select) {
     --selection-bg: #ffffff;
     --selection-fg: #000000;
   }
 
+  .light :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select)::selection,
   .light
-    :is(
-      .bg-card,
-      .bg-popover,
-      .bg-background,
-      .bg-muted,
-      input,
-      textarea,
-      select
-    )::selection,
-  .light
-    :is(
-      .bg-card,
-      .bg-popover,
-      .bg-background,
-      .bg-muted,
-      input,
-      textarea,
-      select
-    )
+    :is(.bg-card, .bg-popover, .bg-background, .bg-muted, input, textarea, select)
     *::selection {
     background-color: #ffffff;
     color: #000000;

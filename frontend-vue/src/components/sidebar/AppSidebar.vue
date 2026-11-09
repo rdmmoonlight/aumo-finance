@@ -1,31 +1,62 @@
 <template>
   <!-- WRAPPER -->
-  <div data-slot="sidebar-wrapper" :data-state="sidebarStore.state" data-collapsible="icon" data-variant="sidebar"
-    data-side="left" :style="{
+  <div
+    data-slot="sidebar-wrapper"
+    :data-state="sidebarStore.state"
+    data-collapsible="icon"
+    data-variant="sidebar"
+    data-side="left"
+    :style="{
       '--sidebar-width': '285px',
       '--sidebar-width-icon': '3.5rem',
-    }" class="group peer hidden md:block text-sidebar-foreground">
+    }"
+    class="group peer hidden md:block text-sidebar-foreground"
+  >
     <!-- SIDEBAR-GAP -->
-    <div data-slot="sidebar-gap"
-      class="relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-[--sidebar-width-icon]" />
+    <div
+      data-slot="sidebar-gap"
+      class="relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
+    />
 
     <!-- SIDEBAR-CONTAINER -->
-    <div data-slot="sidebar-container"
-      class="fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:left-auto group-data-[side=right]:right-0 group-data-[side=right]:border-l">
+    <div
+      data-slot="sidebar-container"
+      class="fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)] group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:left-auto group-data-[side=right]:right-0 group-data-[side=right]:border-l"
+    >
       <!-- SIDEBAR-INNER -->
-      <div data-slot="sidebar-inner"
-        class="bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow flex h-full w-full flex-col">
+      <div
+        data-slot="sidebar-inner"
+        class="bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow flex h-full w-full flex-col"
+      >
         <!-- Header -->
-        <div :class="[
-          'border-b shrink-0 flex items-center gap-2',
-          sidebarStore.isCollapsed ? 'flex-col justify-center p-2.5 gap-3' : 'flex-row justify-between p-3.5',
-        ]">
-          <div v-if="sidebarStore.isCollapsed" class="flex size-9 items-center justify-center rounded-xl bg-primary/10">
-            <img src="/favicon.ico" alt="Aumo" width="28" height="28" class="h-7 w-7 object-contain" />
+        <div
+          :class="[
+            'border-b shrink-0 flex items-center gap-2',
+            sidebarStore.isCollapsed
+              ? 'flex-col justify-center p-2.5 gap-3'
+              : 'flex-row justify-between p-3.5',
+          ]"
+        >
+          <div
+            v-if="sidebarStore.isCollapsed"
+            class="flex size-9 items-center justify-center rounded-xl bg-primary/10"
+          >
+            <img
+              src="/favicon.ico"
+              alt="Aumo"
+              width="28"
+              height="28"
+              class="h-7 w-7 object-contain"
+            />
           </div>
           <h2 v-else class="text-xl font-bold tracking-tight truncate">Aumo Finance</h2>
 
-          <Button variant="ghost" size="icon" class="h-7 w-7 shrink-0" @click="sidebarStore.toggleSidebar">
+          <Button
+            variant="ghost"
+            size="icon"
+            class="h-7 w-7 shrink-0"
+            @click="sidebarStore.toggleSidebar"
+          >
             <PanelLeft v-if="sidebarStore.isCollapsed" class="h-4 w-4" />
             <PanelLeftClose v-else class="h-4 w-4" />
           </Button>
@@ -35,7 +66,8 @@
         <div class="p-2.5 flex-1 overflow-y-auto">
           <div>
             <div
-              class="uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden text-xs">
+              class="uppercase tracking-widest text-muted-foreground mb-2 px-2 group-data-[collapsible=icon]:hidden text-xs"
+            >
               Navigation
             </div>
             <div>
@@ -43,12 +75,15 @@
                 <li v-for="item in navigation" :key="item.title">
                   <Tooltip>
                     <TooltipTrigger as-child>
-                      <RouterLink :to="item.url" :class="[
-                        'flex items-center gap-2.5 text-sm h-8 font-normal px-2 rounded-md transition-colors',
-                        isActive(item.url)
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                          : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                      ]">
+                      <RouterLink
+                        :to="item.url"
+                        :class="[
+                          'flex items-center gap-2.5 text-sm h-8 font-normal px-2 rounded-md transition-colors',
+                          isActive(item.url)
+                            ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                            : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                        ]"
+                      >
                         <component :is="item.icon" :class="ICON_CLASS" />
                         <span class="truncate group-data-[collapsible=icon]:hidden">
                           {{ item.title }}
@@ -66,7 +101,12 @@
         </div>
 
         <!-- Footer: Dropdown Pengguna -->
-        <div :class="['border-t shrink-0', sidebarStore.isCollapsed ? 'p-2 flex justify-center' : 'p-2.5']">
+        <div
+          :class="[
+            'border-t shrink-0',
+            sidebarStore.isCollapsed ? 'p-2 flex justify-center' : 'p-2.5',
+          ]"
+        >
           <ul>
             <li>
               <DropdownMenu>
@@ -74,11 +114,15 @@
                   <!-- Mode collapsed -->
                   <Tooltip v-if="sidebarStore.isCollapsed">
                     <TooltipTrigger as-child>
-                      <button class="mx-auto flex size-9 items-center justify-center rounded-full p-0 hover:bg-accent">
+                      <button
+                        class="mx-auto flex size-9 items-center justify-center rounded-full p-0 hover:bg-accent"
+                      >
                         <Avatar class="h-8 w-8">
                           <AvatarImage :src="user?.avatarUrl" :alt="user?.fullName || 'User'" />
                           <AvatarFallback class="bg-muted text-xs">
-                            <template v-if="user?.fullName">{{ user.fullName.slice(0, 2).toUpperCase() }}</template>
+                            <template v-if="user?.fullName">{{
+                              user.fullName.slice(0, 2).toUpperCase()
+                            }}</template>
                             <User v-else class="h-4 w-4" />
                           </AvatarFallback>
                         </Avatar>
@@ -90,22 +134,32 @@
                   </Tooltip>
 
                   <!-- Mode expanded -->
-                  <button v-else
-                    class="h-auto w-full flex items-center justify-between px-2 py-2.5 rounded-md hover:bg-accent text-left">
+                  <button
+                    v-else
+                    class="h-auto w-full flex items-center justify-between px-2 py-2.5 rounded-md hover:bg-accent text-left"
+                  >
                     <div class="flex min-w-0 items-center gap-2.5">
                       <Avatar class="h-8 w-8 shrink-0">
                         <AvatarImage :src="user?.avatarUrl" :alt="user?.fullName || 'User'" />
                         <AvatarFallback class="bg-muted text-xs">
-                          <template v-if="user?.fullName">{{ user.fullName.slice(0, 2).toUpperCase() }}</template>
+                          <template v-if="user?.fullName">{{
+                            user.fullName.slice(0, 2).toUpperCase()
+                          }}</template>
                           <User v-else class="h-4 w-4" />
                         </AvatarFallback>
                       </Avatar>
                       <div class="flex min-w-0 flex-col truncate">
                         <span class="truncate text-sm font-medium leading-tight">
-                          {{ !isMounted || isUserLoading ? 'Memuat...' : user?.fullName || user?.userName || 'Guest' }}
+                          {{
+                            !isMounted || isUserLoading
+                              ? 'Memuat...'
+                              : user?.fullName || user?.userName || 'Guest'
+                          }}
                         </span>
                         <span class="truncate text-xs text-muted-foreground">
-                          {{ !isMounted || isUserLoading ? '...' : user?.email || 'Tidak ada email' }}
+                          {{
+                            !isMounted || isUserLoading ? '...' : user?.email || 'Tidak ada email'
+                          }}
                         </span>
                       </div>
                     </div>
@@ -113,8 +167,12 @@
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" :side="sidebarStore.isCollapsed ? 'right' : 'top'" :side-offset="8"
-                  class="w-56">
+                <DropdownMenuContent
+                  align="end"
+                  :side="sidebarStore.isCollapsed ? 'right' : 'top'"
+                  :side-offset="8"
+                  class="w-56"
+                >
                   <DropdownMenuItem as-child class="text-sm">
                     <RouterLink to="/settings">
                       <Settings class="mr-2 h-4 w-4" />
@@ -132,9 +190,13 @@
         </div>
 
         <!-- Rail -->
-        <button data-slot="sidebar-rail" aria-label="Toggle Sidebar" title="Toggle Sidebar"
+        <button
+          data-slot="sidebar-rail"
+          aria-label="Toggle Sidebar"
+          title="Toggle Sidebar"
           class="absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w- hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex"
-          @click="sidebarStore.toggleSidebar" />
+          @click="sidebarStore.toggleSidebar"
+        />
       </div>
     </div>
   </div>
@@ -150,11 +212,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { useGetProfileQuery, useLogoutMutation } from '@/features/auth/api/auth.api'
 import { queryClient } from '@/lib/query-client'
 import {

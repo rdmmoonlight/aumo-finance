@@ -6,8 +6,11 @@
       <div class="flex items-center flex-1 max-w-md">
         <div class="relative w-full">
           <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input type="search" placeholder="Cari transaksi, akun, atau laporan..."
-            class="pl-9 bg-muted/40 text-sm focus-visible:bg-background" />
+          <Input
+            type="search"
+            placeholder="Cari transaksi, akun, atau laporan..."
+            class="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
+          />
         </div>
       </div>
 
@@ -15,11 +18,17 @@
       <div class="flex items-center">
         <Popover>
           <PopoverTrigger as-child>
-            <Button variant="ghost" size="icon" class="relative text-muted-foreground hover:text-foreground"
-              aria-label="Notifikasi">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="relative text-muted-foreground hover:text-foreground"
+              aria-label="Notifikasi"
+            >
               <Bell class="h-5 w-5" />
-              <span v-if="unreadCount > 0"
-                class="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+              <span
+                v-if="unreadCount > 0"
+                class="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive animate-pulse"
+              />
             </Button>
           </PopoverTrigger>
           <PopoverContent class="w-80 p-0 mr-4" align="end">
@@ -31,8 +40,14 @@
                   {{ unreadCount }} baru
                 </Badge>
               </div>
-              <Button v-if="unreadCount > 0" variant="ghost" size="sm" :disabled="isMarkingAllRead"
-                class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground" @click="handleMarkAllAsRead">
+              <Button
+                v-if="unreadCount > 0"
+                variant="ghost"
+                size="sm"
+                :disabled="isMarkingAllRead"
+                class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
+                @click="handleMarkAllAsRead"
+              >
                 <Loader2 v-if="isMarkingAllRead" class="h-3 w-3 animate-spin" />
                 <span v-else>Tandai dibaca</span>
               </Button>
@@ -40,17 +55,28 @@
 
             <!-- List Notifikasi -->
             <div class="max-h-80 overflow-y-auto divide-y">
-              <div v-if="isNotificationsLoading"
-                class="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+              <div
+                v-if="isNotificationsLoading"
+                class="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2"
+              >
                 <Loader2 class="h-4 w-4 animate-spin" /> Memuat notifikasi...
               </div>
-              <div v-else-if="notificationsData.length === 0" class="p-4 text-center text-xs text-muted-foreground">
+              <div
+                v-else-if="notificationsData.length === 0"
+                class="p-4 text-center text-xs text-muted-foreground"
+              >
                 Tidak ada notifikasi saat ini.
               </div>
-              <div v-for="item in notificationsData" v-else :key="item.id" :class="[
-                'p-3 text-xs cursor-pointer transition-colors hover:bg-muted/50 flex gap-3',
-                !item.isRead ? 'bg-muted/20 font-medium' : 'opacity-70',
-              ]" @click="handleMarkAsRead(item.id, item.isRead)">
+              <div
+                v-for="item in notificationsData"
+                v-else
+                :key="item.id"
+                :class="[
+                  'p-3 text-xs cursor-pointer transition-colors hover:bg-muted/50 flex gap-3',
+                  !item.isRead ? 'bg-muted/20 font-medium' : 'opacity-70',
+                ]"
+                @click="handleMarkAsRead(item.id, item.isRead)"
+              >
                 <div class="mt-0.5">
                   <AlertTriangle v-if="item.type === 'warning'" class="h-4 w-4 text-amber-500" />
                   <Info v-else class="h-4 w-4 text-blue-500" />
@@ -87,7 +113,10 @@
             <template v-if="!(segment === 'home' && index === 0)">
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage v-if="index === pathSegments.length - 1" class="text-xs font-semibold">
+                <BreadcrumbPage
+                  v-if="index === pathSegments.length - 1"
+                  class="text-xs font-semibold"
+                >
                   {{ formatSegment(segment) }}
                 </BreadcrumbPage>
                 <BreadcrumbLink v-else :href="getSegmentUrl(index)" class="text-xs">
@@ -101,16 +130,22 @@
 
       <!-- Status Periode -->
       <div class="flex items-center gap-4 text-muted-foreground">
-        <Badge v-if="selectedPeriod" variant="outline" :class="[
-          'gap-1.5 font-medium text-xs',
-          selectedPeriod.isClosed
-            ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
-            : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
-        ]">
-          <span :class="[
-            'h-1.5 w-1.5 rounded-full',
-            selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
-          ]" />
+        <Badge
+          v-if="selectedPeriod"
+          variant="outline"
+          :class="[
+            'gap-1.5 font-medium text-xs',
+            selectedPeriod.isClosed
+              ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
+              : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
+          ]"
+        >
+          <span
+            :class="[
+              'h-1.5 w-1.5 rounded-full',
+              selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
+            ]"
+          />
           Periode: {{ selectedPeriod.periodName }}
           {{ selectedPeriod.isClosed ? ' (Closed)' : ' (Aktif)' }}
         </Badge>
@@ -135,28 +170,15 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Separator } from '@/components/ui/separator'
-import {
-  type PeriodItem,
-  useGetPeriodsQuery,
-} from '@/features/periods/api/periods.api'
+import { type PeriodItem, useGetPeriodsQuery } from '@/features/periods/api/periods.api'
 import {
   useGetNotificationsQuery,
   useMarkAllNotificationsReadMutation,
   useMarkNotificationReadMutation,
 } from '@/features/settings/api/notifications.api'
-import {
-  AlertTriangle,
-  Bell,
-  Info,
-  Loader2,
-  Search,
-} from 'lucide-vue-next'
+import { AlertTriangle, Bell, Info, Loader2, Search } from 'lucide-vue-next'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -176,16 +198,17 @@ const pathname = computed(() => route.path)
 const { data: rawPeriodsData, isLoading: isPeriodLoading } = useGetPeriodsQuery()
 
 // 2. Fetch Notifikasi (menggunakan composable TanStack Query)
-const { data: rawNotifications, isLoading: isNotificationsLoading } = useGetNotificationsQuery(
-  { limit: 20 }
-)
+const { data: rawNotifications, isLoading: isNotificationsLoading } = useGetNotificationsQuery({
+  limit: 20,
+})
 
 const notificationsData = computed<NotificationItem[]>(
   () => (rawNotifications.value as unknown as NotificationItem[]) || [],
 )
 
 // 3. Mutations Notifikasi
-const { mutateAsync: markAllNotificationsRead, isPending: isMarkingAllRead } = useMarkAllNotificationsReadMutation()
+const { mutateAsync: markAllNotificationsRead, isPending: isMarkingAllRead } =
+  useMarkAllNotificationsReadMutation()
 const { mutateAsync: markNotificationRead } = useMarkNotificationReadMutation()
 
 // Handlers Notifikasi
@@ -206,9 +229,7 @@ const handleMarkAsRead = async (id: string, isRead?: boolean) => {
   }
 }
 
-const unreadCount = computed(
-  () => notificationsData.value.filter((n) => !n.isRead).length,
-)
+const unreadCount = computed(() => notificationsData.value.filter((n) => !n.isRead).length)
 
 // Parsing array periods
 const periods = computed<PeriodItem[]>(() => {
@@ -222,8 +243,7 @@ const selectedPeriod = computed(() => periods.value.find((p) => p.isSelected))
 const pathSegments = computed(() => pathname.value.split('/').filter(Boolean))
 
 // Helpers Breadcrumb & Waktu
-const getSegmentUrl = (index: number) =>
-  `/${pathSegments.value.slice(0, index + 1).join('/')}`
+const getSegmentUrl = (index: number) => `/${pathSegments.value.slice(0, index + 1).join('/')}`
 
 const formatSegment = (segment: string) =>
   decodeURIComponent(segment)

@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { RouterLink } from 'vue-router';
+import { RouterLink } from 'vue-router'
 
 const currentYear = new Date().getFullYear()
 </script>

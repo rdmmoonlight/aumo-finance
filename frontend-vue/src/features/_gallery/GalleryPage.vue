@@ -5,8 +5,23 @@ import { ref } from 'vue'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from '@/components/ui/card'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { Skeleton } from '@/components/ui/skeleton'
 
@@ -16,21 +31,71 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@/components/ui/checkbox'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Toggle } from '@/components/ui/toggle'
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
 
 // Navigation & Layout
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from '@/components/ui/breadcrumb'
-import { NavigationMenu, NavigationMenuItem, NavigationMenuLink, NavigationMenuList } from '@/components/ui/navigation-menu'
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb'
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from '@/components/ui/navigation-menu'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 // Overlays, Dialogs & Modals
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog'
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 
 // Disclosure & Organization
@@ -52,14 +117,15 @@ const isCollapsibleOpen = ref(false)
   <div class="container mx-auto p-8 space-y-12 pb-24">
     <div class="space-y-2 border-b pb-4">
       <h1 class="text-3xl font-bold tracking-tight">Gallery Showcase Komponen (Uji Visual)</h1>
-      <p class="text-muted-foreground">Halaman pengujian internal untuk verifikasi varian dan *state* UI. Dihapus pada Fase 10.</p>
+      <p class="text-muted-foreground">
+        Halaman pengujian internal untuk verifikasi varian dan *state* UI. Dihapus pada Fase 10.
+      </p>
     </div>
 
     <!-- 1. DATA DISPLAY & TYPOGRAPHY -->
     <section class="space-y-4">
       <h2 class="text-xl font-semibold">1. Data Display & Typography</h2>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-        
         <!-- Label, Badge & Avatar -->
         <Card>
           <CardHeader>
@@ -196,7 +262,9 @@ const isCollapsibleOpen = ref(false)
               <Label>Checkbox</Label>
               <div class="flex items-center space-x-2">
                 <Checkbox id="terms" v-model:checked="checkboxVal" />
-                <label for="terms" class="text-sm font-medium leading-none">Setuju dengan syarat</label>
+                <label for="terms" class="text-sm font-medium leading-none"
+                  >Setuju dengan syarat</label
+                >
               </div>
             </div>
 
@@ -261,10 +329,14 @@ const isCollapsibleOpen = ref(false)
             <NavigationMenu>
               <NavigationMenuList class="flex gap-2">
                 <NavigationMenuItem>
-                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent">Dashboard</NavigationMenuLink>
+                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent"
+                    >Dashboard</NavigationMenuLink
+                  >
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent">Pengaturan</NavigationMenuLink>
+                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent"
+                    >Pengaturan</NavigationMenuLink
+                  >
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -290,7 +362,6 @@ const isCollapsibleOpen = ref(false)
       <Card>
         <CardContent class="pt-6">
           <div class="flex flex-wrap gap-4">
-            
             <!-- Dialog -->
             <Dialog>
               <DialogTrigger as-child><Button variant="outline">Buka Dialog</Button></DialogTrigger>
@@ -307,11 +378,15 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Alert Dialog -->
             <AlertDialog>
-              <AlertDialogTrigger as-child><Button variant="destructive">Buka Alert Dialog</Button></AlertDialogTrigger>
+              <AlertDialogTrigger as-child
+                ><Button variant="destructive">Buka Alert Dialog</Button></AlertDialogTrigger
+              >
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Konfirmasi Tindakan</AlertDialogTitle>
-                  <AlertDialogDescription>Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.</AlertDialogDescription>
+                  <AlertDialogDescription
+                    >Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.</AlertDialogDescription
+                  >
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -322,7 +397,9 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Sheet -->
             <Sheet>
-              <SheetTrigger as-child><Button variant="outline">Buka Sheet (Drawer)</Button></SheetTrigger>
+              <SheetTrigger as-child
+                ><Button variant="outline">Buka Sheet (Drawer)</Button></SheetTrigger
+              >
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>Panel Samping</SheetTitle>
@@ -333,15 +410,21 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Popover -->
             <Popover>
-              <PopoverTrigger as-child><Button variant="outline">Buka Popover</Button></PopoverTrigger>
+              <PopoverTrigger as-child
+                ><Button variant="outline">Buka Popover</Button></PopoverTrigger
+              >
               <PopoverContent class="w-64">
-                <p class="text-sm">Ini adalah kontainer popover untuk informasi tambahan singkat.</p>
+                <p class="text-sm">
+                  Ini adalah kontainer popover untuk informasi tambahan singkat.
+                </p>
               </PopoverContent>
             </Popover>
 
             <!-- Dropdown Menu -->
             <DropdownMenu>
-              <DropdownMenuTrigger as-child><Button variant="outline">Dropdown Menu</Button></DropdownMenuTrigger>
+              <DropdownMenuTrigger as-child
+                ><Button variant="outline">Dropdown Menu</Button></DropdownMenuTrigger
+              >
               <DropdownMenuContent>
                 <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -353,13 +436,14 @@ const isCollapsibleOpen = ref(false)
             <!-- Tooltip -->
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger as-child><Button variant="ghost">Arahkan Mouse (Tooltip)</Button></TooltipTrigger>
+                <TooltipTrigger as-child
+                  ><Button variant="ghost">Arahkan Mouse (Tooltip)</Button></TooltipTrigger
+                >
                 <TooltipContent>
                   <p>Informasi tooltip bantuan</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-
           </div>
         </CardContent>
       </Card>
@@ -414,17 +498,27 @@ const isCollapsibleOpen = ref(false)
           <!-- Alert -->
           <Alert>
             <AlertTitle>Perhatian!</AlertTitle>
-            <AlertDescription>Ini adalah komponen alert standar untuk informasi penting.</AlertDescription>
+            <AlertDescription
+              >Ini adalah komponen alert standar untuk informasi penting.</AlertDescription
+            >
           </Alert>
 
           <Alert variant="destructive">
             <AlertTitle>Gagal!</AlertTitle>
-            <AlertDescription>Terjadi kesalahan pada sistem, silakan coba lagi nanti.</AlertDescription>
+            <AlertDescription
+              >Terjadi kesalahan pada sistem, silakan coba lagi nanti.</AlertDescription
+            >
           </Alert>
 
           <!-- Sonner Toast Trigger -->
           <div>
-            <Button @click="toast('Notifikasi berhasil dipicu!', { description: 'Pesan toaster Sonner berfungsi dengan baik.' })">
+            <Button
+              @click="
+                toast('Notifikasi berhasil dipicu!', {
+                  description: 'Pesan toaster Sonner berfungsi dengan baik.',
+                })
+              "
+            >
               Uji Notifikasi Toast (Sonner)
             </Button>
           </div>
