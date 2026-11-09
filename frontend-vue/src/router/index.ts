@@ -33,19 +33,6 @@ const router = createRouter({
       component: AuthenticatedLayout,
       meta: { requiresAuth: true },
       children: [
-        // Halaman utama
-        {
-          path: '/home',
-          name: 'home',
-          component: () => import('../views/HomeView.vue'),
-        },
-
-        {
-          path: '/about',
-          name: 'about',
-          component: () => import('../views/AboutView.vue'),
-        },
-
         // Fitur inti
       ],
     },
