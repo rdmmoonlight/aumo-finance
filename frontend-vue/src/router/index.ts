@@ -17,6 +17,11 @@ const router = createRouter({
       // which is lazy-loaded when the route is visited.
       component: () => import('../views/AboutView.vue'),
     },
+    {
+      path: '/_gallery',
+      name: 'gallery-showcase',
+      component: () => import('@/features/_gallery/GalleryPage.vue')
+    },
   ],
 })
 
