@@ -17,6 +17,6 @@ app.use(createVueQueryPlugin())
 app.mount('#app')
 
 client.setConfig({
-    baseUrl: `${getBackendTarget()}/api/v1`,
+    baseUrl: getBackendTarget(),
     credentials: 'include',
 })

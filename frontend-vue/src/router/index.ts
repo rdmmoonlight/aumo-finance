@@ -1,4 +1,6 @@
 import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue';
+import { authKeys, getProfileApi } from '@/features/auth/api/auth.api';
+import { queryClient } from '@/lib/query-client';
 import { createRouter, createWebHistory } from 'vue-router';
 
 const router = createRouter({
@@ -203,14 +205,29 @@ const router = createRouter({
 router.beforeEach(async (to) => {
   const needsAuth = to.matched.some((r) => r.meta.requiresAuth);
   if (!needsAuth) return true;
+
   try {
-    const profile = await getProfileApi();
-    if (!profile) return "/auth/login";
+    // Pakai cache yang sama dengan useGetProfileQuery()
+    // Kalau masih fresh, tidak fetch ulang ke /auth/me
+    const profile = await queryClient.fetchQuery({
+      queryKey: authKeys.profile,
+      queryFn: getProfileApi,
+      staleTime: 5 * 60 * 1000,
+      retry: false,
+    });
+
+    if (!profile) {
+      return { path: '/auth/login', query: { redirect: to.fullPath } };
+    }
     return true;
   } catch (e: any) {
-    const status = e?.response?.status;
-    if (status === 401) return "/auth/login";
-    return "/auth/login";
+    const status = e?.response?.status ?? e?.status;
+
+    if (status === 401) {
+      queryClient.removeQueries({ queryKey: authKeys.all });
+    }
+
+    return { path: '/auth/login', query: { redirect: to.fullPath } };
   }
 });
 
