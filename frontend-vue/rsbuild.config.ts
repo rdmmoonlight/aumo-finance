@@ -1,13 +1,14 @@
 import { defineConfig, loadEnv } from "@rsbuild/core";
 import { pluginVue } from "@rsbuild/plugin-vue";
 import { fileURLToPath, URL } from "node:url";
+import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
 
 export default defineConfig(() => {
   const env = loadEnv().parsed;
   const target = (env.PUBLIC_WEB_API_URL || "http://localhost:5000").replace(/\/+$/, "");
 
   return {
-    plugins: [pluginVue()],
+    plugins: [pluginVue()], [pluginTailwindcss()],
     html: {
       template: './index.html',
     },
