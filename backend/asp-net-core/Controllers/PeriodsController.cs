@@ -1,31 +1,24 @@
 namespace AumoBackend.Controllers;
 
 using System.Security.Claims;
-using AumoBackend.Data;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
 using AumoBackend.Services.Periods;
-using AumoBackend.Validators.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("/periods")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class PeriodsController : ControllerBase
 {
-    private readonly AppDbContext db;
     private readonly IPeriodsService periodsService;
     private readonly IValidator<CreatePeriodRequest> createPeriodValidator;
 
     public PeriodsController(
-        AppDbContext db,
         IPeriodsService periodsService,
         IValidator<CreatePeriodRequest> createPeriodValidator)
     {
-        this.db = db;
         this.periodsService = periodsService;
         this.createPeriodValidator = createPeriodValidator;
     }
@@ -42,46 +35,8 @@ public class PeriodsController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var periodsData = await this.db.Periods
-            .Where(p => p.UserId == userId)
-            .OrderByDescending(p => p.StartDate)
-            .Select(p => new
-            {
-                p.Id,
-                p.PeriodName,
-                p.StartDate,
-                p.EndDate,
-                p.IsClosed,
-                p.IsSelected,
-            })
-            .ToListAsync();
-
-        var selectedPeriod = periodsData.FirstOrDefault(p => p.IsSelected);
-        int? selectedPeriodId = selectedPeriod?.Id;
-
-        // Fallback ke helper jika di DB belum ada yang bernilai IsSelected = true
-        if (!selectedPeriodId.HasValue)
-        {
-            var selectedFromHelper = await SelectedPeriodHelper.GetSelectedPeriodAsync(this.db, userId);
-            selectedPeriodId = selectedFromHelper?.Id;
-        }
-
-        var periods = periodsData.Select(p => new
-        {
-            p.Id,
-            p.PeriodName,
-            p.StartDate,
-            p.EndDate,
-            p.IsClosed,
-            IsSelected = selectedPeriodId.HasValue ? (p.Id == selectedPeriodId.Value) : p.IsSelected,
-        }).ToList();
-
-        return this.Ok(new
-        {
-            success = true,
-            selectedPeriodId = selectedPeriodId,
-            periods = periods,
-        });
+        var result = await this.periodsService.GetPeriodsAsync(userId);
+        return this.Ok(result);
     }
 
     // ==========================================
@@ -96,34 +51,8 @@ public class PeriodsController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var accounts = await this.db.ChartOfAccounts
-            .Where(a => a.IsActive && a.UserId == userId)
-            .OrderBy(a => a.ReferenceNumber)
-            .ToListAsync();
-
-        var permanentAccounts = accounts
-            .Where(a => a.Type == "Assets" || a.Type == "Liabilities" || a.Type == "Equity")
-            .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName, a.Type, a.DisplayLabel })
-            .ToList();
-
-        var availableCashAndBank = accounts.Where(a => a.Role == "CashAndEquivalents")
-            .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName, a.DisplayLabel })
-            .ToList();
-
-        var availableRetainedEarnings = accounts.Where(a => a.Role == "RetainedEarnings")
-            .Select(a => new { a.Id, a.ReferenceNumber, a.AccountName, a.DisplayLabel })
-            .ToList();
-
-        var hasExistingPermanentAccounts = availableCashAndBank.Count > 0 && availableRetainedEarnings.Count > 0;
-
-        return this.Ok(new
-        {
-            success = true,
-            hasExistingPermanentAccounts,
-            availableCashAndBankAccounts = availableCashAndBank,
-            availableRetainedEarningsAccounts = availableRetainedEarnings,
-            permanentAccounts,
-        });
+        var result = await this.periodsService.GetOpenPeriodInfoAsync(userId);
+        return this.Ok(result);
     }
 
     // ==========================================
@@ -167,30 +96,23 @@ public class PeriodsController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
-        if (entity == null)
+        var result = await this.periodsService.SelectPeriodAsync(userId, id);
+
+        if (!result.Success)
         {
-            return this.NotFound(new { success = false, message = "Accounting period not found." });
+            if (result.NotFound)
+            {
+                return this.NotFound(new { success = false, message = result.Message });
+            }
+
+            return this.BadRequest(new { success = false, message = result.Message });
         }
-
-        // TAHAP 1: Reset SEMUA IsSelected milik user ini menjadi false
-        await this.db.Periods
-            .Where(p => p.UserId == userId && p.IsSelected)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
-
-        // TAHAP 2: Set HANYA 1 periode yang dipilih menjadi true
-        await this.db.Periods
-            .Where(p => p.Id == id && p.UserId == userId)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, true));
-
-        // Sinkronisasi dengan helper session/cache
-        await SelectedPeriodHelper.SelectPeriodAsync(this.db, userId, entity.Id);
 
         return this.Ok(new
         {
             success = true,
-            selectedPeriodId = entity.Id,
-            message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
+            selectedPeriodId = result.SelectedPeriodId,
+            message = result.Message,
         });
     }
 
@@ -206,17 +128,11 @@ public class PeriodsController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        // Set semua IsSelected milik user menjadi false
-        await this.db.Periods
-            .Where(p => p.UserId == userId && p.IsSelected)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
-
-        await SelectedPeriodHelper.ClearSelectionAsync(this.db, userId);
-
+        var result = await this.periodsService.ClearSelectionAsync(userId);
         return this.Ok(new
         {
-            success = true,
-            message = "Period selection cleared.",
+            success = result.Success,
+            message = result.Message,
         });
     }
 
@@ -232,32 +148,22 @@ public class PeriodsController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == id && p.UserId == userId);
-        if (entity == null)
+        var result = await this.periodsService.ClosePeriodAsync(userId, id);
+
+        if (!result.Success)
         {
-            return this.NotFound(new { success = false, message = "Accounting period not found." });
+            if (result.NotFound)
+            {
+                return this.NotFound(new { success = false, message = result.Message });
+            }
+
+            return this.BadRequest(new { success = false, message = result.Message });
         }
-
-        if (entity.IsClosed)
-        {
-            return this.BadRequest(new { success = false, message = $"Period {entity.PeriodName} is already closed." });
-        }
-
-        var hasEarlierOpenPeriod = await this.db.Periods
-            .AnyAsync(p => p.UserId == userId && p.Id != entity.Id && p.StartDate < entity.StartDate && !p.IsClosed);
-
-        if (hasEarlierOpenPeriod)
-        {
-            return this.BadRequest(new { success = false, message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first." });
-        }
-
-        entity.IsClosed = true;
-        await this.db.SaveChangesAsync();
 
         return this.Ok(new
         {
             success = true,
-            message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked.",
+            message = result.Message,
         });
     }
 
