@@ -1,9 +1,11 @@
 namespace AumoBackend.Controllers;
 
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
+using AumoBackend.DTOs.Reports;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Validators.Common;
 using FluentValidation;
@@ -76,9 +78,8 @@ public class JournalEntryController : ControllerBase
 
         try
         {
-            // Catatan: Jika DTO request di service menggunakan CreateGeneralJournalRequest, 
-            // petakan atau teruskan request ke CreateAsync.
-            var result = await this.journalEntryService.CreateAsync(userId, request);
+            var serviceRequest = MapToCreateGeneralJournalRequest(request);
+            var result = await this.journalEntryService.CreateAsync(userId, serviceRequest);
 
             return this.Ok(new
             {
@@ -114,9 +115,9 @@ public class JournalEntryController : ControllerBase
 
         try
         {
-            await this.journalEntryService.UpdateAsync(userId, id, request);
+            var serviceRequest = MapToUpdateGeneralJournalRequest(request);
+            await this.journalEntryService.UpdateAsync(userId, id, serviceRequest);
 
-            // Mendapatkan data terbaru setelah update untuk mengambil nomor transaksi pesan response
             var updatedEntry = await this.journalEntryService.GetByIdAsync(userId, id);
             string transactionNumber = updatedEntry?.TransactionNumber ?? string.Empty;
 
@@ -234,5 +235,39 @@ public class JournalEntryController : ControllerBase
                      ?? this.User.FindFirstValue("sub");
 
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
+    }
+
+    private static CreateGeneralJournalRequest MapToCreateGeneralJournalRequest(CreateJournalEntryRequest request)
+    {
+        return new CreateGeneralJournalRequest
+        {
+            JournalType = request.JournalType,
+            EntryDate = request.EntryDate,
+            CreatedAt = request.CreatedAt,
+            Lines = request.Lines?.Select(l => new CreateGeneralJournalLineRequest
+            {
+                AccountId = l.AccountId,
+                LineDescription = l.LineDescription,
+                Debit = l.Debit,
+                Credit = l.Credit
+            }).ToList() ?? new()
+        };
+    }
+
+    private static UpdateGeneralJournalRequest MapToUpdateGeneralJournalRequest(UpdateJournalEntryRequest request)
+    {
+        return new UpdateGeneralJournalRequest
+        {
+            JournalType = request.JournalType,
+            EntryDate = request.EntryDate,
+            UpdatedAt = request.UpdatedAt,
+            Lines = request.Lines?.Select(l => new UpdateGeneralJournalLineRequest
+            {
+                AccountId = l.AccountId,
+                LineDescription = l.LineDescription,
+                Debit = l.Debit,
+                Credit = l.Credit
+            }).ToList() ?? new()
+        };
     }
 }
