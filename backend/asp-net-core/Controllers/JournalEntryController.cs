@@ -1,11 +1,10 @@
 namespace AumoBackend.Controllers;
 
 using System;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
-using AumoBackend.DTOs.Reports;
+using AumoBackend.Extensions;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Validators.Common;
 using FluentValidation;
@@ -37,50 +36,30 @@ public class JournalEntryController : ControllerBase
         this.nextNumberValidator = nextNumberValidator;
     }
 
-    // ==========================================
-    // 1. GET: /journal-entry/{id}
-    // ==========================================
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
     {
         var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        if (userId == Guid.Empty) return this.UnauthorizedUser();
 
         var entry = await this.journalEntryService.GetByIdAsync(userId, id);
-        if (entry == null)
-        {
-            return this.NotFound(new { success = false, message = "Journal entry not found." });
-        }
+        if (entry == null) return this.NotFound(new { success = false, message = "Journal entry not found." });
 
         return this.Ok(new { success = true, entry });
     }
 
-    // ==========================================
-    // 2. POST: /journal-entry/create
-    // ==========================================
     [HttpPost("create")]
     public async Task<IActionResult> Create([FromBody] CreateJournalEntryRequest request)
     {
         var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        if (userId == Guid.Empty) return this.UnauthorizedUser();
 
         var validation = await this.createValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-        {
-            return this.BadRequest(validation.ToErrorResponse());
-        }
+        if (!validation.IsValid) return this.BadRequest(validation.ToErrorResponse());
 
         try
         {
-            var serviceRequest = MapToCreateGeneralJournalRequest(request);
-            var result = await this.journalEntryService.CreateAsync(userId, serviceRequest);
-
+            var result = await this.journalEntryService.CreateAsync(userId, request.ToServiceRequest());
             return this.Ok(new
             {
                 success = true,
@@ -89,76 +68,50 @@ public class JournalEntryController : ControllerBase
                 transactionNumber = result.TransactionNumber,
             });
         }
-        catch (InvalidOperationException ex)
+        catch (Exception ex)
         {
-            return this.BadRequest(new { success = false, message = ex.Message });
+            return this.HandleServiceException(ex);
         }
     }
 
-    // ==========================================
-    // 3. PUT: /journal-entry/edit/{id}
-    // ==========================================
     [HttpPut("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id, [FromBody] UpdateJournalEntryRequest request)
     {
         var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        if (userId == Guid.Empty) return this.UnauthorizedUser();
 
         var validation = await this.updateValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-        {
-            return this.BadRequest(validation.ToErrorResponse());
-        }
+        if (!validation.IsValid) return this.BadRequest(validation.ToErrorResponse());
 
         try
         {
-            var serviceRequest = MapToUpdateGeneralJournalRequest(request);
-            await this.journalEntryService.UpdateAsync(userId, id, serviceRequest);
-
+            await this.journalEntryService.UpdateAsync(userId, id, request.ToServiceRequest());
             var updatedEntry = await this.journalEntryService.GetByIdAsync(userId, id);
-            string transactionNumber = updatedEntry?.TransactionNumber ?? string.Empty;
 
             return this.Ok(new
             {
                 success = true,
-                message = $"Journal entry {transactionNumber} updated successfully.",
+                message = $"Journal entry {updatedEntry?.TransactionNumber} updated successfully.",
             });
         }
-        catch (KeyNotFoundException ex)
+        catch (Exception ex)
         {
-            return this.NotFound(new { success = false, message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return this.BadRequest(new { success = false, message = ex.Message });
+            return this.HandleServiceException(ex);
         }
     }
 
-    // ==========================================
-    // 4. DELETE: /journal-entry/delete/{id}
-    // ==========================================
     [HttpDelete("delete/{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
         var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        if (userId == Guid.Empty) return this.UnauthorizedUser();
 
         try
         {
             var existing = await this.journalEntryService.GetByIdAsync(userId, id);
-            if (existing == null)
-            {
-                return this.NotFound(new { success = false, message = "Journal entry not found." });
-            }
+            if (existing == null) return this.NotFound(new { success = false, message = "Journal entry not found." });
 
             string transactionNumber = existing.TransactionNumber;
-
             await this.journalEntryService.DeleteAsync(userId, id);
 
             return this.Ok(new
@@ -167,61 +120,36 @@ public class JournalEntryController : ControllerBase
                 message = $"Journal entry {transactionNumber} deleted successfully.",
             });
         }
-        catch (KeyNotFoundException ex)
+        catch (Exception ex)
         {
-            return this.NotFound(new { success = false, message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return this.BadRequest(new { success = false, message = ex.Message });
+            return this.HandleServiceException(ex);
         }
     }
 
-    // ==========================================
-    // 5. GET: /journal-entry/search-descriptions
-    // ==========================================
     [HttpGet("search-descriptions")]
     public async Task<IActionResult> SearchDescriptions([FromQuery] SearchDescriptionsQuery request)
     {
         var validation = await this.searchValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-        {
-            return this.BadRequest(validation.ToErrorResponse());
-        }
+        if (!validation.IsValid) return this.BadRequest(validation.ToErrorResponse());
 
         var q = request.Q ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2)
-        {
-            return this.Ok(Array.Empty<string>());
-        }
+        if (string.IsNullOrWhiteSpace(q) || q.Trim().Length < 2) return this.Ok(Array.Empty<string>());
 
         var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        if (userId == Guid.Empty) return this.UnauthorizedUser();
 
         var results = await this.journalEntryService.SearchLineDescriptionsAsync(userId, q.Trim());
         return this.Ok(results);
     }
 
-    // ==========================================
-    // 6. GET: /journal-entry/next-transaction-number
-    // ==========================================
     [HttpGet("next-transaction-number")]
     public async Task<IActionResult> GetNextTransactionNumber([FromQuery] NextTransactionNumberQuery request)
     {
         var validation = await this.nextNumberValidator.ValidateAsync(request);
-        if (!validation.IsValid)
-        {
-            return this.BadRequest(validation.ToErrorResponse());
-        }
+        if (!validation.IsValid) return this.BadRequest(validation.ToErrorResponse());
 
         var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
+        if (userId == Guid.Empty) return this.UnauthorizedUser();
 
         var journalType = request.JournalType ?? "General";
         string nextNumber = await this.journalEntryService.GetNextTransactionNumberAsync(userId, journalType, request.EntryDate);
@@ -237,38 +165,6 @@ public class JournalEntryController : ControllerBase
         return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
     }
 
-    private static CreateGeneralJournalRequest MapToCreateGeneralJournalRequest(CreateJournalEntryRequest request)
-    {
-        return new CreateGeneralJournalRequest
-        {
-            JournalType = request.JournalType,
-            EntryDate = request.EntryDate,
-            CreatedAt = request.CreatedAt,
-            Lines = request.Lines?.Select(l => new CreateGeneralJournalLineRequest
-            {
-                AccountId = l.AccountId,
-                LineDescription = l.LineDescription,
-                Debit = l.Debit,
-                Credit = l.Credit
-            }).ToList() ?? new()
-        };
-    }
-
-    private static UpdateGeneralJournalRequest MapToUpdateGeneralJournalRequest(UpdateJournalEntryRequest request)
-{
-    return new UpdateGeneralJournalRequest
-    {
-        JournalType = request.JournalType,
-        EntryDate = request.EntryDate,
-        UpdatedAt = request.UpdatedAt,
-        Lines = request.Lines?.Select(l => new CreateGeneralJournalLineRequest
-        {
-            AccountId = l.AccountId,
-            LineDescription = l.LineDescription,
-            Debit = l.Debit,
-            Credit = l.Credit
-        }).ToList() ?? new()
-    };
-}
-
+    private UnauthorizedObjectResult UnauthorizedUser() =>
+        this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
 }
