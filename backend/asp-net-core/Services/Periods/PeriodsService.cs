@@ -1,7 +1,6 @@
-using System.Globalization;
-
 namespace AumoBackend.Services.Periods;
 
+using System.Globalization;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
@@ -12,6 +11,9 @@ using Microsoft.EntityFrameworkCore;
 
 public class PeriodsService : IPeriodsService
 {
+    private static readonly string[] PermanentTypes = { "Assets", "Liabilities", "Equity" };
+    private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "OperatingExpenses", "OtherExpenses" };
+
     private readonly AppDbContext db;
     private readonly ITransactionNumberService txNumberService;
     private readonly IGeneralLedgersService glService;
@@ -28,7 +30,7 @@ public class PeriodsService : IPeriodsService
 
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)
     {
-        var periodsData = await this.db.Periods
+        var periods = await this.db.Periods
             .Where(p => p.UserId == userId)
             .OrderByDescending(p => p.StartDate)
             .Select(p => new PeriodDto
@@ -42,7 +44,7 @@ public class PeriodsService : IPeriodsService
             })
             .ToListAsync();
 
-        var selectedPeriod = periodsData.FirstOrDefault(p => p.IsSelected);
+        var selectedPeriod = periods.FirstOrDefault(p => p.IsSelected);
         int? selectedPeriodId = selectedPeriod?.Id;
 
         if (!selectedPeriodId.HasValue)
@@ -51,15 +53,13 @@ public class PeriodsService : IPeriodsService
             selectedPeriodId = selectedFromHelper?.Id;
         }
 
-        var periods = periodsData.Select(p => new PeriodDto
+        if (selectedPeriodId.HasValue)
         {
-            Id = p.Id,
-            PeriodName = p.PeriodName,
-            StartDate = p.StartDate,
-            EndDate = p.EndDate,
-            IsClosed = p.IsClosed,
-            IsSelected = selectedPeriodId.HasValue ? (p.Id == selectedPeriodId.Value) : p.IsSelected,
-        }).ToList();
+            foreach (var period in periods)
+            {
+                period.IsSelected = period.Id == selectedPeriodId.Value;
+            }
+        }
 
         return new GetPeriodsResponse
         {
@@ -284,8 +284,101 @@ public class PeriodsService : IPeriodsService
         static CreatePeriodResult Fail(string message) => new() { Success = false, Message = message };
     }
 
-    private static readonly string[] PermanentTypes = { "Assets", "Liabilities", "Equity" };
-    private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "OperatingExpenses", "OtherExpenses" };
+    public async Task<SelectPeriodResult> SelectPeriodAsync(Guid userId, int periodId)
+    {
+        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
+        if (entity == null)
+        {
+            return new SelectPeriodResult
+            {
+                Success = false,
+                NotFound = true,
+                Message = "Accounting period not found.",
+            };
+        }
+
+        await this.db.Periods
+            .Where(p => p.UserId == userId && p.IsSelected)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
+
+        await this.db.Periods
+            .Where(p => p.Id == periodId && p.UserId == userId)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, true));
+
+        await SelectedPeriodHelper.SelectPeriodAsync(this.db, userId, entity.Id);
+
+        await this.glService.RefreshGeneralLedgersAsync(userId);
+
+        return new SelectPeriodResult
+        {
+            Success = true,
+            SelectedPeriodId = entity.Id,
+            Message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
+        };
+    }
+
+    public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
+    {
+        await this.glService.ClearSelectedPeriodLedgersAsync(userId);
+
+        await this.db.Periods
+            .Where(p => p.UserId == userId && p.IsSelected)
+            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
+
+        await SelectedPeriodHelper.ClearSelectionAsync(this.db, userId);
+
+        return new BaseServiceResult
+        {
+            Success = true,
+            Message = "Period selection cleared.",
+        };
+    }
+
+    public async Task<BaseServiceResult> ClosePeriodAsync(Guid userId, int periodId)
+    {
+        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
+        if (entity == null)
+        {
+            return new BaseServiceResult
+            {
+                Success = false,
+                NotFound = true,
+                Message = "Accounting period not found.",
+            };
+        }
+
+        if (entity.IsClosed)
+        {
+            return new BaseServiceResult
+            {
+                Success = false,
+                IsBadRequest = true,
+                Message = $"Period {entity.PeriodName} is already closed.",
+            };
+        }
+
+        var hasEarlierOpenPeriod = await this.db.Periods
+            .AnyAsync(p => p.UserId == userId && p.Id != entity.Id && p.StartDate < entity.StartDate && !p.IsClosed);
+
+        if (hasEarlierOpenPeriod)
+        {
+            return new BaseServiceResult
+            {
+                Success = false,
+                IsBadRequest = true,
+                Message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first.",
+            };
+        }
+
+        entity.IsClosed = true;
+        await this.db.SaveChangesAsync();
+
+        return new BaseServiceResult
+        {
+            Success = true,
+            Message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked.",
+        };
+    }
 
     private sealed record OpeningResult(int AccountCount, string? Error);
 
@@ -383,95 +476,5 @@ public class PeriodsService : IPeriodsService
         await this.db.SaveChangesAsync();
 
         return new OpeningResult(balances.Count, null);
-    }
-
-    public async Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId)
-    {
-        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
-        if (entity == null)
-        {
-            return null;
-        }
-
-        await this.db.Periods
-            .Where(p => p.UserId == userId && p.IsSelected)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
-
-        await this.db.Periods
-            .Where(p => p.Id == periodId && p.UserId == userId)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, true));
-
-        await SelectedPeriodHelper.SelectPeriodAsync(this.db, userId, entity.Id);
-
-        // Regenerasikan data staging General Ledgers untuk periode terpilih
-        await this.glService.RefreshGeneralLedgersAsync(userId);
-
-        return new SelectPeriodResult
-        {
-            Success = true,
-            SelectedPeriodId = entity.Id,
-            Message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
-        };
-    }
-
-    public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
-    {
-        // Bersihkan staging table sebelum menghilangkan penanda pilihan
-        await this.glService.ClearSelectedPeriodLedgersAsync(userId);
-
-        await this.db.Periods
-            .Where(p => p.UserId == userId && p.IsSelected)
-            .ExecuteUpdateAsync(s => s.SetProperty(p => p.IsSelected, false));
-
-        await SelectedPeriodHelper.ClearSelectionAsync(this.db, userId);
-
-        return new BaseServiceResult
-        {
-            Success = true,
-            Message = "Period selection cleared.",
-        };
-    }
-
-    public async Task<BaseServiceResult> ClosePeriodAsync(Guid userId, int periodId)
-    {
-        var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
-        if (entity == null)
-        {
-            return new BaseServiceResult
-            {
-                Success = false,
-                Message = "Accounting period not found.",
-            };
-        }
-
-        if (entity.IsClosed)
-        {
-            return new BaseServiceResult
-            {
-                Success = false,
-                Message = $"Period {entity.PeriodName} is already closed.",
-            };
-        }
-
-        var hasEarlierOpenPeriod = await this.db.Periods
-            .AnyAsync(p => p.UserId == userId && p.Id != entity.Id && p.StartDate < entity.StartDate && !p.IsClosed);
-
-        if (hasEarlierOpenPeriod)
-        {
-            return new BaseServiceResult
-            {
-                Success = false,
-                Message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first.",
-            };
-        }
-
-        entity.IsClosed = true;
-        await this.db.SaveChangesAsync();
-
-        return new BaseServiceResult
-        {
-            Success = true,
-            Message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked.",
-        };
     }
 }
