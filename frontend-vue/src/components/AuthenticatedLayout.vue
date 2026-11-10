@@ -14,7 +14,11 @@
 
   <!-- Layout Utama -->
   <TooltipProvider v-else :delay-duration="0">
-    <div class="flex min-h-svh flex-col bg-background w-full">
+    <!-- Menambahkan --topbar-height: 104px sebagai single source of truth -->
+    <div
+      class="flex min-h-svh flex-col bg-background w-full"
+      :style="{ '--topbar-height': '104px' }"
+    >
       <!-- Topbar Full Width di paling atas (Header Area) -->
       <AppTopbar class="sticky top-0 z-20 w-full border-b shrink-0 bg-background" />
 
@@ -26,7 +30,7 @@
         }"
         class="flex flex-1 w-full min-h-0 relative"
       >
-        <!-- Sidebar sekarang di bawah Topbar -->
+        <!-- Sidebar di bawah Topbar -->
         <AppSidebar />
         
         <!-- Area Utama / Content Inset -->
