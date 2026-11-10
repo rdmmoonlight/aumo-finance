@@ -15,13 +15,13 @@
     <!-- SIDEBAR-GAP: Penahan alur Flexbox (Diturunkan 2cm di bawah Topbar) -->
     <div
       data-slot="sidebar-gap"
-      class="relative h-[calc(100vh-3.5rem-2cm)] w-[var(--sidebar-width)] bg-transparent transition-[width] duration-200 ease-linear"
+      class="relative h-[calc(100vh-3.5rem-1cm)] w-[var(--sidebar-width)] bg-transparent transition-[width] duration-200 ease-linear"
     />
 
     <!-- SIDEBAR-CONTAINER: Position Fixed (top: calc(3.5rem + 2cm)) -->
     <div
       data-slot="sidebar-container"
-      class="fixed top-[calc(3.5rem+2cm)] bottom-0 z-10 hidden h-[calc(100vh-3.5rem-2cm)] w-[var(--sidebar-width)] transition-[width,left,right] duration-200 ease-linear md:flex left-0 border-r border-sidebar-border bg-sidebar"
+      class="fixed top-[calc(3.5rem+1cm)] bottom-0 z-10 hidden h-[calc(100vh-3.5rem-1cm)] w-[var(--sidebar-width)] transition-[width,left,right] duration-200 ease-linear md:flex left-0 border-r border-sidebar-border bg-sidebar"
     >
       <!-- SIDEBAR-INNER -->
       <div
