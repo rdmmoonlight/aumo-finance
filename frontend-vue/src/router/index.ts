@@ -1,4 +1,4 @@
-import { authKeys, getProfileApi } from '@/features/auth/api/auth.api'
+import { authKeys, getProfileApi } from '@/features/auth/auth.api'
 import { queryClient } from '@/lib/query-client'
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -9,7 +9,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'landing',
-      component: () => import('../features/landing/LandingPage.vue'),
+      component: () => import('@/features/landing/LandingPage.vue'),
       meta: { requiresAuth: false },
     },
     {
@@ -23,16 +23,49 @@ const router = createRouter({
     {
       path: '/auth/login',
       name: 'login',
-      component: () => import('../features/auth/AuthPage.vue'),
+      component: () => import('@/features/auth/AuthPage.vue'),
       props: { mode: 'login' },
       meta: { requiresAuth: false },
     },
     {
       path: '/auth/register',
       name: 'register',
-      component: () => import('../features/auth/AuthPage.vue'),
+      component: () => import('@/features/auth/AuthPage.vue'),
       props: { mode: 'register' },
       meta: { requiresAuth: false },
+    },
+    // Opsional: Jika LoginPage & RegisterPage dipanggil secara independen tanpa AuthPage wrapper
+    {
+      path: '/auth/login-standalone',
+      name: 'login-standalone',
+      component: () => import('@/features/auth/LoginPage.vue'),
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/auth/register-standalone',
+      name: 'register-standalone',
+      component: () => import('@/features/auth/RegisterPage.vue'),
+      meta: { requiresAuth: false },
+    },
+
+    // 3. Protected Dashboard Routes (Membutuhkan Auth)
+    {
+      path: '/home',
+      name: 'home',
+      component: () => import('@/features/home/HomePage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/chart-of-accounts',
+      name: 'chart-of-accounts',
+      component: () => import('@/features/chart-of-accounts/ChartOfAccountsPage.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/periods',
+      name: 'periods',
+      component: () => import('@/features/periods/PeriodsPage.vue'),
+      meta: { requiresAuth: true },
     },
 
     // 4. Showcase (Publik)
@@ -40,6 +73,7 @@ const router = createRouter({
       path: '/_gallery',
       name: 'gallery-showcase',
       component: () => import('@/features/_gallery/GalleryPage.vue'),
+      meta: { requiresAuth: false },
     },
 
     // 5. Rute tidak dikenal -> landing
@@ -64,8 +98,9 @@ router.beforeEach(async (to) => {
       return { path: '/auth/login', query: { redirect: to.fullPath } }
     }
     return true
-  } catch (e: any) {
-    const status = e?.response?.status ?? e?.status
+  } catch (e: unknown) {
+    const error = e as { response?: { status?: number }; status?: number } | null
+    const status = error?.response?.status ?? error?.status
 
     if (status === 401) {
       queryClient.removeQueries({ queryKey: authKeys.all })
