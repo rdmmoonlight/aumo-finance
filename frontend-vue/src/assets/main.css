@@ -6,11 +6,16 @@
 /* =========================================
       1. VARIANTS & SETUP
    ========================================= */
+/* Tailwind CSS v4 directives; not standard CSS at-rules. */
+/* stylelint-disable at-rule-no-unknown */
+/* Tailwind CSS v4 custom at-rule; intentionally not standard CSS. */
+/* stylelint-disable-next-line at-rule-no-unknown */
 @custom-variant dark (&:is(.dark *));
 
 /* =========================================
       2. DESIGN TOKENS - AUMO MATTE
    ========================================= */
+/* stylelint-disable-next-line at-rule-no-unknown */
 @theme inline {
   /* Radius */
   --radius-sm: calc(var(--radius) - 4px);
@@ -76,6 +81,7 @@
   --text-display: 48px;
   --font-heading: var(--font-sans);
 }
+/* stylelint-enable at-rule-no-unknown */
 
 /* =========================================
       3. BASE RESET & GLOBAL

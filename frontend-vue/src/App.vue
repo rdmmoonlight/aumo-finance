@@ -9,7 +9,6 @@ const isAuthRequired = computed(() => route.meta.requiresAuth ?? false)
 </script>
 
 <template>
-
   <AuthenticatedLayout v-if="isAuthRequired">
     <RouterView />
   </AuthenticatedLayout>

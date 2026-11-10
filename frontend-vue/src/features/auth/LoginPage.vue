@@ -46,19 +46,38 @@ const handleSubmit = async () => {
     <form class="space-y-4" @submit.prevent="handleSubmit">
       <div class="space-y-2">
         <Label for="login-email">Email</Label>
-        <Input id="login-email" v-model="email" type="email" autocomplete="email" placeholder="nama@email.com" required
-          :disabled="login.isPending.value" class="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-500" />
+        <Input
+          id="login-email"
+          v-model="email"
+          type="email"
+          autocomplete="email"
+          placeholder="nama@email.com"
+          required
+          :disabled="login.isPending.value"
+          class="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-500"
+        />
       </div>
 
       <div class="space-y-2">
         <Label for="login-password">Kata Sandi</Label>
-        <Input id="login-password" v-model="password" type="password" autocomplete="current-password" required
-          :disabled="login.isPending.value" class="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-500" />
+        <Input
+          id="login-password"
+          v-model="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          :disabled="login.isPending.value"
+          class="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-500"
+        />
       </div>
 
       <p v-if="errorMessage" class="text-sm text-red-400" role="alert">{{ errorMessage }}</p>
 
-      <Button type="submit" class="w-full bg-white text-black hover:bg-zinc-200" :disabled="login.isPending.value">
+      <Button
+        type="submit"
+        class="w-full bg-white text-black hover:bg-zinc-200"
+        :disabled="login.isPending.value"
+      >
         {{ login.isPending.value ? 'Memproses...' : 'Masuk' }}
       </Button>
     </form>
