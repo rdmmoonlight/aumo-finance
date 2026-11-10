@@ -2,6 +2,7 @@ namespace AumoBackend.Controllers;
 
 using System.Security.Claims;
 using AumoBackend.DTOs;
+using AumoBackend.Helpers;
 using AumoBackend.Services.Periods;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
@@ -70,6 +71,7 @@ public class PeriodsController : ControllerBase
         var validation = await this.createPeriodValidator.ValidateAsync(request);
         if (!validation.IsValid)
         {
+            // Fix Error 1: Menggunakan using AumoBackend.Helpers untuk ToErrorResponse()
             return this.BadRequest(validation.ToErrorResponse());
         }
 
@@ -98,14 +100,10 @@ public class PeriodsController : ControllerBase
 
         var result = await this.periodsService.SelectPeriodAsync(userId, id);
 
-        if (!result.Success)
+        // Fix Error 2: Cek ketersediaan via nullability result (SelectPeriodResult?)
+        if (result == null)
         {
-            if (result.NotFound)
-            {
-                return this.NotFound(new { success = false, message = result.Message });
-            }
-
-            return this.BadRequest(new { success = false, message = result.Message });
+            return this.NotFound(new { success = false, message = "Accounting period not found." });
         }
 
         return this.Ok(new
@@ -150,9 +148,10 @@ public class PeriodsController : ControllerBase
 
         var result = await this.periodsService.ClosePeriodAsync(userId, id);
 
+        // Fix Error 3: Cek pesan error dari BaseServiceResult untuk membedakan NotFound vs BadRequest
         if (!result.Success)
         {
-            if (result.NotFound)
+            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
             {
                 return this.NotFound(new { success = false, message = result.Message });
             }
