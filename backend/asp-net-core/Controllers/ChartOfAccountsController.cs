@@ -16,14 +16,14 @@ using Microsoft.AspNetCore.Mvc;
 public class ChartOfAccountsController : ControllerBase
 {
     private readonly IChartOfAccountsService chartOfAccountsService;
-    private readonly IValidator<CreateAccountRequest> createAccountValidator;
-    private readonly IValidator<UpdateAccountRequest> updateAccountValidator;
+    private readonly IValidator<CreateAccountRequestDto> createAccountValidator;
+    private readonly IValidator<UpdateAccountRequestDto> updateAccountValidator;
     private readonly IValidator<GetAccountsQuery> getAccountsValidator;
 
     public ChartOfAccountsController(
         IChartOfAccountsService chartOfAccountsService,
-        IValidator<CreateAccountRequest> createAccountValidator,
-        IValidator<UpdateAccountRequest> updateAccountValidator,
+        IValidator<CreateAccountRequestDto> createAccountValidator,
+        IValidator<UpdateAccountRequestDto> updateAccountValidator,
         IValidator<GetAccountsQuery> getAccountsValidator)
     {
         this.chartOfAccountsService = chartOfAccountsService;
@@ -58,7 +58,7 @@ public class ChartOfAccountsController : ControllerBase
     // 2. POST: /chart-of-accounts
     // ==========================================
     [HttpPost]
-    public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequest request)
+    public async Task<IActionResult> CreateAccount([FromBody] CreateAccountRequestDto request)
     {
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
@@ -73,24 +73,14 @@ public class ChartOfAccountsController : ControllerBase
         }
 
         var result = await this.chartOfAccountsService.CreateAccountAsync(userId, request);
-        if (!result.IsSuccess)
-        {
-            return this.BadRequest(new { success = false, message = result.Message });
-        }
-
-        return this.Ok(new
-        {
-            success = true,
-            message = result.Message,
-            accountId = result.AccountId,
-        });
+        return this.StatusCode(result.StatusCode, result);
     }
 
     // ==========================================
     // 3. PUT: /chart-of-accounts/{id}
     // ==========================================
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> UpdateAccount(int id, [FromBody] UpdateAccountRequest request)
+    public async Task<IActionResult> UpdateAccount(int id, [FromBody] UpdateAccountRequestDto request)
     {
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
@@ -105,21 +95,7 @@ public class ChartOfAccountsController : ControllerBase
         }
 
         var result = await this.chartOfAccountsService.UpdateAccountAsync(userId, id, request);
-        if (!result.IsSuccess)
-        {
-            if (result.IsNotFound)
-            {
-                return this.NotFound(new { success = false, message = result.Message });
-            }
-
-            return this.BadRequest(new { success = false, message = result.Message });
-        }
-
-        return this.Ok(new
-        {
-            success = true,
-            message = result.Message,
-        });
+        return this.StatusCode(result.StatusCode, result);
     }
 
     // ==========================================
@@ -135,21 +111,7 @@ public class ChartOfAccountsController : ControllerBase
         }
 
         var result = await this.chartOfAccountsService.DeleteAccountAsync(userId, id);
-        if (!result.IsSuccess)
-        {
-            if (result.IsNotFound)
-            {
-                return this.NotFound(new { success = false, message = result.Message });
-            }
-
-            return this.BadRequest(new { success = false, message = result.Message });
-        }
-
-        return this.Ok(new
-        {
-            success = true,
-            message = result.Message,
-        });
+        return this.StatusCode(result.StatusCode, result);
     }
 
     private Guid GetCurrentUserId()
