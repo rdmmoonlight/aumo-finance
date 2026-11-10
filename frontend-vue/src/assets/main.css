@@ -15,6 +15,32 @@ a,
   padding: 3px;
 }
 
+/* Regular */
+@font-face {
+  font-family: 'CalibriCustom';
+  src: url('./fonts/calibri.woff2') format('woff2'),
+    url('./fonts/calibri.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Bold */
+@font-face {
+  font-family: 'CalibriCustom';
+  src: url('./fonts/calibri-bold.woff2') format('woff2'),
+    url('./fonts/calibri-bold.woff') format('woff');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Terapkan ke elemen global */
+:root,
+body {
+  font-family: 'CalibriCustom', Calibri, sans-serif;
+}
+
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
