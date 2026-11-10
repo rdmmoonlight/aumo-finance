@@ -1,32 +1,32 @@
 <template>
-  <!-- WRAPPER -->
+  <!-- WRAPPER: Diubah ke 'hidden md:flex shrink-0' agar masuk kalkulasi flex container utama -->
   <div
     data-slot="sidebar-wrapper"
-    :data-state="sidebarStore.state"
+    :data-state="sidebarStore.isCollapsed ? 'collapsed' : 'expanded'"
     data-collapsible="icon"
     data-variant="sidebar"
     data-side="left"
     :style="{
-      '--sidebar-width': '285px',
+      '--sidebar-width': sidebarStore.isCollapsed ? '3.5rem' : '285px',
       '--sidebar-width-icon': '3.5rem',
     }"
-    class="group peer hidden md:block text-sidebar-foreground"
+    class="group peer hidden md:flex shrink-0 text-sidebar-foreground transition-[width] duration-200 ease-linear"
   >
-    <!-- SIDEBAR-GAP -->
+    <!-- SIDEBAR-GAP (Ruang kosong penahan flex-layout di sebelah kiri) -->
     <div
       data-slot="sidebar-gap"
-      class="relative h-svh w-[--sidebar-width] bg-transparent transition-[width] duration-200 ease-linear group-data-[collapsible=offcanvas]:w-0 group-data-[side=right]:rotate-180 group-data-[collapsible=icon]:w-[--sidebar-width-icon]"
+      class="relative h-svh w-[var(--sidebar-width)] bg-transparent transition-[width] duration-200 ease-linear"
     />
 
-    <!-- SIDEBAR-CONTAINER -->
+    <!-- SIDEBAR-CONTAINER (Fixed overlay di atas gap) -->
     <div
       data-slot="sidebar-container"
-      class="fixed inset-y-0 z-10 hidden h-svh w-[--sidebar-width] transition-[left,right,width] duration-200 ease-linear md:flex left-0 group-data-[collapsible=offcanvas]:-left-(--sidebar-width) group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=left]:border-r group-data-[side=right]:left-auto group-data-[side=right]:right-0 group-data-[side=right]:border-l"
+      class="fixed inset-y-0 z-10 hidden h-svh w-[var(--sidebar-width)] transition-[width,left,right] duration-200 ease-linear md:flex left-0 border-r border-sidebar-border bg-sidebar"
     >
       <!-- SIDEBAR-INNER -->
       <div
         data-slot="sidebar-inner"
-        class="bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow flex h-full w-full flex-col overflow-hidden"
+        class="flex h-full w-full flex-col overflow-hidden"
       >
         <!-- Header -->
         <div class="border-b shrink-0 flex items-center justify-between p-3.5 h-14">
@@ -77,6 +77,7 @@
                         isActive(item.url)
                           ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
                           : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                        sidebarStore.isCollapsed ? 'justify-center px-0' : '',
                       ]"
                     >
                       <component :is="item.icon" :class="ICON_CLASS" />
@@ -173,7 +174,7 @@
           data-slot="sidebar-rail"
           aria-label="Toggle Sidebar"
           title="Toggle Sidebar"
-          class="absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w- hover:after:bg-sidebar-border group-data-[side=left]:-right-4 group-data-[side=right]:left-0 sm:flex"
+          class="absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[1px] hover:after:bg-sidebar-border -right-4 sm:flex"
           @click="sidebarStore.toggleSidebar"
         />
       </div>
@@ -253,10 +254,7 @@ const handleSignOut = async () => {
   } catch (e) {
     console.error('Logout error:', e)
   } finally {
-    // 1. Reset seluruh query cache di TanStack Query (pengganti resetApiState RTK)
     queryClient.clear()
-
-    // 2. Clear Cookie Session
     document.cookie = 'AumoFinance.Session=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;'
     window.location.replace('/')
   }
