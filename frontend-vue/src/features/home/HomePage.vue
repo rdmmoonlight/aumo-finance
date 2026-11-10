@@ -104,7 +104,7 @@ import { toast } from "vue-sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useGetMarketIndicatorsQuery } from "./api/home.api";
+import { useGetMarketIndicatorsQuery } from "./home.api";
 
 interface MarketItem {
     symbol: string;

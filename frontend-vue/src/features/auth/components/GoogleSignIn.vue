@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { GoogleLogin } from 'vue3-google-login'
-import { useGoogleLoginMutation } from '../api/auth.api'
+import { useGoogleLoginMutation } from '../auth.api'
 import { GOOGLE_CLIENT_ID } from '../config'
 import { getAuthErrorMessage } from '../error'
 
@@ -33,10 +33,7 @@ const onCredential = async (response: { credential?: string }) => {
 
 <template>
   <div class="space-y-2">
-    <p
-      v-if="!GOOGLE_CLIENT_ID"
-      class="rounded-md border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-400"
-    >
+    <p v-if="!GOOGLE_CLIENT_ID" class="rounded-md border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-400">
       Login Google belum dikonfigurasi (PUBLIC_GOOGLE_CLIENT_ID kosong).
     </p>
     <div v-else class="flex justify-center">

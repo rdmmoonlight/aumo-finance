@@ -15,6 +15,7 @@
     "api:generate": "openapi-ts"
   },
   "dependencies": {
+    "@internationalized/date": "^3.12.4",
     "@lucide/vue": "^1.70.0",
     "@tanstack/vue-query": "^5.107.1",
     "@vee-validate/zod": "^4.15.1",

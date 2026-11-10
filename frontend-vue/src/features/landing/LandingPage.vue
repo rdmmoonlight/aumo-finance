@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue'
 import { useRouter } from 'vue-router'
-import { useGetProfileQuery } from '../auth/api/auth.api'
+import { useGetProfileQuery } from '../auth/auth.api'
 import { hasHomeRoute, HOME_PATH } from '../auth/redirect'
 import AuthDialog from './components/AuthDialog.vue'
 import LandingLeft from './components/LandingLeft.vue'
@@ -37,11 +37,8 @@ watchEffect(() => {
   <div class="grid min-h-screen w-full bg-black text-white lg:grid-cols-[1.15fr_1fr]">
     <LandingLeft />
 
-    <LandingRight
-      :checking-auth="checkingAuth"
-      @login="handleOpenModal('login')"
-      @register="handleOpenModal('register')"
-    />
+    <LandingRight :checking-auth="checkingAuth" @login="handleOpenModal('login')"
+      @register="handleOpenModal('register')" />
 
     <AuthDialog v-model:open="open" :auth-mode="authMode" @success="handleSuccess" />
   </div>
