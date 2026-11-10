@@ -255,19 +255,20 @@ public class JournalEntryController : ControllerBase
     }
 
     private static UpdateGeneralJournalRequest MapToUpdateGeneralJournalRequest(UpdateJournalEntryRequest request)
+{
+    return new UpdateGeneralJournalRequest
     {
-        return new UpdateGeneralJournalRequest
+        JournalType = request.JournalType,
+        EntryDate = request.EntryDate,
+        UpdatedAt = request.UpdatedAt,
+        Lines = request.Lines?.Select(l => new CreateGeneralJournalLineRequest
         {
-            JournalType = request.JournalType,
-            EntryDate = request.EntryDate,
-            UpdatedAt = request.UpdatedAt,
-            Lines = request.Lines?.Select(l => new UpdateGeneralJournalLineRequest
-            {
-                AccountId = l.AccountId,
-                LineDescription = l.LineDescription,
-                Debit = l.Debit,
-                Credit = l.Credit
-            }).ToList() ?? new()
-        };
-    }
+            AccountId = l.AccountId,
+            LineDescription = l.LineDescription,
+            Debit = l.Debit,
+            Credit = l.Credit
+        }).ToList() ?? new()
+    };
+}
+
 }
