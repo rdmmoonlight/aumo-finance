@@ -12,8 +12,8 @@ RUN npm install -g pnpm@12
 # Copy package.json saja (tanpa lockfile)
 COPY package.json ./
 
-# Install dependencies tanpa pnpm-lock.yaml
-RUN pnpm install --no-frozen-lockfile
+# Install dependencies dengan mengizinkan build scripts (vue-demi, dll)
+RUN pnpm install --no-frozen-lockfile --config.onlyBuiltDependencies=""
 
 # Copy seluruh source code project
 COPY . .
