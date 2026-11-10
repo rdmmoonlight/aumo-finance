@@ -1,5 +1,6 @@
 namespace AumoBackend.Validators.Common;
 
+using System.Linq;
 using FluentValidation.Results;
 
 public static class ValidationResultExtensions
@@ -15,7 +16,7 @@ public static class ValidationResultExtensions
         {
             success = false,
             message = errors.FirstOrDefault() ?? "Validation failed.",
-            errors,
+            errors = errors,
         };
     }
 }
