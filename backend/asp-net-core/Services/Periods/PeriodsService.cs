@@ -284,17 +284,12 @@ public class PeriodsService : IPeriodsService
         static CreatePeriodResult Fail(string message) => new() { Success = false, Message = message };
     }
 
-    public async Task<SelectPeriodResult> SelectPeriodAsync(Guid userId, int periodId)
+    public async Task<SelectPeriodResult?> SelectPeriodAsync(Guid userId, int periodId)
     {
         var entity = await this.db.Periods.FirstOrDefaultAsync(p => p.Id == periodId && p.UserId == userId);
         if (entity == null)
         {
-            return new SelectPeriodResult
-            {
-                Success = false,
-                NotFound = true,
-                Message = "Accounting period not found.",
-            };
+            return null; // Return null untuk mencocokkan Task<SelectPeriodResult?> di IPeriodsService & sinyal NotFound di controller
         }
 
         await this.db.Periods
@@ -342,7 +337,6 @@ public class PeriodsService : IPeriodsService
             return new BaseServiceResult
             {
                 Success = false,
-                NotFound = true,
                 Message = "Accounting period not found.",
             };
         }
@@ -352,7 +346,6 @@ public class PeriodsService : IPeriodsService
             return new BaseServiceResult
             {
                 Success = false,
-                IsBadRequest = true,
                 Message = $"Period {entity.PeriodName} is already closed.",
             };
         }
@@ -365,7 +358,6 @@ public class PeriodsService : IPeriodsService
             return new BaseServiceResult
             {
                 Success = false,
-                IsBadRequest = true,
                 Message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first.",
             };
         }
