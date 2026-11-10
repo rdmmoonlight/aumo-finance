@@ -1,18 +1,11 @@
 // src/lib/api.ts
 
+export const DEFAULT_BACKEND_URL = 'https://aumoweb.onrender.com'
+
 export function getBackendTarget(): string {
-  // Di client pakai proxy /api/v1 -> biar lewat rewrite
-  if (typeof window !== 'undefined') {
-    return ''
-  }
-
-  const target =
-    import.meta.env.INTERNAL_API_URL ||
-    import.meta.env.BACKEND_URL ||
-    import.meta.env.WEB_API_URL ||
-    'http://127.0.0.1:5000'
-
-  return target.replace(/\/+$/, '')
+  // Base URL backend. Bisa diganti lewat PUBLIC_API_BASE_URL di .env
+  const target = import.meta.env.PUBLIC_API_BASE_URL || DEFAULT_BACKEND_URL
+  return String(target).replace(/\/+$/, '')
 }
 
 export const API_BASE_URL = getBackendTarget()
@@ -126,7 +119,7 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
 
       if (!isPublicPath) {
         isRedirecting = true
-        window.location.replace(`/auth/login?redirectTo=${encodeURIComponent(currentPath)}`)
+        window.location.replace(`/auth/login?redirect=${encodeURIComponent(currentPath)}`)
       }
     }
 

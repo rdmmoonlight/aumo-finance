@@ -19,16 +19,20 @@ const router = createRouter({
     },
 
     // 2. Auth Routes (Publik)
+    { path: '/auth', redirect: '/auth/login' },
     {
-      path: '/auth',
-      redirect: '/auth/login',
-      children: [
-        {
-          path: 'login',
-          name: 'login',
-          component: () => import('../features/auth/LoginPage.vue'), // Pastikan file login Anda di-import di sini
-        },
-      ],
+      path: '/auth/login',
+      name: 'login',
+      component: () => import('../features/auth/AuthPage.vue'),
+      props: { mode: 'login' },
+      meta: { requiresAuth: false },
+    },
+    {
+      path: '/auth/register',
+      name: 'register',
+      component: () => import('../features/auth/AuthPage.vue'),
+      props: { mode: 'register' },
+      meta: { requiresAuth: false },
     },
 
     // 4. Showcase (Publik)
@@ -37,6 +41,9 @@ const router = createRouter({
       name: 'gallery-showcase',
       component: () => import('@/features/_gallery/GalleryPage.vue'),
     },
+
+    // 5. Rute tidak dikenal -> landing
+    { path: '/:pathMatch(.*)*', name: 'not-found', redirect: '/' },
   ],
 })
 

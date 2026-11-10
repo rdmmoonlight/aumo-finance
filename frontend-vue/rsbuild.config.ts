@@ -5,10 +5,10 @@ import { pluginTailwindcss } from '@rsbuild/plugin-tailwindcss';
 
 export default defineConfig(() => {
   const env = loadEnv().parsed;
-  const target = (env.PUBLIC_WEB_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+  const target = (env.PUBLIC_API_BASE_URL || "https://aumoweb.onrender.com").replace(/\/+$/, "");
 
   return {
-    plugins: [pluginVue()], [pluginTailwindcss()],
+    plugins: [pluginVue(), pluginTailwindcss()],
     html: {
       template: './index.html',
     },

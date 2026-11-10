@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ref } from 'vue'
-import { useLoginThrottle } from './composables/useLoginThrottle'
+import { useLoginMutation } from './api/auth.api'
+import GoogleSignIn from './components/GoogleSignIn.vue'
+import { getAuthErrorMessage } from './error'
 
 interface Props {
   initialMode?: 'login' | 'register'
@@ -18,58 +20,65 @@ const emit = defineEmits<{
 }>()
 
 const email = ref('')
-const isLoading = ref(false)
-
-const { isThrottled, remainingTime, startThrottle } = useLoginThrottle(60)
+const password = ref('')
+const errorMessage = ref('')
+const login = useLoginMutation()
 
 const handleSubmit = async () => {
-  if (!email.value || isThrottled.value) return
+  if (!email.value || !password.value || login.isPending.value) return
 
-  isLoading.value = true
+  errorMessage.value = ''
   try {
-    // Jalankan logika API login kamu di sini
-    // await authApi.login({ email: email.value })
-
-    startThrottle()
+    const res = await login.mutateAsync({ email: email.value, password: password.value })
+    if (res?.success === false) {
+      errorMessage.value = res.message || 'Email atau kata sandi salah.'
+      return
+    }
     emit('success')
-  } catch (error) {
-    console.error('Login error:', error)
-  } finally {
-    isLoading.value = false
+  } catch (e) {
+    errorMessage.value = getAuthErrorMessage(e)
   }
-}
-
-const handleGoogleSuccess = (response: any) => {
-  // Callback saat login Google berhasil
-  console.log('Google Auth Success:', response)
-  emit('success')
 }
 </script>
 
 <template>
   <div class="space-y-4">
-    <form @submit.prevent="handleSubmit" class="space-y-4">
+    <form class="space-y-4" @submit.prevent="handleSubmit">
       <div class="space-y-2">
-        <Label for="email">Email</Label>
+        <Label for="login-email">Email</Label>
         <Input
-          id="email"
+          id="login-email"
           v-model="email"
           type="email"
+          autocomplete="email"
           placeholder="nama@email.com"
           required
-          :disabled="isLoading"
+          :disabled="login.isPending.value"
           class="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-500"
         />
       </div>
 
+      <div class="space-y-2">
+        <Label for="login-password">Kata Sandi</Label>
+        <Input
+          id="login-password"
+          v-model="password"
+          type="password"
+          autocomplete="current-password"
+          required
+          :disabled="login.isPending.value"
+          class="border-zinc-800 bg-zinc-900 text-white placeholder:text-zinc-500"
+        />
+      </div>
+
+      <p v-if="errorMessage" class="text-sm text-red-400" role="alert">{{ errorMessage }}</p>
+
       <Button
         type="submit"
         class="w-full bg-white text-black hover:bg-zinc-200"
-        :disabled="isLoading || isThrottled"
+        :disabled="login.isPending.value"
       >
-        <span v-if="isLoading">Loading...</span>
-        <span v-else-if="isThrottled">Kirim ulang dalam {{ remainingTime }}s</span>
-        <span v-else>Masuk / Kirim OTP</span>
+        {{ login.isPending.value ? 'Memproses...' : 'Masuk' }}
       </Button>
     </form>
 
@@ -80,15 +89,6 @@ const handleGoogleSuccess = (response: any) => {
       <div class="relative bg-zinc-950 px-2 text-xs text-zinc-400">ATAU</div>
     </div>
 
-    <!-- Google Login Button -->
-    <!-- Jika pakai plugin vue3-google-login, gunakan komponen bawaannya seperti <GoogleLogin :callback="handleGoogleSuccess" /> -->
-    <Button
-      type="button"
-      variant="outline"
-      class="w-full border-zinc-800 bg-zinc-900 text-white hover:bg-zinc-800"
-      @click="handleGoogleSuccess"
-    >
-      Continue with Google
-    </Button>
+    <GoogleSignIn @success="emit('success')" />
   </div>
 </template>

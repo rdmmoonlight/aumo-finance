@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import RegisterPage from '#/features/auth/RegisterPage.vue';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import LoginPage from '@/features/auth/LoginPage.vue';
-import GoogleOAuthProvider from 'vue3-google-login';
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID ?? ''
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import LoginPage from '@/features/auth/LoginPage.vue'
+import RegisterPage from '@/features/auth/RegisterPage.vue'
 
 interface Props {
   authMode: 'login' | 'register'
@@ -34,24 +31,8 @@ const handleSuccess = () => {
       </DialogHeader>
 
       <div class="p-6 pt-4">
-        <!-- Google OAuth Wrapper jika menggunakan plugin Vue OAuth -->
-        <GoogleOAuthProvider :client-id="GOOGLE_CLIENT_ID">
-          <Suspense>
-            <template #default>
-              <LoginPage v-if="authMode === 'login'" initial-mode="login" @success="handleSuccess" />
-              <RegisterPage v-else initial-mode="register" @success="handleSuccess" />
-            </template>
-
-            <!-- Pengganti Suspense fallback dari React -->
-            <template #fallback>
-              <div class="space-y-4" role="status" aria-label="Loading authentication form">
-                <div class="h-10 animate-pulse rounded-md bg-zinc-800" />
-                <div class="h-10 animate-pulse rounded-md bg-zinc-800" />
-                <div class="h-10 animate-pulse rounded-md bg-zinc-800" />
-              </div>
-            </template>
-          </Suspense>
-        </GoogleOAuthProvider>
+        <LoginPage v-if="authMode === 'login'" initial-mode="login" @success="handleSuccess" />
+        <RegisterPage v-else initial-mode="register" @success="handleSuccess" />
       </div>
     </DialogContent>
   </Dialog>

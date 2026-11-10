@@ -100,6 +100,7 @@ export function useGetProfileQuery() {
   return useQuery({
     queryKey: authKeys.profile,
     queryFn: ({ signal }) => getProfileApi(signal),
+    retry: false,
   })
 }
 
