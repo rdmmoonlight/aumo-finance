@@ -1,8 +1,18 @@
 <script setup lang="ts">
-import { RouterView } from 'vue-router'
+import AuthenticatedLayout from '@/components/AuthenticatedLayout.vue'
+import { computed } from 'vue'
+import { RouterView, useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const isAuthRequired = computed(() => route.meta.requiresAuth ?? false)
 </script>
 
 <template>
-  <!-- Komponen halaman dari router (termasuk LandingPage) akan tampil penuh di sini -->
-  <RouterView />
+
+  <AuthenticatedLayout v-if="isAuthRequired">
+    <RouterView />
+  </AuthenticatedLayout>
+
+  <RouterView v-else />
 </template>
