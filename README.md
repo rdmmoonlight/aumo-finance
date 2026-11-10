@@ -19,7 +19,6 @@ Sistem informasi keuangan dan akuntansi terintegrasi, berorientasi presisi.
 | `backend/asp-net-core` | REST API utama | ASP.NET Core (.NET 10), EF Core, PostgreSQL |
 | `frontend` | Aplikasi web | React 19, TypeScript, Rsbuild, TanStack Router, Tailwind |
 | `mobile` | Aplikasi Android native | Kotlin, Jetpack Compose |
-| `backend/axum`, `backend/go` | Eksperimen (belum dipakai produksi) | Rust, Go |
 | `docs` | Dokumentasi | Markdown |
 
 ## Autentikasi
