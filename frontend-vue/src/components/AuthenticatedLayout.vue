@@ -12,36 +12,41 @@
     <p class="text-sm text-muted-foreground">Sesi berakhir, mengalihkan ke halaman login...</p>
   </div>
 
-  <!-- Susunan: SidebarProvider -> AppSidebar + SidebarInset -->
+  <!-- Layout Utama -->
   <TooltipProvider v-else :delay-duration="0">
-    <SidebarProvider
-      :style="{
-        '--sidebar-width': '285px',
-        '--sidebar-width-icon': '3.5rem',
-      }"
-      class="flex min-h-svh w-full bg-background"
-    >
-      <AppSidebar />
-      
-      <!-- Ditambahkan flex-1, min-w-0, w-full, dan overflow-x-hidden agar tidak offset ke bawah/samping -->
-      <SidebarInset class="flex flex-1 flex-col min-w-0 w-full overflow-x-hidden transition-all duration-200 ease-linear">
-        <AppTopbar />
-        
-        <main class="relative flex-1 p-6">
-          <!-- PeriodsLoadingOverlay -->
-          <div
-            v-if="isPeriodsPending"
-            class="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm"
-          >
-            <p class="text-sm text-muted-foreground">Memuat data periode...</p>
-          </div>
+    <div class="flex min-h-svh flex-col bg-background w-full">
+      <!-- Topbar Full Width di paling atas (Header Area) -->
+      <AppTopbar class="sticky top-0 z-20 w-full border-b shrink-0 bg-background" />
 
-          <RouterView />
-        </main>
+      <!-- Area Bawah Topbar: Sidebar + Content -->
+      <SidebarProvider
+        :style="{
+          '--sidebar-width': '285px',
+          '--sidebar-width-icon': '3.5rem',
+        }"
+        class="flex flex-1 w-full min-h-0 relative"
+      >
+        <!-- Sidebar sekarang di bawah Topbar -->
+        <AppSidebar />
         
-        <AppFooter />
-      </SidebarInset>
-    </SidebarProvider>
+        <!-- Area Utama / Content Inset -->
+        <SidebarInset class="flex flex-1 flex-col min-w-0 w-full overflow-x-hidden transition-all duration-200 ease-linear">
+          <main class="relative flex-1 p-6">
+            <!-- PeriodsLoadingOverlay -->
+            <div
+              v-if="isPeriodsPending"
+              class="absolute inset-0 z-10 flex items-center justify-center bg-background/50 backdrop-blur-sm"
+            >
+              <p class="text-sm text-muted-foreground">Memuat data periode...</p>
+            </div>
+
+            <RouterView />
+          </main>
+          
+          <AppFooter />
+        </SidebarInset>
+      </SidebarProvider>
+    </div>
   </TooltipProvider>
 </template>
 
