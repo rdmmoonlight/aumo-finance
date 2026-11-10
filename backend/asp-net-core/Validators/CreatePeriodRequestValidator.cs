@@ -1,4 +1,4 @@
-namespace AumoBackend.Validators;
+namespace AumoBackend.Validators.Common;
 
 using AumoBackend.DTOs;
 using FluentValidation;
