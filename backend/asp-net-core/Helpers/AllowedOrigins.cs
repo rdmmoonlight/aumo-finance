@@ -5,7 +5,7 @@ public static class AllowedOrigins
     public static readonly string[] All =
     {
         "http://localhost:3000",
-        "https://aumoweb.vercel.app",
+        "https://aumo.onrender.com",
         "https://aumoweb.onrender.com"
     };
 
