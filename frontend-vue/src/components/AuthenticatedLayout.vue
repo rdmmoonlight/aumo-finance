@@ -19,10 +19,14 @@
         '--sidebar-width': '285px',
         '--sidebar-width-icon': '3.5rem',
       }"
+      class="flex min-h-svh w-full bg-background"
     >
       <AppSidebar />
-      <SidebarInset class="flex flex-1 flex-col min-w-0">
+      
+      <!-- Ditambahkan flex-1, min-w-0, w-full, dan overflow-x-hidden agar tidak offset ke bawah/samping -->
+      <SidebarInset class="flex flex-1 flex-col min-w-0 w-full overflow-x-hidden transition-all duration-200 ease-linear">
         <AppTopbar />
+        
         <main class="relative flex-1 p-6">
           <!-- PeriodsLoadingOverlay -->
           <div
@@ -34,6 +38,7 @@
 
           <RouterView />
         </main>
+        
         <AppFooter />
       </SidebarInset>
     </SidebarProvider>
