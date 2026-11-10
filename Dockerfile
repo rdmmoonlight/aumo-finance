@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy source code & CMakeLists.txt
 COPY CMakeLists.txt ./
-COPY archiver_service/ ./archiver_service/
+COPY archiver-service/ ./archiver-service/
 
 # Build binary C++ mode Release
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
@@ -75,7 +75,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy hasil build C++ Archiver
-COPY --from=cpp-builder /src/build/archiver_service /usr/local/bin/archiver_service
+COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
 
 # Copy hasil build .NET Core API & Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend

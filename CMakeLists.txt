@@ -11,12 +11,12 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(PQXX REQUIRED IMPORTED_TARGET libpqxx)
 
 include_directories(
-    archiver_service/include
+    archiver-service/include
 )
 
-file(GLOB_RECURSE SOURCES "archiver_service/*.cpp")
+file(GLOB_RECURSE SOURCES "archiver-service/*.cpp")
 
-add_executable(archiver_service ${SOURCES})
+add_executable(archiver-service ${SOURCES})
 
 # Link ke Imported Target PkgConfig dan libpq
-target_link_libraries(archiver_service PRIVATE PkgConfig::PQXX pq)
+target_link_libraries(archiver-service PRIVATE PkgConfig::PQXX pq)

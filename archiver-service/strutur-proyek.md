@@ -1,5 +1,5 @@
 ```
-archiver_service/
+archiver-service/
 ├── include/
 │   ├── Str.hpp               # Helper cat(...) pengganti std::format (build C++17)
 │   ├── TableRef.hpp          # Rujukan tabel schema.nama + quoting identifier aman
@@ -12,6 +12,7 @@ archiver_service/
 ```
 
 Aturan sistem arsip:
+
 - Sumber: public."GeneralJournal"; tujuan: archive."GeneralJournal".
 - Baris diarsipkan bila EntryDate jatuh dalam rentang periode milik user yang sama
   dengan public."Periods"."IsClosed" = true (GeneralJournal tidak punya PeriodId).

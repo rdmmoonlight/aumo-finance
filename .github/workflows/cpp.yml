@@ -4,11 +4,11 @@ on:
   push:
     branches: [ "main", "master", "develop" ]
     paths:
-      - 'archiver_service/**'
+      - 'archiver-service/**'
   pull_request:
     branches: [ "main", "master" ]
     paths:
-      - 'archiver_service/**'
+      - 'archiver-service/**'
 
 jobs:
   build:
@@ -38,8 +38,8 @@ jobs:
 
     - name: Verify Executable Output
       run: |
-        if [ -f ./build/archiver_service ]; then
-          echo "Build sukses! Biner archiver_service berhasil dibuat."
+        if [ -f ./build/archiver-service ]; then
+          echo "Build sukses! Biner archiver-service berhasil dibuat."
         else
           echo "Biner tidak ditemukan!" && exit 1
         fi
