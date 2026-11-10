@@ -40,7 +40,7 @@ import AppTopbar from '@/components/AppTopbar.vue'
 import AppSidebar from '@/components/sidebar/AppSidebar.vue'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useGetProfileQuery } from '@/features/auth/api/auth.api'
+import { useGetProfileQuery } from '@/features/auth/auth.api'
 import { watch } from 'vue'
 import { RouterView, useRouter } from 'vue-router'
 
