@@ -1,6 +1,3 @@
-#pragma warning disable CA1862
-#pragma warning disable CA1304
-#pragma warning disable CA1311
 using System.Globalization;
 
 namespace AumoBackend.Services.ChartOfAccounts;
