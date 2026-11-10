@@ -33,12 +33,17 @@ const onCredential = async (response: { credential?: string }) => {
 
 <template>
   <div class="space-y-2">
-    <p v-if="!GOOGLE_CLIENT_ID" class="rounded-md border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-400">
+    <p
+      v-if="!GOOGLE_CLIENT_ID"
+      class="rounded-md border border-zinc-800 bg-zinc-900 p-3 text-xs text-zinc-400"
+    >
       Login Google belum dikonfigurasi (PUBLIC_GOOGLE_CLIENT_ID kosong).
     </p>
     <div v-else class="flex justify-center">
       <GoogleLogin :client-id="GOOGLE_CLIENT_ID" :callback="onCredential" />
     </div>
-    <p v-if="errorMessage" class="text-center text-xs text-red-400" role="alert">{{ errorMessage }}</p>
+    <p v-if="errorMessage" class="text-center text-xs text-red-400" role="alert">
+      {{ errorMessage }}
+    </p>
   </div>
 </template>

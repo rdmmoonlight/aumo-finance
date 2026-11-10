@@ -16,9 +16,7 @@ const emit = defineEmits<{
 
 <template>
   <div class="space-y-4">
-    <p class="text-sm text-zinc-400">
-      Pendaftaran akun baru dilakukan melalui akun Google Anda.
-    </p>
+    <p class="text-sm text-zinc-400">Pendaftaran akun baru dilakukan melalui akun Google Anda.</p>
     <GoogleSignIn @success="emit('success')" />
   </div>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Loader2, Lock, UserPlus } from 'lucide-vue-next';
+import { ArrowRight, Loader2, Lock, UserPlus } from 'lucide-vue-next'
 
 defineProps({
   checkingAuth: { type: Boolean, required: true },
@@ -18,18 +18,22 @@ const emit = defineEmits(['login', 'register'])
     </div>
 
     <div class="flex w-full max-w-sm flex-col items-center gap-3 sm:flex-row">
-      <button type="button"
+      <button
+        type="button"
         class="flex h-12 w-full flex-1 items-center justify-center gap-2 rounded-xl border border-white/20 bg-white text-sm font-medium text-black hover:bg-zinc-200 disabled:opacity-50"
-        @click="emit('login')">
+        @click="emit('login')"
+      >
         <Loader2 v-if="checkingAuth" class="h-4 w-4 animate-spin" />
         <Lock v-else class="h-4 w-4" />
         <span>{{ checkingAuth ? 'Checking...' : 'Sign In' }}</span>
         <ArrowRight v-if="!checkingAuth" class="h-4 w-4" />
       </button>
 
-      <button type="button"
+      <button
+        type="button"
         class="flex h-12 w-full flex-1 items-center justify-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 hover:text-white disabled:opacity-50"
-        @click="emit('register')">
+        @click="emit('register')"
+      >
         <UserPlus class="h-4 w-4" />
         <span>Register</span>
       </button>
