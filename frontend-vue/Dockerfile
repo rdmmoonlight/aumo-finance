@@ -6,8 +6,8 @@ FROM node:26-alpine AS builder
 # Set working directory
 WORKDIR /app
 
-# Enable pnpm v12 via corepack
-RUN corepack enable && corepack prepare pnpm@12 --activate
+# Install pnpm v12 secara global via npm
+RUN npm install -g pnpm@12
 
 # Copy package.json saja (tanpa lockfile)
 COPY package.json ./
