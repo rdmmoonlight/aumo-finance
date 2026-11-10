@@ -34,7 +34,7 @@
     "vue-sonner": "^2.0.9",
     "vue3-google-login": "^2.1.4",
     "xlsx": "^0.18.5",
-    "zod": "^4.6.7"
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@hey-api/client-fetch": "^0.13.1",
