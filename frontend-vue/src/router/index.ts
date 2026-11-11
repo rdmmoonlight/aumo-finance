@@ -5,70 +5,42 @@ import { createRouter, createWebHistory } from 'vue-router'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // 1. Landing Page (Publik)
     {
       path: '/',
       name: 'landing',
       component: () => import('@/features/landing/LandingPage.vue'),
       meta: { requiresAuth: false },
     },
+
     {
       path: '/_test-auth',
       name: 'test-auth',
       component: () => import('../views/_TestAuth.vue'),
     },
 
-    // 2. Auth Routes (Publik)
-    { path: '/auth', redirect: '/auth/login' },
+    {
+      path: '/auth',
+      name: 'auth',
+      component: () => import('@/features/auth/AuthPage.vue'),
+      meta: { requiresAuth: false },
+    },
+
     {
       path: '/auth/login',
       name: 'login',
-      component: () => import('@/features/auth/AuthPage.vue'),
+      component: () => import('@/features/auth/LoginPage.vue'),
       props: { mode: 'login' },
       meta: { requiresAuth: false },
     },
+
     {
       path: '/auth/register',
       name: 'register',
-      component: () => import('@/features/auth/AuthPage.vue'),
+      component: () => import('@/features/auth/RegisterPage.vue'),
       props: { mode: 'register' },
       meta: { requiresAuth: false },
     },
-    // Opsional: Jika LoginPage & RegisterPage dipanggil secara independen tanpa AuthPage wrapper
-    {
-      path: '/auth/login-standalone',
-      name: 'login-standalone',
-      component: () => import('@/features/auth/LoginPage.vue'),
-      meta: { requiresAuth: false },
-    },
-    {
-      path: '/auth/register-standalone',
-      name: 'register-standalone',
-      component: () => import('@/features/auth/RegisterPage.vue'),
-      meta: { requiresAuth: false },
-    },
 
-    // 3. Protected Dashboard Routes (Membutuhkan Auth)
-    {
-      path: '/home',
-      name: 'home',
-      component: () => import('@/features/home/HomePage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/chart-of-accounts',
-      name: 'chart-of-accounts',
-      component: () => import('@/features/chart-of-accounts/ChartOfAccountsPage.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/periods',
-      name: 'periods',
-      component: () => import('@/features/periods/PeriodsPage.vue'),
-      meta: { requiresAuth: true },
-    },
-
-    // 4. Showcase (Publik)
     {
       path: '/_gallery',
       name: 'gallery-showcase',
@@ -76,8 +48,49 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
 
-    // 5. Rute tidak dikenal -> landing
     { path: '/:pathMatch(.*)*', name: 'not-found', redirect: '/' },
+
+    {
+      path: '/home',
+      name: 'home',
+      component: () => import('@/features/home/HomePage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/periods',
+      name: 'periods',
+      component: () => import('@/features/periods/PeriodsPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/chart-of-accounts',
+      name: 'chart-of-accounts',
+      component: () => import('@/features/chart-of-accounts/ChartOfAccountsPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/journal-entry',
+      name: 'journal-entry',
+      component: () => import('@/features/journal-entry/JournalEntryPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/dashboard',
+      name: 'dashboard',
+      component: () => import('@/features/dashboard/DashboardPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/settings',
+      name: 'settings',
+      component: () => import('@/features/settings/SettingsPage.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

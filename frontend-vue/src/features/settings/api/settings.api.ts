@@ -1,3 +1,4 @@
+import { authKeys } from '@/features/auth/auth.api'
 import {
   deleteApiV1SettingsDeleteAccount,
   postApiV1SettingsAvatar,
@@ -7,7 +8,6 @@ import {
   putApiV1SettingsProfile,
 } from '@/lib/generated'
 import type { ChangePasswordRequest, UpdateProfileRequest } from '@/lib/generated/types.gen'
-import { authKeys } from '@/features/auth/api/auth.api'
 import { useMutation, useQueryClient } from '@tanstack/vue-query'
 
 export type { ChangePasswordRequest, UpdateProfileRequest }
@@ -31,10 +31,8 @@ export async function updateProfileApi(body: UpdateProfileRequest) {
 }
 
 export async function uploadAvatarApi(formData: FormData) {
-  // Skema generated mendeklarasikan form-urlencoded, padahal endpoint menerima
-  // multipart. Serializer dan Content-Type dimatikan agar browser mengatur boundary.
   const { data } = await postApiV1SettingsAvatar({
-    body: formData as any,
+    body: formData as unknown as Parameters<typeof postApiV1SettingsAvatar>[0]['body'],
     bodySerializer: null,
     headers: { 'Content-Type': null },
     throwOnError: true,

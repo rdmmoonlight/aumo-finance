@@ -1,3 +1,5 @@
+import { dashboardKeys } from '#/features/dashboard/dashboard.api'
+import { reportsKeys } from '#/features/reports/reports.api'
 import {
   deleteApiV1JournalEntryDeleteById,
   getApiV1JournalEntryById,
@@ -11,8 +13,6 @@ import type {
   JournalEntryLineDto,
   UpdateJournalEntryRequest,
 } from '@/lib/generated/types.gen'
-import { dashboardKeys } from '@/features/dashboard/api/dashboard.api'
-import { reportsKeys } from '@/features/reports/api/reports.api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 

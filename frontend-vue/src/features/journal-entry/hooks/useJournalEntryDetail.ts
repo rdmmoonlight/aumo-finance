@@ -1,5 +1,7 @@
 import { onMounted, ref } from 'vue'
-import { journalEntryApi, type JournalEntry } from '../api/journalEntryApi'
+import { getJournalEntryByIdApi } from '../journal-entry.api'
+
+type JournalEntry = Awaited<ReturnType<typeof getJournalEntryByIdApi>>
 
 export function useJournalEntryDetail(id?: string) {
   const entry = ref<JournalEntry | null>(null)
@@ -10,9 +12,9 @@ export function useJournalEntryDetail(id?: string) {
     isLoading.value = true
     error.value = null
     try {
-      entry.value = await journalEntryApi.getJournalEntryById(entryId)
-    } catch (err: any) {
-      error.value = err.message || 'Gagal mengambil detail entri jurnal'
+      entry.value = (await getJournalEntryByIdApi(Number(entryId))) as JournalEntry
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Gagal mengambil detail entri jurnal'
     } finally {
       isLoading.value = false
     }
