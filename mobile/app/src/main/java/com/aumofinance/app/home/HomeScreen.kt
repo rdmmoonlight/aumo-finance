@@ -77,24 +77,26 @@ fun HomeScreen(
                 )
             }
 
-            // Hero Cards (Bagi tinggi secara dinamis)
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            // Hero Cards: Dashboard & Reports (Kanan-Kiri)
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(0.9f)
+                    .padding(vertical = 4.dp)
             ) {
-                Spacer(Modifier.height(4.dp))
-                HeroDashboardCard(item = dashboard, modifier = Modifier.weight(1f))
-                HeroDashboardCard(item = reports, modifier = Modifier.weight(1f))
+                HeroDashboardCard(item = dashboard, modifier = Modifier.weight(1f).fillMaxHeight())
+                HeroDashboardCard(item = reports, modifier = Modifier.weight(1f).fillMaxHeight())
             }
 
             SectionLabel("MAIN MENU")
 
-            // Bento Grid Cards (Bagi tinggi secara dinamis)
+            // Bento Grid Cards (Kanan-Kiri 2 Row)
             Column(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1.1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Spacer(Modifier.height(4.dp))
+                Spacer(Modifier.height(2.dp))
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     modifier = Modifier.weight(1f).fillMaxWidth()
@@ -173,7 +175,7 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
 
 @Composable
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.padding(vertical = 4.dp)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.padding(vertical = 2.dp)) {
         Text(
             text, color = AumoColors.TextMuted,
             style = MaterialTheme.typography.labelSmall.copy(
@@ -192,30 +194,52 @@ private fun HeroDashboardCard(item: HomeMenuItem, modifier: Modifier = Modifier)
     )
     Card(
         onClick = item.onClick,
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         Box(
-            Modifier.fillMaxSize().background(gradient).padding(16.dp)
+            Modifier.fillMaxSize().background(gradient).padding(12.dp)
         ) {
-            Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.size(44.dp).clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(0.14f))
-                        .border(1.dp, Color.White.copy(0.18f), RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
+            // Blob dekoratif asli
+            Box(Modifier.size(100.dp).offset(x = 60.dp, y = (-30).dp).clip(CircleShape).background(Color.White.copy(0.08f)))
+            Box(Modifier.size(70.dp).offset(x = (-20).dp, y = 50.dp).clip(CircleShape).background(Color.White.copy(0.06f)))
+
+            Column(
+                Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Top
                 ) {
-                    TablerIcon(item.icon, tint = Color.White, size = 24.dp)
+                    Box(
+                        Modifier.size(38.dp).clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(0.14f))
+                            .border(1.dp, Color.White.copy(0.18f), RoundedCornerShape(12.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        TablerIcon(item.icon, tint = Color.White, size = 20.dp)
+                    }
+                    Box(Modifier.size(24.dp).clip(CircleShape).background(Color.White.copy(0.12f)), contentAlignment = Alignment.Center) {
+                        TablerIcon(TablerIcons.ChevronRight, tint = Color.White, size = 14.dp)
+                    }
                 }
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text(item.title, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                Column {
+                    Text(
+                        item.title,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.titleMedium
+                    )
                     Spacer(Modifier.height(2.dp))
-                    Text(item.subtitle, color = Color.White.copy(0.75f), style = MaterialTheme.typography.bodySmall, maxLines = 1)
-                }
-                Box(Modifier.size(28.dp).clip(CircleShape).background(Color.White.copy(0.12f)), contentAlignment = Alignment.Center) {
-                    TablerIcon(TablerIcons.ChevronRight, tint = Color.White, size = 16.dp)
+                    Text(
+                        item.subtitle,
+                        color = Color.White.copy(0.75f),
+                        style = MaterialTheme.typography.labelSmall,
+                        maxLines = 2
+                    )
                 }
             }
         }
