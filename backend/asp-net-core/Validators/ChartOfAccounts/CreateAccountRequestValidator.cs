@@ -4,7 +4,7 @@ using AumoBackend.DTOs;
 using AumoBackend.Models;
 using FluentValidation;
 
-public class CreateAccountRequestValidator : AbstractValidator<CreateAccountRequest>
+public class CreateAccountRequestValidator : AbstractValidator<CreateAccountRequestDto>
 {
     public CreateAccountRequestValidator()
     {
