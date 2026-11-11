@@ -5,7 +5,6 @@
     "allowArbitraryExtensions": true,
     "types": [],
     "paths": {
-      "#/*": ["./src/*"],
       "@/*": ["./src/*"]
     },
 

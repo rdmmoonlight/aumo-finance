@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import type { HTMLAttributes } from 'vue'
-import { cn } from 'cn'
-import { useFormField } from './useFormField'
+import type { HTMLAttributes } from "vue"
+import { cn } from "cn"
+import { useFormField } from "./useFormField"
 
 const props = defineProps<{
-  class?: HTMLAttributes['class']
+  class?: HTMLAttributes["class"]
 }>()
 
 const { formDescriptionId } = useFormField()
