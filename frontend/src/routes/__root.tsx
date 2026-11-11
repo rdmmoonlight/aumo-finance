@@ -1,7 +1,16 @@
-import RootLayout from "@/components/layouts/root-layout";
 import "@/styles/index.css";
-import { createRootRoute } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
-  component: RootLayout,
+  component: RootComponent,
 });
+
+function RootComponent() {
+  return (
+    <>
+      {/* Tambahkan Navbar / Header global di sini jika ada */}
+      <Outlet />
+      {/* TanStackRouterDevtools / Footer */}
+    </>
+  );
+}

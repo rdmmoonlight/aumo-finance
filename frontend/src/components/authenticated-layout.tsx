@@ -5,11 +5,11 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { AppTopBar } from "@/components/app-topbar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { authApi } from "@/features/auth/api/authApi";
+import { periodsApi } from "@/features/periods/api/periodsApi";
 import { useAppRouter } from "@/lib/router-compat";
 import { Outlet } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { authApi } from "../../features/auth/api/authApi";
-import { periodsApi } from "../../features/periods/api/periodsApi";
 
 function PeriodsLoadingOverlay() {
   const { isLoading } = periodsApi.useGetPeriodsOpenInfoQuery();
