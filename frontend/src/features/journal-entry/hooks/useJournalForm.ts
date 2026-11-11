@@ -1,82 +1,65 @@
-import {
-  journalEntrySchema,
-  parseFormattedNumber,
-} from "@/lib/validations/journal-entry";
-import { useFieldArray, useForm } from "react-hook-form";
-import { toast } from "sonner";
-import { z } from "zod";
-import { formatNumberWithDots, zodResolver } from "../utils/helpers";
+import { computed, ref } from 'vue'
+import type { JournalLine } from '../api/journalEntryApi'
+import { calculateTotals } from '../helpers'
 
-export const createEmptyLine = () => ({
-  id: `${Date.now()}-${Math.random()}`,
-  accountId: 0,
-  lineDescription: "",
-  debit: "",
-  credit: "",
-});
+export function useJournalForm(initialLines: JournalLine[] = []) {
+  const transactionDate = ref<string>(new Date().toISOString().split('T')[0])
+  const referenceNumber = ref<string>('')
+  const description = ref<string>('')
+  const lines = ref<JournalLine[]>(
+    initialLines.length > 0
+      ? initialLines
+      : [
+          { accountId: '', debit: 0, credit: 0, memo: '' },
+          { accountId: '', debit: 0, credit: 0, memo: '' },
+        ],
+  )
 
-export function useJournalForm() {
-  const form = useForm<
-    z.input<typeof journalEntrySchema>,
-    any,
-    z.output<typeof journalEntrySchema>
-  >({
-    resolver: zodResolver(journalEntrySchema),
-    defaultValues: {
-      journalType: "General",
-      entryDate: new Date().toISOString().split("T")[0],
-      lines: [createEmptyLine(), createEmptyLine()],
-    },
-  });
+  const totals = computed(() => calculateTotals(lines.value))
+  const totalDebit = computed(() => totals.value.totalDebit)
+  const totalCredit = computed(() => totals.value.totalCredit)
+  const isBalanced = computed(() => totalDebit.value > 0 && totalDebit.value === totalCredit.value)
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "lines",
-  });
-  const watchedLines = form.watch("lines");
+  const addLine = () => {
+    lines.value.push({ accountId: '', debit: 0, credit: 0, memo: '' })
+  }
 
-  const totalDebit = watchedLines.reduce(
-    (s, l) => s + parseFormattedNumber(l?.debit || ""),
-    0,
-  );
-  const totalCredit = watchedLines.reduce(
-    (s, l) => s + parseFormattedNumber(l?.credit || ""),
-    0,
-  );
-  const isBalanced = totalDebit > 0 && totalDebit === totalCredit;
+  const removeLine = (index: number) => {
+    if (lines.value.length > 2) {
+      lines.value.splice(index, 1)
+    }
+  }
 
-  const addLine = () => append(createEmptyLine());
-  const removeLine = (i: number) => {
-    if (fields.length <= 2)
-      return toast.warning("Minimal 2 baris jurnal wajib ada.");
-    remove(i);
-  };
-  const handleAmountChange = (
-    i: number,
-    field: "debit" | "credit",
-    value: string,
-  ) => {
-    form.setValue(`lines.${i}.${field}`, formatNumberWithDots(value), {
-      shouldValidate: true,
-    });
-    if (value)
-      form.setValue(
-        `lines.${i}.${field === "debit" ? "credit" : "debit"}`,
-        "",
-        { shouldValidate: true },
-      );
-  };
+  const updateLine = (index: number, field: keyof JournalLine, value: any) => {
+    if (lines.value[index]) {
+      lines.value[index] = {
+        ...lines.value[index],
+        [field]: value,
+      }
+    }
+  }
+
+  const resetForm = () => {
+    transactionDate.value = new Date().toISOString().split('T')[0]
+    referenceNumber.value = ''
+    description.value = ''
+    lines.value = [
+      { accountId: '', debit: 0, credit: 0, memo: '' },
+      { accountId: '', debit: 0, credit: 0, memo: '' },
+    ]
+  }
 
   return {
-    ...form,
-    fields,
-    watchedLines,
+    transactionDate,
+    referenceNumber,
+    description,
+    lines,
     totalDebit,
     totalCredit,
     isBalanced,
     addLine,
     removeLine,
-    handleAmountChange,
-    createEmptyLine,
-  };
+    updateLine,
+    resetForm,
+  }
 }

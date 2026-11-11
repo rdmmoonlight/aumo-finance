@@ -1,21 +1,43 @@
-import { toast } from "sonner";
-import { chartOfAccountsApi } from "../../chart-of-accounts/api/chartOfAccountsApi";
-import { AccountOption } from "../utils/helpers";
+import { onMounted, ref } from 'vue'
+
+export interface AccountOption {
+  id: string
+  code: string
+  name: string
+}
 
 export function useAvailableAccounts() {
-  const query = chartOfAccountsApi.endpoints.getChartOfAccounts.useQuery();
+  const accounts = ref<AccountOption[]>([])
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
 
-  if (query.error) toast.error("Gagal memuat Chart of Accounts");
+  const fetchAccounts = async () => {
+    isLoading.value = true
+    error.value = null
+    try {
+      const response = await fetch('/api/chart-of-accounts')
+      if (!response.ok) throw new Error('Gagal mengambil daftar akun')
+      const data = await response.json()
+      accounts.value = data.map((acc: any) => ({
+        id: acc.id,
+        code: acc.code,
+        name: acc.name,
+      }))
+    } catch (err: any) {
+      error.value = err.message || 'Gagal memuat akun'
+    } finally {
+      isLoading.value = false
+    }
+  }
 
-  const raw: any = query.data;
-  const list = raw?.accounts || raw?.data || (Array.isArray(raw) ? raw : []);
+  onMounted(() => {
+    fetchAccounts()
+  })
 
-  const accounts: AccountOption[] = list.map((a: any) => ({
-    ...a,
-    id: Number(a.id),
-    referenceNumber: a.referenceNumber ?? "",
-    accountName: a.accountName ?? "",
-  }));
-
-  return { accounts, isLoading: query.isLoading };
+  return {
+    accounts,
+    isLoading,
+    error,
+    fetchAccounts,
+  }
 }

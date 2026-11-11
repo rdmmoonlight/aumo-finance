@@ -1,21 +1,25 @@
-import * as React from "react";
+import { onMounted, onUnmounted, ref } from 'vue'
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(
-    undefined,
-  );
+  const isMobile = ref<boolean>(false)
 
-  React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
-    const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    };
-    mql.addEventListener("change", onChange);
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
-    return () => mql.removeEventListener("change", onChange);
-  }, []);
+  let mql: MediaQueryList | null = null
 
-  return !!isMobile;
+  const onChange = (e: MediaQueryListEvent) => {
+    isMobile.value = e.matches
+  }
+
+  onMounted(() => {
+    mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    isMobile.value = mql.matches
+    mql.addEventListener('change', onChange)
+  })
+
+  onUnmounted(() => {
+    mql?.removeEventListener('change', onChange)
+  })
+
+  return isMobile
 }

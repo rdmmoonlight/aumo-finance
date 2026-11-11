@@ -22,7 +22,8 @@ class PeriodsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.load()
+        // load() TIDAK dipanggil di sini: onResume() selalu berjalan tepat setelah
+        // onCreate(), sehingga memanggilnya di keduanya mengirim 2 request identik.
 
         setContent {
             var periodPendingClose by remember { mutableStateOf<Period?>(null) }

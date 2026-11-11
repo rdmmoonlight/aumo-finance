@@ -1,43 +1,35 @@
-import {
-  useGetJournalEntryByIdQuery,
-  useGetNextTransactionNumberQuery,
-} from "../api/journalEntryApi";
+import { onMounted, ref } from 'vue'
+import { getJournalEntryByIdApi } from '../journal-entry.api'
 
-export function useJournalEntryDetail(
-  isEdit: boolean,
-  entryId: number,
-  journalType: string,
-  entryDate: string,
-  setValue: any,
-) {
-  const txQuery = useGetNextTransactionNumberQuery(
-    { journalType, entryDate },
-    { skip: isEdit },
-  );
-  const detailQuery = useGetJournalEntryByIdQuery(
-    { id: entryId },
-    { skip: !isEdit },
-  );
+type JournalEntry = Awaited<ReturnType<typeof getJournalEntryByIdApi>>
 
-  const nextTxNumber = !isEdit
-    ? (txQuery.data as any)?.transactionNumber ||
-      (txQuery.data as any)?.data ||
-      (txQuery.data as string)
-    : null;
-  const editData = detailQuery.data as any;
-  const jData = editData?.entry || editData?.data || editData;
+export function useJournalEntryDetail(id?: string) {
+  const entry = ref<JournalEntry | null>(null)
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
 
-  // hydration saat edit - pindah dari useEffect di page ke sini
-  // panggil di useEffect sekali saja di hook ini
+  const fetchDetail = async (entryId: string) => {
+    isLoading.value = true
+    error.value = null
+    try {
+      entry.value = (await getJournalEntryByIdApi(Number(entryId))) as JournalEntry
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Gagal mengambil detail entri jurnal'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  onMounted(() => {
+    if (id) {
+      fetchDetail(id)
+    }
+  })
+
   return {
-    nextTxNumber,
-    editData,
-    isTxLoading: txQuery.isLoading,
-    isEditLoading: detailQuery.isLoading,
-    displayedTxNumber: isEdit
-      ? jData?.transactionNumber || "Loading..."
-      : nextTxNumber || "Loading...",
-    isLocked: Boolean(editData?.isLocked || editData?.entry?.isLocked),
-    jData,
-  };
+    entry,
+    isLoading,
+    error,
+    fetchDetail,
+  }
 }

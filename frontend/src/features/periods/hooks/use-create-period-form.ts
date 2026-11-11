@@ -1,66 +1,32 @@
-"use client";
+import { ref } from 'vue'
+import { createPeriodApi } from '../periods.api'
+import type { CreatePeriodPayload } from '../types'
 
-import { type CreatePeriodFormProps } from "#/features/periods/types";
-import {
-  createPeriodSchema,
-  type CreatePeriodFormValues,
-  type CreatePeriodOutputValues,
-} from "@/lib/validations/period";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+export function useCreatePeriodForm(onSuccessCallback?: () => void) {
+  const isLoading = ref(false)
+  const error = ref<string | null>(null)
 
-export function useCreatePeriodForm({
-  openInfo,
-  initialValues,
-  defaultValues,
-  isCreating,
-  isLoading,
-}: CreatePeriodFormProps) {
-  const mergedDefaultValues = useMemo<Partial<CreatePeriodFormValues>>(
-    () => ({
-      month: new Date().getMonth() + 1,
-      year: new Date().getFullYear(),
-      setupMode: openInfo?.hasExistingPermanentAccounts
-        ? "LoadExisting"
-        : "CreateNew",
-      cashAccountId: "",
-      bankAccountId: "",
-      retainedId: "",
-      cashAccountCode: "",
-      cashAccountName: "",
-      cashBalance: "",
-      bankAccountCode: "",
-      bankAccountName: "",
-      bankBalance: "",
-      retainedCode: "",
-      retainedName: "",
-      ...defaultValues,
-      ...initialValues,
-    }),
-    [openInfo, defaultValues, initialValues],
-  );
-
-  const methods = useForm<
-    CreatePeriodFormValues,
-    any,
-    CreatePeriodOutputValues
-  >({
-    resolver: zodResolver(createPeriodSchema),
-    defaultValues: mergedDefaultValues,
-  });
-
-  const setupMode = methods.watch("setupMode");
-  const month = methods.watch("month");
+  const submitForm = async (payload: CreatePeriodPayload) => {
+    isLoading.value = true
+    error.value = null
+    try {
+      await createPeriodApi({
+        createPeriodRequest: payload as unknown as NonNullable<
+          Parameters<typeof createPeriodApi>[0]['createPeriodRequest']
+        >,
+      })
+      if (onSuccessCallback) onSuccessCallback()
+    } catch (err: unknown) {
+      error.value =
+        err instanceof Error && err.message ? err.message : 'Terjadi kesalahan saat membuat periode'
+    } finally {
+      isLoading.value = false
+    }
+  }
 
   return {
-    methods,
-    setupMode,
-    month,
-    cashAccountId: methods.watch("cashAccountId"),
-    bankAccountId: methods.watch("bankAccountId"),
-    retainedId: methods.watch("retainedId"),
-    isSubmitting: isCreating || isLoading,
-    mergedDefaultValues,
-  };
+    isLoading,
+    error,
+    submitForm,
+  }
 }
