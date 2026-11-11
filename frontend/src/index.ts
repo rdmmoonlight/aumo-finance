@@ -17,10 +17,13 @@ const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
-    <React.StrictMode>
-      <Provider store={store}>
-        <RouterProvider router={router} />
-      </Provider>
-    </React.StrictMode>,
+    React.createElement(
+      React.StrictMode,
+      null,
+      React.createElement(Provider, {
+        store,
+        children: React.createElement(RouterProvider, { router }),
+      }),
+    ),
   );
 }
