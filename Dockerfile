@@ -4,8 +4,9 @@
 FROM ubuntu:24.04 AS cpp-builder
 WORKDIR /src
 
-# Install compiler C++20, CMake, dan driver libpqxx
-RUN apt-get update && apt-get install -y \
+# Disable interactive prompt & install paket esensial saja
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     g++ \
@@ -14,13 +15,13 @@ RUN apt-get update && apt-get install -y \
     libpqxx-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy source code & CMakeLists.txt
+# Copy hanya file build C++ agar layer cache optimal
 COPY CMakeLists.txt ./
 COPY archiver-service/ ./archiver-service/
 
-# Build binary C++ mode Release
+# Build spesifik target Release (Parallel job -j$(nproc))
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-    && cmake --build build --config Release
+    && cmake --build build --config Release -j$(nproc)
 
 # ==========================================
 # STAGE 2: Build ASP.NET Core Backend
@@ -28,30 +29,34 @@ RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
 FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS dotnet-builder
 WORKDIR /src
 
-# Copy project file dan restore dependensi
+# Copy csproj & restore dependensi (Cache Layer)
 COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
 RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
 
-# Copy seluruh source code backend & publish
+# Copy source code backend & publish
 COPY backend/asp-net-core/ ./backend/asp-net-core/
-RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build
+RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build --no-restore
 
 # ==========================================
-# STAGE 3: Build Rsbuild + TanStack Router Frontend (SPA)
+# STAGE 3: Build Frontend (SPA)
 # ==========================================
-FROM node:24-alpine AS frontend-builder
+# Gunakan Node LTS (22/20) untuk stabilitas Corepack & Native Modules
+FROM node:22-alpine AS frontend-builder
 WORKDIR /app
 
+# Enable Corepack & pastikan pnpm terpasang dengan cepat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Copy manifest dependensi
 COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/pnpm-workspace.yaml* ./
 
-# Izinkan eksekusi script native unrs-resolver untuk pnpm v10
-RUN pnpm install --frozen-lockfile --allow-build=unrs-resolver
+# Install dependensi dengan cache mount agar build super cepat
+RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
 
+# Copy seluruh source code frontend
 COPY frontend/ ./
 
-# Environment variables untuk Client-Side Build
 ARG PUBLIC_GOOGLE_CLIENT_ID
 ARG NEXT_PUBLIC__GOOGLE_CLIENT_ID
 ENV PUBLIC_GOOGLE_CLIENT_ID=${PUBLIC_GOOGLE_CLIENT_ID:-$NEXT_PUBLIC__GOOGLE_CLIENT_ID}
@@ -63,8 +68,9 @@ RUN pnpm run build
 # ==========================================
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
-# Install Nginx, Supervisor, Curl, dan runtime shared library PostgreSQL
-RUN apt-get update && apt-get install -y \
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     curl \
@@ -74,10 +80,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy hasil build C++ Archiver
+# Copy hasil artifact dari tiap builder stage
 COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
-
-# Copy hasil build .NET Core API & Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend
 COPY --from=frontend-builder /app/dist ./frontend-dist
 
