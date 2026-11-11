@@ -3,7 +3,7 @@ namespace AumoBackend.Extensions;
 using AumoBackend.Models;
 using FluentValidation;
 
-internal static class AccountRuleExtension
+internal static class AccountRuleExtensions
 {
     public const int MaxAccountNameLength = 100; // selaras HasMaxLength(100) di AppDbContext
 
