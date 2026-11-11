@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import type { RevenueTrendData } from '../../api/dashboardApi';
+
+type RevenueTrendData = {
+    date: string
+    amount: number
+}
 
 const props = withDefaults(
     defineProps<{
@@ -39,9 +43,6 @@ const svgPoints = computed(() => {
         .join(' L ')
 })
 
-function formatRupiah(val: number): string {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
-}
 </script>
 
 <template>

@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
-    "lint": "run-s \"lint:*\"",
-    "lint:oxlint": "oxlint . --fix",
+    "lint": "run-s lint:oxlint lint:eslint",
+    "lint:oxlint": "oxlint --fix",
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "api:generate": "openapi-ts"

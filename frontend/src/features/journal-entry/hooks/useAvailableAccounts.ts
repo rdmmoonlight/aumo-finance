@@ -17,14 +17,14 @@ export function useAvailableAccounts() {
     try {
       const response = await fetch('/api/chart-of-accounts')
       if (!response.ok) throw new Error('Gagal mengambil daftar akun')
-      const data = await response.json()
-      accounts.value = data.map((acc: any) => ({
+      const data: AccountOption[] = await response.json()
+      accounts.value = data.map((acc) => ({
         id: acc.id,
         code: acc.code,
         name: acc.name,
       }))
-    } catch (err: any) {
-      error.value = err.message || 'Gagal memuat akun'
+    } catch (err: unknown) {
+      error.value = err instanceof Error ? err.message : 'Gagal memuat akun'
     } finally {
       isLoading.value = false
     }

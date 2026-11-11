@@ -107,7 +107,13 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
     const error: ApiError = {
       status: response.status,
       data: errorData,
-      message: (errorData as any)?.message || response.statusText,
+      message:
+        typeof errorData === 'object' &&
+        errorData !== null &&
+        'message' in errorData &&
+        typeof errorData.message === 'string'
+          ? errorData.message
+          : response.statusText,
     }
 
     console.warn(`⚠ [API ${response.status}]: ${method} ${url}`, error)

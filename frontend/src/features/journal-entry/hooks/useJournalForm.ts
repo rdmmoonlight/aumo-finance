@@ -1,6 +1,12 @@
 import { computed, ref } from 'vue'
-import type { JournalLine } from '../api/journalEntryApi'
 import { calculateTotals } from '../helpers'
+
+type JournalLine = {
+  accountId: string
+  debit: number
+  credit: number
+  memo: string
+}
 
 export function useJournalForm(initialLines: JournalLine[] = []) {
   const transactionDate = ref<string>(new Date().toISOString().split('T')[0])
@@ -30,7 +36,11 @@ export function useJournalForm(initialLines: JournalLine[] = []) {
     }
   }
 
-  const updateLine = (index: number, field: keyof JournalLine, value: any) => {
+  const updateLine = <K extends keyof JournalLine>(
+    index: number,
+    field: K,
+    value: JournalLine[K],
+  ) => {
     if (lines.value[index]) {
       lines.value[index] = {
         ...lines.value[index],

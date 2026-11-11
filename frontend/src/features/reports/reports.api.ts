@@ -35,7 +35,7 @@ export interface GetGeneralLedgerPermanentResponse {
   selectedPeriodName?: string
   isTemporary: boolean
   message?: string
-  accounts?: Array<any>
+  accounts?: Array<unknown>
 }
 
 export interface GetGeneralLedgerTemporaryResponse {
@@ -45,16 +45,16 @@ export interface GetGeneralLedgerTemporaryResponse {
   isTemporary: boolean
   netIncomeBeforeClosing?: number
   message?: string
-  accounts?: Array<any>
+  accounts?: Array<unknown>
 }
 
 export interface RefreshGeneralLedgerResponse {
   success: boolean
   message?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
-export type SummaryResponse = any
+export type SummaryResponse = unknown
 
 // --- Query keys ---
 export const reportsKeys = {
@@ -89,7 +89,7 @@ export async function getIncomeStatementApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getRetainedEarningsApi(signal?: AbortSignal) {
@@ -97,7 +97,7 @@ export async function getRetainedEarningsApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getStatementOfCashFlowApi(signal?: AbortSignal) {
@@ -105,7 +105,7 @@ export async function getStatementOfCashFlowApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getStatementOfFinancialPositionApi(
@@ -117,7 +117,7 @@ export async function getStatementOfFinancialPositionApi(
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getGeneralLedgerPermanentApi(signal?: AbortSignal) {
@@ -148,7 +148,7 @@ export async function getJournalsGeneralApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getJournalsAdjustingApi(signal?: AbortSignal) {
@@ -156,7 +156,7 @@ export async function getJournalsAdjustingApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function deleteJournalsAdjustingByIdApi({ id }: { id: number }) {
@@ -164,7 +164,7 @@ export async function deleteJournalsAdjustingByIdApi({ id }: { id: number }) {
     path: { id },
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getJournalsClosingApi(signal?: AbortSignal) {
@@ -172,7 +172,7 @@ export async function getJournalsClosingApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getTrialBalanceApi(params?: GetTrialBalanceParams, signal?: AbortSignal) {
@@ -181,7 +181,7 @@ export async function getTrialBalanceApi(params?: GetTrialBalanceParams, signal?
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 export async function getWorksheetApi(signal?: AbortSignal) {
@@ -189,7 +189,7 @@ export async function getWorksheetApi(signal?: AbortSignal) {
     signal,
     throwOnError: true,
   })
-  return data as any
+  return data as unknown
 }
 
 // --- Composables (query) ---

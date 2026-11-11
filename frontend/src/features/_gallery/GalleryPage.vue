@@ -9,9 +9,7 @@ import {
   Card,
   CardHeader,
   CardTitle,
-  CardDescription,
   CardContent,
-  CardFooter,
 } from '@/components/ui/card'
 import {
   Table,
@@ -192,13 +190,17 @@ const isCollapsibleOpen = ref(false)
               <TableBody>
                 <TableRow>
                   <TableCell class="font-medium">INV-001</TableCell>
-                  <TableCell><Badge variant="outline">Paid</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="outline">Paid</Badge>
+                  </TableCell>
                   <TableCell>Transfer BRI</TableCell>
                   <TableCell class="text-right">Rp 250.000</TableCell>
                 </TableRow>
                 <TableRow>
                   <TableCell class="font-medium">INV-002</TableCell>
-                  <TableCell><Badge variant="secondary">Pending</Badge></TableCell>
+                  <TableCell>
+                    <Badge variant="secondary">Pending</Badge>
+                  </TableCell>
                   <TableCell>QRIS</TableCell>
                   <TableCell class="text-right">Rp 120.000</TableCell>
                 </TableRow>
@@ -262,9 +264,7 @@ const isCollapsibleOpen = ref(false)
               <Label>Checkbox</Label>
               <div class="flex items-center space-x-2">
                 <Checkbox id="terms" v-model:checked="checkboxVal" />
-                <label for="terms" class="text-sm font-medium leading-none"
-                  >Setuju dengan syarat</label
-                >
+                <label for="terms" class="text-sm font-medium leading-none">Setuju dengan syarat</label>
               </div>
             </div>
 
@@ -329,14 +329,12 @@ const isCollapsibleOpen = ref(false)
             <NavigationMenu>
               <NavigationMenuList class="flex gap-2">
                 <NavigationMenuItem>
-                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent"
-                    >Dashboard</NavigationMenuLink
-                  >
+                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent">Dashboard
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
-                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent"
-                    >Pengaturan</NavigationMenuLink
-                  >
+                  <NavigationMenuLink class="px-3 py-2 text-sm rounded-md hover:bg-accent">Pengaturan
+                  </NavigationMenuLink>
                 </NavigationMenuItem>
               </NavigationMenuList>
             </NavigationMenu>
@@ -378,15 +376,12 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Alert Dialog -->
             <AlertDialog>
-              <AlertDialogTrigger as-child
-                ><Button variant="destructive">Buka Alert Dialog</Button></AlertDialogTrigger
-              >
+              <AlertDialogTrigger as-child><Button variant="destructive">Buka Alert Dialog</Button></AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
                   <AlertDialogTitle>Konfirmasi Tindakan</AlertDialogTitle>
-                  <AlertDialogDescription
-                    >Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.</AlertDialogDescription
-                  >
+                  <AlertDialogDescription>Apakah Anda yakin? Tindakan ini tidak dapat dibatalkan.
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Batal</AlertDialogCancel>
@@ -397,9 +392,7 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Sheet -->
             <Sheet>
-              <SheetTrigger as-child
-                ><Button variant="outline">Buka Sheet (Drawer)</Button></SheetTrigger
-              >
+              <SheetTrigger as-child><Button variant="outline">Buka Sheet (Drawer)</Button></SheetTrigger>
               <SheetContent>
                 <SheetHeader>
                   <SheetTitle>Panel Samping</SheetTitle>
@@ -410,9 +403,7 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Popover -->
             <Popover>
-              <PopoverTrigger as-child
-                ><Button variant="outline">Buka Popover</Button></PopoverTrigger
-              >
+              <PopoverTrigger as-child><Button variant="outline">Buka Popover</Button></PopoverTrigger>
               <PopoverContent class="w-64">
                 <p class="text-sm">
                   Ini adalah kontainer popover untuk informasi tambahan singkat.
@@ -422,9 +413,7 @@ const isCollapsibleOpen = ref(false)
 
             <!-- Dropdown Menu -->
             <DropdownMenu>
-              <DropdownMenuTrigger as-child
-                ><Button variant="outline">Dropdown Menu</Button></DropdownMenuTrigger
-              >
+              <DropdownMenuTrigger as-child><Button variant="outline">Dropdown Menu</Button></DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuLabel>Akun Saya</DropdownMenuLabel>
                 <DropdownMenuSeparator />
@@ -436,9 +425,7 @@ const isCollapsibleOpen = ref(false)
             <!-- Tooltip -->
             <TooltipProvider>
               <Tooltip>
-                <TooltipTrigger as-child
-                  ><Button variant="ghost">Arahkan Mouse (Tooltip)</Button></TooltipTrigger
-                >
+                <TooltipTrigger as-child><Button variant="ghost">Arahkan Mouse (Tooltip)</Button></TooltipTrigger>
                 <TooltipContent>
                   <p>Informasi tooltip bantuan</p>
                 </TooltipContent>
@@ -498,27 +485,21 @@ const isCollapsibleOpen = ref(false)
           <!-- Alert -->
           <Alert>
             <AlertTitle>Perhatian!</AlertTitle>
-            <AlertDescription
-              >Ini adalah komponen alert standar untuk informasi penting.</AlertDescription
-            >
+            <AlertDescription>Ini adalah komponen alert standar untuk informasi penting.</AlertDescription>
           </Alert>
 
           <Alert variant="destructive">
             <AlertTitle>Gagal!</AlertTitle>
-            <AlertDescription
-              >Terjadi kesalahan pada sistem, silakan coba lagi nanti.</AlertDescription
-            >
+            <AlertDescription>Terjadi kesalahan pada sistem, silakan coba lagi nanti.</AlertDescription>
           </Alert>
 
           <!-- Sonner Toast Trigger -->
           <div>
-            <Button
-              @click="
-                toast('Notifikasi berhasil dipicu!', {
-                  description: 'Pesan toaster Sonner berfungsi dengan baik.',
-                })
-              "
-            >
+            <Button @click="
+              toast('Notifikasi berhasil dipicu!', {
+                description: 'Pesan toaster Sonner berfungsi dengan baik.',
+              })
+              ">
               Uji Notifikasi Toast (Sonner)
             </Button>
           </div>
