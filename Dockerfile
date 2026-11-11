@@ -80,11 +80,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy hasil artifact dari tiap builder stage
+# Copy hasil build C++ Archiver
 COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
+
+# Copy hasil build .NET Core API & VueJS Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend
 COPY --from=frontend-builder /app/dist ./frontend-dist
 
+# Bersihkan config default Nginx (port 80)
+RUN rm -rf /etc/nginx/sites-enabled/* /etc/nginx/sites-available/* /etc/nginx/conf.d/*
+
+# Copy config Supervisor & Custom Nginx (port 10000)
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY nginx.conf /etc/nginx/nginx.conf
 
