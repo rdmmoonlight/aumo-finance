@@ -1,12 +1,10 @@
 package com.aumofinance.app.home
 
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -22,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import com.aumofinance.app.ui.icons.TablerIcon
 import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
-import java.util.Calendar as JavaCalendar
 import com.aumofinance.app.ui.theme.AumoDimens
+import java.util.Calendar as JavaCalendar
 
 data class HomeMenuItem(
     val title: String,
@@ -32,7 +30,7 @@ data class HomeMenuItem(
     val onClick: () -> Unit,
 )
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     dashboard: HomeMenuItem,
@@ -50,53 +48,66 @@ fun HomeScreen(
         containerColor = AumoColors.Background,
         topBar = { PremiumTopBar(isDbConnected, onSettingsClick) }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(innerPadding),
-            contentPadding =
-                PaddingValues(
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(
                     start = AumoDimens.ScreenPadding,
                     end = AumoDimens.ScreenPadding,
                     top = AumoDimens.SpacingSmall,
-                    bottom = 32.dp,
+                    bottom = AumoDimens.ScreenPadding
                 ),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            item {
-                Column(modifier = Modifier.animateItemPlacement()) {
-                    Text(
-                        text = "Assalaamu'alaikum wa rahmatullahi wa barakaatuh",
-                        color = AumoColors.TextMuted,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    Spacer(Modifier.height(AumoDimens.SpacingSmall))
-                    Text(
-                        text = greeting,
-                        color = AumoColors.TextPrimary,
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            fontWeight = FontWeight.ExtraBold
-                        ),
-                    )
+            // Header Greeting
+            Column {
+                Text(
+                    text = "Assalaamu'alaikum wa rahmatullahi wa barakaatuh",
+                    color = AumoColors.TextMuted,
+                    style = MaterialTheme.typography.labelMedium,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    text = greeting,
+                    color = AumoColors.TextPrimary,
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontWeight = FontWeight.ExtraBold
+                    ),
+                )
+            }
+
+            // Hero Cards (Bagi tinggi secara dinamis)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Spacer(Modifier.height(4.dp))
+                HeroDashboardCard(item = dashboard, modifier = Modifier.weight(1f))
+                HeroDashboardCard(item = reports, modifier = Modifier.weight(1f))
+            }
+
+            SectionLabel("MAIN MENU")
+
+            // Bento Grid Cards (Bagi tinggi secara dinamis)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Spacer(Modifier.height(4.dp))
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.weight(1f).fillMaxWidth()
+                ) {
+                    BentoCard(item = journalEntry, modifier = Modifier.weight(1f).fillMaxHeight())
+                    BentoCard(item = generalJournal, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
-            }
-
-            item { HeroDashboardCard(item = dashboard, modifier = Modifier.animateItemPlacement()) }
-
-            item { HeroDashboardCard(item = reports, modifier = Modifier.animateItemPlacement()) }
-
-            item {
-                SectionLabel("MAIN MENU", modifier = Modifier.animateItemPlacement())
-            }
-
-            item {
-                Column(verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge), modifier = Modifier.animateItemPlacement()) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge), modifier = Modifier.fillMaxWidth()) {
-                        BentoCard(item = journalEntry, modifier = Modifier.weight(1f))
-                        BentoCard(item = generalJournal, modifier = Modifier.weight(1f))
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge), modifier = Modifier.fillMaxWidth()) {
-                        BentoCard(item = periods, modifier = Modifier.weight(1f))
-                        BentoCard(item = coa, modifier = Modifier.weight(1f))
-                    }
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.weight(1f).fillMaxWidth()
+                ) {
+                    BentoCard(item = periods, modifier = Modifier.weight(1f).fillMaxHeight())
+                    BentoCard(item = coa, modifier = Modifier.weight(1f).fillMaxHeight())
                 }
             }
         }
@@ -116,30 +127,30 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(horizontal = 20.dp, vertical = AumoDimens.SpacingLarge),
+            .padding(horizontal = 20.dp, vertical = AumoDimens.SpacingSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 "Aumo Finance",
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Black),
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Black),
                 color = AumoColors.TextPrimary
             )
-            Spacer(Modifier.height(AumoDimens.SpacingSmall))
+            Spacer(Modifier.height(2.dp))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .clip(RoundedCornerShape(100.dp))
                     .background(if (isDbConnected) Color(0xFFDCFCE7) else Color(0xFFFFF8E1))
                     .border(1.dp, if (isDbConnected) Color(0xFF86EFAC).copy(0.5f) else Color(0xFFFFE082), RoundedCornerShape(100.dp))
-                    .padding(horizontal = AumoDimens.SpacingSmall, vertical = AumoDimens.SpacingSmall)
+                    .padding(horizontal = 8.dp, vertical = 2.dp)
             ) {
                 Box(
                     Modifier.size(6.dp).alpha(if (isDbConnected) 1f else blinkAlpha)
                         .clip(CircleShape)
                         .background(if (isDbConnected) Color(0xFF16A34A) else Color(0xFFFFC107))
                 )
-                Spacer(Modifier.width(AumoDimens.SpacingSmall))
+                Spacer(Modifier.width(4.dp))
                 Text(
                     text = if (isDbConnected) "Connected" else "Waking up server...",
                     style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
@@ -149,7 +160,7 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
         }
 
         Box(
-            Modifier.size(42.dp).clip(CircleShape)
+            Modifier.size(38.dp).clip(CircleShape)
                 .background(AumoColors.SurfaceElevated)
                 .border(1.dp, AumoColors.TextPrimary.copy(0.06f), CircleShape)
                 .clickable(onClick = onSettingsClick),
@@ -162,7 +173,7 @@ private fun PremiumTopBar(isDbConnected: Boolean, onSettingsClick: () -> Unit) {
 
 @Composable
 private fun SectionLabel(text: String, modifier: Modifier = Modifier) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.padding(top = AumoDimens.SpacingSmall)) {
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = modifier.padding(vertical = 4.dp)) {
         Text(
             text, color = AumoColors.TextMuted,
             style = MaterialTheme.typography.labelSmall.copy(
@@ -181,34 +192,30 @@ private fun HeroDashboardCard(item: HomeMenuItem, modifier: Modifier = Modifier)
     )
     Card(
         onClick = item.onClick,
-        shape = RoundedCornerShape(28.dp),
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        modifier = modifier.fillMaxWidth().height(148.dp)
+        modifier = modifier.fillMaxWidth()
     ) {
         Box(
-            Modifier.fillMaxSize().background(gradient).padding(20.dp)
+            Modifier.fillMaxSize().background(gradient).padding(16.dp)
         ) {
-            // decorative blobs
-            Box(Modifier.size(180.dp).offset(x = 120.dp, y = (-40).dp).clip(CircleShape).background(Color.White.copy(0.08f)))
-            Box(Modifier.size(120.dp).offset(x = (-20).dp, y = 80.dp).clip(CircleShape).background(Color.White.copy(0.06f)))
-
             Row(Modifier.fillMaxSize(), verticalAlignment = Alignment.CenterVertically) {
                 Box(
-                    Modifier.size(56.dp).clip(RoundedCornerShape(16.dp))
+                    Modifier.size(44.dp).clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(0.14f))
-                        .border(1.dp, Color.White.copy(0.18f), RoundedCornerShape(16.dp)),
+                        .border(1.dp, Color.White.copy(0.18f), RoundedCornerShape(12.dp)),
                     contentAlignment = Alignment.Center
                 ) {
-                    TablerIcon(item.icon, tint = Color.White, size = 28.dp)
+                    TablerIcon(item.icon, tint = Color.White, size = 24.dp)
                 }
-                Spacer(Modifier.width(AumoDimens.SpacingLarge))
+                Spacer(Modifier.width(12.dp))
                 Column(Modifier.weight(1f)) {
-                    Text(item.title, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(AumoDimens.SpacingSmall))
-                    Text(item.subtitle, color = Color.White.copy(0.75f), style = MaterialTheme.typography.bodySmall, lineHeight = MaterialTheme.typography.bodySmall.lineHeight)
+                    Text(item.title, color = Color.White, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Spacer(Modifier.height(2.dp))
+                    Text(item.subtitle, color = Color.White.copy(0.75f), style = MaterialTheme.typography.bodySmall, maxLines = 1)
                 }
-                Box(Modifier.size(32.dp).clip(CircleShape).background(Color.White.copy(0.12f)), contentAlignment = Alignment.Center) {
-                    TablerIcon(TablerIcons.ChevronRight, tint = Color.White, size = 18.dp)
+                Box(Modifier.size(28.dp).clip(CircleShape).background(Color.White.copy(0.12f)), contentAlignment = Alignment.Center) {
+                    TablerIcon(TablerIcons.ChevronRight, tint = Color.White, size = 16.dp)
                 }
             }
         }
@@ -219,24 +226,24 @@ private fun HeroDashboardCard(item: HomeMenuItem, modifier: Modifier = Modifier)
 private fun BentoCard(item: HomeMenuItem, modifier: Modifier = Modifier) {
     Card(
         onClick = item.onClick,
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = AumoColors.Surface),
         border = androidx.compose.foundation.BorderStroke(1.dp, AumoColors.TextPrimary.copy(0.06f)),
-        modifier = modifier.height(142.dp),
+        modifier = modifier,
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(Modifier.fillMaxSize().padding(AumoDimens.SpacingLarge), verticalArrangement = Arrangement.SpaceBetween) {
+        Column(Modifier.fillMaxSize().padding(12.dp), verticalArrangement = Arrangement.SpaceBetween) {
             Box(
-                Modifier.size(42.dp).clip(RoundedCornerShape(12.dp))
+                Modifier.size(36.dp).clip(RoundedCornerShape(10.dp))
                     .background(AumoColors.Primary.copy(0.1f)),
                 contentAlignment = Alignment.Center
             ) {
-                TablerIcon(item.icon, tint = AumoColors.Primary, size = AumoDimens.IconSmall)
+                TablerIcon(item.icon, tint = AumoColors.Primary, size = 18.dp)
             }
             Column {
                 Text(item.title, color = AumoColors.TextPrimary, fontWeight = FontWeight.SemiBold, style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.height(2.dp))
-                Text(item.subtitle, color = AumoColors.TextMuted, style = MaterialTheme.typography.labelSmall, maxLines = 2)
+                Text(item.subtitle, color = AumoColors.TextMuted, style = MaterialTheme.typography.labelSmall, maxLines = 1)
             }
         }
     }
