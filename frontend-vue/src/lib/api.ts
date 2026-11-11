@@ -3,8 +3,8 @@
 export const DEFAULT_BACKEND_URL = 'https://aumoweb.onrender.com'
 
 export function getBackendTarget(): string {
-  // Base URL backend. Bisa diganti lewat PUBLIC_API_BASE_URL di .env
-  const target = import.meta.env.PUBLIC_API_BASE_URL || DEFAULT_BACKEND_URL
+  // Base URL backend. Bisa diganti lewat VITE_API_BASE_URL di .env
+  const target = import.meta.env.VITE_API_BASE_URL || DEFAULT_BACKEND_URL
   return String(target).replace(/\/+$/, '')
 }
 
