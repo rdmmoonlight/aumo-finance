@@ -13,12 +13,6 @@ const router = createRouter({
     },
 
     {
-      path: '/_test-auth',
-      name: 'test-auth',
-      component: () => import('../views/_TestAuth.vue'),
-    },
-
-    {
       path: '/auth',
       name: 'auth',
       component: () => import('@/features/auth/AuthPage.vue'),
