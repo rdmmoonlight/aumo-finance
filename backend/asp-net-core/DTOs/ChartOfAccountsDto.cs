@@ -75,27 +75,3 @@ public class AccountDto
 
     public string Role { get; set; } = string.Empty;
 }
-
-public class CreateAccountRequest
-{
-    public int ReferenceNumber { get; set; }
-
-    public string AccountName { get; set; } = string.Empty;
-
-    public string Type { get; set; } = string.Empty;
-
-    public string Role { get; set; } = string.Empty;
-}
-
-public class UpdateAccountRequest
-{
-    public int ReferenceNumber { get; set; }
-
-    public string AccountName { get; set; } = string.Empty;
-
-    public string Type { get; set; } = string.Empty;
-
-    public string Role { get; set; } = string.Empty;
-
-    public bool IsActive { get; set; } = true;
-}
