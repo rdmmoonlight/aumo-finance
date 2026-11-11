@@ -30,21 +30,6 @@
       >
         <!-- Header -->
         <div class="border-b shrink-0 flex items-center justify-between p-3.5 h-14">
-          <div class="flex items-center gap-2 min-w-0">
-            <div class="flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <img
-                src="/favicon.ico"
-                alt="Aumo"
-                width="24"
-                height="24"
-                class="h-6 w-6 object-contain"
-              />
-            </div>
-            <h2 v-if="!sidebarStore.isCollapsed" class="text-lg font-bold tracking-tight truncate">
-              Aumo Finance
-            </h2>
-          </div>
-
           <!-- Button Toggle Expand / Hide -->
           <Button
             variant="ghost"
