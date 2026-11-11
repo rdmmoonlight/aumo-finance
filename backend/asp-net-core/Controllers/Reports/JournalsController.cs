@@ -38,7 +38,6 @@ public class JournalsController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        // Jurnal penutup tidak punya tabel fisik: dihitung dari GeneralJournals periode terpilih.
         ClosingJournalReportResult result = await _journalsService.GetClosingJournalAsync(userId);
 
         if (!result.HasPeriodSelected)
@@ -94,6 +93,7 @@ public class JournalsController : ControllerBase
 
         try
         {
+            // Panggilan langsung ke IJournalsService yang mengkapsulasi logika validasi dan pendelegasian
             await _journalsService.DeleteAdjustingAsync(userId, id);
             return Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
         }
@@ -107,7 +107,6 @@ public class JournalsController : ControllerBase
         }
     }
 
-    // Kontrak respons: jurnal umum dan penyesuaian memakai "entries".
     private async Task<IActionResult> GetJournalAsync(string journalType, string listKey)
     {
         var userId = User.GetCurrentUserId();
