@@ -28,15 +28,21 @@ ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 RUN pnpm build
 
 # ==========================================
-# Stage 2: Production Phase
+# Stage 2: Production Phase (Node.js + serve)
 # ==========================================
-FROM nginx:alpine AS production
+FROM node:26-alpine AS production
 
-# Copy hasil build dari stage builder ke folder web server Nginx
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Expose port 80
-EXPOSE 80
+# Install package 'serve' untuk melayani static files & client-side routing
+RUN npm install -g serve
 
-# Jalankan Nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Copy hasil build dari stage builder
+COPY --from=builder /app/dist ./dist
+
+# Render otomatis menginjeksikan PORT (default 10000), tapi fallback ke 8080 jika lokal
+ENV PORT=8080
+EXPOSE ${PORT}
+
+# Jalankan 'serve' dengan opsi -s (SPA fallback ke index.html)
+CMD ["sh", "-c", "serve -s dist -l $PORT"]
