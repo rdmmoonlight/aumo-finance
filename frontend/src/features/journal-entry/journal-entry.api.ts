@@ -1,5 +1,5 @@
-import { dashboardKeys } from '#/features/dashboard/dashboard.api'
-import { reportsKeys } from '#/features/reports/reports.api'
+import { dashboardKeys } from '@/features/dashboard/dashboard.api'
+import { reportsKeys } from '@/features/reports/reports-page/summary.api'
 import {
   deleteApiV1JournalEntryDeleteById,
   getApiV1JournalEntryById,
