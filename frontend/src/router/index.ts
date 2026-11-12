@@ -68,6 +68,46 @@ const router = createRouter({
     },
 
     {
+      path: '/repots',
+      name: 'reports-page',
+      component: () => import('@/features/reports/reports-page/ReportsPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // --- Financial Statements ---
+    {
+      path: '/financial-statements/income-statement',
+      name: 'income-statement',
+      component: () =>
+        import('@/features/reports/financial-statements/income-statement/IncomeStatementPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/financial-statements/retained-earnings',
+      name: 'retained-earnings',
+      component: () =>
+        import('@/features/reports/financial-statements/retained-earnings/RetainedEarningsPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/financial-statements/cash-flow',
+      name: 'statement-of-cash-flow',
+      component: () =>
+        import('@/features/reports/financial-statements/cash-flow/StatementOfCashFlowPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/financial-statements/financial-position',
+      name: 'statement-of-financial-position',
+      component: () =>
+        import('@/features/reports/financial-statements/financial-position/StatementOfFinancialPositionPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
       path: '/dashboard',
       name: 'dashboard',
       component: () => import('@/features/dashboard/DashboardPage.vue'),
