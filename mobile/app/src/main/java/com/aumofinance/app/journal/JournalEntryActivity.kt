@@ -12,7 +12,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.components.AumoDatePickerDialog
 import com.aumofinance.app.ui.components.SnackbarMessageHost
 import com.aumofinance.app.ui.theme.AumoTheme
@@ -78,9 +77,6 @@ class JournalEntryActivity : ComponentActivity() {
                         accounts = viewModel.accounts,
                         onAddLine = { viewModel.addLine() },
                         onRemoveLine = { viewModel.removeLine(it) },
-                        totalDebitText = CurrencyFormatter.format(viewModel.totalDebit()),
-                        totalCreditText = CurrencyFormatter.format(viewModel.totalCredit()),
-                        isBalanced = viewModel.isBalanced(),
                         isEditingMode = entryId != null,
                         submitButtonText = if (entryId == null) "Save" else "Update",
                         onCancel = { finish() },

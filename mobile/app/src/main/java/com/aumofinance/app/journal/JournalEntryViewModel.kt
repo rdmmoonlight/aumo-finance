@@ -103,12 +103,6 @@ class JournalEntryViewModel : ViewModel() {
         if (lines.size > 1) lines.remove(line)
     }
 
-    fun totalDebit(): Double = lines.sumOf { it.debitAmount() }
-
-    fun totalCredit(): Double = lines.sumOf { it.creditAmount() }
-
-    fun isBalanced(): Boolean = totalDebit() > 0 && totalDebit() == totalCredit()
-
     private fun loadActiveAccounts() {
         viewModelScope.launch {
             try {
@@ -164,10 +158,9 @@ class JournalEntryViewModel : ViewModel() {
     private fun formatAmount(value: Double): String = if (value == 0.0) "" else Math.round(value).toString()
 
     fun save() {
-        if (!isBalanced()) {
-            errorMessage = "Entri belum balance — total debit harus sama dengan total kredit."
-            return
-        }
+        // Keseimbangan debit/kredit dan aturan jurnal lainnya divalidasi backend
+        // (JournalEntryValidatorBase); pesan penolakannya tampil lewat errorMessage.
+        // Pengecekan akun di bawah hanya penjaga pembentukan payload (accountId!!).
         if (lines.any { it.accountId == null }) {
             errorMessage = "Setiap baris harus memilih akun."
             return

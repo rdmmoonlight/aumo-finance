@@ -78,9 +78,6 @@ fun JournalEntryScreen(
     accounts: List<Account>,
     onAddLine: () -> Unit,
     onRemoveLine: (JournalLineDraft) -> Unit,
-    totalDebitText: String,
-    totalCreditText: String,
-    isBalanced: Boolean,
     isEditingMode: Boolean,
     submitButtonText: String,
     onCancel: () -> Unit,
@@ -155,9 +152,6 @@ fun JournalEntryScreen(
             }
 
             BottomActionBar(
-                totalDebitText = totalDebitText,
-                totalCreditText = totalCreditText,
-                isBalanced = isBalanced,
                 isEditingMode = isEditingMode,
                 submitButtonText = submitButtonText,
                 onCancel = onCancel,
@@ -464,9 +458,6 @@ private fun ThousandsAmountField(
 
 @Composable
 private fun BottomActionBar(
-    totalDebitText: String,
-    totalCreditText: String,
-    isBalanced: Boolean,
     isEditingMode: Boolean,
     submitButtonText: String,
     onCancel: () -> Unit,
@@ -481,40 +472,6 @@ private fun BottomActionBar(
                 .padding(AumoDimens.SpacingLarge),
         verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Total Debit", color = AumoColors.TextSecondary, fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                Text(
-                    totalDebitText,
-                    color = AumoColors.TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                )
-            }
-            Column(modifier = Modifier.weight(1f)) {
-                Text("Total Credit", color = AumoColors.TextSecondary, fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                Text(
-                    totalCreditText,
-                    color = AumoColors.TextPrimary,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.bodyMedium.fontSize,
-                )
-            }
-            Box(
-                modifier =
-                    Modifier
-                        .background(if (isBalanced) AumoColors.Good else AumoColors.Bad, RoundedCornerShape(6.dp))
-                        .padding(AumoDimens.SpacingSmall, AumoDimens.SpacingSmall),
-            ) {
-                Text(
-                    text = if (isBalanced) "Balanced" else "Unbalanced",
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
-                )
-            }
-        }
-
         Row(horizontalArrangement = Arrangement.spacedBy(AumoDimens.SpacingSmall)) {
             if (isEditingMode) {
                 TextButton(
