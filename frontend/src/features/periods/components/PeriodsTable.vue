@@ -1,3 +1,39 @@
+<script setup lang="ts">
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Loader2, MoreHorizontal } from 'lucide-vue-next'
+import type { Period } from '../types'
+
+interface Props {
+  periods: Period[]
+  isLoading?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  periods: () => [],
+  isLoading: false,
+})
+
+const emit = defineEmits<{
+  'close-period': [id: string]
+  'view-detail': [id: string]
+}>()
+</script>
+
 <template>
   <div class="rounded-md border">
     <Table>
@@ -55,10 +91,7 @@
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem
-                    v-if="period.status === 'ACTIVE'"
-                    @click="emit('close-period', period.id)"
-                  >
+                  <DropdownMenuItem v-if="period.status === 'ACTIVE'" @click="emit('close-period', period.id)">
                     Tutup Periode
                   </DropdownMenuItem>
                   <DropdownMenuItem @click="emit('view-detail', period.id)">
@@ -73,39 +106,3 @@
     </Table>
   </div>
 </template>
-
-<script setup lang="ts">
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
-import { Loader2, MoreHorizontal } from 'lucide-vue-next'
-import type { Period } from '../types'
-
-interface Props {
-  periods: Period[]
-  isLoading?: boolean
-}
-
-const props = withDefaults(defineProps<Props>(), {
-  periods: () => [],
-  isLoading: false,
-})
-
-const emit = defineEmits<{
-  'close-period': [id: string]
-  'view-detail': [id: string]
-}>()
-</script>

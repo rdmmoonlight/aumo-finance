@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { useGetRetainedEarningsQuery } from '../../reports.api.ts'; // sesuaikan alias path modul laporan Anda
-import ErrorAlert from '../components/ErrorAlert.vue'
-import LoadingState from '../components/LoadingState.vue'
-import NoPeriodCard from '../components/NoPeriodCard.vue'
-import RetainedEarningsTable from '../retained-earnings/RetainedEarningsTable.vue'
-import type { RetainedEarningsData } from '../types.ts'
+import { useQuery } from '@tanstack/vue-query';
+import { getRetainedEarningsApi } from '../../financial-statements/financial-statements.api.ts';
+import ErrorAlert from '../components/ErrorAlert.vue';
+import LoadingState from '../components/LoadingState.vue';
+import NoPeriodCard from '../components/NoPeriodCard.vue';
+import RetainedEarningsTable from '../retained-earnings/RetainedEarningsTable.vue';
+import type { RetainedEarningsData } from '../types.ts';
 
 // TanStack Vue Query Composable
-const { data, isLoading, isError, error, refetch } = useGetRetainedEarningsQuery()
+const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['retained-earnings'],
+    queryFn: ({ signal }) => getRetainedEarningsApi(signal),
+})
 
 const handleManagePeriod = () => {
     console.log('Navigasi ke manajemen periode')

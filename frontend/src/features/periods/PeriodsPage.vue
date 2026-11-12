@@ -5,15 +5,14 @@ import PeriodsAlerts from './components/PeriodsAlerts.vue'
 import PeriodsTable from './components/PeriodsTable.vue'
 import { usePeriodsPage } from './hooks/use-periods-page'
 
-// Interface lokal untuk item periode (sesuaikan properti jika ada bidang lain)
 export interface PeriodItem {
-  id: string | number
-  name?: string
+  id: string
+  name: string
   status?: string
   isActive?: boolean
   isOpen?: boolean
-  startDate?: string
-  endDate?: string
+  startDate: string
+  endDate: string
   [key: string]: unknown
 }
 

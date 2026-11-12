@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { useGetIncomeStatementQuery } from '../../reports.api.ts'
+import { useQuery } from '@tanstack/vue-query'
+import { getIncomeStatementApi } from '../../financial-statements/financial-statements.api.ts'
 import ErrorAlert from '../components/ErrorAlert.vue'
 import LoadingState from '../components/LoadingState.vue'
 import NoPeriodCard from '../components/NoPeriodCard.vue'
 import IncomeStatementTable from '../income-statement/IncomeStatementTable.vue'
 import type { IncomeStatementData } from '../types.ts'
 
-// TanStack Vue Query Composable
-const { data, isLoading, isError, error, refetch } = useGetIncomeStatementQuery()
+const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: ['income-statement'],
+    queryFn: ({ signal }) => getIncomeStatementApi(signal),
+})
 
 const handleManagePeriod = () => {
     console.log('Navigasi ke manajemen periode')

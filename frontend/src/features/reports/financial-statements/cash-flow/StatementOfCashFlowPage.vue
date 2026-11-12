@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { useGetStatementOfCashFlowQuery } from '../../reports.api.ts'; // sesuaikan alias path modul laporan Anda
-import CashFlowTable from '../cash-flow/CashFlowTable.vue'
-import ErrorAlert from '../components/ErrorAlert.vue'
-import LoadingState from '../components/LoadingState.vue'
-import NoPeriodCard from '../components/NoPeriodCard.vue'
-import type { CashFlowData } from '../types'
+import { useQuery } from '@tanstack/vue-query';
+import CashFlowTable from '../cash-flow/CashFlowTable.vue';
+import ErrorAlert from '../components/ErrorAlert.vue';
+import LoadingState from '../components/LoadingState.vue';
+import NoPeriodCard from '../components/NoPeriodCard.vue';
+import { getStatementOfCashFlowApi } from '../financial-statements.api.ts';
+import type { CashFlowData } from '../types';
 
-// TanStack Vue Query Composable
-const { data, isLoading, isError, error, refetch } = useGetStatementOfCashFlowQuery()
+const { data, isLoading, isError, error, refetch } = useQuery<CashFlowData>({
+    queryKey: ['statement-of-cash-flow'],
+    queryFn: () => getStatementOfCashFlowApi() as Promise<CashFlowData>,
+})
 
 const handleManagePeriod = () => {
     console.log('Navigasi ke manajemen periode')

@@ -2,7 +2,7 @@
   <Dialog :open="props.open" @update:open="(val) => emit('update:open', val)">
     <DialogTrigger as-child>
       <slot name="trigger">
-        <Button variant="primary">Buka Periode Baru</Button>
+        <Button variant="default">Buka Periode Baru</Button>
       </slot>
     </DialogTrigger>
 
@@ -22,13 +22,10 @@
             <Popover>
               <PopoverTrigger as-child>
                 <FormControl>
-                  <Button
-                    variant="outline"
-                    :class="[
-                      'w-full justify-start text-left font-normal',
-                      !value && 'text-muted-foreground',
-                    ]"
-                  >
+                  <Button variant="outline" :class="[
+                    'w-full justify-start text-left font-normal',
+                    !value && 'text-muted-foreground',
+                  ]">
                     <CalendarIcon class="mr-2 h-4 w-4" />
                     {{ value ? value : 'Pilih tanggal mulai' }}
                   </Button>
@@ -49,13 +46,10 @@
             <Popover>
               <PopoverTrigger as-child>
                 <FormControl>
-                  <Button
-                    variant="outline"
-                    :class="[
-                      'w-full justify-start text-left font-normal',
-                      !value && 'text-muted-foreground',
-                    ]"
-                  >
+                  <Button variant="outline" :class="[
+                    'w-full justify-start text-left font-normal',
+                    !value && 'text-muted-foreground',
+                  ]">
                     <CalendarIcon class="mr-2 h-4 w-4" />
                     {{ value ? value : 'Pilih tanggal selesai' }}
                   </Button>

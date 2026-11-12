@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { useQuery } from '@tanstack/vue-query';
 import { computed, ref } from 'vue';
-import { useGetStatementOfFinancialPositionQuery } from '../../reports.api.ts'; // sesuaikan alias path modul laporan Anda
+import { getStatementOfFinancialPositionApi } from '../../financial-statements/financial-statements.api.ts'; // sesuaikan alias path modul laporan Anda
 import ErrorAlert from '../components/ErrorAlert.vue';
 import LoadingState from '../components/LoadingState.vue';
 import NoPeriodCard from '../components/NoPeriodCard.vue';
@@ -13,9 +14,10 @@ const queryParams = computed(() => ({
     isPostClosing: isPostClosing.value,
 }))
 
-// TanStack Vue Query Composable (otomatis refetch saat queryParams berubah)
-const { data, isLoading, isError, error, refetch } =
-    useGetStatementOfFinancialPositionQuery(queryParams)
+const { data, isLoading, isError, error, refetch } = useQuery({
+    queryKey: computed(() => ['statement-of-financial-position', queryParams.value]),
+    queryFn: () => getStatementOfFinancialPositionApi(queryParams.value),
+})
 
 const handleManagePeriod = () => {
     console.log('Navigasi ke manajemen periode')
