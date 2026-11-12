@@ -12,12 +12,7 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
 
-    {
-      path: '/auth',
-      name: 'auth',
-      component: () => import('@/features/auth/AuthPage.vue'),
-      meta: { requiresAuth: false },
-    },
+    { path: '/auth', name: 'auth', redirect: '/auth/login' },
 
     {
       path: '/auth/login',

@@ -1,43 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import ErrorAlert from '../components/ErrorAlert.vue';
-import LoadingState from '../components/LoadingState.vue';
-import NoPeriodCard from '../components/NoPeriodCard.vue';
-import type { IncomeStatementData } from '../types';
-import IncomeStatementTable from './IncomeStatementTable.vue';
+import { useGetIncomeStatementQuery } from '../../reports.api.ts'
+import ErrorAlert from '../components/ErrorAlert.vue'
+import LoadingState from '../components/LoadingState.vue'
+import NoPeriodCard from '../components/NoPeriodCard.vue'
+import IncomeStatementTable from '../income-statement/IncomeStatementTable.vue'
+import type { IncomeStatementData } from '../types.ts'
 
-// State Management
-const isLoading = ref<boolean>(true);
-const isError = ref<boolean>(false);
-const errorMessage = ref<string>('');
-const hasPeriod = ref<boolean>(true);
-const statementData = ref<IncomeStatementData | null>(null);
-
-// Contoh fungsi fetching data
-const fetchIncomeStatement = async () => {
-    isLoading.value = true;
-    isError.value = false;
-
-    try {
-        await new Promise((resolve) => setTimeout(resolve, 800));
-    } catch (err: unknown) {
-        isError.value = true;
-        errorMessage.value = err instanceof Error
-            ? err.message
-            : 'Gagal mengambil data Laporan Laba Rugi.';
-    } finally {
-        isLoading.value = false;
-    }
-};
+// TanStack Vue Query Composable
+const { data, isLoading, isError, error, refetch } = useGetIncomeStatementQuery()
 
 const handleManagePeriod = () => {
-    // Navigasi atau logika pembukaan modal manajemen periode
-    console.log('Navigasi ke manajemen periode');
-};
-
-onMounted(() => {
-    fetchIncomeStatement();
-});
+    console.log('Navigasi ke manajemen periode')
+}
 </script>
 
 <template>
@@ -48,8 +22,9 @@ onMounted(() => {
                 <h1 class="text-2xl font-bold tracking-tight text-gray-900">
                     Laporan Laba Rugi
                 </h1>
-                <p class="mt-1 text-sm text-gray-500" v-if="statementData?.period">
-                    Periode: {{ statementData.period.startDate }} s/d {{ statementData.period.endDate }}
+                <p class="mt-1 text-sm text-gray-500" v-if="(data as IncomeStatementData)?.period">
+                    Periode: {{ (data as IncomeStatementData).period.startDate }} s/d {{ (data as
+                        IncomeStatementData).period.endDate }}
                 </p>
             </div>
         </div>
@@ -58,15 +33,16 @@ onMounted(() => {
         <LoadingState v-if="isLoading" message="Memuat Laporan Laba Rugi..." />
 
         <!-- State 2: Error -->
-        <ErrorAlert v-else-if="isError" title="Gagal Memuat Laporan Laba Rugi" :message="errorMessage"
-            @retry="fetchIncomeStatement" />
+        <ErrorAlert v-else-if="isError" title="Gagal Memuat Laporan Laba Rugi"
+            :message="error?.message || 'Terjadi kesalahan saat mengambil data Laporan Laba Rugi.'"
+            @retry="() => refetch()" />
 
-        <!-- State 3: Periode Tidak Aktif / Kosong -->
-        <NoPeriodCard v-else-if="!hasPeriod" title="Belum Ada Periode Aktif"
+        <!-- State 3: Data Kosong / Periode Tidak Ada -->
+        <NoPeriodCard v-else-if="!data" title="Belum Ada Periode Aktif"
             message="Silakan buat atau aktifkan periode akuntansi untuk melihat Laporan Laba Rugi."
             @action="handleManagePeriod" />
 
         <!-- State 4: Tampilan Data Utama -->
-        <IncomeStatementTable v-else-if="statementData" :data="statementData" />
+        <IncomeStatementTable v-else :data="(data as IncomeStatementData)" />
     </div>
 </template>
