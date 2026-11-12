@@ -17,11 +17,13 @@ permissions:
 jobs:
   lint-and-fix:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          # Menggunakan token bawaan agar action dapat melakukan push
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up JDK 17
@@ -32,6 +34,8 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          build-root-directory: mobile
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -46,7 +50,8 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "style: auto-fix Kotlin code style [skip ci]"
+          working_directory: mobile
 
-      # 3. Jalankan Android Lint (pemeriksaan potensi bug & struktur Android)
+      # 3. Jalankan Android Lint
       - name: Run Android Lint
         run: ./gradlew lintDebug --stacktrace
