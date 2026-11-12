@@ -1,35 +1,59 @@
 <template>
   <!-- WRAPPER: Flex item (hidden md:flex shrink-0) dengan dinamis style width -->
-  <div data-slot="sidebar-wrapper" :data-state="sidebarStore.isCollapsed ? 'collapsed' : 'expanded'"
-    data-collapsible="icon" data-variant="sidebar" data-side="left" :style="{
+  <div
+    data-slot="sidebar-wrapper"
+    :data-state="sidebarStore.isCollapsed ? 'collapsed' : 'expanded'"
+    data-collapsible="icon"
+    data-variant="sidebar"
+    data-side="left"
+    :style="{
       '--sidebar-width': sidebarStore.isCollapsed ? '3.5rem' : '285px',
       '--sidebar-width-icon': '3.5rem',
-    }" class="group peer hidden md:flex shrink-0 text-sidebar-foreground transition-[width] duration-200 ease-linear">
+    }"
+    class="group peer hidden md:flex shrink-0 text-sidebar-foreground transition-[width] duration-200 ease-linear"
+  >
     <!-- SIDEBAR-GAP: Penahan alur Flexbox (Diturunkan 2cm di bawah Topbar) -->
-    <div data-slot="sidebar-gap"
-      class="relative h-[calc(100vh-var(--topbar-height,104px))] w-[var(--sidebar-width)] bg-transparent transition-[width] duration-200 ease-linear" />
+    <div
+      data-slot="sidebar-gap"
+      class="relative h-[calc(100vh-var(--topbar-height,104px))] w-[var(--sidebar-width)] bg-transparent transition-[width] duration-200 ease-linear"
+    />
 
     <!-- SIDEBAR-CONTAINER: Position Fixed (top: calc(3.5rem + 2cm)) -->
-    <div data-slot="sidebar-container"
-      class="fixed top-[var(--topbar-height,104px)] bottom-0 z-10 hidden h-[calc(100vh-var(--topbar-height,104px))] w-[var(--sidebar-width)] transition-[width,left,right] duration-200 ease-linear md:flex left-0 border-r border-sidebar-border bg-sidebar">
+    <div
+      data-slot="sidebar-container"
+      class="fixed top-[var(--topbar-height,104px)] bottom-0 z-10 hidden h-[calc(100vh-var(--topbar-height,104px))] w-[var(--sidebar-width)] transition-[width,left,right] duration-200 ease-linear md:flex left-0 border-r border-sidebar-border bg-sidebar"
+    >
       <!-- SIDEBAR-INNER -->
       <div data-slot="sidebar-inner" class="flex h-full w-full flex-col overflow-hidden">
         <!-- Content Navigation -->
         <div class="p-2 flex-1 overflow-y-auto">
           <div>
             <!-- Header Navigation & Button Toggle -->
-            <div v-if="!sidebarStore.isCollapsed" class="flex items-center justify-between px-2 mb-2 h-7">
+            <div
+              v-if="!sidebarStore.isCollapsed"
+              class="flex items-center justify-between px-2 mb-2 h-7"
+            >
               <span class="uppercase tracking-widest text-muted-foreground text-xs font-semibold">
                 Navigation
               </span>
-              <Button variant="ghost" size="icon" class="h-7 w-7 shrink-0" @click="sidebarStore.toggleSidebar">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="h-7 w-7 shrink-0"
+                @click="sidebarStore.toggleSidebar"
+              >
                 <PanelLeftClose class="h-4 w-4" />
               </Button>
             </div>
 
             <!-- Button Toggle saat Collapsed -->
             <div v-else class="flex justify-center mb-2">
-              <Button variant="ghost" size="icon" class="h-7 w-7 shrink-0" @click="sidebarStore.toggleSidebar">
+              <Button
+                variant="ghost"
+                size="icon"
+                class="h-7 w-7 shrink-0"
+                @click="sidebarStore.toggleSidebar"
+              >
                 <PanelLeft class="h-4 w-4" />
               </Button>
             </div>
@@ -38,13 +62,16 @@
               <li v-for="item in navigation" :key="item.title">
                 <Tooltip>
                   <TooltipTrigger as-child>
-                    <RouterLink :to="item.url" :class="[
-                      'flex items-center gap-3 text-sm h-9 font-normal px-2.5 rounded-md transition-colors min-w-0',
-                      isActive(item.url)
-                        ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
-                        : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
-                      sidebarStore.isCollapsed ? 'justify-center px-0' : '',
-                    ]">
+                    <RouterLink
+                      :to="item.url"
+                      :class="[
+                        'flex items-center gap-3 text-sm h-9 font-normal px-2.5 rounded-md transition-colors min-w-0',
+                        isActive(item.url)
+                          ? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+                          : 'hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
+                        sidebarStore.isCollapsed ? 'justify-center px-0' : '',
+                      ]"
+                    >
                       <component :is="item.icon" :class="ICON_CLASS" />
                       <span v-if="!sidebarStore.isCollapsed" class="truncate">
                         {{ item.title }}
@@ -67,7 +94,9 @@
               <div>
                 <Tooltip v-if="sidebarStore.isCollapsed">
                   <TooltipTrigger as-child>
-                    <button class="h-10 w-full flex items-center justify-center rounded-md hover:bg-accent">
+                    <button
+                      class="h-10 w-full flex items-center justify-center rounded-md hover:bg-accent"
+                    >
                       <Avatar class="h-7 w-7 shrink-0">
                         <AvatarFallback class="bg-muted text-xs">
                           <template v-if="profileEmail">
@@ -83,8 +112,10 @@
                   </TooltipContent>
                 </Tooltip>
 
-                <button v-else
-                  class="h-10 w-full flex items-center justify-between px-2 rounded-md hover:bg-accent text-left min-w-0">
+                <button
+                  v-else
+                  class="h-10 w-full flex items-center justify-between px-2 rounded-md hover:bg-accent text-left min-w-0"
+                >
                   <div class="flex min-w-0 items-center gap-2.5">
                     <Avatar class="h-7 w-7 shrink-0">
                       <AvatarFallback class="bg-muted text-xs">
@@ -110,8 +141,12 @@
               </div>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent align="end" :side="sidebarStore.isCollapsed ? 'right' : 'top'" :side-offset="8"
-              class="w-56">
+            <DropdownMenuContent
+              align="end"
+              :side="sidebarStore.isCollapsed ? 'right' : 'top'"
+              :side-offset="8"
+              class="w-56"
+            >
               <DropdownMenuItem as-child class="text-sm">
                 <RouterLink to="/settings">
                   <Settings class="mr-2 h-4 w-4" />
@@ -127,9 +162,13 @@
         </div>
 
         <!-- Rail -->
-        <button data-slot="sidebar-rail" aria-label="Toggle Sidebar" title="Toggle Sidebar"
+        <button
+          data-slot="sidebar-rail"
+          aria-label="Toggle Sidebar"
+          title="Toggle Sidebar"
           class="absolute inset-y-0 z-20 hidden w-4 -translate-x-1/2 transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-[1px] hover:after:bg-sidebar-border -right-4 sm:flex"
-          @click="sidebarStore.toggleSidebar" />
+          @click="sidebarStore.toggleSidebar"
+        />
       </div>
     </div>
   </div>
@@ -168,7 +207,6 @@ import { RouterLink, useRoute } from 'vue-router'
 const ICON_CLASS = 'h-4 w-4 shrink-0'
 const SIDEBAR_KEYBOARD_SHORTCUT = 'b'
 
-// Store & Routing
 const sidebarStore = useSidebarStore()
 const route = useRoute()
 const pathname = computed(() => route.path)
@@ -179,7 +217,7 @@ const navigation = [
   { title: 'Periods', url: '/periods', icon: Calendar },
   { title: 'Chart of Accounts', url: '/chart-of-accounts', icon: BookOpen },
   { title: 'Journal Entry', url: '/journal-entry', icon: FileSpreadsheet },
-  { title: 'Reports', url: '/reports', icon: FileBarChart },
+  { title: 'Reports', url: '/reports-page', icon: FileBarChart },
   { title: 'Settings', url: '/settings', icon: Settings },
 ]
 

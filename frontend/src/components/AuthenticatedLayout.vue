@@ -32,9 +32,11 @@
       >
         <!-- Sidebar di bawah Topbar -->
         <AppSidebar />
-        
+
         <!-- Area Utama / Content Inset -->
-        <SidebarInset class="flex flex-1 flex-col min-w-0 w-full overflow-x-hidden transition-all duration-200 ease-linear">
+        <SidebarInset
+          class="flex flex-1 flex-col min-w-0 w-full overflow-x-hidden transition-all duration-200 ease-linear"
+        >
           <main class="relative flex-1 p-6">
             <!-- PeriodsLoadingOverlay -->
             <div
@@ -46,7 +48,7 @@
 
             <RouterView />
           </main>
-          
+
           <AppFooter />
         </SidebarInset>
       </SidebarProvider>
@@ -55,9 +57,9 @@
 </template>
 
 <script setup lang="ts">
+import AppTopbar from '#/components/topbar/AppTopbar.vue'
 import { useGetPeriodsQuery } from '#/features/periods/periods.api'
 import AppFooter from '@/components/AppFooter.vue'
-import AppTopbar from '@/components/AppTopbar.vue'
 import AppSidebar from '@/components/sidebar/AppSidebar.vue'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 import { TooltipProvider } from '@/components/ui/tooltip'
