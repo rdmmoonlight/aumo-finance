@@ -1,4 +1,4 @@
-# Aumo Finance
+# ./
 
 Sistem informasi keuangan dan akuntansi terintegrasi, berorientasi presisi.
 
