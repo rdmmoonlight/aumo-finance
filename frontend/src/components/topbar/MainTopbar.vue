@@ -1,23 +1,28 @@
 <template>
-  <div class="flex h-16 items-center justify-between pl-3 pr-4 gap-16">
-    <!-- Sisi Kiri: Teks Sambutan & Search Bar -->
-    <div class="flex items-center gap-6 flex-1">
-      <!-- Teks Sambutan -->
-      <div class="hidden sm:flex flex-col justify-center shrink-0">
-        <span class="text-sm font-semibold leading-tight text-foreground"> Welcome </span>
-        <span class="text-xs leading-tight text-muted-foreground">
-          Hati-hati Dan Tetap Waspada!
-        </span>
-      </div>
+<!-- KELOMPOK 1: Bar Utama -->
+    <div class="flex h-16 items-center justify-between pl-3 pr-4 gap-4">
+      <!-- Sisi Kiri: Teks Sambutan & Search Bar -->
+      <div class="flex items-center flex-1">
+        <!-- Teks Sambutan dengan lebar tetap w-72 (atau w-75 di Tailwind v4) -->
+        <div class="hidden sm:flex flex-col justify-center shrink-0 w-72">
+          <span class="text-sm font-semibold leading-tight text-foreground">
+            Welcome
+          </span>
+          <span class="text-xs leading-tight text-muted-foreground">
+            Hati-hati Dan Tetap Waspada!
+          </span>
+        </div>
 
-      <!-- Search Bar -->
-      <div class="relative w-full max-w-md ml-6">
-        <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input :model-value="searchQuery" type="search" placeholder="Cari transaksi, akun, atau laporan..."
-          class="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
-          @update:model-value="searchQuery = String($event ?? '')" />
+        <!-- Search Bar (Otomatis sejajar dengan pl-75) -->
+        <div class="relative w-full max-w-md">
+          <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            type="search"
+            placeholder="Cari transaksi, akun, atau laporan..."
+            class="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
+          />
+        </div>
       </div>
-    </div>
 
     <!-- Sisi Kanan: Notifikasi -->
     <div class="flex items-center">
