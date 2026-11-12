@@ -11,15 +11,11 @@
       </div>
 
       <!-- Search Bar -->
-      <div class="relative w-full max-w-md">
+      <div class="relative w-full max-w-md ml-6">
         <Search class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          :model-value="searchQuery"
-          type="search"
-          placeholder="Cari transaksi, akun, atau laporan..."
+        <Input :model-value="searchQuery" type="search" placeholder="Cari transaksi, akun, atau laporan..."
           class="pl-9 bg-muted/40 text-sm focus-visible:bg-background"
-          @update:model-value="searchQuery = String($event ?? '')"
-        />
+          @update:model-value="searchQuery = String($event ?? '')" />
       </div>
     </div>
 
@@ -27,17 +23,11 @@
     <div class="flex items-center">
       <Popover>
         <PopoverTrigger as-child>
-          <Button
-            variant="ghost"
-            size="icon"
-            class="relative text-muted-foreground hover:text-foreground"
-            aria-label="Notifikasi"
-          >
+          <Button variant="ghost" size="icon" class="relative text-muted-foreground hover:text-foreground"
+            aria-label="Notifikasi">
             <Bell class="h-5 w-5" />
-            <span
-              v-if="unreadCount > 0"
-              class="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive animate-pulse"
-            />
+            <span v-if="unreadCount > 0"
+              class="absolute top-2 right-2 h-2 w-2 rounded-full bg-destructive animate-pulse" />
           </Button>
         </PopoverTrigger>
         <PopoverContent class="w-80 p-0 mr-4" align="end">
@@ -49,14 +39,8 @@
                 {{ unreadCount }} baru
               </Badge>
             </div>
-            <Button
-              v-if="unreadCount > 0"
-              variant="ghost"
-              size="sm"
-              :disabled="isMarkingAllRead"
-              class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground"
-              @click="emit('mark-all-as-read')"
-            >
+            <Button v-if="unreadCount > 0" variant="ghost" size="sm" :disabled="isMarkingAllRead"
+              class="h-auto p-0 text-xs text-muted-foreground hover:text-foreground" @click="emit('mark-all-as-read')">
               <Loader2 v-if="isMarkingAllRead" class="h-3 w-3 animate-spin" />
               <span v-else>Tandai dibaca</span>
             </Button>
@@ -64,28 +48,17 @@
 
           <!-- List Notifikasi -->
           <div class="max-h-80 overflow-y-auto divide-y">
-            <div
-              v-if="isNotificationsLoading"
-              class="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2"
-            >
+            <div v-if="isNotificationsLoading"
+              class="p-4 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
               <Loader2 class="h-4 w-4 animate-spin" /> Memuat notifikasi...
             </div>
-            <div
-              v-else-if="notificationsData.length === 0"
-              class="p-4 text-center text-xs text-muted-foreground"
-            >
+            <div v-else-if="notificationsData.length === 0" class="p-4 text-center text-xs text-muted-foreground">
               Tidak ada notifikasi saat ini.
             </div>
-            <div
-              v-for="item in notificationsData"
-              v-else
-              :key="item.id"
-              :class="[
-                'p-3 text-xs cursor-pointer transition-colors hover:bg-muted/50 flex gap-3',
-                !item.isRead ? 'bg-muted/20 font-medium' : 'opacity-70',
-              ]"
-              @click="emit('mark-as-read', item.id)"
-            >
+            <div v-for="item in notificationsData" v-else :key="item.id" :class="[
+              'p-3 text-xs cursor-pointer transition-colors hover:bg-muted/50 flex gap-3',
+              !item.isRead ? 'bg-muted/20 font-medium' : 'opacity-70',
+            ]" @click="emit('mark-as-read', item.id)">
               <div class="mt-0.5">
                 <AlertTriangle v-if="item.type === 'warning'" class="h-4 w-4 text-amber-500" />
                 <Info v-else class="h-4 w-4 text-blue-500" />

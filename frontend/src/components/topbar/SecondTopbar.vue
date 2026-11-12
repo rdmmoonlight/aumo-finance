@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-10 items-center justify-between pl-3 pr-4 bg-muted/20 text-xs">
+  <div class="flex h-10 items-center justify-between pl-15 pr-4 bg-muted/20 text-xs">
     <!-- Dynamic Breadcrumbs -->
     <Breadcrumb>
       <BreadcrumbList>
@@ -10,10 +10,7 @@
           <template v-if="!(segment === 'home' && index === 0)">
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage
-                v-if="index === pathSegments.length - 1"
-                class="text-xs font-semibold"
-              >
+              <BreadcrumbPage v-if="index === pathSegments.length - 1" class="text-xs font-semibold">
                 {{ formatSegment(segment) }}
               </BreadcrumbPage>
               <BreadcrumbLink v-else :href="getSegmentUrl(index)" class="text-xs">
@@ -27,22 +24,16 @@
 
     <!-- Status Periode -->
     <div class="flex items-center gap-4 text-muted-foreground">
-      <Badge
-        v-if="selectedPeriod"
-        variant="outline"
-        :class="[
-          'gap-1.5 font-medium text-xs',
-          selectedPeriod.isClosed
-            ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
-            : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
-        ]"
-      >
-        <span
-          :class="[
-            'h-1.5 w-1.5 rounded-full',
-            selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
-          ]"
-        />
+      <Badge v-if="selectedPeriod" variant="outline" :class="[
+        'gap-1.5 font-medium text-xs',
+        selectedPeriod.isClosed
+          ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
+          : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
+      ]">
+        <span :class="[
+          'h-1.5 w-1.5 rounded-full',
+          selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
+        ]" />
         Periode: {{ selectedPeriod.periodName }}
         {{ selectedPeriod.isClosed ? ' (Closed)' : ' (Aktif)' }}
       </Badge>
