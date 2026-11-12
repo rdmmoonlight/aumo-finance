@@ -38,7 +38,7 @@ const handleSelectPeriod = (id: number) => {
     <!-- Header Halaman -->
     <div class="flex items-center justify-between">
       <div>
-        <h2 class="text-3xl font-bold tracking-tight">Periode Buku Kas</h2>
+        <h2 class="text-1xl font-bold tracking-tight">Periode Buku Kas</h2>
         <p class="text-muted-foreground">Kelola pembukaan dan penutupan periode pembukuan kas.</p>
       </div>
       <div class="flex items-center gap-2">
