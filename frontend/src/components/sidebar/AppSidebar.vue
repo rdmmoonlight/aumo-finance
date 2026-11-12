@@ -161,7 +161,6 @@ import {
   PanelLeftClose,
   Settings,
   User,
-  Wrench,
 } from 'lucide-vue-next'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
@@ -174,7 +173,6 @@ const sidebarStore = useSidebarStore()
 const route = useRoute()
 const pathname = computed(() => route.path)
 
-// Navigation Configuration
 const navigation = [
   { title: 'Home', url: '/home', icon: Home },
   { title: 'Dashboard', url: '/dashboard', icon: LayoutDashboard },
@@ -182,7 +180,6 @@ const navigation = [
   { title: 'Chart of Accounts', url: '/chart-of-accounts', icon: BookOpen },
   { title: 'Journal Entry', url: '/journal-entry', icon: FileSpreadsheet },
   { title: 'Reports', url: '/reports', icon: FileBarChart },
-  { title: 'Tools', url: '/tools', icon: Wrench },
   { title: 'Settings', url: '/settings', icon: Settings },
 ]
 
