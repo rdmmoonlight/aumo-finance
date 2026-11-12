@@ -127,10 +127,30 @@ private fun amountOrDash(value: Double): String = if (value > 0) CurrencyFormatt
 private fun LedgerHeaderRow() {
     Row(modifier = Modifier.fillMaxWidth().padding(top = AumoDimens.SpacingSmall)) {
         Text("Tgl", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(0.7f))
-        Text("Keterangan", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(2f))
-        Text("Debit", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(1.3f))
-        Text("Kredit", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(1.3f))
-        Text("Saldo", color = AumoColors.TextMuted, fontSize = MaterialTheme.typography.labelSmall.fontSize, modifier = Modifier.weight(1.4f))
+        Text(
+            "Keterangan",
+            color = AumoColors.TextMuted,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.weight(2f),
+        )
+        Text(
+            "Debit",
+            color = AumoColors.TextMuted,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.weight(1.3f),
+        )
+        Text(
+            "Kredit",
+            color = AumoColors.TextMuted,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.weight(1.3f),
+        )
+        Text(
+            "Saldo",
+            color = AumoColors.TextMuted,
+            fontSize = MaterialTheme.typography.labelSmall.fontSize,
+            modifier = Modifier.weight(1.4f),
+        )
     }
 }
 

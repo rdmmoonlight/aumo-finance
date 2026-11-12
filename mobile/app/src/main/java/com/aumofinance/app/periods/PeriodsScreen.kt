@@ -47,8 +47,8 @@ import androidx.compose.ui.unit.dp
 import com.aumofinance.app.ui.icons.TablerIcon
 import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
-import java.util.Calendar
 import com.aumofinance.app.ui.theme.AumoDimens
+import java.util.Calendar
 
 /**
  * Halaman Periods. Font mengikuti MaterialTheme.typography global
@@ -105,7 +105,13 @@ fun PeriodsScreen(
             } else {
                 LazyColumn(
                     modifier = Modifier.weight(1f).fillMaxWidth(),
-                    contentPadding = PaddingValues(AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge, AumoDimens.SpacingLarge),
+                    contentPadding =
+                        PaddingValues(
+                            AumoDimens.SpacingLarge,
+                            AumoDimens.SpacingLarge,
+                            AumoDimens.SpacingLarge,
+                            AumoDimens.SpacingLarge,
+                        ),
                     verticalArrangement = Arrangement.spacedBy(AumoDimens.SpacingLarge),
                 ) {
                     items(periods) { period ->

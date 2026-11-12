@@ -29,9 +29,9 @@ import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.icons.TablerIcon
 import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.aumofinance.app.ui.theme.AumoDimens
 
 // Lebar indentasi/tab nomor referensi baris kredit — dipakai juga untuk
 // menggeser mundur (backspace) nominal debit sejauh jarak yang sama, supaya

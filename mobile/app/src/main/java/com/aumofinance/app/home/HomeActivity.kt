@@ -1,7 +1,6 @@
 package com.aumofinance.app.home
 
 import android.content.Intent
-import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.SystemBarStyle
@@ -24,9 +23,9 @@ import com.aumofinance.app.ui.theme.AumoTheme
 import io.ktor.client.request.get
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
+import android.graphics.Color as AndroidColor
 
 class HomeActivity : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         // Splash modern + edge to edge agar HomeScreen bisa tampil full bleed.
         installSplashScreen()
@@ -49,44 +48,50 @@ class HomeActivity : ComponentActivity() {
 
             AumoTheme {
                 HomeScreen(
-                    dashboard = HomeMenuItem(
-                        title = "Dashboard",
-                        subtitle = "Ringkasan posisi keuangan periode berjalan",
-                        icon = HomeIcons.Dashboard,
-                        onClick = { open<DashboardActivity>() }
-                    ),
-                    journalEntry = HomeMenuItem(
-                        title = "Journal Entry",
-                        subtitle = "Catat transaksi baru",
-                        icon = HomeIcons.JournalEntry,
-                        onClick = { open<JournalEntryActivity>() }
-                    ),
-                    generalJournal = HomeMenuItem(
-                        title = "General Journal",
-                        subtitle = "Riwayat jurnal umum",
-                        icon = HomeIcons.GeneralJournal,
-                        onClick = { open<GeneralJournalReportActivity>() }
-                    ),
-                    periods = HomeMenuItem(
-                        title = "Periode",
-                        subtitle = "Kelola periode akuntansi",
-                        icon = HomeIcons.Periods,
-                        onClick = { open<PeriodsActivity>() }
-                    ),
-                    coa = HomeMenuItem(
-                        title = "Chart of Accounts",
-                        subtitle = "Daftar & kategori akun",
-                        icon = HomeIcons.Coa,
-                        onClick = { open<CoaActivity>() }
-                    ),
-                    reports = HomeMenuItem(
-                        title = "Reports",
-                        subtitle = "Buku besar, neraca saldo, laporan keuangan",
-                        icon = HomeIcons.Reports,
-                        onClick = { open<ReportsMenuActivity>() }
-                    ),
+                    dashboard =
+                        HomeMenuItem(
+                            title = "Dashboard",
+                            subtitle = "Ringkasan posisi keuangan periode berjalan",
+                            icon = HomeIcons.Dashboard,
+                            onClick = { open<DashboardActivity>() },
+                        ),
+                    journalEntry =
+                        HomeMenuItem(
+                            title = "Journal Entry",
+                            subtitle = "Catat transaksi baru",
+                            icon = HomeIcons.JournalEntry,
+                            onClick = { open<JournalEntryActivity>() },
+                        ),
+                    generalJournal =
+                        HomeMenuItem(
+                            title = "General Journal",
+                            subtitle = "Riwayat jurnal umum",
+                            icon = HomeIcons.GeneralJournal,
+                            onClick = { open<GeneralJournalReportActivity>() },
+                        ),
+                    periods =
+                        HomeMenuItem(
+                            title = "Periode",
+                            subtitle = "Kelola periode akuntansi",
+                            icon = HomeIcons.Periods,
+                            onClick = { open<PeriodsActivity>() },
+                        ),
+                    coa =
+                        HomeMenuItem(
+                            title = "Chart of Accounts",
+                            subtitle = "Daftar & kategori akun",
+                            icon = HomeIcons.Coa,
+                            onClick = { open<CoaActivity>() },
+                        ),
+                    reports =
+                        HomeMenuItem(
+                            title = "Reports",
+                            subtitle = "Buku besar, neraca saldo, laporan keuangan",
+                            icon = HomeIcons.Reports,
+                            onClick = { open<ReportsMenuActivity>() },
+                        ),
                     isDbConnected = isDbConnected,
-                    onSettingsClick = { open<SettingsActivity>() }
+                    onSettingsClick = { open<SettingsActivity>() },
                 )
             }
         }

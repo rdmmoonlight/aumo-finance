@@ -2,6 +2,7 @@ package com.aumofinance.app.crashlog
 
 import android.content.Context
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -10,7 +11,6 @@ import java.util.concurrent.Callable
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.RejectedExecutionException
-import kotlinx.coroutines.CancellationException
 
 // Pencatat log terpusat. Semua error (crash, kegagalan HTTP, exception yang
 // "ditelan" try/catch) ditulis ke satu berkas agar tampil di halaman Log.

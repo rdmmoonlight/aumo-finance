@@ -6,12 +6,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.reports.financials.ClosingJournalReport
 import com.aumofinance.app.reports.financials.FinancialReportScaffold
-import com.aumofinance.app.reports.financials.ReportInfoNote
 import com.aumofinance.app.reports.financials.ReportDivider
+import com.aumofinance.app.reports.financials.ReportInfoNote
 import com.aumofinance.app.reports.financials.ReportRow
 import com.aumofinance.app.reports.financials.ReportSectionTitle
 import com.aumofinance.app.ui.theme.AumoColors

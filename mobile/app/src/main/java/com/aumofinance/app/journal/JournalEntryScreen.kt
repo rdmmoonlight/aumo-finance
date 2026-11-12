@@ -8,13 +8,13 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,10 +52,10 @@ import com.aumofinance.app.core.CurrencyFormatter
 import com.aumofinance.app.ui.icons.TablerIcon
 import com.aumofinance.app.ui.icons.TablerIcons
 import com.aumofinance.app.ui.theme.AumoColors
+import com.aumofinance.app.ui.theme.AumoDimens
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import com.aumofinance.app.ui.theme.AumoDimens
 
 private val DATE_DISPLAY = SimpleDateFormat("dd MMM yyyy", Locale("in", "ID"))
 
