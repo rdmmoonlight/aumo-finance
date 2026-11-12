@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-10 items-center justify-between pl-55 pr-4 bg-muted/20 text-xs">
+  <div class="flex h-10 items-center justify-between pl-95 pr-4 bg-muted/20 text-xs">
     <!-- Dynamic Breadcrumbs -->
     <Breadcrumb>
       <BreadcrumbList>
