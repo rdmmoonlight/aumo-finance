@@ -5,14 +5,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.ktor.client.call.body
+import com.aumofinance.app.network.SingleFlight
+import com.aumofinance.app.network.safeBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 
 // State Compose (mutableStateOf), bukan LiveData.
 class CoaViewModel : ViewModel() {
     private val api = CoaApi()
+    private val flight = SingleFlight()
 
     var accounts: List<Account> by mutableStateOf(emptyList())
         private set
@@ -20,14 +23,18 @@ class CoaViewModel : ViewModel() {
     var errorMessage: String? by mutableStateOf(null)
         private set
 
+    // replace = true: parameter pencarian/kategori bisa berubah di tengah jalan,
+    // jadi request lama dibatalkan supaya hasil basi tidak menimpa hasil terbaru.
     fun load(
         search: String? = null,
         category: String? = null,
     ) {
-        viewModelScope.launch {
+        flight.launch(viewModelScope, replace = true) {
             accounts =
                 try {
-                    api.list(search, category).body<AccountsResponse>().accounts.orEmpty()
+                    api.list(search, category).safeBody<AccountsResponse>().accounts.orEmpty()
+                } catch (c: CancellationException) {
+                    throw c
                 } catch (t: Throwable) {
                     com.aumofinance.app.crashlog.AppLogger.error("CoaViewModel", "Error tertangkap", t)
                     emptyList()
@@ -59,7 +66,7 @@ class CoaViewModel : ViewModel() {
 
     private suspend fun handleResult(response: HttpResponse) {
         try {
-            val body = response.body<SimpleApiResponse>()
+            val body = response.safeBody<SimpleApiResponse>()
             if (response.status.isSuccess() && body.success) {
                 load()
             } else {

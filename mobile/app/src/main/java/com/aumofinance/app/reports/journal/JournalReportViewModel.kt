@@ -7,8 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aumofinance.app.journal.JournalApi
 import com.aumofinance.app.journal.SimpleApiResponse
-import io.ktor.client.call.body
+import com.aumofinance.app.network.SingleFlight
+import com.aumofinance.app.network.safeBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
 
 // State Compose (mutableStateOf), bukan LiveData (lihat
@@ -18,6 +22,7 @@ import kotlinx.coroutines.launch
 class JournalReportViewModel : ViewModel() {
     private val reportApi = JournalReportApi()
     private val journalApi = JournalApi()
+    private val flight = SingleFlight()
 
     var entries: List<JournalReportEntry> by mutableStateOf(emptyList())
         private set
@@ -38,15 +43,26 @@ class JournalReportViewModel : ViewModel() {
         fetch { reportApi.getAdjustingJournal() }
     }
 
+    // Setelah delete data sudah berubah: replace = true agar request lama yang
+    // masih berjalan dibatalkan dan tidak menimpa hasil terbaru.
     private fun reload() {
-        if (isAdjusting) loadAdjusting() else loadGeneral()
+        if (isAdjusting) {
+            fetch(replace = true) { reportApi.getAdjustingJournal() }
+        } else {
+            fetch(replace = true) { reportApi.getGeneralJournal() }
+        }
     }
 
-    private fun fetch(call: suspend () -> io.ktor.client.statement.HttpResponse) {
-        viewModelScope.launch {
+    private fun fetch(
+        replace: Boolean = false,
+        call: suspend () -> HttpResponse,
+    ) {
+        flight.launch(viewModelScope, replace) {
             try {
                 val response = call()
-                val body = runCatching { response.body<JournalReportResponse>() }.getOrNull()
+                val body = runCatching { response.safeBody<JournalReportResponse>() }.getOrNull()
+                // runCatching ikut menelan CancellationException; pastikan pembatalan tetap berlaku.
+                ensureActive()
                 if (!response.status.isSuccess() || body == null || !body.success) {
                     entries = emptyList()
                     snackbarMessage = body?.message?.takeIf { it.isNotBlank() }
@@ -55,6 +71,8 @@ class JournalReportViewModel : ViewModel() {
                 }
                 entries = body.entries.orEmpty()
                 selectedPeriodName = body.selectedPeriodName
+            } catch (c: CancellationException) {
+                throw c
             } catch (t: Throwable) {
                 com.aumofinance.app.crashlog.AppLogger.error("JournalReportViewModel", "Error tertangkap", t)
                 entries = emptyList()
@@ -75,7 +93,7 @@ class JournalReportViewModel : ViewModel() {
                     } else {
                         journalApi.delete(entry.id)
                     }
-                val body = response.body<SimpleApiResponse>()
+                val body = response.safeBody<SimpleApiResponse>()
                 if (response.status.isSuccess() && body.success) {
                     reload()
                 } else {

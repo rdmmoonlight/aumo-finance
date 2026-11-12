@@ -22,6 +22,7 @@ import com.aumofinance.app.reports.menu.ReportsMenuActivity
 import com.aumofinance.app.settings.SettingsActivity
 import com.aumofinance.app.ui.theme.AumoTheme
 import io.ktor.client.request.get
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
 class HomeActivity : ComponentActivity() {
@@ -94,15 +95,22 @@ class HomeActivity : ComponentActivity() {
     private fun initDatabaseConnection() {
         // Warmup Render cold-start
         lifecycleScope.launch {
-            DbConnectionManager.ensureConnected {
-                runCatching { ApiClient.client.get("/api/v1/periods") }
-            }
+            DbConnectionManager.ensureConnected { pingBackend() }
         }
 
         // Heartbeat di scope DbConnectionManager sendiri, biar tetep jalan walau pindah Activity
-        DbConnectionManager.startHeartbeat {
-            runCatching { ApiClient.client.get("/api/v1/periods") }
-        }
+        DbConnectionManager.startHeartbeat { pingBackend() }
+    }
+
+    // Ping ke /api/v1/health (anonim, ringan, ikut mengecek database) — bukan ke
+    // /periods yang butuh login dan mengunduh seluruh daftar periode. Status
+    // non-2xx WAJIB dianggap gagal: ApiClient memakai expectSuccess = false,
+    // jadi 502/503/halaman HTML gateway Render saat cold start tidak melempar
+    // exception sendiri. Tanpa pemeriksaan ini indikator hijau padahal server
+    // belum siap. Exception dibiarkan naik ke DbConnectionManager untuk di-retry.
+    private suspend fun pingBackend() {
+        val response = ApiClient.client.get("/api/v1/health")
+        check(response.status.isSuccess()) { "Health check gagal (HTTP ${response.status.value})" }
     }
 
     // Inline reified = paling muthakir, type-safe, gak perlu Class<*>

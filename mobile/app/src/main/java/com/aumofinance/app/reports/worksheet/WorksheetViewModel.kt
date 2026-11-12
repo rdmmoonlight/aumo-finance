@@ -5,20 +5,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.ktor.client.call.body
-import kotlinx.coroutines.launch
+import com.aumofinance.app.network.SingleFlight
+import com.aumofinance.app.network.safeBody
 
 class WorksheetViewModel : ViewModel() {
     private val api = WorksheetApi()
+    private val flight = SingleFlight()
 
     var report: WorksheetReport? by mutableStateOf(null)
         private set
 
     fun load() {
-        viewModelScope.launch {
+        flight.launch(viewModelScope) {
             report =
                 try {
-                    api.getWorksheet().body<WorksheetReport>()
+                    api.getWorksheet().safeBody<WorksheetReport>()
                 } catch (t: Throwable) {
                     com.aumofinance.app.crashlog.AppLogger.error("WorksheetViewModel", "Error tertangkap", t)
                     null

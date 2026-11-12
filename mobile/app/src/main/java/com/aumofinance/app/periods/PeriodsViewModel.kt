@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aumofinance.app.crashlog.AppLogger
 import com.aumofinance.app.data.DbConnectionManager
+import com.aumofinance.app.network.SingleFlight
 import com.aumofinance.app.network.safeBody
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -15,7 +16,6 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -44,32 +44,34 @@ class PeriodsViewModel : ViewModel() {
     var isSubmitting: Boolean by mutableStateOf(false)
         private set
 
-    // Job pemuatan daftar periode yang sedang berjalan. Dibatalkan sebelum
-    // pemuatan baru dimulai, supaya dua request tidak berjalan bersamaan dan
-    // respons lama tidak menimpa respons baru.
-    private var loadJob: Job? = null
+    // Menjaga satu pemuatan daftar periode pada satu waktu (lihat SingleFlight).
+    private val loadFlight = SingleFlight()
 
-    fun load() {
-        loadJob?.cancel()
-        loadJob =
-            viewModelScope.launch {
-                try {
-                    val response = api.list()
-                    val body = response.safeBody<PeriodsResponse>()
-                    periods = body.periods
-                    selectedPeriodId = body.selectedPeriodId
-                    // Request ke backend TERBUKTI berhasil di sini — berarti server Render
-                    // sudah bangun. Tandai langsung supaya indikator di Home ikut hijau
-                    // tanpa harus menunggu ping Home selesai sendiri.
-                    DbConnectionManager.markConnected()
-                } catch (t: Throwable) {
-                    // Pembatalan (load baru menggantikan yang lama, atau sesi berakhir)
-                    // bukan kegagalan: jangan kosongkan daftar periode.
-                    if (t is CancellationException) throw t
-                    AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
-                    periods = emptyList()
-                }
+    // force = false: diabaikan bila pemuatan sebelumnya masih berjalan, sebab
+    // onCreate dan onResume sama-sama memanggil load() sehingga tanpa ini setiap
+    // pembukaan layar mengirim dua request identik. force = true: dipakai setelah
+    // data berubah (open/select/close); request lama dibatalkan supaya respons
+    // lama tidak menimpa respons baru.
+    fun load(force: Boolean = false) {
+        loadFlight.launch(viewModelScope, replace = force) {
+            try {
+                val response = api.list()
+                val body = response.safeBody<PeriodsResponse>()
+                periods = body.periods
+                selectedPeriodId = body.selectedPeriodId
+                // Request ke backend TERBUKTI berhasil di sini — berarti server Render
+                // sudah bangun. Tandai langsung supaya indikator di Home ikut hijau
+                // tanpa harus menunggu ping Home selesai sendiri.
+                DbConnectionManager.markConnected()
+            } catch (t: Throwable) {
+                // Pembatalan (load baru menggantikan yang lama, atau sesi berakhir)
+                // bukan kegagalan: jangan kosongkan daftar periode.
+                if (t is CancellationException) throw t
+                AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
+                periods = emptyList()
+                snackbarMessage = "Gagal memuat periode. Periksa koneksi atau coba lagi."
             }
+        }
     }
 
     // Dipanggil sebelum menampilkan dialog Open New Period, supaya dialog
@@ -101,7 +103,7 @@ class PeriodsViewModel : ViewModel() {
                 snackbarMessage = message
                 if (success) {
                     openPeriodInfo = null
-                    load()
+                    load(force = true)
                 }
             } catch (t: Throwable) {
                 AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
@@ -143,7 +145,7 @@ class PeriodsViewModel : ViewModel() {
                 val response = api.select(id)
                 val body = response.safeBody<SimpleApiResponse>()
                 if (response.status.isSuccess() && body.success) {
-                    load()
+                    load(force = true)
                 } else {
                     snackbarMessage = body.message.ifBlank { "Failed to switch period (HTTP ${response.status.value})." }
                 }
@@ -160,7 +162,7 @@ class PeriodsViewModel : ViewModel() {
                 val response = api.close(id)
                 val body = response.safeBody<SimpleApiResponse>()
                 snackbarMessage = body.message
-                load()
+                load(force = true)
             } catch (t: Throwable) {
                 AppLogger.error("PeriodsViewModel", "Error tertangkap", t)
                 snackbarMessage = t.message ?: "Network error."
