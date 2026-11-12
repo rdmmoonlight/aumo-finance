@@ -1,6 +1,11 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { useClosePeriodMutation, useCreatePeriodMutation, useGetPeriodsQuery } from '../periods.api'
+import {
+  useClosePeriodMutation,
+  useCreatePeriodMutation,
+  useGetPeriodsQuery,
+  type CreatePeriodRequest,
+} from '../periods.api'
 import type { CreatePeriodPayload, Period } from '../types'
 
 export function usePeriodsPage() {
@@ -8,67 +13,77 @@ export function usePeriodsPage() {
   const periodsQuery = useGetPeriodsQuery()
   const closePeriodMutation = useClosePeriodMutation()
   const createPeriodMutation = useCreatePeriodMutation()
-  const periods = ref<Period[]>([])
-  const isLoading = ref(false)
-  const isCreating = ref(false)
-  const errorMessage = ref<string | null>(null)
+
+  const actionError = ref<string | null>(null)
+
+  // Normalisasi berbagai bentuk respons API (GetPeriodsApiResult) menjadi array
+  const periods = computed<Period[]>(() => {
+    const raw = periodsQuery.data.value
+    if (!raw) return []
+
+    const list = Array.isArray(raw)
+      ? raw
+      : 'periods' in raw
+        ? raw.periods
+        : 'items' in raw
+          ? raw.items
+          : []
+
+    return list as unknown as Period[]
+  })
 
   const activePeriod = computed(() => periods.value.find((p) => p.status === 'ACTIVE'))
 
   const hasActivePeriod = computed(() => !!activePeriod.value)
 
+  // Gabungkan error dari query maupun dari aksi mutasi terakhir
+  const errorMessage = computed(() => {
+    if (actionError.value) return actionError.value
+    const queryErr = periodsQuery.error.value
+    if (!queryErr) return null
+    return queryErr instanceof Error && queryErr.message
+      ? queryErr.message
+      : 'Gagal memuat daftar periode'
+  })
+
   const fetchPeriods = async () => {
-    isLoading.value = true
-    errorMessage.value = null
-    try {
-      const result = await periodsQuery.refetch()
-      periods.value = (result.data ?? []) as unknown as Period[]
-    } catch (err: unknown) {
-      errorMessage.value =
-        (err instanceof Error ? err.message : '') || 'Gagal memuat daftar periode'
-    } finally {
-      isLoading.value = false
-    }
+    actionError.value = null
+    await periodsQuery.refetch()
   }
 
   const createPeriod = async (payload: CreatePeriodPayload) => {
-    isCreating.value = true
-    errorMessage.value = null
+    actionError.value = null
     try {
       await createPeriodMutation.mutateAsync({
-        createPeriodRequest: payload as unknown as NonNullable<
-          Parameters<typeof createPeriodMutation.mutateAsync>[0]['createPeriodRequest']
-        >,
+        createPeriodRequest: payload as unknown as CreatePeriodRequest,
       })
-      await fetchPeriods()
+      // Cache otomatis ter-invalidate oleh onSuccess di useCreatePeriodMutation
     } catch (err: unknown) {
-      errorMessage.value = (err instanceof Error ? err.message : '') || 'Gagal membuat periode baru'
-    } finally {
-      isCreating.value = false
+      actionError.value =
+        err instanceof Error && err.message ? err.message : 'Gagal membuat periode baru'
     }
   }
 
-  const closePeriod = async (id: string) => {
+  const closePeriod = async (id: string | number) => {
+    actionError.value = null
     try {
       await closePeriodMutation.mutateAsync({ id: Number(id) })
-      await fetchPeriods()
+      // Cache otomatis ter-invalidate oleh onSuccess di useClosePeriodMutation
     } catch (err: unknown) {
-      errorMessage.value = (err instanceof Error ? err.message : '') || 'Gagal menutup periode'
+      actionError.value =
+        err instanceof Error && err.message ? err.message : 'Gagal menutup periode'
     }
   }
 
-  const navigateToDetail = (id: string) => {
+  const navigateToDetail = (id: string | number) => {
     router.push(`/periods/${id}`)
   }
 
-  onMounted(() => {
-    fetchPeriods()
-  })
-
   return {
     periods,
-    isLoading,
-    isCreating,
+    isLoading: periodsQuery.isPending,
+    isCreating: createPeriodMutation.isPending,
+    isClosing: closePeriodMutation.isPending,
     hasActivePeriod,
     activePeriod,
     errorMessage,

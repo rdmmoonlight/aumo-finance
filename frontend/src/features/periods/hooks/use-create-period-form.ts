@@ -1,31 +1,30 @@
-import { ref } from 'vue'
-import { createPeriodApi } from '../periods.api'
+import { computed } from 'vue'
+import { useCreatePeriodMutation, type CreatePeriodRequest } from '../periods.api'
 import type { CreatePeriodPayload } from '../types'
 
 export function useCreatePeriodForm(onSuccessCallback?: () => void) {
-  const isLoading = ref(false)
-  const error = ref<string | null>(null)
+  const { mutateAsync, isPending, error: mutationError } = useCreatePeriodMutation()
+
+  const error = computed(() => {
+    if (!mutationError.value) return null
+    return mutationError.value instanceof Error && mutationError.value.message
+      ? mutationError.value.message
+      : 'Terjadi kesalahan saat membuat periode'
+  })
 
   const submitForm = async (payload: CreatePeriodPayload) => {
-    isLoading.value = true
-    error.value = null
     try {
-      await createPeriodApi({
-        createPeriodRequest: payload as unknown as NonNullable<
-          Parameters<typeof createPeriodApi>[0]['createPeriodRequest']
-        >,
+      await mutateAsync({
+        createPeriodRequest: payload as unknown as CreatePeriodRequest,
       })
-      if (onSuccessCallback) onSuccessCallback()
-    } catch (err: unknown) {
-      error.value =
-        err instanceof Error && err.message ? err.message : 'Terjadi kesalahan saat membuat periode'
-    } finally {
-      isLoading.value = false
+      onSuccessCallback?.()
+    } catch {
+      // Error sudah otomatis ditangkap dan disimpan ke state `mutationError`
     }
   }
 
   return {
-    isLoading,
+    isLoading: isPending,
     error,
     submitForm,
   }
