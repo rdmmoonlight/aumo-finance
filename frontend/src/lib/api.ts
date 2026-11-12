@@ -1,10 +1,13 @@
 // src/lib/api.ts
 
-export const DEFAULT_BACKEND_URL = 'https://aumoweb.onrender.com'
+// Kosongkan DEFAULT_BACKEND_URL agar request menggunakan Relative Path ('')
+// Ini memastikan request selalu melalui Reverse Proxy (Nginx di Render / Vite Proxy di lokal)
+export const DEFAULT_BACKEND_URL = ''
 
 export function getBackendTarget(): string {
-  // Base URL backend. Bisa diganti lewat VITE_API_BASE_URL di .env
-  const target = import.meta.env.VITE_API_BASE_URL || DEFAULT_BACKEND_URL
+  // Base URL backend. Jika VITE_API_BASE_URL diisi, pakai nilainya.
+  // Jika tidak diisi, gunakan relative path ''
+  const target = import.meta.env.VITE_API_BASE_URL ?? DEFAULT_BACKEND_URL
   return String(target).replace(/\/+$/, '')
 }
 
@@ -52,7 +55,9 @@ export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
 }
 
 function buildUrl(url: string, params?: ApiFetchOptions['params']) {
-  const full = `${getBackendTarget()}/api/v1${url}`
+  const target = getBackendTarget()
+  // Hasilnya akan menjadi '/api/v1/auth/login' (relative path ke Nginx / Vite proxy)
+  const full = `${target}/api/v1${url}`
   if (!params) return full
 
   const search = new URLSearchParams()
@@ -141,7 +146,7 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
   return (await response.text()) as T
 }
 
-// Helper ringkas, pengganti baseApi endpoint
+// Helper ringkas
 export const api = {
   get: <T>(url: string, options?: ApiFetchOptions) =>
     apiFetch<T>(url, { ...options, method: 'GET' }),
@@ -155,20 +160,13 @@ export const api = {
     apiFetch<T>(url, { ...options, method: 'DELETE' }),
 }
 
-// Kompatibilitas dengan pemakaian lama di AppSidebar:
-// store.dispatch(baseApi.util.resetApiState())
-// Di Vue tidak ada Redux store, reset di sini cukup reset flag redirect
-// dan bisa dipakai untuk clear cache manual di feature api.
 export const baseApi = {
   fetch: apiFetch,
   util: {
     resetApiState: () => {
       resetRedirectFlag()
     },
-    invalidateTags: (_tags: ApiTag[]) => {
-      // No-op: tidak ada cache RTK di Vue.
-      // Feature api bisa panggil refetch manual setelah mutasi.
-    },
+    invalidateTags: (_tags: ApiTag[]) => {},
   },
 }
 
