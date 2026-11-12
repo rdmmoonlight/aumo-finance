@@ -1,5 +1,5 @@
 <template>
-  <div class="flex h-16 items-center justify-between pl-3 pr-4 gap-8">
+  <div class="flex h-16 items-center justify-between pl-3 pr-4 gap-16">
     <!-- Sisi Kiri: Teks Sambutan & Search Bar -->
     <div class="flex items-center gap-6 flex-1">
       <!-- Teks Sambutan -->
