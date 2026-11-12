@@ -1,38 +1,39 @@
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
 import {
   useClosePeriodMutation,
   useCreatePeriodMutation,
   useGetPeriodsQuery,
+  useSelectPeriodMutation,
   type CreatePeriodRequest,
+  type GetPeriodsApiResult,
 } from '../periods.api'
 import type { CreatePeriodPayload, Period } from '../types'
 
+// Normalisasi berbagai bentuk respons API menjadi array periode
+function normalizePeriods(raw: GetPeriodsApiResult | undefined): Period[] {
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw
+  if ('periods' in raw) return raw.periods
+  if ('items' in raw) return raw.items
+  return []
+}
+
 export function usePeriodsPage() {
-  const router = useRouter()
   const periodsQuery = useGetPeriodsQuery()
   const closePeriodMutation = useClosePeriodMutation()
   const createPeriodMutation = useCreatePeriodMutation()
+  const selectPeriodMutation = useSelectPeriodMutation()
 
   const actionError = ref<string | null>(null)
 
-  // Normalisasi berbagai bentuk respons API (GetPeriodsApiResult) menjadi array
-  const periods = computed<Period[]>(() => {
-    const raw = periodsQuery.data.value
-    if (!raw) return []
+  const periods = computed<Period[]>(() => normalizePeriods(periodsQuery.data.value))
 
-    const list = Array.isArray(raw)
-      ? raw
-      : 'periods' in raw
-        ? raw.periods
-        : 'items' in raw
-          ? raw.items
-          : []
-
-    return list as unknown as Period[]
-  })
-
-  const activePeriod = computed(() => periods.value.find((p) => p.status === 'ACTIVE'))
+  // Periode aktif: periode terbuka yang sedang dipilih, atau periode terbuka pertama
+  const activePeriod = computed<Period | undefined>(
+    () =>
+      periods.value.find((p) => p.isSelected && !p.isClosed) ??
+      periods.value.find((p) => !p.isClosed),
+  )
 
   const hasActivePeriod = computed(() => !!activePeriod.value)
 
@@ -57,26 +58,30 @@ export function usePeriodsPage() {
       await createPeriodMutation.mutateAsync({
         createPeriodRequest: payload as unknown as CreatePeriodRequest,
       })
-      // Cache otomatis ter-invalidate oleh onSuccess di useCreatePeriodMutation
     } catch (err: unknown) {
       actionError.value =
         err instanceof Error && err.message ? err.message : 'Gagal membuat periode baru'
     }
   }
 
-  const closePeriod = async (id: string | number) => {
+  const closePeriod = async (id: number) => {
     actionError.value = null
     try {
-      await closePeriodMutation.mutateAsync({ id: Number(id) })
-      // Cache otomatis ter-invalidate oleh onSuccess di useClosePeriodMutation
+      await closePeriodMutation.mutateAsync({ id })
     } catch (err: unknown) {
       actionError.value =
         err instanceof Error && err.message ? err.message : 'Gagal menutup periode'
     }
   }
 
-  const navigateToDetail = (id: string | number) => {
-    router.push(`/periods/${id}`)
+  const selectPeriod = async (id: number) => {
+    actionError.value = null
+    try {
+      await selectPeriodMutation.mutateAsync({ id })
+    } catch (err: unknown) {
+      actionError.value =
+        err instanceof Error && err.message ? err.message : 'Gagal memilih periode'
+    }
   }
 
   return {
@@ -84,12 +89,13 @@ export function usePeriodsPage() {
     isLoading: periodsQuery.isPending,
     isCreating: createPeriodMutation.isPending,
     isClosing: closePeriodMutation.isPending,
+    isSelecting: selectPeriodMutation.isPending,
     hasActivePeriod,
     activePeriod,
     errorMessage,
     fetchPeriods,
     createPeriod,
     closePeriod,
-    navigateToDetail,
+    selectPeriod,
   }
 }

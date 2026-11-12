@@ -16,6 +16,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Loader2, MoreHorizontal } from 'lucide-vue-next'
+import { formatPeriodDate } from '../format'
 import type { Period } from '../types'
 
 interface Props {
@@ -29,8 +30,8 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const emit = defineEmits<{
-  'close-period': [id: string]
-  'view-detail': [id: string]
+  'close-period': [id: number]
+  'select-period': [id: number]
 }>()
 </script>
 
@@ -69,18 +70,21 @@ const emit = defineEmits<{
         <template v-else>
           <TableRow v-for="period in props.periods" :key="period.id">
             <TableCell class="font-medium">
-              {{ period.name }}
+              {{ period.periodName }}
             </TableCell>
             <TableCell>
-              {{ period.startDate }}
+              {{ formatPeriodDate(period.startDate) }}
             </TableCell>
             <TableCell>
-              {{ period.endDate }}
+              {{ formatPeriodDate(period.endDate) }}
             </TableCell>
             <TableCell>
-              <Badge :variant="period.status === 'ACTIVE' ? 'default' : 'secondary'">
-                {{ period.status === 'ACTIVE' ? 'Aktif' : 'Tutup' }}
-              </Badge>
+              <div class="flex items-center gap-2">
+                <Badge :variant="period.isClosed ? 'secondary' : 'default'">
+                  {{ period.isClosed ? 'Tutup' : 'Terbuka' }}
+                </Badge>
+                <Badge v-if="period.isSelected" variant="outline">Dipilih</Badge>
+              </div>
             </TableCell>
             <TableCell class="text-right">
               <DropdownMenu>
@@ -91,11 +95,11 @@ const emit = defineEmits<{
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem v-if="period.status === 'ACTIVE'" @click="emit('close-period', period.id)">
+                  <DropdownMenuItem v-if="!period.isClosed" @click="emit('close-period', period.id)">
                     Tutup Periode
                   </DropdownMenuItem>
-                  <DropdownMenuItem @click="emit('view-detail', period.id)">
-                    Lihat Detail
+                  <DropdownMenuItem v-if="!period.isSelected" @click="emit('select-period', period.id)">
+                    Pilih Periode
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>

@@ -15,12 +15,9 @@ export type { CreatePeriodRequest }
 export interface PeriodItem {
   id: number
   periodName: string
-  month: number
-  year: number
   startDate: string
   endDate: string
-  status?: 'Open' | 'Closed' | string
-  isClosed?: boolean
+  isClosed: boolean
   isSelected: boolean
 }
 

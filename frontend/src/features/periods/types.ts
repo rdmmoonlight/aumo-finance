@@ -1,12 +1,7 @@
-export interface Period {
-  id: string
-  name: string
-  startDate: string
-  endDate: string
-  status: 'ACTIVE' | 'CLOSED'
-  createdAt?: string
-  updatedAt?: string
-}
+import type { PeriodItem } from './periods.api'
+
+// Bentuk data periode mengikuti respons backend (PeriodDto).
+export type Period = PeriodItem
 
 export interface CreatePeriodPayload {
   startDate: string
