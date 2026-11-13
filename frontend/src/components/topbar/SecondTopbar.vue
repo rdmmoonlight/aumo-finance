@@ -1,32 +1,32 @@
 <template>
-  <!-- Ubah pl-75 menjadi pl-4 (atau atur sesuai kebutuhan) dan gunakan gap-4 -->
-  <div class="flex h-10 items-center justify-start gap-4 px-4 bg-muted/20 text-xs">
-    <!-- Status Periode (Sekarang di sebelah kiri) -->
-    <div class="flex items-center shrink-0 text-muted-foreground">
+  <!-- Tetap pertahankan pl-75 dan tambahkan 'relative' agar posisi breadcrumb tidak bergeser -->
+  <div class="relative flex h-10 items-center pl-75 pr-4 bg-muted/20 text-xs">
+
+    <!-- Kotak Periode: mengisi celah kosong selebar w-75 di sebelah kiri breadcrumb -->
+    <div class="absolute left-0 top-0 flex h-full w-75 items-center px-4 text-muted-foreground">
       <Badge v-if="selectedPeriod" variant="outline" :class="[
-        'gap-1.5 font-medium text-xs',
+        'gap-1.5 font-medium text-xs max-w-full truncate',
         selectedPeriod.isClosed
           ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
           : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
       ]">
         <span :class="[
-          'h-1.5 w-1.5 rounded-full',
+          'h-1.5 w-1.5 shrink-0 rounded-full',
           selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
         ]" />
-        Periode: {{ selectedPeriod.periodName }}
-        {{ selectedPeriod.isClosed ? ' (Closed)' : ' (Aktif)' }}
+        <span class="truncate">
+          Periode: {{ selectedPeriod.periodName }}
+          {{ selectedPeriod.isClosed ? ' (Closed)' : ' (Aktif)' }}
+        </span>
       </Badge>
 
       <Badge v-else variant="outline" class="gap-1.5 font-medium text-xs text-muted-foreground">
-        <span class="h-1.5 w-1.5 rounded-full bg-slate-400" />
+        <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
         {{ isPeriodLoading ? 'Memuat periode...' : 'Belum Ada Periode Dipilih' }}
       </Badge>
     </div>
 
-    <!-- Pembatas tipis opsional antara badge periode & breadcrumb -->
-    <div class="h-4 w-[1px] bg-border" />
-
-    <!-- Dynamic Breadcrumbs -->
+    <!-- Dynamic Breadcrumbs (Posisi 100% tetap di pl-75) -->
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
