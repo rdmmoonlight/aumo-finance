@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.aumofinance.app.coa.Account
 import com.aumofinance.app.coa.AccountsResponse
 import com.aumofinance.app.coa.CoaApi
-import io.ktor.client.call.body
+import com.aumofinance.app.network.safeBody
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -106,7 +106,7 @@ class JournalEntryViewModel : ViewModel() {
     private fun loadActiveAccounts() {
         viewModelScope.launch {
             try {
-                accounts = coaApi.list().body<AccountsResponse>().accounts.orEmpty().filter { it.isActive }
+                accounts = coaApi.list().safeBody<AccountsResponse>().accounts.orEmpty().filter { it.isActive }
             } catch (t: Throwable) {
                 com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 // kegagalan diabaikan (tidak ada pesan ke pengguna)
@@ -118,7 +118,7 @@ class JournalEntryViewModel : ViewModel() {
         val entryDateIso = DATE_ONLY_ISO.format(_entryDate.time)
         viewModelScope.launch {
             try {
-                val body = api.nextTransactionNumber(_journalType, entryDateIso).body<NextTransactionNumberResponse>()
+                val body = api.nextTransactionNumber(_journalType, entryDateIso).safeBody<NextTransactionNumberResponse>()
                 transactionNumber = body.transactionNumber
             } catch (t: Throwable) {
                 com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
@@ -130,7 +130,7 @@ class JournalEntryViewModel : ViewModel() {
     private fun loadById(id: Int) {
         viewModelScope.launch {
             try {
-                api.getById(id).body<JournalEntryDetailResponse>().entry?.let { bindExistingEntry(it) }
+                api.getById(id).safeBody<JournalEntryDetailResponse>().entry?.let { bindExistingEntry(it) }
             } catch (t: Throwable) {
                 com.aumofinance.app.crashlog.AppLogger.error("JournalEntryViewModel", "Error tertangkap", t)
                 // kegagalan diabaikan (tidak ada pesan ke pengguna)
@@ -185,7 +185,7 @@ class JournalEntryViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.create(request)
-                val body = response.body<CreateJournalEntryResponse>()
+                val body = response.safeBody<CreateJournalEntryResponse>()
                 if (response.status.isSuccess() && body.success) {
                     saveResult = body
                 } else {
@@ -205,7 +205,7 @@ class JournalEntryViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.update(id, request)
-                val body = response.body<SimpleApiResponse>()
+                val body = response.safeBody<SimpleApiResponse>()
                 if (response.status.isSuccess() && body.success) {
                     updateResult = true
                 } else {

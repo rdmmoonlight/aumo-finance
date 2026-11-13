@@ -7,7 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aumofinance.app.network.SessionManager
 import com.aumofinance.app.network.SessionStore
-import io.ktor.client.call.body
+import com.aumofinance.app.network.safeBody
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
 
@@ -43,7 +43,7 @@ class LoginViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val response = api.login(LoginRequest(email, password, shouldKeepSignedIn))
-                val body = response.body<LoginResponse>()
+                val body = response.safeBody<LoginResponse>()
                 if (response.status.isSuccess() && body.success && body.token != null && body.userId != null && body.fullName != null) {
                     SessionManager.token = body.token
                     SessionManager.userId = body.userId
