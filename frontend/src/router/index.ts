@@ -57,7 +57,7 @@ const router = createRouter({
       component: () => import('@/features/chart-of-accounts/ChartOfAccountsPage.vue'),
       meta: { requiresAuth: true },
     },
-    
+
     {
       path: '/journal-entry',
       name: 'journal-entry',
@@ -70,7 +70,10 @@ const router = createRouter({
     { path: '/reports/journals', redirect: '/reports/journals/general' },
     { path: '/reports/general-ledgers', redirect: '/reports/general-ledgers/permanent' },
     { path: '/reports/trial-balances', redirect: '/reports/trial-balances/unadjusted' },
-    { path: '/reports/financial-statements', redirect: '/reports/financial-statements/income-statement' },
+    {
+      path: '/reports/financial-statements',
+      redirect: '/reports/financial-statements/income-statement',
+    },
 
     // --- Reports Page ---
     {
@@ -79,29 +82,26 @@ const router = createRouter({
       component: () => import('@/features/reports/reports-page/ReportsPage.vue'),
       meta: { requiresAuth: true },
     },
-   
+
     // --- Journals & Ledgers (Step 01 - 03) ---
     {
       path: '/reports/journals/general',
       name: 'general-journal',
-      component: () =>
-        import('@/features/reports/journals/general/GeneralJournalPage.vue'),
+      component: () => import('@/features/reports/journals/GeneralJournalPage.vue'),
       meta: { requiresAuth: true },
     },
 
     {
       path: '/reports/general-ledgers/permanent',
       name: 'general-ledger-permanent',
-      component: () =>
-        import('@/features/reports/general-ledgers/permanent/PermanentGeneralLedgerPage.vue'),
+      component: () => import('@/features/reports/general-ledgers/PermanentPage.vue'),
       meta: { requiresAuth: true },
     },
 
     {
       path: '/reports/general-ledgers/temporary',
       name: 'general-ledger-temporary',
-      component: () =>
-        import('@/features/reports/general-ledgers/temporary/TemporaryGeneralLedgerPage.vue'),
+      component: () => import('@/features/reports/general-ledgers/TemporaryPage.vue'),
       meta: { requiresAuth: true },
     },
 
@@ -109,32 +109,28 @@ const router = createRouter({
     {
       path: '/reports/trial-balances/unadjusted',
       name: 'unadjusted-trial-balance',
-      component: () =>
-        import('@/features/reports/trial-balances/unadjusted/UnadjustedTrialBalancePage.vue'),
-      meta: { requiresAuth: true },
-    },
-
-    {
-      path: '/reports/worksheet',
-      name: 'worksheet',
-      component: () =>
-        import('@/features/reports/worksheet/WorksheetPage.vue'),
+      component: () => import('@/features/reports/trial-balances/UnadjustedTrialBalancePage.vue'),
       meta: { requiresAuth: true },
     },
 
     {
       path: '/reports/journals/adjusting',
       name: 'adjusting-journal',
-      component: () =>
-        import('@/features/reports/journals/adjusting/AdjustingJournalPage.vue'),
+      component: () => import('@/features/reports/journals/AdjustingJournalPage.vue'),
       meta: { requiresAuth: true },
     },
 
     {
       path: '/reports/trial-balances/adjusted',
       name: 'adjusted-trial-balance',
-      component: () =>
-        import('@/features/reports/trial-balances/adjusted/AdjustedTrialBalancePage.vue'),
+      component: () => import('@/features/reports/trial-balances/AdjustedTrialBalancePage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/worksheet',
+      name: 'worksheet',
+      component: () => import('@/features/reports/worksheet/WorksheetPage.vue'),
       meta: { requiresAuth: true },
     },
 
@@ -175,16 +171,14 @@ const router = createRouter({
     {
       path: '/reports/journals/closing',
       name: 'closing-journal',
-      component: () =>
-        import('@/features/reports/journals/closing/ClosingJournalPage.vue'),
+      component: () => import('@/features/reports/journals/ClosingJournalPage.vue'),
       meta: { requiresAuth: true },
     },
 
     {
       path: '/reports/trial-balances/post-closing',
       name: 'post-closing-trial-balance',
-      component: () =>
-        import('@/features/reports/trial-balances/post-closing/PostClosingTrialBalancePage.vue'),
+      component: () => import('@/features/reports/trial-balances/PostClosingTrialBalancePage.vue'),
       meta: { requiresAuth: true },
     },
 

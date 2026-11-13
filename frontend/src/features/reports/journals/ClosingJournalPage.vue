@@ -6,9 +6,9 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import ClosingGroupTable from './components/ClosingGroupTable.vue'
 import NoPeriodState from './components/NoPeriodState.vue'
-import { getJournalsClosingApi } from './journals.api'
-import { formatNumberWithParen } from './lib/format'
-import type { ClosingJournalViewModel } from './lib/types'
+import { getJournalsClosingApi } from './journals.api.ts'
+import { formatNumberWithParen } from './lib/format.ts'
+import type { ClosingJournalViewModel } from './lib/types.ts'
 
 type ClosingJournalResponse = {
     hasPeriodSelected?: boolean
