@@ -37,8 +37,6 @@ const router = createRouter({
       meta: { requiresAuth: false },
     },
 
-    { path: '/:pathMatch(.*)*', name: 'not-found', redirect: '/' },
-
     {
       path: '/home',
       name: 'home',
@@ -59,7 +57,7 @@ const router = createRouter({
       component: () => import('@/features/chart-of-accounts/ChartOfAccountsPage.vue'),
       meta: { requiresAuth: true },
     },
-
+    
     {
       path: '/journal-entry',
       name: 'journal-entry',
@@ -67,16 +65,82 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
 
+    // --- Path Redirect ---
+    { path: '/reports', redirect: '/reports-page' },
+    { path: '/reports/journals', redirect: '/reports/journals/general' },
+    { path: '/reports/general-ledgers', redirect: '/reports/general-ledgers/permanent' },
+    { path: '/reports/trial-balances', redirect: '/reports/trial-balances/unadjusted' },
+    { path: '/reports/financial-statements', redirect: '/reports/financial-statements/income-statement' },
+
+    // --- Reports Page ---
     {
       path: '/reports-page',
       name: 'reports-page',
       component: () => import('@/features/reports/reports-page/ReportsPage.vue'),
       meta: { requiresAuth: true },
     },
-
-    // --- Financial Statements ---
+   
+    // --- Journals & Ledgers (Step 01 - 03) ---
     {
-      path: '/financial-statements/income-statement',
+      path: '/reports/journals/general',
+      name: 'general-journal',
+      component: () =>
+        import('@/features/reports/journals/general/GeneralJournalPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/general-ledgers/permanent',
+      name: 'general-ledger-permanent',
+      component: () =>
+        import('@/features/reports/general-ledgers/permanent/PermanentGeneralLedgerPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/general-ledgers/temporary',
+      name: 'general-ledger-temporary',
+      component: () =>
+        import('@/features/reports/general-ledgers/temporary/TemporaryGeneralLedgerPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // --- Trial Balance Cycle (Step 04 - 07) ---
+    {
+      path: '/reports/trial-balances/unadjusted',
+      name: 'unadjusted-trial-balance',
+      component: () =>
+        import('@/features/reports/trial-balances/unadjusted/UnadjustedTrialBalancePage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/worksheet',
+      name: 'worksheet',
+      component: () =>
+        import('@/features/reports/worksheet/WorksheetPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/journals/adjusting',
+      name: 'adjusting-journal',
+      component: () =>
+        import('@/features/reports/journals/adjusting/AdjustingJournalPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/trial-balances/adjusted',
+      name: 'adjusted-trial-balance',
+      component: () =>
+        import('@/features/reports/trial-balances/adjusted/AdjustedTrialBalancePage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    // --- Financial Statements (Step 08 - 11) ---
+    {
+      path: '/reports/financial-statements/income-statement',
       name: 'income-statement',
       component: () =>
         import('@/features/reports/financial-statements/income-statement/IncomeStatementPage.vue'),
@@ -84,7 +148,7 @@ const router = createRouter({
     },
 
     {
-      path: '/financial-statements/retained-earnings',
+      path: '/reports/financial-statements/retained-earnings',
       name: 'retained-earnings',
       component: () =>
         import('@/features/reports/financial-statements/retained-earnings/RetainedEarningsPage.vue'),
@@ -92,18 +156,35 @@ const router = createRouter({
     },
 
     {
-      path: '/financial-statements/cash-flow',
+      path: '/reports/financial-statements/statement-of-financial-position',
+      name: 'statement-of-financial-position',
+      component: () =>
+        import('@/features/reports/financial-statements/financial-position/StatementOfFinancialPositionPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/financial-statements/statement-of-cash-flow',
       name: 'statement-of-cash-flow',
       component: () =>
         import('@/features/reports/financial-statements/cash-flow/StatementOfCashFlowPage.vue'),
       meta: { requiresAuth: true },
     },
 
+    // --- Closing Cycle (Step 12 - 13) ---
     {
-      path: '/financial-statements/financial-position',
-      name: 'statement-of-financial-position',
+      path: '/reports/journals/closing',
+      name: 'closing-journal',
       component: () =>
-        import('@/features/reports/financial-statements/financial-position/StatementOfFinancialPositionPage.vue'),
+        import('@/features/reports/journals/closing/ClosingJournalPage.vue'),
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/reports/trial-balances/post-closing',
+      name: 'post-closing-trial-balance',
+      component: () =>
+        import('@/features/reports/trial-balances/post-closing/PostClosingTrialBalancePage.vue'),
       meta: { requiresAuth: true },
     },
 
@@ -120,6 +201,9 @@ const router = createRouter({
       component: () => import('@/features/settings/SettingsPage.vue'),
       meta: { requiresAuth: true },
     },
+
+    // --- Catch-all 404 ---
+    { path: '/:pathMatch(.*)*', name: 'not-found', redirect: '/' },
   ],
 })
 
