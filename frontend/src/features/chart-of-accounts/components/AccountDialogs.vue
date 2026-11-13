@@ -13,19 +13,39 @@
         </DialogHeader>
 
         <form @submit="onSubmit" class="space-y-4">
+          <!-- Tipe Akun -->
+          <FormField v-slot="{ componentField }" name="type">
+            <FormItem>
+              <FormLabel>Tipe Akun</FormLabel>
+              <Select v-bind="componentField">
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pilih Tipe Akun" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem v-for="opt in ACCOUNT_TYPE_OPTIONS" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          </FormField>
+
           <!-- Kode Akun -->
-          <FormField v-slot="{ componentField }" name="code">
+          <FormField v-slot="{ componentField }" name="referenceNumber">
             <FormItem>
               <FormLabel>Kode Akun</FormLabel>
               <FormControl>
-                <Input placeholder="Contoh: 1001" v-bind="componentField" />
+                <Input type="number" inputmode="numeric" :placeholder="referencePlaceholder" v-bind="componentField" />
               </FormControl>
               <FormMessage />
             </FormItem>
           </FormField>
 
           <!-- Nama Akun -->
-          <FormField v-slot="{ componentField }" name="name">
+          <FormField v-slot="{ componentField }" name="accountName">
             <FormItem>
               <FormLabel>Nama Akun</FormLabel>
               <FormControl>
@@ -35,66 +55,33 @@
             </FormItem>
           </FormField>
 
-          <!-- Tipe Akun -->
-          <FormField v-slot="{ componentField }" name="type">
+          <!-- Peran Akun -->
+          <FormField v-slot="{ componentField }" name="role">
             <FormItem>
-              <FormLabel>Tipe Akun</FormLabel>
-
+              <FormLabel>Peran Akun</FormLabel>
               <Select v-bind="componentField">
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Pilih Tipe Akun" />
+                    <SelectValue placeholder="Pilih Peran Akun" />
                   </SelectTrigger>
                 </FormControl>
-
                 <SelectContent>
-                  <SelectItem value="ASSET">Aset (Asset)</SelectItem>
-                  <SelectItem value="LIABILITY">Kewajiban (Liability)</SelectItem>
-                  <SelectItem value="EQUITY">Ekuitas (Equity)</SelectItem>
-                  <SelectItem value="REVENUE">Pendapatan (Revenue)</SelectItem>
-                  <SelectItem value="EXPENSE">Beban (Expense)</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <FormMessage />
-            </FormItem>
-          </FormField>
-
-          <!-- Sub Akun Dari (Parent Account) -->
-          <FormField v-slot="{ componentField }" name="parentId">
-            <FormItem>
-              <FormLabel>Induk Akun (Opsional)</FormLabel>
-
-              <Select v-bind="componentField">
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih Induk Akun (Kosongkan jika akun utama)" />
-                  </SelectTrigger>
-                </FormControl>
-
-                <SelectContent>
-                  <SelectItem :value="null">-- Tidak Ada Induk --</SelectItem>
-                  <SelectItem v-for="acc in props.availableParents" :key="acc.id" :value="acc.id">
-                    {{ acc.code }} - {{ acc.name }}
+                  <SelectItem v-for="opt in ACCOUNT_ROLE_OPTIONS" :key="opt.value" :value="opt.value">
+                    {{ opt.label }}
                   </SelectItem>
                 </SelectContent>
               </Select>
-
               <FormMessage />
             </FormItem>
           </FormField>
 
-          <!-- Deskripsi -->
-          <FormField v-slot="{ componentField }" name="description">
-            <FormItem>
-              <FormLabel>Deskripsi (Opsional)</FormLabel>
+          <!-- Status Aktif (hanya saat edit) -->
+          <FormField v-if="props.editingAccount" v-slot="{ value, handleChange }" name="isActive">
+            <FormItem class="flex items-center justify-between rounded-md border p-3">
+              <FormLabel class="mb-0">Akun Aktif</FormLabel>
               <FormControl>
-                <Textarea
-                  placeholder="Catatan tambahan mengenai akun ini"
-                  v-bind="componentField"
-                />
+                <Switch :model-value="Boolean(value)" @update:model-value="handleChange" />
               </FormControl>
-              <FormMessage />
             </FormItem>
           </FormField>
 
@@ -121,7 +108,7 @@
           <AlertDialogTitle>Apakah Anda yakin?</AlertDialogTitle>
           <AlertDialogDescription>
             Tindakan ini tidak dapat dibatalkan. Akun
-            <strong>{{ props.deletingAccount?.name }}</strong>
+            <strong>{{ props.deletingAccount?.accountName }}</strong>
             akan dihapus secara permanen dari sistem.
           </AlertDialogDescription>
         </AlertDialogHeader>
@@ -142,11 +129,9 @@
 </template>
 
 <script setup lang="ts">
-import { toTypedSchema } from '@vee-validate/zod'
 import { Loader2 } from 'lucide-vue-next'
-import { useForm } from 'vee-validate'
-import { watch } from 'vue'
-import * as z from 'zod'
+import { useForm, type GenericValidateFunction } from 'vee-validate'
+import { computed, watch } from 'vue'
 
 import {
   AlertDialog,
@@ -176,9 +161,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
+import { Switch } from '@/components/ui/switch'
 
-import type { Account, AccountType } from '../types'
+import {
+  ACCOUNT_ROLE_OPTIONS,
+  ACCOUNT_TYPE_OPTIONS,
+  type Account,
+  type AccountFormValues,
+  type AccountRole,
+  type AccountType,
+} from '../types'
 
 interface Props {
   isFormOpen?: boolean
@@ -186,7 +178,6 @@ interface Props {
   isLoading?: boolean
   editingAccount?: Account | null
   deletingAccount?: Account | null
-  availableParents?: Account[]
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -195,57 +186,74 @@ const props = withDefaults(defineProps<Props>(), {
   isLoading: false,
   editingAccount: null,
   deletingAccount: null,
-  availableParents: () => [],
 })
 
 const emit = defineEmits<{
   'update:isFormOpen': [value: boolean]
   'update:isDeleteOpen': [value: boolean]
-  'submit-form': [
-    values: {
-      code: string
-      name: string
-      type: AccountType
-      parentId?: string | null
-      description?: string
-    },
-  ]
+  'submit-form': [values: AccountFormValues]
   'confirm-delete': []
 }>()
 
-const formSchema = toTypedSchema(
-  z.object({
-    code: z.string().min(1, 'Kode akun wajib diisi'),
-    name: z.string().min(1, 'Nama akun wajib diisi'),
-    type: z.enum(['ASSET', 'LIABILITY', 'EQUITY', 'REVENUE', 'EXPENSE'], {
-      required_error: 'Tipe akun wajib dipilih',
-    }),
-    parentId: z.string().nullable().optional(),
-    description: z.string().optional(),
-  }),
-)
+interface FormState {
+  type: AccountType
+  referenceNumber: string | number
+  accountName: string
+  role: AccountRole
+  isActive: boolean
+}
 
-const form = useForm({
-  validationSchema: formSchema,
+const getRange = (type: unknown) => ACCOUNT_TYPE_OPTIONS.find((o) => o.value === type)?.range
+
+// Validasi ditulis sebagai fungsi biasa agar tidak bergantung pada versi zod.
+const referenceNumberRule: GenericValidateFunction = (value, ctx) => {
+  const raw = String(value ?? '').trim()
+  if (raw === '') return 'Kode akun wajib diisi'
+  const n = Number(raw)
+  if (!Number.isInteger(n)) return 'Kode akun harus berupa angka bulat'
+  const range = getRange((ctx.form as Partial<FormState>).type)
+  if (range && (n < range[0] || n > range[1])) {
+    return `Kode akun untuk tipe ini harus antara ${range[0]} dan ${range[1]}`
+  }
+  return true
+}
+
+const form = useForm<FormState>({
+  validationSchema: {
+    type: ((v) => (v ? true : 'Tipe akun wajib dipilih')) as GenericValidateFunction,
+    referenceNumber: referenceNumberRule,
+    accountName: ((v) =>
+      String(v ?? '').trim() ? true : 'Nama akun wajib diisi') as GenericValidateFunction,
+    role: ((v) => (v ? true : 'Peran akun wajib dipilih')) as GenericValidateFunction,
+  },
   initialValues: {
-    code: '',
-    name: '',
-    type: 'ASSET' as AccountType,
-    parentId: null,
-    description: '',
+    type: 'Assets',
+    referenceNumber: '',
+    accountName: '',
+    role: 'Default',
+    isActive: true,
   },
 })
 
+const referencePlaceholder = computed(() => {
+  const range = getRange(form.values.type)
+  return range ? `Contoh: ${range[0]}` : 'Contoh: 100'
+})
+
+// Isi ulang form setiap kali dialog dibuka (tambah maupun edit).
 watch(
-  () => props.editingAccount,
-  (newVal) => {
-    if (newVal) {
-      form.setValues({
-        code: newVal.code,
-        name: newVal.name,
-        type: newVal.type,
-        parentId: newVal.parentId || null,
-        description: newVal.description || '',
+  () => [props.isFormOpen, props.editingAccount] as const,
+  ([open, account]) => {
+    if (!open) return
+    if (account) {
+      form.resetForm({
+        values: {
+          type: account.type as AccountType,
+          referenceNumber: account.referenceNumber,
+          accountName: account.accountName,
+          role: account.role as AccountRole,
+          isActive: account.isActive,
+        },
       })
     } else {
       form.resetForm()
@@ -255,6 +263,12 @@ watch(
 )
 
 const onSubmit = form.handleSubmit((values) => {
-  emit('submit-form', values)
+  emit('submit-form', {
+    referenceNumber: Number(values.referenceNumber),
+    accountName: String(values.accountName).trim(),
+    type: values.type,
+    role: values.role,
+    isActive: Boolean(values.isActive),
+  })
 })
 </script>

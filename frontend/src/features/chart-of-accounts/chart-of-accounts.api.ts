@@ -8,6 +8,8 @@ import type { CreateAccountRequest, UpdateAccountRequest } from '@/lib/generated
 import { useMutation, useQuery, useQueryClient } from '@tanstack/vue-query'
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 
+import type { Account, ChartOfAccountsList } from './types'
+
 export type { CreateAccountRequest, UpdateAccountRequest }
 
 export interface GetChartOfAccountsParams {
@@ -26,18 +28,33 @@ export const chartOfAccountsKeys = {
   list: (params?: GetChartOfAccountsParams) => ['chart-of-accounts', 'list', params ?? {}] as const,
 }
 
+// Respons generated bertipe `unknown`, sedangkan backend mengirim objek pembungkus
+// { success, selectedPeriodName, accounts: [...] }. Fungsi ini menormalkan respons
+// agar sisi UI selalu menerima bentuk yang pasti.
+function normalizeList(raw: unknown): ChartOfAccountsList {
+  if (Array.isArray(raw)) {
+    return { success: true, selectedPeriodName: null, accounts: raw as Account[] }
+  }
+  const obj = (raw ?? {}) as Partial<ChartOfAccountsList>
+  return {
+    success: obj.success ?? true,
+    selectedPeriodName: obj.selectedPeriodName ?? null,
+    accounts: Array.isArray(obj.accounts) ? obj.accounts : [],
+  }
+}
+
 // --- Fungsi API murni ---
 export async function getChartOfAccountsApi(
   params?: GetChartOfAccountsParams,
   signal?: AbortSignal,
-) {
+): Promise<ChartOfAccountsList> {
   const { data } = await getApiV1ChartOfAccounts({
     // Nama query generated berhuruf kapital (Search, Category)
     query: { Search: params?.search, Category: params?.category },
     signal,
     throwOnError: true,
   })
-  return data
+  return normalizeList(data)
 }
 
 export async function createChartOfAccountApi(body: CreateAccountRequest) {

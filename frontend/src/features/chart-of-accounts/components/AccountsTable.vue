@@ -6,6 +6,8 @@
           <TableHead class="w-[120px]">Kode Akun</TableHead>
           <TableHead>Nama Akun</TableHead>
           <TableHead>Tipe</TableHead>
+          <TableHead>Peran</TableHead>
+          <TableHead>Status</TableHead>
           <TableHead class="text-right">Saldo Saat Ini</TableHead>
           <TableHead class="w-[80px] text-right">Aksi</TableHead>
         </TableRow>
@@ -13,7 +15,7 @@
       <TableBody>
         <template v-if="props.isLoading">
           <TableRow>
-            <TableCell colspan="5" class="h-24 text-center">
+            <TableCell colspan="7" class="h-24 text-center">
               <div class="flex items-center justify-center gap-2 text-muted-foreground">
                 <Loader2 class="h-4 w-4 animate-spin" />
                 <span>Memuat data akun...</span>
@@ -24,7 +26,7 @@
 
         <template v-else-if="props.accounts.length === 0">
           <TableRow>
-            <TableCell colspan="5" class="h-24 text-center text-muted-foreground">
+            <TableCell colspan="7" class="h-24 text-center text-muted-foreground">
               Belum ada data akun buku besar.
             </TableCell>
           </TableRow>
@@ -33,16 +35,24 @@
         <template v-else>
           <TableRow v-for="account in props.accounts" :key="account.id">
             <TableCell class="font-mono font-medium">
-              {{ account.code }}
+              {{ account.referenceNumber }}
             </TableCell>
             <TableCell>
-              <span :class="{ 'pl-4 text-muted-foreground': account.parentId }">
-                {{ account.name }}
+              <span :class="{ 'text-muted-foreground': !account.isActive }">
+                {{ account.accountName }}
               </span>
             </TableCell>
             <TableCell>
               <Badge :variant="getTypeBadgeVariant(account.type)">
-                {{ account.type }}
+                {{ getAccountTypeLabel(account.type) }}
+              </Badge>
+            </TableCell>
+            <TableCell class="text-muted-foreground">
+              {{ account.role === 'Default' ? '-' : getAccountRoleLabel(account.role) }}
+            </TableCell>
+            <TableCell>
+              <Badge :variant="account.isActive ? 'outline' : 'secondary'">
+                {{ account.isActive ? 'Aktif' : 'Nonaktif' }}
               </Badge>
             </TableCell>
             <TableCell class="text-right font-mono">
@@ -96,7 +106,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Loader2, MoreHorizontal, Pencil, Trash2 } from 'lucide-vue-next'
-import type { Account, AccountType } from '../types'
+
+import { getAccountRoleLabel, getAccountTypeLabel, type Account } from '../types'
 
 interface Props {
   accounts: Account[]
@@ -113,17 +124,19 @@ const emit = defineEmits<{
   'delete-account': [account: Account]
 }>()
 
-const getTypeBadgeVariant = (type: AccountType) => {
+const getTypeBadgeVariant = (type: string) => {
   switch (type) {
-    case 'ASSET':
+    case 'Assets':
       return 'default'
-    case 'LIABILITY':
+    case 'Liabilities':
       return 'destructive'
-    case 'EQUITY':
+    case 'Equity':
       return 'secondary'
-    case 'REVENUE':
+    case 'OperatingIncome':
+    case 'OtherIncome':
       return 'outline'
-    case 'EXPENSE':
+    case 'OperatingExpenses':
+    case 'OtherExpenses':
       return 'secondary'
     default:
       return 'default'
@@ -135,6 +148,6 @@ const formatCurrency = (amount: number) => {
     style: 'currency',
     currency: 'IDR',
     minimumFractionDigits: 0,
-  }).format(amount)
+  }).format(amount ?? 0)
 }
 </script>

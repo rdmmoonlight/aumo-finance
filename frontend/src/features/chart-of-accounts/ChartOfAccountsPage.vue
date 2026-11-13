@@ -6,6 +6,7 @@
         <h2 class="text-3xl font-bold tracking-tight">Bagan Akun (Chart of Accounts)</h2>
         <p class="text-muted-foreground">
           Kelola daftar akun buku besar untuk pencatatan transaksi keuangan.
+          <span v-if="selectedPeriodName"> Periode saldo: {{ selectedPeriodName }}.</span>
         </p>
       </div>
       <Button @click="handleOpenCreateModal">
@@ -36,7 +37,6 @@
       :is-loading="isSubmitting"
       :editing-account="editingAccount"
       :deleting-account="deletingAccount"
-      :available-parents="availableParents"
       @submit-form="handleSubmitForm"
       @confirm-delete="handleConfirmDelete"
     />
@@ -47,103 +47,118 @@
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { AlertCircle, Plus } from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 
 import {
   useCreateChartOfAccountMutation,
   useDeleteChartOfAccountMutation,
   useGetChartOfAccountsQuery,
   useUpdateChartOfAccountMutation,
-} from './chart-of-accounts.api.ts'
+} from './chart-of-accounts.api'
 import AccountDialogs from './components/AccountDialogs.vue'
 import AccountsTable from './components/AccountsTable.vue'
-import type { Account, CreateAccountPayload, UpdateAccountPayload } from './types'
+import type { Account, AccountFormValues } from './types'
 
-// States
-const accounts = ref<Account[]>([])
-const isLoading = ref(false)
-const isSubmitting = ref(false)
-const errorMessage = ref<string | null>(null)
+// Query & mutation harus dipanggil di level setup (bukan di dalam handler).
 const accountsQuery = useGetChartOfAccountsQuery()
+const createMutation = useCreateChartOfAccountMutation()
+const updateMutation = useUpdateChartOfAccountMutation()
+const deleteMutation = useDeleteChartOfAccountMutation()
+
+// Data berasal langsung dari query; tidak ada salinan state manual.
+const accounts = computed<Account[]>(() => accountsQuery.data.value?.accounts ?? [])
+const selectedPeriodName = computed(() => accountsQuery.data.value?.selectedPeriodName ?? null)
+const isLoading = computed(() => accountsQuery.isPending.value)
+
+const isSubmitting = computed(
+  () =>
+    createMutation.isPending.value || updateMutation.isPending.value || deleteMutation.isPending.value,
+)
+
+const actionError = ref<string | null>(null)
 
 const isFormOpen = ref(false)
 const isDeleteOpen = ref(false)
-
 const editingAccount = ref<Account | null>(null)
 const deletingAccount = ref<Account | null>(null)
 
-// Computed: Daftar induk akun yang bisa dipilih (mencegah memilih dirinya sendiri sebagai parent)
-const availableParents = computed(() => {
-  if (!editingAccount.value) return accounts.value
-  return accounts.value.filter((acc) => acc.id !== editingAccount.value?.id)
+// Mengambil pesan dari Error, atau dari body error backend ({ message }).
+const extractMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof Error && err.message) return err.message
+  if (typeof err === 'string' && err) return err
+  if (err && typeof err === 'object' && 'message' in err) {
+    const message = (err as { message?: unknown }).message
+    if (typeof message === 'string' && message) return message
+  }
+  return fallback
+}
+
+const errorMessage = computed(() => {
+  if (actionError.value) return actionError.value
+  if (accountsQuery.isError.value) {
+    return extractMessage(accountsQuery.error.value, 'Gagal memuat data bagan akun')
+  }
+  return null
 })
 
 // Handlers
-const fetchAccounts = async () => {
-  isLoading.value = true
-  errorMessage.value = null
-  try {
-    const { data } = await accountsQuery.refetch()
-    accounts.value = (data ?? []) as Account[]
-  } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Gagal memuat data bagan akun'
-  } finally {
-    isLoading.value = false
-  }
-}
-
 const handleOpenCreateModal = () => {
+  actionError.value = null
   editingAccount.value = null
   isFormOpen.value = true
 }
 
 const handleOpenEditModal = (account: Account) => {
+  actionError.value = null
   editingAccount.value = account
   isFormOpen.value = true
 }
 
 const handleOpenDeleteModal = (account: Account) => {
+  actionError.value = null
   deletingAccount.value = account
   isDeleteOpen.value = true
 }
 
-const handleSubmitForm = async (values: CreateAccountPayload | UpdateAccountPayload) => {
-  isSubmitting.value = true
-  errorMessage.value = null
+const handleSubmitForm = async (values: AccountFormValues) => {
+  actionError.value = null
   try {
     if (editingAccount.value) {
-      await useUpdateChartOfAccountMutation().mutateAsync({
-        id: Number(editingAccount.value.id),
-        updateAccountRequest: values as UpdateAccountPayload,
+      await updateMutation.mutateAsync({
+        id: editingAccount.value.id,
+        updateAccountRequest: {
+          referenceNumber: values.referenceNumber,
+          accountName: values.accountName,
+          type: values.type,
+          role: values.role,
+          isActive: values.isActive,
+        },
       })
     } else {
-      await useCreateChartOfAccountMutation().mutateAsync(values as CreateAccountPayload)
+      await createMutation.mutateAsync({
+        referenceNumber: values.referenceNumber,
+        accountName: values.accountName,
+        type: values.type,
+        role: values.role,
+      })
     }
     isFormOpen.value = false
-    await fetchAccounts()
+    editingAccount.value = null
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Gagal menyimpan data akun'
-  } finally {
-    isSubmitting.value = false
+    actionError.value = extractMessage(err, 'Gagal menyimpan data akun')
   }
 }
 
 const handleConfirmDelete = async () => {
   if (!deletingAccount.value) return
-  isSubmitting.value = true
-  errorMessage.value = null
+  actionError.value = null
   try {
-    await useDeleteChartOfAccountMutation().mutateAsync({ id: Number(deletingAccount.value.id) })
+    await deleteMutation.mutateAsync({ id: deletingAccount.value.id })
     isDeleteOpen.value = false
-    await fetchAccounts()
+    deletingAccount.value = null
   } catch (err: unknown) {
-    errorMessage.value = err instanceof Error ? err.message : 'Gagal menghapus akun'
-  } finally {
-    isSubmitting.value = false
+    isDeleteOpen.value = false
+    actionError.value = extractMessage(err, 'Gagal menghapus akun')
   }
 }
-
-onMounted(() => {
-  fetchAccounts()
-})
 </script>
