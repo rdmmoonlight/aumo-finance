@@ -24,19 +24,26 @@
 
     <!-- Status Periode -->
     <div class="flex items-center gap-4 text-muted-foreground">
-      <Badge v-if="selectedPeriod" variant="outline" :class="[
-        'gap-1.5 font-medium text-xs',
-        selectedPeriod.isClosed
-          ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
-          : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
-      ]">
-        <span :class="[
-          'h-1.5 w-1.5 rounded-full',
-          selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
-        ]" />
+      <Badge
+        v-if="selectedPeriod"
+        variant="outline"
+        :class="[
+          'gap-1.5 font-medium text-xs',
+          selectedPeriod.isClosed
+            ? 'border-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10'
+            : 'border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10',
+        ]"
+      >
+        <span
+          :class="[
+            'h-1.5 w-1.5 rounded-full',
+            selectedPeriod.isClosed ? 'bg-amber-500' : 'bg-emerald-500 animate-pulse',
+          ]"
+        />
         Periode: {{ selectedPeriod.periodName }}
         {{ selectedPeriod.isClosed ? ' (Closed)' : ' (Aktif)' }}
       </Badge>
+
       <Badge v-else variant="outline" class="gap-1.5 font-medium text-xs text-muted-foreground">
         <span class="h-1.5 w-1.5 rounded-full bg-slate-400" />
         {{ isPeriodLoading ? 'Memuat periode...' : 'Belum Ada Periode Dipilih' }}
@@ -55,24 +62,42 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { useGetPeriodsQuery, type PeriodItem } from '@/features/periods/periods.api'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 
-export interface SelectedPeriod {
-  periodName: string
-  isClosed: boolean
-}
-
-defineProps<{
-  selectedPeriod: SelectedPeriod | null
-  isPeriodLoading?: boolean
-}>()
-
 const route = useRoute()
+
+// 1. Panggil query periods
+const { data: periodsData, isLoading: isPeriodLoading } = useGetPeriodsQuery()
+
+// 2. Ekstrak daftar periode & cari yang sedang dipilih
+const selectedPeriod = computed<PeriodItem | null>(() => {
+  const raw = periodsData.value
+  if (!raw) return null
+
+  let list: PeriodItem[] = []
+  let selectedId: number | null | undefined = null
+
+  if (Array.isArray(raw)) {
+    list = raw
+  } else if ('periods' in raw && Array.isArray(raw.periods)) {
+    list = raw.periods
+    selectedId = raw.selectedPeriodId
+  } else if ('items' in raw && Array.isArray(raw.items)) {
+    list = raw.items
+  }
+
+  // Prioritaskan flag isSelected, fallback ke selectedPeriodId jika ada
+  return (
+    list.find((p) => p.isSelected) ??
+    (selectedId != null ? list.find((p) => p.id === selectedId) : null) ??
+    null
+  )
+})
 
 const pathSegments = computed(() => route.path.split('/').filter(Boolean))
 
-// Ganti dengan formatSegment / getSegmentUrl lamamu kalau sudah ada
 function formatSegment(segment: string) {
   return segment.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
