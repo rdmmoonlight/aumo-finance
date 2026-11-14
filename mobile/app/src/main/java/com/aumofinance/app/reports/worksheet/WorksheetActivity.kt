@@ -17,8 +17,6 @@ class WorksheetActivity : ComponentActivity() {
                 WorksheetScreen(report = viewModel.report)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

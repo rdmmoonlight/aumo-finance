@@ -17,8 +17,6 @@ class DashboardActivity : ComponentActivity() {
                 DashboardScreen(summary = viewModel.summary)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

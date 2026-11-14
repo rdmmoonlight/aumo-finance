@@ -27,7 +27,6 @@ class AdjustingJournalReportActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.loadAdjusting()
 
         setContent {
             var entryPendingDelete by remember { mutableStateOf<JournalReportEntry?>(null) }

@@ -17,8 +17,6 @@ class FinancialPositionActivity : ComponentActivity() {
                 FinancialPositionScreen(report = viewModel.report)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

@@ -17,8 +17,6 @@ class ClosingJournalActivity : ComponentActivity() {
                 ClosingJournalScreen(report = viewModel.report)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

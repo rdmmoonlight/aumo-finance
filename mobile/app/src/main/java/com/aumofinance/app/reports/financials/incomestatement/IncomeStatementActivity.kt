@@ -17,8 +17,6 @@ class IncomeStatementActivity : ComponentActivity() {
                 IncomeStatementScreen(report = viewModel.report)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

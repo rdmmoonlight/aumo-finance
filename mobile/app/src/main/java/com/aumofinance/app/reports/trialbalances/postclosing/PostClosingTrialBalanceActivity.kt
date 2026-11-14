@@ -22,8 +22,6 @@ class PostClosingTrialBalanceActivity : ComponentActivity() {
                 )
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

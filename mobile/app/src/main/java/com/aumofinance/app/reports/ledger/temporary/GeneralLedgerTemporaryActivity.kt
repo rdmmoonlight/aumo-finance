@@ -22,8 +22,6 @@ class GeneralLedgerTemporaryActivity : ComponentActivity() {
                 )
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

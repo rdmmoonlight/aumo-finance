@@ -25,7 +25,6 @@ class GeneralJournalReportActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        viewModel.loadGeneral()
 
         setContent {
             var showActions by remember { mutableStateOf(false) }

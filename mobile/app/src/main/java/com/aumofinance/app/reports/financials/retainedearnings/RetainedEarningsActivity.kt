@@ -17,8 +17,6 @@ class RetainedEarningsActivity : ComponentActivity() {
                 RetainedEarningsScreen(report = viewModel.report)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

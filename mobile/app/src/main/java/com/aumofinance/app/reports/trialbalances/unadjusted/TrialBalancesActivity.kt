@@ -18,8 +18,6 @@ class TrialBalancesActivity : ComponentActivity() {
                 TrialBalancesScreen(report = viewModel.report, fallbackTitle = "Neraca Saldo")
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {

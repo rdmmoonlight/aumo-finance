@@ -17,8 +17,6 @@ class CashFlowActivity : ComponentActivity() {
                 CashFlowScreen(report = viewModel.report)
             }
         }
-
-        viewModel.load()
     }
 
     override fun onResume() {
