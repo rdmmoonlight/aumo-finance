@@ -133,6 +133,37 @@ public class PeriodsService : IPeriodsService
 
         try
         {
+            // Pre-step (di luar transaksi pembuatan periode). SelectPeriodAsync memakai
+            // transaksi dan execution strategy sendiri (RefreshGeneralLedgersAsync), sehingga
+            // tidak boleh dipanggil di dalam transaksi di bawah.
+            if (await this.db.Periods.AnyAsync(p => p.UserId == userId && p.StartDate == startDate))
+            {
+                return Fail($"Period {periodName} already exists.");
+            }
+
+            var previous = await this.db.Periods
+                .AsNoTracking()
+                .Where(p => p.UserId == userId && p.StartDate < startDate)
+                .OrderByDescending(p => p.StartDate)
+                .FirstOrDefaultAsync();
+
+            // Periode sebelumnya wajib ditutup dulu sebelum periode baru dibuka.
+            if (previous != null && !previous.IsClosed)
+            {
+                return Fail($"Period {previous.PeriodName} must be closed before opening {periodName}.");
+            }
+
+            // Saldo Awal dihitung dari tabel sumber. Pilih periode sebelumnya terlebih dahulu
+            // supaya IsSelected berpindah ke sana dan datanya dipulihkan dari arsip.
+            if (isLoadExisting && previous != null)
+            {
+                var selected = await this.SelectPeriodAsync(userId, previous.Id);
+                if (selected is not { Success: true })
+                {
+                    return Fail($"Failed to load the data of {previous.PeriodName}. The new period was not opened.");
+                }
+            }
+
             return await strategy.ExecuteAsync(async () =>
             {
                 this.db.ChangeTracker.Clear();
@@ -302,6 +333,14 @@ public class PeriodsService : IPeriodsService
 
         await SelectedPeriodHelper.SelectPeriodAsync(this.db, userId, entity.Id);
 
+        // Periode tertutup yang tidak terpilih dibersihkan dari tabel sumber oleh archiver.
+        // IsSelected sudah true di atas (archiver melewati periode terpilih), lalu baris
+        // periode ini dipulihkan dari arsip SEBELUM General Ledger dihitung ulang.
+        if (entity.IsClosed)
+        {
+            await this.RestorePeriodRowsAsync(userId, entity);
+        }
+
         await this.glService.RefreshGeneralLedgersAsync(userId);
 
         return new SelectPeriodResult
@@ -310,6 +349,39 @@ public class PeriodsService : IPeriodsService
             SelectedPeriodId = entity.Id,
             Message = $"Now viewing {entity.PeriodName}" + (entity.IsClosed ? " (Closed)." : "."),
         };
+    }
+
+    // Daftar kolom harus sama dengan entity GeneralJournal (urutan bebas, nama = kolom tabel).
+    private const string GeneralJournalColumns =
+        "\"LineId\", \"AccountId\", \"LineDescription\", \"Debit\", \"Credit\", \"LineOrder\", "
+        + "\"JournalEntryId\", \"JournalType\", \"EntryDate\", \"TransactionNumber\", \"UserId\", "
+        + "\"Status\", \"CreatedAt\", \"UpdatedAt\"";
+
+    private const string RestoreGeneralJournalSql =
+        "INSERT INTO \"public\".\"GeneralJournal\" (" + GeneralJournalColumns + ") "
+        + "SELECT " + GeneralJournalColumns + " FROM \"archive\".\"GeneralJournal\" "
+        + "WHERE \"UserId\" = {0} AND \"EntryDate\" >= {1} AND \"EntryDate\" < {2} "
+        + "ON CONFLICT DO NOTHING";
+
+    // Menyalin baris jurnal satu periode dari arsip ke tabel sumber. Aman dipanggil berulang:
+    // baris yang sudah ada dilewati (ON CONFLICT DO NOTHING). Rentang tanggal sama dengan
+    // yang dipakai archiver (>= StartDate dan < EndDate + 1 hari).
+    private async Task RestorePeriodRowsAsync(Guid userId, Period period)
+    {
+        var archiveExists = await this.db.Database
+            .SqlQuery<bool>($"SELECT to_regclass('archive.\"GeneralJournal\"') IS NOT NULL AS \"Value\"")
+            .SingleAsync();
+
+        // Arsip belum dibuat berarti belum ada yang diarsipkan; semua baris masih di tabel sumber.
+        if (!archiveExists)
+        {
+            return;
+        }
+
+        var start = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);
+        var endExclusive = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1), DateTimeKind.Utc);
+
+        await this.db.Database.ExecuteSqlRawAsync(RestoreGeneralJournalSql, userId, start, endExclusive);
     }
 
     public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
