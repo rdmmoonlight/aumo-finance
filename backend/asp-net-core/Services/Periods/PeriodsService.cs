@@ -357,6 +357,9 @@ public class PeriodsService : IPeriodsService
         + "\"JournalEntryId\", \"JournalType\", \"EntryDate\", \"TransactionNumber\", \"UserId\", "
         + "\"Status\", \"CreatedAt\", \"UpdatedAt\"";
 
+    private const string GeneralJournalSyncLockSql =
+        "SELECT pg_advisory_xact_lock(hashtext('aumo_generaljournal_sync'))";
+
     private const string RestoreGeneralJournalSql =
         "INSERT INTO \"public\".\"GeneralJournal\" (" + GeneralJournalColumns + ") "
         + "SELECT " + GeneralJournalColumns + " FROM \"archive\".\"GeneralJournal\" "
@@ -381,7 +384,17 @@ public class PeriodsService : IPeriodsService
         var start = DateTime.SpecifyKind(period.StartDate.Date, DateTimeKind.Utc);
         var endExclusive = DateTime.SpecifyKind(period.EndDate.Date.AddDays(1), DateTimeKind.Utc);
 
-        await this.db.Database.ExecuteSqlRawAsync(RestoreGeneralJournalSql, userId, start, endExclusive);
+        // Advisory lock yang sama dengan archiver (purgeArchivedClosedPeriods). IsSelected sudah
+        // tersimpan sebelum method ini dipanggil, jadi purge yang berjalan setelah lock dilepas
+        // akan melewati periode ini; purge yang sudah berjalan lebih dulu selesai sebelum pemulihan.
+        var strategy = this.db.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var tx = await this.db.Database.BeginTransactionAsync();
+            await this.db.Database.ExecuteSqlRawAsync(GeneralJournalSyncLockSql);
+            await this.db.Database.ExecuteSqlRawAsync(RestoreGeneralJournalSql, userId, start, endExclusive);
+            await tx.CommitAsync();
+        });
     }
 
     public async Task<BaseServiceResult> ClearSelectionAsync(Guid userId)
