@@ -77,6 +77,14 @@ int envInt(const char* name, int fallback) {
     return fallback;
 }
 
+bool envBool(const char* name, bool fallback) {
+    if (const char* v = std::getenv(name); v && *v) {
+        std::string s = lower(v);
+        return !(s == "0" || s == "false" || s == "no" || s == "off");
+    }
+    return fallback;
+}
+
 } // namespace
 
 int main() {
@@ -88,6 +96,8 @@ int main() {
     const TableRef periods_table{"public", "Periods"};
 
     const int interval_minutes = envInt("ARCHIVE_INTERVAL_MINUTES", 360);
+    // Saklar pengaman: set ARCHIVE_PURGE_ENABLED=false untuk hanya menyalin tanpa menghapus.
+    const bool purge_enabled = envBool("ARCHIVE_PURGE_ENABLED", true);
 
     std::cout << "[Archiver Daemon] Service Archiver C++ dimulai...\n" << std::flush;
 
@@ -102,7 +112,10 @@ int main() {
     }
 
     while (true) {
-        archiver.archiveClosedPeriods(source_table, archive_table, periods_table);
+        // Hapus dari tabel sumber hanya bila penyalinan ke arsip baru saja berhasil.
+        if (archiver.archiveClosedPeriods(source_table, archive_table, periods_table) && purge_enabled) {
+            archiver.purgeArchivedClosedPeriods(source_table, archive_table, periods_table);
+        }
         std::cout << cat("[Archiver Daemon] Pemeriksaan berikutnya ", interval_minutes, " menit lagi.\n")
                   << std::flush;
         std::this_thread::sleep_for(std::chrono::minutes(interval_minutes));
