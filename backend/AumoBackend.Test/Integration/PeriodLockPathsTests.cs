@@ -20,7 +20,6 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-        var entryService = new JournalEntryService(db, new TransactionNumberService(db));
 
         // Jurnal penyesuaian pada tanggal di periode tertutup disisipkan langsung (jalur normal menolaknya).
         int entryId = await GeneralJournalWriter.NextJournalEntryIdAsync(db);
@@ -34,6 +33,16 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
             }));
         await db.SaveChangesAsync();
 
+        var closedPeriods = await db.Periods
+            .AsNoTracking()
+            .Where(p => p.UserId == u.UserId && p.IsClosed)
+            .ToListAsync();
+
+        var rows = await db.GeneralJournals
+            .Where(g => g.UserId == u.UserId && g.JournalEntryId == entryId)
+            .ToListAsync();
+
+        Assert.True(PeriodLock.IsDateLocked(rows.First().EntryDate, closedPeriods));
         Assert.Equal(2, await db.GeneralJournals.CountAsync(g => g.JournalEntryId == entryId));
     }
 
@@ -53,6 +62,15 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
                 new() { AccountId = u.EquityId, Credit = 50m },
             },
         });
+
+        Assert.False(created.IsLocked);
+
+        var rows = await db.GeneralJournals
+            .Where(g => g.UserId == u.UserId && g.JournalEntryId == created.Id)
+            .ToListAsync();
+
+        db.GeneralJournals.RemoveRange(rows);
+        await db.SaveChangesAsync();
 
         Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
     }
