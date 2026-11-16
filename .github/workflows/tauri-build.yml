@@ -12,6 +12,9 @@ permissions:
 jobs:
   build-tauri:
     runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: ./vuejs-tauri
 
     steps:
       - name: Checkout repository
