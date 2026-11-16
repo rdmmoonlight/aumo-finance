@@ -4,6 +4,7 @@ using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.ReversingJournals;
 using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
 
