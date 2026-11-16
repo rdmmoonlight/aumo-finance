@@ -1,7 +1,7 @@
 # ==========================================
 # STAGE 1: Build C++ Archiver Service
 # ==========================================
-FROM ubuntu:24.04 AS cpp-builder
+FROM ubuntu:26.04 AS cpp-builder
 WORKDIR /src
 
 # Disable interactive prompt & install paket esensial saja
@@ -40,28 +40,28 @@ RUN dotnet publish ./backend/AumoBackend/AumoBackend.csproj -c Release -o /app/d
 # ==========================================
 # STAGE 3: Build Frontend (SPA)
 # ==========================================
-# Gunakan Node LTS (22/20) untuk stabilitas Corepack & Native Modules
 FROM node:22-alpine AS frontend-builder
 WORKDIR /app
 
 # Enable Corepack & pastikan pnpm terpasang dengan cepat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Copy manifest dependensi
-COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/pnpm-workspace.yaml* ./
+# Copy manifest dependensi dari folder vuejs-tauri
+COPY vuejs-tauri/package.json vuejs-tauri/pnpm-lock.yaml* vuejs-tauri/pnpm-workspace.yaml* ./
 
 # Install dependensi dengan cache mount agar build super cepat
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
-# Copy seluruh source code frontend
-COPY frontend/ ./
+# Copy source code frontend dari folder vuejs-tauri
+COPY vuejs-tauri/ ./
 
 ARG PUBLIC_GOOGLE_CLIENT_ID
 ARG NEXT_PUBLIC__GOOGLE_CLIENT_ID
 ENV PUBLIC_GOOGLE_CLIENT_ID=${PUBLIC_GOOGLE_CLIENT_ID:-$NEXT_PUBLIC__GOOGLE_CLIENT_ID}
 
-RUN pnpm run build
+# Jalankan build khusus mode web (gunakan 'pnpm run build' jika tanpa mode)
+RUN pnpm run build:web
 
 # ==========================================
 # STAGE 4: Runtime Environment
