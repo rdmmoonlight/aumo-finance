@@ -4,7 +4,6 @@ using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
-using AumoBackend.Services.Reports.Journals;
 using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
 
@@ -75,10 +74,13 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var (expenseId, liabilityId) = await SeedAccrualAccountsAsync(db, u.UserId);
 
+        var openPeriod = await db.Periods.AsNoTracking().SingleAsync(p => p.Id == u.OpenPeriodId);
+        var previousPeriodEnd = openPeriod.StartDate.AddDays(-1);
+
         int adjustingId = await SeedAdjustingEntryAsync(
             db,
             u.UserId,
-            SeededUser.Utc(2025, 12, 31),
+            previousPeriodEnd,
             debitAccountId: expenseId,
             creditAccountId: liabilityId,
             amount: 1_500_000m);
@@ -90,7 +92,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
 
         var reversing = Assert.Single(result);
         Assert.Equal("Reversing", reversing.JournalType);
-        Assert.Equal(SeededUser.Utc(2026, 1, 1), reversing.EntryDate);
+        Assert.Equal(openPeriod.StartDate.Date, reversing.EntryDate.Date);
         Assert.Equal(GeneralJournalWriter.PostedStatus, reversing.Status);
         Assert.Equal(2, reversing.Lines.Count);
 
@@ -124,10 +126,13 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var (expenseId, liabilityId) = await SeedAccrualAccountsAsync(db, u.UserId);
 
+        var openPeriod = await db.Periods.AsNoTracking().SingleAsync(p => p.Id == u.OpenPeriodId);
+        var previousPeriodEnd = openPeriod.StartDate.AddDays(-1);
+
         int adjustingId = await SeedAdjustingEntryAsync(
             db,
             u.UserId,
-            SeededUser.Utc(2025, 12, 31),
+            previousPeriodEnd,
             expenseId,
             liabilityId,
             750_000m);
@@ -160,16 +165,18 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var (expenseId, liabilityId) = await SeedAccrualAccountsAsync(db, u.UserId);
 
+        var openPeriod = await db.Periods.SingleAsync(p => p.Id == u.OpenPeriodId);
+        var previousPeriodEnd = openPeriod.StartDate.AddDays(-1);
+
         int adjustingId = await SeedAdjustingEntryAsync(
             db,
             u.UserId,
-            SeededUser.Utc(2025, 12, 31),
+            previousPeriodEnd,
             expenseId,
             liabilityId,
             500_000m);
 
-        // Tutup periode terpilih (Januari 2026)
-        var openPeriod = await db.Periods.SingleAsync(p => p.Id == u.OpenPeriodId);
+        // Tutup periode terpilih
         openPeriod.IsClosed = true;
         await db.SaveChangesAsync();
 
@@ -196,14 +203,18 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var (expenseId, liabilityId) = await SeedAccrualAccountsAsync(db, u.UserId);
 
-        // 1. Transaksi modal awal pada periode sebelumnya (Desember 2025 - tertutup)
+        var newPeriod = await db.Periods.AsNoTracking().SingleAsync(p => p.Id == u.OpenPeriodId);
+        var previousPeriodEnd = newPeriod.StartDate.AddDays(-1);
+        var previousPeriodMid = previousPeriodEnd.AddDays(-15);
+
+        // 1. Transaksi modal awal pada periode sebelumnya (tertutup)
         int initialEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(db);
         db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
             initialEntryId,
             u.UserId,
             $"JU-{initialEntryId:D4}",
             "General",
-            SeededUser.Utc(2025, 12, 10),
+            previousPeriodMid,
             DateTime.UtcNow,
             null,
             new[]
@@ -213,45 +224,44 @@ public class ReversingJournalsTests(PostgresFixture fixture)
             }));
         await db.SaveChangesAsync();
 
-        // 2. Jurnal penyesuaian akrual gaji akhir Desember 2025
+        // 2. Jurnal penyesuaian akrual gaji akhir periode sebelumnya
         int adjustingId = await SeedAdjustingEntryAsync(
             db,
             u.UserId,
-            SeededUser.Utc(2025, 12, 31),
+            previousPeriodEnd,
             debitAccountId: expenseId,
             creditAccountId: liabilityId,
             amount: 1_500_000m);
 
-        // 3. Jalankan jurnal pembalik pada awal periode baru (Januari 2026)
+        // 3. Jalankan jurnal pembalik pada awal periode baru
         await CreateService(db).CreateReversingAsync(u.UserId, new CreateReversingRequest
         {
             AdjustingEntryIds = [adjustingId],
         });
 
-        // 4. Hitung Unadjusted Trial Balance untuk periode baru (Januari 2026)
-        var newPeriod = await db.Periods.AsNoTracking().SingleAsync(p => p.Id == u.OpenPeriodId);
+        // 4. Hitung Unadjusted Trial Balance untuk periode baru
         var trialBalanceService = new TrialBalancesService(db);
         var rows = await trialBalanceService.BuildUnadjustedTrialBalanceAsync(u.UserId, newPeriod);
 
         // Akun riil dari periode lalu tetap terbawa: Kas Debit 5.000.000, Modal Credit 5.000.000
-        var cashRow = rows.Single(r => r.AccountId.ToString() == u.CashId.ToString());
+        var cashRow = Assert.Single(rows, r => r.AccountId == u.CashId);
         Assert.Equal(5_000_000m, cashRow.Debit);
         Assert.Equal(0m, cashRow.Credit);
 
-        var equityRow = rows.Single(r => r.AccountId.ToString() == u.EquityId.ToString());
+        var equityRow = Assert.Single(rows, r => r.AccountId == u.EquityId);
         Assert.Equal(0m, equityRow.Debit);
         Assert.Equal(5_000_000m, equityRow.Credit);
 
-        // Utang Gaji (Credit 1.500.000 dari Des 2025 + Debit 1.500.000 dari Reversing Jan 2026) menjadi 0
-        var liabilityRow = rows.FirstOrDefault(r => r.AccountId.ToString() == liabilityId.ToString());
+        // Utang Gaji (Credit 1.500.000 dari periode lalu + Debit 1.500.000 dari Reversing) menjadi 0
+        var liabilityRow = rows.FirstOrDefault(r => r.AccountId == liabilityId);
         if (liabilityRow is not null)
         {
             Assert.Equal(0m, liabilityRow.Debit);
             Assert.Equal(0m, liabilityRow.Credit);
         }
 
-        // Beban Gaji di Januari 2026 bersaldo Credit 1.500.000 akibat jurnal pembalik
-        var expenseRow = rows.Single(r => r.AccountId.ToString() == expenseId.ToString());
+        // Beban Gaji di periode baru bersaldo Credit 1.500.000 akibat jurnal pembalik
+        var expenseRow = Assert.Single(rows, r => r.AccountId == expenseId);
         Assert.Equal(0m, expenseRow.Debit);
         Assert.Equal(1_500_000m, expenseRow.Credit);
 
