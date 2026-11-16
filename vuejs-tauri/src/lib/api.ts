@@ -1,4 +1,5 @@
 // src/lib/api.ts
+import axios from 'axios';
 
 // Kosongkan DEFAULT_BACKEND_URL agar request menggunakan Relative Path ('')
 // Ini memastikan request selalu melalui Reverse Proxy (Nginx di Render / Vite Proxy di lokal)
@@ -149,19 +150,32 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
   return (await response.text()) as T
 }
 
-// Helper ringkas
-export const api = {
-  get: <T>(url: string, options?: ApiFetchOptions) =>
-    apiFetch<T>(url, { ...options, method: 'GET' }),
-  post: <T>(url: string, body?: unknown, options?: ApiFetchOptions) =>
-    apiFetch<T>(url, { ...options, method: 'POST', body }),
-  put: <T>(url: string, body?: unknown, options?: ApiFetchOptions) =>
-    apiFetch<T>(url, { ...options, method: 'PUT', body }),
-  patch: <T>(url: string, body?: unknown, options?: ApiFetchOptions) =>
-    apiFetch<T>(url, { ...options, method: 'PATCH', body }),
-  delete: <T>(url: string, options?: ApiFetchOptions) =>
-    apiFetch<T>(url, { ...options, method: 'DELETE' }),
-}
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('access_token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Opsional: Tangani jika token expired (401)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token');
+      // redirect ke halaman login jika perlu
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const baseApi = {
   fetch: apiFetch,
