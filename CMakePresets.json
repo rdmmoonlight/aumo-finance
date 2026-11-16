@@ -3,9 +3,14 @@
   "configurePresets": [
     {
       "name": "ubuntu-debug",
-      "displayName": "Ubuntu 24.04 GCC (Debug)",
+      "displayName": "Ubuntu 26.04 GCC (Debug)",
       "generator": "Ninja",
       "binaryDir": "${sourceDir}/build",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      },
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_COMPILER": "g++",
