@@ -6,11 +6,16 @@ yarn-error.log*
 pnpm-debug.log*
 .pnpm-store
 
-# Next.js & Build Output
-.next
-out
-build
-dist
+# Abaikan folder native Tauri (Rust) dan hasil build lokal
+vuejs-tauri/src-tauri/
+vuejs-tauri/node_modules/
+vuejs-tauri/dist/
+
+# Abaikan folder build backend/C++ lokal
+backend/**/bin/
+backend/**/obj/
+build/
+.git/
 
 # Berkas Lingkungan & Rahasia (Environment Variables)
 .env
