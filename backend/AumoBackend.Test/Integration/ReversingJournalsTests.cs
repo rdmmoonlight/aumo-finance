@@ -68,6 +68,17 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         return journalEntryId;
     }
 
+    private static bool MatchesAccount(TrialBalancesRow row, ChartOfAccount account)
+    {
+        if (row.IsTotalRow)
+            return false;
+
+        string refStr = account.ReferenceNumber.ToString();
+        return row.ReferenceNumber == refStr
+            || row.AccountNumber == refStr
+            || string.Equals(row.AccountName, account.AccountName, StringComparison.OrdinalIgnoreCase);
+    }
+
     [Fact]
     public async Task CreateReversing_ValidAdjustingEntry_SucceedsAndSwapsDebitCredit()
     {
@@ -204,6 +215,17 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var (expenseId, liabilityId) = await SeedAccrualAccountsAsync(db, u.UserId);
 
+        var accountIds = new[] { u.CashId, u.EquityId, expenseId, liabilityId };
+        var accountsById = await db.ChartOfAccounts
+            .AsNoTracking()
+            .Where(a => accountIds.Contains(a.Id))
+            .ToDictionaryAsync(a => a.Id);
+
+        var cashAccount = accountsById[u.CashId];
+        var equityAccount = accountsById[u.EquityId];
+        var expenseAccount = accountsById[expenseId];
+        var liabilityAccount = accountsById[liabilityId];
+
         var newPeriod = await db.Periods.AsNoTracking().SingleAsync(p => p.Id == u.OpenPeriodId);
         var previousPeriodEnd = newPeriod.StartDate.AddDays(-1);
         var previousPeriodMid = previousPeriodEnd.AddDays(-15);
@@ -245,16 +267,16 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var rows = await trialBalanceService.BuildUnadjustedTrialBalanceAsync(u.UserId, newPeriod);
 
         // Akun riil dari periode lalu tetap terbawa: Kas Debit 5.000.000, Modal Credit 5.000.000
-        var cashRow = Assert.Single(rows, r => r.AccountId == u.CashId);
+        var cashRow = Assert.Single(rows, r => MatchesAccount(r, cashAccount));
         Assert.Equal(5_000_000m, cashRow.Debit);
         Assert.Equal(0m, cashRow.Credit);
 
-        var equityRow = Assert.Single(rows, r => r.AccountId == u.EquityId);
+        var equityRow = Assert.Single(rows, r => MatchesAccount(r, equityAccount));
         Assert.Equal(0m, equityRow.Debit);
         Assert.Equal(5_000_000m, equityRow.Credit);
 
         // Utang Gaji (Credit 1.500.000 dari periode lalu + Debit 1.500.000 dari Reversing) menjadi 0
-        var liabilityRow = rows.FirstOrDefault(r => r.AccountId == liabilityId);
+        var liabilityRow = rows.FirstOrDefault(r => MatchesAccount(r, liabilityAccount));
         if (liabilityRow is not null)
         {
             Assert.Equal(0m, liabilityRow.Debit);
@@ -262,11 +284,12 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         }
 
         // Beban Gaji di periode baru bersaldo Credit 1.500.000 akibat jurnal pembalik
-        var expenseRow = Assert.Single(rows, r => r.AccountId == expenseId);
+        var expenseRow = Assert.Single(rows, r => MatchesAccount(r, expenseAccount));
         Assert.Equal(0m, expenseRow.Debit);
         Assert.Equal(1_500_000m, expenseRow.Credit);
 
         // Total Debit dan Total Credit Trial Balance periode baru harus seimbang
-        Assert.Equal(rows.Sum(r => r.Debit), rows.Sum(r => r.Credit));
+        var accountRows = rows.Where(r => !r.IsTotalRow).ToList();
+        Assert.Equal(accountRows.Sum(r => r.Debit), accountRows.Sum(r => r.Credit));
     }
 }
