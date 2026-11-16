@@ -240,7 +240,7 @@ public partial class PeriodsService
         var totals = await this.db.GeneralJournals
             .AsNoTracking()
             .Where(l => l.UserId == userId
-                     && (l.JournalType == "General" || l.JournalType == "Adjusting")
+                     && (l.JournalType == "General" || l.JournalType == "Adjusting" || l.JournalType == "Reversing")
                      && l.EntryDate >= prevStart
                      && l.EntryDate <= prevEnd)
             .GroupBy(l => l.AccountId)

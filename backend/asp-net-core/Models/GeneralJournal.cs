@@ -33,6 +33,8 @@ public partial class GeneralJournal
 
     public DateTime? UpdatedAt { get; set; }
 
+    public int? SourceJournalEntryId { get; set; }
+
     public virtual ChartOfAccount Account { get; set; } = null!;
 
     public virtual ICollection<GeneralLedgerPermanentAccount> GeneralLedgerPermanentAccounts { get; set; } = new List<GeneralLedgerPermanentAccount>();

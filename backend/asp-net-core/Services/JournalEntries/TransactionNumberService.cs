@@ -8,7 +8,7 @@ public class TransactionNumberService(AppDbContext db) : ITransactionNumberServi
 {
     public async Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate)
     {
-        string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
+        string prefix = GetPrefix(journalType);
         string counterKey = $"{prefix}{entryDate:yyMM}";
         var connection = db.Database.GetDbConnection();
         if (connection.State != ConnectionState.Open)
@@ -43,10 +43,17 @@ public class TransactionNumberService(AppDbContext db) : ITransactionNumberServi
 
     public async Task<string> PeekNextAsync(Guid userId, string journalType, DateTime entryDate)
     {
-        string prefix = journalType == "Adjusting" ? "AJ" : "GJ";
+        string prefix = GetPrefix(journalType);
         string counterKey = $"{prefix}{entryDate:yyMM}";
         var current = await db.TransactionCounters.Where(c => c.UserId == userId && c.CounterKey == counterKey).Select(c => (int?)c.LastSequence).FirstOrDefaultAsync();
         var previewSeq = (current ?? 0) + 1;
         return $"{counterKey}{previewSeq:D4}";
     }
+
+    private static string GetPrefix(string journalType) => journalType switch
+    {
+        "Adjusting" => "AJ",
+        "Reversing" => "RJ",
+        _ => "GJ",
+    };
 }

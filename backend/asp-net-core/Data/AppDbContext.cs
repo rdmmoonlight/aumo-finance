@@ -88,6 +88,8 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
             entity.HasIndex(e => e.JournalEntryId, "IX_GeneralJournal_JournalEntryId");
 
+            entity.HasIndex(e => e.SourceJournalEntryId, "IX_GeneralJournal_SourceJournalEntryId");
+
             entity.HasIndex(e => new { e.UserId, e.EntryDate }, "IX_GeneralJournal_UserId_EntryDate");
 
             entity.HasIndex(e => new { e.UserId, e.TransactionNumber }, "IX_GeneralJournal_UserId_TransactionNumber");

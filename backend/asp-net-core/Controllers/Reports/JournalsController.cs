@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 [Route("reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class JournalsController : ControllerBase
 {
     private readonly IJournalsService _journalsService;
@@ -28,6 +27,42 @@ public class JournalsController : ControllerBase
     [HttpGet("adjusting")]
     public async Task<IActionResult> GetAdjustingJournal()
         => await GetJournalAsync("Adjusting", "entries");
+
+    // GET /api/v1/reports/journals/reversing
+    [HttpGet("reversing")]
+    public async Task<IActionResult> GetReversingJournal()
+        => await GetJournalAsync("Reversing", "entries");
+
+    // POST /api/v1/reports/journals/reversing
+    [HttpPost("reversing")]
+    public async Task<IActionResult> CreateReversingJournal([FromBody] CreateReversingRequest request)
+    {
+        var userId = User.GetCurrentUserId();
+        if (userId == Guid.Empty)
+        {
+            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+        }
+
+        if (request == null || request.AdjustingEntryIds == null || request.AdjustingEntryIds.Count == 0)
+        {
+            return BadRequest(new { success = false, message = "AdjustingEntryIds is required and cannot be empty." });
+        }
+
+        try
+        {
+            var createdEntries = await _journalsService.CreateReversingAsync(userId, request);
+
+            return Ok(new
+            {
+                success = true,
+                entries = createdEntries
+            });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { success = false, message = ex.Message });
+        }
+    }
 
     // GET /api/v1/reports/journals/closing
     [HttpGet("closing")]

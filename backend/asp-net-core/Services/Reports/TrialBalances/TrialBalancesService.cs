@@ -190,8 +190,8 @@ public class TrialBalancesService : ITrialBalancesService
                      && l.EntryDate <= endUtc);
 
         var lines = includeAdjustingLines
-            ? await linesQuery.Where(l => l.JournalType == "General" || l.JournalType == "Adjusting").ToListAsync()
-            : await linesQuery.Where(l => l.JournalType == "General").ToListAsync();
+            ? await linesQuery.Where(l => l.JournalType == "General" || l.JournalType == "Reversing" || l.JournalType == "Adjusting").ToListAsync()
+            : await linesQuery.Where(l => l.JournalType == "General" || l.JournalType == "Reversing").ToListAsync();
 
         var linesByAccount = lines
             .GroupBy(l => l.AccountId)
@@ -356,7 +356,7 @@ public class TrialBalancesService : ITrialBalancesService
         => !string.IsNullOrEmpty(type) && AccountClassificationHelper.IsTemporary(type);
 
     private static string Truncate(string? value, int max)
-        {
+    {
         value ??= string.Empty;
         return value.Length <= max ? value : value[..max];
     }

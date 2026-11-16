@@ -53,7 +53,7 @@ public class ChartOfAccountsService(AppDbContext db) : IChartOfAccountsService
             var accountBalances = await db.GeneralJournals
                 .Where(j => accountIds.Contains(j.AccountId) &&
                             j.UserId == userId &&
-                            (j.JournalType == "General" || j.JournalType == "Adjusting") &&
+                            (j.JournalType == "General" || j.JournalType == "Adjusting" || j.JournalType == "Reversing") &&
                             j.EntryDate >= startUtc &&
                             j.EntryDate <= endUtc)
                 .GroupBy(j => j.AccountId)

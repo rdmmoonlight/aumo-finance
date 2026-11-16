@@ -180,3 +180,8 @@ public class CreateGeneralJournalLineRequest
 
     public int LineOrder { get; set; }
 }
+
+public class CreateReversingRequest
+{
+    public List<int> AdjustingEntryIds { get; set; } = new();
+}
