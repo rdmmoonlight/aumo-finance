@@ -2,6 +2,7 @@ namespace AumoBackend.Test.Integration;
 
 using AumoBackend.DTOs;
 using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Reports.Journals;
 using AumoBackend.Services.Tools;
