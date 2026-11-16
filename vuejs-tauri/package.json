@@ -6,6 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:web": "vite build --mode web",
+    "build:desktop": "vite build --mode desktop",
+    "tauri": "tauri"
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:oxlint lint:eslint",
@@ -13,7 +16,6 @@
     "lint:eslint": "eslint . --fix --cache",
     "format": "prettier --write --experimental-cli src/",
     "api:generate": "openapi-ts",
-    "tauri": "tauri"
   },
   "dependencies": {
     "@internationalized/date": "^3.12.4",
