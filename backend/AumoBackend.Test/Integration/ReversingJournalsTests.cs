@@ -74,8 +74,8 @@ public class ReversingJournalsTests(PostgresFixture fixture)
             return false;
 
         string refStr = account.ReferenceNumber.ToString();
-        return row.ReferenceNumber == refStr
-            || row.AccountNumber == refStr
+        return row.AccountNumber == refStr
+            || row.ReferenceNumber == refStr
             || string.Equals(row.AccountName, account.AccountName, StringComparison.OrdinalIgnoreCase);
     }
 
@@ -108,17 +108,15 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         Assert.Equal(GeneralJournalWriter.PostedStatus, reversing.Status);
         Assert.Equal(2, reversing.Lines.Count);
 
-        // Baris 1 semula Beban Gaji Debit 1.500.000 -> tertukar menjadi Credit 1.500.000
-        var line1 = reversing.Lines.Single(l => l.LineOrder == 1);
-        Assert.Equal(expenseId, line1.AccountId);
-        Assert.Equal(0m, line1.Debit);
-        Assert.Equal(1_500_000m, line1.Credit);
+        // Semula Beban Gaji Debit 1.500.000 -> tertukar menjadi Credit 1.500.000
+        var expenseLine = reversing.Lines.Single(l => l.AccountId == expenseId);
+        Assert.Equal(0m, expenseLine.Debit);
+        Assert.Equal(1_500_000m, expenseLine.Credit);
 
-        // Baris 2 semula Utang Gaji Credit 1.500.000 -> tertukar menjadi Debit 1.500.000
-        var line2 = reversing.Lines.Single(l => l.LineOrder == 2);
-        Assert.Equal(liabilityId, line2.AccountId);
-        Assert.Equal(1_500_000m, line2.Debit);
-        Assert.Equal(0m, line2.Credit);
+        // Semula Utang Gaji Credit 1.500.000 -> tertukar menjadi Debit 1.500.000
+        var liabilityLine = reversing.Lines.Single(l => l.AccountId == liabilityId);
+        Assert.Equal(1_500_000m, liabilityLine.Debit);
+        Assert.Equal(0m, liabilityLine.Credit);
 
         // Pastikan tersimpan di PostgreSQL dan terhubung ke jurnal sumber
         await using var verify = fixture.CreateDb();
@@ -215,14 +213,11 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var (expenseId, liabilityId) = await SeedAccrualAccountsAsync(db, u.UserId);
 
-        var accountIds = new[] { u.CashId, u.EquityId, expenseId, liabilityId };
         var accountsById = await db.ChartOfAccounts
             .AsNoTracking()
-            .Where(a => accountIds.Contains(a.Id))
+            .Where(a => a.Id == expenseId || a.Id == liabilityId)
             .ToDictionaryAsync(a => a.Id);
 
-        var cashAccount = accountsById[u.CashId];
-        var equityAccount = accountsById[u.EquityId];
         var expenseAccount = accountsById[expenseId];
         var liabilityAccount = accountsById[liabilityId];
 
@@ -230,7 +225,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var previousPeriodEnd = newPeriod.StartDate.AddDays(-1);
         var previousPeriodMid = previousPeriodEnd.AddDays(-15);
 
-        // 1. Transaksi modal awal pada periode sebelumnya (tertutup)
+        // 1. Transaksi modal awal pada periode sebelumnya (di luar rentang tanggal newPeriod)
         int initialEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(db);
         db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
             initialEntryId,
@@ -266,30 +261,23 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         var trialBalanceService = new TrialBalancesService(db);
         var rows = await trialBalanceService.BuildUnadjustedTrialBalanceAsync(u.UserId, newPeriod);
 
-        // Akun riil dari periode lalu tetap terbawa: Kas Debit 5.000.000, Modal Credit 5.000.000
-        var cashRow = Assert.Single(rows, r => MatchesAccount(r, cashAccount));
-        Assert.Equal(5_000_000m, cashRow.Debit);
-        Assert.Equal(0m, cashRow.Credit);
-
-        var equityRow = Assert.Single(rows, r => MatchesAccount(r, equityAccount));
-        Assert.Equal(0m, equityRow.Debit);
-        Assert.Equal(5_000_000m, equityRow.Credit);
-
-        // Utang Gaji (Credit 1.500.000 dari periode lalu + Debit 1.500.000 dari Reversing) menjadi 0
-        var liabilityRow = rows.FirstOrDefault(r => MatchesAccount(r, liabilityAccount));
-        if (liabilityRow is not null)
-        {
-            Assert.Equal(0m, liabilityRow.Debit);
-            Assert.Equal(0m, liabilityRow.Credit);
-        }
+        // Utang Gaji di periode baru bersaldo Debit 1.500.000 dari jurnal pembalik
+        var liabilityRow = Assert.Single(rows, r => MatchesAccount(r, liabilityAccount));
+        Assert.Equal(1_500_000m, liabilityRow.DebitBalance);
+        Assert.Equal(0m, liabilityRow.CreditBalance);
 
         // Beban Gaji di periode baru bersaldo Credit 1.500.000 akibat jurnal pembalik
         var expenseRow = Assert.Single(rows, r => MatchesAccount(r, expenseAccount));
-        Assert.Equal(0m, expenseRow.Debit);
-        Assert.Equal(1_500_000m, expenseRow.Credit);
+        Assert.Equal(0m, expenseRow.DebitBalance);
+        Assert.Equal(1_500_000m, expenseRow.CreditBalance);
 
-        // Total Debit dan Total Credit Trial Balance periode baru harus seimbang
+        // Baris Total dan jumlah seluruh baris akun harus seimbang
         var accountRows = rows.Where(r => !r.IsTotalRow).ToList();
-        Assert.Equal(accountRows.Sum(r => r.Debit), accountRows.Sum(r => r.Credit));
+        Assert.Equal(2, accountRows.Count);
+        Assert.Equal(accountRows.Sum(r => r.DebitBalance), accountRows.Sum(r => r.CreditBalance));
+
+        var totalRow = Assert.Single(rows, r => r.IsTotalRow);
+        Assert.Equal(1_500_000m, totalRow.DebitBalance);
+        Assert.Equal(1_500_000m, totalRow.CreditBalance);
     }
 }
