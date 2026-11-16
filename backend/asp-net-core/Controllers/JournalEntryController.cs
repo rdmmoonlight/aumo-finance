@@ -14,24 +14,22 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 [Route("/journal-entry")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class JournalEntryController : ControllerBase
 {
     private readonly IJournalEntryService journalEntryService;
     private readonly IValidator<CreateJournalEntryRequest> createValidator;
-    private readonly IValidator<UpdateJournalEntryRequest> updateValidator;
     private readonly IValidator<SearchDescriptionsQuery> searchValidator;
     private readonly IValidator<NextTransactionNumberQuery> nextNumberValidator;
 
     public JournalEntryController(
         IJournalEntryService journalEntryService,
         IValidator<CreateJournalEntryRequest> createValidator,
-        IValidator<UpdateJournalEntryRequest> updateValidator,
         IValidator<SearchDescriptionsQuery> searchValidator,
         IValidator<NextTransactionNumberQuery> nextNumberValidator)
     {
         this.journalEntryService = journalEntryService;
         this.createValidator = createValidator;
-        this.updateValidator = updateValidator;
         this.searchValidator = searchValidator;
         this.nextNumberValidator = nextNumberValidator;
     }
@@ -66,58 +64,6 @@ public class JournalEntryController : ControllerBase
                 message = $"Journal entry {result.TransactionNumber} has been posted.",
                 entryId = result.Id,
                 transactionNumber = result.TransactionNumber,
-            });
-        }
-        catch (Exception ex)
-        {
-            return this.HandleServiceException(ex);
-        }
-    }
-
-    [HttpPut("edit/{id:int}")]
-    public async Task<IActionResult> Edit(int id, [FromBody] UpdateJournalEntryRequest request)
-    {
-        var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty) return this.UnauthorizedUser();
-
-        var validation = await this.updateValidator.ValidateAsync(request);
-        if (!validation.IsValid) return this.BadRequest(validation.ToErrorResponse());
-
-        try
-        {
-            await this.journalEntryService.UpdateAsync(userId, id, request.ToServiceRequest());
-            var updatedEntry = await this.journalEntryService.GetByIdAsync(userId, id);
-
-            return this.Ok(new
-            {
-                success = true,
-                message = $"Journal entry {updatedEntry?.TransactionNumber} updated successfully.",
-            });
-        }
-        catch (Exception ex)
-        {
-            return this.HandleServiceException(ex);
-        }
-    }
-
-    [HttpDelete("delete/{id:int}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var userId = this.GetCurrentUserId();
-        if (userId == Guid.Empty) return this.UnauthorizedUser();
-
-        try
-        {
-            var existing = await this.journalEntryService.GetByIdAsync(userId, id);
-            if (existing == null) return this.NotFound(new { success = false, message = "Journal entry not found." });
-
-            string transactionNumber = existing.TransactionNumber;
-            await this.journalEntryService.DeleteAsync(userId, id);
-
-            return this.Ok(new
-            {
-                success = true,
-                message = $"Journal entry {transactionNumber} deleted successfully.",
             });
         }
         catch (Exception ex)

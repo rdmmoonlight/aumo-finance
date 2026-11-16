@@ -1,6 +1,6 @@
-using System.Text.Json.Serialization;
-
 namespace AumoBackend.DTOs.Reports;
+
+using System.Text.Json.Serialization;
 
 // ==========================================
 // RESPONSE DTOs
@@ -179,19 +179,4 @@ public class CreateGeneralJournalLineRequest
     public decimal Credit { get; set; }
 
     public int LineOrder { get; set; }
-}
-
-public class UpdateGeneralJournalRequest
-{
-    public string JournalType { get; set; } = string.Empty;
-
-    public DateTime EntryDate { get; set; }
-
-    public string TransactionNumber { get; set; } = string.Empty;
-
-    public string Status { get; set; } = string.Empty;
-
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    public List<CreateGeneralJournalLineRequest> Lines { get; set; } = new();
 }

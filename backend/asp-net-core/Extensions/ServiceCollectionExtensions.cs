@@ -1,3 +1,5 @@
+namespace AumoBackend.Extensions;
+
 using System.Threading.RateLimiting;
 using AumoBackend.Services;
 using AumoBackend.Services.Auth;
@@ -21,8 +23,6 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
-
-namespace AumoBackend.Extensions;
 
 public static class ServiceCollectionExtensions
 {

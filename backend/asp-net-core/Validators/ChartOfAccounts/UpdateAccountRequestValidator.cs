@@ -10,7 +10,7 @@ public class UpdateAccountRequestValidator : AbstractValidator<UpdateAccountRequ
     {
         this.RuleFor(x => x.AccountName).MustBeValidAccountName();
         this.RuleFor(x => x.Type).MustBeValidAccountType();
-        this.RuleFor(x => x.Role).MustBeValidAccountRole();
+        this.RuleFor(x => x.Role!).MustBeValidAccountRole();
 
         this.RuleFor(x => x.ReferenceNumber)
             .Must((r, n) => AccountClassificationHelper.ValidateReferenceNumber(r.Type, n))

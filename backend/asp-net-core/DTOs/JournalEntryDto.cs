@@ -78,17 +78,6 @@ public class CreateJournalEntryResponseDto
     public string Message { get; set; } = string.Empty;
 }
 
-public class UpdateJournalEntryRequest
-{
-    public string JournalType { get; set; } = string.Empty;
-
-    public DateTime EntryDate { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
-
-    public List<JournalEntryLineDto> Lines { get; set; } = new();
-}
-
 public class CreateJournalEntryLineRequest
 {
     public int AccountId { get; set; }

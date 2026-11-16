@@ -1,30 +1,24 @@
+namespace AumoBackend.Services.Reports.Journals;
+
 using System.Globalization;
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
 
-namespace AumoBackend.Services.Reports.Journals;
-
 public class JournalsService : IJournalsService
 {
-    private const string AdjustingType = "Adjusting";
-
     private readonly AppDbContext _db;
     private readonly ITrialBalancesService _trialBalancesService;
-    private readonly IJournalEntryService _journalEntryService;
 
     public JournalsService(
         AppDbContext db,
-        ITrialBalancesService trialBalancesService,
-        IJournalEntryService journalEntryService)
+        ITrialBalancesService trialBalancesService)
     {
         _db = db;
         _trialBalancesService = trialBalancesService;
-        _journalEntryService = journalEntryService;
     }
 
     public async Task<JournalReportResult> GetJournalAsync(Guid userId, string journalType)
@@ -85,22 +79,6 @@ public class JournalsService : IJournalsService
             IsPeriodClosed = period.IsClosed,
             Entries = entries,
         };
-    }
-
-    public async Task DeleteAdjustingAsync(Guid userId, int journalEntryId)
-    {
-        var exists = await _db.GeneralJournals
-            .AsNoTracking()
-            .AnyAsync(g => g.JournalEntryId == journalEntryId
-                        && g.UserId == userId
-                        && g.JournalType == AdjustingType);
-
-        if (!exists)
-        {
-            throw new KeyNotFoundException("Adjusting journal entry not found.");
-        }
-
-        await _journalEntryService.DeleteAsync(userId, journalEntryId);
     }
 
     public async Task<ClosingJournalReportResult> GetClosingJournalAsync(Guid userId)

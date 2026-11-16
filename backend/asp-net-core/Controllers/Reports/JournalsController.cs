@@ -1,14 +1,15 @@
+namespace AumoBackend.Controllers.Reports;
+
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Extensions;
 using AumoBackend.Services.Reports.Journals;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AumoBackend.Controllers.Reports;
-
 [ApiController]
 [Route("reports/journals")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
+
 public class JournalsController : ControllerBase
 {
     private readonly IJournalsService _journalsService;
@@ -79,32 +80,6 @@ public class JournalsController : ControllerBase
                 groups = result.Groups,
             },
         });
-    }
-
-    // DELETE /api/v1/reports/journals/adjusting/{id}
-    [HttpDelete("adjusting/{id:int}")]
-    public async Task<IActionResult> DeleteAdjustingJournal(int id)
-    {
-        var userId = User.GetCurrentUserId();
-        if (userId == Guid.Empty)
-        {
-            return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
-        }
-
-        try
-        {
-            // Panggilan langsung ke IJournalsService yang mengkapsulasi logika validasi dan pendelegasian
-            await _journalsService.DeleteAdjustingAsync(userId, id);
-            return Ok(new { success = true, message = "Adjusting journal entry deleted successfully." });
-        }
-        catch (KeyNotFoundException ex)
-        {
-            return NotFound(new { success = false, message = ex.Message });
-        }
-        catch (InvalidOperationException ex)
-        {
-            return BadRequest(new { success = false, message = ex.Message });
-        }
     }
 
     private async Task<IActionResult> GetJournalAsync(string journalType, string listKey)

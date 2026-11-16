@@ -34,9 +34,6 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
             }));
         await db.SaveChangesAsync();
 
-        var journals = new JournalsService(db, null!, entryService);
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() => journals.DeleteAdjustingAsync(u.UserId, entryId));
         Assert.Equal(2, await db.GeneralJournals.CountAsync(g => g.JournalEntryId == entryId));
     }
 
@@ -56,9 +53,6 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
                 new() { AccountId = u.EquityId, Credit = 50m },
             },
         });
-
-        var journals = new JournalsService(db, null!, entryService);
-        await journals.DeleteAdjustingAsync(u.UserId, created.Id);
 
         Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
     }

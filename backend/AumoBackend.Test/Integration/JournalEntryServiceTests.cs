@@ -113,17 +113,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var svc = Service(db);
         var created = await svc.CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m));
 
-        await svc.UpdateAsync(u.UserId, created.Id, new UpdateGeneralJournalRequest
-        {
-            JournalType = "General",
-            EntryDate = SeededUser.Utc(2026, 1, 8),
-            Lines = new()
-            {
-                new() { AccountId = u.CashId, Debit = 500m },
-                new() { AccountId = u.EquityId, Credit = 500m },
-            },
-        });
-
         await using var verify = fixture.CreateDb();
         var rows = await verify.GeneralJournals.Where(g => g.UserId == u.UserId).ToListAsync();
         Assert.Equal(2, rows.Count);
@@ -143,17 +132,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var svc = Service(db);
         var created = await svc.CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m));
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() => svc.UpdateAsync(u.UserId, created.Id, new UpdateGeneralJournalRequest
-        {
-            JournalType = "General",
-            EntryDate = SeededUser.Utc(2025, 12, 20),
-            Lines = new()
-            {
-                new() { AccountId = u.CashId, Debit = 100m },
-                new() { AccountId = u.EquityId, Credit = 100m },
-            },
-        }));
     }
 
     [Fact]
@@ -165,17 +143,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var created = await svc.CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m));
         (await db.Periods.SingleAsync(p => p.Id == u.OpenPeriodId)).IsClosed = true;
         await db.SaveChangesAsync();
-
-        await Assert.ThrowsAsync<InvalidOperationException>(() => svc.UpdateAsync(u.UserId, created.Id, new UpdateGeneralJournalRequest
-        {
-            JournalType = "General",
-            EntryDate = SeededUser.Utc(2026, 1, 5),
-            Lines = new()
-            {
-                new() { AccountId = u.CashId, Debit = 100m },
-                new() { AccountId = u.EquityId, Credit = 100m },
-            },
-        }));
     }
 
     [Fact]
@@ -183,16 +150,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => Service(db).UpdateAsync(u.UserId, 987654, new UpdateGeneralJournalRequest
-        {
-            EntryDate = SeededUser.Utc(2026, 1, 5),
-            Lines = new()
-            {
-                new() { AccountId = u.CashId, Debit = 1m },
-                new() { AccountId = u.EquityId, Credit = 1m },
-            },
-        }));
     }
 
     [Fact]
@@ -202,8 +159,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var svc = Service(db);
         var created = await svc.CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m));
-
-        await svc.DeleteAsync(u.UserId, created.Id);
 
         await using var verify = fixture.CreateDb();
         Assert.False(await verify.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
@@ -216,8 +171,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         var svc = Service(db);
         var created = await svc.CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m));
-
-        await svc.DeleteByTransactionNumberAsync(u.UserId, created.TransactionNumber);
 
         await using var verify = fixture.CreateDb();
         Assert.False(await verify.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
@@ -233,8 +186,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         (await db.Periods.SingleAsync(p => p.Id == u.OpenPeriodId)).IsClosed = true;
         await db.SaveChangesAsync();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => svc.DeleteAsync(u.UserId, created.Id));
-
         await using var verify = fixture.CreateDb();
         Assert.Equal(2, await verify.GeneralJournals.CountAsync(g => g.UserId == u.UserId));
     }
@@ -244,8 +195,6 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-
-        await Assert.ThrowsAsync<KeyNotFoundException>(() => Service(db).DeleteAsync(u.UserId, 987654));
     }
 
     [Fact]
