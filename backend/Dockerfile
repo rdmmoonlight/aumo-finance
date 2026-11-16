@@ -20,21 +20,21 @@ RUN dotnet tool install --global dotnet-ef
 ENV PATH="${PATH}:/root/.dotnet/tools"
 
 # Copy csproj dan restore
-COPY ["asp-net-core/AumoBackend.csproj", "asp-net-core/"]
-RUN dotnet restore "asp-net-core/AumoBackend.csproj"
+COPY ["AumoBackend/AumoBackend.csproj", "AumoBackend/"]
+RUN dotnet restore "AumoBackend/AumoBackend.csproj"
 
 # Copy seluruh source code monorepo
 COPY . .
 
 # Pindah ke subfolder proyek .NET
-WORKDIR "/src/asp-net-core"
+WORKDIR "/src/AumoBackend"
 
 # Build & Publish .NET (secara otomatis mengeksekusi cargo build via target .csproj)
 RUN dotnet publish "AumoBackend.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # 3. Stage Migration Runner
 FROM build AS migration-runner
-WORKDIR "/src/asp-net-core"
+WORKDIR "/src/AumoBackend"
 ENTRYPOINT ["dotnet", "ef", "database", "update"]
 
 # 4. Stage Final (App Production)

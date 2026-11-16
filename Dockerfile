@@ -30,12 +30,12 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS dotnet-builder
 WORKDIR /src
 
 # Copy csproj & restore dependensi (Cache Layer)
-COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
-RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
+COPY backend/AumoBackend/*.csproj ./backend/AumoBackend/
+RUN dotnet restore ./backend/AumoBackend/AumoBackend.csproj
 
 # Copy source code backend & publish
-COPY backend/asp-net-core/ ./backend/asp-net-core/
-RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build --no-restore
+COPY backend/AumoBackend/ ./backend/AumoBackend/
+RUN dotnet publish ./backend/AumoBackend/AumoBackend.csproj -c Release -o /app/dotnet-build --no-restore
 
 # ==========================================
 # STAGE 3: Build Frontend (SPA)

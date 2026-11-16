@@ -14,12 +14,12 @@ Sistem informasi keuangan dan akuntansi terintegrasi, berorientasi presisi.
 
 ## Struktur
 
-| Folder | Isi | Teknologi |
-|---|---|---|
-| `backend/asp-net-core` | REST API utama | ASP.NET Core (.NET 10), EF Core, PostgreSQL |
-| `frontend` | Aplikasi web | React 19, TypeScript, Rsbuild, TanStack Router, Tailwind |
-| `mobile` | Aplikasi Android native | Kotlin, Jetpack Compose |
-| `docs` | Dokumentasi | Markdown |
+| Folder                | Isi                     | Teknologi                                                |
+| --------------------- | ----------------------- | -------------------------------------------------------- |
+| `backend/AumoBackend` | REST API utama          | ASP.NET Core (.NET 10), EF Core, PostgreSQL              |
+| `frontend`            | Aplikasi web            | React 19, TypeScript, Rsbuild, TanStack Router, Tailwind |
+| `mobile`              | Aplikasi Android native | Kotlin, Jetpack Compose                                  |
+| `docs`                | Dokumentasi             | Markdown                                                 |
 
 ## Autentikasi
 
@@ -31,7 +31,7 @@ Sistem informasi keuangan dan akuntansi terintegrasi, berorientasi presisi.
 Backend:
 
 ```bash
-dotnet run --project backend/asp-net-core
+dotnet run --project backend/AumoBackend
 ```
 
 Frontend:

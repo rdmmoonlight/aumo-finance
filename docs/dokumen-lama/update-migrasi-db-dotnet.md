@@ -1,7 +1,7 @@
 Panduan ini bersifat generik untuk database **PostgreSQL**:
 
-```markdown
-Berikut panduan langkah demi langkah (*step-by-step*) pengelolaan database berbasis **EF Core Migrations & Scaffolding** untuk proyek `AumoBackend`.
+````markdown
+Berikut panduan langkah demi langkah (_step-by-step_) pengelolaan database berbasis **EF Core Migrations & Scaffolding** untuk proyek `AumoBackend`.
 
 Anda bisa langsung menyalin dokumen Markdown ini dan menyimpannya di folder proyek Anda di **`/docs/DATABASE_GUIDE.md`**.
 
@@ -9,7 +9,7 @@ Anda bisa langsung menyalin dokumen Markdown ini dan menyimpannya di folder proy
 
 # Dokumentasi Pengelolaan Database & EF Core Migration
 
-Dokumen ini berisi panduan standar untuk melakukan *scaffolding* (reverse engineering) skema database PostgreSQL serta mengelola *schema migration* menggunakan Entity Framework Core di `AumoBackend`.
+Dokumen ini berisi panduan standar untuk melakukan _scaffolding_ (reverse engineering) skema database PostgreSQL serta mengelola _schema migration_ menggunakan Entity Framework Core di `AumoBackend`.
 
 ---
 
@@ -21,8 +21,8 @@ Sebelum menjalankan perintah EF Core CLI, pastikan variabel lingkungan `Connecti
 
 ```bash
 export ConnectionStrings__DefaultConnection="YOUR_DATABASE_CONNECTION_STRING"
-
 ```
+````
 
 ### PowerShell
 
@@ -37,7 +37,7 @@ $env:ConnectionStrings__DefaultConnection="YOUR_DATABASE_CONNECTION_STRING"
 
 Gunakan langkah ini jika terdapat perubahan skema langsung di database PostgreSQL yang ingin disinkronkan kembali ke dalam kode C# (`AppDbContext` & `Models`).
 
-Jalankan perintah ini dari direktori `/src/backend/asp-net-core`:
+Jalankan perintah ini dari direktori `/src/backend/AumoBackend`:
 
 ```bash
 dotnet ef dbcontext scaffold "$ConnectionStrings__DefaultConnection" Npgsql.EntityFrameworkCore.PostgreSQL \
@@ -65,16 +65,16 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
 
 ## 3. Membuat Migration Baru
 
-Jika Anda melakukan perubahan pada *Entities* di C# atau ingin memperbarui skema:
+Jika Anda melakukan perubahan pada _Entities_ di C# atau ingin memperbarui skema:
 
-1. Buat berkas *migration* baru:
+1. Buat berkas _migration_ baru:
 
 ```bash
 dotnet ef migrations add <NamaMigration> --context AppDbContext
 
 ```
 
-*Contoh:* `dotnet ef migrations add AddTransactionCategories --context AppDbContext`
+_Contoh:_ `dotnet ef migrations add AddTransactionCategories --context AppDbContext`
 
 2. Periksa berkas C# yang ter-generate di dalam direktori `Migrations/` untuk memastikan perubahan kolom/tabel sudah sesuai.
 
@@ -112,7 +112,7 @@ dotnet ef database update --context AppDbContext
 
 ### Opsi B: Eksekusi Otomatis saat Deployment (Production)
 
-Aplikasi sudah dikonfigurasi di `Program.cs` untuk mengeksekusi migration secara otomatis saat *startup* kontainer:
+Aplikasi sudah dikonfigurasi di `Program.cs` untuk mengeksekusi migration secara otomatis saat _startup_ kontainer:
 
 ```csharp
 await context.Database.MigrateAsync();
@@ -123,14 +123,14 @@ await context.Database.MigrateAsync();
 
 ## 6. Rollback / Undo Migration
 
-* **Membatalkan migration lokal yang belum di-push ke database:**
+- **Membatalkan migration lokal yang belum di-push ke database:**
 
 ```bash
 dotnet ef migrations remove --context AppDbContext
 
 ```
 
-* **Kembali ke versi migration tertentu di database:**
+- **Kembali ke versi migration tertentu di database:**
 
 ```bash
 dotnet ef database update <NamaMigrationSebelumnya> --context AppDbContext

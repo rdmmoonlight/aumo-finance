@@ -2,23 +2,23 @@
 
 Prinsip: **jangan pecah sistem yang belum rapi. Rapikan dulu, baru pertimbangkan pemisahan jika memang terpaksa.**
 
-Lingkup: `backend/asp-net-core` (±12.450 baris C# di luar migrasi). Perilaku API tidak boleh berubah selama fase ini.
+Lingkup: `backend/AumoBackend` (±12.450 baris C# di luar migrasi). Perilaku API tidak boleh berubah selama fase ini.
 
 ## 1. Kondisi Saat Ini (hasil pemeriksaan kode)
 
-| No | Temuan | Lokasi | Dampak |
-|---|---|---|---|
-| 1 | Logika jurnal ganda: `JournalEntryController` (368 baris) memakai `AppDbContext` langsung, sementara `JournalEntryService` (306 baris) terdaftar di DI tetapi tidak dipakai controller mana pun | `Controllers/JournalEntryController.cs`, `Services/JournalEntries/` | Perbaikan harus dilakukan dua kali; layanan tidak teruji karena tidak terpakai |
-| 2 | Import jurnal ganda: `ToolsController` (374 baris) dan `ToolsService` (303 baris) memuat alur yang sama | `Controllers/ToolsController.cs`, `Services/Tools/ToolsService.cs` | Sama seperti no. 1 |
-| 3 | Penulisan `GeneralJournals` tersebar di 8 titik: JournalEntryController, JournalsController (hapus), ToolsController, ToolsService, PeriodsService (2), JournalEntryService | lihat kolom lokasi | Aturan jurnal tidak punya satu pintu |
-| 4 | Kunci periode tidak seragam: jurnal biasa memakai `PeriodLock.IsDateLocked` (berdasarkan tanggal), hapus jurnal penyesuaian hanya memeriksa periode terpilih, import tidak memeriksa kunci periode | `JournalEntryController`, `JournalsController`, `ToolsService` | Entri dapat masuk atau terhapus di periode tertutup lewat jalur tertentu |
-| 5 | `PeriodLock` memakai refleksi (`GetProperties`) padahal tipe `Period` sudah jelas; letaknya di `Models/ChartOfAccountsModel.cs` | `Models/ChartOfAccountsModel.cs` | Rapuh, lambat, sulit dibaca |
-| 6 | Controller mengakses database langsung: JournalEntry (17 pemanggilan), ChartOfAccounts (13), Periods (9), Dashboard (8), Journals (5) | `Controllers/` | Logika bisnis bercampur dengan lapisan API |
-| 7 | Dua DbContext: `AppDbContext` dan `NeondbContext` (hanya 3 tabel neraca saldo) | `Data/`, `Models/NeondbContext.cs` | Batas data tidak jelas |
-| 8 | Ledger dibangun ulang penuh per periode (hapus lalu isi) di dalam service laporan; aturan akun permanen/sementara berada di service yang sama | `Services/Reports/GeneralLedgers/GeneralLedgersService.cs` | Perhitungan sulit diuji tanpa database |
-| 9 | `CreatePeriodAsync` ±260 baris dalam satu metode (dua mode setup, transaksi, saldo awal) | `Services/Periods/PeriodsService.cs` | Service gemuk |
-| 10 | Belum ada proyek uji: `AumoBackend.Test` hanya berisi `test.txt`; paket xunit dan Moq berada di proyek utama | `backend/AumoBackend.Test/`, `AumoBackend.csproj` | Tidak ada jaring pengaman; paket uji ikut ke produksi |
-| 11 | Sisa berkas: 7 skrip `fix-build*.js` di folder proyek; header hak cipta `PlaceholderCompany` | `backend/asp-net-core/` | Berantakan |
+| No  | Temuan                                                                                                                                                                                             | Lokasi                                                              | Dampak                                                                         |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| 1   | Logika jurnal ganda: `JournalEntryController` (368 baris) memakai `AppDbContext` langsung, sementara `JournalEntryService` (306 baris) terdaftar di DI tetapi tidak dipakai controller mana pun    | `Controllers/JournalEntryController.cs`, `Services/JournalEntries/` | Perbaikan harus dilakukan dua kali; layanan tidak teruji karena tidak terpakai |
+| 2   | Import jurnal ganda: `ToolsController` (374 baris) dan `ToolsService` (303 baris) memuat alur yang sama                                                                                            | `Controllers/ToolsController.cs`, `Services/Tools/ToolsService.cs`  | Sama seperti no. 1                                                             |
+| 3   | Penulisan `GeneralJournals` tersebar di 8 titik: JournalEntryController, JournalsController (hapus), ToolsController, ToolsService, PeriodsService (2), JournalEntryService                        | lihat kolom lokasi                                                  | Aturan jurnal tidak punya satu pintu                                           |
+| 4   | Kunci periode tidak seragam: jurnal biasa memakai `PeriodLock.IsDateLocked` (berdasarkan tanggal), hapus jurnal penyesuaian hanya memeriksa periode terpilih, import tidak memeriksa kunci periode | `JournalEntryController`, `JournalsController`, `ToolsService`      | Entri dapat masuk atau terhapus di periode tertutup lewat jalur tertentu       |
+| 5   | `PeriodLock` memakai refleksi (`GetProperties`) padahal tipe `Period` sudah jelas; letaknya di `Models/ChartOfAccountsModel.cs`                                                                    | `Models/ChartOfAccountsModel.cs`                                    | Rapuh, lambat, sulit dibaca                                                    |
+| 6   | Controller mengakses database langsung: JournalEntry (17 pemanggilan), ChartOfAccounts (13), Periods (9), Dashboard (8), Journals (5)                                                              | `Controllers/`                                                      | Logika bisnis bercampur dengan lapisan API                                     |
+| 7   | Dua DbContext: `AppDbContext` dan `NeondbContext` (hanya 3 tabel neraca saldo)                                                                                                                     | `Data/`, `Models/NeondbContext.cs`                                  | Batas data tidak jelas                                                         |
+| 8   | Ledger dibangun ulang penuh per periode (hapus lalu isi) di dalam service laporan; aturan akun permanen/sementara berada di service yang sama                                                      | `Services/Reports/GeneralLedgers/GeneralLedgersService.cs`          | Perhitungan sulit diuji tanpa database                                         |
+| 9   | `CreatePeriodAsync` ±260 baris dalam satu metode (dua mode setup, transaksi, saldo awal)                                                                                                           | `Services/Periods/PeriodsService.cs`                                | Service gemuk                                                                  |
+| 10  | Belum ada proyek uji: `AumoBackend.Test` hanya berisi `test.txt`; paket xunit dan Moq berada di proyek utama                                                                                       | `backend/AumoBackend.Test/`, `AumoBackend.csproj`                   | Tidak ada jaring pengaman; paket uji ikut ke produksi                          |
+| 11  | Sisa berkas: 7 skrip `fix-build*.js` di folder proyek; header hak cipta `PlaceholderCompany`                                                                                                       | `backend/AumoBackend/`                                              | Berantakan                                                                     |
 
 ## 2. Aturan Kerja
 
@@ -30,16 +30,16 @@ Lingkup: `backend/asp-net-core` (±12.450 baris C# di luar migrasi). Perilaku AP
 
 ## 3. Urutan Fase (dari termudah)
 
-| Fase | Nama | Risiko | Ukuran |
-|---|---|---|---|
-| 2.1 | Bersih-bersih | Rendah | Kecil |
-| 2.2 | Proyek uji dan tes pertama | Rendah | Kecil |
-| 2.3 | Hapus logika ganda (Controller → Service) | Sedang | Sedang |
-| 2.4 | Pusatkan aturan domain akuntansi | Sedang | Sedang |
-| 2.5 | Jelaskan alur posting, kunci periode, dan ledger | Sedang | Besar |
-| 2.6 | Susun lapisan Domain / Application / Infrastructure / Api | Sedang | Besar |
-| 2.7 | Tetapkan batas modul Administrator dan Core Akuntansi | Sedang | Sedang |
-| 2.8 | Penguatan akhir | Rendah | Sedang |
+| Fase | Nama                                                      | Risiko | Ukuran |
+| ---- | --------------------------------------------------------- | ------ | ------ |
+| 2.1  | Bersih-bersih                                             | Rendah | Kecil  |
+| 2.2  | Proyek uji dan tes pertama                                | Rendah | Kecil  |
+| 2.3  | Hapus logika ganda (Controller → Service)                 | Sedang | Sedang |
+| 2.4  | Pusatkan aturan domain akuntansi                          | Sedang | Sedang |
+| 2.5  | Jelaskan alur posting, kunci periode, dan ledger          | Sedang | Besar  |
+| 2.6  | Susun lapisan Domain / Application / Infrastructure / Api | Sedang | Besar  |
+| 2.7  | Tetapkan batas modul Administrator dan Core Akuntansi     | Sedang | Sedang |
+| 2.8  | Penguatan akhir                                           | Rendah | Sedang |
 
 ---
 
@@ -47,16 +47,16 @@ Lingkup: `backend/asp-net-core` (±12.450 baris C# di luar migrasi). Perilaku AP
 
 Diperiksa terhadap kode pada 2026-11-08.
 
-| Fase | Status | Keterangan |
-|---|---|---|
-| 2.1 | Selesai (5 dari 5 butir) | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs` |
-| 2.2 | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
-| 2.3 | Belum dimulai | `AppDbContext` masih dipakai di 10 berkas `Controllers/` |
-| 2.4 | Belum dimulai | Folder `Domain/` belum ada |
-| 2.5 | Belum dimulai | `IJournalPostingService` belum ada |
-| 2.6 | Belum dimulai | Struktur lapisan belum disusun |
-| 2.7 | Belum dimulai | Batas modul belum ditetapkan |
-| 2.8 | Belum dimulai | |
+| Fase | Status                          | Keterangan                                                                                        |
+| ---- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 2.1  | Selesai (5 dari 5 butir)        | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs`                               |
+| 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
+| 2.3  | Belum dimulai                   | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
+| 2.4  | Belum dimulai                   | Folder `Domain/` belum ada                                                                        |
+| 2.5  | Belum dimulai                   | `IJournalPostingService` belum ada                                                                |
+| 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
+| 2.7  | Belum dimulai                   | Batas modul belum ditetapkan                                                                      |
+| 2.8  | Belum dimulai                   |                                                                                                   |
 
 Langkah berikutnya: jalankan workflow `Quality & Formatting Workflow`, perbaiki tes yang gagal, lalu mulai Fase 2.3.
 
@@ -89,6 +89,7 @@ Tujuan: jaring pengaman sebelum logika dipindahkan.
 - [x] Tambahkan langkah `dotnet test` ke `code-quality.yml`.
 
 Catatan pelaksanaan:
+
 - `Backend.slnx` sebelumnya berisi salinan log PowerShell (bukan XML); sudah diganti dengan solusi valid (backend + proyek uji). `test.txt` dihapus.
 - `ValidateAndExtractLines` dan `GeneralLedgersService.IsDebitNormal` diubah dari `private` menjadi `internal` (tanpa perubahan perilaku) agar bisa diuji; `InternalsVisibleTo` ditambahkan ke `AumoBackend.csproj`.
 - Temuan no. 4, kondisi saat ini: hapus jurnal penyesuaian sudah memakai `JournalEntryService.DeleteAsync` (terkunci per tanggal, ada tesnya); celah yang tersisa adalah import (`ToolsService`), dicatat tes `Import_IntoClosedPeriod_IsNotRejected_CurrentBehavior`.
@@ -173,7 +174,7 @@ Selesai bila: pencarian `GeneralJournals.Add` dan `GeneralJournals.Remove` di lu
 Tujuan: pemisahan jelas, masih dalam satu proyek.
 
 ```
-backend/asp-net-core/
+backend/AumoBackend/
 ├── Domain/            aturan dan objek akuntansi (tanpa EF Core, tanpa ASP.NET)
 ├── Application/       kasus penggunaan, antarmuka layanan, DTO
 ├── Infrastructure/    EF Core (AppDbContext, Migrations), penyimpanan avatar, email, pasar data
@@ -193,11 +194,11 @@ Selesai bila: `Domain` tidak memiliki `using` ke EF Core atau ASP.NET; tes arsit
 
 Tujuan: dua modul dengan batas jelas dalam satu solution.
 
-| Modul | Isi |
-|---|---|
-| Administrator | Auth, Identity, Settings, Notifications, Avatars/Storage, Health |
-| Core Akuntansi | ChartOfAccounts, JournalEntries, Periods, Reports, Tools (import) |
-| Pembaca lintas modul | Home, Dashboard (hanya membaca, lewat antarmuka Core) |
+| Modul                | Isi                                                               |
+| -------------------- | ----------------------------------------------------------------- |
+| Administrator        | Auth, Identity, Settings, Notifications, Avatars/Storage, Health  |
+| Core Akuntansi       | ChartOfAccounts, JournalEntries, Periods, Reports, Tools (import) |
+| Pembaca lintas modul | Home, Dashboard (hanya membaca, lewat antarmuka Core)             |
 
 - [ ] Susun folder per modul di setiap lapisan (mis. `Application/Administrator/`, `Application/Accounting/`).
 - [ ] Core Akuntansi hanya mengenal pengguna lewat `ICurrentUser` (satu `Guid`), tidak memanggil `AuthService` atau `SettingsService`.
@@ -217,33 +218,33 @@ Selesai bila: tabel dependensi antar-modul hanya satu arah (Core → antarmuka i
 
 ## 4. Definisi Selesai Fase 2
 
-| Kriteria | Ukuran |
-|---|---|
-| Controller tipis | Tidak ada `AppDbContext` di `Controllers/`; tidak ada controller di atas ±150 baris |
-| Satu pintu posting | `GeneralJournals.Add/Remove` hanya di satu kelas |
-| Kunci periode seragam | Semua jalur menolak tanggal di periode tertutup, dibuktikan tes |
-| Domain murni | `Domain/` bebas dari EF Core dan ASP.NET |
-| Batas modul | Administrator dan Core Akuntansi tidak saling menyentuh data |
-| Testabilitas | Aturan domain punya tes unit tanpa database; alur utama punya tes integrasi |
-| CI | `dotnet build` dan `dotnet test` hijau |
+| Kriteria              | Ukuran                                                                              |
+| --------------------- | ----------------------------------------------------------------------------------- |
+| Controller tipis      | Tidak ada `AppDbContext` di `Controllers/`; tidak ada controller di atas ±150 baris |
+| Satu pintu posting    | `GeneralJournals.Add/Remove` hanya di satu kelas                                    |
+| Kunci periode seragam | Semua jalur menolak tanggal di periode tertutup, dibuktikan tes                     |
+| Domain murni          | `Domain/` bebas dari EF Core dan ASP.NET                                            |
+| Batas modul           | Administrator dan Core Akuntansi tidak saling menyentuh data                        |
+| Testabilitas          | Aturan domain punya tes unit tanpa database; alur utama punya tes integrasi         |
+| CI                    | `dotnet build` dan `dotnet test` hijau                                              |
 
 ## 5. Catatan Perubahan Perilaku
 
 Isi bagian ini bila ada perubahan yang terlihat dari luar.
 
-| Tanggal | Perubahan | Alasan |
-|---|---|---|
-| (kosong) | | |
+| Tanggal  | Perubahan | Alasan |
+| -------- | --------- | ------ |
+| (kosong) |           |        |
 
 ## 6. Pertanyaan Keputusan
 
 Putuskan saat mencapai fasenya, lalu catat jawabannya di sini.
 
-| No | Pertanyaan | Fase |
-|---|---|---|
-| 1 | Apakah import jurnal boleh masuk ke periode tertutup? (saat ini tidak diperiksa) | 2.5 |
-| 2 | Apa syarat menutup periode (neraca seimbang, jurnal penutup, ledger segar)? | 2.5 |
-| 3 | Ledger dibangun ulang per periode atau diperbarui saat posting? | 2.5 |
-| 4 | Presisi dan pembulatan nominal (jumlah desimal)? | 2.4 |
-| 5 | `NeondbContext` digabung atau tetap terpisah? | 2.7 |
-| 6 | Perlu proyek terpisah per lapisan, atau cukup folder? | 2.6 |
+| No  | Pertanyaan                                                                       | Fase |
+| --- | -------------------------------------------------------------------------------- | ---- |
+| 1   | Apakah import jurnal boleh masuk ke periode tertutup? (saat ini tidak diperiksa) | 2.5  |
+| 2   | Apa syarat menutup periode (neraca seimbang, jurnal penutup, ledger segar)?      | 2.5  |
+| 3   | Ledger dibangun ulang per periode atau diperbarui saat posting?                  | 2.5  |
+| 4   | Presisi dan pembulatan nominal (jumlah desimal)?                                 | 2.4  |
+| 5   | `NeondbContext` digabung atau tetap terpisah?                                    | 2.7  |
+| 6   | Perlu proyek terpisah per lapisan, atau cukup folder?                            | 2.6  |

@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\asp-net-core\AumoBackend.csproj" />
+    <ProjectReference Include="..\AumoBackend\AumoBackend.csproj" />
   </ItemGroup>
 
   <ItemGroup>
