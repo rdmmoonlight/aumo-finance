@@ -1,0 +1,7 @@
+dist/
+dist-ssr/
+coverage/
+src/components/ui/
+src/lib/generated/
+pnpm-lock.yaml
+node_modules
