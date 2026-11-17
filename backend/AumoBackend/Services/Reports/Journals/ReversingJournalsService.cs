@@ -7,21 +7,10 @@ using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
 using Microsoft.EntityFrameworkCore;
 
-public class ReversingJournalsService
+public partial class JournalsService
 {
     private const string AdjustingType = "Adjusting";
     private const string ReversingType = "Reversing";
-
-    private readonly AppDbContext _db;
-    private readonly ITransactionNumberService _transactionNumberService;
-
-    public ReversingJournalsService(
-        AppDbContext db,
-        ITransactionNumberService transactionNumberService)
-    {
-        _db = db;
-        _transactionNumberService = transactionNumberService;
-    }
 
     public async Task<List<GeneralJournalResponseDto>> CreateReversingAsync(Guid userId, CreateReversingRequest request)
     {
