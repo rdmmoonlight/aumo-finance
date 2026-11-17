@@ -15,9 +15,14 @@ public partial class JournalsService : IJournalsService
     private readonly ITrialBalancesService _trialBalancesService;
     private readonly ITransactionNumberService _transactionNumberService;
 
-    public JournalsService(AppDbContext db)
+    public JournalsService(
+    AppDbContext db,
+    ITrialBalancesService trialBalancesService,
+    ITransactionNumberService transactionNumberService)
     {
-        _db = db;
+    _db = db;
+    _trialBalancesService = trialBalancesService;
+    _transactionNumberService = transactionNumberService;
     }
 
     public async Task<JournalReportResult> GetJournalAsync(Guid userId, string journalType)
