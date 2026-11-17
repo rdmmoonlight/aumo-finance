@@ -3,6 +3,8 @@ using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
+using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Services.Reports.Journals;
