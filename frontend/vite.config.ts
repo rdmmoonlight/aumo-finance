@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
+  base: './',
   resolve: {
     alias: {
       '#': fileURLToPath(new URL('./src', import.meta.url)),

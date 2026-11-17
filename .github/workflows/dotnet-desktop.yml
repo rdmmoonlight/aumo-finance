@@ -1,0 +1,217 @@
+name: Build AumoDekstop (.NET 10 WinUI 3 Installer)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build & Package Installer (${{ matrix.configuration }} | win-x64)
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        configuration: [Release]
+
+    env:
+      Project_Path: AumoDekstop.csproj
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Menghasilkan versi CalVer (yy.M.N.PC) lanjutan dari rilis PC GitHub terakhir
+      - name: Generate CalVer version (.PC)
+        id: version
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          # Format yy.M (contoh: 26.11 untuk November 2026)
+          $now = (Get-Date).ToUniversalTime()
+          $yearMonth = $now.ToString("yy") + "." + $now.Month
+
+          # Cari tag rilis terakhir khusus yang berakhiran .PC (abaikan rilis Android)
+          $latestTag = ""
+          try {
+            $tags = gh release list --repo "${{ github.repository }}" --limit 20 --json tagName -q '.[].tagName' 2>$null
+            $latestTag = $tags | Where-Object { $_ -like "*.PC" } | Select-Object -First 1
+          } catch {
+            $latestTag = ""
+          }
+
+          # Bersihkan awalan 'v' dan akhiran '.PC' untuk mengambil angka yy.M.N
+          $cleanVersion = if ($latestTag) { $latestTag -replace '^v', '' -replace '\.PC$', '' } else { "" }
+
+          if (-not [string]::IsNullOrWhiteSpace($cleanVersion)) {
+            $parts = $cleanVersion.Split('.')
+            $latestYearMonth = "$($parts[0]).$($parts[1])"
+            $latestBuild = [int]$parts[2]
+          } else {
+            $latestYearMonth = ""
+            $latestBuild = 0
+          }
+
+          if ($yearMonth -eq $latestYearMonth) {
+            $newBuild = $latestBuild + 1
+          } else {
+            $newBuild = 1
+          }
+
+          $numericVersion = "$yearMonth.$newBuild"          # Contoh: 26.11.1
+          $appVersion = "$numericVersion.PC"                # Contoh: 26.11.1.PC
+          $semverVersion = "$numericVersion-PC"             # Contoh: 26.11.1-PC (valid untuk NuGet/MSBuild)
+          $assemblyVersion = "$numericVersion.0"            # Contoh: 26.11.1.0 (wajib 4 angka untuk Windows)
+
+          Write-Host "Rilis PC terakhir: $(if ($latestTag) { $latestTag } else { '<tidak ada>' }) -> versi baru: v$appVersion"
+          "app_version=$appVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "semver_version=$semverVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          "assembly_version=$assemblyVersion" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore $env:Project_Path -r win-x64 -p:Configuration=$env:Configuration
+        env:
+          Configuration: ${{ matrix.configuration }}
+
+      - name: Build application
+        run: |
+          dotnet build $env:Project_Path `
+            -c $env:Configuration `
+            -r win-x64 `
+            -p:Platform=x64 `
+            -p:Version=${{ steps.version.outputs.semver_version }} `
+            -p:InformationalVersion=${{ steps.version.outputs.app_version }} `
+            -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }} `
+            -p:FileVersion=${{ steps.version.outputs.assembly_version }} `
+            --no-restore `
+            -v normal `
+            '--consoleloggerparameters:ErrorsOnly;ShowEventId;ShowTimestamp'
+
+          if ($LASTEXITCODE -ne 0) {
+            $xamlExe = Get-ChildItem -Path "$env:USERPROFILE\.nuget\packages\microsoft.windowsappsdk.winui" -Recurse -Filter "XamlCompiler.exe" | Select-Object -First 1
+            $inputJson = Get-ChildItem -Path . -Recurse -Filter "input.json" | Select-Object -First 1
+            Write-Host "XamlExe: $($xamlExe.FullName)"
+            Write-Host "InputJson: $($inputJson.FullName)"
+            if ($xamlExe -and $inputJson) {
+              & $xamlExe.FullName $inputJson.FullName "debug_pass2.json" 2>&1 | Out-String | Write-Host
+              if (Test-Path "debug_pass2.json") { Get-Content "debug_pass2.json" }
+            }
+            exit 1
+          }
+        env:
+          Configuration: ${{ matrix.configuration }}
+
+      - name: Publish application folder
+        run: >
+          dotnet publish $env:Project_Path
+          -c $env:Configuration
+          -r win-x64
+          -p:Platform=x64
+          -p:Version=${{ steps.version.outputs.semver_version }}
+          -p:InformationalVersion=${{ steps.version.outputs.app_version }}
+          -p:AssemblyVersion=${{ steps.version.outputs.assembly_version }}
+          -p:FileVersion=${{ steps.version.outputs.assembly_version }}
+          --no-build
+          -o ./publish
+        env:
+          Configuration: ${{ matrix.configuration }}
+
+      - name: Sign Application Executable
+        shell: pwsh
+        env:
+          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $pfxPath = "$env:TEMP\codesign.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT_BASE64))
+
+          $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse |
+                      Where-Object { $_.FullName -like "*\x64\*" } |
+                      Select-Object -First 1 -ExpandProperty FullName
+
+          & $signtool sign /f $pfxPath /p $env:CERT_PASSWORD /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 "./publish/AumoDekstop.exe"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+          Remove-Item $pfxPath -Force
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) {
+            choco install innosetup -y --no-progress
+          }
+          if (-not (Test-Path $iscc)) { throw "ISCC.exe tidak ditemukan setelah instalasi Inno Setup." }
+
+      - name: Build Installer (Inno Setup)
+        shell: pwsh
+        env:
+          APP_VERSION: ${{ steps.version.outputs.app_version }}
+          ASSEMBLY_VERSION: ${{ steps.version.outputs.assembly_version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+
+          & $iscc "/DMyAppVersion=$env:APP_VERSION" "/DMyAppNumericVersion=$env:ASSEMBLY_VERSION" "setup.iss"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+          Get-ChildItem ./OutputInstaller
+
+      - name: Sign Installer
+        shell: pwsh
+        env:
+          CERT_BASE64: ${{ secrets.CERT_BASE64 }}
+          CERT_PASSWORD: ${{ secrets.CERT_PASSWORD }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          $pfxPath = "$env:TEMP\codesign.pfx"
+          [IO.File]::WriteAllBytes($pfxPath, [Convert]::FromBase64String($env:CERT_BASE64))
+
+          $signtool = Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse |
+                      Where-Object { $_.FullName -like "*\x64\*" } |
+                      Select-Object -First 1 -ExpandProperty FullName
+
+          $installer = Get-ChildItem ./OutputInstaller -Filter "Setup_*.exe" | Select-Object -First 1
+          & $signtool sign /f $pfxPath /p $env:CERT_PASSWORD /fd SHA256 /tr http://timestamp.digicert.com /td SHA256 $installer.FullName
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+
+          Remove-Item $pfxPath -Force
+
+      - name: Upload Installer Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AumoDekstop-Installer-win-x64-v${{ steps.version.outputs.app_version }}
+          path: ./OutputInstaller/Setup_*.exe
+          retention-days: 7
+
+      - name: Create GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          APP_VERSION: ${{ steps.version.outputs.app_version }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          $installer = (Get-ChildItem ./OutputInstaller -Filter "Setup_*.exe" | Select-Object -First 1).FullName
+
+          # Sertakan codesign.cer jika tersedia di root repo
+          $assets = @($installer)
+          if (Test-Path "./codesign.cer") {
+            $assets += "./codesign.cer"
+          }
+
+          gh release create "v$env:APP_VERSION" @assets `
+            --repo "${{ github.repository }}" `
+            --title "AumoDekstop v$env:APP_VERSION (Installer)" `
+            --generate-notes

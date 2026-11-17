@@ -1,0 +1,57 @@
+{
+  "name": "electron",
+  "version": "1.0.0",
+  "description": "Desktop Wrapper untuk Aplikasi Vue",
+  "main": "main.js",
+  "scripts": {
+    "dev": "concurrently -k \"pnpm --dir ../frontend dev\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron .\"",
+    "build:frontend": "pnpm --dir ../frontend build",
+    "dist:win": "pnpm run build:frontend && electron-builder --win"
+  },
+  "keywords": [],
+  "author": "rdmmoonlight",
+  "license": "ISC",
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.21.0",
+      "onFail": "download"
+    }
+  },
+  "packageManager": "pnpm@12.21.0",
+  "type": "module",
+  "devDependencies": {
+    "concurrently": "^10.0.7",
+    "cross-env": "^10.1.0",
+    "electron": "^45.3.3",
+    "electron-builder": "^26.18.0",
+    "wait-on": "^9.5.1"
+  },
+  "build": {
+    "appId": "com.example.electronvueapp",
+    "productName": "Electron Vue App",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      {
+        "from": "../frontend/dist",
+        "to": "frontend/dist",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
