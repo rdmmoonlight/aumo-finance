@@ -103,12 +103,12 @@ Tujuan: satu logika, satu tempat. Controller hanya menerjemahkan HTTP.
 
 Urutan (dari yang paling jelas duplikat):
 
-1. **JournalEntry**: ubah `JournalEntryController` agar memakai `IJournalEntryService`; hapus akses `db` dan semua logika dari controller. Samakan dulu perbedaan perilaku kedua versi (cocokkan lewat tes fase 2.2), lalu pertahankan satu.
-2. **Tools (import jurnal)**: `ToolsController` memanggil `IToolsService`; hapus salinan logika di controller.
-3. **ChartOfAccounts**: pindahkan 13 akses `db` dari controller ke `IChartOfAccountsService`.
-4. **Periods**: pindahkan 9 akses `db` dari controller ke `IPeriodsService`.
-5. **Journals (laporan)**: pindahkan hapus jurnal penyesuaian ke service.
-6. **Dashboard**: pindahkan 8 akses `db` ke `IDashboardService`.
+- [x] 1. **JournalEntry**: ubah `JournalEntryController` agar memakai `IJournalEntryService`; hapus akses `db` dan semua logika dari controller. Samakan dulu perbedaan perilaku kedua versi (cocokkan lewat tes fase 2.2), lalu pertahankan satu.
+- [x] 2. **Tools (import jurnal)**: `ToolsController` memanggil `IToolsService`; hapus salinan logika di controller.
+- [x] 3. **ChartOfAccounts**: pindahkan 13 akses `db` dari controller ke `IChartOfAccountsService`.
+- [x] 4. **Periods**: pindahkan 9 akses `db` dari controller ke `IPeriodsService`.
+- [x] 5. **Journals (laporan)**: pindahkan hapus jurnal penyesuaian ke service.
+- [x] 6. **Dashboard**: pindahkan 8 akses `db` ke `IDashboardService`.
 
 Bentuk controller yang dituju:
 
