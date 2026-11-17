@@ -75,13 +75,4 @@ public partial class JournalsService : IJournalsService
             Entries = entries,
         };
     }
-
-    public Task<List<GeneralJournalResponseDto>> CreateReversingAsync(Guid userId, CreateReversingRequest request)
-        => _reversingJournalsService.CreateReversingAsync(userId, request);
-
-    public Task<ClosingJournalReportResult> GetClosingJournalAsync(Guid userId)
-        => _closingJournalsService.GetClosingJournalAsync(userId);
-
-    public Task<List<ClosingJournalEntryGroupApiResponse>> BuildClosingJournalGroupsAsync(Guid userId, Period period)
-        => _closingJournalsService.BuildClosingJournalGroupsAsync(userId, period);
 }
