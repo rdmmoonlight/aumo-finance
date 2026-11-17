@@ -10,6 +10,8 @@ namespace AumoBackend.Services.Reports.Journals;
 public partial class JournalsService : IJournalsService
 {
     private readonly AppDbContext _db;
+    private readonly ITrialBalancesService _trialBalancesService;
+    private readonly ITransactionNumberService _transactionNumberService;
 
     public JournalsService(AppDbContext db)
     {
