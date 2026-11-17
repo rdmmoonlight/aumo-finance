@@ -9,6 +9,9 @@ using AumoBackend.Models;
 /// </summary>
 public interface IFinancialStatementsService
 {
+    /// <summary>Periode yang sedang dipilih pengguna, atau null bila belum ada.</summary>
+    Task<Period?> GetSelectedPeriodAsync(Guid userId);
+
     Task<IncomeStatementApiResponse> BuildIncomeStatementAsync(Guid userId, Period period);
 
     Task<RetainedEarningsApiResponse> BuildRetainedEarningsAsync(Guid userId, Period period);

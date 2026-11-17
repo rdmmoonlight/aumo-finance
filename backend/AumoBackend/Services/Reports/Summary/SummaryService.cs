@@ -10,8 +10,14 @@ using Microsoft.EntityFrameworkCore;
 
 public class SummaryService : ISummaryService
 {
-    private readonly AppDbContext? context;
-    private readonly UserManager<ApplicationUser>? userManager;
+    private readonly AppDbContext context;
+    private readonly UserManager<ApplicationUser> userManager;
+
+    public SummaryService(AppDbContext context, UserManager<ApplicationUser> userManager)
+    {
+        this.context = context;
+        this.userManager = userManager;
+    }
 
     public async Task<SummaryDto?> GetSummaryAsync(ClaimsPrincipal userPrincipal)
     {
@@ -23,7 +29,7 @@ public class SummaryService : ISummaryService
 
         var uid = userId.Value;
 
-        // 1. Cari periode aktif
+        // 1. Cari periode yang sedang dipilih oleh user (IsSelected == true)
         var selectedPeriod = await this.context.Periods
             .AsNoTracking()
             .Where(p => p.UserId == uid && p.IsSelected)
@@ -37,7 +43,7 @@ public class SummaryService : ISummaryService
             })
             .FirstOrDefaultAsync();
 
-        // 2. Query jurnal berdasarkan rentang periode
+        // 2. Query GeneralJournal berdasarkan rentang tanggal periode yang dipilih (jika ada)
         var journalQuery = this.context.GeneralJournals
             .AsNoTracking()
             .Where(j => j.UserId == uid);
@@ -49,14 +55,14 @@ public class SummaryService : ISummaryService
 
         var journalCount = await journalQuery.Select(j => j.JournalEntryId).Distinct().CountAsync();
 
-        // 3. Hitung COA aktif
+        // 3. Hitung COA aktif milik user
         var activeCoaCount = await this.context.ChartOfAccounts
             .AsNoTracking()
-            .CountAsync();
+            .CountAsync(c => c.UserId == uid && c.IsActive);
 
         return new SummaryDto
         {
-            SelectedPeriodId = null,
+            SelectedPeriodId = selectedPeriod?.Id,
             TotalJournal = journalCount,
             ActiveCoa = activeCoaCount,
             ActivePeriodName = selectedPeriod?.PeriodName ?? "Tidak Ada Periode Aktif",
@@ -69,7 +75,7 @@ public class SummaryService : ISummaryService
         var user = await this.userManager.GetUserAsync(userPrincipal);
         if (user != null)
         {
-            return null;
+            return user.Id;
         }
 
         var userIdClaim = userPrincipal.FindFirstValue(ClaimTypes.NameIdentifier)

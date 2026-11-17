@@ -3,6 +3,7 @@ namespace AumoBackend.Services.Reports.FinancialStatements;
 using System.Globalization;
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
+using AumoBackend.Helpers;
 using AumoBackend.Models;
 using AumoBackend.Services.Reports.Worksheet;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,9 @@ public class FinancialStatementsService : IFinancialStatementsService
         _worksheetService = worksheetService;
         _logger = logger;
     }
+
+    public Task<Period?> GetSelectedPeriodAsync(Guid userId)
+        => SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
 
     // Satu baris akun dari kolom "Neraca Saldo Disesuaikan" kertas kerja. NetBalance berada di sisi
     // normal akun (debit - kredit untuk akun bersaldo normal debit, sebaliknya untuk kredit).

@@ -1,10 +1,13 @@
+namespace AumoBackend.Services.Reports.TrialBalances;
+
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 
-namespace AumoBackend.Services.Reports.TrialBalances;
-
 public interface ITrialBalancesService
 {
+    /// <summary>Periode yang sedang dipilih pengguna, atau null bila belum ada.</summary>
+    Task<Period?> ResolveSelectedPeriodAsync(Guid userId);
+
     Task<List<TrialBalancesRow>> BuildTrialBalancesRowsAsync(
         Guid userId,
         Period period,

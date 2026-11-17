@@ -1,29 +1,22 @@
 namespace AumoBackend.Controllers.Reports;
 
 using System.Security.Claims;
-using AumoBackend.Data;
-using AumoBackend.Helpers;
-using AumoBackend.Models;
 using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
 [Route("reports/trial-balances")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class TrialBalancesController : ControllerBase
 {
-    private readonly AppDbContext _db;
     private readonly ITrialBalancesService _trialBalancesService;
     private readonly ILogger<TrialBalancesController> _logger;
 
     public TrialBalancesController(
-        AppDbContext db,
         ITrialBalancesService trialBalancesService,
         ILogger<TrialBalancesController> logger)
     {
-        _db = db;
         _trialBalancesService = trialBalancesService;
         _logger = logger;
     }
@@ -57,7 +50,7 @@ public class TrialBalancesController : ControllerBase
             return BadRequest(new { success = false, message = "type harus unadjusted, adjusted, atau post-closing." });
         }
 
-        var period = await ResolveSelectedPeriodAsync(userId);
+        var period = await _trialBalancesService.ResolveSelectedPeriodAsync(userId);
         if (period == null)
         {
             return Ok(new
@@ -137,23 +130,6 @@ public class TrialBalancesController : ControllerBase
                 credit = r.Credit
             })
         });
-    }
-
-    private async Task<Period?> ResolveSelectedPeriodAsync(Guid userId)
-    {
-        var selected = await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId && x.IsSelected);
-        if (selected != null)
-        {
-            return selected;
-        }
-
-        var helper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
-        if (helper == null)
-        {
-            return null;
-        }
-
-        return await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == helper.Id && x.UserId == userId);
     }
 
     private Guid GetCurrentUserId()

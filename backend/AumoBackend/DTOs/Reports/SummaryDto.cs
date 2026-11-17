@@ -1,9 +1,8 @@
-
 namespace AumoBackend.DTOs.Reports;
 
 public class SummaryDto
 {
-    public Guid? SelectedPeriodId { get; set; }
+    public int? SelectedPeriodId { get; set; }
 
     public int TotalJournal { get; set; }
 

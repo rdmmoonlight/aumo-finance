@@ -1,8 +1,6 @@
 namespace AumoBackend.Controllers.Reports;
 
-using AumoBackend.Data;
 using AumoBackend.Extensions;
-using AumoBackend.Helpers;
 using AumoBackend.Services.Reports.FinancialStatements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,12 +12,10 @@ public class FinancialStatementsController : ControllerBase
 {
     private const string NoPeriodMessage = "No accounting period selected.";
 
-    private readonly AppDbContext _db;
     private readonly IFinancialStatementsService _statements;
 
-    public FinancialStatementsController(AppDbContext db, IFinancialStatementsService statements)
+    public FinancialStatementsController(IFinancialStatementsService statements)
     {
-        _db = db;
         _statements = statements;
     }
 
@@ -33,7 +29,7 @@ public class FinancialStatementsController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var period = await _statements.GetSelectedPeriodAsync(userId);
         if (period == null)
         {
             return Ok(new
@@ -80,7 +76,7 @@ public class FinancialStatementsController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var period = await _statements.GetSelectedPeriodAsync(userId);
         if (period == null)
         {
             return Ok(new
@@ -126,7 +122,7 @@ public class FinancialStatementsController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var period = await _statements.GetSelectedPeriodAsync(userId);
         if (period == null)
         {
             return Ok(new
@@ -176,7 +172,7 @@ public class FinancialStatementsController : ControllerBase
             return Unauthorized(new { success = false, message = "User identity is invalid or expired." });
         }
 
-        var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        var period = await _statements.GetSelectedPeriodAsync(userId);
         if (period == null)
         {
             return Ok(new

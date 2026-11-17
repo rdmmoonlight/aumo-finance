@@ -1,11 +1,12 @@
+namespace AumoBackend.Services.Reports.TrialBalances;
+
 using System.Globalization;
 using System.Linq.Expressions;
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
+using AumoBackend.Helpers;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Services.Reports.TrialBalances;
 
 public class TrialBalancesService : ITrialBalancesService
 {
@@ -18,6 +19,23 @@ public class TrialBalancesService : ITrialBalancesService
     public TrialBalancesService(AppDbContext db)
     {
         _db = db;
+    }
+
+    public async Task<Period?> ResolveSelectedPeriodAsync(Guid userId)
+    {
+        var selected = await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.UserId == userId && x.IsSelected);
+        if (selected != null)
+        {
+            return selected;
+        }
+
+        var helper = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
+        if (helper == null)
+        {
+            return null;
+        }
+
+        return await _db.Periods.AsNoTracking().FirstOrDefaultAsync(x => x.Id == helper.Id && x.UserId == userId);
     }
 
     public async Task<List<TrialBalancesRow>> BuildTrialBalancesRowsAsync(
