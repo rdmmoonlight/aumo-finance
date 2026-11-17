@@ -7,20 +7,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AumoBackend.Services.Reports.Journals;
 
-public class JournalsService : IJournalsService
+public partial class JournalsService : IJournalsService
 {
     private readonly AppDbContext _db;
-    private readonly ReversingJournalsService _reversingJournalsService;
-    private readonly ClosingJournalsService _closingJournalsService;
 
-    public JournalsService(
-        AppDbContext db,
-        ReversingJournalsService reversingJournalsService,
-        ClosingJournalsService closingJournalsService)
+    public JournalsService(AppDbContext db)
     {
         _db = db;
-        _reversingJournalsService = reversingJournalsService;
-        _closingJournalsService = closingJournalsService;
     }
 
     public async Task<JournalReportResult> GetJournalAsync(Guid userId, string journalType)
