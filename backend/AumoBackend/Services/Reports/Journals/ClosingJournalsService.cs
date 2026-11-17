@@ -1,25 +1,12 @@
-using AumoBackend.Data;
+namespace AumoBackend.Services.Reports.Journals;
+
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
 
-namespace AumoBackend.Services.Reports.Journals;
-
-public class ClosingJournalsService
+public partial class JournalsService
 {
-    private readonly AppDbContext _db;
-    private readonly ITrialBalancesService _trialBalancesService;
-
-    public ClosingJournalsService(
-        AppDbContext db,
-        ITrialBalancesService trialBalancesService)
-    {
-        _db = db;
-        _trialBalancesService = trialBalancesService;
-    }
-
     public async Task<ClosingJournalReportResult> GetClosingJournalAsync(Guid userId)
     {
         var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId);
