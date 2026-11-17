@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 [Collection(PostgresCollection.Name)]
 public class ReversingJournalsTests(PostgresFixture fixture)
 {
-    private static ReversingJournalsService CreateService(AppDbContext db) =>
+    private static JournalsService CreateService(AppDbContext db) =>
         new(db, new TransactionNumberService(db));
 
     private static async Task<(int ExpenseId, int LiabilityId)> SeedAccrualAccountsAsync(AppDbContext db, Guid userId)
