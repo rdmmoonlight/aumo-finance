@@ -45,7 +45,7 @@ FROM node:26-alpine AS frontend-builder
 WORKDIR /app
 
 # Enable Corepack & pastikan pnpm terpasang dengan cepat
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN npm install -g pnpm@latest
 
 # Copy manifest dependensi
 COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/pnpm-workspace.yaml* ./
