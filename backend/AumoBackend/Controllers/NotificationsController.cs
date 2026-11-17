@@ -1,13 +1,12 @@
 namespace AumoBackend.Controllers;
 
 using System.Security.Claims;
-using AumoBackend.Data;
 using AumoBackend.DTOs;
+using AumoBackend.Services.Notifications;
 using AumoBackend.Validators.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 [Authorize]
 [ApiController]
@@ -15,12 +14,12 @@ using Microsoft.EntityFrameworkCore;
 
 public class NotificationsController : ControllerBase
 {
-    private readonly AppDbContext context;
+    private readonly INotificationsService notificationsService;
     private readonly IValidator<GetNotificationsQuery> queryValidator;
 
-    public NotificationsController(AppDbContext context, IValidator<GetNotificationsQuery> queryValidator)
+    public NotificationsController(INotificationsService notificationsService, IValidator<GetNotificationsQuery> queryValidator)
     {
-        this.context = context;
+        this.notificationsService = notificationsService;
         this.queryValidator = queryValidator;
     }
 
@@ -41,29 +40,13 @@ public class NotificationsController : ControllerBase
             return this.BadRequest(validation.ToErrorResponse());
         }
 
-        var limit = query.Limit;
-
         var userId = this.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
             return this.Unauthorized();
         }
 
-        var notifications = await this.context.Notifications
-            .Where(n => n.UserId == userId)
-            .OrderByDescending(n => n.CreatedAt)
-            .Take(limit)
-            .Select(n => new NotificationDto
-            {
-                Id = n.Id,
-                Title = n.Title,
-                Message = n.Message,
-                Type = n.Type,
-                IsRead = n.IsRead,
-                TargetUrl = n.TargetUrl,
-                CreatedAt = n.CreatedAt.ToString("o"),
-            })
-            .ToListAsync();
+        var notifications = await this.notificationsService.GetNotificationsByUserIdAsync(userId, query.Limit);
 
         return this.Ok(notifications);
     }
@@ -78,16 +61,11 @@ public class NotificationsController : ControllerBase
             return this.Unauthorized();
         }
 
-        var notification = await this.context.Notifications
-            .FirstOrDefaultAsync(n => n.Id == id && n.UserId == userId);
-
-        if (notification == null)
+        var found = await this.notificationsService.MarkAsReadAsync(id, userId);
+        if (!found)
         {
             return this.NotFound();
         }
-
-        notification.IsRead = true;
-        await this.context.SaveChangesAsync();
 
         return this.NoContent();
     }
@@ -102,9 +80,7 @@ public class NotificationsController : ControllerBase
             return this.Unauthorized();
         }
 
-        await this.context.Notifications
-            .Where(n => n.UserId == userId && !n.IsRead)
-            .ExecuteUpdateAsync(s => s.SetProperty(n => n.IsRead, true));
+        await this.notificationsService.MarkAllAsReadAsync(userId);
 
         return this.NoContent();
     }

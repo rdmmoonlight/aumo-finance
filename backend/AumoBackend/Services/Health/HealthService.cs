@@ -1,16 +1,28 @@
-namespace AumoBackend.Services.Health
-{
-    using AumoBackend.DTOs;
+namespace AumoBackend.Services.Health;
 
-    public class HealthService : IHealthService
+using AumoBackend.Data;
+using AumoBackend.DTOs;
+
+public class HealthService : IHealthService
+{
+    private readonly AppDbContext context;
+
+    public HealthService(AppDbContext context)
     {
-        public Task<HealthStatusDto> GetHealthStatusAsync()
+        this.context = context;
+    }
+
+    public Task<HealthStatusDto> GetHealthStatusAsync()
+    {
+        return Task.FromResult(new HealthStatusDto
         {
-            return Task.FromResult(new HealthStatusDto
-            {
-                Status = "Healthy",
-                Timestamp = DateTime.UtcNow,
-            });
-        }
+            Status = "Healthy",
+            Timestamp = DateTime.UtcNow,
+        });
+    }
+
+    public Task<bool> CanConnectToDatabaseAsync()
+    {
+        return this.context.Database.CanConnectAsync();
     }
 }

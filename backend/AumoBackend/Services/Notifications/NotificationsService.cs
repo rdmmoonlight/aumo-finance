@@ -6,7 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 public class NotificationsService : INotificationsService
 {
-    private readonly AppDbContext? context;
+    private readonly AppDbContext context;
+
+    public NotificationsService(AppDbContext context)
+    {
+        this.context = context;
+    }
 
     public async Task<IEnumerable<NotificationDto>> GetNotificationsByUserIdAsync(Guid userId, int limit)
     {

@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 [Route("/journal-entry")]
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
-
 public class JournalEntryController : ControllerBase
 {
     private readonly IJournalEntryService journalEntryService;

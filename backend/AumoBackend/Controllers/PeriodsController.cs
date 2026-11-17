@@ -2,7 +2,6 @@ namespace AumoBackend.Controllers;
 
 using System.Security.Claims;
 using AumoBackend.DTOs;
-using AumoBackend.Helpers;
 using AumoBackend.Services.Periods;
 using AumoBackend.Validators.Common;
 using FluentValidation;

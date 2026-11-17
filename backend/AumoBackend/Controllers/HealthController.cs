@@ -2,7 +2,7 @@ namespace AumoBackend.Controllers;
 
 using System;
 using System.Threading.Tasks;
-using AumoBackend.Data;
+using AumoBackend.Services.Health;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,11 +14,11 @@ using Microsoft.AspNetCore.Mvc;
 
 public class HealthController : ControllerBase
 {
-    private readonly AppDbContext dbContext;
+    private readonly IHealthService healthService;
 
-    public HealthController(AppDbContext dbContext)
+    public HealthController(IHealthService healthService)
     {
-        this.dbContext = dbContext;
+        this.healthService = healthService;
     }
 
     [HttpGet]
@@ -26,8 +26,8 @@ public class HealthController : ControllerBase
     {
         try
         {
-            // Cek koneksi ke database PostgreSQL via AppDbContext
-            bool canConnect = await this.dbContext.Database.CanConnectAsync();
+            // Cek koneksi ke database PostgreSQL lewat service
+            bool canConnect = await this.healthService.CanConnectToDatabaseAsync();
 
             if (canConnect)
             {
