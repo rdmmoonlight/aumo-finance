@@ -1,4 +1,4 @@
-namespace AumoBackend.Controllers;
+namespace AumoBackend.Controllers.Reports;
 
 using System;
 using System.IdentityModel.Tokens.Jwt;

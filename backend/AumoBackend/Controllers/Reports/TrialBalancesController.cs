@@ -1,3 +1,5 @@
+namespace AumoBackend.Controllers.Reports;
+
 using System.Security.Claims;
 using AumoBackend.Data;
 using AumoBackend.Helpers;
@@ -6,8 +8,6 @@ using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Controllers.Reports;
 
 [ApiController]
 [Route("reports/trial-balances")]
