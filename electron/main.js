@@ -16,7 +16,7 @@ const createWindow = () => {
     win.loadURL(process.env.VITE_DEV_SERVER_URL);
   } else {
     // Mengambil hasil build dari folder frontend sebelah
-    win.loadFile(path.join(__dirname, "../frontend/dist/index.html"));
+    win.loadFile(path.join(__dirname, "/frontend/dist/index.html"));
   }
 };
 
