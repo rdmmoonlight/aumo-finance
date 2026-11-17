@@ -1,7 +1,7 @@
 # ==========================================
 # STAGE 1: Build C++ Archiver Service
 # ==========================================
-FROM ubuntu:26.04 AS cpp-builder
+FROM ubuntu:24.04 AS cpp-builder
 WORKDIR /src
 
 # Disable interactive prompt & install paket esensial saja
@@ -70,18 +70,21 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Hapus libpqxx-7.8t64 karena versi yang dipakai binary adalah 7.10 dari builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     curl \
     libpq5 \
-    libpqxx-7.8t64 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy hasil build C++ Archiver
+# Copy hasil build C++ Archiver beserta shared library (.so) dari cpp-builder
 COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
+RUN --mount=from=cpp-builder,source=/src/build,target=/tmp/cpp-build \
+    find /tmp/cpp-build -name "libpqxx*.so*" -exec cp -P {} /usr/local/lib/ \; \
+    && ldconfig
 
 # Copy hasil build .NET Core API & VueJS Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend
