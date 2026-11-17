@@ -1,7 +1,7 @@
 namespace AumoBackend.Controllers;
 
-using System.Security.Claims;
 using AumoBackend.DTOs;
+using AumoBackend.Extensions;
 using AumoBackend.Services.Periods;
 using AumoBackend.Validators.Common;
 using FluentValidation;
@@ -24,59 +24,49 @@ public class PeriodsController : ControllerBase
         this.createPeriodValidator = createPeriodValidator;
     }
 
-    // ==========================================
-    // 1. GET: /periods (Period List & Selection Status)
-    // ==========================================
+    // GET: /periods (daftar periode dan status pilihan)
     [HttpGet]
     public async Task<IActionResult> GetPeriods()
     {
-        var userId = this.GetCurrentUserId();
+        var userId = this.User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return this.InvalidIdentity();
         }
 
-        var result = await this.periodsService.GetPeriodsAsync(userId);
-        return this.Ok(result);
+        return this.Ok(await this.periodsService.GetPeriodsAsync(userId));
     }
 
-    // ==========================================
-    // 2. GET: /periods/open-info
-    // ==========================================
+    // GET: /periods/open-info
     [HttpGet("open-info")]
     public async Task<IActionResult> GetOpenPeriodInfo()
     {
-        var userId = this.GetCurrentUserId();
+        var userId = this.User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return this.InvalidIdentity();
         }
 
-        var result = await this.periodsService.GetOpenPeriodInfoAsync(userId);
-        return this.Ok(result);
+        return this.Ok(await this.periodsService.GetOpenPeriodInfoAsync(userId));
     }
 
-    // ==========================================
-    // 3. POST: /periods (Open New Period)
-    // ==========================================
+    // POST: /periods (buka periode baru)
     [HttpPost]
     public async Task<IActionResult> CreatePeriod([FromBody] CreatePeriodRequest request)
     {
-        var userId = this.GetCurrentUserId();
+        var userId = this.User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return this.InvalidIdentity();
         }
 
         var validation = await this.createPeriodValidator.ValidateAsync(request);
         if (!validation.IsValid)
         {
-            // Fix Error 1: Menggunakan using AumoBackend.Helpers untuk ToErrorResponse()
             return this.BadRequest(validation.ToErrorResponse());
         }
 
         var result = await this.periodsService.CreatePeriodAsync(userId, request);
-
         if (result.Success)
         {
             return this.Ok(new { success = true, message = result.Message, periodId = result.PeriodId });
@@ -86,91 +76,64 @@ public class PeriodsController : ControllerBase
         return result.IsServerError ? this.StatusCode(500, body) : this.BadRequest(body);
     }
 
-    // ==========================================
-    // 4. POST: /periods/select/{id} (Set Active/Viewing)
-    // ==========================================
+    // POST: /periods/select/{id} (pilih periode untuk dilihat)
     [HttpPost("select/{id:int}")]
     public async Task<IActionResult> SelectPeriod(int id)
     {
-        var userId = this.GetCurrentUserId();
+        var userId = this.User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return this.InvalidIdentity();
         }
 
         var result = await this.periodsService.SelectPeriodAsync(userId, id);
-
-        // Fix Error 2: Cek ketersediaan via nullability result (SelectPeriodResult?)
         if (result == null)
         {
             return this.NotFound(new { success = false, message = "Accounting period not found." });
         }
 
-        return this.Ok(new
-        {
-            success = true,
-            selectedPeriodId = result.SelectedPeriodId,
-            message = result.Message,
-        });
+        return this.Ok(new { success = true, selectedPeriodId = result.SelectedPeriodId, message = result.Message });
     }
 
-    // ==========================================
-    // 5. POST: /periods/clear-selection (Stop Viewing)
-    // ==========================================
+    // POST: /periods/clear-selection (berhenti melihat periode)
     [HttpPost("clear-selection")]
     public async Task<IActionResult> ClearSelection()
     {
-        var userId = this.GetCurrentUserId();
+        var userId = this.User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return this.InvalidIdentity();
         }
 
         var result = await this.periodsService.ClearSelectionAsync(userId);
-        return this.Ok(new
-        {
-            success = result.Success,
-            message = result.Message,
-        });
+        return this.Ok(new { success = result.Success, message = result.Message });
     }
 
-    // ==========================================
-    // 6. POST: /periods/close/{id} (Close Period)
-    // ==========================================
+    // POST: /periods/close/{id} (tutup periode)
     [HttpPost("close/{id:int}")]
     public async Task<IActionResult> ClosePeriod(int id)
     {
-        var userId = this.GetCurrentUserId();
+        var userId = this.User.GetCurrentUserId();
         if (userId == Guid.Empty)
         {
-            return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
+            return this.InvalidIdentity();
         }
 
         var result = await this.periodsService.ClosePeriodAsync(userId, id);
+        var body = new { success = result.Success, message = result.Message };
 
-        // Fix Error 3: Cek pesan error dari BaseServiceResult untuk membedakan NotFound vs BadRequest
-        if (!result.Success)
+        if (result.Success)
         {
-            if (result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase))
-            {
-                return this.NotFound(new { success = false, message = result.Message });
-            }
-
-            return this.BadRequest(new { success = false, message = result.Message });
+            return this.Ok(body);
         }
 
-        return this.Ok(new
-        {
-            success = true,
-            message = result.Message,
-        });
+        return result.Message.Contains("not found", StringComparison.OrdinalIgnoreCase)
+            ? this.NotFound(body)
+            : this.BadRequest(body);
     }
 
-    private Guid GetCurrentUserId()
+    private IActionResult InvalidIdentity()
     {
-        var userIdStr = this.User.FindFirstValue(ClaimTypes.NameIdentifier)
-                     ?? this.User.FindFirstValue("sub");
-
-        return Guid.TryParse(userIdStr, out Guid userId) ? userId : Guid.Empty;
+        return this.Unauthorized(new { success = false, message = "User identity is invalid or expired." });
     }
 }
