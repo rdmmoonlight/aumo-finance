@@ -4,6 +4,7 @@
 FROM ubuntu:26.04 AS cpp-builder
 WORKDIR /src
 
+# Disable interactive prompt & install paket esensial saja
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
@@ -14,9 +15,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpqxx-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Copy hanya file build C++ agar layer cache optimal
 COPY CMakeLists.txt ./
 COPY archiver-service/ ./archiver-service/
 
+# Build spesifik target Release (Parallel job -j$(nproc))
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
     && cmake --build build --config Release -j$(nproc)
 
@@ -26,66 +29,59 @@ RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
 FROM mcr.microsoft.com/dotnet/sdk:10.0-noble AS dotnet-builder
 WORKDIR /src
 
-COPY backend/AumoBackend/*.csproj ./backend/AumoBackend/
-RUN dotnet restore ./backend/AumoBackend/AumoBackend.csproj
+# Copy csproj & restore dependensi (Cache Layer)
+COPY backend/asp-net-core/*.csproj ./backend/asp-net-core/
+RUN dotnet restore ./backend/asp-net-core/AumoBackend.csproj
 
-COPY backend/AumoBackend/ ./backend/AumoBackend/
-RUN dotnet publish ./backend/AumoBackend/AumoBackend.csproj -c Release -o /app/dotnet-build --no-restore
+# Copy source code backend & publish
+COPY backend/asp-net-core/ ./backend/asp-net-core/
+RUN dotnet publish ./backend/asp-net-core/AumoBackend.csproj -c Release -o /app/dotnet-build --no-restore
 
 # ==========================================
 # STAGE 3: Build Frontend (SPA)
 # ==========================================
-FROM node:22-alpine AS frontend-builder
+# Gunakan Node LTS (22/20) untuk stabilitas Corepack & Native Modules
+FROM node:26-alpine AS frontend-builder
 WORKDIR /app
 
+# Enable Corepack & pastikan pnpm terpasang dengan cepat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-COPY vuejs-tauri/package.json vuejs-tauri/pnpm-lock.yaml* vuejs-tauri/pnpm-workspace.yaml* ./
+# Copy manifest dependensi
+COPY frontend/package.json frontend/pnpm-lock.yaml* frontend/pnpm-workspace.yaml* ./
 
+# Install dependensi dengan cache mount agar build super cepat
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile
 
-COPY vuejs-tauri/ ./
+# Copy seluruh source code frontend
+COPY frontend/ ./
 
 ARG PUBLIC_GOOGLE_CLIENT_ID
 ARG NEXT_PUBLIC__GOOGLE_CLIENT_ID
 ENV PUBLIC_GOOGLE_CLIENT_ID=${PUBLIC_GOOGLE_CLIENT_ID:-$NEXT_PUBLIC__GOOGLE_CLIENT_ID}
 
-RUN pnpm run build:web
+RUN pnpm run build
 
 # ==========================================
-# STAGE 4: Runtime Environment (Ubuntu 26.04)
+# STAGE 4: Runtime Environment
 # ==========================================
-FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS dotnet-runtime
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
-FROM ubuntu:26.04 AS runner
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    DOTNET_ROOT=/usr/share/dotnet \
-    PATH="$PATH:/usr/share/dotnet" \
-    ASPNETCORE_URLS=http://+:5000
-
-# Instal dependensi runtime C++ (libpqxx-7.10), .NET (libicu, libssl), Nginx & Supervisor
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     curl \
-    ca-certificates \
-    libicu-dev \
-    libssl3t64 \
     libpq5 \
-    libpqxx-7.10 \
-    && rm -rf /var/lib/apt/lists/* \
-    && ldconfig
-
-# Salin ASP.NET Core 10 Runtime dari stage dotnet-runtime
-COPY --from=dotnet-runtime /usr/share/dotnet /usr/share/dotnet
+    libpqxx-7.8t64 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
 # Copy hasil build C++ Archiver
 COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
-RUN chmod +x /usr/local/bin/archiver-service
 
 # Copy hasil build .NET Core API & VueJS Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend
