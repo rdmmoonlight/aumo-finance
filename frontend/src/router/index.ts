@@ -1,6 +1,6 @@
 import { authKeys, getProfileApi } from '@/features/auth/auth.api'
 import { queryClient } from '@/lib/query-client'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
