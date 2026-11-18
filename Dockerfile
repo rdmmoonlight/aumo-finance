@@ -40,7 +40,6 @@ RUN dotnet publish ./backend/AumoBackend/AumoBackend.csproj -c Release -o /app/d
 # ==========================================
 # STAGE 3: Build Frontend (SPA)
 # ==========================================
-# Gunakan Node LTS (22/20) untuk stabilitas Corepack & Native Modules
 FROM node:26-alpine AS frontend-builder
 WORKDIR /app
 
@@ -70,21 +69,20 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Hapus libpqxx-7.8t64 karena versi yang dipakai binary adalah 7.10 dari builder
+# Instal libpqxx-7.8t64 langsung dari repositori Ubuntu Noble
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     curl \
     libpq5 \
-    && rm -rf /var/lib/apt/lists/*
+    libpqxx-7.8t64 \
+    && rm -rf /var/lib/apt/lists/* \
+    && ldconfig
 
 WORKDIR /app
 
-# Copy hasil build C++ Archiver beserta shared library (.so) dari cpp-builder
+# Copy binary C++ Archiver dari cpp-builder
 COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
-RUN --mount=from=cpp-builder,source=/src/build,target=/tmp/cpp-build \
-    find /tmp/cpp-build -name "libpqxx*.so*" -exec cp -P {} /usr/local/lib/ \; \
-    && ldconfig
 
 # Copy hasil build .NET Core API & VueJS Frontend
 COPY --from=dotnet-builder /app/dotnet-build ./backend
