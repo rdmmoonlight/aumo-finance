@@ -1,6 +1,7 @@
 namespace AumoBackend.Services.JournalEntries;
 
 using AumoBackend.Data;
+using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
@@ -181,24 +182,19 @@ public class JournalEntryService : IJournalEntryService
 
     internal static List<CreateGeneralJournalLineRequest> ValidateAndExtractLines(List<CreateGeneralJournalLineRequest> lines)
     {
-        var effectiveLines = lines
-            .Where(l => l.AccountId != 0 && (l.Debit != 0 || l.Credit != 0))
+        // Seluruh aturan jurnal berada di AumoBackend.Domain.JournalEntry; di sini hanya dipanggil.
+        var entry = JournalEntry.Create(
+            lines.Select(l => new JournalLine(l.AccountId, l.LineDescription, l.Debit, l.Credit)));
+
+        return entry.Lines
+            .Select(l => new CreateGeneralJournalLineRequest
+            {
+                AccountId = l.AccountId,
+                LineDescription = l.Description,
+                Debit = l.Debit,
+                Credit = l.Credit,
+            })
             .ToList();
-
-        if (effectiveLines.Count < 2)
-        {
-            throw new InvalidOperationException("A journal entry must have at least two line items.");
-        }
-
-        var totalDebit = effectiveLines.Sum(l => l.Debit);
-        var totalCredit = effectiveLines.Sum(l => l.Credit);
-
-        if (totalDebit != totalCredit || totalDebit == 0)
-        {
-            throw new InvalidOperationException("Total debit must equal total credit before posting.");
-        }
-
-        return effectiveLines;
     }
 
     private async Task ValidateAccountsAsync(Guid userId, List<CreateGeneralJournalLineRequest> lines)

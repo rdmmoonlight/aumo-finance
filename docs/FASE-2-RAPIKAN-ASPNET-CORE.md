@@ -52,7 +52,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.1  | Selesai (5 dari 5 butir)        | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs`                               |
 | 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
 | 2.3  | Selesai                         | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
-| 2.4  | Belum dimulai                   | Folder `Domain/` belum ada                                                                        |
+| 2.4  | Berjalan (1 dari 6 butir)       | Butir 3 (`JournalEntry`) selesai kode; folder `Domain/` sudah ada; belum diuji CI                 |
 | 2.5  | Belum dimulai                   | `IJournalPostingService` belum ada                                                                |
 | 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
 | 2.7  | Belum dimulai                   | Batas modul belum ditetapkan                                                                      |
@@ -129,7 +129,7 @@ Tujuan: aturan (invarian) ditulis sekali, ketat, dan mudah diuji.
 
 - [x] Buat folder `Domain/` (namespace `AumoBackend.Domain`) tanpa ketergantungan EF Core atau ASP.NET.
 - [x] `PeriodLock`: ganti refleksi dengan akses langsung ke `Period` (atau antarmuka kecil `IPeriodRange`). Satu metode: `IsDateLocked(date, periods)`.
-- [ ] `JournalEntry` (objek domain): metode pembuatan yang memeriksa
+- [x] `JournalEntry` (objek domain): metode pembuatan yang memeriksa
   - minimal dua baris bernilai,
   - total debit = total kredit dan tidak nol,
   - setiap baris hanya debit atau hanya kredit (periksa aturan saat ini; tambahkan bila belum ada),
@@ -138,6 +138,16 @@ Tujuan: aturan (invarian) ditulis sekali, ketat, dan mudah diuji.
 - [ ] `AccountType`: pindahkan `PermanentTypes`, `TemporaryTypes`, `IsDebitNormal`, dan rentang nomor akun ke Domain sebagai satu sumber.
 - [ ] `Period`: perilaku `Close()` dan pemeriksaan "periode sebelumnya masih terbuka" menjadi aturan domain.
 - [ ] Pesan kesalahan memakai kelas pengecualian domain (mis. `DomainRuleViolation`), bukan `ArgumentException` dan `InvalidOperationException` umum.
+
+Catatan pelaksanaan (butir 3, `JournalEntry`):
+
+- Berkas baru: `Domain/JournalLine.cs`, `Domain/JournalEntry.cs` (namespace `AumoBackend.Domain`, tanpa EF Core/ASP.NET/DTO). Folder `Domain/` dibuat sebagai prasyarat (butir 1 dapat dicentang bersamaan).
+- `JournalEntry.Create(lines)` memeriksa berurutan: baris tanpa akun/nominal diabaikan; minimal dua baris bernilai; nominal tidak negatif; satu baris hanya debit atau kredit; presisi nominal; total debit = total kredit dan tidak nol.
+- Presisi (pertanyaan keputusan no. 4): paling banyak 2 desimal dan 16 digit sebelum koma, selaras `DECIMAL(18,2)` dan `PrecisionScale(18, 2, true)` di validator. Nominal yang melebihi presisi **ditolak**, tidak dibulatkan.
+- `JournalEntryService.ValidateAndExtractLines` kini hanya memanggil `JournalEntry.Create`; tanda tangan dan pesan lama dipertahankan sehingga tes fase 2.2 tidak berubah.
+- Perilaku API tetap: aturan tanpa-negatif, satu-sisi, dan presisi sebelumnya sudah ditegakkan `JournalEntryValidatorBase`; kini ditegakkan juga di lapisan domain.
+- Pengecualian masih `InvalidOperationException`; penggantian ke `DomainRuleViolation` dikerjakan pada butir 6.
+- Tes: `AumoBackend.Test/Unit/JournalEntryDomainTests.cs` (tanpa database).
 
 Selesai bila: seluruh aturan di atas punya tes unit tanpa database; Application hanya memanggil, tidak menulis ulang aturan.
 
@@ -248,3 +258,4 @@ Putuskan saat mencapai fasenya, lalu catat jawabannya di sini.
 | 4   | Presisi dan pembulatan nominal (jumlah desimal)?                                 | 2.4  |
 | 5   | `NeondbContext` digabung atau tetap terpisah?                                    | 2.7  |
 | 6   | Perlu proyek terpisah per lapisan, atau cukup folder?                            | 2.6  |
+
