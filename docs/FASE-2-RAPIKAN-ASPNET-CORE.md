@@ -51,7 +51,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | ---- | ------------------------------- | ------------------------------------------------------------------------------------------------- |
 | 2.1  | Selesai (5 dari 5 butir)        | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs`                               |
 | 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
-| 2.3  | Belum dimulai                   | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
+| 2.3  | Selesai                         | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
 | 2.4  | Belum dimulai                   | Folder `Domain/` belum ada                                                                        |
 | 2.5  | Belum dimulai                   | `IJournalPostingService` belum ada                                                                |
 | 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
