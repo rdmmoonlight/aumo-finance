@@ -2,11 +2,9 @@ namespace AumoBackend.Controllers;
 
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
-using AumoBackend.Models;
 using AumoBackend.Services.Auth;
 using AumoBackend.Validators.Common;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -17,12 +15,10 @@ using Microsoft.AspNetCore.RateLimiting;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService authService;
-    private readonly SignInManager<ApplicationUser> signInManager;
 
-    public AuthController(IAuthService authService, SignInManager<ApplicationUser> signInManager)
+    public AuthController(IAuthService authService)
     {
         this.authService = authService;
-        this.signInManager = signInManager;
     }
 
     [HttpPost("login")]
@@ -55,27 +51,7 @@ public class AuthController : ControllerBase
             });
         }
 
-        if (request.IsMobileClient)
-        {
-            return this.Ok(new
-            {
-                success = true,
-                message = result.Message,
-                userId = result.UserId,
-                fullName = result.FullName,
-                avatarUrl = result.AvatarUrl,
-                token = result.Token,
-            });
-        }
-
-        return this.Ok(new
-        {
-            success = true,
-            message = result.Message,
-            userId = result.UserId,
-            fullName = result.FullName,
-            avatarUrl = result.AvatarUrl,
-        });
+        return this.AuthSuccess(result, request.IsMobileClient);
     }
 
     [HttpPost("google-login")]
@@ -95,27 +71,7 @@ public class AuthController : ControllerBase
             return this.Unauthorized(new { success = false, message = "Invalid Google ID Token or account could not be created." });
         }
 
-        if (request.IsMobileClient)
-        {
-            return this.Ok(new
-            {
-                success = true,
-                message = result.Message,
-                userId = result.UserId,
-                fullName = result.FullName,
-                avatarUrl = result.AvatarUrl,
-                token = result.Token,
-            });
-        }
-
-        return this.Ok(new
-        {
-            success = true,
-            message = result.Message,
-            userId = result.UserId,
-            fullName = result.FullName,
-            avatarUrl = result.AvatarUrl,
-        });
+        return this.AuthSuccess(result, request.IsMobileClient);
     }
 
     [HttpGet("google-login")]
@@ -140,13 +96,7 @@ public class AuthController : ControllerBase
             return this.BadRequest(new { success = false, message = $"Error from external provider: {remoteError}" });
         }
 
-        var info = await this.signInManager.GetExternalLoginInfoAsync();
-        if (info == null)
-        {
-            return this.BadRequest(new { success = false, message = "Error loading external login information." });
-        }
-
-        var error = await this.authService.ProcessGoogleCallbackAsync(info.Principal, info.LoginProvider, info.ProviderKey);
+        var error = await this.authService.HandleGoogleCallbackAsync();
         if (error != null)
         {
             return this.BadRequest(new { success = false, message = error });
@@ -166,35 +116,25 @@ public class AuthController : ControllerBase
             return this.Unauthorized(new { success = false, message = "User session expired or user not found." });
         }
 
-        var profileData = new
+        // Data profil dikirim di level atas dan di dalam "data" demi kompatibilitas klien.
+        var response = new Dictionary<string, object?>
         {
-            id = profile.Id,
-            userId = profile.UserId,
-            email = profile.Email,
-            userName = profile.UserName,
-            fullName = profile.FullName,
-            phoneNumber = profile.PhoneNumber,
-            avatarUrl = profile.AvatarUrl,
-            bio = profile.Bio,
-            roles = profile.Roles,
-            customClaims = profile.CustomClaims,
+            ["id"] = profile.Id,
+            ["userId"] = profile.UserId,
+            ["email"] = profile.Email,
+            ["userName"] = profile.UserName,
+            ["fullName"] = profile.FullName,
+            ["phoneNumber"] = profile.PhoneNumber,
+            ["avatarUrl"] = profile.AvatarUrl,
+            ["bio"] = profile.Bio,
+            ["roles"] = profile.Roles,
+            ["customClaims"] = profile.CustomClaims,
         };
 
-        return this.Ok(new
-        {
-            success = true,
-            data = profileData,
-            id = profile.Id,
-            userId = profile.UserId,
-            email = profile.Email,
-            userName = profile.UserName,
-            fullName = profile.FullName,
-            phoneNumber = profile.PhoneNumber,
-            avatarUrl = profile.AvatarUrl,
-            bio = profile.Bio,
-            roles = profile.Roles,
-            customClaims = profile.CustomClaims,
-        });
+        response["success"] = true;
+        response["data"] = new Dictionary<string, object?>(response.Where(x => x.Key != "success"));
+
+        return this.Ok(response);
     }
 
     [HttpPost("logout")]
@@ -202,5 +142,25 @@ public class AuthController : ControllerBase
     {
         await this.authService.LogoutAsync();
         return this.Ok(new { success = true, message = "Logged out successfully." });
+    }
+
+    // Klien mobile menerima token; klien web memakai cookie sehingga tanpa token.
+    private IActionResult AuthSuccess(AuthResponseDto result, bool isMobileClient)
+    {
+        var body = new Dictionary<string, object?>
+        {
+            ["success"] = true,
+            ["message"] = result.Message,
+            ["userId"] = result.UserId,
+            ["fullName"] = result.FullName,
+            ["avatarUrl"] = result.AvatarUrl,
+        };
+
+        if (isMobileClient)
+        {
+            body["token"] = result.Token;
+        }
+
+        return this.Ok(body);
     }
 }
