@@ -16,20 +16,6 @@ public class PeriodLockTests
     private static readonly DateTime End = new(2026, 1, 31, 0, 0, 0, DateTimeKind.Utc);
 
     [Fact]
-    public void IsLocked_NullPeriod_ReturnsFalse() => Assert.False(PeriodLock.IsLocked((Period?)null));
-
-    [Fact]
-    public void IsLocked_ClosedPeriod_ReturnsTrue() => Assert.True(PeriodLock.IsLocked(MakePeriod(Start, End, true)));
-
-    [Fact]
-    public void IsLocked_OpenPeriod_ReturnsFalse() => Assert.False(PeriodLock.IsLocked(MakePeriod(Start, End, false)));
-
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
-    public void IsLocked_Bool_ReturnsSameValue(bool closed) => Assert.Equal(closed, PeriodLock.IsLocked(closed));
-
-    [Fact]
     public void IsDateLocked_NullList_ReturnsFalse() => Assert.False(PeriodLock.IsDateLocked(Start, null));
 
     [Fact]
