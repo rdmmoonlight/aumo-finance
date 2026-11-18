@@ -127,8 +127,8 @@ Selesai bila: tidak ada `AppDbContext` di folder `Controllers/`; tidak ada contr
 
 Tujuan: aturan (invarian) ditulis sekali, ketat, dan mudah diuji.
 
-- [ ] Buat folder `Domain/` (namespace `AumoBackend.Domain`) tanpa ketergantungan EF Core atau ASP.NET.
-- [ ] `PeriodLock`: ganti refleksi dengan akses langsung ke `Period` (atau antarmuka kecil `IPeriodRange`). Satu metode: `IsDateLocked(date, periods)`.
+- [x] Buat folder `Domain/` (namespace `AumoBackend.Domain`) tanpa ketergantungan EF Core atau ASP.NET.
+- [x] `PeriodLock`: ganti refleksi dengan akses langsung ke `Period` (atau antarmuka kecil `IPeriodRange`). Satu metode: `IsDateLocked(date, periods)`.
 - [ ] `JournalEntry` (objek domain): metode pembuatan yang memeriksa
   - minimal dua baris bernilai,
   - total debit = total kredit dan tidak nol,
