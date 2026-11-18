@@ -20,6 +20,7 @@ using AumoBackend.Services.Settings;
 using AumoBackend.Services.Storage;
 using AumoBackend.Services.Tools;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Redis;
@@ -112,7 +113,6 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IAvatarStorage, NeonBucketStorage>();
 
-        services.AddScoped<IGuardianService, GuardianService>();
         services.AddScoped<ITransactionNumberService, TransactionNumberService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();

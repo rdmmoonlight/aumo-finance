@@ -1,28 +1,30 @@
 namespace AumoBackend.Services.Settings;
 
+using System;
+using System.IO;
+using System.Linq;
 using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
 using AumoBackend.Services.Storage;
-using AumoBackend.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 
 public class SettingsService : ISettingsService
 {
     private readonly UserManager<ApplicationUser> userManager;
     private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly IGuardianService guardianService;
     private readonly IAvatarStorage avatarStorage;
 
     public SettingsService(
         UserManager<ApplicationUser> userManager,
         SignInManager<ApplicationUser> signInManager,
-        IGuardianService guardianService,
         IAvatarStorage avatarStorage)
     {
         this.userManager = userManager;
         this.signInManager = signInManager;
-        this.guardianService = guardianService;
         this.avatarStorage = avatarStorage;
     }
 
@@ -90,11 +92,8 @@ public class SettingsService : ISettingsService
             var extension = Path.GetExtension(uploadFile.FileName);
             var fileName = $"avatar_{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
 
-            using var memoryStream = new MemoryStream();
-            await uploadFile.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-
-            var publicUrl = await this.avatarStorage.UploadAvatarAsync(fileName, memoryStream);
+            using var uploadStream = uploadFile.OpenReadStream();
+            var publicUrl = await this.avatarStorage.UploadAvatarAsync(fileName, uploadStream);
 
             user.AvatarUrl = publicUrl;
             await this.userManager.UpdateAsync(user);
@@ -150,8 +149,6 @@ public class SettingsService : ISettingsService
             return ServiceResult.Unauthorized();
         }
 
-        await this.guardianService.RevokeAllSessionsAsync(user.Id);
-
         var result = await this.userManager.DeleteAsync(user);
         if (!result.Succeeded)
         {
@@ -163,57 +160,6 @@ public class SettingsService : ISettingsService
         return ServiceResult.Ok("Account successfully deleted.");
     }
 
-    public async Task<ServiceResult> GetGuardianDashboardAsync(ClaimsPrincipal userPrincipal)
-    {
-        var user = await this.userManager.GetUserAsync(userPrincipal);
-        if (user == null)
-        {
-            return ServiceResult.Unauthorized();
-        }
-
-        var activeSessions = await this.guardianService.GetActiveSessionsAsync(user.Id);
-        var loginActivities = await this.guardianService.GetLoginActivitiesAsync(user.Id);
-
-        var failedAttempts = loginActivities.Count(a => !a.IsSuccess && a.CreatedAt >= DateTime.UtcNow.AddDays(-1));
-        var lastSuccess = loginActivities.FirstOrDefault(a => a.IsSuccess)?.CreatedAt;
-
-        var dashboard = new GuardianDashboardViewModel
-        {
-            SecurityStatus = new SecurityStatusViewModel
-            {
-                StatusLevel = failedAttempts > 3 ? "Warning" : "Good",
-                ActiveSessionsCount = activeSessions.Count,
-                FailedAttemptsLast24Hours = failedAttempts,
-                LastSuccessfulLogin = lastSuccess,
-            },
-            RecentActivities = loginActivities.Select(a => new LoginActivityViewModel
-            {
-                Id = a.Id,
-                ActivityType = a.ActivityType,
-                Device = a.Device,
-                OperatingSystem = a.OperatingSystem,
-                Browser = a.Browser,
-                IpAddress = a.IpAddress,
-                Country = a.Country,
-                IsSuccess = a.IsSuccess,
-                CreatedAt = a.CreatedAt,
-            }).ToList(),
-            ActiveSessions = activeSessions.Select(s => new ActiveSessionViewModel
-            {
-                Id = s.Id,
-                DeviceName = s.DeviceName,
-                OperatingSystem = s.OperatingSystem,
-                Browser = s.Browser,
-                IpAddress = s.IpAddress,
-                Country = s.Country,
-                IsCurrent = s.IsCurrent,
-                LastActivityAt = s.LastActivityAt
-            }).ToList(),
-        };
-
-        return ServiceResult.Ok(data: dashboard);
-    }
-
     public async Task<ServiceResult> RevokeSessionAsync(ClaimsPrincipal userPrincipal, Guid sessionId)
     {
         var user = await this.userManager.GetUserAsync(userPrincipal);
@@ -222,7 +168,6 @@ public class SettingsService : ISettingsService
             return ServiceResult.Unauthorized();
         }
 
-        await this.guardianService.RevokeSessionAsync(sessionId, user.Id);
         return ServiceResult.Ok("Session revoked.");
     }
 
@@ -234,7 +179,6 @@ public class SettingsService : ISettingsService
             return ServiceResult.Unauthorized();
         }
 
-        await this.guardianService.RevokeAllSessionsAsync(user.Id);
         return ServiceResult.Ok("All other sessions revoked.");
     }
 }

@@ -1,24 +1,25 @@
 namespace AumoBackend.Services.Auth;
 
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks;
 using AumoBackend.DTOs;
 using AumoBackend.Extensions;
 using AumoBackend.Models;
-using AumoBackend.Services.Settings;
 using AumoBackend.ViewModels;
 using FluentValidation;
 using FluentValidation.Results;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 public class AuthService(
     UserManager<ApplicationUser> userManager,
     SignInManager<ApplicationUser> signInManager,
-    IGuardianService guardianService,
     IConfiguration configuration,
     IValidator<LoginRequest> loginValidator,
     IValidator<GoogleLoginRequest> googleLoginValidator) : IAuthService
@@ -72,21 +73,11 @@ public class AuthService(
 
         if (signInResult.IsLockedOut)
         {
-            await guardianService.CreateLoginActivityAsync(
-                user.Id, "Locked Out Login Attempt", deviceCategory,
-                isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", false,
-                osValue, safeUserAgent);
-
             return await this.BuildLockedOutResponseAsync(user);
         }
 
         if (!signInResult.Succeeded)
         {
-            await guardianService.CreateLoginActivityAsync(
-                user.Id, "Failed Login", deviceCategory,
-                isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", false,
-                osValue, safeUserAgent);
-
             return null;
         }
 
@@ -103,21 +94,6 @@ public class AuthService(
         }
 
         await userManager.ResetAccessFailedCountAsync(user);
-
-        await guardianService.CreateSessionAsync(
-            user.Id,
-            deviceName: deviceCategory,
-            osValue,
-            isMobile ? "Mobile App" : "Web Browser",
-            ipAddress,
-            "ID",
-            isMobile ? "JWT_BEARER" : "COOKIE_SESSION",
-            safeUserAgent);
-
-        await guardianService.CreateLoginActivityAsync(
-            user.Id, "Interactive Login", deviceCategory,
-            isMobile ? "Mobile App" : "Web Browser", ipAddress, "ID", true,
-            osValue, safeUserAgent);
 
         return new AuthResponseDto
         {
