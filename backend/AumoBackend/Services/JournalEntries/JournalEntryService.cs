@@ -187,7 +187,7 @@ public class JournalEntryService : IJournalEntryService
 
         if (effectiveLines.Count < 2)
         {
-            throw new ArgumentException("A journal entry must have at least two line items.");
+            throw new InvalidOperationException("A journal entry must have at least two line items.");
         }
 
         var totalDebit = effectiveLines.Sum(l => l.Debit);
@@ -195,7 +195,7 @@ public class JournalEntryService : IJournalEntryService
 
         if (totalDebit != totalCredit || totalDebit == 0)
         {
-            throw new ArgumentException("Total debit must equal total credit before posting.");
+            throw new InvalidOperationException("Total debit must equal total credit before posting.");
         }
 
         return effectiveLines;
@@ -211,7 +211,7 @@ public class JournalEntryService : IJournalEntryService
 
         if (lines.Any(l => !validAccountIds.Contains(l.AccountId)))
         {
-            throw new ArgumentException("One or more selected accounts are invalid or inactive.");
+            throw new InvalidOperationException("One or more selected accounts are invalid or inactive.");
         }
     }
 }

@@ -32,19 +32,19 @@ public class JournalLineValidationTests
     [Fact]
     public void SingleEffectiveLine_Throws()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             JournalEntryService.ValidateAndExtractLines(new() { Line(1, 100, 0), Line(2, 0, 0) }));
         Assert.Contains("at least two", ex.Message);
     }
 
     [Fact]
     public void EmptyList_Throws() =>
-        Assert.Throws<ArgumentException>(() => JournalEntryService.ValidateAndExtractLines(new()));
+        Assert.Throws<InvalidOperationException>(() => JournalEntryService.ValidateAndExtractLines(new()));
 
     [Fact]
     public void Unbalanced_Throws()
     {
-        var ex = Assert.Throws<ArgumentException>(() =>
+        var ex = Assert.Throws<InvalidOperationException>(() =>
             JournalEntryService.ValidateAndExtractLines(new() { Line(1, 100, 0), Line(2, 0, 99) }));
         Assert.Contains("must equal", ex.Message);
     }
@@ -71,6 +71,6 @@ public class JournalLineValidationTests
 
     [Fact]
     public void TotalsThatCancelToZero_Throws() =>
-        Assert.Throws<ArgumentException>(() =>
+        Assert.Throws<InvalidOperationException>(() =>
             JournalEntryService.ValidateAndExtractLines(new() { Line(1, 100, 0), Line(2, -100, 0) }));
 }

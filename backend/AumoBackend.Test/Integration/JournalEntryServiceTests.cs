@@ -78,7 +78,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var request = Request(u, SeededUser.Utc(2026, 1, 5), 100m);
         request.Lines[0].AccountId = other.CashId;
 
-        await Assert.ThrowsAsync<ArgumentException>(() => Service(db).CreateAsync(u.UserId, request));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service(db).CreateAsync(u.UserId, request));
     }
 
     [Fact]
@@ -90,7 +90,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         cash.IsActive = false;
         await db.SaveChangesAsync();
 
-        await Assert.ThrowsAsync<ArgumentException>(() =>
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
             Service(db).CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m)));
     }
 
@@ -102,7 +102,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var request = Request(u, SeededUser.Utc(2026, 1, 5), 100m);
         request.Lines[1].Credit = 90m;
 
-        await Assert.ThrowsAsync<ArgumentException>(() => Service(db).CreateAsync(u.UserId, request));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => Service(db).CreateAsync(u.UserId, request));
     }
 
     [Fact]
