@@ -208,6 +208,17 @@ public class AuthService(
         return signInManager.ConfigureExternalAuthenticationProperties("Google", redirectUrl);
     }
 
+    public async Task<string?> HandleGoogleCallbackAsync()
+    {
+        var info = await signInManager.GetExternalLoginInfoAsync();
+        if (info == null)
+        {
+            return "Error loading external login information.";
+        }
+
+        return await this.ProcessGoogleCallbackAsync(info.Principal, info.LoginProvider, info.ProviderKey);
+    }
+
     public async Task<string?> ProcessGoogleCallbackAsync(ClaimsPrincipal principal, string loginProvider, string providerKey)
     {
         var result = await signInManager.ExternalLoginSignInAsync(loginProvider, providerKey, isPersistent: true, bypassTwoFactor: true);

@@ -1,13 +1,10 @@
 namespace AumoBackend.Controllers;
 
 using AumoBackend.DTOs;
-using AumoBackend.Models;
 using AumoBackend.Services.Settings;
-using AumoBackend.Services.Storage;
 using AumoBackend.Validators.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
@@ -15,27 +12,18 @@ using Microsoft.AspNetCore.Mvc;
 [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
 public class SettingsController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly IGuardianService guardianService;
-    private readonly IAvatarStorage avatarStorage;
+    private readonly ISettingsService settingsService;
     private readonly IValidator<ChangePasswordRequest> changePasswordValidator;
     private readonly IValidator<UpdateProfileRequest> updateProfileValidator;
     private readonly IValidator<IFormFile> avatarFileValidator;
 
     public SettingsController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
-        IGuardianService guardianService,
-        IAvatarStorage avatarStorage,
+        ISettingsService settingsService,
         IValidator<ChangePasswordRequest> changePasswordValidator,
         IValidator<UpdateProfileRequest> updateProfileValidator,
         IValidator<IFormFile> avatarFileValidator)
     {
-        this.userManager = userManager;
-        this.signInManager = signInManager;
-        this.guardianService = guardianService;
-        this.avatarStorage = avatarStorage;
+        this.settingsService = settingsService;
         this.changePasswordValidator = changePasswordValidator;
         this.updateProfileValidator = updateProfileValidator;
         this.avatarFileValidator = avatarFileValidator;
@@ -50,60 +38,14 @@ public class SettingsController : ControllerBase
             return this.BadRequest(validation.ToErrorResponse());
         }
 
-        var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
-        {
-            return this.Unauthorized();
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.UserName) && request.UserName != user.UserName)
-        {
-            var setUserNameResult = await this.userManager.SetUserNameAsync(user, request.UserName);
-            if (!setUserNameResult.Succeeded)
-            {
-                var errors = string.Join(", ", setUserNameResult.Errors.Select(e => e.Description));
-                return this.BadRequest(new { success = false, message = errors });
-            }
-        }
-
-        if (request.PhoneNumber != user.PhoneNumber)
-        {
-            var setPhoneResult = await this.userManager.SetPhoneNumberAsync(user, request.PhoneNumber);
-            if (!setPhoneResult.Succeeded)
-            {
-                var errors = string.Join(", ", setPhoneResult.Errors.Select(e => e.Description));
-                return this.BadRequest(new { success = false, message = errors });
-            }
-        }
-
-        user.FullName = request.FullName;
-        user.Bio = request.Bio;
-        if (!string.IsNullOrWhiteSpace(request.AvatarUrl))
-        {
-            user.AvatarUrl = request.AvatarUrl;
-        }
-
-        var updateResult = await this.userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
-        {
-            var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
-            return this.BadRequest(new { success = false, message = errors });
-        }
-
-        return this.Ok(new { success = true, message = "Profile updated successfully." });
+        return this.ToResponse(await this.settingsService.UpdateProfileAsync(this.User, request));
     }
 
     [HttpPost("avatar")]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> UploadAvatar([FromForm] IFormFile? file, [FromForm] IFormFile? avatar)
     {
-        var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
-        {
-            return this.Unauthorized();
-        }
-
-        // Flexible Binding
+        // Flexible binding: kunci form boleh "file", "avatar", atau berkas pertama.
         var uploadFile = file ?? avatar ?? (this.Request.Form.Files.Count > 0 ? this.Request.Form.Files[0] : null);
 
         if (uploadFile == null || uploadFile.Length == 0)
@@ -117,38 +59,17 @@ public class SettingsController : ControllerBase
             return this.BadRequest(fileValidation.ToErrorResponse());
         }
 
-        var extension = Path.GetExtension(uploadFile.FileName);
+        var result = await this.settingsService.UploadAvatarAsync(this.User, uploadFile);
 
-        if (!this.avatarStorage.IsConfigured)
+        if (result.Success)
         {
-            return this.StatusCode(500, new { success = false, message = "Neon bucket belum dikonfigurasi di server." });
+            return this.Ok(new { success = true, message = result.Message, avatarUrl = result.Data });
         }
 
-        try
-        {
-            var fileName = $"avatar_{user.Id}_{Guid.NewGuid()}{extension.ToLowerInvariant()}";
-
-            using var memoryStream = new MemoryStream();
-            await uploadFile.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-
-            var publicUrl = await this.avatarStorage.UploadAvatarAsync(fileName, memoryStream);
-
-            // Simpan URL avatar ke database user
-            user.AvatarUrl = publicUrl;
-            await this.userManager.UpdateAsync(user);
-
-            return this.Ok(new
-            {
-                success = true,
-                message = "Avatar uploaded successfully.",
-                avatarUrl = publicUrl,
-            });
-        }
-        catch (Exception ex)
-        {
-            return this.StatusCode(500, new { success = false, message = $"Avatar upload error: {ex.Message}", details = ex.InnerException?.Message });
-        }
+        // Galat 500 dari proses unggah membawa "details" (pesan InnerException) pada Data.
+        return result.StatusCode == StatusCodes.Status500InternalServerError
+            ? this.StatusCode(500, new { success = false, message = result.Message, details = result.Data })
+            : this.ToResponse(result);
     }
 
     /// <summary>
@@ -158,12 +79,7 @@ public class SettingsController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetAvatar(string fileName, CancellationToken cancellationToken)
     {
-        if (!this.avatarStorage.IsConfigured)
-        {
-            return this.NotFound();
-        }
-
-        var avatar = await this.avatarStorage.GetAvatarAsync(fileName, cancellationToken);
+        var avatar = await this.settingsService.GetAvatarAsync(fileName, cancellationToken);
         if (avatar == null)
         {
             return this.NotFound();
@@ -183,67 +99,36 @@ public class SettingsController : ControllerBase
             return this.BadRequest(validation.ToErrorResponse());
         }
 
-        var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
-        {
-            return this.Unauthorized();
-        }
-
-        var result = await this.userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return this.BadRequest(new { success = false, message = errors });
-        }
-
-        return this.Ok(new { success = true, message = "Password successfully updated." });
+        return this.ToResponse(await this.settingsService.ChangePasswordAsync(this.User, request));
     }
 
     [HttpDelete("delete-account")]
     public async Task<IActionResult> DeleteAccount()
     {
-        var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
-        {
-            return this.Unauthorized();
-        }
-
-        await this.guardianService.RevokeAllSessionsAsync(user.Id);
-
-        var result = await this.userManager.DeleteAsync(user);
-        if (!result.Succeeded)
-        {
-            var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-            return this.BadRequest(new { success = false, message = errors });
-        }
-
-        await this.signInManager.SignOutAsync();
-        return this.Ok(new { success = true, message = "Account successfully deleted." });
+        return this.ToResponse(await this.settingsService.DeleteAccountAsync(this.User));
     }
 
     [HttpPost("revoke-session/{sessionId}")]
     public async Task<IActionResult> RevokeSession(Guid sessionId)
     {
-        var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
-        {
-            return this.Unauthorized();
-        }
-
-        await this.guardianService.RevokeSessionAsync(sessionId, user.Id);
-        return this.Ok(new { success = true, message = "Session revoked." });
+        return this.ToResponse(await this.settingsService.RevokeSessionAsync(this.User, sessionId));
     }
 
     [HttpPost("revoke-all-sessions")]
     public async Task<IActionResult> RevokeAllSessions()
     {
-        var user = await this.userManager.GetUserAsync(this.User);
-        if (user == null)
+        return this.ToResponse(await this.settingsService.RevokeAllSessionsAsync(this.User));
+    }
+
+    // 401 dikirim tanpa isi; status lain memakai bentuk { success, message }.
+    private IActionResult ToResponse(ServiceResult result)
+    {
+        if (result.StatusCode == StatusCodes.Status401Unauthorized)
         {
             return this.Unauthorized();
         }
 
-        await this.guardianService.RevokeAllSessionsAsync(user.Id);
-        return this.Ok(new { success = true, message = "All other sessions revoked." });
+        var body = new { success = result.Success, message = result.Message };
+        return result.Success ? this.Ok(body) : this.StatusCode(result.StatusCode, body);
     }
 }

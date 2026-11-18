@@ -2,12 +2,15 @@ namespace AumoBackend.Services.Settings
 {
     using System.Security.Claims;
     using AumoBackend.DTOs;
+    using AumoBackend.Services.Storage;
 
     public interface ISettingsService
     {
         Task<ServiceResult> UpdateProfileAsync(ClaimsPrincipal userPrincipal, UpdateProfileRequest request);
 
-        Task<ServiceResult> UploadAvatarAsync(ClaimsPrincipal userPrincipal, IFormFile? file, IFormFile? avatar, IFormFileCollection? files);
+        Task<ServiceResult> UploadAvatarAsync(ClaimsPrincipal userPrincipal, IFormFile uploadFile);
+
+        Task<AvatarObject?> GetAvatarAsync(string fileName, CancellationToken cancellationToken);
 
         Task<ServiceResult> ChangePasswordAsync(ClaimsPrincipal userPrincipal, ChangePasswordRequest request);
 

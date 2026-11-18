@@ -21,6 +21,9 @@ public interface IAuthService
 
     Task<string?> ProcessGoogleCallbackAsync(ClaimsPrincipal principal, string loginProvider, string providerKey);
 
+    /// <summary>Memuat info login eksternal dari sesi, lalu memprosesnya. Mengembalikan pesan galat atau null bila berhasil.</summary>
+    Task<string?> HandleGoogleCallbackAsync();
+
     Task<UserProfileViewModel?> GetUserProfileAsync(ClaimsPrincipal userPrincipal);
 
     Task LogoutAsync();
