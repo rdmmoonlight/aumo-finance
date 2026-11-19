@@ -1,6 +1,7 @@
 namespace AumoBackend.Services.Periods;
 
 using System.Globalization;
+using AumoBackend.Domain;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
@@ -219,7 +220,7 @@ public partial class PeriodsService
         var prevStart = DateTime.SpecifyKind(previous.StartDate.Date, DateTimeKind.Utc);
         var prevEnd = DateTime.SpecifyKind(previous.EndDate.Date.AddDays(1).AddTicks(-1), DateTimeKind.Utc);
 
-        if (!PermanentTypes.Contains(retainedAccount.Type))
+        if (!AccountType.IsPermanent(retainedAccount.Type))
         {
             return new OpeningResult(0, "The selected Retained Earnings account must be an Equity account.");
         }
@@ -248,11 +249,11 @@ public partial class PeriodsService
             totals.TryGetValue(a.Id, out var t) ? t.Debit - t.Credit : 0m;
 
         decimal netIncome = accounts
-            .Where(a => TemporaryTypes.Contains(a.Type))
+            .Where(a => AccountType.IsTemporary(a.Type))
             .Sum(a => -Signed(a));
 
         var balances = new List<(ChartOfAccount Account, decimal Signed)>();
-        foreach (var account in accounts.Where(a => PermanentTypes.Contains(a.Type)).OrderBy(a => a.ReferenceNumber))
+        foreach (var account in accounts.Where(a => AccountType.IsPermanent(a.Type)).OrderBy(a => a.ReferenceNumber))
         {
             var balance = Signed(account);
             if (account.Id == retainedAccount.Id)
