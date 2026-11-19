@@ -52,7 +52,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.1  | Selesai (5 dari 5 butir)        | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs`                               |
 | 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
 | 2.3  | Selesai                         | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
-| 2.4  | Berjalan (1 dari 6 butir)       | Butir 3 (`JournalEntry`) selesai kode; folder `Domain/` sudah ada; belum diuji CI                 |
+| 2.4  | Berjalan (2 dari 6 butir)       | Butir 3 (`JournalEntry`) dan butir 4 (`AccountType`) selesai kode; belum diuji CI                 |
 | 2.5  | Belum dimulai                   | `IJournalPostingService` belum ada                                                                |
 | 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
 | 2.7  | Belum dimulai                   | Batas modul belum ditetapkan                                                                      |
@@ -135,7 +135,7 @@ Tujuan: aturan (invarian) ditulis sekali, ketat, dan mudah diuji.
   - setiap baris hanya debit atau hanya kredit (periksa aturan saat ini; tambahkan bila belum ada),
   - nilai tidak negatif,
   - presisi desimal seragam (tetapkan jumlah desimal dan aturan pembulatan).
-- [ ] `AccountType`: pindahkan `PermanentTypes`, `TemporaryTypes`, `IsDebitNormal`, dan rentang nomor akun ke Domain sebagai satu sumber.
+- [x] `AccountType`: pindahkan `PermanentTypes`, `TemporaryTypes`, `IsDebitNormal`, dan rentang nomor akun ke Domain sebagai satu sumber. Dikerjakan di `Domain/AccountType.cs`; `PeriodsService`, `GeneralLedgersService`, dan `AccountClassificationHelper` memanggilnya dan tidak lagi menyimpan daftar sendiri. Nama lama yang longgar di buku besar (`Asset`, `Revenue`, `Expenses`, dst.) dipetakan lewat `AccountType.Normalize`.
 - [ ] `Period`: perilaku `Close()` dan pemeriksaan "periode sebelumnya masih terbuka" menjadi aturan domain.
 - [ ] Pesan kesalahan memakai kelas pengecualian domain (mis. `DomainRuleViolation`), bukan `ArgumentException` dan `InvalidOperationException` umum.
 
@@ -244,7 +244,7 @@ Isi bagian ini bila ada perubahan yang terlihat dari luar.
 
 | Tanggal  | Perubahan | Alasan |
 | -------- | --------- | ------ |
-| (kosong) |           |        |
+| 2026-11-19 | `AccountClassificationHelper.NormalBalanceIsDebit(string?)` untuk jenis tidak dikenal berubah dari debit menjadi kredit (kini sama dengan buku besar) | Satu sumber aturan. Tidak ada pemanggil di kode produksi; validator hanya meloloskan tujuh jenis kanonik, sehingga API tidak berubah |
 
 ## 6. Pertanyaan Keputusan
 
