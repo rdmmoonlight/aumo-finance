@@ -1,5 +1,7 @@
 namespace AumoBackend.Models
 {
+    using AumoBackend.Domain;
+
     public enum AccountClassification
     {
         Asset,
@@ -34,18 +36,9 @@ namespace AumoBackend.Models
         public static bool NormalBalanceIsDebit(AccountClassification classification)
             => classification.NormalBalanceIsDebit();
 
-        // Saldo Normal:
-        // Debit  : Assets, OperatingExpenses, OtherExpenses
-        // Kredit : Liabilities, Equity, OperatingIncome, OtherIncome
+        // Saldo normal: aturan ada di AumoBackend.Domain.AccountType.
         public static bool NormalBalanceIsDebit(string? accountType)
-        {
-            return accountType switch
-            {
-                "Assets" or "OperatingExpenses" or "OtherExpenses" => true,
-                "Liabilities" or "Equity" or "OperatingIncome" or "OtherIncome" => false,
-                _ => true,
-            };
-        }
+            => AccountType.IsDebitNormal(accountType);
 
         public static bool IsTemporary(AccountClassification classification)
             => classification.IsTemporary();
@@ -63,41 +56,28 @@ namespace AumoBackend.Models
             return int.TryParse(refNum, out _);
         }
 
-        // Akun temporer = akun laba rugi (pendapatan dan beban); ditutup ke Laba Ditahan saat closing.
-        // Akun permanen = akun posisi keuangan (aset, liabilitas, ekuitas).
+        // Akun temporer = akun laba rugi; akun permanen = akun posisi keuangan (lihat AccountType di Domain).
         internal static bool IsTemporary(string type)
         {
-            return type is "OperatingIncome" or "OtherIncome" or "OperatingExpenses" or "OtherExpenses";
+            return AccountType.IsTemporary(type);
         }
 
+        // Perilaku lama dipertahankan: apa pun yang bukan akun temporer dianggap permanen.
         internal static bool IsPermanent(string type)
         {
-            return !IsTemporary(type);
+            return !AccountType.IsTemporary(type);
         }
 
-        private static readonly Dictionary<string, (int Start, int End)> ReferenceRanges = new()
-        {
-            ["Assets"] = (100, 199),
-            ["Liabilities"] = (200, 299),
-            ["Equity"] = (300, 399),
-            ["OperatingIncome"] = (400, 499),
-            ["OperatingExpenses"] = (500, 599),
-            ["OtherIncome"] = (600, 799),
-            ["OtherExpenses"] = (800, 999),
-        };
-
-        public static IReadOnlyCollection<string> AccountTypes => ReferenceRanges.Keys;
+        public static IReadOnlyCollection<string> AccountTypes => AccountType.All;
 
         public static readonly string[] AccountRoles = { "Default", "CashAndEquivalents", "RetainedEarnings" };
 
         public static bool IsKnownAccountType(string? type)
-            => type != null && ReferenceRanges.ContainsKey(type);
+            => AccountType.IsKnown(type);
 
         internal static bool ValidateReferenceNumber(string type, int referenceNumber)
         {
-            return ReferenceRanges.TryGetValue(type ?? string.Empty, out var range)
-                && referenceNumber >= range.Start
-                && referenceNumber <= range.End;
+            return AccountType.IsReferenceNumberValid(type, referenceNumber);
         }
     }
 }
