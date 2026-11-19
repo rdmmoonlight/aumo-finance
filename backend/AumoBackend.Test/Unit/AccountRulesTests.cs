@@ -83,13 +83,14 @@ public class AccountRulesTests
     public void Ledger_IsDebitNormal_ByType(string type, bool expected) =>
         Assert.Equal(expected, GeneralLedgersService.IsDebitNormal(type));
 
-    // Karakterisasi: tipe tidak dikenal diperlakukan berbeda oleh dua aturan yang sama-sama ada di kode.
-    // Buku besar -> kredit normal; AccountClassificationHelper -> debit normal. Diselaraskan pada Fase 2.4.
+    // Fase 2.4: buku besar dan AccountClassificationHelper kini memakai satu sumber (Domain.AccountType);
+    // jenis tidak dikenal dianggap bukan debit normal di kedua tempat.
     [Fact]
-    public void UnknownType_LedgerAndHelperDisagree_CurrentBehavior()
+    public void UnknownType_LedgerAndHelperAgree()
     {
         Assert.False(GeneralLedgersService.IsDebitNormal("Unknown"));
         Assert.False(GeneralLedgersService.IsDebitNormal(null));
-        Assert.True(AccountClassificationHelper.NormalBalanceIsDebit("Unknown"));
+        Assert.False(AccountClassificationHelper.NormalBalanceIsDebit("Unknown"));
+        Assert.False(AccountClassificationHelper.NormalBalanceIsDebit((string?)null));
     }
 }
