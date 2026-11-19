@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     pkg-config \
     libpq-dev \
+    libpoco-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Build libpqxx dari source dengan C++20 & static linking agar cocok ABI-nya

@@ -69,6 +69,12 @@ target_include_directories(archiver-service PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/archiver-service/include"
 )
 
+find_package(Poco REQUIRED COMPONENTS Foundation Util)
+target_link_libraries(archiver-service PRIVATE
+    Poco::Foundation
+    Poco::Util
+)
+
 # Pencarian library libpqxx (mendukung vcpkg/CMake Config maupun PkgConfig di Linux/MSYS2)
 find_package(libpqxx CONFIG QUIET)
 if(libpqxx_FOUND)

@@ -19,6 +19,7 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
         "PKG_CONFIG_EXECUTABLE": "C:/msys64/mingw64/bin/pkg-config.exe",
+        "CMAKE_PREFIX_PATH": "C:/msys64/mingw64",
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
       }
     },

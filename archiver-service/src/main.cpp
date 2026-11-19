@@ -242,4 +242,7 @@ private:
     std::atomic<bool> _stop_requested{false};
 };
 
-POCO_SERVER_MAIN(ArchiverApplication)
+int main(int argc, char** argv) {
+    ArchiverApplication app;
+    return app.run(argc, argv);
+}
