@@ -250,12 +250,12 @@ Isi bagian ini bila ada perubahan yang terlihat dari luar.
 
 Putuskan saat mencapai fasenya, lalu catat jawabannya di sini.
 
-| No  | Pertanyaan                                                                       | Fase | Jawaban |
-| --- | -------------------------------------------------------------------------------- | ---- |
-| 1   | Apakah import jurnal boleh masuk ke periode tertutup? (saat ini tidak diperiksa) | 2.5  |
-| 2   | Apa syarat menutup periode (neraca seimbang, jurnal penutup, ledger segar)?      | 2.5  |
-| 3   | Ledger dibangun ulang per periode atau diperbarui saat posting?                  | 2.5  |
-| 4   | Presisi dan pembulatan nominal (jumlah desimal)?                                 | 2.4  | Presisi (pertanyaan keputusan no. 4): paling banyak 2 desimal dan 16 digit sebelum koma, selaras DECIMAL(18,2) dan PrecisionScale(18, 2, true) di validator. Nominal yang melebihi presisi ditolak, tidak dibulatkan. |
-| 5   | `NeondbContext` digabung atau tetap terpisah?                                    | 2.7  |
-| 6   | Perlu proyek terpisah per lapisan, atau cukup folder?                            | 2.6  |
+| No | Pertanyaan | Fase | Jawaban |
+| :---: | :--- | :---: | :--- |
+| 1 | Apakah import jurnal boleh masuk ke periode tertutup? *(saat ini tidak diperiksa)* | 2.5 | |
+| 2 | Apa syarat menutup periode (neraca seimbang, jurnal penutup, ledger segar)? | 2.5 | |
+| 3 | Ledger dibangun ulang per periode atau diperbarui saat posting? | 2.5 | |
+| 4 | Presisi dan pembulatan nominal (jumlah desimal)? | 2.4 | Maksimal 2 angka di belakang koma dan 16 digit di depan koma, selaras dengan `DECIMAL(18,2)` serta `PrecisionScale(18, 2, true)` pada validator. Nominal yang melebihi presisi akan **ditolak** (tidak dibulatkan). |
+| 5 | `NeondbContext` digabung atau tetap terpisah? | 2.7 | |
+| 6 | Perlu proyek terpisah per lapisan, atau cukup folder? | 2.6 | |
 
