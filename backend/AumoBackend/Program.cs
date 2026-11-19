@@ -1,3 +1,5 @@
+namespace AumoBackend;
+
 using System.Globalization;
 using System.Security.Claims;
 using AumoBackend.Data;
@@ -13,8 +15,6 @@ using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 using Serilog;
 using Serilog.Sinks.SystemConsole.Themes;
-
-namespace AumoBackend;
 
 public partial class Program
 {

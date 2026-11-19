@@ -1,11 +1,11 @@
+namespace AumoBackend.Extensions;
+
 using System.Text;
 using AumoBackend.Data;
 using AumoBackend.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
-
-namespace AumoBackend.Extensions;
 
 public static class IdentityServiceExtensions
 {

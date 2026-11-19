@@ -4,6 +4,35 @@
 // Ini memastikan request selalu melalui Reverse Proxy (Nginx di Render / Vite Proxy di lokal)
 export const DEFAULT_BACKEND_URL = ''
 
+// Deklarasi tipe global untuk flag dari electron/preload.cjs
+declare global {
+  interface Window {
+    electronEnv?: {
+      isElectron?: boolean
+    }
+  }
+}
+
+export const TOKEN_STORAGE_KEY = 'aumo_access_token'
+
+export function isElectronApp(): boolean {
+  return typeof window !== 'undefined' && Boolean(window.electronEnv?.isElectron)
+}
+
+export function getAuthToken(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(TOKEN_STORAGE_KEY)
+}
+
+export function setAuthToken(token: string | null): void {
+  if (typeof window === 'undefined') return
+  if (token) {
+    localStorage.setItem(TOKEN_STORAGE_KEY, token)
+  } else {
+    localStorage.removeItem(TOKEN_STORAGE_KEY)
+  }
+}
+
 export function getBackendTarget(): string {
   // Base URL backend. Jika VITE_API_BASE_URL diisi, pakai nilainya.
   // Jika tidak diisi, gunakan relative path ''
@@ -57,6 +86,7 @@ export interface ApiFetchOptions extends Omit<RequestInit, 'body'> {
 function buildUrl(url: string, params?: ApiFetchOptions['params']) {
   const target = getBackendTarget()
   // Hasilnya akan menjadi '/api/v1/auth/login' (relative path ke Nginx / Vite proxy)
+  // atau 'https://domain.com/api/v1/auth/login' saat VITE_API_BASE_URL di-set di Electron
   const full = `${target}/api/v1${url}`
   if (!params) return full
 
@@ -76,8 +106,18 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
 
   const { body, params, headers, ...rest } = options
   const method = (rest.method || 'GET').toUpperCase()
+  const isElectron = isElectronApp()
 
   const fetchHeaders = new Headers(headers as HeadersInit | undefined)
+
+  // Konfigurasi khusus Electron: pakai JWT Bearer & header identifikasi klien
+  if (isElectron) {
+    fetchHeaders.set('X-Client-Type', 'electron')
+    const token = getAuthToken()
+    if (token && !fetchHeaders.has('Authorization')) {
+      fetchHeaders.set('Authorization', `Bearer ${token}`)
+    }
+  }
 
   let fetchBody: BodyInit | undefined
   if (body instanceof FormData) {
@@ -98,7 +138,8 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
     method,
     headers: fetchHeaders,
     body: fetchBody,
-    credentials: 'include',
+    // Web pakai cookie ('include'), Electron pakai Bearer header ('omit')
+    credentials: isElectron ? 'omit' : 'include',
   })
 
   if (!response.ok) {
@@ -123,14 +164,25 @@ export async function apiFetch<T>(url: string, options: ApiFetchOptions = {}): P
 
     console.warn(`⚠ [API ${response.status}]: ${method} ${url}`, error)
 
-    // Status 401 di luar / dan /auth* -> alihkan ke login satu kali
+    // Status 401 di luar / dan /auth* -> bersihkan token (jika Electron) & alihkan ke login
     if (response.status === 401 && typeof window !== 'undefined' && !isRedirecting) {
-      const currentPath = window.location.pathname
+      if (isElectron) {
+        setAuthToken(null)
+      }
+
+      // Cek path baik untuk Web (pathname) maupun Electron (hash routing)
+      const currentPath = isElectron
+        ? window.location.hash.replace(/^#/, '') || '/'
+        : window.location.pathname
       const isPublicPath = currentPath === '/' || currentPath.startsWith('/auth')
 
       if (!isPublicPath) {
         isRedirecting = true
-        window.location.replace(`/auth/login?redirect=${encodeURIComponent(currentPath)}`)
+        if (isElectron) {
+          window.location.hash = `#/auth/login?redirect=${encodeURIComponent(currentPath)}`
+        } else {
+          window.location.replace(`/auth/login?redirect=${encodeURIComponent(currentPath)}`)
+        }
       }
     }
 
