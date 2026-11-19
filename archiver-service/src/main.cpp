@@ -1,26 +1,36 @@
+#include <Poco/AutoPtr.h>
+#include <Poco/ConsoleChannel.h>
+#include <Poco/Environment.h>
+#include <Poco/FormattingChannel.h>
+#include <Poco/Logger.h>
+#include <Poco/PatternFormatter.h>
+#include <Poco/Util/ServerApplication.h>
+#include <Poco/Util/Timer.h>
+#include <Poco/Util/TimerTask.h>
+
 #include <algorithm>
+#include <atomic>
 #include <cctype>
 #include <chrono>
-#include <cstdlib>
 #include <initializer_list>
-#include <iostream>
 #include <map>
+#include <memory>
 #include <string>
 #include <thread>
+
 #include "ArchiverService.hpp"
 #include "DatabaseMigrator.hpp"
-#include "TableRef.hpp"
 #include "Str.hpp"
+#include "TableRef.hpp"
 
 namespace {
 
 std::string lower(std::string s) {
-    std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::tolower(c); });
+    std::transform(s.begin(), s.end(), s.begin(),
+                   [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
     return s;
 }
 
-// Mengubah connection string gaya Npgsql ("Host=..;Database=..;Username=..;Password=..")
-// menjadi format libpq ("host=.. dbname=.. user=.. password=..").
 std::string npgsqlToLibpq(const std::string& npgsql) {
     std::map<std::string, std::string> kv;
     size_t pos = 0;
@@ -36,88 +46,200 @@ std::string npgsqlToLibpq(const std::string& npgsql) {
         }
         pos = end + 1;
     }
+
     auto get = [&](std::initializer_list<const char*> names) -> std::string {
-        for (auto n : names) if (kv.count(n)) return kv[n];
+        for (auto n : names) {
+            if (kv.count(n)) return kv[n];
+        }
         return "";
     };
+
     std::string out;
     auto add = [&](const char* k, const std::string& v) {
         if (v.empty()) return;
         std::string esc;
-        for (char c : v) { if (c == '\\' || c == '\'') esc += '\\'; esc += c; }
+        for (char c : v) {
+            if (c == '\\' || c == '\'') esc += '\\';
+            esc += c;
+        }
         out += cat(k, "='", esc, "' ");
     };
+
     add("host", get({"host", "server"}));
     add("port", get({"port"}));
     add("dbname", get({"database", "dbname"}));
     add("user", get({"username", "userid", "uid", "user"}));
     add("password", get({"password", "pwd"}));
+
     std::string ssl = lower(get({"sslmode"}));
-    if (ssl == "require" || ssl == "verifyfull" || ssl == "verifyca") out += "sslmode=require ";
-    else if (ssl == "disable") out += "sslmode=disable ";
+    if (ssl == "require" || ssl == "verifyfull" || ssl == "verifyca") {
+        out += "sslmode=require ";
+    } else if (ssl == "disable") {
+        out += "sslmode=disable ";
+    }
     return out;
 }
 
-// Prioritas: DATABASE_URL (format libpq/URI) -> ConnectionStrings__DefaultConnection
-// (env yang sama dengan backend .NET) -> default lokal.
 std::string resolveConnectionString() {
-    if (const char* url = std::getenv("DATABASE_URL"); url && *url) return url;
-    if (const char* dn = std::getenv("ConnectionStrings__DefaultConnection"); dn && *dn) {
-        std::string v = dn;
-        if (v.rfind("postgres://", 0) == 0 || v.rfind("postgresql://", 0) == 0) return v;
-        return npgsqlToLibpq(v);
+    if (Poco::Environment::has("DATABASE_URL")) {
+        std::string url = Poco::Environment::get("DATABASE_URL");
+        if (!url.empty()) return url;
+    }
+    if (Poco::Environment::has("ConnectionStrings__DefaultConnection")) {
+        std::string dn = Poco::Environment::get("ConnectionStrings__DefaultConnection");
+        if (!dn.empty()) {
+            if (dn.rfind("postgres://", 0) == 0 || dn.rfind("postgresql://", 0) == 0) return dn;
+            return npgsqlToLibpq(dn);
+        }
     }
     return "host=localhost port=5432 dbname=aumo_db user=postgres password=secret";
 }
 
-int envInt(const char* name, int fallback) {
-    if (const char* v = std::getenv(name); v && *v) {
-        try { return std::max(1, std::stoi(v)); } catch (...) {}
-    }
-    return fallback;
-}
-
-bool envBool(const char* name, bool fallback) {
-    if (const char* v = std::getenv(name); v && *v) {
-        std::string s = lower(v);
-        return !(s == "0" || s == "false" || s == "no" || s == "off");
-    }
-    return fallback;
-}
-
 } // namespace
 
-int main() {
-    const std::string db_conn = resolveConnectionString();
+// ============================================================================
+// Worker Task (Setara dengan ExecuteAsync pada BackgroundService .NET)
+// ============================================================================
+class ArchiveWorkerTask : public Poco::Util::TimerTask {
+public:
+    ArchiveWorkerTask(ArchiverService& archiver,
+                      DatabaseMigrator& migrator,
+                      const TableRef& source,
+                      const TableRef& archive,
+                      const TableRef& periods,
+                      bool purge_enabled,
+                      int interval_minutes,
+                      std::atomic<bool>& stop_requested)
+        : _archiver(archiver),
+          _migrator(migrator),
+          _source(source),
+          _archive(archive),
+          _periods(periods),
+          _purge_enabled(purge_enabled),
+          _interval_minutes(interval_minutes),
+          _stop_requested(stop_requested),
+          _logger(Poco::Logger::get("ArchiverWorker")) {}
 
-    // Nama tabel persis sesuai model EF Core (PascalCase).
-    const TableRef source_table{"public", "GeneralJournal"};
-    const TableRef archive_table{"archive", "GeneralJournal"};
-    const TableRef periods_table{"public", "Periods"};
+    void run() override {
+        if (_stop_requested.load()) return;
 
-    const int interval_minutes = envInt("ARCHIVE_INTERVAL_MINUTES", 360);
-    // Saklar pengaman: set ARCHIVE_PURGE_ENABLED=false untuk hanya menyalin tanpa menghapus.
-    const bool purge_enabled = envBool("ARCHIVE_PURGE_ENABLED", true);
+        try {
+            // Pastikan migrasi selesai sebelum siklus pengarsipan pertama berjalan
+            if (!_migrated) {
+                _logger.information("Menunggu tabel sumber dan menjalankan migrasi...");
+                _migrator.waitForSourceTable(_source, 15);
+                if (_stop_requested.load()) return;
 
-    std::cout << "[Archiver Daemon] Service Archiver C++ dimulai...\n" << std::flush;
+                if (!_migrator.runMigrations(_source, _archive)) {
+                    _logger.warning("Migrasi belum siap, akan dicoba ulang pada siklus berikutnya.");
+                    return;
+                }
+                _migrated = true;
+                _logger.information("Migrasi database berhasil diverifikasi.");
+            }
 
-    DatabaseMigrator migrator(db_conn);
-    ArchiverService archiver(db_conn);
+            _logger.information("Memulai siklus pengarsipan periode tutup buku...");
+            if (_archiver.archiveClosedPeriods(_source, _archive, _periods) && _purge_enabled) {
+                _archiver.purgeArchivedClosedPeriods(_source, _archive, _periods);
+            }
 
-    // Tidak pernah keluar dengan error: menunggu DB + migrasi backend selesai,
-    // supaya supervisord tidak crash-loop dan tidak menghambat startup web.
-    migrator.waitForSourceTable(source_table, 15);
-    while (!migrator.runMigrations(source_table, archive_table)) {
-        std::this_thread::sleep_for(std::chrono::seconds(30));
-    }
-
-    while (true) {
-        // Hapus dari tabel sumber hanya bila penyalinan ke arsip baru saja berhasil.
-        if (archiver.archiveClosedPeriods(source_table, archive_table, periods_table) && purge_enabled) {
-            archiver.purgeArchivedClosedPeriods(source_table, archive_table, periods_table);
+            _logger.information("Selesai. Pemeriksaan berikutnya dalam %d menit.", _interval_minutes);
+        } catch (const std::exception& ex) {
+            _logger.error("Terjadi kesalahan saat eksekusi worker: %s", std::string(ex.what()));
+        } catch (...) {
+            _logger.error("Terjadi kesalahan tidak dikenal pada worker.");
         }
-        std::cout << cat("[Archiver Daemon] Pemeriksaan berikutnya ", interval_minutes, " menit lagi.\n")
-                  << std::flush;
-        std::this_thread::sleep_for(std::chrono::minutes(interval_minutes));
     }
-}
+
+private:
+    ArchiverService& _archiver;
+    DatabaseMigrator& _migrator;
+    TableRef _source;
+    TableRef _archive;
+    TableRef _periods;
+    bool _purge_enabled;
+    int _interval_minutes;
+    std::atomic<bool>& _stop_requested;
+    bool _migrated{false};
+    Poco::Logger& _logger;
+};
+
+// ============================================================================
+// Application Host (Setara dengan Generic Host / ServerApplication)
+// ============================================================================
+class ArchiverApplication : public Poco::Util::ServerApplication {
+protected:
+    void initialize(Application& self) override {
+        loadConfiguration(); // Muat konfigurasi default POCO (opsional)
+        ServerApplication::initialize(self);
+
+        // Konfigurasi standar format log ke stdout/stderr (ramah Docker & Supervisord)
+        Poco::AutoPtr<Poco::ConsoleChannel> console_channel(new Poco::ConsoleChannel);
+        Poco::AutoPtr<Poco::PatternFormatter> formatter(
+            new Poco::PatternFormatter("%Y-%m-%d %H:%M:%S [%p] [%s] %t"));
+        Poco::AutoPtr<Poco::FormattingChannel> formatting_channel(
+            new Poco::FormattingChannel(formatter, console_channel));
+        Poco::Logger::root().setChannel(formatting_channel);
+        Poco::Logger::root().setLevel("information");
+    }
+
+    void uninitialize() override {
+        logger().information("Membersihkan resource Archiver Daemon...");
+        ServerApplication::uninitialize();
+    }
+
+    int main(const std::vector<std::string>& args) override {
+        const std::string db_conn = resolveConnectionString();
+
+        // Pembacaan konfigurasi terstandar melalui layer konfigurasi POCO
+        // Mendukung env var langsung dengan prefix system.env.*
+        int interval_minutes = 360;
+        if (Poco::Environment::has("ARCHIVE_INTERVAL_MINUTES")) {
+            try {
+                interval_minutes = std::max(1, std::stoi(Poco::Environment::get("ARCHIVE_INTERVAL_MINUTES")));
+            } catch (...) {}
+        }
+
+        bool purge_enabled = true;
+        if (Poco::Environment::has("ARCHIVE_PURGE_ENABLED")) {
+            std::string v = lower(Poco::Environment::get("ARCHIVE_PURGE_ENABLED"));
+            purge_enabled = !(v == "0" || v == "false" || v == "no" || v == "off");
+        }
+
+        const TableRef source_table{"public", "GeneralJournal"};
+        const TableRef archive_table{"archive", "GeneralJournal"};
+        const TableRef periods_table{"public", "Periods"};
+
+        DatabaseMigrator migrator(db_conn);
+        ArchiverService archiver(db_conn);
+
+        logger().information("Service Archiver C++ dimulai (Interval: %d menit, Purge: %b).",
+                             interval_minutes, purge_enabled);
+
+        Poco::Util::Timer timer;
+        const long interval_ms = static_cast<long>(interval_minutes) * 60 * 1000;
+
+        // Jalankan langsung saat startup (delay 0 ms), lalu ulangi setiap interval_ms
+        // scheduleAtFixedRate menjamin tidak terjadi penumpukan tugas jika eksekusi memakan waktu lama
+        timer.schedule(
+            new ArchiveWorkerTask(archiver, migrator, source_table, archive_table,
+                                  periods_table, purge_enabled, interval_minutes, _stop_requested),
+            0,
+            interval_ms
+        );
+
+        // Blokir thread utama sampai menerima SIGTERM / SIGINT dari Docker atau Supervisord
+        waitForTerminationRequest();
+
+        logger().information("Sinyal berhenti diterima. Menghentikan scheduler...");
+        _stop_requested.store(true);
+        timer.cancel(true); // Tunggu tugas yang sedang berjalan selesai sebelum keluar
+
+        return Application::EXIT_OK;
+    }
+
+private:
+    std::atomic<bool> _stop_requested{false};
+};
+
+POCO_SERVER_MAIN(ArchiverApplication)
