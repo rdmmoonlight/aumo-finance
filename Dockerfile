@@ -15,6 +15,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     pkg-config \
     libpq-dev \
     libpoco-dev \
+    libpocoutil80 \
+    libpocofoundation80 \
+    libpoconet80 \
+    libpoconetssl80 \
     && rm -rf /var/lib/apt/lists/*
 
 # Build libpqxx dari source dengan C++20 & static linking agar cocok ABI-nya
