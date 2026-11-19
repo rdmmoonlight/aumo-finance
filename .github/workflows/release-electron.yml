@@ -50,6 +50,8 @@ jobs:
         env:
           # Nonaktifkan code signing otomatis karena tidak pakai sertifikat berbayar
           CSC_IDENTITY_AUTO_DISCOVERY: false
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+          VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
