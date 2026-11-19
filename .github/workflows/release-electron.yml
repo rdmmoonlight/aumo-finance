@@ -40,16 +40,12 @@ jobs:
         with:
           node-version: 24
 
-      - name: Install dependencies (Frontend)
+      - name: Install dependencies
         working-directory: ./frontend
         run: pnpm install
 
-      - name: Install dependencies (Electron)
-        working-directory: ./electron
-        run: pnpm install
-
       - name: Build Frontend & Package Windows (.exe)
-        working-directory: ./electron
+        working-directory: ./frontend
         run: pnpm dist:win
         env:
           # Nonaktifkan code signing otomatis karena tidak pakai sertifikat berbayar
@@ -63,6 +59,6 @@ jobs:
           draft: ${{ inputs.draft }}
           generate_release_notes: true
           files: |
-            electron/release/*.exe
-            electron/release/*.blockmap
-            electron/release/latest.yml
+            frontend/release/*.exe
+            frontend/release/*.blockmap
+            frontend/release/latest.yml
