@@ -2,6 +2,27 @@
   "version": 3,
   "configurePresets": [
     {
+      "name": "windows-mingw-debug",
+      "displayName": "Windows MinGW GCC (Debug)",
+      "generator": "MinGW Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "environment": {
+        "PATH": "C:/msys64/mingw64/bin;$penv{PATH}",
+        "PKG_CONFIG_PATH": "C:/msys64/mingw64/lib/pkgconfig"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_CXX_COMPILER": "C:/msys64/mingw64/bin/g++.exe",
+        "PKG_CONFIG_EXECUTABLE": "C:/msys64/mingw64/bin/pkg-config.exe",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
       "name": "ubuntu-debug",
       "displayName": "Ubuntu 26.04 GCC (Debug)",
       "generator": "Ninja",
@@ -20,7 +41,13 @@
   ],
   "buildPresets": [
     {
-      "name": "build-debug",
+      "name": "build-windows-debug",
+      "displayName": "Build Windows Debug",
+      "configurePreset": "windows-mingw-debug"
+    },
+    {
+      "name": "build-ubuntu-debug",
+      "displayName": "Build Ubuntu Debug",
       "configurePreset": "ubuntu-debug"
     }
   ]
