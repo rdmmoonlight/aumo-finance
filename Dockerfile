@@ -10,9 +10,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     cmake \
     g++ \
+    git \
+    ca-certificates \
     pkg-config \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
+
+# Build libpqxx dari source dengan C++20 & static linking agar cocok ABI-nya
+RUN git clone --depth 1 --branch 7.9.2 https://github.com/jtv/libpqxx.git /tmp/libpqxx \
+    && cmake -S /tmp/libpqxx -B /tmp/libpqxx/build \
+       -DCMAKE_BUILD_TYPE=Release \
+       -DCMAKE_CXX_STANDARD=20 \
+       -DCMAKE_INSTALL_PREFIX=/usr/local \
+       -DBUILD_SHARED_LIBS=OFF \
+       -DSKIP_BUILD_TEST=ON \
+    && cmake --build /tmp/libpqxx/build -j$(nproc) \
+    && cmake --install /tmp/libpqxx/build \
+    && rm -rf /tmp/libpqxx
 
 # Copy hanya file build C++ agar layer cache optimal
 COPY CMakeLists.txt ./
@@ -78,7 +92,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy binary C++ Archiver dari cpp-builder
+# Copy binary C++ Archiver dari cpp-builder (libpqxx sudah tertanam secara static)
 COPY --from=cpp-builder /src/build/archiver-service /usr/local/bin/archiver-service
 
 # Copy hasil build .NET Core API & VueJS Frontend
