@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "version": "2.2.0",
+  "version": "2.2.4",
   "main": "electron/main.cjs",
   "private": true,
   "type": "module",
@@ -19,8 +19,8 @@
     "api:generate": "openapi-ts"
   },
   "build": {
-    "appId": "com.domainanda.namaaplikasi",
-    "productName": "NamaAplikasi",
+    "appId": "com.b&rc.aumo-electronjs",
+    "productName": "AumoElectronjs",
     "directories": {
       "output": "release"
     },
