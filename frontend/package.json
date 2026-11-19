@@ -9,6 +9,7 @@
     "build": "vite build",
     "electron:dev": "concurrently \"pnpm run dev\" \"wait-on http://localhost:5173 && electron .\"",
     "electron:build": "pnpm run build && electron-builder",
+    "dist:win": "vite build && electron-builder --win",
     "preview": "vite preview",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:oxlint lint:eslint",
