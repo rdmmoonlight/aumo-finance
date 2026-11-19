@@ -2,13 +2,7 @@ name: Build & Release Windows App (Electronjs)
 
 on:
   workflow_dispatch:
-    inputs:
-      draft:
-        description: "Simpan sebagai Draft (belum dipublikasikan)?"
-        required: false
-        default: false
-        type: boolean
-
+  
 permissions:
   contents: write
 
