@@ -2,6 +2,7 @@ namespace AumoBackend.Services.Periods;
 
 using System.Globalization;
 using AumoBackend.Data;
+using AumoBackend.Domain;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
@@ -11,9 +12,6 @@ using Microsoft.EntityFrameworkCore;
 
 public partial class PeriodsService : IPeriodsService
 {
-    private static readonly string[] PermanentTypes = { "Assets", "Liabilities", "Equity" };
-    private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "OperatingExpenses", "OtherExpenses" };
-
     private readonly AppDbContext db;
     private readonly ITransactionNumberService txNumberService;
     private readonly IGeneralLedgersService glService;
@@ -77,7 +75,7 @@ public partial class PeriodsService : IPeriodsService
             .ToListAsync();
 
         var permanentAccounts = accounts
-            .Where(a => a.Type == "Assets" || a.Type == "Liabilities" || a.Type == "Equity")
+            .Where(a => AccountType.IsPermanent(a.Type))
             .Select(a => new AccountSimpleDto
             {
                 Id = a.Id,
