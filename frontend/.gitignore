@@ -38,5 +38,15 @@ __screenshots__/
 # Vite
 *.timestamp-*-*.mjs
 
+# Electron & electron-builder output
+release/
+dist-electron/
+out/
+build/
+
+# Electron cache & runtime logs
+.electron/
+*.log
+
 .env.production
 .env
