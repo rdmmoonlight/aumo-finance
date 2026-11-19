@@ -2,6 +2,7 @@ namespace AumoBackend.Services.Reports.GeneralLedgers;
 
 using System.Globalization;
 using AumoBackend.Data;
+using AumoBackend.Domain;
 using AumoBackend.DTOs;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
@@ -11,11 +12,6 @@ using Microsoft.EntityFrameworkCore;
 public class GeneralLedgersService : IGeneralLedgersService
 {
     private readonly AppDbContext db;
-
-    private static readonly string[] PermanentTypes = { "Assets", "Asset", "Liabilities", "Liability", "Equity" };
-    private static readonly string[] TemporaryTypes = { "OperatingIncome", "OtherIncome", "Income", "Revenue", "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
-    private static readonly string[] RevenueTypes = { "OperatingIncome", "OtherIncome", "Revenue", "Income" };
-    private static readonly string[] ExpenseTypes = { "OperatingExpenses", "OtherExpenses", "Expense", "Expenses" };
 
     public GeneralLedgersService(AppDbContext db) => this.db = db;
 
@@ -74,8 +70,8 @@ public class GeneralLedgersService : IGeneralLedgersService
         var flat = await this.FetchTemporaryDtosAsync(userId, period.Id);
         var grouped = MapToGrouped(flat);
 
-        decimal totalRev = flat.Where(x => RevenueTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Credit - x.Debit);
-        decimal totalExp = flat.Where(x => ExpenseTypes.Contains(x.AccountType, StringComparer.OrdinalIgnoreCase)).Sum(x => x.Debit - x.Credit);
+        decimal totalRev = flat.Where(x => AccountType.IsRevenue(AccountType.Normalize(x.AccountType))).Sum(x => x.Credit - x.Debit);
+        decimal totalExp = flat.Where(x => AccountType.IsExpense(AccountType.Normalize(x.AccountType))).Sum(x => x.Debit - x.Credit);
 
         return new BaseServiceResult<TemporaryLedgerGroupedResponse>
         {
@@ -133,8 +129,8 @@ public class GeneralLedgersService : IGeneralLedgersService
                     }
 
                     decimal running = 0;
-                    bool isPermanent = PermanentTypes.Contains(acc.Type ?? string.Empty, StringComparer.OrdinalIgnoreCase);
-                    bool isTemporary = TemporaryTypes.Contains(acc.Type ?? string.Empty, StringComparer.OrdinalIgnoreCase);
+                    bool isPermanent = AccountType.IsPermanent(AccountType.Normalize(acc.Type));
+                    bool isTemporary = AccountType.IsTemporary(AccountType.Normalize(acc.Type));
                     bool isDebitNormal = IsDebitNormal(acc.Type);
 
                     foreach (var line in g)
@@ -329,7 +325,7 @@ public class GeneralLedgersService : IGeneralLedgersService
     }
 
     internal static bool IsDebitNormal(string? type) =>
-        type != null && (type.Equals("Assets", StringComparison.OrdinalIgnoreCase) || type.Equals("Asset", StringComparison.OrdinalIgnoreCase) || ExpenseTypes.Contains(type, StringComparer.OrdinalIgnoreCase));
+        AccountType.IsDebitNormal(AccountType.Normalize(type));
 
     private async Task ClearLedgerDataForPeriodAsync(Guid userId, int periodId)
     {
