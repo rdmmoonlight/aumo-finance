@@ -26,7 +26,8 @@
     },
     "files": [
       "dist/**/*",
-      "electron/**/*"
+      "electron/**/*",
+      ".env"
     ],
     "win": {
       "target": "portable"

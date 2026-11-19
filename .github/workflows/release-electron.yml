@@ -4,17 +4,17 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: 'Tag versi release (contoh: v1.0.0)'
+        description: "Tag versi release (contoh: v1.0.0)"
         required: true
-        default: 'v1.0.0'
+        default: "v1.0.0"
         type: string
       release_name:
-        description: 'Judul Release (contoh: Release v1.0.0)'
+        description: "Judul Release (contoh: Release v1.0.0)"
         required: true
-        default: 'Release v1.0.0'
+        default: "Release v1.0.0"
         type: string
       draft:
-        description: 'Simpan sebagai Draft (belum dipublikasikan)?'
+        description: "Simpan sebagai Draft (belum dipublikasikan)?"
         required: false
         default: false
         type: boolean
@@ -43,6 +43,15 @@ jobs:
       - name: Install dependencies
         working-directory: ./frontend
         run: pnpm install
+
+      - name: Create .env file
+        working-directory: ./frontend
+        shell: pwsh
+        run: |
+          @"
+          VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
+          VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          "@ | Out-File -FilePath .env -Encoding utf8
 
       - name: Build Frontend & Package Windows (.exe)
         working-directory: ./frontend
