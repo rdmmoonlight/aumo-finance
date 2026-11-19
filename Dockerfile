@@ -12,7 +12,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     g++ \
     pkg-config \
     libpq-dev \
-    libpqxx-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy hanya file build C++ agar layer cache optimal
@@ -69,13 +68,11 @@ FROM mcr.microsoft.com/dotnet/aspnet:10.0-noble AS runner
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instal libpqxx-7.8t64 langsung dari repositori Ubuntu Noble
 RUN apt-get update && apt-get install -y --no-install-recommends \
     nginx \
     supervisor \
     curl \
     libpq5 \
-    libpqxx-7.8t64 \
     && rm -rf /var/lib/apt/lists/* \
     && ldconfig
 
