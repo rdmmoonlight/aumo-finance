@@ -2,7 +2,7 @@ namespace AumoBackend.Test.Integration;
 
 using AumoBackend.Domain;
 using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Periods;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using Microsoft.EntityFrameworkCore;
