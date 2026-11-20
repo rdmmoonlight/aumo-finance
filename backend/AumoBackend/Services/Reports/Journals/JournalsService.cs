@@ -1,13 +1,12 @@
+namespace AumoBackend.Services.Reports.Journals;
+
 using System.Globalization;
 using AumoBackend.Data;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
-
-namespace AumoBackend.Services.Reports.Journals;
 
 public partial class JournalsService : IJournalsService
 {
@@ -20,9 +19,9 @@ public partial class JournalsService : IJournalsService
     ITrialBalancesService trialBalancesService,
     ITransactionNumberService transactionNumberService)
     {
-    _db = db;
-    _trialBalancesService = trialBalancesService;
-    _transactionNumberService = transactionNumberService;
+        _db = db;
+        _trialBalancesService = trialBalancesService;
+        _transactionNumberService = transactionNumberService;
     }
 
     public async Task<JournalReportResult> GetJournalAsync(Guid userId, string journalType)

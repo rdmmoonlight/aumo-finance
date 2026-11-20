@@ -1,5 +1,11 @@
 namespace AumoBackend.Services.JournalEntry;
 
+using AumoBackend.Data;
+using AumoBackend.Domain;
+using AumoBackend.DTOs.Reports;
+using AumoBackend.Models;
+using Microsoft.EntityFrameworkCore;
+
 public class JournalEntryService : IJournalEntryService
 {
     private readonly AppDbContext db;
@@ -117,13 +123,18 @@ public class JournalEntryService : IJournalEntryService
         var entryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc);
         var createdAt = DateTime.SpecifyKind(deviceCreatedAt, DateTimeKind.Utc);
 
-        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.db);
+        int journalEntryId = ((await this.db.GeneralJournals
+            .Select(gj => (int?)gj.JournalEntryId)
+            .MaxAsync()) ?? 0) + 1;
 
         var rows = GeneralJournalWriter.BuildRows(
             journalEntryId, userId, transactionNumber, journalType, entryDate, createdAt, null,
             effectiveLines.Select(l => new GeneralJournalWriter.Line(l.AccountId, l.LineDescription, l.Debit, l.Credit)));
 
-        this.db.GeneralJournals.AddRange(rows);
+        foreach (var row in rows)
+        {
+            this.db.GeneralJournals.Add(row);
+        }
         await this.db.SaveChangesAsync();
 
         return new GeneralJournalResponseDto

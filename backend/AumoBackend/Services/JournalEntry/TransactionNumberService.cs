@@ -1,5 +1,9 @@
 namespace AumoBackend.Services.JournalEntry;
 
+using System.Data;
+using AumoBackend.Data;
+using Microsoft.EntityFrameworkCore;
+
 public class TransactionNumberService(AppDbContext db) : ITransactionNumberService
 {
     public async Task<string> GenerateAsync(Guid userId, string journalType, DateTime entryDate)

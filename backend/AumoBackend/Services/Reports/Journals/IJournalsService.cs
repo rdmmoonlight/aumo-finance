@@ -1,7 +1,7 @@
+namespace AumoBackend.Services.Reports.Journals;
+
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
-
-namespace AumoBackend.Services.Reports.Journals;
 
 public interface IJournalsService
 {

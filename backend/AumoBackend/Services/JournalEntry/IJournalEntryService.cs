@@ -1,5 +1,7 @@
 namespace AumoBackend.Services.JournalEntry;
 
+using AumoBackend.DTOs.Reports;
+
 public interface IJournalEntryService
 {
     Task<GeneralJournalResponseDto?> GetByIdAsync(Guid userId, int id);

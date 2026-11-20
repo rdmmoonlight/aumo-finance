@@ -1,11 +1,10 @@
 namespace AumoBackend.Services.Reports.Journals;
 
-using AumoBackend.Data;
 using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using Microsoft.EntityFrameworkCore;
 
 public partial class JournalsService
@@ -71,11 +70,14 @@ public partial class JournalsService
 
         var createdAt = DateTime.UtcNow;
         var created = new List<(int EntryId, string TransactionNumber, List<GeneralJournal> Rows)>();
+        var nextJournalEntryId = (await _db.GeneralJournals
+            .Select(g => (int?)g.JournalEntryId)
+            .MaxAsync() ?? 0) + 1;
 
         foreach (var group in sourceRows.GroupBy(g => g.JournalEntryId))
         {
             var sourceHeader = group.First();
-            int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(_db);
+            int journalEntryId = nextJournalEntryId++;
             string transactionNumber = await _transactionNumberService.GenerateAsync(userId, ReversingType, reversalDate);
 
             // Debit dan Kredit setiap baris ditukar.
@@ -100,7 +102,22 @@ public partial class JournalsService
                 row.SourceJournalEntryId = sourceHeader.JournalEntryId;
             }
 
-            created.Add((journalEntryId, transactionNumber, rows));
+            created.Add((journalEntryId, transactionNumber, rows.Select(row => new AumoBackend.Models.GeneralJournal
+            {
+                LineId = row.LineId,
+                JournalEntryId = row.JournalEntryId,
+                UserId = row.UserId,
+                TransactionNumber = row.TransactionNumber,
+                JournalType = row.JournalType,
+                EntryDate = row.EntryDate,
+                CreatedAt = row.CreatedAt,
+                SourceJournalEntryId = row.SourceJournalEntryId,
+                AccountId = row.AccountId,
+                LineDescription = row.LineDescription,
+                Debit = row.Debit,
+                Credit = row.Credit,
+                LineOrder = row.LineOrder,
+            }).ToList()));
         }
 
         // Satu SaveChanges: seluruh jurnal pembalik tersimpan atau tidak sama sekali.
