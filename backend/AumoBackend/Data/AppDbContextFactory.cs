@@ -1,8 +1,7 @@
-using AumoBackend.Data;
+namespace AumoBackend.Data;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
-
-namespace AumoBackend.Data;
 
 public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {

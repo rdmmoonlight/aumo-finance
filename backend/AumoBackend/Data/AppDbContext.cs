@@ -333,6 +333,12 @@ public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityR
             entity.Property(e => e.IsTotalRow).HasDefaultValue(false);
         });
 
+        builder.Entity<JournalEntryIdResult>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView(null);
+        });
+
         builder.HasSequence<int>("GeneralJournal_JournalEntryId_seq");
 
         OnModelCreatingPartial(builder);

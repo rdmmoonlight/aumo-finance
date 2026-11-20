@@ -12,15 +12,11 @@ public static class GeneralJournalWriter
 
     public static async Task<int> NextJournalEntryIdAsync(AppDbContext db, CancellationToken ct = default)
     {
-        var result = await db.Set<JournalEntryIdResult>()
-            .FromSqlRaw($"SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
-            .ToListAsync(ct);
-        return result[0].Value;
-    }
+        var result = await db.Database
+     .SqlQueryRaw<int>("SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
+     .SingleAsync(ct);
 
-    private sealed class JournalEntryIdResult
-    {
-        public int Value { get; set; }
+        return result;
     }
 
     public static List<GeneralJournal> BuildRows(
