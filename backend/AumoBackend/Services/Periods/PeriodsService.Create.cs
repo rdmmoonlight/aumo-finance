@@ -159,27 +159,20 @@ public partial class PeriodsService
 
                     if (totalOpeningBalance != 0)
                     {
-                        var transactionNumber = await this.txNumberService.GenerateAsync(userId, "General", startDate);
-
-                        var openingLines = new List<GeneralJournalWriter.Line>();
+                        var openingLines = new List<JournalLine>();
                         if (cashBalance != 0)
                         {
-                            openingLines.Add(new GeneralJournalWriter.Line(cashAccount.Id, "Saldo Awal", cashBalance, 0));
+                            openingLines.Add(new JournalLine(cashAccount.Id, "Saldo Awal", cashBalance, 0));
                         }
 
                         if (bankBalance != 0)
                         {
-                            openingLines.Add(new GeneralJournalWriter.Line(bankAccount.Id, "Saldo Awal", bankBalance, 0));
+                            openingLines.Add(new JournalLine(bankAccount.Id, "Saldo Awal", bankBalance, 0));
                         }
 
-                        openingLines.Add(new GeneralJournalWriter.Line(retainedAccount.Id, "Saldo Awal", 0, totalOpeningBalance));
+                        openingLines.Add(new JournalLine(retainedAccount.Id, "Saldo Awal", 0, totalOpeningBalance));
 
-                        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.db);
-
-                        this.db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
-                            journalEntryId, userId, transactionNumber, "General",
-                            startDate, DateTime.UtcNow, null, openingLines));
-                        await this.db.SaveChangesAsync();
+                        await this.posting.PostAsync(new PostJournalCommand(userId, "General", startDate, openingLines));
                     }
 
                     await transaction.CommitAsync();
@@ -286,20 +279,13 @@ public partial class PeriodsService
                 $"Saldo Awal is not balanced (debit {totalDebit:N2} vs credit {totalCredit:N2}). Check the journals of {previous.PeriodName}.");
         }
 
-        var transactionNumber = await this.txNumberService.GenerateAsync(userId, "General", startDate);
-
-        var openingLines = balances.Select(b => new GeneralJournalWriter.Line(
+        var openingLines = balances.Select(b => new JournalLine(
             b.Account.Id,
             "Saldo Awal",
             b.Signed > 0 ? b.Signed : 0m,
             b.Signed < 0 ? -b.Signed : 0m)).ToList();
 
-        int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(this.db);
-
-        this.db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
-            journalEntryId, userId, transactionNumber, "General",
-            startDate, DateTime.UtcNow, null, openingLines));
-        await this.db.SaveChangesAsync();
+        await this.posting.PostAsync(new PostJournalCommand(userId, "General", startDate, openingLines));
 
         return new OpeningResult(balances.Count, null);
     }

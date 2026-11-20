@@ -72,3 +72,10 @@ public sealed class SeededUser
         return user;
     }
 }
+
+/// <summary>Merakit pintu posting jurnal di atas DbContext tes, sama seperti pendaftaran DI di aplikasi.</summary>
+public static class TestPosting
+{
+    public static AumoBackend.Services.JournalEntry.JournalPostingService For(AppDbContext db) =>
+        new(db, new AumoBackend.Services.JournalEntry.TransactionNumberService(db));
+}

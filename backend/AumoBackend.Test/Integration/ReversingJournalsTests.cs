@@ -16,7 +16,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
     new(
         db,
         new TrialBalancesService(db),
-        new TransactionNumberService(db)
+        TestPosting.For(db)
     );
 
     private static async Task<(int ExpenseId, int LiabilityId)> SeedAccrualAccountsAsync(AppDbContext db, Guid userId)

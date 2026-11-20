@@ -1,16 +1,13 @@
 namespace AumoBackend.Test.Integration;
 
-using AumoBackend.DTOs;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.Services.JournalEntry;
-using AumoBackend.Services.Tools;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
 /// Temuan no. 4 (kunci periode tidak seragam): satu tes per jalur masuk/keluar jurnal.
-/// Tes bertanda "CurrentBehavior" mendokumentasikan celah yang ADA SAAT INI; bila celah ditutup (Fase 2.3/2.5),
-/// ubah assert-nya menjadi penolakan.
+/// Jalur import (ToolsService) sudah tidak ada di backend, sehingga tes import dihapus.
 /// </summary>
 [Collection(PostgresCollection.Name)]
 public class PeriodLockPathsTests(PostgresFixture fixture)
@@ -51,7 +48,8 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-        var entryService = new JournalEntryService(db, new TransactionNumberService(db));
+        var posting = TestPosting.For(db);
+        var entryService = new JournalEntryService(db, new TransactionNumberService(db), posting);
         var created = await entryService.CreateAsync(u.UserId, new CreateGeneralJournalRequest
         {
             JournalType = "Adjusting",
@@ -65,45 +63,9 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
 
         Assert.False(created.IsLocked);
 
-        var rows = await db.GeneralJournals
-            .Where(g => g.UserId == u.UserId && g.JournalEntryId == created.Id)
-            .ToListAsync();
+        int removed = await posting.RemoveAsync(u.UserId, created.Id);
 
-        db.GeneralJournals.RemoveRange(rows);
-        await db.SaveChangesAsync();
-
+        Assert.Equal(2, removed);
         Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
-    }
-
-    [Fact]
-    public async Task Import_IntoClosedPeriod_IsNotRejected_CurrentBehavior()
-    {
-        await using var db = fixture.CreateDb();
-        var u = await SeededUser.CreateAsync(db);
-        var tools = new ToolsService(db);
-
-        var result = await tools.ImportJournalEntriesAsync(u.UserId, new JournalImportRequestDto
-        {
-            TargetYear = 2025,
-            TargetMonth = 12,
-            Transactions = new()
-            {
-                new JournalTransactionDto
-                {
-                    Date = "2025-12-15",
-                    JournalType = "General",
-                    Lines = new()
-                    {
-                        new JournalLineDto { RefNumber = 101, AccountName = "Kas", Debit = 100m },
-                        new JournalLineDto { RefNumber = 301, AccountName = "Modal", Credit = 100m },
-                    },
-                },
-            },
-        });
-
-        // Celah: periode Desember 2025 sudah tertutup, tetapi import tetap menulis jurnal ke dalamnya.
-        Assert.Equal(1, result.ImportedEntriesCount);
-        Assert.Equal(2, await db.GeneralJournals.CountAsync(g => g.UserId == u.UserId));
-        Assert.True((await db.Periods.SingleAsync(p => p.Id == u.ClosedPeriodId)).IsClosed);
     }
 }

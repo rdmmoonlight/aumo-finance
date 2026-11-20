@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 public class ClosePeriodTests(PostgresFixture fixture)
 {
     private static PeriodsService Service(AumoBackend.Data.AppDbContext db) =>
-        new(db, new TransactionNumberService(db), new GeneralLedgersService(db));
+        new(db, TestPosting.For(db), new GeneralLedgersService(db));
 
     [Fact]
     public async Task Close_OpenPeriodWithNoEarlierOpenPeriod_Succeeds()
@@ -86,7 +86,7 @@ public class ClosePeriodTests(PostgresFixture fixture)
         var u = await SeededUser.CreateAsync(db);
         await Service(db).ClosePeriodAsync(u.UserId, u.OpenPeriodId);
 
-        var entryService = new JournalEntryService(db, new TransactionNumberService(db));
+        var entryService = new JournalEntryService(db, new TransactionNumberService(db), TestPosting.For(db));
         await Assert.ThrowsAsync<DomainRuleViolation>(() => entryService.CreateAsync(u.UserId, new AumoBackend.DTOs.Reports.CreateGeneralJournalRequest
         {
             EntryDate = SeededUser.Utc(2026, 1, 10),

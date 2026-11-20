@@ -20,7 +20,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
     };
 
     private static JournalEntryService Service(AumoBackend.Data.AppDbContext db) =>
-        new(db, new TransactionNumberService(db));
+        new(db, new TransactionNumberService(db), TestPosting.For(db));
 
     [Fact]
     public async Task Create_InOpenPeriod_PersistsPostedRowsWithTransactionNumber()

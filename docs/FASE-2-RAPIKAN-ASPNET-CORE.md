@@ -53,7 +53,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
 | 2.3  | Selesai                         | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
 | 2.4  | Selesai kode (6 dari 6 butir)   | Butir 1–6 selesai kode; menunggu CI hijau sebelum dinyatakan selesai                              |
-| 2.5  | Belum dimulai                   | `IJournalPostingService` belum ada                                                                |
+| 2.5  | Sebagian (butir 1 dan 2)        | `IJournalPostingService` sudah ada dan dipakai 4 titik tulis; butir 3 dan seterusnya belum        |
 | 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
 | 2.7  | Belum dimulai                   | Batas modul belum ditetapkan                                                                      |
 | 2.8  | Belum dimulai                   |                                                                                                   |
@@ -164,8 +164,13 @@ Tujuan: alur jelas dan mudah diuji.
 
 **Posting jurnal (satu pintu)**
 
-- [ ] Buat `IJournalPostingService` dengan operasi: `Post`, `Replace`, `Remove`.
-- [ ] Semua 8 titik penulisan `GeneralJournals` (temuan no. 3) wajib lewat pintu ini, termasuk import dan saldo awal periode.
+- [x] Buat `IJournalPostingService` dengan operasi: `Post`, `Replace`, `Remove` (`PostAsync`, `ReplaceAsync`, `RemoveAsync`; berkas di `Services/JournalEntry/`).
+- [x] Semua titik penulisan `GeneralJournals` (temuan no. 3) wajib lewat pintu ini, termasuk import dan saldo awal periode.
+  * Pemeriksaan kode 2026-11-20: titik tulis kini 4, yaitu `JournalEntryService.CreateAsync`, `PeriodsService.Create` (2 titik saldo awal), dan `ReversingJournalsService`. Keempatnya sudah lewat `IJournalPostingService`.
+  * `ToolsService` (import) dan hapus jurnal sudah tidak ada di backend, sehingga tes import dihapus. Bila import dibangun lagi, wajib memanggil `PostAsync`.
+  * `PeriodsService.Selection.cs` memulihkan baris arsip lewat `INSERT ... SELECT` dengan nomor jurnal asli. Itu salinan ulang, bukan posting, dan menjadi satu-satunya pengecualian tertulis di `JournalWriteGuardTests`. Penghapusan baris oleh archiver terjadi di luar .NET.
+  * `ReplaceAsync` dan `RemoveAsync` belum punya pemanggil, karena endpoint ubah dan hapus jurnal belum ada.
+  * Pemeriksaan akun, kunci periode, dan perilaku import (butir 3 dan 4) belum dikerjakan.
 - [ ] Pintu ini yang memeriksa: akun aktif milik pengguna, kunci periode berdasarkan tanggal (bukan periode terpilih), saldo seimbang, nomor transaksi.
 - [ ] Putuskan perilaku import terhadap periode tertutup (saat ini tidak diperiksa). Samakan dengan jurnal biasa dan catat di "Catatan Perubahan Perilaku".
 
@@ -252,6 +257,8 @@ Isi bagian ini bila ada perubahan yang terlihat dari luar.
 | Tanggal    | Perubahan                                                                                                                                             | Alasan                                                                                                                               |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-11-19 | `AccountClassificationHelper.NormalBalanceIsDebit(string?)` untuk jenis tidak dikenal berubah dari debit menjadi kredit (kini sama dengan buku besar) | Satu sumber aturan. Tidak ada pemanggil di kode produksi; validator hanya meloloskan tujuh jenis kanonik, sehingga API tidak berubah |
+| 2026-11-20 | `JournalEntryId` jurnal biasa dan jurnal pembalik kini diambil dari sequence; nomor yang sudah dipakai baris lama dilewati | Satu sumber nomor. Sebelumnya dua jalur memakai MAX+1 dan dua jalur saldo awal memakai sequence |
+| 2026-11-20 | Saldo awal periode kini melewati aturan domain jurnal (maksimal 2 desimal, tidak negatif, seimbang) | Satu pintu. Validator `CreatePeriodRequest` sudah menolak nilai negatif, sehingga efek praktis hanya pada nominal lebih dari 2 desimal |
 
 ## 6. Pertanyaan Keputusan
 

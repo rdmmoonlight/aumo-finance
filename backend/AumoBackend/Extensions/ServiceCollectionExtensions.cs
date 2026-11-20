@@ -113,6 +113,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IAvatarStorage, NeonBucketStorage>();
 
         services.AddScoped<ITransactionNumberService, TransactionNumberService>();
+        services.AddScoped<IJournalPostingService, JournalPostingService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IChartOfAccountsService, ChartOfAccountsService>();
         services.AddScoped<IDashboardService, DashboardService>();

@@ -22,7 +22,7 @@ public class GeneralLedgerTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-        var entries = new JournalEntryService(db, new TransactionNumberService(db));
+        var entries = new JournalEntryService(db, new TransactionNumberService(db), TestPosting.For(db));
 
         // Kas (debit normal): +1000 lalu -300. Modal (kredit normal): +1000 lalu -300.
         await entries.CreateAsync(u.UserId, Journal(SeededUser.Utc(2026, 1, 5), u.CashId, u.EquityId, 1000m));
@@ -51,7 +51,7 @@ public class GeneralLedgerTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-        var entries = new JournalEntryService(db, new TransactionNumberService(db));
+        var entries = new JournalEntryService(db, new TransactionNumberService(db), TestPosting.For(db));
         await entries.CreateAsync(u.UserId, Journal(SeededUser.Utc(2026, 1, 5), u.CashId, u.EquityId, 100m));
 
         var result = await new GeneralLedgersService(db).GetPermanentLedgersAsync(u.UserId);
@@ -64,7 +64,7 @@ public class GeneralLedgerTests(PostgresFixture fixture)
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
-        var entries = new JournalEntryService(db, new TransactionNumberService(db));
+        var entries = new JournalEntryService(db, new TransactionNumberService(db), TestPosting.For(db));
         await entries.CreateAsync(u.UserId, Journal(SeededUser.Utc(2026, 1, 5), u.CashId, u.EquityId, 100m));
         // Februari 2026 tidak punya periode, jadi tidak ikut buku besar periode terpilih (Januari).
         await entries.CreateAsync(u.UserId, Journal(SeededUser.Utc(2026, 2, 5), u.CashId, u.EquityId, 900m));

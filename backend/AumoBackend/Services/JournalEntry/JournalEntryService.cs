@@ -10,11 +10,16 @@ public class JournalEntryService : IJournalEntryService
 {
     private readonly AppDbContext db;
     private readonly ITransactionNumberService transactionNumberService;
+    private readonly IJournalPostingService posting;
 
-    public JournalEntryService(AppDbContext db, ITransactionNumberService transactionNumberService)
+    public JournalEntryService(
+        AppDbContext db,
+        ITransactionNumberService transactionNumberService,
+        IJournalPostingService posting)
     {
         this.db = db;
         this.transactionNumberService = transactionNumberService;
+        this.posting = posting;
     }
 
     public async Task<GeneralJournalResponseDto?> GetByIdAsync(Guid userId, int id)
@@ -116,37 +121,24 @@ public class JournalEntryService : IJournalEntryService
             throw new DomainRuleViolation("This date falls within a closed accounting period. Choose a date in an open period.");
         }
 
-        string journalType = string.IsNullOrWhiteSpace(request.JournalType) ? "General" : request.JournalType;
-        string transactionNumber = await this.transactionNumberService.GenerateAsync(userId, journalType, request.EntryDate);
-
-        var deviceCreatedAt = request.CreatedAt == default ? DateTime.UtcNow : request.CreatedAt;
-        var entryDate = DateTime.SpecifyKind(request.EntryDate, DateTimeKind.Utc);
-        var createdAt = DateTime.SpecifyKind(deviceCreatedAt, DateTimeKind.Utc);
-
-        int journalEntryId = ((await this.db.GeneralJournals
-            .Select(gj => (int?)gj.JournalEntryId)
-            .MaxAsync()) ?? 0) + 1;
-
-        var rows = GeneralJournalWriter.BuildRows(
-            journalEntryId, userId, transactionNumber, journalType, entryDate, createdAt, null,
-            effectiveLines.Select(l => new GeneralJournalWriter.Line(l.AccountId, l.LineDescription, l.Debit, l.Credit)));
-
-        foreach (var row in rows)
-        {
-            this.db.GeneralJournals.Add(row);
-        }
-        await this.db.SaveChangesAsync();
+        // Penulisan ke GeneralJournals hanya lewat IJournalPostingService.
+        var posted = await this.posting.PostAsync(new PostJournalCommand(
+            userId,
+            request.JournalType,
+            request.EntryDate,
+            effectiveLines.Select(l => new JournalLine(l.AccountId, l.LineDescription, l.Debit, l.Credit)).ToList(),
+            request.CreatedAt));
 
         return new GeneralJournalResponseDto
         {
-            Id = journalEntryId,
-            TransactionNumber = transactionNumber,
-            JournalType = journalType,
-            EntryDate = entryDate,
-            CreatedAt = createdAt,
+            Id = posted.JournalEntryId,
+            TransactionNumber = posted.TransactionNumber,
+            JournalType = posted.JournalType,
+            EntryDate = posted.EntryDate,
+            CreatedAt = posted.CreatedAt,
             UpdatedAt = null,
             IsLocked = false,
-            Lines = rows.Select(l => new GeneralJournalLineDto
+            Lines = posted.Rows.Select(l => new GeneralJournalLineDto
             {
                 Id = l.LineId,
                 AccountId = l.AccountId,

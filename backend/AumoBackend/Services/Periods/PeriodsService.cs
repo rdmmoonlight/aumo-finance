@@ -11,16 +11,16 @@ using Microsoft.EntityFrameworkCore;
 public partial class PeriodsService : IPeriodsService
 {
     private readonly AppDbContext db;
-    private readonly ITransactionNumberService txNumberService;
+    private readonly IJournalPostingService posting;
     private readonly IGeneralLedgersService glService;
 
     public PeriodsService(
         AppDbContext db,
-        ITransactionNumberService txNumberService,
+        IJournalPostingService posting,
         IGeneralLedgersService glService)
     {
         this.db = db;
-        this.txNumberService = txNumberService;
+        this.posting = posting;
         this.glService = glService;
     }
 

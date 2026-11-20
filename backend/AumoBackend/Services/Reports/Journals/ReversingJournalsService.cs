@@ -69,64 +69,43 @@ public partial class JournalsService
         }
 
         var createdAt = DateTime.UtcNow;
-        var created = new List<(int EntryId, string TransactionNumber, List<GeneralJournal> Rows)>();
-        var nextJournalEntryId = (await _db.GeneralJournals
-            .Select(g => (int?)g.JournalEntryId)
-            .MaxAsync() ?? 0) + 1;
+        var sourceGroups = sourceRows.GroupBy(g => g.JournalEntryId).ToList();
 
-        foreach (var group in sourceRows.GroupBy(g => g.JournalEntryId))
+        // Seluruh jurnal pembalik tersimpan atau tidak sama sekali: satu transaksi di sekitar semua PostAsync.
+        var strategy = _db.Database.CreateExecutionStrategy();
+        var created = await strategy.ExecuteAsync(async () =>
         {
-            var sourceHeader = group.First();
-            int journalEntryId = nextJournalEntryId++;
-            string transactionNumber = await _transactionNumberService.GenerateAsync(userId, ReversingType, reversalDate);
+            _db.ChangeTracker.Clear();
+            await using var tx = await _db.Database.BeginTransactionAsync();
 
-            // Debit dan Kredit setiap baris ditukar.
-            var rows = GeneralJournalWriter.BuildRows(
-                journalEntryId,
-                userId,
-                transactionNumber,
-                ReversingType,
-                reversalDate,
-                createdAt,
-                null,
-                group.OrderBy(l => l.LineOrder).Select(l => new GeneralJournalWriter.Line(
-                    l.AccountId,
-                    string.IsNullOrWhiteSpace(l.LineDescription)
-                        ? $"Reversing {sourceHeader.TransactionNumber}"
-                        : $"Reversing: {l.LineDescription}",
-                    l.Credit,
-                    l.Debit)));
-
-            foreach (var row in rows)
+            var posted = new List<PostedJournal>();
+            foreach (var group in sourceGroups)
             {
-                row.SourceJournalEntryId = sourceHeader.JournalEntryId;
+                var sourceHeader = group.First();
+
+                // Debit dan Kredit setiap baris ditukar. Penulisan ke GeneralJournals hanya lewat IJournalPostingService.
+                posted.Add(await _posting.PostAsync(new PostJournalCommand(
+                    userId,
+                    ReversingType,
+                    reversalDate,
+                    group.OrderBy(l => l.LineOrder).Select(l => new JournalLine(
+                        l.AccountId,
+                        string.IsNullOrWhiteSpace(l.LineDescription)
+                            ? $"Reversing {sourceHeader.TransactionNumber}"
+                            : $"Reversing: {l.LineDescription}",
+                        l.Credit,
+                        l.Debit)).ToList(),
+                    createdAt,
+                    sourceHeader.JournalEntryId)));
             }
 
-            created.Add((journalEntryId, transactionNumber, rows.Select(row => new AumoBackend.Models.GeneralJournal
-            {
-                LineId = row.LineId,
-                JournalEntryId = row.JournalEntryId,
-                UserId = row.UserId,
-                TransactionNumber = row.TransactionNumber,
-                JournalType = row.JournalType,
-                EntryDate = row.EntryDate,
-                CreatedAt = row.CreatedAt,
-                SourceJournalEntryId = row.SourceJournalEntryId,
-                AccountId = row.AccountId,
-                LineDescription = row.LineDescription,
-                Debit = row.Debit,
-                Credit = row.Credit,
-                LineOrder = row.LineOrder,
-            }).ToList()));
-        }
-
-        // Satu SaveChanges: seluruh jurnal pembalik tersimpan atau tidak sama sekali.
-        _db.GeneralJournals.AddRange(created.SelectMany(c => c.Rows));
-        await _db.SaveChangesAsync();
+            await tx.CommitAsync();
+            return posted;
+        });
 
         return created.Select(c => new GeneralJournalResponseDto
         {
-            Id = c.EntryId,
+            Id = c.JournalEntryId,
             TransactionNumber = c.TransactionNumber,
             JournalType = ReversingType,
             EntryDate = reversalDate,
