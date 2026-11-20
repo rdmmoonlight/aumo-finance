@@ -1,6 +1,7 @@
 namespace AumoBackend.Test.Integration;
 
 using AumoBackend.Data;
+using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
@@ -17,7 +18,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         new TrialBalancesService(db),
         new TransactionNumberService(db)
     );
-    
+
     private static async Task<(int ExpenseId, int LiabilityId)> SeedAccrualAccountsAsync(AppDbContext db, Guid userId)
     {
         var expense = new ChartOfAccount
@@ -134,7 +135,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
     }
 
     [Fact]
-    public async Task CreateReversing_DuplicateReversal_ThrowsInvalidOperationException()
+    public async Task CreateReversing_DuplicateReversal_ThrowsDomainRuleViolation()
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
@@ -158,7 +159,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         await service.CreateReversingAsync(u.UserId, request);
 
         // Pembalikan kedua untuk sumber yang sama wajib ditolak
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => service.CreateReversingAsync(u.UserId, request));
+        var ex = await Assert.ThrowsAsync<DomainRuleViolation>(() => service.CreateReversingAsync(u.UserId, request));
         Assert.Contains("sudah pernah dibalik", ex.Message);
 
         await using var verify = fixture.CreateDb();
@@ -173,7 +174,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
     }
 
     [Fact]
-    public async Task CreateReversing_WhenSelectedPeriodIsClosed_ThrowsInvalidOperationException()
+    public async Task CreateReversing_WhenSelectedPeriodIsClosed_ThrowsDomainRuleViolation()
     {
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
@@ -194,7 +195,7 @@ public class ReversingJournalsTests(PostgresFixture fixture)
         openPeriod.IsClosed = true;
         await db.SaveChangesAsync();
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<DomainRuleViolation>(() =>
             CreateService(db).CreateReversingAsync(u.UserId, new CreateReversingRequest
             {
                 AdjustingEntryIds = [adjustingId],

@@ -11,8 +11,8 @@ public interface IJournalsService
     /// <summary>
     /// Membuat jurnal pembalik (Reversing) pada hari pertama periode terpilih dari jurnal penyesuaian
     /// periode sebelumnya: Debit dan Kredit setiap baris ditukar. Satu jurnal sumber hanya dapat dibalik
-    /// sekali. Melempar KeyNotFoundException jika jurnal sumber tidak ada dan InvalidOperationException
-    /// jika periode tidak dipilih/sudah ditutup, tanggal sumber tidak valid, atau sudah pernah dibalik.
+    /// sekali. Melempar KeyNotFoundException jika jurnal sumber tidak ada dan DomainRuleViolation
+    /// (turunan InvalidOperationException) jika periode tidak dipilih/sudah ditutup, tanggal sumber tidak valid, atau sudah pernah dibalik.
     /// </summary>
     Task<List<GeneralJournalResponseDto>> CreateReversingAsync(Guid userId, CreateReversingRequest request);
 

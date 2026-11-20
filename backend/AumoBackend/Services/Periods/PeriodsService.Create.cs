@@ -39,7 +39,7 @@ public partial class PeriodsService
             {
                 PeriodRules.EnsurePreviousClosed(previous is null ? null : ToRange(previous), periodName);
             }
-            catch (InvalidOperationException ex)
+            catch (DomainRuleViolation ex)
             {
                 return Fail(ex.Message);
             }

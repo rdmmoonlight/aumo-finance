@@ -10,8 +10,7 @@ public sealed record PeriodRange(int Id, string Name, DateTime StartDate, DateTi
 /// 1. Periode yang sudah ditutup tidak dapat ditutup lagi.
 /// 2. Periode hanya dapat ditutup bila tidak ada periode yang lebih awal yang masih terbuka.
 /// 3. Periode baru hanya dapat dibuka bila periode sebelumnya (jika ada) sudah ditutup.
-/// Pelanggaran dilaporkan lewat <see cref="InvalidOperationException"/> agar pesan API tetap;
-/// diganti dengan kelas pengecualian domain pada butir berikutnya di Fase 2.4.
+/// Pelanggaran dilaporkan lewat <see cref="DomainRuleViolation"/>.
 /// </remarks>
 public static class PeriodRules
 {
@@ -31,12 +30,12 @@ public static class PeriodRules
 
         if (period.IsClosed)
         {
-            throw new InvalidOperationException($"Period {period.Name} is already closed.");
+            throw new DomainRuleViolation($"Period {period.Name} is already closed.");
         }
 
         if (HasEarlierOpenPeriod(period, allPeriods))
         {
-            throw new InvalidOperationException(
+            throw new DomainRuleViolation(
                 $"Cannot close {period.Name}: an earlier period is still open. Close earlier periods first.");
         }
     }
@@ -46,7 +45,7 @@ public static class PeriodRules
     {
         if (previous is { IsClosed: false })
         {
-            throw new InvalidOperationException($"Period {previous.Name} must be closed before opening {newPeriodName}.");
+            throw new DomainRuleViolation($"Period {previous.Name} must be closed before opening {newPeriodName}.");
         }
     }
 }

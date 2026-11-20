@@ -26,7 +26,7 @@ public class PeriodRulesTests
     public void EnsureCanClose_AlreadyClosed_Throws()
     {
         var jan = P(1, 1, true);
-        var ex = Assert.Throws<InvalidOperationException>(() => PeriodRules.EnsureCanClose(jan, new[] { jan }));
+        var ex = Assert.Throws<DomainRuleViolation>(() => PeriodRules.EnsureCanClose(jan, new[] { jan }));
         Assert.Equal("Period 2026-01 is already closed.", ex.Message);
     }
 
@@ -35,7 +35,7 @@ public class PeriodRulesTests
     {
         var jan = P(1, 1, false);
         var feb = P(2, 2, false);
-        var ex = Assert.Throws<InvalidOperationException>(() => PeriodRules.EnsureCanClose(feb, new[] { jan, feb }));
+        var ex = Assert.Throws<DomainRuleViolation>(() => PeriodRules.EnsureCanClose(feb, new[] { jan, feb }));
         Assert.Equal("Cannot close 2026-02: an earlier period is still open. Close earlier periods first.", ex.Message);
     }
 
@@ -65,7 +65,7 @@ public class PeriodRulesTests
     [Fact]
     public void EnsurePreviousClosed_PreviousOpen_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() => PeriodRules.EnsurePreviousClosed(P(1, 1, false), "2026-02"));
+        var ex = Assert.Throws<DomainRuleViolation>(() => PeriodRules.EnsurePreviousClosed(P(1, 1, false), "2026-02"));
         Assert.Equal("Period 2026-01 must be closed before opening 2026-02.", ex.Message);
     }
 }

@@ -113,7 +113,7 @@ public class JournalEntryService : IJournalEntryService
 
         if (PeriodLock.IsDateLocked(request.EntryDate, closedPeriods))
         {
-            throw new InvalidOperationException("This date falls within a closed accounting period. Choose a date in an open period.");
+            throw new DomainRuleViolation("This date falls within a closed accounting period. Choose a date in an open period.");
         }
 
         string journalType = string.IsNullOrWhiteSpace(request.JournalType) ? "General" : request.JournalType;
@@ -207,7 +207,7 @@ public class JournalEntryService : IJournalEntryService
 
         if (lines.Any(l => !validAccountIds.Contains(l.AccountId)))
         {
-            throw new InvalidOperationException("One or more selected accounts are invalid or inactive.");
+            throw new DomainRuleViolation("One or more selected accounts are invalid or inactive.");
         }
     }
 }

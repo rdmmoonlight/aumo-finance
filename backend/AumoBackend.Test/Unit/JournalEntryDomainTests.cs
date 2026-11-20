@@ -56,14 +56,14 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_EmptyList_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() => JournalEntry.Create(Array.Empty<JournalLine>()));
+        var ex = Assert.Throws<DomainRuleViolation>(() => JournalEntry.Create(Array.Empty<JournalLine>()));
         Assert.Contains("at least two", ex.Message);
     }
 
     [Fact]
     public void Create_SingleEffectiveLine_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[] { Line(1, 100, 0), Line(2, 0, 0) }));
         Assert.Contains("at least two", ex.Message);
     }
@@ -71,7 +71,7 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_Unbalanced_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[] { Line(1, 100, 0), Line(2, 0, 99) }));
         Assert.Contains("must equal", ex.Message);
     }
@@ -88,7 +88,7 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_NegativeDebit_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[] { Line(1, 100, 0), Line(2, -100, 0) }));
         Assert.Contains("cannot be negative", ex.Message);
     }
@@ -96,7 +96,7 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_NegativeCredit_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[] { Line(1, 100, 0), Line(2, 0, -100) }));
         Assert.Contains("cannot be negative", ex.Message);
     }
@@ -104,7 +104,7 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_LineWithDebitAndCredit_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[] { Line(1, 100, 100), Line(2, 0, 0.01m), Line(3, 0.01m, 0) }));
         Assert.Contains("both a debit and a credit", ex.Message);
     }
@@ -112,7 +112,7 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_MoreThanTwoDecimals_IsRejectedNotRounded()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[] { Line(1, 100.001m, 0), Line(2, 0, 100.001m) }));
         Assert.Contains("2 decimal places", ex.Message);
     }
@@ -136,7 +136,7 @@ public class JournalEntryDomainTests
     [Fact]
     public void Create_AmountBeyondSixteenIntegerDigits_Throws()
     {
-        var ex = Assert.Throws<InvalidOperationException>(() =>
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
             JournalEntry.Create(new[]
             {
                 Line(1, 10_000_000_000_000_000m, 0),

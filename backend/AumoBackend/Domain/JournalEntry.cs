@@ -13,8 +13,7 @@ namespace AumoBackend.Domain;
 /// 5. Presisi seragam: paling banyak 2 desimal dan 16 digit sebelum koma (selaras dengan kolom DECIMAL(18,2)).
 ///    Nominal yang melebihi presisi DITOLAK, tidak dibulatkan secara diam-diam.
 /// 6. Total debit sama dengan total kredit dan tidak nol.
-/// Pesan kesalahan sementara memakai <see cref="InvalidOperationException"/> agar perilaku API tetap;
-/// diganti dengan kelas pengecualian domain pada butir berikutnya di Fase 2.4.
+/// Pelanggaran aturan dilaporkan lewat <see cref="DomainRuleViolation"/>.
 /// </remarks>
 public sealed class JournalEntry
 {
@@ -48,7 +47,7 @@ public sealed class JournalEntry
 
         if (effective.Count < MinimumLineCount)
         {
-            throw new InvalidOperationException("A journal entry must have at least two line items.");
+            throw new DomainRuleViolation("A journal entry must have at least two line items.");
         }
 
         foreach (var line in effective)
@@ -61,7 +60,7 @@ public sealed class JournalEntry
 
         if (totalDebit != totalCredit || totalDebit == 0)
         {
-            throw new InvalidOperationException("Total debit must equal total credit before posting.");
+            throw new DomainRuleViolation("Total debit must equal total credit before posting.");
         }
 
         return new JournalEntry(effective.AsReadOnly(), totalDebit, totalCredit);
@@ -78,22 +77,22 @@ public sealed class JournalEntry
     {
         if (line.Debit < 0)
         {
-            throw new InvalidOperationException("Debit amount cannot be negative.");
+            throw new DomainRuleViolation("Debit amount cannot be negative.");
         }
 
         if (line.Credit < 0)
         {
-            throw new InvalidOperationException("Credit amount cannot be negative.");
+            throw new DomainRuleViolation("Credit amount cannot be negative.");
         }
 
         if (line.Debit > 0 && line.Credit > 0)
         {
-            throw new InvalidOperationException("A journal line cannot have both a debit and a credit amount.");
+            throw new DomainRuleViolation("A journal line cannot have both a debit and a credit amount.");
         }
 
         if (!IsValidAmount(line.Debit) || !IsValidAmount(line.Credit))
         {
-            throw new InvalidOperationException(
+            throw new DomainRuleViolation(
                 "Amounts support at most 2 decimal places and 16 digits before the decimal point.");
         }
     }

@@ -28,7 +28,7 @@ public partial class PeriodsService
         {
             PeriodRules.EnsureCanClose(ToRange(entity), periods.Select(ToRange));
         }
-        catch (InvalidOperationException ex)
+        catch (DomainRuleViolation ex)
         {
             return new BaseServiceResult
             {

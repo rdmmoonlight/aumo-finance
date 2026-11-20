@@ -1,5 +1,6 @@
 namespace AumoBackend.Test.Integration;
 
+using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Services.JournalEntries;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +63,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         await using var db = fixture.CreateDb();
         var u = await SeededUser.CreateAsync(db);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
             Service(db).CreateAsync(u.UserId, Request(u, SeededUser.Utc(2025, 12, 15), 100m)));
 
         Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
@@ -78,7 +79,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var request = Request(u, SeededUser.Utc(2026, 1, 5), 100m);
         request.Lines[0].AccountId = other.CashId;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Service(db).CreateAsync(u.UserId, request));
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => Service(db).CreateAsync(u.UserId, request));
     }
 
     [Fact]
@@ -90,7 +91,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         cash.IsActive = false;
         await db.SaveChangesAsync();
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
             Service(db).CreateAsync(u.UserId, Request(u, SeededUser.Utc(2026, 1, 5), 100m)));
     }
 
@@ -102,7 +103,7 @@ public class JournalEntryServiceTests(PostgresFixture fixture)
         var request = Request(u, SeededUser.Utc(2026, 1, 5), 100m);
         request.Lines[1].Credit = 90m;
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => Service(db).CreateAsync(u.UserId, request));
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => Service(db).CreateAsync(u.UserId, request));
     }
 
     [Fact]

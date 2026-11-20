@@ -1,5 +1,6 @@
 namespace AumoBackend.Test.Integration;
 
+using AumoBackend.Domain;
 using AumoBackend.Models;
 using AumoBackend.Services.JournalEntries;
 using AumoBackend.Services.Periods;
@@ -86,7 +87,7 @@ public class ClosePeriodTests(PostgresFixture fixture)
         await Service(db).ClosePeriodAsync(u.UserId, u.OpenPeriodId);
 
         var entryService = new JournalEntryService(db, new TransactionNumberService(db));
-        await Assert.ThrowsAsync<InvalidOperationException>(() => entryService.CreateAsync(u.UserId, new AumoBackend.DTOs.Reports.CreateGeneralJournalRequest
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => entryService.CreateAsync(u.UserId, new AumoBackend.DTOs.Reports.CreateGeneralJournalRequest
         {
             EntryDate = SeededUser.Utc(2026, 1, 10),
             Lines = new()

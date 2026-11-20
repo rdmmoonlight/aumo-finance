@@ -1,6 +1,7 @@
 namespace AumoBackend.Services.Reports.Journals;
 
 using AumoBackend.Data;
+using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
 using AumoBackend.Helpers;
 using AumoBackend.Models;
@@ -17,15 +18,15 @@ public partial class JournalsService
         var sourceIds = (request?.AdjustingEntryIds ?? new List<int>()).Distinct().ToList();
         if (sourceIds.Count == 0)
         {
-            throw new InvalidOperationException("Pilih minimal satu jurnal penyesuaian yang akan dibalik.");
+            throw new DomainRuleViolation("Pilih minimal satu jurnal penyesuaian yang akan dibalik.");
         }
 
         var period = await SelectedPeriodHelper.GetSelectedPeriodAsync(_db, userId)
-            ?? throw new InvalidOperationException("Belum ada periode akuntansi yang dipilih.");
+            ?? throw new DomainRuleViolation("Belum ada periode akuntansi yang dipilih.");
 
         if (period.IsClosed)
         {
-            throw new InvalidOperationException("Periode terpilih sudah ditutup. Jurnal pembalik hanya dapat dibuat pada periode yang masih terbuka.");
+            throw new DomainRuleViolation("Periode terpilih sudah ditutup. Jurnal pembalik hanya dapat dibuat pada periode yang masih terbuka.");
         }
 
         // Jurnal pembalik dicatat pada hari pertama periode terpilih.
@@ -49,7 +50,7 @@ public partial class JournalsService
         // Hanya jurnal penyesuaian dari periode sebelumnya yang dapat dibalik.
         if (sourceRows.Any(g => g.EntryDate.Date >= reversalDate.Date))
         {
-            throw new InvalidOperationException("Jurnal yang dibalik harus bertanggal sebelum awal periode terpilih.");
+            throw new DomainRuleViolation("Jurnal yang dibalik harus bertanggal sebelum awal periode terpilih.");
         }
 
         // Satu jurnal sumber hanya boleh dibalik satu kali.
@@ -65,7 +66,7 @@ public partial class JournalsService
 
         if (alreadyReversed.Count > 0)
         {
-            throw new InvalidOperationException($"Jurnal berikut sudah pernah dibalik: {string.Join(", ", alreadyReversed)}.");
+            throw new DomainRuleViolation($"Jurnal berikut sudah pernah dibalik: {string.Join(", ", alreadyReversed)}.");
         }
 
         var createdAt = DateTime.UtcNow;

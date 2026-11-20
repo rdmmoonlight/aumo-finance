@@ -52,7 +52,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.1  | Selesai (5 dari 5 butir)        | Header `PlaceholderCompany` sudah dihapus dari seluruh berkas `.cs`                               |
 | 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
 | 2.3  | Selesai                         | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
-| 2.4  | Berjalan (3 dari 6 butir)       | Butir 3 (`JournalEntry`), 4 (`AccountType`), dan 5 (`Period`) selesai kode; belum diuji CI        |
+| 2.4  | Selesai kode (6 dari 6 butir)   | Butir 1–6 selesai kode; menunggu CI hijau sebelum dinyatakan selesai                              |
 | 2.5  | Belum dimulai                   | `IJournalPostingService` belum ada                                                                |
 | 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
 | 2.7  | Belum dimulai                   | Batas modul belum ditetapkan                                                                      |
@@ -137,7 +137,7 @@ Tujuan: aturan (invarian) ditulis sekali, ketat, dan mudah diuji.
   - presisi desimal seragam (tetapkan jumlah desimal dan aturan pembulatan).
 - [x] `AccountType`: pindahkan `PermanentTypes`, `TemporaryTypes`, `IsDebitNormal`, dan rentang nomor akun ke Domain sebagai satu sumber. Dikerjakan di `Domain/AccountType.cs`; `PeriodsService`, `GeneralLedgersService`, dan `AccountClassificationHelper` memanggilnya dan tidak lagi menyimpan daftar sendiri. Nama lama yang longgar di buku besar (`Asset`, `Revenue`, `Expenses`, dst.) dipetakan lewat `AccountType.Normalize`.
 - [x] `Period`: perilaku `Close()` dan pemeriksaan "periode sebelumnya masih terbuka" menjadi aturan domain. Dikerjakan di `Domain/PeriodRules.cs` (`EnsureCanClose`, `EnsurePreviousClosed`, `HasEarlierOpenPeriod`) dengan nilai `PeriodRange`; `ClosePeriodAsync` dan `CreatePeriodAsync` hanya memanggilnya. Pesan API tidak berubah.
-- [ ] Pesan kesalahan memakai kelas pengecualian domain (mis. `DomainRuleViolation`), bukan `ArgumentException` dan `InvalidOperationException` umum.
+- [x] Pesan kesalahan memakai kelas pengecualian domain (mis. `DomainRuleViolation`), bukan `ArgumentException` dan `InvalidOperationException` umum. Dikerjakan di `Domain/DomainRuleViolation.cs`; seluruh pelanggaran aturan di `JournalEntry`, `PeriodRules`, `JournalEntryService`, dan `ReversingJournalsService` kini melempar `DomainRuleViolation`.
 
 Catatan pelaksanaan (butir 3, `JournalEntry`):
 
@@ -146,8 +146,15 @@ Catatan pelaksanaan (butir 3, `JournalEntry`):
 - Presisi (pertanyaan keputusan no. 4): paling banyak 2 desimal dan 16 digit sebelum koma, selaras `DECIMAL(18,2)` dan `PrecisionScale(18, 2, true)` di validator. Nominal yang melebihi presisi **ditolak**, tidak dibulatkan.
 - `JournalEntryService.ValidateAndExtractLines` kini hanya memanggil `JournalEntry.Create`; tanda tangan dan pesan lama dipertahankan sehingga tes fase 2.2 tidak berubah.
 - Perilaku API tetap: aturan tanpa-negatif, satu-sisi, dan presisi sebelumnya sudah ditegakkan `JournalEntryValidatorBase`; kini ditegakkan juga di lapisan domain.
-- Pengecualian masih `InvalidOperationException`; penggantian ke `DomainRuleViolation` dikerjakan pada butir 6.
+- Pengecualian diganti menjadi `DomainRuleViolation` pada butir 6.
 - Tes: `AumoBackend.Test/Unit/JournalEntryDomainTests.cs` (tanpa database).
+
+Catatan pelaksanaan (butir 6, `DomainRuleViolation`):
+
+- `DomainRuleViolation` menurunkan `InvalidOperationException` dengan sengaja. `ControllerBaseExtensions.HandleServiceException` dan `JournalsController` tetap menghasilkan 400 dengan pesan yang sama, sehingga perilaku API tidak berubah.
+- Tetap memakai pengecualian bawaan: `ArgumentNullException` (guard argumen), serta kesalahan konfigurasi dan infrastruktur (`DatabaseServiceExtensions`, `JwtSettings`, `NeonBucketStorage`, `HomeService`, `TransactionNumberService`, `AppDbContextFactory`), karena bukan pelanggaran aturan akuntansi.
+- `PeriodsService` menangkap `DomainRuleViolation` saja, bukan `InvalidOperationException` umum.
+- Tes yang menegaskan tipe pengecualian diperbarui dari `InvalidOperationException` ke `DomainRuleViolation` (tes tipe bersifat tepat). Tes baru: `Unit/DomainRuleViolationTests.cs`.
 
 Selesai bila: seluruh aturan di atas punya tes unit tanpa database; Application hanya memanggil, tidak menulis ulang aturan.
 
