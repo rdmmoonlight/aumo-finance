@@ -1,12 +1,10 @@
 namespace AumoBackend.Services.Periods;
 
-using System.Globalization;
 using AumoBackend.Data;
 using AumoBackend.Domain;
 using AumoBackend.DTOs;
 using AumoBackend.Helpers;
-using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Reports.GeneralLedgers;
 using Microsoft.EntityFrameworkCore;
 

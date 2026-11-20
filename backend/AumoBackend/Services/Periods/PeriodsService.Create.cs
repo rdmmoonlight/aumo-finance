@@ -4,7 +4,7 @@ using System.Globalization;
 using AumoBackend.Domain;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using Microsoft.EntityFrameworkCore;
 
 public partial class PeriodsService

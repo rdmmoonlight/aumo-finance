@@ -7,7 +7,7 @@ using AumoBackend.Services.ChartOfAccounts;
 using AumoBackend.Services.Dashboard;
 using AumoBackend.Services.Health;
 using AumoBackend.Services.Home;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Notifications;
 using AumoBackend.Services.Periods;
 using AumoBackend.Services.Reports.FinancialStatements;
@@ -20,8 +20,8 @@ using AumoBackend.Services.Settings;
 using AumoBackend.Services.Storage;
 using AumoBackend.Services.Tools;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 using StackExchange.Redis;
 

@@ -4,7 +4,7 @@ using System.Globalization;
 using AumoBackend.Data;
 using AumoBackend.DTOs;
 using AumoBackend.Models;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.ViewModels;
 using ClosedXML.Excel;
 using Microsoft.EntityFrameworkCore;
@@ -272,11 +272,16 @@ public class ToolsService(AppDbContext context) : IToolsService
 
                 if (importLines.Count > 0)
                 {
-                    int journalEntryId = await GeneralJournalWriter.NextJournalEntryIdAsync(context);
+                    int journalEntryId = (await context.GeneralJournals
+                        .MaxAsync(j => (int?)j.JournalEntryId) ?? 0) + 1;
 
-                    context.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+                    var journalRows = GeneralJournalWriter.BuildRows(
                         journalEntryId, userId, transactionNumber, txDto.JournalType,
-                        txDate, txDate, null, importLines));
+                        txDate, txDate, null, importLines);
+                    foreach (var journalRow in journalRows)
+                    {
+                        context.GeneralJournals.Add(journalRow);
+                    }
                     importedEntriesCount++;
                 }
             }
