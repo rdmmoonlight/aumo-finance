@@ -1,3 +1,7 @@
 {
-  "python.terminal.useEnvFile": true
+  "python.terminal.useEnvFile": true,
+  "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "openFiles",
+  "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "openFiles",
+  "dotnet.projects.enableAutomaticRestore": false,
+  "csharp.suppressBuildAssetsNotification": true
 }
