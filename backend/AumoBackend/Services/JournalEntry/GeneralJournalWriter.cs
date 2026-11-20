@@ -13,8 +13,8 @@ public static class GeneralJournalWriter
     public static async Task<int> NextJournalEntryIdAsync(AppDbContext db, CancellationToken ct = default)
     {
         var result = await db.Database
-     .SqlQueryRaw<int>("SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
-     .SingleAsync(ct);
+            .SqlQueryRaw<int>("SELECT nextval('\"GeneralJournal_JournalEntryId_seq\"')::int AS \"Value\"")
+            .SingleAsync(ct);
 
         return result;
     }
