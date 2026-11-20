@@ -1,7 +1,7 @@
 namespace AumoBackend.Test.Integration;
 
 using AumoBackend.DTOs.Reports;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Reports.GeneralLedgers;
 
 [Collection(PostgresCollection.Name)]
