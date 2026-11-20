@@ -1,10 +1,4 @@
-namespace AumoBackend.Services.JournalEntries;
-
-using AumoBackend.Data;
-using AumoBackend.Domain;
-using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
-using Microsoft.EntityFrameworkCore;
+namespace AumoBackend.Services.JournalEntry;
 
 public class JournalEntryService : IJournalEntryService
 {

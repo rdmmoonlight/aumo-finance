@@ -1,4 +1,4 @@
-namespace AumoBackend.Services.JournalEntries;
+namespace AumoBackend.Services.JournalEntry;
 
 public interface ITransactionNumberService
 {

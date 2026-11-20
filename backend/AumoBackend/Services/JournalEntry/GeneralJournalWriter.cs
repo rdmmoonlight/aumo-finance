@@ -1,8 +1,4 @@
-namespace AumoBackend.Services.JournalEntries;
-
-using AumoBackend.Data;
-using AumoBackend.Models;
-using Microsoft.EntityFrameworkCore;
+namespace AumoBackend.Services.JournalEntry;
 
 public static class GeneralJournalWriter
 {

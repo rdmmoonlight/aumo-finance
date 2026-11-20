@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using AumoBackend.DTOs;
 using AumoBackend.Extensions;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using AumoBackend.Validators.Common;
 using FluentValidation;
 using Microsoft.AspNetCore.Authorization;

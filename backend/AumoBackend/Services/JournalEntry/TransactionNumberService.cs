@@ -1,8 +1,4 @@
-namespace AumoBackend.Services.JournalEntries;
-
-using System.Data;
-using AumoBackend.Data;
-using Microsoft.EntityFrameworkCore;
+namespace AumoBackend.Services.JournalEntry;
 
 public class TransactionNumberService(AppDbContext db) : ITransactionNumberService
 {

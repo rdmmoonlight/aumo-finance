@@ -1,6 +1,4 @@
-namespace AumoBackend.Services.JournalEntries;
-
-using AumoBackend.DTOs.Reports;
+namespace AumoBackend.Services.JournalEntry;
 
 public interface IJournalEntryService
 {
