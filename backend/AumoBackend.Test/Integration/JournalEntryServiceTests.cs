@@ -2,7 +2,7 @@ namespace AumoBackend.Test.Integration;
 
 using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 using Microsoft.EntityFrameworkCore;
 
 [Collection(PostgresCollection.Name)]
