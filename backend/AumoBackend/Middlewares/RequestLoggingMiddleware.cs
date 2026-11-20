@@ -1,6 +1,6 @@
-using System.Diagnostics;
-
 namespace AumoBackend.Middlewares;
+
+using System.Diagnostics;
 
 public class RequestLoggingMiddleware
 {

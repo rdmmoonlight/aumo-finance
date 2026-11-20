@@ -18,7 +18,6 @@ using AumoBackend.Services.Reports.TrialBalances;
 using AumoBackend.Services.Reports.Worksheet;
 using AumoBackend.Services.Settings;
 using AumoBackend.Services.Storage;
-using AumoBackend.Services.Tools;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -129,7 +128,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IWorksheetService, WorksheetService>();
         services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<ISummaryService, SummaryService>();
-        services.AddScoped<IToolsService, ToolsService>();
 
         services.AddHttpClient<IMarketDataService, MarketDataService>();
 

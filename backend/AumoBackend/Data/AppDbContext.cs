@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-
 using DataProtectionKeyEntity = Microsoft.AspNetCore.DataProtection.EntityFrameworkCore.DataProtectionKey;
 
 public partial class AppDbContext : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>, IDataProtectionKeyContext
