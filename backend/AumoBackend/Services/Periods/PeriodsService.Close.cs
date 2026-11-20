@@ -1,6 +1,8 @@
 namespace AumoBackend.Services.Periods;
 
+using AumoBackend.Domain;
 using AumoBackend.DTOs;
+using AumoBackend.Models;
 using Microsoft.EntityFrameworkCore;
 
 public partial class PeriodsService
@@ -17,24 +19,21 @@ public partial class PeriodsService
             };
         }
 
-        if (entity.IsClosed)
+        var periods = await this.db.Periods
+            .AsNoTracking()
+            .Where(p => p.UserId == userId)
+            .ToListAsync();
+
+        try
         {
-            return new BaseServiceResult
-            {
-                Success = false,
-                Message = $"Period {entity.PeriodName} is already closed.",
-            };
+            PeriodRules.EnsureCanClose(ToRange(entity), periods.Select(ToRange));
         }
-
-        var hasEarlierOpenPeriod = await this.db.Periods
-            .AnyAsync(p => p.UserId == userId && p.Id != entity.Id && p.StartDate < entity.StartDate && !p.IsClosed);
-
-        if (hasEarlierOpenPeriod)
+        catch (InvalidOperationException ex)
         {
             return new BaseServiceResult
             {
                 Success = false,
-                Message = $"Cannot close {entity.PeriodName}: an earlier period is still open. Close earlier periods first.",
+                Message = ex.Message,
             };
         }
 
@@ -47,4 +46,6 @@ public partial class PeriodsService
             Message = $"Period {entity.PeriodName} has been closed. Transactions in this period are now locked.",
         };
     }
+
+    private static PeriodRange ToRange(Period p) => new(p.Id, p.PeriodName, p.StartDate, p.EndDate, p.IsClosed);
 }

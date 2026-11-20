@@ -1,7 +1,13 @@
 {
-  "python.terminal.useEnvFile": true,
+  "dotnet.defaultSolution": "disable",
+  "dotnet.projects.enableAutomaticRestore": false,
   "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "openFiles",
   "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "openFiles",
-  "dotnet.projects.enableAutomaticRestore": false,
-  "csharp.suppressBuildAssetsNotification": true
+  "csharp.suppressBuildAssetsNotification": true,
+  "files.watcherExclude": {
+    "**/bin/**": true,
+    "**/obj/**": true,
+    "**/.git/objects/**": true,
+    "**/node_modules/**": true
+  }
 }

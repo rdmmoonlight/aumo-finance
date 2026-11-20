@@ -35,9 +35,13 @@ public partial class PeriodsService
                 .FirstOrDefaultAsync();
 
             // Periode sebelumnya wajib ditutup dulu sebelum periode baru dibuka.
-            if (previous != null && !previous.IsClosed)
+            try
             {
-                return Fail($"Period {previous.PeriodName} must be closed before opening {periodName}.");
+                PeriodRules.EnsurePreviousClosed(previous is null ? null : ToRange(previous), periodName);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Fail(ex.Message);
             }
 
             // Saldo Awal dihitung dari tabel sumber. Pilih periode sebelumnya terlebih dahulu
