@@ -1,6 +1,6 @@
 namespace AumoBackend.Test.Unit;
 
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 
 public class GeneralJournalWriterTests
 {

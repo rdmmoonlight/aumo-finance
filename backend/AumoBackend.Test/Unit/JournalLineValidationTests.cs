@@ -2,7 +2,7 @@ namespace AumoBackend.Test.Unit;
 
 using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
-using AumoBackend.Services.JournalEntries;
+using AumoBackend.Services.JournalEntry;
 
 public class JournalLineValidationTests
 {
