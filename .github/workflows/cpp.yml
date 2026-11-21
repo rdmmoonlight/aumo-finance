@@ -13,33 +13,38 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Menjalankan semua perintah 'run' secara otomatis di dalam folder archiver-service
+    defaults:
+      run:
+        working-directory: archiver-service
 
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-    - name: Install Dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential \
-          cmake \
-          g++ \
-          libpq-dev \
-          libpqxx-dev
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            g++ \
+            libpq-dev \
+            libpqxx-dev \
+            libpoco-dev
 
-    - name: Configure CMake
-      run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=Release
+      - name: Configure CMake
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-    - name: Build Project
-      run: |
-        cmake --build build --config Release
+      - name: Build Project
+        run: |
+          cmake --build build --config Release -j$(nproc)
 
-    - name: Verify Executable Output
-      run: |
-        if [ -f ./build/archiver-service ]; then
-          echo "Build sukses! Biner archiver-service berhasil dibuat."
-        else
-          echo "Biner tidak ditemukan!" && exit 1
-        fi
+      - name: Verify Executable Output
+        run: |
+          if [ -f ./build/archiver-service ]; then
+            echo "Build sukses! Biner archiver-service berhasil dibuat."
+          else
+            echo "Biner tidak ditemukan!" && exit 1
+          fi
