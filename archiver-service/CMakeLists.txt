@@ -60,15 +60,17 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# CONFIGURE_DEPENDS agar file .cpp baru otomatis terdeteksi saat build
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "archiver-service/*.cpp")
+# Mencari seluruh file .cpp hanya di dalam folder src/
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(archiver-service ${SOURCES})
 
+# Header files berada di dalam archiver-service/include/
 target_include_directories(archiver-service PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/archiver-service/include"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include"
 )
 
+# Pencarian library Poco
 find_package(Poco REQUIRED COMPONENTS Foundation Util)
 target_link_libraries(archiver-service PRIVATE
     Poco::Foundation
