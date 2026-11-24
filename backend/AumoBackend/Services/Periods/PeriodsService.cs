@@ -6,6 +6,8 @@ using AumoBackend.DTOs;
 using AumoBackend.Helpers;
 using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Reports.GeneralLedgers;
+using AumoBackend.Services.Reports.Journals;
+using AumoBackend.Services.Reports.TrialBalances;
 using Microsoft.EntityFrameworkCore;
 
 public partial class PeriodsService : IPeriodsService
@@ -13,15 +15,21 @@ public partial class PeriodsService : IPeriodsService
     private readonly AppDbContext db;
     private readonly IJournalPostingService posting;
     private readonly IGeneralLedgersService glService;
+    private readonly ITrialBalancesService trialBalances;
+    private readonly IJournalsService journals;
 
     public PeriodsService(
         AppDbContext db,
         IJournalPostingService posting,
-        IGeneralLedgersService glService)
+        IGeneralLedgersService glService,
+        ITrialBalancesService trialBalances,
+        IJournalsService journals)
     {
         this.db = db;
         this.posting = posting;
         this.glService = glService;
+        this.trialBalances = trialBalances;
+        this.journals = journals;
     }
 
     public async Task<GetPeriodsResponse> GetPeriodsAsync(Guid userId)

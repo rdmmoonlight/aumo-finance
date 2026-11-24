@@ -68,4 +68,76 @@ public class PeriodRulesTests
         var ex = Assert.Throws<DomainRuleViolation>(() => PeriodRules.EnsurePreviousClosed(P(1, 1, false), "2026-02"));
         Assert.Equal("Period 2026-01 must be closed before opening 2026-02.", ex.Message);
     }
+
+    [Fact]
+    public void EnsureTrialBalanceBalanced_Equal_Passes() =>
+        PeriodRules.EnsureTrialBalanceBalanced("2026-01", 1500.50m, 1500.50m);
+
+    [Fact]
+    public void EnsureTrialBalanceBalanced_DifferenceBelowOneCent_Passes() =>
+        PeriodRules.EnsureTrialBalanceBalanced("2026-01", 100.001m, 100.002m);
+
+    [Fact]
+    public void EnsureTrialBalanceBalanced_Different_ThrowsWithTotals()
+    {
+        var ex = Assert.Throws<DomainRuleViolation>(() => PeriodRules.EnsureTrialBalanceBalanced("2026-01", 100m, 90m));
+        Assert.Equal(
+            "Cannot close 2026-01: the trial balance is not balanced (debit 100.00 vs credit 90.00). Check the journals of this period.",
+            ex.Message);
+    }
+
+    [Fact]
+    public void EnsureTrialBalanceBalanced_UsesStageInMessage()
+    {
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
+            PeriodRules.EnsureTrialBalanceBalanced("2026-01", 1m, 2m, "post-closing trial balance"));
+        Assert.Contains("post-closing trial balance", ex.Message);
+    }
+
+    [Fact]
+    public void NetIncome_RevenueMinusExpense_IgnoresPermanentAccounts()
+    {
+        var rows = new (string? Type, decimal NetBalance)[]
+        {
+            ("OperatingIncome", 500m),
+            ("OtherIncome", 50m),
+            ("OperatingExpenses", 300m),
+            ("OtherExpenses", 20m),
+            ("Assets", 9999m),
+            ("Equity", 8888m),
+        };
+
+        Assert.Equal(230m, PeriodRules.NetIncome(rows));
+    }
+
+    [Fact]
+    public void NetIncome_Loss_IsNegative() =>
+        Assert.Equal(-40m, PeriodRules.NetIncome(new (string? Type, decimal NetBalance)[] { ("OperatingIncome", 10m), ("OperatingExpenses", 50m) }));
+
+    [Fact]
+    public void EnsureCanReceiveNetIncome_ZeroWithoutAccount_Passes() =>
+        PeriodRules.EnsureCanReceiveNetIncome("2026-01", 0m, false);
+
+    [Fact]
+    public void EnsureCanReceiveNetIncome_NonZeroWithAccount_Passes() =>
+        PeriodRules.EnsureCanReceiveNetIncome("2026-01", -75m, true);
+
+    [Fact]
+    public void EnsureCanReceiveNetIncome_NonZeroWithoutAccount_Throws()
+    {
+        var ex = Assert.Throws<DomainRuleViolation>(() => PeriodRules.EnsureCanReceiveNetIncome("2026-01", 100m, false));
+        Assert.Contains("Retained Earnings", ex.Message);
+    }
+
+    [Fact]
+    public void EnsureClosingGroupBalanced_Unbalanced_ThrowsWithDescription()
+    {
+        var ex = Assert.Throws<DomainRuleViolation>(() =>
+            PeriodRules.EnsureClosingGroupBalanced("2026-01", "Closing Revenue Accounts to Income Summary", 10m, 12m));
+        Assert.Contains("Closing Revenue Accounts to Income Summary", ex.Message);
+    }
+
+    [Fact]
+    public void EnsureClosingGroupBalanced_Balanced_Passes() =>
+        PeriodRules.EnsureClosingGroupBalanced("2026-01", "x", 10m, 10m);
 }
