@@ -110,17 +110,8 @@ public class JournalEntryService : IJournalEntryService
     public async Task<GeneralJournalResponseDto> CreateAsync(Guid userId, CreateGeneralJournalRequest request)
     {
         var effectiveLines = ValidateAndExtractLines(request.Lines);
-        await this.ValidateAccountsAsync(userId, effectiveLines);
 
-        var closedPeriods = await this.db.Periods
-            .Where(p => p.UserId == userId && p.IsClosed)
-            .ToListAsync();
-
-        if (PeriodLock.IsDateLocked(request.EntryDate, closedPeriods))
-        {
-            throw new DomainRuleViolation("This date falls within a closed accounting period. Choose a date in an open period.");
-        }
-
+        // Akun aktif milik pengguna dan kunci periode (menurut tanggal) diperiksa oleh pintu posting.
         // Penulisan ke GeneralJournals hanya lewat IJournalPostingService.
         var posted = await this.posting.PostAsync(new PostJournalCommand(
             userId,
@@ -192,19 +183,5 @@ public class JournalEntryService : IJournalEntryService
                 Credit = l.Credit,
             })
             .ToList();
-    }
-
-    private async Task ValidateAccountsAsync(Guid userId, List<CreateGeneralJournalLineRequest> lines)
-    {
-        var validAccountIds = (await this.db.ChartOfAccounts
-            .Where(a => a.IsActive && a.UserId == userId)
-            .Select(a => a.Id)
-            .ToListAsync())
-            .ToHashSet();
-
-        if (lines.Any(l => !validAccountIds.Contains(l.AccountId)))
-        {
-            throw new DomainRuleViolation("One or more selected accounts are invalid or inactive.");
-        }
     }
 }

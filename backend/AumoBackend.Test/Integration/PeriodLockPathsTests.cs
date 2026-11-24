@@ -1,13 +1,15 @@
 namespace AumoBackend.Test.Integration;
 
+using AumoBackend.Domain;
 using AumoBackend.DTOs.Reports;
-using AumoBackend.Models;
 using AumoBackend.Services.JournalEntry;
 using Microsoft.EntityFrameworkCore;
 
 /// <summary>
-/// Temuan no. 4 (kunci periode tidak seragam): satu tes per jalur masuk/keluar jurnal.
-/// Jalur import (ToolsService) sudah tidak ada di backend, sehingga tes import dihapus.
+/// Temuan no. 4 (kunci periode tidak seragam): satu tes per jalur masuk/keluar jurnal. Kunci periode kini
+/// diperiksa di pintu posting (<c>IJournalPostingService</c>), sehingga semua jalur menolak tanggal di periode tertutup.
+/// Jalur import (ToolsService) sudah tidak ada di backend. Bila dibangun lagi, import wajib memanggil <c>PostAsync</c>
+/// dan otomatis tunduk pada aturan yang sama; tes <c>Post_IntoClosedPeriod_IsRejected_ForEveryJournalType</c> menjaganya.
 /// </summary>
 [Collection(PostgresCollection.Name)]
 public class PeriodLockPathsTests(PostgresFixture fixture)
@@ -30,17 +32,31 @@ public class PeriodLockPathsTests(PostgresFixture fixture)
             }));
         await db.SaveChangesAsync();
 
-        var closedPeriods = await db.Periods
-            .AsNoTracking()
-            .Where(p => p.UserId == u.UserId && p.IsClosed)
-            .ToListAsync();
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => TestPosting.For(db).RemoveAsync(u.UserId, entryId));
 
-        var rows = await db.GeneralJournals
-            .Where(g => g.UserId == u.UserId && g.JournalEntryId == entryId)
-            .ToListAsync();
-
-        Assert.True(PeriodLock.IsDateLocked(rows.First().EntryDate, closedPeriods));
         Assert.Equal(2, await db.GeneralJournals.CountAsync(g => g.JournalEntryId == entryId));
+    }
+
+    [Theory]
+    [InlineData("General")]
+    [InlineData("Adjusting")]
+    [InlineData("Reversing")]
+    public async Task Post_IntoClosedPeriod_IsRejected_ForEveryJournalType(string journalType)
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => TestPosting.For(db).PostAsync(new PostJournalCommand(
+            u.UserId,
+            journalType,
+            SeededUser.Utc(2025, 12, 15),
+            new[]
+            {
+                new JournalLine(u.CashId, null, 50m, 0m),
+                new JournalLine(u.EquityId, null, 0m, 50m),
+            })));
+
+        Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
     }
 
     [Fact]

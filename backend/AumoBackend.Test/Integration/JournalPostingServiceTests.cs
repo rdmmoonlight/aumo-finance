@@ -1,5 +1,6 @@
 namespace AumoBackend.Test.Integration;
 
+using AumoBackend.Data;
 using AumoBackend.Domain;
 using AumoBackend.Services.JournalEntry;
 using AumoBackend.Services.Reports.GeneralLedgers;
@@ -251,5 +252,188 @@ public class JournalPostingServiceTests(PostgresFixture fixture)
 
         await using var verify = fixture.CreateDb();
         Assert.Equal(0, await verify.GeneralLedgerPermanentAccounts.CountAsync(x => x.UserId == u.UserId));
+    }
+
+    // ---- Pemeriksaan di pintu posting: akun, kunci periode menurut tanggal, nomor transaksi ----
+
+    private static PostJournalCommand CommandOn(SeededUser u, DateTime date, string? type = "General") =>
+        new(u.UserId, type, date, Lines(u, 100m));
+
+    /// <summary>Menyisipkan jurnal langsung (jalur normal menolaknya) pada tanggal di periode yang kemudian tertutup.</summary>
+    private static async Task<int> SeedRawEntryAsync(AppDbContext db, SeededUser u, DateTime date)
+    {
+        int entryId = await GeneralJournalWriter.NextJournalEntryIdAsync(db);
+        db.GeneralJournals.AddRange(GeneralJournalWriter.BuildRows(
+            entryId, u.UserId, "GJ25120001", "General", date, date, null,
+            new[]
+            {
+                new GeneralJournalWriter.Line(u.CashId, null, 50m, 0m),
+                new GeneralJournalWriter.Line(u.EquityId, null, 0m, 50m),
+            }));
+        await db.SaveChangesAsync();
+        return entryId;
+    }
+
+    [Fact]
+    public async Task Post_DateInClosedPeriod_ThrowsAndWritesNothing()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
+            TestPosting.For(db).PostAsync(CommandOn(u, SeededUser.Utc(2025, 12, 15))));
+
+        Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
+    }
+
+    [Fact]
+    public async Task Post_LockFollowsEntryDate_NotTheSelectedPeriod()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+
+        // Periode terpilih dipindah ke Desember 2025 (tertutup); Januari 2026 (terbuka) tidak lagi terpilih.
+        (await db.Periods.SingleAsync(p => p.Id == u.OpenPeriodId)).IsSelected = false;
+        await db.SaveChangesAsync();
+        (await db.Periods.SingleAsync(p => p.Id == u.ClosedPeriodId)).IsSelected = true;
+        await db.SaveChangesAsync();
+
+        var posting = TestPosting.For(db);
+
+        // Tanggal di periode terbuka diterima walau periode terpilih tertutup.
+        var posted = await posting.PostAsync(CommandOn(u, SeededUser.Utc(2026, 1, 5)));
+        Assert.Equal(2, posted.Rows.Count);
+
+        // Tanggal di periode tertutup ditolak walau periode itu yang terpilih.
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
+            posting.PostAsync(CommandOn(u, SeededUser.Utc(2025, 12, 15))));
+    }
+
+    [Fact]
+    public async Task Post_InactiveAccount_ThrowsAndWritesNothing()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        (await db.ChartOfAccounts.SingleAsync(a => a.Id == u.CashId)).IsActive = false;
+        await db.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
+            TestPosting.For(db).PostAsync(CommandOn(u, SeededUser.Utc(2026, 1, 5))));
+
+        Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
+    }
+
+    [Fact]
+    public async Task Post_AccountOfAnotherUser_ThrowsAndWritesNothing()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        var other = await SeededUser.CreateAsync(db);
+        var lines = new[]
+        {
+            new JournalLine(other.CashId, null, 100m, 0m),
+            new JournalLine(u.EquityId, null, 0m, 100m),
+        };
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
+            TestPosting.For(db).PostAsync(new PostJournalCommand(u.UserId, "General", SeededUser.Utc(2026, 1, 5), lines)));
+
+        Assert.False(await db.GeneralJournals.AnyAsync(g => g.UserId == u.UserId));
+    }
+
+    [Fact]
+    public async Task Post_RejectedEntry_DoesNotConsumeTransactionNumber()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        var posting = TestPosting.For(db);
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() =>
+            posting.PostAsync(CommandOn(u, SeededUser.Utc(2025, 12, 15))));
+
+        var posted = await posting.PostAsync(CommandOn(u, SeededUser.Utc(2026, 1, 5)));
+
+        Assert.Equal("GJ26010001", posted.TransactionNumber);
+    }
+
+    [Fact]
+    public async Task Replace_NewDateInClosedPeriod_ThrowsAndKeepsRows()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        var posting = TestPosting.For(db);
+        var posted = await posting.PostAsync(Command(u, 100m));
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => posting.ReplaceAsync(
+            new ReplaceJournalCommand(u.UserId, posted.JournalEntryId, SeededUser.Utc(2025, 12, 15), Lines(u, 100m))));
+
+        await using var verify = fixture.CreateDb();
+        var rows = await verify.GeneralJournals.Where(g => g.JournalEntryId == posted.JournalEntryId).ToListAsync();
+        Assert.Equal(2, rows.Count);
+        Assert.All(rows, r => Assert.Equal(SeededUser.Utc(2026, 1, 5), r.EntryDate));
+    }
+
+    [Fact]
+    public async Task Replace_EntryAlreadyInClosedPeriod_ThrowsAndKeepsRows()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        int entryId = await SeedRawEntryAsync(db, u, SeededUser.Utc(2025, 12, 20));
+
+        // Tanggal baru berada di periode terbuka, tetapi jurnal lamanya sudah terkunci.
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => TestPosting.For(db).ReplaceAsync(
+            new ReplaceJournalCommand(u.UserId, entryId, SeededUser.Utc(2026, 1, 9), Lines(u, 400m))));
+
+        await using var verify = fixture.CreateDb();
+        var rows = await verify.GeneralJournals.Where(g => g.JournalEntryId == entryId).ToListAsync();
+        Assert.Equal(2, rows.Count);
+        Assert.Equal(50m, rows.Sum(r => r.Debit));
+    }
+
+    [Fact]
+    public async Task Replace_InactiveAccount_ThrowsAndKeepsRows()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        var posting = TestPosting.For(db);
+        var posted = await posting.PostAsync(Command(u, 100m));
+
+        (await db.ChartOfAccounts.SingleAsync(a => a.Id == u.EquityId)).IsActive = false;
+        await db.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => posting.ReplaceAsync(
+            new ReplaceJournalCommand(u.UserId, posted.JournalEntryId, SeededUser.Utc(2026, 1, 5), Lines(u, 300m))));
+
+        Assert.Equal(100m, await db.GeneralJournals
+            .Where(g => g.JournalEntryId == posted.JournalEntryId)
+            .SumAsync(g => g.Debit));
+    }
+
+    [Fact]
+    public async Task Remove_EntryInClosedPeriod_ThrowsAndKeepsRows()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        int entryId = await SeedRawEntryAsync(db, u, SeededUser.Utc(2025, 12, 20));
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => TestPosting.For(db).RemoveAsync(u.UserId, entryId));
+
+        Assert.Equal(2, await db.GeneralJournals.CountAsync(g => g.JournalEntryId == entryId));
+    }
+
+    [Fact]
+    public async Task Remove_AfterItsPeriodIsClosed_Throws()
+    {
+        await using var db = fixture.CreateDb();
+        var u = await SeededUser.CreateAsync(db);
+        var posting = TestPosting.For(db);
+        var posted = await posting.PostAsync(Command(u, 100m));
+
+        (await db.Periods.SingleAsync(p => p.Id == u.OpenPeriodId)).IsClosed = true;
+        await db.SaveChangesAsync();
+
+        await Assert.ThrowsAsync<DomainRuleViolation>(() => posting.RemoveAsync(u.UserId, posted.JournalEntryId));
+
+        Assert.Equal(2, await db.GeneralJournals.CountAsync(g => g.JournalEntryId == posted.JournalEntryId));
     }
 }

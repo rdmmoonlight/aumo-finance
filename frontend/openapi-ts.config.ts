@@ -3,7 +3,7 @@ import { defineConfig } from '@hey-api/openapi-ts'
 
 export default defineConfig({
     // Sama dengan openapi-config.ts lama
-    input: 'https://aumoweb.onrender.com/openapi/v1.json',
+    input: 'https://aumo.onrender.com/openapi/v1.json',
     output: 'src/lib/generated',
     plugins: [
         {

@@ -53,7 +53,7 @@ Diperiksa terhadap kode pada 2026-11-08.
 | 2.2  | Kode selesai, menunggu CI hijau | Proyek uji + 104 kasus uji ditulis; belum pernah dijalankan (lingkungan penulis tanpa .NET/NuGet) |
 | 2.3  | Selesai                         | `AppDbContext` masih dipakai di 10 berkas `Controllers/`                                          |
 | 2.4  | Selesai kode (6 dari 6 butir)   | Butir 1–6 selesai kode; menunggu CI hijau sebelum dinyatakan selesai                              |
-| 2.5  | Sebagian (butir 1 dan 2)        | `IJournalPostingService` sudah ada dan dipakai 4 titik tulis; butir 3 dan seterusnya belum        |
+| 2.5  | Sebagian (butir 1 sampai 4)     | Pintu posting memeriksa akun, kunci periode, saldo, dan nomor; butir kunci periode, ledger, dan pecah `CreatePeriodAsync` belum |
 | 2.6  | Belum dimulai                   | Struktur lapisan belum disusun                                                                    |
 | 2.7  | Belum dimulai                   | Batas modul belum ditetapkan                                                                      |
 | 2.8  | Belum dimulai                   |                                                                                                   |
@@ -170,9 +170,15 @@ Tujuan: alur jelas dan mudah diuji.
   * `ToolsService` (import) dan hapus jurnal sudah tidak ada di backend, sehingga tes import dihapus. Bila import dibangun lagi, wajib memanggil `PostAsync`.
   * `PeriodsService.Selection.cs` memulihkan baris arsip lewat `INSERT ... SELECT` dengan nomor jurnal asli. Itu salinan ulang, bukan posting, dan menjadi satu-satunya pengecualian tertulis di `JournalWriteGuardTests`. Penghapusan baris oleh archiver terjadi di luar .NET.
   * `ReplaceAsync` dan `RemoveAsync` belum punya pemanggil, karena endpoint ubah dan hapus jurnal belum ada.
-  * Pemeriksaan akun, kunci periode, dan perilaku import (butir 3 dan 4) belum dikerjakan.
-- [ ] Pintu ini yang memeriksa: akun aktif milik pengguna, kunci periode berdasarkan tanggal (bukan periode terpilih), saldo seimbang, nomor transaksi.
-- [ ] Putuskan perilaku import terhadap periode tertutup (saat ini tidak diperiksa). Samakan dengan jurnal biasa dan catat di "Catatan Perubahan Perilaku".
+- [x] Pintu ini yang memeriksa: akun aktif milik pengguna, kunci periode berdasarkan tanggal (bukan periode terpilih), saldo seimbang, nomor transaksi.
+  * `PostAsync` memeriksa berurutan, sebelum nomor transaksi diambil: (1) aturan domain jurnal (minimal dua baris bernilai, saldo seimbang), (2) setiap akun aktif dan milik pengguna, (3) `PeriodLock.IsDateLocked` pada `EntryDate`. Bila salah satu gagal, tidak ada baris tertulis dan nomor transaksi tidak terpakai.
+  * `ReplaceAsync` menolak bila tanggal jurnal lama **atau** tanggal baru berada di periode tertutup, dan memeriksa akun baris baru. `RemoveAsync` menolak bila tanggal jurnal berada di periode tertutup.
+  * Periode yang dipilih pengguna tidak dipakai; hanya tanggal entri yang menentukan (dibuktikan tes `Post_LockFollowsEntryDate_NotTheSelectedPeriod`).
+  * Pesan kesalahan `CreateAsync` tidak berubah. Pemeriksaan akun dan kunci periode yang sebelumnya ada di `JournalEntryService` dihapus, karena kini hanya ada di pintu posting.
+  * Jurnal pembalik dan saldo awal periode ikut diperiksa karena keduanya lewat `PostAsync` (lihat "Catatan Perubahan Perilaku").
+- [x] Putuskan perilaku import terhadap periode tertutup (saat ini tidak diperiksa). Samakan dengan jurnal biasa dan catat di "Catatan Perubahan Perilaku".
+  * Keputusan: import **ditolak** pada tanggal di periode tertutup, sama dengan jurnal biasa. Modul `Tools` sudah dihapus, sehingga tidak ada kode import yang berubah. Bila import dibangun lagi, wajib memanggil `IJournalPostingService.PostAsync`, sehingga aturan ini berlaku otomatis tanpa pemeriksaan tersendiri.
+  * Tes `Post_IntoClosedPeriod_IsRejected_ForEveryJournalType` (General, Adjusting, Reversing) menjaga keputusan ini.
 
 **Kunci periode**
 
@@ -259,6 +265,10 @@ Isi bagian ini bila ada perubahan yang terlihat dari luar.
 | 2026-11-19 | `AccountClassificationHelper.NormalBalanceIsDebit(string?)` untuk jenis tidak dikenal berubah dari debit menjadi kredit (kini sama dengan buku besar) | Satu sumber aturan. Tidak ada pemanggil di kode produksi; validator hanya meloloskan tujuh jenis kanonik, sehingga API tidak berubah |
 | 2026-11-20 | `JournalEntryId` jurnal biasa dan jurnal pembalik kini diambil dari sequence; nomor yang sudah dipakai baris lama dilewati | Satu sumber nomor. Sebelumnya dua jalur memakai MAX+1 dan dua jalur saldo awal memakai sequence |
 | 2026-11-20 | Saldo awal periode kini melewati aturan domain jurnal (maksimal 2 desimal, tidak negatif, seimbang) | Satu pintu. Validator `CreatePeriodRequest` sudah menolak nilai negatif, sehingga efek praktis hanya pada nominal lebih dari 2 desimal |
+| 2026-11-24 | Jurnal pembalik kini ditolak bila salah satu akun pada jurnal sumber sudah nonaktif atau bukan milik pengguna, dengan pesan `One or more selected accounts are invalid or inactive.` | Satu pintu. Pemeriksaan akun aktif dan milik pengguna kini di `PostAsync`, sehingga berlaku di semua jalur. Sebelumnya jurnal pembalik tidak memeriksa akun |
+| 2026-11-24 | Saldo awal periode (mode "muat data lama") kini ditolak bila akun Retained Earnings yang dipilih nonaktif. Kegagalan muncul sebagai `Failed to open period: ...` | Sama seperti di atas. Akun lain pada saldo awal sudah berstatus aktif sejak query-nya |
+| 2026-11-24 | Import jurnal terhadap periode tertutup: **ditolak**, sama dengan jurnal biasa (pesan `This date falls within a closed accounting period. Choose a date in an open period.`) | Keputusan butir 4 fase 2.5. Modul import sudah dihapus, sehingga belum ada perubahan yang terlihat; berlaku bila import dibangun lagi karena wajib lewat `PostAsync` |
+| 2026-11-24 | `ReplaceAsync` dan `RemoveAsync` menolak jurnal yang tanggalnya berada di periode tertutup (pesan `This journal falls within a closed accounting period and cannot be changed.`) | Satu aturan kunci periode di pintu posting. Belum ada endpoint ubah dan hapus jurnal, sehingga belum terlihat dari luar |
 
 ## 6. Pertanyaan Keputusan
 
@@ -266,7 +276,7 @@ Putuskan saat mencapai fasenya, lalu catat jawabannya di sini.
 
 | No  | Pertanyaan                                                                         | Fase | Jawaban                                                                                                                                                                                                             |
 | :-: | :--------------------------------------------------------------------------------- | :--: | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-|  1  | Apakah import jurnal boleh masuk ke periode tertutup? _(saat ini tidak diperiksa)_ | 2.5  | Tools sepenuhnya dihapus, karena tidak digunakan lagi. |                                                                                                                                                                                                                   |
+|  1  | Apakah import jurnal boleh masuk ke periode tertutup? _(saat ini tidak diperiksa)_ | 2.5  | Tidak boleh, sama dengan jurnal biasa. Modul `Tools` (import) sudah dihapus; bila dibangun lagi, import wajib lewat `IJournalPostingService.PostAsync` yang menolak tanggal di periode tertutup. |
 |  2  | Apa syarat menutup periode (neraca seimbang, jurnal penutup, ledger segar)?        | 2.5  |                                                                                                                                                                                                                     |
 |  3  | Ledger dibangun ulang per periode atau diperbarui saat posting?                    | 2.5  |                                                                                                                                                                                                                     |
 |  4  | Presisi dan pembulatan nominal (jumlah desimal)?                                   | 2.4  | Maksimal 2 angka di belakang koma dan 16 digit di depan koma, selaras dengan `DECIMAL(18,2)` serta `PrecisionScale(18, 2, true)` pada validator. Nominal yang melebihi presisi akan **ditolak** (tidak dibulatkan). |
