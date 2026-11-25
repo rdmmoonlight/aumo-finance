@@ -9,18 +9,26 @@ public class LoginRequest
 
     public bool RememberMe { get; set; }
 
+    public bool IsDesktopClient { get; set; }
+
     public bool IsMobileClient { get; set; }
 
     public string? UserAgent { get; set; }
 
     public string? OperatingSystem { get; set; }
+
+    public bool RequiresJwtToken => IsMobileClient || IsDesktopClient;
 }
 
 public class GoogleLoginRequest
 {
     public string IdToken { get; set; } = string.Empty;
 
+    public bool IsDesktopClient { get; set; }
+
     public bool IsMobileClient { get; set; }
+
+    public bool RequiresJwtToken => IsMobileClient || IsDesktopClient;
 }
 
 public class AuthResponseDto
