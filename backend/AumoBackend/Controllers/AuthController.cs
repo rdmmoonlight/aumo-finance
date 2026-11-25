@@ -51,7 +51,7 @@ public class AuthController : ControllerBase
             });
         }
 
-        return this.AuthSuccess(result, request.IsMobileClient);
+        return this.AuthSuccess(result, request.RequiresJwtToken);
     }
 
     [HttpPost("google-login")]
@@ -71,7 +71,7 @@ public class AuthController : ControllerBase
             return this.Unauthorized(new { success = false, message = "Invalid Google ID Token or account could not be created." });
         }
 
-        return this.AuthSuccess(result, request.IsMobileClient);
+        return this.AuthSuccess(result, request.RequiresJwtToken);
     }
 
     [HttpGet("google-login")]
@@ -144,8 +144,8 @@ public class AuthController : ControllerBase
         return this.Ok(new { success = true, message = "Logged out successfully." });
     }
 
-    // Klien mobile menerima token; klien web memakai cookie sehingga tanpa token.
-    private IActionResult AuthSuccess(AuthResponseDto result, bool isMobileClient)
+    // Klien mobile & desktop menerima token; klien web memakai cookie sehingga tanpa token.
+    private IActionResult AuthSuccess(AuthResponseDto result, bool includeToken)
     {
         var body = new Dictionary<string, object?>
         {
@@ -156,7 +156,7 @@ public class AuthController : ControllerBase
             ["avatarUrl"] = result.AvatarUrl,
         };
 
-        if (isMobileClient)
+        if (includeToken && !string.IsNullOrEmpty(result.Token))
         {
             body["token"] = result.Token;
         }
