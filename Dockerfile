@@ -91,9 +91,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     supervisor \
     curl \
     libpq5 \
+    libpocoutil80 \
+    libpocofoundation80 \
+    libpoconet80 \
+    libpoconetssl80 \
     && rm -rf /var/lib/apt/lists/* \
     && ldconfig
-
+    
 WORKDIR /app
 
 # Copy binary C++ Archiver dari cpp-builder (libpqxx sudah tertanam secara static)
