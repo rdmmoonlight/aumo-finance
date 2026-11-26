@@ -33,9 +33,8 @@ RUN git clone --depth 1 --branch 7.9.2 https://github.com/jtv/libpqxx.git /tmp/l
     && cmake --install /tmp/libpqxx/build \
     && rm -rf /tmp/libpqxx
 
-# Copy hanya file build C++ agar layer cache optimal
-COPY CMakeLists.txt ./
-COPY archiver-service/ ./archiver-service/
+# Copy seluruh isi folder archiver-service langsung ke /src (CMakeLists.txt ada di dalamnya)
+COPY archiver-service/ ./
 
 # Build spesifik target Release (Parallel job -j$(nproc))
 RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
