@@ -28,7 +28,9 @@
     "lint:fix": "eslint . --fix",
     "api:generate": "rtk-query-codegen-openapi openapi-config.ts",
     "electron:dev": "concurrently -k \"pnpm dev:server\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron:build": "pnpm build && electron-builder"
+    "electron:build": "pnpm build && electron-builder",
+    "dist": "pnpm build && electron-builder",
+    "dist:win": "pnpm build && electron-builder --win"
   },
   "build": {
     "appId": "com.aumo.finance",
