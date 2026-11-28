@@ -1,11 +1,23 @@
-import { ReduxProvider } from "@/components/redux-provider";
-import { ThemeProvider } from "@/components/theme-provider";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { routeTree } from "./routeTree.gen";
+import { ReduxProvider } from '@/components/redux-provider';
+import { ThemeProvider } from '@/components/theme-provider';
+import {
+  RouterProvider,
+  createBrowserHistory,
+  createHashHistory,
+  createRouter,
+} from '@tanstack/react-router';
+import { routeTree } from './routeTree.gen';
 
-const router = createRouter({ routeTree });
+const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
 
-declare module "@tanstack/react-router" {
+const history = isFileProtocol ? createHashHistory() : createBrowserHistory();
+
+const router = createRouter({
+  routeTree,
+  history,
+});
+
+declare module '@tanstack/react-router' {
   interface Register {
     router: typeof router;
   }

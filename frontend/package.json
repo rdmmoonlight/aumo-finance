@@ -1,10 +1,13 @@
 {
   "name": "aumo-web",
-  "version": "5.2.0",
+  "version": "6.0.0",
   "private": true,
   "type": "module",
+  "main": "electron/main.cjs",
   "allowScripts": {
-    "unrs-resolver": true
+    "unrs-resolver": true,
+    "electron": true,
+    "electron-builder": true
   },
   "imports": {
     "#/*": "./src/*",
@@ -12,6 +15,7 @@
   },
   "scripts": {
     "dev": "vite --open",
+    "dev:server": "vite",
     "prebuild": "pnpm clean",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
@@ -22,7 +26,23 @@
     "test:e2e": "playwright test",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "api:generate": "rtk-query-codegen-openapi openapi-config.ts"
+    "api:generate": "rtk-query-codegen-openapi openapi-config.ts",
+    "electron:dev": "concurrently -k \"pnpm dev:server\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron:build": "pnpm build && electron-builder"
+  },
+  "build": {
+    "appId": "com.aumo.finance",
+    "productName": "Aumo Finance",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    }
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
@@ -59,7 +79,10 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.2.1",
+    "concurrently": "^10.0.7",
     "cross-env": "^10.1.0",
+    "electron": "^45.5.0",
+    "electron-builder": "^26.18.0",
     "esbuild-runner": "^2.2.2",
     "eslint": "^9.20.0",
     "eslint-config-next": "^16.0.0",
@@ -71,12 +94,13 @@
     "tsx": "^4.23.15",
     "typescript": "~7.0.2",
     "vite": "^8.3.5",
-    "vite-plugin-checker": "^0.14.5"
+    "vite-plugin-checker": "^0.14.5",
+    "wait-on": "^9.5.1"
   },
   "overrides": {
     "eslint": "^9.20.0"
   },
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=26.0.0"
   }
 }
