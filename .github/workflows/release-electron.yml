@@ -2,7 +2,13 @@ name: Build & Release Windows App (Electronjs)
 
 on:
   workflow_dispatch:
-  
+    inputs:
+      draft:
+        description: "Simpan sebagai draft release?"
+        required: false
+        default: false
+        type: boolean
+
 permissions:
   contents: write
 
@@ -64,10 +70,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: "pnpm"
+          cache-dependency-path: frontend/pnpm-lock.yaml
 
       - name: Install dependencies
         working-directory: ./frontend
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: Update package.json version
         working-directory: ./frontend
@@ -77,13 +85,13 @@ jobs:
 
       - name: Create .env file
         working-directory: ./frontend
-        shell: pwsh
+        shell: bash
         run: |
-          @"
+          cat << 'EOF' > .env
           VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}
           VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}
           VITE_APP_VERSION=${{ steps.version.outputs.release_tag }}
-          "@ | Out-File -FilePath .env -Encoding utf8
+          EOF
 
       - name: Build Frontend & Package Windows (.exe)
         working-directory: ./frontend
@@ -92,6 +100,7 @@ jobs:
           CSC_IDENTITY_AUTO_DISCOVERY: false
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
+          VITE_APP_VERSION: ${{ steps.version.outputs.release_tag }}
 
       - name: Upload to GitHub Release
         uses: softprops/action-gh-release@v2
