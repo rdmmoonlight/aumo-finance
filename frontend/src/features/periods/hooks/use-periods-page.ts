@@ -1,101 +1,197 @@
-import { computed, ref } from 'vue'
+"use client";
+
+import { useMemo, useState } from "react";
 import {
+  PeriodItem,
+  useClearSelectionMutation,
   useClosePeriodMutation,
   useCreatePeriodMutation,
+  useGetPeriodsOpenInfoQuery,
   useGetPeriodsQuery,
   useSelectPeriodMutation,
-  type CreatePeriodRequest,
-  type GetPeriodsApiResult,
-} from '../periods.api'
-import type { CreatePeriodPayload, Period } from '../types'
-
-// Normalisasi berbagai bentuk respons API menjadi array periode
-function normalizePeriods(raw: GetPeriodsApiResult | undefined): Period[] {
-  if (!raw) return []
-  if (Array.isArray(raw)) return raw
-  if ('periods' in raw) return raw.periods
-  if ('items' in raw) return raw.items
-  return []
-}
+} from "../api/periodsApi";
+import type { ApiError, CreatePeriodValues } from "../types";
+import { usePeriodFormState } from "./use-period-form";
 
 export function usePeriodsPage() {
-  const periodsQuery = useGetPeriodsQuery()
-  const closePeriodMutation = useClosePeriodMutation()
-  const createPeriodMutation = useCreatePeriodMutation()
-  const selectPeriodMutation = useSelectPeriodMutation()
+  const {
+    data: periodsData,
+    isLoading,
+    isError: isGetPeriodsError,
+  } = useGetPeriodsQuery();
+  const { data: openInfo, isLoading: isLoadingOpenInfo } =
+    useGetPeriodsOpenInfoQuery();
 
-  const actionError = ref<string | null>(null)
+  const [selectPeriod, { isLoading: isSelecting }] = useSelectPeriodMutation();
+  const [clearSelection, { isLoading: isClearing }] =
+    useClearSelectionMutation();
+  const [closePeriod, { isLoading: isClosing }] = useClosePeriodMutation();
+  const [createPeriod, { isLoading: isCreating }] = useCreatePeriodMutation();
 
-  const periods = computed<Period[]>(() => normalizePeriods(periodsQuery.data.value))
+  const form = usePeriodFormState(openInfo);
 
-  // Periode aktif: periode terbuka yang sedang dipilih, atau periode terbuka pertama
-  const activePeriod = computed<Period | undefined>(
-    () =>
-      periods.value.find((p) => p.isSelected && !p.isClosed) ??
-      periods.value.find((p) => !p.isClosed),
-  )
+  const [viewMode, setViewMode] = useState<"list" | "create">("list");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [selectingId, setSelectingId] = useState<number | null>(null);
+  const [closingId, setClosingId] = useState<number | null>(null);
 
-  const hasActivePeriod = computed(() => !!activePeriod.value)
+  const periods: PeriodItem[] = useMemo(() => {
+    if (!periodsData) return [];
+    if (Array.isArray(periodsData)) return periodsData;
+    if ("periods" in periodsData && Array.isArray(periodsData.periods))
+      return periodsData.periods;
+    if ("items" in periodsData && Array.isArray(periodsData.items))
+      return periodsData.items;
+    return [];
+  }, [periodsData]);
 
-  // Gabungkan error dari query maupun dari aksi mutasi terakhir
-  const errorMessage = computed(() => {
-    if (actionError.value) return actionError.value
-    const queryErr = periodsQuery.error.value
-    if (!queryErr) return null
-    return queryErr instanceof Error && queryErr.message
-      ? queryErr.message
-      : 'Gagal memuat daftar periode'
-  })
+  const selectedPeriod = useMemo(
+    () => periods.find((p) => p.isSelected) || null,
+    [periods],
+  );
 
-  const fetchPeriods = async () => {
-    actionError.value = null
-    await periodsQuery.refetch()
-  }
-
-  const createPeriod = async (payload: CreatePeriodPayload) => {
-    actionError.value = null
+  const handleSelectPeriod = async (p: PeriodItem) => {
+    setErrorMessage(null);
+    setSelectingId(p.id);
     try {
-      await createPeriodMutation.mutateAsync({
-        createPeriodRequest: payload as unknown as CreatePeriodRequest,
-      })
-    } catch (err: unknown) {
-      actionError.value =
-        err instanceof Error && err.message ? err.message : 'Gagal membuat periode baru'
+      await selectPeriod({ id: p.id }).unwrap();
+      setSuccessMessage(`Now viewing: ${p.periodName}`);
+    } catch (err) {
+      setErrorMessage(
+        (err as ApiError)?.data?.message || "Gagal memilih periode.",
+      );
+    } finally {
+      setSelectingId(null);
     }
-  }
+  };
 
-  const closePeriod = async (id: number) => {
-    actionError.value = null
+  const handleClearSelection = async () => {
+    setErrorMessage(null);
     try {
-      await closePeriodMutation.mutateAsync({ id })
-    } catch (err: unknown) {
-      actionError.value =
-        err instanceof Error && err.message ? err.message : 'Gagal menutup periode'
+      await clearSelection().unwrap();
+      setSuccessMessage("No period selected.");
+    } catch (err) {
+      setErrorMessage(
+        (err as ApiError)?.data?.message || "Gagal menghapus pilihan periode.",
+      );
     }
-  }
+  };
 
-  const selectPeriod = async (id: number) => {
-    actionError.value = null
+  const handleClosePeriod = async (p: PeriodItem) => {
+    if (!confirm(`Close ${p.periodName}? This will lock all entries.`)) return;
+    setErrorMessage(null);
+    setClosingId(p.id);
     try {
-      await selectPeriodMutation.mutateAsync({ id })
-    } catch (err: unknown) {
-      actionError.value =
-        err instanceof Error && err.message ? err.message : 'Gagal memilih periode'
+      await closePeriod({ id: p.id }).unwrap();
+      setSuccessMessage(`${p.periodName} closed successfully.`);
+    } catch (err) {
+      setErrorMessage(
+        (err as ApiError)?.data?.message || "Failed to close period.",
+      );
+    } finally {
+      setClosingId(null);
     }
-  }
+  };
+
+  const handleCreateSubmit = async (values?: CreatePeriodValues) => {
+    setErrorMessage(null);
+    const currentSetupMode = values?.setupMode ?? form.setupMode;
+
+    if (
+      currentSetupMode === "LoadExisting" &&
+      (!(values?.cashAccountId ?? form.cashAccountId) ||
+        !(values?.bankAccountId ?? form.bankAccountId) ||
+        !(values?.retainedId ?? form.retainedId))
+    ) {
+      setErrorMessage("Select Cash, Bank, and Retained Earnings accounts.");
+      return;
+    }
+
+    try {
+      await createPeriod({
+        createPeriodRequest: {
+          month: Number(values?.month ?? form.month),
+          year: Number(values?.year ?? form.year),
+          setupMode: currentSetupMode,
+          cashAccountId:
+            currentSetupMode === "LoadExisting"
+              ? parseInt(values?.cashAccountId ?? form.cashAccountId, 10)
+              : null,
+          bankAccountId:
+            currentSetupMode === "LoadExisting"
+              ? parseInt(values?.bankAccountId ?? form.bankAccountId, 10)
+              : null,
+          retainedEarningsAccountId:
+            currentSetupMode === "LoadExisting"
+              ? parseInt(values?.retainedId ?? form.retainedId, 10)
+              : null,
+          cashAccountCode:
+            currentSetupMode === "CreateNew"
+              ? (values?.cashAccountCode ?? form.cashAccountCode)
+              : undefined,
+          cashAccountName:
+            currentSetupMode === "CreateNew"
+              ? (values?.cashAccountName ?? form.cashAccountName)
+              : undefined,
+          cashBalance:
+            currentSetupMode === "CreateNew"
+              ? Number(values?.cashBalance ?? form.cashBalance) || 0
+              : undefined,
+          bankAccountCode:
+            currentSetupMode === "CreateNew"
+              ? (values?.bankAccountCode ?? form.bankAccountCode)
+              : undefined,
+          bankAccountName:
+            currentSetupMode === "CreateNew"
+              ? (values?.bankAccountName ?? form.bankAccountName)
+              : undefined,
+          bankBalance:
+            currentSetupMode === "CreateNew"
+              ? Number(values?.bankBalance ?? form.bankBalance) || 0
+              : undefined,
+          retainedEarningsAccountCode:
+            currentSetupMode === "CreateNew"
+              ? (values?.retainedCode ?? form.retainedCode)
+              : undefined,
+          retainedEarningsAccountName:
+            currentSetupMode === "CreateNew"
+              ? (values?.retainedName ?? form.retainedName)
+              : undefined,
+        },
+      }).unwrap();
+      setSuccessMessage("Period opened successfully.");
+      setViewMode("list");
+    } catch (err) {
+      setErrorMessage(
+        (err as ApiError)?.data?.message || "Failed to create period.",
+      );
+    }
+  };
 
   return {
     periods,
-    isLoading: periodsQuery.isPending,
-    isCreating: createPeriodMutation.isPending,
-    isClosing: closePeriodMutation.isPending,
-    isSelecting: selectPeriodMutation.isPending,
-    hasActivePeriod,
-    activePeriod,
+    openInfo,
+    selectedPeriod,
+    form,
+    viewMode,
+    setViewMode,
     errorMessage,
-    fetchPeriods,
-    createPeriod,
-    closePeriod,
-    selectPeriod,
-  }
+    setErrorMessage,
+    successMessage,
+    setSuccessMessage,
+    isLoading,
+    isLoadingOpenInfo,
+    isGetPeriodsError,
+    isSelecting,
+    isClearing,
+    isClosing,
+    isCreating,
+    selectingId,
+    closingId,
+    handleSelectPeriod,
+    handleClearSelection,
+    handleClosePeriod,
+    handleCreateSubmit,
+  };
 }

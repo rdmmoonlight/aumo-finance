@@ -1,31 +1,66 @@
-import { computed } from 'vue'
-import { useCreatePeriodMutation, type CreatePeriodRequest } from '../periods.api'
-import type { CreatePeriodPayload } from '../types'
+"use client";
 
-export function useCreatePeriodForm(onSuccessCallback?: () => void) {
-  const { mutateAsync, isPending, error: mutationError } = useCreatePeriodMutation()
+import { type CreatePeriodFormProps } from "#/features/periods/types";
+import {
+  createPeriodSchema,
+  type CreatePeriodFormValues,
+  type CreatePeriodOutputValues,
+} from "@/lib/validations/period";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
+import { useForm } from "react-hook-form";
 
-  const error = computed(() => {
-    if (!mutationError.value) return null
-    return mutationError.value instanceof Error && mutationError.value.message
-      ? mutationError.value.message
-      : 'Terjadi kesalahan saat membuat periode'
-  })
+export function useCreatePeriodForm({
+  openInfo,
+  initialValues,
+  defaultValues,
+  isCreating,
+  isLoading,
+}: CreatePeriodFormProps) {
+  const mergedDefaultValues = useMemo<Partial<CreatePeriodFormValues>>(
+    () => ({
+      month: new Date().getMonth() + 1,
+      year: new Date().getFullYear(),
+      setupMode: openInfo?.hasExistingPermanentAccounts
+        ? "LoadExisting"
+        : "CreateNew",
+      cashAccountId: "",
+      bankAccountId: "",
+      retainedId: "",
+      cashAccountCode: "",
+      cashAccountName: "",
+      cashBalance: "",
+      bankAccountCode: "",
+      bankAccountName: "",
+      bankBalance: "",
+      retainedCode: "",
+      retainedName: "",
+      ...defaultValues,
+      ...initialValues,
+    }),
+    [openInfo, defaultValues, initialValues],
+  );
 
-  const submitForm = async (payload: CreatePeriodPayload) => {
-    try {
-      await mutateAsync({
-        createPeriodRequest: payload as unknown as CreatePeriodRequest,
-      })
-      onSuccessCallback?.()
-    } catch {
-      // Error sudah otomatis ditangkap dan disimpan ke state `mutationError`
-    }
-  }
+  const methods = useForm<
+    CreatePeriodFormValues,
+    any,
+    CreatePeriodOutputValues
+  >({
+    resolver: zodResolver(createPeriodSchema),
+    defaultValues: mergedDefaultValues,
+  });
+
+  const setupMode = methods.watch("setupMode");
+  const month = methods.watch("month");
 
   return {
-    isLoading: isPending,
-    error,
-    submitForm,
-  }
+    methods,
+    setupMode,
+    month,
+    cashAccountId: methods.watch("cashAccountId"),
+    bankAccountId: methods.watch("bankAccountId"),
+    retainedId: methods.watch("retainedId"),
+    isSubmitting: isCreating || isLoading,
+    mergedDefaultValues,
+  };
 }

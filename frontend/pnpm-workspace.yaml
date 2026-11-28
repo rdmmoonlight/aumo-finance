@@ -1,3 +1,6 @@
+packages:
+  - "."
+
 allowBuilds:
-  electron-winstaller: true
-  vue-demi: true
+  esbuild: true
+  unrs-resolver: true
